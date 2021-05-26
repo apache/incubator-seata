@@ -32,4 +32,9 @@ public class SimpleBusinessImpl implements Business {
         LOGGER.info("Business doBiz");
         return "hello " + msg;
     }
+
+    @Override
+    public String doGlobalLock() {
+        return Business.super.doGlobalLock();
+    }
 }

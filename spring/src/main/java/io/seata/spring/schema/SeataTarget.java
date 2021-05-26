@@ -23,16 +23,36 @@ import java.util.Objects;
  * @author xingfudeshi@gmail.com
  */
 public class SeataTarget {
-    private SeataTargetType seataTargetType;
+    /**
+     * target type
+     */
+    private SeataTargetType targetType;
+    /**
+     * the name of the target class or method
+     */
     private String targetName;
-    private GlobalTransactionalConfig globalTransactionalConfig;
+    /**
+     * annotation class
+     */
+    private Class<?> annotationClass;
+    /**
+     * config object of annotation class
+     */
+    private Object annotationConfigObject;
 
-    public SeataTargetType getSeataTargetType() {
-        return seataTargetType;
+    public SeataTarget(SeataTargetType targetType, String targetName, Class<?> annotationClass, Object annotationConfigObject) {
+        this.targetType = targetType;
+        this.targetName = targetName;
+        this.annotationClass = annotationClass;
+        this.annotationConfigObject = annotationConfigObject;
     }
 
-    public void setSeataTargetType(SeataTargetType seataTargetType) {
-        this.seataTargetType = seataTargetType;
+    public SeataTargetType getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(SeataTargetType targetType) {
+        this.targetType = targetType;
     }
 
     public String getTargetName() {
@@ -43,37 +63,46 @@ public class SeataTarget {
         this.targetName = targetName;
     }
 
-    public GlobalTransactionalConfig getGlobalTransactionalConfig() {
-        return globalTransactionalConfig;
+    public Class<?> getAnnotationClass() {
+        return annotationClass;
     }
 
-    public void setGlobalTransactionalConfig(GlobalTransactionalConfig globalTransactionalConfig) {
-        this.globalTransactionalConfig = globalTransactionalConfig;
+    public void setAnnotationClass(Class<?> annotationClass) {
+        this.annotationClass = annotationClass;
+    }
+
+    public Object getAnnotationConfigObject() {
+        return annotationConfigObject;
+    }
+
+    public void setAnnotationConfigObject(Object annotationConfigObject) {
+        this.annotationConfigObject = annotationConfigObject;
     }
 
     @Override
     public String toString() {
         return "SeataTarget{" +
-            "seataTargetType=" + seataTargetType +
+            "targetType=" + targetType +
             ", targetName='" + targetName + '\'' +
-            ", globalTransactionalConfig=" + globalTransactionalConfig +
+            ", annotationClass=" + annotationClass +
+            ", annotationConfigObject=" + annotationConfigObject +
             '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
+        if (this == o){
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass()){
             return false;
         }
         SeataTarget that = (SeataTarget) o;
-        return seataTargetType == that.seataTargetType && Objects.equals(targetName, that.targetName);
+        return targetType == that.targetType && Objects.equals(targetName, that.targetName) && Objects.equals(annotationClass, that.annotationClass) && Objects.equals(annotationConfigObject, that.annotationConfigObject);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(seataTargetType, targetName);
+        return Objects.hash(targetType, targetName, annotationClass, annotationConfigObject);
     }
 }

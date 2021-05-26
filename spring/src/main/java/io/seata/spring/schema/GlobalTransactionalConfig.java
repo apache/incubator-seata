@@ -18,6 +18,7 @@ package io.seata.spring.schema;
 import java.util.Arrays;
 import java.util.Objects;
 
+import io.seata.common.DefaultValues;
 import io.seata.tm.api.transaction.Propagation;
 
 /**
@@ -26,15 +27,15 @@ import io.seata.tm.api.transaction.Propagation;
  * @author xingfudeshi@gmail.com
  */
 public class GlobalTransactionalConfig {
-    private int timeoutMills;
-    private String name;
-    private Class<? extends Throwable>[] rollbackFor = new Class[0];
+    private int timeoutMills = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+    private String name = "";
+    private Class<? extends Throwable>[] rollbackFor = new Class[]{};
     private String[] rollbackForClassName = {};
-    private Class<? extends Throwable>[] noRollbackFor = new Class[0];
+    private Class<? extends Throwable>[] noRollbackFor = new Class[]{};
     private String[] noRollbackForClassName = {};
-    private Propagation propagation;
-    private int lockRetryInternal;
-    private int lockRetryTimes;
+    private Propagation propagation = Propagation.REQUIRED;
+    private int lockRetryInterval = 0;
+    private int lockRetryTimes = -1;
     private String scanPackage;
     private String pattern;
 
@@ -94,12 +95,12 @@ public class GlobalTransactionalConfig {
         this.propagation = propagation;
     }
 
-    public int getLockRetryInternal() {
-        return lockRetryInternal;
+    public int getLockRetryInterval() {
+        return lockRetryInterval;
     }
 
-    public void setLockRetryInternal(int lockRetryInternal) {
-        this.lockRetryInternal = lockRetryInternal;
+    public void setLockRetryInterval(int lockRetryInterval) {
+        this.lockRetryInterval = lockRetryInterval;
     }
 
     public int getLockRetryTimes() {
@@ -136,7 +137,7 @@ public class GlobalTransactionalConfig {
             ", noRollbackFor=" + Arrays.toString(noRollbackFor) +
             ", noRollbackForClassName=" + Arrays.toString(noRollbackForClassName) +
             ", propagation=" + propagation +
-            ", lockRetryInternal=" + lockRetryInternal +
+            ", lockRetryInterval=" + lockRetryInterval +
             ", lockRetryTimes=" + lockRetryTimes +
             ", scanPackage='" + scanPackage + '\'' +
             ", pattern='" + pattern + '\'' +

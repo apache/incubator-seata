@@ -15,6 +15,8 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.common.util.StringUtils;
+
 /**
  * The interface Business.
  */
@@ -26,4 +28,12 @@ public interface Business {
      * @return the string
      */
     String doBiz(String msg);
+    /**
+     * do global lock
+     * @return java.lang.String
+     * @author xingfudeshi@gmail.com
+     */
+    default String doGlobalLock(){
+        return StringUtils.EMPTY;
+    }
 }

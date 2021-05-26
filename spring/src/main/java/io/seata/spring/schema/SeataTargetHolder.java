@@ -72,15 +72,15 @@ public enum SeataTargetHolder {
     /**
      * find
      *
-     * @param seataTargetType
+     * @param targetType
      * @param targetName
      * @return io.seata.spring.schema.SeataTarget
      * @author xingfudeshi@gmail.com
      */
-    public SeataTarget find(SeataTargetType seataTargetType, String targetName) {
+    public SeataTarget find(SeataTargetType targetType, String targetName) {
         return this.seataTargets
             .stream()
-            .filter(seataTarget -> seataTarget.getSeataTargetType().equals(seataTargetType) && seataTarget.getTargetName().equals(targetName))
+            .filter(seataTarget -> seataTarget.getTargetType().equals(targetType) && seataTarget.getTargetName().equals(targetName))
             .findAny().orElse(null);
     }
 

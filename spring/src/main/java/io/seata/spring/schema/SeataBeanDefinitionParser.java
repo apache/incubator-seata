@@ -18,7 +18,6 @@ package io.seata.spring.schema;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
@@ -45,6 +44,8 @@ import static io.seata.spring.annotation.GlobalTransactionScanner.DEFAULT_MODE;
  */
 public class SeataBeanDefinitionParser implements BeanDefinitionParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataBeanDefinitionParser.class);
+    private static final String NODE_NAME_GLOBAL_TRANSACTIONAL = "globalTransactional";
+    private static final String NODE_NAME_GLOBAL_LOCK = "globalLock";
 
 
     @Override
@@ -84,7 +85,8 @@ public class SeataBeanDefinitionParser implements BeanDefinitionParser {
         beanDefinition.setBeanClass(SeataTargetScanner.class);
         beanDefinition.setLazyInit(false);
         ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-        constructorArgumentValues.addIndexedArgumentValue(0, getSeataConfig(element));
+        constructorArgumentValues.addIndexedArgumentValue(0, getGlobalTransactionalConfigs(element));
+        constructorArgumentValues.addIndexedArgumentValue(1, getGlobalLockConfigs(element));
         beanDefinition.setConstructorArgumentValues(constructorArgumentValues);
         parserContext.getRegistry().registerBeanDefinition(SeataTargetScanner.class.getName(), beanDefinition);
     }
@@ -96,7 +98,7 @@ public class SeataBeanDefinitionParser implements BeanDefinitionParser {
      * @return java.util.List<io.seata.spring.schema.GlobalTransactionalConfig>
      * @author xingfudeshi@gmail.com
      */
-    private static Set<GlobalTransactionalConfig> getSeataConfig(Element element) {
+    private static Set<GlobalTransactionalConfig> getGlobalTransactionalConfigs(Element element) {
         NodeList nodeList = element.getChildNodes();
         int length = nodeList.getLength();
         Set<GlobalTransactionalConfig> globalTransactionalConfigs = new HashSet<>();
@@ -104,54 +106,82 @@ public class SeataBeanDefinitionParser implements BeanDefinitionParser {
             Node node = nodeList.item(i);
             if (node instanceof Element) {
                 Element ele = (Element) node;
-                GlobalTransactionalConfig globalTransactionalConfig = new GlobalTransactionalConfig();
-                globalTransactionalConfig.setScanPackage(ele.getAttribute("scanPackage"));
-                globalTransactionalConfig.setPattern(ele.getAttribute("pattern"));
-                String timeoutMills = ele.getAttribute("timeoutMills");
-                if (StringUtils.isNotBlank(timeoutMills)) {
-                    globalTransactionalConfig.setTimeoutMills(Integer.parseInt(timeoutMills));
-                } else {
-                    globalTransactionalConfig.setTimeoutMills(DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+                if (NODE_NAME_GLOBAL_TRANSACTIONAL.equals(ele.getLocalName())) {
+                    GlobalTransactionalConfig globalTransactionalConfig = new GlobalTransactionalConfig();
+                    globalTransactionalConfig.setScanPackage(ele.getAttribute("scanPackage"));
+                    globalTransactionalConfig.setPattern(ele.getAttribute("pattern"));
+                    String timeoutMills = ele.getAttribute("timeoutMills");
+                    if (StringUtils.isNotBlank(timeoutMills)) {
+                        globalTransactionalConfig.setTimeoutMills(Integer.parseInt(timeoutMills));
+                    }
+                    globalTransactionalConfig.setName(ele.getAttribute("name"));
+                    String rollbackFor = ele.getAttribute("rollbackFor");
+                    if (StringUtils.isNotBlank(rollbackFor)) {
+                        globalTransactionalConfig.setRollbackFor(convertClass(rollbackFor));
+                    }
+                    String rollbackForClassName = ele.getAttribute("rollbackForClassName");
+                    if (StringUtils.isNotBlank(rollbackForClassName)) {
+                        globalTransactionalConfig.setRollbackForClassName(rollbackForClassName.split(","));
+                    }
+                    String noRollbackFor = ele.getAttribute("noRollbackFor");
+                    if (StringUtils.isNotBlank(noRollbackFor)) {
+                        globalTransactionalConfig.setNoRollbackFor(convertClass(noRollbackFor));
+                    }
+                    String noRollbackForClassName = ele.getAttribute("noRollbackForClassName");
+                    if (StringUtils.isNotBlank(noRollbackForClassName)) {
+                        globalTransactionalConfig.setNoRollbackForClassName(noRollbackForClassName.split(","));
+                    }
+                    String propagation = ele.getAttribute("propagation");
+                    if (StringUtils.isNotBlank(propagation)) {
+                        globalTransactionalConfig.setPropagation(Propagation.valueOf(propagation));
+                    }
+                    String lockRetryInterval = ele.getAttribute("lockRetryInterval");
+                    if (StringUtils.isNotBlank(lockRetryInterval)) {
+                        globalTransactionalConfig.setLockRetryInterval(Integer.parseInt(lockRetryInterval));
+                    }
+                    String lockRetryTimes = ele.getAttribute("lockRetryTimes");
+                    if (StringUtils.isNotBlank(lockRetryTimes)) {
+                        globalTransactionalConfig.setLockRetryTimes(Integer.parseInt(lockRetryTimes));
+                    }
+                    globalTransactionalConfigs.add(globalTransactionalConfig);
                 }
-                globalTransactionalConfig.setName(ele.getAttribute("name"));
-                String rollbackFor = ele.getAttribute("rollbackFor");
-                if (StringUtils.isNotBlank(rollbackFor)) {
-                    globalTransactionalConfig.setRollbackFor(convertClass(rollbackFor));
-                }
-                String rollbackForClassName = ele.getAttribute("rollbackForClassName");
-                if (StringUtils.isNotBlank(rollbackForClassName)) {
-                    globalTransactionalConfig.setRollbackForClassName(rollbackForClassName.split(","));
-                }
-                String noRollbackFor = ele.getAttribute("noRollbackFor");
-                if (StringUtils.isNotBlank(noRollbackFor)) {
-                    globalTransactionalConfig.setNoRollbackFor(convertClass(noRollbackFor));
-                }
-                String noRollbackForClassName = ele.getAttribute("noRollbackForClassName");
-                if (StringUtils.isNotBlank(noRollbackForClassName)) {
-                    globalTransactionalConfig.setNoRollbackForClassName(noRollbackForClassName.split(","));
-                }
-                String propagation = ele.getAttribute("propagation");
-                if (StringUtils.isNotBlank(propagation)) {
-                    globalTransactionalConfig.setPropagation(Propagation.valueOf(propagation));
-                } else {
-                    globalTransactionalConfig.setPropagation(Propagation.REQUIRED);
-                }
-                String lockRetryInternal = ele.getAttribute("lockRetryInternal");
-                if (StringUtils.isNotBlank(lockRetryInternal)) {
-                    globalTransactionalConfig.setLockRetryInternal(Integer.parseInt(lockRetryInternal));
-                } else {
-                    globalTransactionalConfig.setLockRetryInternal(0);
-                }
-                String lockRetryTimes = ele.getAttribute("lockRetryTimes");
-                if (StringUtils.isNotBlank(lockRetryTimes)) {
-                    globalTransactionalConfig.setLockRetryTimes(Integer.parseInt(lockRetryTimes));
-                } else {
-                    globalTransactionalConfig.setLockRetryTimes(-1);
-                }
-                globalTransactionalConfigs.add(globalTransactionalConfig);
             }
         }
         return globalTransactionalConfigs;
+    }
+
+    /**
+     * get global lock configs
+     *
+     * @param element
+     * @return java.util.Set<io.seata.spring.schema.GlobalLockConfig>
+     * @author xingfudeshi@gmail.com
+     */
+    private static Set<GlobalLockConfig> getGlobalLockConfigs(Element element) {
+        NodeList nodeList = element.getChildNodes();
+        int length = nodeList.getLength();
+        Set<GlobalLockConfig> globalLockConfigs = new HashSet<>();
+        for (int i = 0; i < length; i++) {
+            Node node = nodeList.item(i);
+            if (node instanceof Element) {
+                Element ele = (Element) node;
+                if (NODE_NAME_GLOBAL_LOCK.equals(ele.getLocalName())) {
+                    GlobalLockConfig globalLockConfig = new GlobalLockConfig();
+                    globalLockConfig.setScanPackage(ele.getAttribute("scanPackage"));
+                    globalLockConfig.setPattern(ele.getAttribute("pattern"));
+                    String lockRetryInterval = ele.getAttribute("lockRetryInternal");
+                    if (StringUtils.isNotBlank(lockRetryInterval)) {
+                        globalLockConfig.setLockRetryInterval(Integer.parseInt(lockRetryInterval));
+                    }
+                    String lockRetryTimes = ele.getAttribute("lockRetryTimes");
+                    if (StringUtils.isNotBlank(lockRetryTimes)) {
+                        globalLockConfig.setLockRetryTimes(Integer.parseInt(lockRetryTimes));
+                    }
+                    globalLockConfigs.add(globalLockConfig);
+                }
+            }
+        }
+        return globalLockConfigs;
     }
 
     /**

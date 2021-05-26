@@ -29,6 +29,7 @@
                 <xsd:extension base="beans:identifiedType">
                     <xsd:sequence>
                         <xsd:element ref="globalTransactional" minOccurs="0" maxOccurs="unbounded"/>
+                        <xsd:element ref="globalLock" minOccurs="0" maxOccurs="unbounded"/>
                     </xsd:sequence>
                     <xsd:attribute name="applicationId" type="xsd:string" use="required"/>
                     <xsd:attribute name="txServiceGroup" type="xsd:string" use="required"/>
@@ -39,7 +40,6 @@
         </xsd:complexType>
     </xsd:element>
 
-
     <xsd:element name="globalTransactional">
         <xsd:complexType>
             <xsd:attribute name="timeoutMills" type="xsd:int" use="optional"/>
@@ -49,8 +49,17 @@
             <xsd:attribute name="noRollbackFor" type="xsd:string" use="optional"/>
             <xsd:attribute name="noRollbackForClassName" type="xsd:string" use="optional"/>
             <xsd:attribute name="propagation" type="xsd:string" use="optional"/>
-            <xsd:attribute name="lockRetry-internal" type="xsd:int" use="optional"/>
-            <xsd:attribute name="lockRetry-times" type="xsd:int" use="optional"/>
+            <xsd:attribute name="lockRetryInternal" type="xsd:int" use="optional"/>
+            <xsd:attribute name="lockRetryTimes" type="xsd:int" use="optional"/>
+            <xsd:attribute name="scanPackage" type="xsd:string" use="required"/>
+            <xsd:attribute name="pattern" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="globalLock">
+        <xsd:complexType>
+            <xsd:attribute name="lockRetryInterval" type="xsd:int" use="optional"/>
+            <xsd:attribute name="lockRetryTimes" type="xsd:int" use="optional"/>
             <xsd:attribute name="scanPackage" type="xsd:string" use="required"/>
             <xsd:attribute name="pattern" type="xsd:string" use="required"/>
         </xsd:complexType>

@@ -47,5 +47,11 @@ public class SpringSchemaTest {
         SeataTarget seataTarget = SeataTargetHolder.INSTANCE.find(SeataTargetType.METHOD, "doBiz");
         Assertions.assertThat(seataTarget).isNotNull();
         Assertions.assertThat(seataTarget.getTargetName()).isEqualTo("doBiz");
+
+        seataTarget = SeataTargetHolder.INSTANCE.find(SeataTargetType.METHOD, "doGlobalLock");
+        Assertions.assertThat(seataTarget).isNotNull();
+        Assertions.assertThat(seataTarget.getTargetName()).isEqualTo("doGlobalLock");
+
+
     }
 }

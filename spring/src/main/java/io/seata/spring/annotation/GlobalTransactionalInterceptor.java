@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
@@ -53,6 +54,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
@@ -153,7 +156,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (seataTarget != null) {
-                    return handleGlobalTransaction(methodInvocation, seataTarget);
+                    return handleSeataTarget(methodInvocation, seataTarget);
                 } else if (globalTransactionalAnnotation != null) {
                     return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
                 } else if (globalLockAnnotation != null) {
@@ -260,81 +263,35 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    Object handleGlobalTransaction(final MethodInvocation methodInvocation, final SeataTarget seataTarget) throws Throwable {
-        boolean succeed = true;
-        try {
-            return transactionalTemplate.execute(new TransactionalExecutor() {
-                @Override
-                public Object execute() throws Throwable {
-                    return methodInvocation.proceed();
-                }
-
-                public String name() {
-                    String name = seataTarget.getGlobalTransactionalConfig().getName();
-                    if (!StringUtils.isNullOrEmpty(name)) {
-                        return name;
-                    }
-                    return formatMethod(methodInvocation.getMethod());
-                }
-
-                @Override
-                public TransactionInfo getTransactionInfo() {
-                    // reset the value of timeout
-                    int timeout = seataTarget.getGlobalTransactionalConfig().getTimeoutMills();
-                    if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
-                        timeout = defaultGlobalTransactionTimeout;
-                    }
-
-                    TransactionInfo transactionInfo = new TransactionInfo();
-                    transactionInfo.setTimeOut(timeout);
-                    transactionInfo.setName(name());
-                    transactionInfo.setPropagation(seataTarget.getGlobalTransactionalConfig().getPropagation());
-                    transactionInfo.setLockRetryInterval(seataTarget.getGlobalTransactionalConfig().getLockRetryInternal());
-                    transactionInfo.setLockRetryTimes(seataTarget.getGlobalTransactionalConfig().getLockRetryTimes());
-                    Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
-                    for (Class<?> rbRule : seataTarget.getGlobalTransactionalConfig().getRollbackFor()) {
-                        rollbackRules.add(new RollbackRule(rbRule));
-                    }
-                    for (String rbRule : seataTarget.getGlobalTransactionalConfig().getRollbackForClassName()) {
-                        rollbackRules.add(new RollbackRule(rbRule));
-                    }
-                    for (Class<?> rbRule : seataTarget.getGlobalTransactionalConfig().getNoRollbackFor()) {
-                        rollbackRules.add(new NoRollbackRule(rbRule));
-                    }
-                    for (String rbRule : seataTarget.getGlobalTransactionalConfig().getNoRollbackForClassName()) {
-                        rollbackRules.add(new NoRollbackRule(rbRule));
-                    }
-                    transactionInfo.setRollbackRules(rollbackRules);
-                    return transactionInfo;
-                }
-            });
-        } catch (TransactionalExecutor.ExecutionException e) {
-            TransactionalExecutor.Code code = e.getCode();
-            switch (code) {
-                case RollbackDone:
-                    throw e.getOriginalException();
-                case BeginFailure:
-                    succeed = false;
-                    failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
-                case CommitFailure:
-                    succeed = false;
-                    failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
-                case RollbackFailure:
-                    failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
-                    throw e.getOriginalException();
-                case RollbackRetrying:
-                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
-                    throw e.getOriginalException();
-                default:
-                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
-            }
-        } finally {
-            if (degradeCheck) {
-                EVENT_BUS.post(new DegradeCheckEvent(succeed));
-            }
+    /**
+     * handle seata target
+     * @param methodInvocation
+     * @param seataTarget
+     * @return java.lang.Object
+     * @author xingfudeshi@gmail.com
+     */
+    Object handleSeataTarget(final MethodInvocation methodInvocation, final SeataTarget seataTarget) throws Throwable {
+        if (seataTarget.getAnnotationClass().equals(GlobalTransactional.class)) {
+            return handleGlobalTransaction(methodInvocation, proxyAnnotationClass(GlobalTransactional.class, seataTarget.getAnnotationConfigObject()));
+        } else if (seataTarget.getAnnotationClass().equals(GlobalLock.class)) {
+            return handleGlobalLock(methodInvocation, proxyAnnotationClass(GlobalLock.class, seataTarget.getAnnotationConfigObject()));
+        } else {
+            throw new ShouldNeverHappenException("unsupported operation");
         }
+    }
+    /**
+     * proxy annotation class
+     * @param annotationClass
+	 * @param annotationConfigObject
+     * @return T
+     * @author xingfudeshi@gmail.com
+     */
+    private <T> T proxyAnnotationClass(Class<T> annotationClass, Object annotationConfigObject) {
+        return annotationClass.cast(Enhancer.create(annotationClass, (org.springframework.cglib.proxy.MethodInterceptor) (o, method, objects, methodProxy) -> {
+            PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(annotationConfigObject.getClass(), method.getName());
+            Method getter = propertyDescriptor.getReadMethod();
+            return getter.invoke(annotationConfigObject);
+        }));
     }
 
     public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
