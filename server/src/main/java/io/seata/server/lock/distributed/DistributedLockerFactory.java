@@ -38,8 +38,7 @@ public class DistributedLockerFactory {
      * @return the distributed locker
      */
     public static DistributedLocker getDistributedLocker(String dbType) {
-        return CollectionUtils.computeIfAbsent(DISTRIBUTED_LOCKER_MAP, dbType,
-                key -> EnhancedServiceLoader.load(DistributedLocker.class, dbType));
+        return CollectionUtils.computeIfAbsent(DISTRIBUTED_LOCKER_MAP, dbType, key -> EnhancedServiceLoader.load(DistributedLocker.class, dbType));
     }
 
 }
