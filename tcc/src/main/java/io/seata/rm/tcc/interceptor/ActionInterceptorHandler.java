@@ -78,9 +78,12 @@ public class ActionInterceptorHandler {
         //MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
-        //share actionContext implicitly
-        BusinessActionContextUtil.setContext(actionContext);
+        // save the previous action context
+        BusinessActionContext previousActionContext = BusinessActionContextUtil.getContext();
         try {
+            //share actionContext implicitly
+            BusinessActionContextUtil.setContext(actionContext);
+
             if (businessAction.useTCCFence()) {
                 try {
                     // Use TCC Fence, and return the business result
@@ -97,9 +100,18 @@ public class ActionInterceptorHandler {
                 return targetCallback.execute();
             }
         } finally {
-            BusinessActionContextUtil.clear();
-            //to report business action context finally if the actionContext.getUpdated() is true
-            BusinessActionContextUtil.reportContext(actionContext);
+            try {
+                //to report business action context finally if the actionContext.getUpdated() is true
+                BusinessActionContextUtil.reportContext(actionContext);
+            } finally {
+                if (previousActionContext != null) {
+                    // recovery the previous action context
+                    BusinessActionContextUtil.setContext(previousActionContext);
+                } else {
+                    // clear the action context
+                    BusinessActionContextUtil.clear();
+                }
+            }
         }
     }
 

@@ -134,10 +134,9 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
                     timeBefore = DateUtils.addDays(new Date(), -cleanPeriod);
                 }
                 boolean result = TCCFenceHandler.deleteFenceByDate(timeBefore);
-                if (!result) {
-                    LOGGER.error("TCC fence clean task executed error!");
+                if (result) {
+                    LOGGER.info("TCC fence clean task executed success! timeBefore: {}", timeBefore);
                 }
-                LOGGER.info("TCC fence clean task executed success! timeBefore: {}", timeBefore);
             }, 0, cleanPeriod, timeUnit);
         }
     }
