@@ -231,7 +231,14 @@ public class TCCFenceHandler {
      * @return the deleted row count
      */
     public static int deleteFenceByDate(Date datetime) {
-        Connection conn = DataSourceUtils.getConnection(dataSource);
-        return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
+        return transactionTemplate.execute(status -> {
+            try {
+                Connection conn = DataSourceUtils.getConnection(dataSource);
+                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
+            } catch (RuntimeException e) {
+                status.setRollbackOnly();
+                throw e;
+            }
+        });
     }
 }
