@@ -213,6 +213,7 @@ public class TCCFenceHandler {
                 ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
             } catch (Exception e) {
                 status.setRollbackOnly();
+                LOGGER.error("delete fence log failed, xid: {}, branchId: {}", xid, branchId, e);
             }
             return ret;
         });
@@ -231,6 +232,7 @@ public class TCCFenceHandler {
                 ret = TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
             } catch (Exception e) {
                 status.setRollbackOnly();
+                LOGGER.error("delete fence log failed, timeBefore: {}", datetime, e);
             }
             return ret;
         });
