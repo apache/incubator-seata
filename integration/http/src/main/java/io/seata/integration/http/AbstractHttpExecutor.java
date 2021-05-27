@@ -55,40 +55,39 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         Args.notNull(host, "host");
         Args.notNull(path, "path");
 
-        try (CloseableHttpClient httpClient = initHttpClientInstance(paramObject)) {
-            HttpPost httpPost = new HttpPost(host + path);
-            StringEntity entity = null;
-            if (paramObject != null) {
-                String content;
-                if (paramObject instanceof String) {
-                    String sParam = (String)paramObject;
-                    JSONObject jsonObject = null;
-                    try {
-                        jsonObject = JSON.parseObject(sParam);
-                        content = jsonObject.toJSONString();
-                    } catch (JSONException e) {
-                        //Interface provider process parse exception
-                        if (LOGGER.isWarnEnabled()) {
-                            LOGGER.warn(e.getMessage());
-                        }
-                        content = sParam;
+        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
+        HttpPost httpPost = new HttpPost(host + path);
+        StringEntity entity = null;
+        if (paramObject != null) {
+            String content;
+            if (paramObject instanceof String) {
+                String sParam = (String) paramObject;
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = JSON.parseObject(sParam);
+                    content = jsonObject.toJSONString();
+                } catch (JSONException e) {
+                    //Interface provider process parse exception
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn(e.getMessage());
                     }
-
-                } else {
-                    content = JSON.toJSONString(paramObject);
+                    content = sParam;
                 }
-                entity = new StringEntity(content, ContentType.APPLICATION_JSON);
-            }
 
-            entity = buildEntity(entity, paramObject);
-            if (entity != null) {
-                httpPost.setEntity(entity);
+            } else {
+                content = JSON.toJSONString(paramObject);
             }
-            Map<String, String> headers = new HashMap<>();
-
-            buildPostHeaders(headers, paramObject);
-            return wrapHttpExecute(returnType, httpClient, httpPost, headers);
+            entity = new StringEntity(content, ContentType.APPLICATION_JSON);
         }
+
+        entity = buildEntity(entity, paramObject);
+        if (entity != null) {
+            httpPost.setEntity(entity);
+        }
+        Map<String, String> headers = new HashMap<>();
+
+        buildPostHeaders(headers, paramObject);
+        return wrapHttpExecute(returnType, httpClient, httpPost, headers);
     }
 
     @Override
@@ -98,13 +97,13 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         Args.notNull(host, "host");
         Args.notNull(path, "path");
 
-        try (CloseableHttpClient httpClient = initHttpClientInstance(paramObject)) {
-            HttpGet httpGet = new HttpGet(initGetUrl(host, path, paramObject));
-            Map<String, String> headers = new HashMap<>();
+        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
 
-            buildGetHeaders(headers, paramObject);
-            return wrapHttpExecute(returnType, httpClient, httpGet, headers);
-        }
+        HttpGet httpGet = new HttpGet(initGetUrl(host, path, paramObject));
+        Map<String, String> headers = new HashMap<>();
+
+        buildGetHeaders(headers, paramObject);
+        return wrapHttpExecute(returnType, httpClient, httpGet, headers);
     }
 
     private <T> CloseableHttpClient initHttpClientInstance(T paramObject) {
