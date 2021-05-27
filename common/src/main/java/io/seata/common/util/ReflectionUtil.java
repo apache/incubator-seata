@@ -247,7 +247,7 @@ public final class ReflectionUtil {
         fields = targetClazz.getDeclaredFields();
         List<Field> fieldList = new ArrayList<>(Arrays.asList(fields));
 
-        // Remove unwanted fields
+        // remove unwanted fields
         Field field;
         for (int i = 0; i < fieldList.size(); ++i) {
             field = fieldList.get(i);
@@ -268,7 +268,7 @@ public final class ReflectionUtil {
         if (!fieldList.isEmpty()) {
             resultFields = fieldList.toArray(new Field[fieldList.size()]);
         } else {
-            // Reuse the EMPTY_FIELD_ARRAY
+            // reuse the EMPTY_FIELD_ARRAY
             resultFields = EMPTY_FIELD_ARRAY;
         }
 

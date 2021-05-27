@@ -49,54 +49,57 @@ public final class BusinessActionContextUtil {
      *
      * @param key   the key of new context
      * @param value new context
+     * @return branch report succeed
      */
-    public static void addContext(String key, Object value) {
+    public static boolean addContext(String key, Object value) {
         if (value == null) {
-            return;
+            return false;
         }
 
         Map<String, Object> newContext = Collections.singletonMap(key, value);
-        addContext(newContext);
+        return addContext(newContext);
     }
 
     /**
      * batch share new context to tcc phase 2
      *
      * @param context the new context
+     * @return branch report succeed
      */
     @SuppressWarnings("deprecation")
-    public static void addContext(Map<String, Object> context) {
+    public static boolean addContext(Map<String, Object> context) {
         if (CollectionUtils.isEmpty(context)) {
-            return;
+            return false;
         }
 
         // put action context
         BusinessActionContext actionContext = BusinessActionContextUtil.getContext();
         if (!ActionContextUtil.putActionContext(actionContext.getActionContext(), context)) {
             // the action context is not changed, do not report
-            return;
+            return false;
         }
         // set updated
         actionContext.setUpdated(true);
 
         // if delay report, params will be finally reported after phase 1 execution
         if (Boolean.TRUE.equals(actionContext.getDelayReport())) {
-            return;
+            return false;
         }
 
         // do branch report
-        reportContext(actionContext);
+        return reportContext(actionContext);
     }
 
     /**
      * to do branch report sharing actionContext
      *
      * @param actionContext the context
+     * @return branch report succeed
      */
-    public static void reportContext(BusinessActionContext actionContext) {
+    public static boolean reportContext(BusinessActionContext actionContext) {
         // check is updated
         if (!Boolean.TRUE.equals(actionContext.getUpdated())) {
-            return;
+            return false;
         }
 
         try {
@@ -111,6 +114,7 @@ public final class BusinessActionContextUtil {
 
             // reset to un_updated
             actionContext.setUpdated(null);
+            return true;
         } catch (TransactionException e) {
             String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
             LOGGER.error("{}, error: {}", msg, e.getMessage());
