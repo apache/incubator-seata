@@ -119,7 +119,7 @@ public class ReflectionUtilTest {
         // TestSuperClass
         this.testGetAllFieldsInternal(TestSuperClass.class, "f2");
         // EmptyClass
-        this.testGetAllFieldsInternal(Object.class);
+        this.testGetAllFieldsInternal(EmptyClass.class);
         // TestInterface
         this.testGetAllFieldsInternal(TestInterface.class);
         // Object
@@ -127,7 +127,7 @@ public class ReflectionUtilTest {
 
         // case: The fields of EmptyClass is `EMPTY_FIELD_ARRAY`
         Assertions.assertTrue(ReflectionUtil.getAllFields(EmptyClass.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
-        // case: The fields of Interface is `EMPTY_FIELD_ARRAY`
+        // case: The fields of TestInterface is `EMPTY_FIELD_ARRAY`
         Assertions.assertTrue(ReflectionUtil.getAllFields(TestInterface.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
         // case: The fields of Object is `EMPTY_FIELD_ARRAY`
         Assertions.assertTrue(ReflectionUtil.getAllFields(Object.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
