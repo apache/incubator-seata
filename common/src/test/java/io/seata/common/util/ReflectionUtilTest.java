@@ -83,19 +83,6 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testGetMethod() throws NoSuchMethodException {
-        Assertions.assertEquals("public int java.lang.String.length()",
-                ReflectionUtil.getMethod(String.class, "length", null)
-                        .toString());
-        Assertions.assertEquals("public char java.lang.String.charAt(int)",
-                ReflectionUtil.getMethod(String.class, "charAt",
-                        new Class<?>[]{int.class}).toString());
-
-        Assertions.assertThrows(NoSuchMethodException.class,
-                () -> ReflectionUtil.getMethod(String.class, "size", null));
-    }
-
-    @Test
     public void testGetInterfaces() {
         Assertions.assertArrayEquals(new Object[]{Serializable.class},
                 ReflectionUtil.getInterfaces(Serializable.class).toArray());
@@ -111,6 +98,9 @@ public class ReflectionUtilTest {
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
         Assertions.assertEquals("hello world", testValue);
     }
+
+
+    //region test the method 'getAllFields'
 
     @Test
     public void testGetAllFields() {
@@ -182,6 +172,8 @@ public class ReflectionUtilTest {
 
     interface TestInterface {
     }
+
+    //endregion
 
     //endregion
 }

@@ -16,7 +16,6 @@
 package io.seata.common.util;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -73,10 +72,9 @@ public final class ReflectionUtil {
      * @throws NoSuchFieldException the no such field exception
      * @throws SecurityException the security exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws IllegalAccessException the illegal access exception
      */
     public static Object getFieldValue(Object target, String fieldName)
-        throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException {
         Class<?> cl = target.getClass();
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && cl != null) {
@@ -99,13 +97,10 @@ public final class ReflectionUtil {
      * @return object
      * @throws NoSuchMethodException the no such method exception
      * @throws SecurityException the security exception
-     * @throws IllegalAccessException the illegal access exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeMethod(Object target, String methodName)
-        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-        InvocationTargetException {
+            throws NoSuchMethodException, SecurityException, IllegalArgumentException {
         Class<?> cl = target.getClass();
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && cl != null) {
@@ -130,13 +125,10 @@ public final class ReflectionUtil {
      * @return object
      * @throws NoSuchMethodException the no such method exception
      * @throws SecurityException the security exception
-     * @throws IllegalAccessException the illegal access exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeMethod(Object target, String methodName, Class<?>[] parameterTypes, Object[] args)
-        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-        InvocationTargetException {
+            throws NoSuchMethodException, SecurityException, IllegalArgumentException {
         Class<?> cl = target.getClass();
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && cl != null) {
@@ -161,14 +153,11 @@ public final class ReflectionUtil {
      * @return object
      * @throws NoSuchMethodException the no such method exception
      * @throws SecurityException the security exception
-     * @throws IllegalAccessException the illegal access exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeStaticMethod(Class<?> targetClass, String methodName, Class<?>[] parameterTypes,
                                             Object[] parameterValues)
-        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-        InvocationTargetException {
+            throws NoSuchMethodException, SecurityException, IllegalArgumentException {
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && targetClass != null) {
             try {
@@ -179,21 +168,6 @@ public final class ReflectionUtil {
             }
         }
         throw new NoSuchMethodException("class:" + targetClass + ", methodName:" + methodName);
-    }
-
-    /**
-     * get Method by name
-     *
-     * @param classType      the class type
-     * @param methodName     the method name
-     * @param parameterTypes the parameter types
-     * @return method
-     * @throws NoSuchMethodException the no such method exception
-     * @throws SecurityException the security exception
-     */
-    public static Method getMethod(Class<?> classType, String methodName, Class<?>[] parameterTypes)
-        throws NoSuchMethodException, SecurityException {
-        return classType.getMethod(methodName, parameterTypes);
     }
 
     /**
