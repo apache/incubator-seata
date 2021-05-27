@@ -24,6 +24,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.CommitType;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
@@ -34,6 +35,7 @@ import org.slf4j.MDC;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,13 +88,27 @@ public class ActionInterceptorHandler {
             }
             argIndex++;
         }
+
         //share actionContext implicitly
         ActionInterceptorHandler.setUpContext(actionContext);
         try {
             //the final parameters of the try method
             ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
-            //the final result
-            ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+            
+            // Use TCC Fence
+            if (businessAction.useTCCFence()) {
+                try {
+                    Object ans = TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
+                    ret.put(Constants.TCC_METHOD_RESULT, ans);
+                } catch (FrameworkException | UndeclaredThrowableException e) {
+                    String msg = String.format("prepare TCC resource error, xid: %s.", xid);
+                    LOGGER.error(msg, e.getCause());
+                    throw e.getCause();
+                }
+            } else {
+                //the final result
+                ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+            }
         } finally {
             ActionInterceptorHandler.cleanUp();
             //to report business action context finally.
@@ -175,6 +191,7 @@ public class ActionInterceptorHandler {
             context.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
             context.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
             context.put(Constants.ACTION_NAME, businessAction.name());
+            context.put(Constants.USE_TCC_FENCE, businessAction.useTCCFence());
         }
     }
 
