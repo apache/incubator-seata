@@ -44,11 +44,6 @@ public class BranchReportRequestCodec extends AbstractTransactionRequestToTCCode
         String applicationData = branchReportRequest.getApplicationData();
         BranchType branchType = branchReportRequest.getBranchType();
 
-        byte[] applicationDataBytes = null;
-        if (applicationData != null) {
-            applicationDataBytes = applicationData.getBytes(UTF8);
-        }
-
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
@@ -76,6 +71,7 @@ public class BranchReportRequestCodec extends AbstractTransactionRequestToTCCode
 
         // 5. Application Data
         if (applicationData != null) {
+            byte[] applicationDataBytes = applicationData.getBytes(UTF8);
             out.writeInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
                 out.writeBytes(applicationDataBytes);

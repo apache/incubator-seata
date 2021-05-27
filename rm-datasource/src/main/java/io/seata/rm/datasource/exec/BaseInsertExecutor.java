@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -263,14 +264,17 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         final String sql = sequenceable.getSequenceSql(expr);
         LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
 
-        ResultSet genKeys;
-        genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
-        pkValues = new ArrayList<>();
-        while (genKeys.next()) {
-            Object v = genKeys.getObject(1);
-            pkValues.add(v);
+        Connection conn = statementProxy.getConnection();
+        try (Statement ps = conn.createStatement();
+             ResultSet genKeys = ps.executeQuery(sql)) {
+
+            pkValues = new ArrayList<>();
+            while (genKeys.next()) {
+                Object v = genKeys.getObject(1);
+                pkValues.add(v);
+            }
+            return pkValues;
         }
-        return pkValues;
     }
 
     /**
