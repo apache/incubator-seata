@@ -18,11 +18,10 @@ package io.seata.common.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -191,7 +190,7 @@ public final class ReflectionUtil {
         return interfaces;
     }
 
-    public static void modifyStaticFinalField(Class cla, String modifyFieldName, Object newValue)
+    public static void modifyStaticFinalField(Class<?> cla, String modifyFieldName, Object newValue)
         throws NoSuchFieldException, IllegalAccessException {
         Field field = cla.getDeclaredField(modifyFieldName);
         field.setAccessible(true);
@@ -219,17 +218,10 @@ public final class ReflectionUtil {
 
         // load current class declared fields
         fields = targetClazz.getDeclaredFields();
-        List<Field> fieldList = new ArrayList<>(Arrays.asList(fields));
+        LinkedList<Field> fieldList = new LinkedList<>(Arrays.asList(fields));
 
-        // remove unwanted fields
-        Field field;
-        for (int i = 0; i < fieldList.size(); ++i) {
-            field = fieldList.get(i);
-            if (field.getName().contains("$")) {
-                fieldList.remove(i);
-                --i;
-            }
-        }
+        // remove un_used fields
+        fieldList.removeIf(field -> field.getName().contains("$"));
 
         // load super class all fields, and add to the field list
         Field[] superFields = getAllFields(targetClazz.getSuperclass());
@@ -240,7 +232,7 @@ public final class ReflectionUtil {
         // list to array
         Field[] resultFields;
         if (!fieldList.isEmpty()) {
-            resultFields = fieldList.toArray(new Field[fieldList.size()]);
+            resultFields = fieldList.toArray(new Field[0]);
         } else {
             // reuse the EMPTY_FIELD_ARRAY
             resultFields = EMPTY_FIELD_ARRAY;
