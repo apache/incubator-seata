@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.parser;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -309,8 +310,8 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
 
         @Override
         public void serialize(SerialClob clob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            try {
-                gen.writeString(clob.getCharacterStream(), (int)clob.length());
+            try (Reader r = clob.getCharacterStream()) {
+                gen.writeString(r, (int)clob.length());
             } catch (SerialException e) {
                 LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
             }
