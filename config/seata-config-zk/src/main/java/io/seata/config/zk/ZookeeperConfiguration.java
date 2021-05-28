@@ -64,7 +64,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     private static final String CONFIG_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
-    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + SEATA_FILE_ROOT_CONFIG;
+    private static final String DEFAULT_ROOT_PATH = ZK_PATH_SPLIT_CHAR + SEATA_FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String SESSION_TIMEOUT_KEY = "sessionTimeout";
@@ -76,7 +76,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final int THREAD_POOL_NUM = 1;
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
-    private static final String DEFAULT_CONFIG_PATH = ROOT_PATH + "/seata.properties";
+    private static final String DEFAULT_CONFIG_PATH = DEFAULT_ROOT_PATH + "/seata.properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
             + FILE_CONFIG_SPLIT_CHAR;
     private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
@@ -87,6 +87,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, ZKListener>> CONFIG_LISTENERS_MAP
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile Properties seataConfig = new Properties();
+    private static final String CONFIG_CLUSTER = "cluster";
+    private static volatile String ROOT_PATH = DEFAULT_ROOT_PATH;
 
     /**
      * Instantiates a new Zookeeper configuration.
@@ -105,6 +107,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                     if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
                         StringBuilder auth = new StringBuilder(username).append(":").append(password);
                         zkClient.addAuthInfo("digest", auth.toString().getBytes());
+                    }
+                    String clusterName = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_CLUSTER, "");
+                    if (StringUtils.isNotBlank(clusterName)) {
+                        ROOT_PATH = ZK_PATH_SPLIT_CHAR + clusterName;
                     }
                 }
             }
