@@ -184,7 +184,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     }
 
     /**
-     * get cluster name
+     * get cluster name , this function is only on the server use
      *
      * @return
      */
