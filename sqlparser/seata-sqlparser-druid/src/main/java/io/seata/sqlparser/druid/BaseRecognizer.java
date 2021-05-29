@@ -75,7 +75,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
     protected void throwError(SQLExpr expr) {
         try {
             throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             // druid 1.2.6 SQLObjectImpl#toString exist NPE
             throw new SQLParsingException("Unknown SQLExpr: " + e.getMessage(), e);
         }
