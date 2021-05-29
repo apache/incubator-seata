@@ -45,7 +45,7 @@ public interface TccAction {
     boolean prepare(BusinessActionContext actionContext,
                     @BusinessActionContextParameter("a") int a,
                     @BusinessActionContextParameter(paramName = "b", index = 0) List b,
-                    @BusinessActionContextParameter(paramName = "c", index = 1) long[] c,
+                    @BusinessActionContextParameter(value = "c", index = 1) long[] c,
                     @BusinessActionContextParameter(isParamInProperty = true) TccParam d,
                     @BusinessActionContextParameter(paramName = "e", isParamInProperty = true) TccParam e);
 
