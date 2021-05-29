@@ -31,7 +31,6 @@ import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGUpdateStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
-import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
