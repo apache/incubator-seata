@@ -87,6 +87,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, ZKListener>> CONFIG_LISTENERS_MAP
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile Properties seataConfig = new Properties();
+    private static final String REGULAR_ESCAPE = "\\";
 
     /**
      * Instantiates a new Zookeeper configuration.
@@ -348,15 +349,15 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
                 return;
             }
-            String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
+            String dataId = s.replaceFirst(REGULAR_ESCAPE + ROOT_PATH + REGULAR_ESCAPE + ZK_PATH_SPLIT_CHAR, "");
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(o.toString())
-                .setChangeType(ConfigurationChangeType.MODIFY);
+                    .setChangeType(ConfigurationChangeType.MODIFY);
             listener.onProcessEvent(event);
         }
 
         @Override
         public void handleDataDeleted(String s) {
-            String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
+            String dataId = s.replaceFirst(REGULAR_ESCAPE + ROOT_PATH + REGULAR_ESCAPE + ZK_PATH_SPLIT_CHAR, "");
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setChangeType(
                     ConfigurationChangeType.DELETE);
             listener.onProcessEvent(event);
