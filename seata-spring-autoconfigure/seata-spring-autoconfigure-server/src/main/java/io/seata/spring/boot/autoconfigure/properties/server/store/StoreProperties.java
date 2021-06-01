@@ -57,7 +57,7 @@ public class StoreProperties {
     @Component
     @ConfigurationProperties(prefix = STORE_SESSION_PREFIX)
     public static class Session {
-        private String mode = "file";
+        private String mode;
 
         public String getMode() {
             return mode;
@@ -73,7 +73,7 @@ public class StoreProperties {
     @Component
     @ConfigurationProperties(prefix = STORE_LOCK_PREFIX)
     public static class Lock {
-        private String mode = "file";
+        private String mode;
 
         public String getMode() {
             return mode;
