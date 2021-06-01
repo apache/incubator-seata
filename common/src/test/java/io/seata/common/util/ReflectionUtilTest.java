@@ -155,7 +155,7 @@ public class ReflectionUtilTest {
 
         // case: Inner class
         try {
-            ReflectionUtil.getSingleton(TestInnerClass.class);
+            ReflectionUtil.getSingleton(TestClass.TestInnerClass.class);
         } catch (RuntimeException e) {
             Assertions.assertEquals(IllegalArgumentException.class, e.getClass());
             Assertions.assertEquals(InstantiationException.class, e.getCause().getClass());
@@ -181,11 +181,4 @@ public class ReflectionUtilTest {
     }
 
     //endregion
-
-
-    /**
-     * Test Inner Class
-     */
-    class TestInnerClass {
-    }
 }

@@ -11,4 +11,7 @@ public class TestClass extends TestSuperClass {
     public void setF1(String f1) {
         this.f1 = f1;
     }
+
+    public class TestInnerClass {
+    }
 }
