@@ -8,7 +8,7 @@ WORKDIR /$BASE_DIR
 
 # ADD FORM distribution
 ADD bin/ /seata-server/bin
-ADD target/ /seata-server/target
+ADD lib/ /seata-server/lib
 ADD conf/ /seata-server/conf
 ADD LICENSE /seata-server/LICENSE
 

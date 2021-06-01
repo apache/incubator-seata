@@ -122,7 +122,7 @@ JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
 JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.pid=${$} -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"
 JAVA_OPT="${JAVA_OPT} -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml"
-JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/target/seata-server.jar"
+JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/lib/seata-server.jar"
 
 
 if [ ! -x "$BASEDIR"/logs ]; then

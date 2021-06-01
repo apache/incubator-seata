@@ -26,25 +26,13 @@
     <fileSets>
         <fileSet>
             <includes>
-                <include>plugins/**</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
-            <includes>
                 <include>bin/*</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
 
         <fileSet>
-            <includes>
-                <include>logs/**</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
-            <directory>../server/src/main/resources/logback/</directory>
+            <directory>src/main/resources/logback/</directory>
             <outputDirectory>conf/logback/</outputDirectory>
             <includes>
                 <include>**/*.xml</include>
@@ -57,37 +45,30 @@
             <source>LICENSE-BIN</source>
             <destName>LICENSE</destName>
         </file>
+
         <file>
             <source>Dockerfile</source>
             <destName>Dockerfile</destName>
         </file>
 
+        <!-- libs -->
         <file>
-            <source>../server/target/seata-server.jar</source>
-            <outputDirectory>target/</outputDirectory>
+            <source>target/seata-server.jar</source>
+            <outputDirectory>lib/</outputDirectory>
         </file>
 
+        <!-- config files -->
         <file>
-            <source>../server/src/main/resources/application.yml</source>
+            <source>src/main/resources/application.yml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
         <file>
-            <source>../server/src/main/resources/application.example.yml</source>
+            <source>src/main/resources/application.example.yml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
-
         <file>
-            <source>../server/src/main/resources/logback-spring.xml</source>
+            <source>src/main/resources/logback-spring.xml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
     </files>
-
-    <moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-            <includes>
-                <include>io.seata:seata-server</include>
-            </includes>
-        </moduleSet>
-    </moduleSets>
 </assembly>
