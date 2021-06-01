@@ -126,7 +126,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
             }
         } catch (Exception e) {
             throw new EngineExecutionException(e,
-                    "Input in java object error, Method[" + state.getServiceMethod() + "] on BeanClass[" + bean.getClass()
+                    "Input to java object error, Method[" + state.getServiceMethod() + "] on BeanClass[" + bean.getClass()
                             + "]", FrameworkErrorCode.InvalidParameter);
         }
 
