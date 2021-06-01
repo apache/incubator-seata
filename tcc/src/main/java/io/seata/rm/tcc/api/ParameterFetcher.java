@@ -31,9 +31,8 @@ public interface ParameterFetcher {
      * fetch context from the param or field
      *
      * @param objValue      the value of the param or field
-     * @param actionContext the action context
      * @param annotation    the annotation
-     * @return the context
+     * @param actionContext the action context
      */
-    void fetchContext(@Nonnull Object objValue, @Nonnull Map<String, Object> actionContext, @Nonnull BusinessActionContextParameter annotation);
+    void fetchContext(@Nonnull Object objValue, @Nonnull BusinessActionContextParameter annotation, @Nonnull Map<String, Object> actionContext);
 }

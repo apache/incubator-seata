@@ -141,7 +141,7 @@ public final class ActionContextUtil {
             ParameterFetcher fetcher = ReflectionUtil.getSingleton(fetcherClazz);
 
             // fetch context from the param or field, and put in the action context
-            fetcher.fetchContext(objValue, actionContext, annotation);
+            fetcher.fetchContext(objValue, annotation, actionContext);
         } else {
             String paramName = getParamName(annotation);
             if (StringUtils.isNotBlank(paramName)) {

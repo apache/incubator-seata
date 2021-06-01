@@ -31,7 +31,7 @@ import io.seata.rm.tcc.interceptor.ActionContextUtil;
 public class DefaultParameterFetcher implements ParameterFetcher {
 
     @Override
-    public void fetchContext(@Nonnull Object objValue, @Nonnull Map<String, Object> actionContext, @Nonnull BusinessActionContextParameter annotation) {
+    public void fetchContext(@Nonnull Object objValue, @Nonnull BusinessActionContextParameter annotation, @Nonnull Map<String, Object> actionContext) {
         Map<String, Object> paramContext = ActionContextUtil.fetchContextFromObject(objValue);
         if (CollectionUtils.isEmpty(paramContext)) {
             return;
