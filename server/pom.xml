@@ -29,6 +29,8 @@
 
     <properties>
         <spring-boot.version>2.3.10.RELEASE</spring-boot.version>
+
+        <!-- logback-appenders -->
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
     </properties>
@@ -205,7 +207,7 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>2.4.5</version>
+                        <version>${spring-boot.version}</version>
                         <configuration>
                             <mainClass>io.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
