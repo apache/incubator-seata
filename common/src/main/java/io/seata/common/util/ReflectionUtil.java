@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sun.istack.internal.NotNull;
-
 /**
  * Reflection tools
  *
@@ -259,7 +257,6 @@ public final class ReflectionUtil {
      * @return the singleton
      * @throws IllegalArgumentException
      */
-    @NotNull
     public static <T> T getSingleton(Class<T> clazz) {
         if (clazz == null) {
             throw new IllegalArgumentException("clazz must be not null");
