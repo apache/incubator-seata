@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource.mock;
-import io.seata.common.util.ReflectionUtil;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+
+import io.seata.common.util.ReflectionUtil;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 
 /**
  * @author will
@@ -108,7 +108,7 @@ public class MockResultSetMetaData implements ResultSetMetaData {
         try {
             Object tableName = ReflectionUtil.getFieldValue(columnMeta, "tableName");
             return tableName.toString();
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (NoSuchFieldException e) {
             e.printStackTrace();
             return null;
         }

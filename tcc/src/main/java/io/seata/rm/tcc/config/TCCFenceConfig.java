@@ -133,11 +133,15 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
                 } else {
                     timeBefore = DateUtils.addDays(new Date(), -cleanPeriod);
                 }
-                boolean result = TCCFenceHandler.deleteFenceByDate(timeBefore);
-                if (!result) {
-                    LOGGER.error("TCC fence clean task executed error!");
+                try {
+                    int deletedRowCount = TCCFenceHandler.deleteFenceByDate(timeBefore);
+                    if (deletedRowCount > 0) {
+                        LOGGER.info("TCC fence clean task executed success, timeBefore: {}, deleted row count: {}",
+                                timeBefore, deletedRowCount);
+                    }
+                } catch (RuntimeException e) {
+                    LOGGER.error("delete fence log failed, timeBefore: {}", timeBefore, e);
                 }
-                LOGGER.info("TCC fence clean task executed success! timeBefore: {}", timeBefore);
             }, 0, cleanPeriod, timeUnit);
         }
     }

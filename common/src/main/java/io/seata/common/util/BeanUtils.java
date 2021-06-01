@@ -15,12 +15,13 @@
  */
 package io.seata.common.util;
 
-import io.seata.common.exception.NotSupportYetException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.seata.common.exception.NotSupportYetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +47,6 @@ public class BeanUtils {
             try {
                 val = ReflectionUtil.getFieldValue(o, field.getName());
             } catch (NoSuchFieldException e) {
-                LOGGER.warn(e.getMessage(), e);
-            } catch (IllegalAccessException e) {
                 LOGGER.warn(e.getMessage(), e);
             }
             if (val != null) {
