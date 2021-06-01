@@ -52,7 +52,7 @@ public @interface BusinessActionContextParameter {
      * if it is a sharding param ?
      *
      * @return the boolean
-     * @deprecated this Properties not in use
+     * @deprecated This property is no longer in use.
      */
     @Deprecated
     boolean isShardingParam() default false;
