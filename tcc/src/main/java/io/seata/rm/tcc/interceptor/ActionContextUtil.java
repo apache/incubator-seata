@@ -132,7 +132,7 @@ public final class ActionContextUtil {
         if (annotation.isParamInProperty()) {
             // get the class of the parameter fetcher
             // @since above 1.4.2
-            Class<? extends ParameterFetcher> fetcherClazz = annotation.paramFetcher();
+            Class<? extends ParameterFetcher> fetcherClazz = annotation.fetcher();
             if (fetcherClazz.isInterface()) {
                 throw new FrameworkException("the parameter fetcher must be not an interface, fetcher = " + fetcherClazz.getName());
             }

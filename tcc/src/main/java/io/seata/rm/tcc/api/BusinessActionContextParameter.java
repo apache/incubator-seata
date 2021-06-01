@@ -84,5 +84,5 @@ public @interface BusinessActionContextParameter {
      * @see io.seata.rm.tcc.interceptor.ActionContextUtil#loadParamByAnnotationAndPutToContext
      * @since above 1.4.2
      */
-    Class<? extends ParameterFetcher> paramFetcher() default DefaultParameterFetcher.class;
+    Class<? extends ParameterFetcher> fetcher() default DefaultParameterFetcher.class;
 }
