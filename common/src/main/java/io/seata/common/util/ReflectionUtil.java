@@ -266,7 +266,7 @@ public final class ReflectionUtil {
         }
 
         if (clazz.isInterface()) {
-            throw new IllegalArgumentException("clazz must be not an interface： " + clazz);
+            throw new IllegalArgumentException("clazz must be not an interface: " + clazz);
         }
 
         return (T)CollectionUtils.computeIfAbsent(SINGLETON_CACHE, clazz, key -> {
