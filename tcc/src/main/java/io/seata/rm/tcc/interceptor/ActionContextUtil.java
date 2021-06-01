@@ -32,6 +32,7 @@ import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.ParameterFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -93,7 +94,7 @@ public final class ActionContextUtil {
                 f.setAccessible(true);
                 Object fieldValue = f.get(targetParam);
 
-                // load param by the config of annotation, and then put to the context
+                // load param by the config of annotation, and then put in the context
                 String fieldName = f.getName();
                 loadParamByAnnotationAndPutToContext("field", fieldName, fieldValue, annotation, context);
             }
@@ -106,14 +107,14 @@ public final class ActionContextUtil {
     /**
      * load param by the config of annotation, and then put to the context
      *
-     * @param objType    the object type, 'param' or 'field'
-     * @param objName    the object key
-     * @param objValue   the object value
-     * @param annotation the annotation on the param or field
-     * @param context    the action context
+     * @param objType       the object type, 'param' or 'field'
+     * @param objName       the object key
+     * @param objValue      the object value
+     * @param annotation    the annotation on the param or field
+     * @param actionContext the action context
      */
     public static void loadParamByAnnotationAndPutToContext(@Nonnull final String objType, @Nonnull String objName, Object objValue,
-            @Nonnull final BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> context) {
+            @Nonnull final BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
         if (objValue == null) {
             return;
         }
@@ -129,31 +130,29 @@ public final class ActionContextUtil {
 
         // if {@code isParamInProperty == true}, fetch context from objValue
         if (annotation.isParamInProperty()) {
-            Map<String, Object> paramContext = fetchContextFromObject(objValue);
-            if (CollectionUtils.isEmpty(paramContext)) {
-                return;
+            // get the class of the parameter fetcher
+            // @since above 1.4.2
+            Class<? extends ParameterFetcher> fetcherClazz = annotation.paramFetcher();
+            if (fetcherClazz.isInterface()) {
+                throw new FrameworkException("the parameter fetcher must be not an interface, fetcher = " + fetcherClazz.getName());
             }
-            String paramName = getParamName(annotation);
-            if (StringUtils.isNotBlank(paramName)) {
-                // If the `paramName` of "@BusinessActionContextParameter" is not blank, put the param context in it
-                // @since: above 1.4.2
-                context.put(paramName, paramContext);
-            } else {
-                // Merge the param context into context
-                // Warn: This may cause values with the same name to be overridden
-                context.putAll(paramContext);
-            }
+
+            // get the singleton of the parameter fetcher
+            ParameterFetcher fetcher = ReflectionUtil.getSingleton(fetcherClazz);
+
+            // fetch context from the param or field, and put in the action context
+            fetcher.fetchContext(objValue, actionContext, annotation);
         } else {
             String paramName = getParamName(annotation);
             if (StringUtils.isNotBlank(paramName)) {
                 objName = paramName;
             }
-            context.put(objName, objValue);
+            actionContext.put(objName, objValue);
         }
     }
 
     @Nullable
-    private static Object getByIndex(String objType, String objName, Object objValue, int index) {
+    private static Object getByIndex(String objType, String objName, @Nonnull Object objValue, int index) {
         if (objValue instanceof List) {
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>)objValue;

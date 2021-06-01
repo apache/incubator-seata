@@ -19,6 +19,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
 /**
  * the TCC parameters that need to be passed to the action context;
@@ -36,6 +37,7 @@ public @interface BusinessActionContextParameter {
      * parameter's name. Synonym for {@link #paramName()}.
      *
      * @return the name of the param or field
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getParamName
      */
     String value() default "";
 
@@ -43,6 +45,7 @@ public @interface BusinessActionContextParameter {
      * parameter's name. Synonym for {@link #value()}.
      *
      * @return the name of the param or field
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getParamName
      */
     String paramName() default "";
 
@@ -50,13 +53,17 @@ public @interface BusinessActionContextParameter {
      * if it is a sharding param ?
      *
      * @return the boolean
+     * @deprecated this Properties not in use
      */
+    @Deprecated
     boolean isShardingParam() default false;
 
     /**
      * Specify the index of the parameter in the List or Array
+     * supports Array @since above 1.4.2
      *
      * @return the index of the List or Array
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getByIndex
      */
     int index() default -1;
 
@@ -65,6 +72,18 @@ public @interface BusinessActionContextParameter {
      * if {@code index >= 0}, the object get from the List or Array and then do get the parameter from the property of the object
      *
      * @return the boolean
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#loadParamByAnnotationAndPutToContext
      */
     boolean isParamInProperty() default false;
+
+    /**
+     * The parameter fetcher.
+     * When {@link #isParamInProperty()} is true, it will
+     * The default parameter fetcher is {@link DefaultParameterFetcher}
+     *
+     * @return the class
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#loadParamByAnnotationAndPutToContext
+     * @since above 1.4.2
+     */
+    Class<? extends ParameterFetcher> paramFetcher() default DefaultParameterFetcher.class;
 }

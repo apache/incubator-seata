@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sun.istack.internal.NotNull;
+
 /**
  * Reflection tools
  *
@@ -52,6 +54,11 @@ public final class ReflectionUtil {
     private static final Map<Class<?>, Field[]> CLASS_FIELDS_CACHE = new ConcurrentHashMap<>();
 
     /**
+     * The cache SINGLETON_CACHE
+     */
+    private static final Map<Class<?>, Object> SINGLETON_CACHE = new ConcurrentHashMap<>();
+
+    /**
      * Gets class by name.
      *
      * @param className the class name
@@ -68,8 +75,8 @@ public final class ReflectionUtil {
      * @param target    the target
      * @param fieldName the field name
      * @return field value
-     * @throws NoSuchFieldException the no such field exception
-     * @throws SecurityException the security exception
+     * @throws NoSuchFieldException     the no such field exception
+     * @throws SecurityException        the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object getFieldValue(Object target, String fieldName)
@@ -94,8 +101,8 @@ public final class ReflectionUtil {
      * @param target     the target
      * @param methodName the method name
      * @return object
-     * @throws NoSuchMethodException the no such method exception
-     * @throws SecurityException the security exception
+     * @throws NoSuchMethodException    the no such method exception
+     * @throws SecurityException        the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object invokeMethod(Object target, String methodName)
@@ -122,8 +129,8 @@ public final class ReflectionUtil {
      * @param parameterTypes the parameter types
      * @param args           the args
      * @return object
-     * @throws NoSuchMethodException the no such method exception
-     * @throws SecurityException the security exception
+     * @throws NoSuchMethodException    the no such method exception
+     * @throws SecurityException        the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object invokeMethod(Object target, String methodName, Class<?>[] parameterTypes, Object[] args)
@@ -150,8 +157,8 @@ public final class ReflectionUtil {
      * @param parameterTypes  the parameter types
      * @param parameterValues the parameter values
      * @return object
-     * @throws NoSuchMethodException the no such method exception
-     * @throws SecurityException the security exception
+     * @throws NoSuchMethodException    the no such method exception
+     * @throws SecurityException        the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object invokeStaticMethod(Class<?> targetClass, String methodName, Class<?>[] parameterTypes,
@@ -191,7 +198,7 @@ public final class ReflectionUtil {
     }
 
     public static void modifyStaticFinalField(Class<?> cla, String modifyFieldName, Object newValue)
-        throws NoSuchFieldException, IllegalAccessException {
+            throws NoSuchFieldException, IllegalAccessException {
         Field field = cla.getDeclaredField(modifyFieldName);
         field.setAccessible(true);
         Field modifiers = field.getClass().getDeclaredField("modifiers");
@@ -242,5 +249,32 @@ public final class ReflectionUtil {
         CLASS_FIELDS_CACHE.put(targetClazz, resultFields);
 
         return resultFields;
+    }
+
+    /**
+     * get singleton for the class
+     *
+     * @param clazz the clazz
+     * @param <T>   the type
+     * @return the singleton
+     * @throws IllegalArgumentException
+     */
+    @NotNull
+    public static <T> T getSingleton(Class<T> clazz) {
+        if (clazz == null) {
+            throw new IllegalArgumentException("clazz must be not null");
+        }
+
+        if (clazz.isInterface()) {
+            throw new IllegalArgumentException("clazz must be not an interface： " + clazz);
+        }
+
+        return (T)CollectionUtils.computeIfAbsent(SINGLETON_CACHE, clazz, key -> {
+            try {
+                return clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new IllegalArgumentException("new instance failed, the class is: " + clazz, e);
+            }
+        });
     }
 }

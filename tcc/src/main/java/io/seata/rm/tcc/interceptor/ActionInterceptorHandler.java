@@ -276,7 +276,7 @@ public class ActionInterceptorHandler {
                         throw new FrameworkException(errorMsg);
                     }
 
-                    // load param by the config of annotation, and then put to the context
+                    // load param by the config of annotation, and then put in the context
                     paramName = parameterNames != null ? parameterNames[i] : parameters[i].getName();
                     ActionContextUtil.loadParamByAnnotationAndPutToContext("param", paramName, paramObject, annotation, context);
                 }
