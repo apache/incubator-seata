@@ -59,7 +59,7 @@ public @interface BusinessActionContextParameter {
 
     /**
      * Specify the index of the parameter in the List or Array
-     * supports Array @since above 1.4.2
+     * Supports Array @since above 1.4.2
      *
      * @return the index of the List or Array
      * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getByIndex
@@ -77,7 +77,7 @@ public @interface BusinessActionContextParameter {
 
     /**
      * The parameter fetcher.
-     * When {@link #isParamInProperty()} is true, it will
+     * When {@link #isParamInProperty()} is true, this property will be used.
      * The default parameter fetcher is {@link DefaultParameterFetcher}
      *
      * @return the class
