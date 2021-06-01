@@ -28,6 +28,7 @@ import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
@@ -175,11 +176,11 @@ public class ActionInterceptorHandler {
         //Merge context and origin context if it exists.
         //@since: above 1.4.2
         Map<String, Object> originContext = actionContext.getActionContext();
-        if (originContext == null) {
-            actionContext.setActionContext(context);
-        } else {
+        if (CollectionUtils.isNotEmpty(originContext)) {
             originContext.putAll(context);
             context = originContext;
+        } else {
+            actionContext.setActionContext(context);
         }
 
         //Init applicationData
