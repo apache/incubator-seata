@@ -45,6 +45,7 @@
                 </dependency>
             </dependencies>
             <build>
+                <finalName>seata-server</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -66,7 +67,6 @@
                         </executions>
                     </plugin>
                 </plugins>
-                <finalName>seata</finalName>
             </build>
         </profile>
     </profiles>

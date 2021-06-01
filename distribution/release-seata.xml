@@ -54,6 +54,11 @@
 
     <files>
         <file>
+            <source>Dockerfile</source>
+            <destName>Dockerfile</destName>
+        </file>
+
+        <file>
             <source>LICENSE-BIN</source>
             <destName>LICENSE</destName>
         </file>
@@ -75,11 +80,6 @@
         <file>
             <source>../server/src/main/resources/logback-spring.xml</source>
             <outputDirectory>conf/</outputDirectory>
-        </file>
-
-        <file>
-            <source>Dockerfile</source>
-            <destName>Dockerfile</destName>
         </file>
     </files>
 
