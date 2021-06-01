@@ -266,7 +266,7 @@ public class ActionInterceptorHandler {
                         continue;
                     }
 
-                    // if the parameter names is null, print log
+                    // if the parameter names is null, print log and throw exception
                     String paramName = ActionContextUtil.getParamName(annotation);
                     if (parameterNames == null && StringUtils.isBlank(paramName) && !annotation.isParamInProperty()) {
                         String errorMsg = String.format("Unable to get parameter names from the method `%s.%s(...)`." +
