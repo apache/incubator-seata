@@ -67,6 +67,7 @@ public class TccParam {
      * @param name   the name
      * @param email  the email
      * @param remark the remark
+     * @param flag   the flag
      */
     public TccParam(int num, String name, String email, String remark, Boolean flag) {
         this.num = num;
