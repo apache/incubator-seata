@@ -15,7 +15,6 @@
  */
 package io.seata.server;
 
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +31,6 @@ import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.env.ContainerHelper;
-import io.seata.server.env.PortHelper;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
@@ -47,13 +45,8 @@ public class Server {
      * The entry point of application.
      *
      * @param args the input arguments
-     * @throws IOException the io exception
      */
-    public static void start(String[] args) throws IOException {
-        // get port first, use to logback.xml
-        int port = PortHelper.getPort(args);
-        System.setProperty(ConfigurationKeys.SERVER_PORT, Integer.toString(port));
-
+    public static void start(String[] args) {
         // create logger
         final Logger logger = LoggerFactory.getLogger(Server.class);
         if (ContainerHelper.isRunningInContainer()) {

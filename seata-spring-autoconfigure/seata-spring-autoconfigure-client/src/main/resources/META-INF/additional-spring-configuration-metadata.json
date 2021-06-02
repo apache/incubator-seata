@@ -238,6 +238,34 @@
         "replacement": "seata.client.load-balance.virtual-nodes",
         "reason": "Please configure to 'seata.client.load-balance.virtual-nodes'."
       }
+    },
+    {
+      "name": "seata.tcc-fence.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable tcc fence configuration.",
+      "sourceType": "io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "seata.tcc-fence.config.log-table-name",
+      "type": "java.lang.String",
+      "description": "TCC fence log table name.",
+      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
+      "defaultValue": "tcc_fence_log"
+    },
+    {
+      "name": "seata.tcc-fence.config.clean-mode",
+      "type": "java.lang.String",
+      "description": "TCC fence log clean mode.",
+      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
+      "defaultValue": "hour"
+    },
+    {
+      "name": "seata.tcc-fence.config.clean-period",
+      "type": "java.lang.Integer",
+      "description": "TCC fence log clean period.",
+      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
+      "defaultValue": 1
     }
   ],
   "hints": [
@@ -323,6 +351,17 @@
           "name": "handle-as",
           "parameters": {
             "target": "io.seata.core.compressor.CompressorType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.tcc-fence.config.clean-mode",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.rm.tcc.constant.TCCFenceCleanMode"
           }
         }
       ]
