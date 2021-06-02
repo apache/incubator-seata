@@ -72,6 +72,7 @@ public @interface BusinessActionContextParameter {
      *
      * @return the boolean
      * @see io.seata.rm.tcc.interceptor.ActionContextUtil#loadParamByAnnotationAndPutToContext
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#fetchContextFromObject
      */
     boolean isParamInProperty() default false;
 

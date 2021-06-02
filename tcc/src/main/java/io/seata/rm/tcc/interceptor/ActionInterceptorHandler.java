@@ -22,6 +22,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
@@ -126,6 +127,7 @@ public class ActionInterceptorHandler {
      * @return the action context
      * @since above 1.4.2
      */
+    @Nonnull
     protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Class<?>[] parameterTypes, Object[] arguments) {
         BusinessActionContext actionContext = null;
 
@@ -178,10 +180,10 @@ public class ActionInterceptorHandler {
         //Init running environment context
         initFrameworkContext(context);
 
-        //Merge context and origin context if it exists.
-        //@since: above 1.4.2
         Map<String, Object> originContext = actionContext.getActionContext();
         if (CollectionUtils.isNotEmpty(originContext)) {
+            //Merge context and origin context if it exists.
+            //@since: above 1.4.2
             originContext.putAll(context);
             context = originContext;
         } else {

@@ -13,19 +13,19 @@ import io.seata.rm.tcc.interceptor.ActionContextUtil;
  */
 public class MockBooleanParameterFetcher implements ParameterFetcher<Boolean> {
 
-	@Override
-	public void fetchContext(@Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull Boolean paramValue,
-			@Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
-		Object paramObject;
+    @Override
+    public void fetchContext(@Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull Boolean paramValue,
+            @Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
+        Object paramObject;
 
-		// fetch context
-		if (paramValue) {
-			paramObject = "yes";
-		} else {
-			paramObject = "no";
-		}
+        // fetch context
+        if (paramValue) {
+            paramObject = "yes";
+        } else {
+            paramObject = "no";
+        }
 
-		// put into the context
-		ActionContextUtil.putObjectByParamName(paramName, paramObject, annotation, actionContext);
-	}
+        // put into the context
+        ActionContextUtil.putObjectByParamName(paramName, paramObject, annotation, actionContext);
+    }
 }

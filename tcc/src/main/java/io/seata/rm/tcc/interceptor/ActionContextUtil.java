@@ -106,7 +106,7 @@ public final class ActionContextUtil {
     }
 
     /**
-     * load param by the config of annotation, and then put to the context
+     * load param by the config of annotation, and then put into the action context
      *
      * @param paramType     the param type, 'param' or 'field'
      * @param paramName     the param name
@@ -114,8 +114,8 @@ public final class ActionContextUtil {
      * @param annotation    the annotation on the param or field
      * @param actionContext the action context
      */
-    public static void loadParamByAnnotationAndPutToContext(@Nonnull ParamType paramType, @Nonnull String paramName, Object paramValue,
-            @Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
+    public static void loadParamByAnnotationAndPutToContext(@Nonnull final ParamType paramType, @Nonnull String paramName, Object paramValue,
+            @Nonnull final BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
         if (paramValue == null) {
             return;
         }
