@@ -21,6 +21,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
@@ -124,6 +125,7 @@ public class ActionInterceptorHandler {
      * @return the action context
      * @since above 1.4.2
      */
+    @Nonnull
     protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Class<?>[] parameterTypes, Object[] arguments) {
         BusinessActionContext actionContext = null;
 
@@ -265,8 +267,7 @@ public class ActionInterceptorHandler {
                     }
 
                     // load param by the config of annotation, and then put into the context
-                    String paramName = ActionContextUtil.getParamNameFromAnnotation(annotation);
-                    ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, paramName, paramObject, annotation, context);
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, annotation, context);
                 }
             }
         }
