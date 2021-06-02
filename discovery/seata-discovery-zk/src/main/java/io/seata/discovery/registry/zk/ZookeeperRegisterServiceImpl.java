@@ -193,6 +193,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
                     if (!exist) {
                         return null;
                     }
+
                     List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH + clusterName);
                     refreshClusterAddressMap(clusterName, childClusterPath);
                     subscribeCluster(clusterName);
