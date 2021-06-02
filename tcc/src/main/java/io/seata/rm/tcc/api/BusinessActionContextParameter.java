@@ -58,20 +58,20 @@ public @interface BusinessActionContextParameter {
     boolean isShardingParam() default false;
 
     /**
-     * Specify the index of the parameter in the List or Array
-     * Supports Array @since above 1.4.2
+     * Specify the index of the parameter in the List
      *
-     * @return the index of the List or Array
+     * @return the index of the List
      * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getByIndex
      */
     int index() default -1;
 
     /**
      * whether get the parameter from the property of the object
-     * if {@code index >= 0}, the object get from the List or Array and then do get the parameter from the property of the object
+     * if {@code index >= 0}, the object get from the List and then do get the parameter from the property of the object
      *
      * @return the boolean
      * @see io.seata.rm.tcc.interceptor.ActionContextUtil#loadParamByAnnotationAndPutToContext
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#fetchContextFromObject
      */
     boolean isParamInProperty() default false;
 }
