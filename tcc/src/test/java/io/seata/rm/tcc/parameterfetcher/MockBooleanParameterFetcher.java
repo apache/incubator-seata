@@ -1,10 +1,8 @@
 package io.seata.rm.tcc.parameterfetcher;
 
-import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 
-import io.seata.rm.tcc.TccParam;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.ParamType;
 import io.seata.rm.tcc.api.ParameterFetcher;
