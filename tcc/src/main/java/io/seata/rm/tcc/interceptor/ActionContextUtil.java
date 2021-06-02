@@ -95,7 +95,7 @@ public final class ActionContextUtil {
                 f.setAccessible(true);
                 Object fieldValue = f.get(targetParam);
 
-                // load param by the config of annotation, and then put in the context
+                // load param by the config of annotation, and then put into the context
                 String fieldName = f.getName();
                 loadParamByAnnotationAndPutToContext(ParamType.FIELD, fieldName, fieldValue, annotation, context);
             }
@@ -141,7 +141,7 @@ public final class ActionContextUtil {
             // get the singleton of the parameter fetcher
             ParameterFetcher fetcher = ReflectionUtil.getSingleton(fetcherClazz);
 
-            // fetch context from the param or field, and put in the action context
+            // fetch context from the param or field, and put into the action context
             fetcher.fetchContext(paramType, paramName, paramValue, annotation, actionContext);
         } else {
             putObjectByParamName(paramName, paramValue, annotation, actionContext);
@@ -208,7 +208,7 @@ public final class ActionContextUtil {
             paramName = paramNameFromAnnotation;
         }
 
-        // put in the context
+        // put into the context
         actionContext.put(paramName, paramValue);
     }
 

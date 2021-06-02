@@ -27,7 +27,7 @@ public class MockBooleanParameterFetcher implements ParameterFetcher<Boolean> {
 			paramObject = "no";
 		}
 
-		// put in the context
+		// put into the context
 		ActionContextUtil.putObjectByParamName(paramName, paramObject, annotation, actionContext);
 	}
 }
