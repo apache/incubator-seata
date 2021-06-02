@@ -175,7 +175,7 @@ public final class ActionContextUtil {
             if (length <= index) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("The index '{}' is out of bounds for the array {} named '{}'," +
-                        " whose size is '{}', so pass this {}", index, paramType, paramName, length, paramType);
+                        " whose size is '{}', so pass this {}", index, paramType.getCode(), paramName, length, paramType.getCode());
                 }
                 return null;
             }

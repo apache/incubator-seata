@@ -41,6 +41,9 @@ public interface TccAction {
      * @param c             the array c
      * @param d             the object d
      * @param e             the object e
+     * @param f             the object f
+     * @param g             the boolean g
+     * @param h             the boolean h
      * @return the boolean
      */
     @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback")
