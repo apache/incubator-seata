@@ -45,19 +45,19 @@ darwin=false;
 case "`uname`" in
   CYGWIN*) cygwin=true ;;
   Darwin*) darwin=true
-           if [ -z "$JAVA_VERSION" ] ; then
-             JAVA_VERSION="CurrentJDK"
-           else
-             echo "Using Java version: $JAVA_VERSION"
-           fi
-		   if [ -z "$JAVA_HOME" ]; then
-		      if [ -x "/usr/libexec/java_home" ]; then
-			      JAVA_HOME=`/usr/libexec/java_home`
-			  else
-			      JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
-			  fi
-           fi       
-           ;;
+    if [ -z "$JAVA_VERSION" ] ; then
+      JAVA_VERSION="CurrentJDK"
+    else
+      echo "Using Java version: $JAVA_VERSION"
+    fi
+    if [ -z "$JAVA_HOME" ]; then
+      if [ -x "/usr/libexec/java_home" ]; then
+        JAVA_HOME=`/usr/libexec/java_home`
+      else
+        JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
+      fi
+    fi
+  ;;
 esac
 
 if [ -z "$JAVA_HOME" ] ; then
