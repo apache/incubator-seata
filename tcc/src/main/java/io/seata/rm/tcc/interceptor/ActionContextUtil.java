@@ -103,7 +103,7 @@ public final class ActionContextUtil {
             return;
         }
 
-        // If {@code index >= 0}, get by index from the list/array param or field
+        // If {@code index >= 0}, get by index from the list param or field
         int index = annotation.index();
         if (index >= 0) {
             paramValue = getByIndex(paramType, paramName, paramValue, index);
