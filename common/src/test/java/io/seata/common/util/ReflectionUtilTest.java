@@ -128,7 +128,7 @@ public class ReflectionUtilTest {
         Assertions.assertEquals(fieldNames.length, fields.length);
         Field[] fields2 = ReflectionUtil.getAllFields(clazz);
         // same instance, use the `==`
-        Assertions.assertTrue(fields == fields2);
+        Assertions.assertSame(fields, fields2);
 
         if (fieldNames.length == 0) {
             return;
