@@ -48,6 +48,9 @@ public class TccParam {
     @BusinessActionContextParameter(paramName = "remark")
     protected String remark;
 
+    /**
+     * The flag, try to use the fetcher
+     */
     @BusinessActionContextParameter(isParamInProperty = true, fetcher = MockBooleanParameterFetcher.class)
     protected Boolean flag;
 
