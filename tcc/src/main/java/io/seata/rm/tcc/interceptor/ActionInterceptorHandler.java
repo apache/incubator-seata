@@ -176,10 +176,10 @@ public class ActionInterceptorHandler {
         //Init running environment context
         initFrameworkContext(context);
 
-        //Merge context and origin context if it exists.
-        //@since: above 1.4.2
         Map<String, Object> originContext = actionContext.getActionContext();
         if (CollectionUtils.isNotEmpty(originContext)) {
+            //Merge context and origin context if it exists.
+            //@since: above 1.4.2
             originContext.putAll(context);
             context = originContext;
         } else {
