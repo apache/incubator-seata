@@ -182,7 +182,7 @@ public final class ActionContextUtil {
             paramValue = Array.get(array, index);
         } else {
             LOGGER.warn("the {} named '{}' is not a `List` or `Array`, so the 'index' field of '@{}' cannot be used on it",
-                paramType, paramName, BusinessActionContextParameter.class.getSimpleName());
+                paramType.getCode(), paramName, BusinessActionContextParameter.class.getSimpleName());
         }
 
         return paramValue;
