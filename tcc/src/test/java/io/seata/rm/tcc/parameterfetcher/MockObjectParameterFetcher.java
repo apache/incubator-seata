@@ -24,6 +24,6 @@ public class MockObjectParameterFetcher implements ParameterFetcher<TccParam> {
 		paramContext.put("name", param.getName());
 
 		// put into the context
-		ActionContextUtil.putMapByParamName(paramContext, annotation, actionContext);
+		ActionContextUtil.putContextByParamName(paramContext, annotation, actionContext);
 	}
 }

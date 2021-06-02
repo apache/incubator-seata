@@ -197,7 +197,7 @@ public final class ActionContextUtil {
     }
 
     public static void putObjectByParamName(String paramName, Object paramValue, @Nonnull BusinessActionContextParameter annotation,
-                                            @Nonnull final Map<String, Object> actionContext) {
+            @Nonnull final Map<String, Object> actionContext) {
         if (paramValue == null) {
             return;
         }
@@ -212,8 +212,8 @@ public final class ActionContextUtil {
         actionContext.put(paramName, paramValue);
     }
 
-    public static void putMapByParamName(Map<String, Object> paramContext, @Nonnull BusinessActionContextParameter annotation,
-                                         @Nonnull final Map<String, Object> actionContext) {
+    public static void putContextByParamName(Map<String, Object> paramContext, @Nonnull BusinessActionContextParameter annotation,
+            @Nonnull final Map<String, Object> actionContext) {
         if (CollectionUtils.isEmpty(paramContext)) {
             return;
         }

@@ -18,8 +18,6 @@ package io.seata.rm.tcc.api;
 import java.util.Map;
 import javax.annotation.Nonnull;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
 
 /**
@@ -33,7 +31,10 @@ public class DefaultParameterFetcher implements ParameterFetcher<Object> {
     @Override
     public void fetchContext(@Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull Object paramValue,
             @Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
+        // fetch context
         Map<String, Object> paramContext = ActionContextUtil.fetchContextFromObject(paramValue);
-        ActionContextUtil.putMapByParamName(paramContext, annotation, actionContext);
+
+        // put into the action context
+        ActionContextUtil.putContextByParamName(paramContext, annotation, actionContext);
     }
 }
