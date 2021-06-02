@@ -186,15 +186,19 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     // visible for test.
     List<InetSocketAddress> doLookup(String clusterName) throws Exception {
-        boolean exist = getClientInstance().exists(ROOT_PATH + clusterName);
-        if (!exist) {
-            return null;
-        }
-
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
-            List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH + clusterName);
-            refreshClusterAddressMap(clusterName, childClusterPath);
-            subscribeCluster(clusterName);
+            synchronized (clusterName.intern()) {
+                if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+                    boolean exist = getClientInstance().exists(ROOT_PATH + clusterName);
+                    if (!exist) {
+                        return null;
+                    }
+
+                    List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH + clusterName);
+                    refreshClusterAddressMap(clusterName, childClusterPath);
+                    subscribeCluster(clusterName);
+                }
+            }
         }
 
         return CLUSTER_ADDRESS_MAP.get(clusterName);
