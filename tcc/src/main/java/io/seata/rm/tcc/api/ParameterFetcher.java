@@ -25,14 +25,17 @@ import javax.annotation.Nonnull;
  * @author wang.liang
  * @since above 1.4.2
  */
-public interface ParameterFetcher {
+public interface ParameterFetcher<T> {
 
     /**
      * fetch context from the param or field
      *
-     * @param objValue      the value of the param or field
-     * @param annotation    the annotation
+     * @param paramType     the type of the param, 'param' or 'field'
+     * @param paramName     the name of the param or field
+     * @param paramValue    the value of the param or field
+     * @param annotation    the annotation on the param or field
      * @param actionContext the action context
      */
-    void fetchContext(@Nonnull Object objValue, @Nonnull BusinessActionContextParameter annotation, @Nonnull Map<String, Object> actionContext);
+    void fetchContext(@Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull T paramValue,
+        @Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext);
 }

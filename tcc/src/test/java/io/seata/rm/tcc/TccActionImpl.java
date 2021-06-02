@@ -32,7 +32,10 @@ public class TccActionImpl implements TccAction {
                            List b,
                            long[] c,
                            TccParam d,
-                           TccParam e) {
+                           TccParam e,
+                           TccParam f,
+                           boolean g,
+                           boolean h) {
         return true;
     }
 

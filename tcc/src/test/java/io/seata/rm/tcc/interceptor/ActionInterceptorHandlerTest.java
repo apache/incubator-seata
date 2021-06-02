@@ -46,7 +46,8 @@ class ActionInterceptorHandlerTest {
     @Test
     void testBusinessActionContext() throws NoSuchMethodException {
         Method prepareMethod = TccAction.class.getDeclaredMethod("prepare",
-                BusinessActionContext.class, int.class, List.class, long[].class, TccParam.class, TccParam.class);
+                BusinessActionContext.class, int.class, List.class, long[].class,
+                TccParam.class, TccParam.class, TccParam.class, boolean.class, boolean.class);
 
         // int a
         int intA = 11;
@@ -61,26 +62,38 @@ class ActionInterceptorHandlerTest {
         arrayC[1] = 33L;
 
         // object d
-        TccParam objD = new TccParam(1, "aaa", "aaa@ali.com", null);
+        TccParam objD = new TccParam(1, "aaa", "aaa@ali.com", null, true);
 
         // object e
-        TccParam objE = new TccParam(2, "bbb", null, "bbb is an IT man");
+        TccParam objE = new TccParam(2, "bbb", null, "bbb is an IT man", false);
 
+        // object f
+        TccParam objF = new TccParam(3, "ccc", "ccc@ali.com", "ccc is a strong man", null);
+
+        // boolean g
+        boolean g = true;
+
+        // boolean h
+        boolean h = false;
+
+        // fetch context
         Map<String, Object> paramContext = actionInterceptorHandler.fetchActionRequestContext(prepareMethod,
-                new Object[]{null, intA, listB, arrayC, objD, objE});
+                new Object[]{null, intA, listB, arrayC, objD, objE, objF, g, h});
         System.out.println(paramContext);
 
-        // a, b, c
+        // int a
         Assertions.assertEquals(11, paramContext.get("a"));
+        // list b
         Assertions.assertEquals("bb", paramContext.get("b"));
+        // array c
         Assertions.assertEquals(33L, paramContext.get("c"));
-        // d
+        // object d
         Assertions.assertEquals(1, paramContext.get("num"));
         Assertions.assertFalse(paramContext.containsKey("name"));
         Assertions.assertEquals("aaa@ali.com", paramContext.get("email0"));
         Assertions.assertFalse(paramContext.containsKey("remark"));
-        // e
-        Assertions.assertTrue(paramContext.containsKey("e"));
+        Assertions.assertEquals("yes", paramContext.get("flag"));
+        // object e
         @SuppressWarnings("all")
         Map<String, Object> contextE = (Map)paramContext.get("e");
         Assertions.assertNotNull(contextE);
@@ -88,6 +101,21 @@ class ActionInterceptorHandlerTest {
         Assertions.assertFalse(contextE.containsKey("name"));
         Assertions.assertFalse(contextE.containsKey("email0"));
         Assertions.assertEquals("bbb is an IT man", contextE.get("remark"));
+        Assertions.assertEquals("no", contextE.get("flag"));
+        // object f
+        @SuppressWarnings("all")
+        Map<String, Object> contextF = (Map)paramContext.get("f");
+        Assertions.assertNotNull(contextF);
+        Assertions.assertEquals(2, contextF.size());
+        Assertions.assertEquals(3, contextF.get("num"));
+        Assertions.assertEquals("ccc", contextF.get("name"));
+        Assertions.assertFalse(contextF.containsKey("email0"));
+        Assertions.assertFalse(contextF.containsKey("remark"));
+        Assertions.assertFalse(contextF.containsKey("flag"));
+        // boolean g
+        Assertions.assertEquals("yes", paramContext.get("g"));
+        // boolean h
+        Assertions.assertEquals("no", paramContext.get("h"));
     }
 
 }

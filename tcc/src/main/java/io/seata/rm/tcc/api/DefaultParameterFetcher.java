@@ -28,23 +28,12 @@ import io.seata.rm.tcc.interceptor.ActionContextUtil;
  * @author wang.liang
  * @since above 1.4.2
  */
-public class DefaultParameterFetcher implements ParameterFetcher {
+public class DefaultParameterFetcher implements ParameterFetcher<Object> {
 
     @Override
-    public void fetchContext(@Nonnull Object objValue, @Nonnull BusinessActionContextParameter annotation, @Nonnull Map<String, Object> actionContext) {
-        Map<String, Object> paramContext = ActionContextUtil.fetchContextFromObject(objValue);
-        if (CollectionUtils.isEmpty(paramContext)) {
-            return;
-        }
-        String paramName = ActionContextUtil.getParamName(annotation);
-        if (StringUtils.isNotBlank(paramName)) {
-            // If the `paramName` of "@BusinessActionContextParameter" is not blank, put the param context in it
-            // @since: above 1.4.2
-            actionContext.put(paramName, paramContext);
-        } else {
-            // Merge the param context into context
-            // Warn: This may cause values with the same name to be overridden
-            actionContext.putAll(paramContext);
-        }
+    public void fetchContext(@Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull Object paramValue,
+            @Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
+        Map<String, Object> paramContext = ActionContextUtil.fetchContextFromObject(paramValue);
+        ActionContextUtil.putMapByParamName(paramContext, annotation, actionContext);
     }
 }

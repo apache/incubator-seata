@@ -19,6 +19,8 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.parameterfetcher.MockBooleanParameterFetcher;
+import io.seata.rm.tcc.parameterfetcher.MockObjectParameterFetcher;
 
 import java.util.List;
 
@@ -47,7 +49,10 @@ public interface TccAction {
                     @BusinessActionContextParameter(paramName = "b", index = 0) List b,
                     @BusinessActionContextParameter(value = "c", index = 1) long[] c,
                     @BusinessActionContextParameter(isParamInProperty = true) TccParam d,
-                    @BusinessActionContextParameter(paramName = "e", isParamInProperty = true) TccParam e);
+                    @BusinessActionContextParameter(paramName = "e", isParamInProperty = true) TccParam e,
+                    @BusinessActionContextParameter(paramName = "f", isParamInProperty = true, fetcher = MockObjectParameterFetcher.class) TccParam f,
+                    @BusinessActionContextParameter(paramName = "g", isParamInProperty = true, fetcher = MockBooleanParameterFetcher.class) boolean g,
+                    @BusinessActionContextParameter(paramName = "h", isParamInProperty = true, fetcher = MockBooleanParameterFetcher.class) boolean h);
 
     /**
      * Commit boolean.
