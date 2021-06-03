@@ -109,11 +109,13 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             return;
         }
         // gets a record of the lock and session at the moment
-        Map<String, Object> maps = new HashMap<>();
+        Map<String, Object> maps = new HashMap<>(2);
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
-        Map<String, byte[]> globalSessionByteMap = new HashMap<>();
-        Map<Long, byte[]> branchSessionByteMap = new HashMap<>();
+        Integer initialCapacity = sessionMap.size();
+        Map<String, byte[]> globalSessionByteMap = new HashMap<>(initialCapacity);
+        // each transaction is expected to have two branches
+        Map<Long, byte[]> branchSessionByteMap = new HashMap<>(initialCapacity * 2);
         sessionMap.forEach((k, v) -> {
             globalSessionByteMap.put(v.getXid(), v.encode());
             List<BranchSession> branchSessions = v.getBranchSessions();
@@ -123,7 +125,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         maps.put(ROOT_SESSION_MANAGER_NAME, globalSessionByteMap);
         maps.put(BRANCH_SESSION_MAP, branchSessionByteMap);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("globalSessionmap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
+            LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
                 branchSessionByteMap.size());
         }
         if (maps.isEmpty()) {

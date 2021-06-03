@@ -703,4 +703,34 @@ public interface ConfigurationKeys {
      */
     String SERVER_RAFT_SNAPSHOT_INTERVAL = SERVER_RAFT + "snapshotInterval";
 
+    /**
+     * The constant SERVER_RAFT_DISRUPTOR_BUFFER_SIZE.
+     */
+    String SERVER_RAFT_DISRUPTOR_BUFFER_SIZE = SERVER_RAFT + "disruptorBufferSize";
+
+    /**
+     * The constant SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS.
+     */
+    String SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS = SERVER_RAFT + "maxReplicatorInflightMsgs";
+
+    /**
+     * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.
+     */
+    String SERVER_RAFT_MAX_APPEND_BUFFER_SIZE = SERVER_RAFT + "maxAppendBufferSize";
+
+    /**
+     * The constant SERVER_RAFT_APPLY_BATCH.
+     */
+    String SERVER_RAFT_APPLY_BATCH = SERVER_RAFT + "applyBatch";
+
+    /**
+     * The constant SERVER_RAFT_APPLY_BATCH.
+     */
+    String SERVER_RAFT_ELECTION_TIMEOUT_MS = SERVER_RAFT + "electionTimeoutMs";
+
+    /**
+     * The constant SERVER_RAFT_REPORTER_ENABLED.
+     */
+    String SERVER_RAFT_REPORTER_ENABLED = SERVER_RAFT + "reporterEnabled";
+
 }

@@ -17,6 +17,7 @@ package io.seata.server.raft;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
@@ -28,14 +29,17 @@ import com.alipay.sofa.jraft.option.CliOptions;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
+import com.codahale.metrics.Slf4jReporter;
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.raft.AbstractRaftServer;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServer;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
@@ -65,11 +69,18 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         nodeOptions.setRaftMetaUri(dataPath + File.separator + "raft_meta");
         // Snapshot, optional, is generally recommended
         nodeOptions.setSnapshotUri(dataPath + File.separator + "snapshot");
-        nodeOptions.setElectionTimeoutMs(2000);
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
         this.cliService = RaftServiceFactory.createAndInitCliService(new CliOptions());
         this.node = this.raftGroupService.start();
+        boolean reporterEnabled =
+            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED, false);
+        if (reporterEnabled) {
+            final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
+                .outputTo(LoggerFactory.getLogger(getClass())).convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS).build();
+            reporter.start(30, TimeUnit.MINUTES);
+        }
     }
 
     public RaftServerImpl() {}

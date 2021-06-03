@@ -18,6 +18,7 @@ package io.seata.core.raft;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
+import com.alipay.sofa.jraft.option.RaftOptions;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -77,6 +78,18 @@ public class RaftServerFactory {
         // snapshot should be made every 30 seconds
         Integer snapshotInterval = config.getInt(ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
+        RaftOptions raftOptions = new RaftOptions();
+        raftOptions
+            .setApplyBatch(config.getInt(ConfigurationKeys.SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
+        raftOptions.setMaxAppendBufferSize(
+            config.getInt(ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
+        raftOptions.setDisruptorBufferSize(
+            config.getInt(ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
+        raftOptions.setMaxReplicatorInflightMsgs(config.getInt(
+            ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
+        nodeOptions.setRaftOptions(raftOptions);
+        nodeOptions.setElectionTimeoutMs(
+            config.getInt(ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
         // analytic parameter
         final PeerId serverId = new PeerId();
         if (!serverId.parse(serverIdStr)) {
