@@ -36,8 +36,7 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testGetFieldValue() throws
-            NoSuchFieldException, IllegalAccessException {
+    public void testGetFieldValue() throws NoSuchFieldException {
         Assertions.assertEquals("d",
                 ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT"));
 
@@ -46,8 +45,7 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testInvokeMethod() throws NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
+    public void testInvokeMethod() throws NoSuchMethodException, InvocationTargetException {
         Assertions.assertEquals(0, ReflectionUtil.invokeMethod("", "length"));
         Assertions.assertEquals(3,
                 ReflectionUtil.invokeMethod("foo", "length"));
@@ -57,29 +55,27 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testInvokeMethod2() throws NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
+    public void testInvokeMethod2() throws NoSuchMethodException, InvocationTargetException {
         Assertions.assertEquals(0, ReflectionUtil
-                .invokeMethod("", "length", null, null));
+                .invokeMethod("", "length", null, ReflectionUtil.EMPTY_ARGS));
         Assertions.assertEquals(3, ReflectionUtil
-                .invokeMethod("foo", "length", null, null));
+                .invokeMethod("foo", "length", null, ReflectionUtil.EMPTY_ARGS));
 
         Assertions.assertThrows(NoSuchMethodException.class, () -> ReflectionUtil
-                .invokeMethod("", "size", null, null));
+                .invokeMethod("", "size", null, ReflectionUtil.EMPTY_ARGS));
     }
 
     @Test
-    public void testInvokeMethod3() throws NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
+    public void testInvokeMethod3() throws NoSuchMethodException, InvocationTargetException {
         Assertions.assertEquals("0", ReflectionUtil.invokeStaticMethod(
                 String.class, "valueOf",
-                new Class<?>[]{int.class}, new Object[]{0}));
+                new Class<?>[]{int.class}, 0));
         Assertions.assertEquals("123", ReflectionUtil.invokeStaticMethod(
                 String.class, "valueOf",
-                new Class<?>[]{int.class}, new Object[]{123}));
+                new Class<?>[]{int.class}, 123));
 
         Assertions.assertThrows(NoSuchMethodException.class, () -> ReflectionUtil
-                .invokeStaticMethod(String.class, "size", null, null));
+                .invokeStaticMethod(String.class, "size", null, ReflectionUtil.EMPTY_ARGS));
     }
 
     @Test
@@ -116,11 +112,11 @@ public class ReflectionUtilTest {
         this.testGetAllFieldsInternal(Object.class);
 
         // case: The fields of EmptyClass is `EMPTY_FIELD_ARRAY`
-        Assertions.assertTrue(ReflectionUtil.getAllFields(EmptyClass.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+        Assertions.assertSame(ReflectionUtil.EMPTY_FIELD_ARRAY, ReflectionUtil.getAllFields(EmptyClass.class));
         // case: The fields of TestInterface is `EMPTY_FIELD_ARRAY`
-        Assertions.assertTrue(ReflectionUtil.getAllFields(TestInterface.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+        Assertions.assertSame(ReflectionUtil.EMPTY_FIELD_ARRAY, ReflectionUtil.getAllFields(TestInterface.class));
         // case: The fields of Object is `EMPTY_FIELD_ARRAY`
-        Assertions.assertTrue(ReflectionUtil.getAllFields(Object.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+        Assertions.assertSame(ReflectionUtil.EMPTY_FIELD_ARRAY, ReflectionUtil.getAllFields(Object.class));
     }
 
     private void testGetAllFieldsInternal(Class<?> clazz, String... fieldNames) {
@@ -128,7 +124,7 @@ public class ReflectionUtilTest {
         Assertions.assertEquals(fieldNames.length, fields.length);
         Field[] fields2 = ReflectionUtil.getAllFields(clazz);
         // same instance, use the `==`
-        Assertions.assertTrue(fields == fields2);
+        Assertions.assertSame(fields, fields2);
 
         if (fieldNames.length == 0) {
             return;
