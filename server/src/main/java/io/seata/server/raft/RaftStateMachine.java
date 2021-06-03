@@ -28,6 +28,7 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import com.alipay.sofa.jraft.util.Utils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -111,6 +112,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         Map<String, Object> maps = new HashMap<>(2);
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
+        if (sessionMap.isEmpty()) {
+            return;
+        }
         Integer initialCapacity = sessionMap.size();
         Map<String, byte[]> globalSessionByteMap = new HashMap<>(initialCapacity);
         // each transaction is expected to have two branches
@@ -127,19 +131,19 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
                 branchSessionByteMap.size());
         }
-        if (maps.isEmpty()) {
-            return;
-        }
-        final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
-        if (snapshot.save(maps)) {
-            if (writer.addFile("data")) {
-                done.run(Status.OK());
+        // async save
+        Utils.runInThread(() -> {
+            final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
+            if (snapshot.save(maps)) {
+                if (writer.addFile("data")) {
+                    done.run(Status.OK());
+                } else {
+                    done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
+                }
             } else {
-                done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
+                done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
             }
-        } else {
-            done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
-        }
+        });
     }
 
     @Override
