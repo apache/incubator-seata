@@ -62,6 +62,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchType branchType;
 
+    /**
+     * @since above 1.4.2
+     */
     private CommitType commitType = CommitType.SyncCommit;
 
     private BranchStatus status = BranchStatus.Unknown;

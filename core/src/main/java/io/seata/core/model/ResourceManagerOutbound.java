@@ -27,13 +27,13 @@ public interface ResourceManagerOutbound {
     /**
      * Branch register long.
      *
-     * @param branchType the branch type
-     * @param commitType the commit type
-     * @param resourceId the resource id
-     * @param clientId   the client id
-     * @param xid        the xid
+     * @param branchType      the branch type
+     * @param commitType      the commit type, @since above 1.4.2
+     * @param resourceId      the resource id
+     * @param clientId        the client id
+     * @param xid             the xid
      * @param applicationData the context
-     * @param lockKeys   the lock keys
+     * @param lockKeys        the lock keys
      * @return the long
      * @throws TransactionException the transaction exception
      */
@@ -43,12 +43,12 @@ public interface ResourceManagerOutbound {
     /**
      * Branch register long.
      *
-     * @param branchType the branch type
-     * @param resourceId the resource id
-     * @param clientId   the client id
-     * @param xid        the xid
+     * @param branchType      the branch type
+     * @param resourceId      the resource id
+     * @param clientId        the client id
+     * @param xid             the xid
      * @param applicationData the context
-     * @param lockKeys   the lock keys
+     * @param lockKeys        the lock keys
      * @return the long
      * @throws TransactionException the transaction exception
      */
