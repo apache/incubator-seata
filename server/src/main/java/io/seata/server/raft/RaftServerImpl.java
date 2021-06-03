@@ -31,6 +31,7 @@ import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.codahale.metrics.Slf4jReporter;
 import io.seata.common.loader.LoadLevel;
+import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
@@ -72,6 +73,7 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
         this.cliService = RaftServiceFactory.createAndInitCliService(new CliOptions());
+        ConfigurationCache.addConfigListener(ConfigurationKeys.SERVER_RAFT_CLUSTER, this);
         this.node = this.raftGroupService.start();
         boolean reporterEnabled =
             ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED, false);
