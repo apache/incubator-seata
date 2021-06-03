@@ -28,7 +28,6 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import com.alipay.sofa.jraft.util.Utils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -105,7 +104,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
-        if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
+        if (!isLeader() || !StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
             return;
         }
         // gets a record of the lock and session at the moment
@@ -131,19 +130,16 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         if (maps.isEmpty()) {
             return;
         }
-        // async save
-        Utils.runInThread(() -> {
-            final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
-            if (snapshot.save(maps)) {
-                if (writer.addFile("data")) {
-                    done.run(Status.OK());
-                } else {
-                    done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
-                }
+        final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
+        if (snapshot.save(maps)) {
+            if (writer.addFile("data")) {
+                done.run(Status.OK());
             } else {
-                done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
+                done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
             }
-        });
+        } else {
+            done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
+        }
     }
 
     @Override
@@ -186,6 +182,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 });
                 SessionHolder.reload(rootSessionMap.values(), StoreMode.FILE);
             }
+            LOGGER.info("on snapshot load end");
             return true;
         } catch (final Exception e) {
             LOGGER.error("fail to load snapshot from {}", snapshot.getPath());
