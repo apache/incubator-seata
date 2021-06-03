@@ -72,8 +72,7 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         nodeOptions.setRaftMetaUri(dataPath + File.separator + "raft_meta");
         // Snapshot, optional, is generally recommended
         nodeOptions.setSnapshotUri(dataPath + File.separator + "snapshot");
-        boolean reporterEnabled =
-            ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
+        boolean reporterEnabled = ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
         nodeOptions.setEnableMetrics(reporterEnabled);
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
@@ -84,7 +83,8 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
                 .outputTo(LoggerFactory.getLogger(getClass())).convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-            reporter.start(ConfigurationFactory.getInstance().getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY,30), TimeUnit.MINUTES);
+            reporter.start(ConfigurationFactory.getInstance().getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY, 30),
+                TimeUnit.MINUTES);
         }
     }
 
