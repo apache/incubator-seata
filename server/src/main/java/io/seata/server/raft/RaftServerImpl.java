@@ -35,7 +35,6 @@ import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.raft.AbstractRaftServer;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServer;
@@ -44,6 +43,9 @@ import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_CLUSTER;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
 import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
 
 /**
@@ -73,15 +75,15 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
         this.cliService = RaftServiceFactory.createAndInitCliService(new CliOptions());
-        ConfigurationCache.addConfigListener(ConfigurationKeys.SERVER_RAFT_CLUSTER, this);
+        ConfigurationCache.addConfigListener(SERVER_RAFT_CLUSTER, this);
         this.node = this.raftGroupService.start();
         boolean reporterEnabled =
-            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED, false);
+            ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
         if (reporterEnabled) {
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
                 .outputTo(LoggerFactory.getLogger(getClass())).convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-            reporter.start(30, TimeUnit.MINUTES);
+            reporter.start(ConfigurationFactory.getInstance().getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY,30), TimeUnit.MINUTES);
         }
     }
 
@@ -115,7 +117,7 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
 
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
-        if (ConfigurationKeys.SERVER_RAFT_CLUSTER.equals(event.getDataId())) {
+        if (SERVER_RAFT_CLUSTER.equals(event.getDataId())) {
             final Configuration newConf = new Configuration();
             if (newConf.parse(event.getNewValue())) {
                 Node node = getNode();

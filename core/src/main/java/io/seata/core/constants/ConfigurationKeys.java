@@ -733,4 +733,9 @@ public interface ConfigurationKeys {
      */
     String SERVER_RAFT_REPORTER_ENABLED = SERVER_RAFT + "reporterEnabled";
 
+    /**
+     * The constant SERVER_RAFT_REPORTER_INITIAL_DELAY.
+     */
+    String SERVER_RAFT_REPORTER_INITIAL_DELAY = SERVER_RAFT + "reporterInitialDelay";
+
 }

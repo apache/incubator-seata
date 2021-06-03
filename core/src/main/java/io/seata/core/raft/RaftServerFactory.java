@@ -31,6 +31,12 @@ import org.slf4j.LoggerFactory;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
 import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
 import static java.io.File.separator;
 
@@ -76,20 +82,20 @@ public class RaftServerFactory {
         // enable the CLI service.
         nodeOptions.setDisableCli(false);
         // snapshot should be made every 30 seconds
-        Integer snapshotInterval = config.getInt(ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
+        Integer snapshotInterval = config.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         RaftOptions raftOptions = new RaftOptions();
         raftOptions
-            .setApplyBatch(config.getInt(ConfigurationKeys.SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
+            .setApplyBatch(config.getInt(SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
         raftOptions.setMaxAppendBufferSize(
-            config.getInt(ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
+            config.getInt(SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
         raftOptions.setDisruptorBufferSize(
-            config.getInt(ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
+            config.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
         raftOptions.setMaxReplicatorInflightMsgs(config.getInt(
-            ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
+            SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
         nodeOptions.setRaftOptions(raftOptions);
         nodeOptions.setElectionTimeoutMs(
-            config.getInt(ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
+            config.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
         // analytic parameter
         final PeerId serverId = new PeerId();
         if (!serverId.parse(serverIdStr)) {
