@@ -29,6 +29,8 @@ public class ReflectionUtilTest {
     //Prevent jvm from optimizing final
     public static final String testValue = (null != null ? "hello" : "hello");
 
+    public final String testValue2 = (null != null ? "hello world" : "hello world");
+
     @Test
     public void testGetClassByName() throws ClassNotFoundException {
         Assertions.assertEquals(String.class,
@@ -93,6 +95,11 @@ public class ReflectionUtilTest {
         Assertions.assertEquals("hello", testValue);
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
         Assertions.assertEquals("hello world", testValue);
+
+        // case: not a static field
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue2", "hello");
+        });
     }
 
 
@@ -123,7 +130,6 @@ public class ReflectionUtilTest {
         Field[] fields = ReflectionUtil.getAllFields(clazz);
         Assertions.assertEquals(fieldNames.length, fields.length);
         Field[] fields2 = ReflectionUtil.getAllFields(clazz);
-        // same instance, use the `==`
         Assertions.assertSame(fields, fields2);
 
         if (fieldNames.length == 0) {

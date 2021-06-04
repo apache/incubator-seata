@@ -273,32 +273,57 @@ public final class ReflectionUtil {
     /**
      * modify `static` or `static final` field value
      *
+     * @param staticField the static field
+     * @param newValue    the new value
+     * @throws IllegalArgumentException if {@code staticField} is {@code null} or not a static field
+     * @throws NoSuchFieldException     if the class of the staticField has no `modifiers` field
+     * @throws IllegalAccessException   the illegal access exception
+     */
+    public static void modifyStaticFinalField(Field staticField, Object newValue)
+            throws NoSuchFieldException, IllegalAccessException {
+        if (staticField == null) {
+            throw new IllegalArgumentException("staticField must be not null");
+        }
+
+        // check is static field
+        if (!Modifier.isStatic(staticField.getModifiers())) {
+            throw new IllegalArgumentException("the `" + fieldToString(staticField) + "` is not a static field, cannot modify value.");
+        }
+
+        // remove the `final` keyword from the field
+        if (Modifier.isFinal(staticField.getModifiers())) {
+            Field modifiers = staticField.getClass().getDeclaredField("modifiers");
+            modifiers.setAccessible(true);
+            modifiers.setInt(staticField, staticField.getModifiers() & ~Modifier.FINAL);
+        }
+
+        // set new value
+        staticField.setAccessible(true);
+        staticField.set(staticField.getDeclaringClass(), newValue);
+    }
+
+    /**
+     * modify `static` or `static final` field value
+     *
      * @param targetClass     the target class
-     * @param modifyFieldName the modify field name
+     * @param staticFieldName the static field name
      * @param newValue        the new value
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
+     * @throws NullPointerException     if {@code staticFieldName} is {@code null}
      * @throws NoSuchFieldException     if the field named {@code modifyFieldName} does not exist
      * @throws IllegalAccessException   the illegal access exception
      */
-    public static void modifyStaticFinalField(Class<?> targetClass, String modifyFieldName, Object newValue)
+    public static void modifyStaticFinalField(Class<?> targetClass, String staticFieldName, Object newValue)
             throws NoSuchFieldException, IllegalAccessException {
         if (targetClass == null) {
             throw new IllegalArgumentException("targetClass must be not null");
         }
 
         // get field
-        Field field = targetClass.getDeclaredField(modifyFieldName);
+        Field field = targetClass.getDeclaredField(staticFieldName);
 
-        // remove the `final` keyword from the field
-        if (Modifier.isFinal(field.getModifiers())) {
-            Field modifiers = field.getClass().getDeclaredField("modifiers");
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-        }
-
-        // set new value
-        field.setAccessible(true);
-        field.set(targetClass, newValue);
+        // modify static final field value
+        modifyStaticFinalField(field, newValue);
     }
 
     //endregion
@@ -549,6 +574,28 @@ public final class ReflectionUtil {
             methodStr = "static " + methodStr;
         }
         return methodStr;
+    }
+
+    /**
+     * field to string
+     *
+     * @param clazz     the clazz
+     * @param fieldName the field name
+     * @param fieldType the field type
+     * @return the string
+     */
+    public static String fieldToString(Class<?> clazz, String fieldName, Class<?> fieldType) {
+        return fieldType.getName() + " field " + clazz.getName() + "." + fieldName;
+    }
+
+    /**
+     * field to string
+     *
+     * @param field the field
+     * @return the string
+     */
+    public static String fieldToString(Field field) {
+        return fieldToString(field.getDeclaringClass(), field.getName(), field.getType());
     }
 
     /**
