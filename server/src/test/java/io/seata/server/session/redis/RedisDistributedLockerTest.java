@@ -1,17 +1,17 @@
 package io.seata.server.session.redis;
 
+import org.junit.jupiter.api.Assertions;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
+import redis.clients.jedis.JedisPoolConfig;
+import java.io.IOException;
+
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.StoreMode;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.redis.JedisPooledFactory;
-import org.junit.jupiter.api.Assertions;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolAbstract;
-import redis.clients.jedis.JedisPoolConfig;
-
-import java.io.IOException;
 
 /**
  * @description: redis distributed lock test
@@ -56,11 +56,11 @@ public class RedisDistributedLockerTest {
 //    @Test
     public void test_acquireScheduledLock_success_() {
         SessionHolder.init(StoreMode.REDIS.getName());
-        boolean accquire = SessionHolder.retryRollbackingLock();
+        boolean accquire = SessionHolder.acquireLock(retryRollbacking);
         Assertions.assertEquals(true,accquire);
         String lockValueExisted = jedisPoolInstance.getResource().get(retryRollbacking);
         Assertions.assertEquals("null:0",lockValueExisted);
-        boolean release = SessionHolder.unRetryRollbackingLock();
+        boolean release = SessionHolder.releaseLock(retryRollbacking);
         Assertions.assertEquals(true,release);
         Assertions.assertNull(jedisPoolInstance.getResource().get(retryRollbacking));
     }

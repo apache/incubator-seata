@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -36,15 +38,7 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.core.store.StoreMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-
-import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.RETRY_COMMITTING;
-import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
-import static io.seata.common.Constants.UNDOLOG_DELETE;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
@@ -352,93 +346,21 @@ public class SessionHolder {
     }
 
     /**
-     * retry rollbacking lock
+     * acquire lock
      *
      * @return the boolean
      */
-    public static boolean retryRollbackingLock() {
-        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(RETRY_ROLLBACKING, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
+    public static boolean acquireLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     /**
-     * retry committing lock
+     * release lock
      *
      * @return the boolean
      */
-    public static boolean retryCommittingLock() {
-        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(RETRY_COMMITTING, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * async committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean asyncCommittingLock() {
-        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(ASYNC_COMMITTING, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * tx timeout check lOck
-     *
-     * @return the boolean
-     */
-    public static boolean txTimeoutCheckLock() {
-        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(TX_TIMEOUT_CHECK, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * undolog delete lock
-     *
-     * @return the boolean
-     */
-    public static boolean undoLogDeleteLock() {
-        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(UNDOLOG_DELETE, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * un retry rollbacking lock
-     *
-     * @return the boolean
-     */
-    public static boolean unRetryRollbackingLock() {
-        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(RETRY_ROLLBACKING, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * un retry committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean unRetryCommittingLock() {
-        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(RETRY_COMMITTING, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * un async committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean unAsyncCommittingLock() {
-        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(ASYNC_COMMITTING, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * un tx timeout check lOck
-     *
-     * @return the boolean
-     */
-    public static boolean unTxTimeoutCheckLock() {
-        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(TX_TIMEOUT_CHECK, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    /**
-     * un undolog delete lock
-     *
-     * @return the boolean
-     */
-    public static boolean unUndoLogDeleteLock() {
-        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(UNDOLOG_DELETE, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
+    public static boolean releaseLock(String lockkey) {
+        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockkey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     public static void destroy() {
