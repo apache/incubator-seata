@@ -16,7 +16,10 @@
 package io.seata.common.util;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -80,19 +83,6 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    public void testGetMethod() throws NoSuchMethodException {
-        Assertions.assertEquals("public int java.lang.String.length()",
-                ReflectionUtil.getMethod(String.class, "length", null)
-                        .toString());
-        Assertions.assertEquals("public char java.lang.String.charAt(int)",
-                ReflectionUtil.getMethod(String.class, "charAt",
-                        new Class<?>[]{int.class}).toString());
-
-        Assertions.assertThrows(NoSuchMethodException.class,
-                () -> ReflectionUtil.getMethod(String.class, "size", null));
-    }
-
-    @Test
     public void testGetInterfaces() {
         Assertions.assertArrayEquals(new Object[]{Serializable.class},
                 ReflectionUtil.getInterfaces(Serializable.class).toArray());
@@ -108,4 +98,82 @@ public class ReflectionUtilTest {
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
         Assertions.assertEquals("hello world", testValue);
     }
+
+
+    //region test the method 'getAllFields'
+
+    @Test
+    public void testGetAllFields() {
+        // TestClass
+        this.testGetAllFieldsInternal(TestClass.class, "f1", "f2");
+        // TestSuperClass
+        this.testGetAllFieldsInternal(TestSuperClass.class, "f2");
+        // EmptyClass
+        this.testGetAllFieldsInternal(EmptyClass.class);
+        // TestInterface
+        this.testGetAllFieldsInternal(TestInterface.class);
+        // Object
+        this.testGetAllFieldsInternal(Object.class);
+
+        // case: The fields of EmptyClass is `EMPTY_FIELD_ARRAY`
+        Assertions.assertTrue(ReflectionUtil.getAllFields(EmptyClass.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+        // case: The fields of TestInterface is `EMPTY_FIELD_ARRAY`
+        Assertions.assertTrue(ReflectionUtil.getAllFields(TestInterface.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+        // case: The fields of Object is `EMPTY_FIELD_ARRAY`
+        Assertions.assertTrue(ReflectionUtil.getAllFields(Object.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+    }
+
+    private void testGetAllFieldsInternal(Class<?> clazz, String... fieldNames) {
+        Field[] fields = ReflectionUtil.getAllFields(clazz);
+        Assertions.assertEquals(fieldNames.length, fields.length);
+        Field[] fields2 = ReflectionUtil.getAllFields(clazz);
+        // same instance, use the `==`
+        Assertions.assertTrue(fields == fields2);
+
+        if (fieldNames.length == 0) {
+            return;
+        }
+
+        List<String> fieldNameList = Arrays.asList(fieldNames);
+        for (Field field : fields) {
+            Assertions.assertTrue(fieldNameList.contains(field.getName()));
+        }
+    }
+
+    //region the test class and interface
+
+    class EmptyClass {
+    }
+
+    class TestClass extends TestSuperClass implements TestInterface {
+
+        private String f1;
+
+        public String getF1() {
+            return f1;
+        }
+
+        public void setF1(String f1) {
+            this.f1 = f1;
+        }
+    }
+
+    class TestSuperClass implements TestInterface {
+        private String f2;
+
+        public String getF2() {
+            return f2;
+        }
+
+        public void setF2(String f2) {
+            this.f2 = f2;
+        }
+    }
+
+    interface TestInterface {
+    }
+
+    //endregion
+
+    //endregion
 }
