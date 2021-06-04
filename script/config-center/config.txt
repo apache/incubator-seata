@@ -35,6 +35,7 @@ client.tm.degradeCheck=false
 client.tm.degradeCheckAllowTimes=10
 client.tm.degradeCheckPeriod=2000
 client.tm.interceptorOrder=-2147482648
+store.mode=file
 store.lock.mode=file
 store.session.mode=file
 store.publicKey=
