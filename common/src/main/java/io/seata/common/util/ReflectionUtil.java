@@ -73,8 +73,8 @@ public final class ReflectionUtil {
      * @param target    the target
      * @param fieldName the field name
      * @return field value
-     * @throws NoSuchFieldException     the no such field exception
-     * @throws SecurityException        the security exception
+     * @throws NoSuchFieldException the no such field exception
+     * @throws SecurityException the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object getFieldValue(Object target, String fieldName)
@@ -99,8 +99,8 @@ public final class ReflectionUtil {
      * @param target     the target
      * @param methodName the method name
      * @return object
-     * @throws NoSuchMethodException    the no such method exception
-     * @throws SecurityException        the security exception
+     * @throws NoSuchMethodException the no such method exception
+     * @throws SecurityException the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object invokeMethod(Object target, String methodName)
@@ -127,8 +127,8 @@ public final class ReflectionUtil {
      * @param parameterTypes the parameter types
      * @param args           the args
      * @return object
-     * @throws NoSuchMethodException    the no such method exception
-     * @throws SecurityException        the security exception
+     * @throws NoSuchMethodException the no such method exception
+     * @throws SecurityException the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object invokeMethod(Object target, String methodName, Class<?>[] parameterTypes, Object[] args)
@@ -155,8 +155,8 @@ public final class ReflectionUtil {
      * @param parameterTypes  the parameter types
      * @param parameterValues the parameter values
      * @return object
-     * @throws NoSuchMethodException    the no such method exception
-     * @throws SecurityException        the security exception
+     * @throws NoSuchMethodException the no such method exception
+     * @throws SecurityException the security exception
      * @throws IllegalArgumentException the illegal argument exception
      */
     public static Object invokeStaticMethod(Class<?> targetClass, String methodName, Class<?>[] parameterTypes,
@@ -196,7 +196,7 @@ public final class ReflectionUtil {
     }
 
     public static void modifyStaticFinalField(Class<?> cla, String modifyFieldName, Object newValue)
-            throws NoSuchFieldException, IllegalAccessException {
+        throws NoSuchFieldException, IllegalAccessException {
         Field field = cla.getDeclaredField(modifyFieldName);
         field.setAccessible(true);
         Field modifiers = field.getClass().getDeclaredField("modifiers");
