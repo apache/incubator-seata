@@ -222,13 +222,13 @@ public final class ReflectionUtil {
     /**
      * set field value
      *
-     * @param target   the target
-     * @param field    the field of the target
-     * @param newValue the new value
+     * @param target     the target
+     * @param field      the field of the target
+     * @param fieldValue the field value
      * @throws IllegalArgumentException if {@code target} is {@code null}
      * @throws SecurityException        the security exception
      */
-    public static void setFieldValue(Object target, Field field, Object newValue)
+    public static void setFieldValue(Object target, Field field, Object fieldValue)
             throws IllegalArgumentException, SecurityException {
         if (target == null) {
             throw new IllegalArgumentException("target must be not null");
@@ -239,7 +239,7 @@ public final class ReflectionUtil {
                 field.setAccessible(true);
             }
             try {
-                field.set(target, newValue);
+                field.set(target, fieldValue);
                 return;
             } catch (IllegalAccessException ignore) {
                 // avoid other threads executing `field.setAccessible(false)`
