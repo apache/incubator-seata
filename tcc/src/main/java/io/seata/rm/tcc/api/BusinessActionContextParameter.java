@@ -21,10 +21,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * the TCC parameters that need to be passed to  the BusinessActivityContext;
+ * the TCC parameters that need to be passed to the action context;
  * <p>
- * add this annotation on the parameters of the try method, and the parameters will be passed to  the
- * BusinessActivityContext
+ * add this annotation on the parameters of the try method, and the parameters will be passed to the action context
  *
  * @author zhangsen
  */
@@ -33,30 +32,37 @@ import java.lang.annotation.Target;
 public @interface BusinessActionContextParameter {
 
     /**
-     * parameter's name
+     * parameter's name. Synonym for {@link #paramName()}.
      *
-     * @return the string
+     * @return the name of the param or field
+     */
+    String value() default "";
+
+    /**
+     * parameter's name. Synonym for {@link #value()}.
+     *
+     * @return the name of the param or field
      */
     String paramName() default "";
 
     /**
      * if it is a sharding param ?
      *
-     * @return boolean boolean
+     * @return the boolean
      */
     boolean isShardingParam() default false;
 
     /**
      * Specify the index of the parameter in the List
      *
-     * @return int int
+     * @return the index of the List
      */
     int index() default -1;
 
     /**
-     * if get the parameter from the property of the object ?
+     * whether get the parameter from the property of the object
      *
-     * @return boolean boolean
+     * @return the boolean
      */
     boolean isParamInProperty() default false;
 }
