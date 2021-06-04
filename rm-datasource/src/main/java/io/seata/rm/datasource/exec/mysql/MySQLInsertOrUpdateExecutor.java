@@ -297,7 +297,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                             continue;
                         }
                         if ((imageParamperterMap.get(columnName) == null && m.getColumnDef() == null) || imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
-                            if (!"PRIMARY".equals(k.toUpperCase())) {
+                            if (!"PRIMARY".equalsIgnoreCase(k)) {
                                 columnIsNull = false;
                                 uniqueList.add(columnName + " is ? ");
                                 paramAppenderTempList.add("NULL");
@@ -335,7 +335,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         List<String> duplicateKeyUpdateCloms = recognizer.getDuplicateKeyUpdate();
         if (CollectionUtils.isNotEmpty(duplicateKeyUpdateCloms)) {
             getTableMeta().getAllIndexes().forEach((k, v) -> {
-                if ("PRIMARY".equals(k.toUpperCase())) {
+                if ("PRIMARY".equalsIgnoreCase(k)) {
                     for (ColumnMeta m : v.getValues()) {
                         if (duplicateKeyUpdateCloms.contains(m.getColumnName())) {
                             throw new ShouldNeverHappenException("update pk value is not supported!");

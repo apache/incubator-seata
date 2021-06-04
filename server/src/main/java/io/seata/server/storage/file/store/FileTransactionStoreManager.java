@@ -361,9 +361,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     @Override
     public boolean hasRemaining(boolean isHistory) {
-        File file = null;
+        File file;
         RandomAccessFile raf = null;
-        long currentOffset = 0;
+        long currentOffset;
         if (isHistory) {
             file = new File(hisFullFileName);
             currentOffset = recoverHisOffset;
