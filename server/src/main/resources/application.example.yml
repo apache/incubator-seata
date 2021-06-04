@@ -140,7 +140,7 @@ seata:
       password:
       max-total: 100
       query-limit: 100
-      sigle:
+      single:
         host: 127.0.0.1
         port: 6379
       sentinel:
