@@ -289,7 +289,7 @@ public final class ReflectionUtil {
         // get field
         Field field = targetClass.getDeclaredField(modifyFieldName);
 
-        // modify the modifiers of the field
+        // remove the `final` keyword from the field
         Field modifiers = field.getClass().getDeclaredField("modifiers");
         modifiers.setAccessible(true);
         modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
