@@ -439,12 +439,20 @@ public final class ReflectionUtil {
      * @param staticMethod the static method
      * @param args         the args
      * @return the result of the static method
+     * @throws IllegalArgumentException  if {@code staticMethod} is {@code null} or not a static method
      * @throws InvocationTargetException if the underlying method throws an exception.
-     * @throws IllegalArgumentException  the illegal argument exception
      * @throws SecurityException         the security exception
      */
     public static Object invokeStaticMethod(Method staticMethod, Object... args)
-            throws InvocationTargetException, IllegalArgumentException, SecurityException {
+            throws IllegalArgumentException, InvocationTargetException, SecurityException {
+        if (staticMethod == null) {
+            throw new IllegalArgumentException("staticMethod must be not null");
+        }
+
+        if (!Modifier.isStatic(staticMethod.getModifiers())) {
+            throw new IllegalArgumentException("`" + methodToString(staticMethod) + "` is not a static method");
+        }
+
         return invokeMethod(null, staticMethod, args);
     }
 
@@ -525,6 +533,20 @@ public final class ReflectionUtil {
      */
     public static String methodToString(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         return clazz.getName() + "." + methodName + parameterTypesToString(parameterTypes);
+    }
+
+    /**
+     * method to string
+     *
+     * @param method the method
+     * @return the string
+     */
+    public static String methodToString(Method method) {
+        String methodStr = methodToString(method.getDeclaringClass(), method.getName(), method.getParameterTypes());
+        if (Modifier.isStatic(method.getModifiers())) {
+            methodStr = "static " + methodStr;
+        }
+        return methodStr;
     }
 
     /**
