@@ -271,7 +271,7 @@ public final class ReflectionUtil {
     }
 
     /**
-     * modify static final field
+     * modify `static` or `static final` field value
      *
      * @param targetClass     the target class
      * @param modifyFieldName the modify field name
@@ -290,9 +290,11 @@ public final class ReflectionUtil {
         Field field = targetClass.getDeclaredField(modifyFieldName);
 
         // remove the `final` keyword from the field
-        Field modifiers = field.getClass().getDeclaredField("modifiers");
-        modifiers.setAccessible(true);
-        modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        if (Modifier.isFinal(field.getModifiers())) {
+            Field modifiers = field.getClass().getDeclaredField("modifiers");
+            modifiers.setAccessible(true);
+            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        }
 
         // set new value
         field.setAccessible(true);
