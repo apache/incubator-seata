@@ -56,11 +56,11 @@ public class RedisDistributedLockerTest {
 //    @Test
     public void test_acquireScheduledLock_success_() {
         SessionHolder.init(StoreMode.REDIS.getName());
-        boolean accquire = SessionHolder.acquireLock(retryRollbacking);
+        boolean accquire = SessionHolder.acquireDistributedLock(retryRollbacking);
         Assertions.assertEquals(true,accquire);
         String lockValueExisted = jedisPoolInstance.getResource().get(retryRollbacking);
         Assertions.assertEquals("null:0",lockValueExisted);
-        boolean release = SessionHolder.releaseLock(retryRollbacking);
+        boolean release = SessionHolder.releaseDistributedLock(retryRollbacking);
         Assertions.assertEquals(true,release);
         Assertions.assertNull(jedisPoolInstance.getResource().get(retryRollbacking));
     }
