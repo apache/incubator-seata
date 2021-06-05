@@ -350,7 +350,7 @@ public class SessionHolder {
      *
      * @return the boolean
      */
-    public static boolean acquireLock(String lockKey) {
+    public static boolean acquireDistributedLock(String lockKey) {
         return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
@@ -359,8 +359,8 @@ public class SessionHolder {
      *
      * @return the boolean
      */
-    public static boolean releaseLock(String lockkey) {
-        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockkey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
+    public static boolean releaseDistributedLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     public static void destroy() {

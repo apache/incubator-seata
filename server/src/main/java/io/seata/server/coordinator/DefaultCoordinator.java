@@ -401,66 +401,66 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.acquireLock(RETRY_ROLLBACKING);
+            boolean lock = SessionHolder.acquireDistributedLock(RETRY_ROLLBACKING);
             if (lock) {
                 try {
                     handleRetryRollbacking();
                 } catch (Exception e) {
                     LOGGER.info("Exception retry rollbacking ... ", e);
                 } finally {
-                    SessionHolder.releaseLock(RETRY_ROLLBACKING);
+                    SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING);
                 }
             }
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.acquireLock(RETRY_COMMITTING);
+            boolean lock = SessionHolder.acquireDistributedLock(RETRY_COMMITTING);
             if (lock) {
                 try {
                     handleRetryCommitting();
                 } catch (Exception e) {
                     LOGGER.info("Exception retry committing ... ", e);
                 } finally {
-                    SessionHolder.releaseLock(RETRY_COMMITTING);
+                    SessionHolder.releaseDistributedLock(RETRY_COMMITTING);
                 }
             }
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.acquireLock(ASYNC_COMMITTING);
+            boolean lock = SessionHolder.acquireDistributedLock(ASYNC_COMMITTING);
             if (lock) {
                 try {
                     handleAsyncCommitting();
                 } catch (Exception e) {
                     LOGGER.info("Exception async committing ... ", e);
                 } finally {
-                    SessionHolder.releaseLock(ASYNC_COMMITTING);
+                    SessionHolder.releaseDistributedLock(ASYNC_COMMITTING);
                 }
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.acquireLock(TX_TIMEOUT_CHECK);
+            boolean lock = SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK);
             if (lock) {
                 try {
                     timeoutCheck();
                 } catch (Exception e) {
                     LOGGER.info("Exception timeout checking ... ", e);
                 } finally {
-                    SessionHolder.releaseLock(TX_TIMEOUT_CHECK);
+                    SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK);
                 }
             }
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         undoLogDelete.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.acquireLock(UNDOLOG_DELETE);
+            boolean lock = SessionHolder.acquireDistributedLock(UNDOLOG_DELETE);
             if (lock) {
                 try {
                     undoLogDelete();
                 } catch (Exception e) {
                     LOGGER.info("Exception undoLog deleting ... ", e);
                 } finally {
-                    SessionHolder.releaseLock(UNDOLOG_DELETE);
+                    SessionHolder.releaseDistributedLock(UNDOLOG_DELETE);
                 }
             }
         }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
