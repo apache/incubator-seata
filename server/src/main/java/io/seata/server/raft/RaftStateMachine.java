@@ -28,6 +28,7 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import com.alipay.sofa.jraft.util.Platform;
 import com.alipay.sofa.jraft.util.Utils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -105,7 +106,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
-        if (!isLeader() || !StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
+        if (!StringUtils.equals(StoreMode.RAFT.getName(), mode) || (!isLeader() && Platform.isWindows())) {
             return;
         }
         // gets a record of the lock and session at the moment
@@ -172,6 +173,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 Map<String, GlobalSession> sessionMap = new HashMap<>();
                 globalSessionByteMap.forEach((k, v) -> {
                     GlobalSession session = new GlobalSession();
+                    session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                     session.decode(v);
                     sessionMap.put(k, session);
                 });

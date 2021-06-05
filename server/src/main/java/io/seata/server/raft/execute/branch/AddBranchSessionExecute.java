@@ -15,6 +15,7 @@
  */
 package io.seata.server.raft.execute.branch;
 
+import io.seata.common.util.StringUtils;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
@@ -38,6 +39,9 @@ public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
         BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
         if (branchSession == null) {
             branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
+            if (StringUtils.isNotBlank(branchSession.getLockKey())) {
+                branchSession.lock();
+            }
             globalSession.addBranch(branchSession);
             logger.info("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
                 branchTransactionDO.getBranchId());

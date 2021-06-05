@@ -141,22 +141,28 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
-        if (StringUtils.isNotBlank(getInitAddress())) {
-            String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-            if (Objects.equals(storeMode, StoreMode.RAFT.getName())) {
-                CLI_CLIENT_SERVICE = new CliClientServiceImpl();
-                CLI_CLIENT_SERVICE.init(new CliOptions());
-                LEADER_ADDRESS = new RaftLeader();
-                findLeader();
-                // The leader election takes 1 second
-                FIND_LEADER_EXECUTOR.scheduleAtFixedRate(() -> {
-                    try {
-                        findLeader();
-                    } catch (Exception e) {
-                        // prevents an exception from being thrown that causes the thread to break
-                        LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
+        if (LEADER_ADDRESS == null) {
+            synchronized (FIND_LEADER_EXECUTOR) {
+                if (LEADER_ADDRESS == null) {
+                    if (StringUtils.isNotBlank(getInitAddress())) {
+                        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+                        if (Objects.equals(storeMode, StoreMode.RAFT.getName())) {
+                            CLI_CLIENT_SERVICE = new CliClientServiceImpl();
+                            CLI_CLIENT_SERVICE.init(new CliOptions());
+                            LEADER_ADDRESS = new RaftLeader();
+                            findLeader();
+                            // The leader election takes 5 second
+                            FIND_LEADER_EXECUTOR.scheduleAtFixedRate(() -> {
+                                try {
+                                    findLeader();
+                                } catch (Exception e) {
+                                    // prevents an exception from being thrown that causes the thread to break
+                                    LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
+                                }
+                            }, DEFAULT_RAFT_PORT_INTERVAL * 5, DEFAULT_RAFT_PORT_INTERVAL * 5, TimeUnit.MILLISECONDS);
+                        }
                     }
-                }, DEFAULT_RAFT_PORT_INTERVAL * 5, DEFAULT_RAFT_PORT_INTERVAL * 5, TimeUnit.MILLISECONDS);
+                }
             }
         }
         super.init();
