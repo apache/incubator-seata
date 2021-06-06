@@ -15,7 +15,7 @@
   ~  limitations under the License.
   -->
 <assembly>
-    <id>${project.version}</id>
+    <id>server-${project.version}</id>
     <includeBaseDirectory>true</includeBaseDirectory>
     <formats>
         <format>dir</format>
@@ -65,7 +65,7 @@
 
         <file>
             <source>../server/target/seata-server.jar</source>
-            <outputDirectory>lib/</outputDirectory>
+            <outputDirectory>target/</outputDirectory>
         </file>
 
         <file>
