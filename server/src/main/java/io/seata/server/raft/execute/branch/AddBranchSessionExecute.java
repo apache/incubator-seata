@@ -47,7 +47,7 @@ public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
         if (branchSession == null) {
             branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
             if (StringUtils.isNotBlank(branchSession.getLockKey())) {
-                branchSession.lock();
+                FILE_LOCK_MANAGER.acquireLock(branchSession);
             }
             globalSession.add(branchSession);
             logger.info("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),

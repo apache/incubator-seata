@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
@@ -29,6 +28,7 @@ import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.alipay.sofa.jraft.storage.snapshot.local.LocalSnapshotWriter;
+import com.alipay.sofa.jraft.util.Utils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -37,6 +37,8 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
+import io.seata.serializer.kryo.KryoInnerSerializer;
+import io.seata.serializer.kryo.KryoSerializerFactory;
 import io.seata.server.raft.execute.RaftMsgExecute;
 import io.seata.server.raft.execute.branch.AddBranchSessionExecute;
 import io.seata.server.raft.execute.branch.RemoveBranchSessionExecute;
@@ -55,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
@@ -91,10 +92,14 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             } else {
                 try {
                     ByteBuffer byteBuffer = iterator.getData();
-                    if (byteBuffer != null) {
-                        RaftSessionSyncMsg msg = SerializerManager.getSerializer(Hessian2)
-                            .deserialize(iterator.getData().array(), RaftSessionSyncMsg.class.getName());
-                        onExecuteRaft(msg);
+                    if (byteBuffer != null && byteBuffer.hasRemaining()) {
+                        KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get();
+                        try {
+                            RaftSessionSyncMsg msg = kryo.deserialize(byteBuffer.array());
+                            onExecuteRaft(msg);
+                        } finally {
+                            KryoSerializerFactory.getInstance().returnKryo(kryo);
+                        }
                     }
                 } catch (Throwable e) {
                     LOGGER.error("Message synchronization failure", e);
@@ -132,7 +137,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 ((LocalSnapshotWriter)writer).getSnapshotIndex());
         }
         // async save
-       // Utils.runInThread(() -> {
+        Utils.runInThread(() -> {
             final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
             if (snapshot.save(maps)) {
                 if (writer.addFile("data")) {
@@ -143,7 +148,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             } else {
                 done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
             }
-       // });
+        });
     }
 
     @Override
@@ -168,6 +173,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
             Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
+            // be sure to clear the data before loading it, because this is a full overwrite update
+            rootSessionMap.clear();
             if (!globalSessionByteMap.isEmpty()) {
                 Map<String, GlobalSession> sessionMap = new HashMap<>();
                 globalSessionByteMap.forEach((k, v) -> {

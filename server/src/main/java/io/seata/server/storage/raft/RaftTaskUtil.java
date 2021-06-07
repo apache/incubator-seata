@@ -16,16 +16,13 @@
 package io.seata.server.storage.raft;
 
 import java.nio.ByteBuffer;
-import com.alipay.remoting.exception.CodecException;
-import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
 import io.seata.core.raft.RaftServerFactory;
+import io.seata.serializer.kryo.KryoInnerSerializer;
+import io.seata.serializer.kryo.KryoSerializerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
-import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 
 /**
  * @author funkye
@@ -40,10 +37,11 @@ public class RaftTaskUtil {
 
     public static void createTask(Closure done, Object data) {
         final Task task = new Task();
+        KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get();
         try {
-            task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(data)));
-        } catch (CodecException e) {
-            LOGGER.error("createTask fail,error msg:{}", e.getMessage(), e);
+            task.setData(ByteBuffer.wrap(kryo.serialize(data)));
+        } finally {
+            KryoSerializerFactory.getInstance().returnKryo(kryo);
         }
         task.setDone(done == null ? status -> {
         } : done);
