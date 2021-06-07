@@ -28,7 +28,6 @@ import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.alipay.sofa.jraft.storage.snapshot.local.LocalSnapshotWriter;
-import com.alipay.sofa.jraft.util.Utils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -136,19 +135,16 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 globalSessionByteMap.size(), branchSessionByteMap.size(),
                 ((LocalSnapshotWriter)writer).getSnapshotIndex());
         }
-        // async save
-        Utils.runInThread(() -> {
-            final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
-            if (snapshot.save(maps)) {
-                if (writer.addFile("data")) {
-                    done.run(Status.OK());
-                } else {
-                    done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
-                }
+        final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
+        if (snapshot.save(maps)) {
+            if (writer.addFile("data")) {
+                done.run(Status.OK());
             } else {
-                done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
+                done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
             }
-        });
+        } else {
+            done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
+        }
     }
 
     @Override
