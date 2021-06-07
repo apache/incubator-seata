@@ -211,9 +211,29 @@ public final class ActionContextUtil {
     }
 
     /**
+     * Handle the args
+     *
+     * @param args the args
+     * @return new args
+     */
+    public static Object[] handleArgs(Object[] args) {
+        Object[] newArgs = new Object[args.length];
+
+        Object arg;
+        for (int i = 0; i < args.length; ++i) {
+            arg = args[i];
+            if (arg == null) {
+                continue;
+            }
+            newArgs[i] = handleActionContext(arg);
+        }
+
+        return newArgs;
+    }
+
+    /**
      * Convert action context
      *
-     * @param key         the actionContext's key
      * @param value       the actionContext's value
      * @param targetClazz the target class
      * @param <T>         the target type

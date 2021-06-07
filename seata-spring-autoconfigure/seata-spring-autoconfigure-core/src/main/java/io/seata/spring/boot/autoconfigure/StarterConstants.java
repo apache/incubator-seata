@@ -39,7 +39,7 @@ public interface StarterConstants {
     String COMPRESS_PREFIX = UNDO_PREFIX + ".compress";
     String TCC_PREFIX = SEATA_PREFIX + ".tcc";
     String TCC_FENCE_PREFIX = TCC_PREFIX + ".fence";
-    String TCC_AUTO_PROXY_PREFIX_KEBAB_STYLE = TCC_PREFIX + ".auto-proxy";
+    String PROXY_PREFIX = SEATA_PREFIX + ".proxy";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";

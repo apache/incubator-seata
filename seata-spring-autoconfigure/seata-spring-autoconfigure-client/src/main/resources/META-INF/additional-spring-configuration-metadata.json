@@ -36,7 +36,6 @@
         "reason": "It may be removed in a future release, please configure to 'seata.tx-service-group'."
       }
     },
-
     {
       "name": "seata.client.rm.async-commit-buffer-limit",
       "type": "java.lang.Integer",
@@ -292,7 +291,6 @@
         }
       ]
     },
-
     {
       "name": "seata.client.load-balance.type",
       "values": [
@@ -363,6 +361,20 @@
           "parameters": {
             "target": "io.seata.rm.tcc.constant.TCCFenceCleanMode"
           }
+        }
+      ]
+    },
+    {
+      "name": "seata.proxy.proxy-handler-type",
+      "values": [
+        {
+          "value": "tcc",
+          "description": "the default handler type."
+        }
+      ],
+      "providers": [
+        {
+          "name": "any"
         }
       ]
     }

@@ -72,9 +72,9 @@ public interface Constants {
     String USE_TCC_FENCE = "useTCCFence";
 
     /**
-     * TCC Proxy Bean Name
+     * TCC Proxy Target Bean Name
      */
-    String TCC_PROXY_BEAN_NAME = "proxyBeanName";
+    String TCC_PROXY_TARGET_BEAN_NAME = "proxyTargetBeanName";
 
     /**
      * TCC Proxy Method Name

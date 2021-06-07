@@ -13,40 +13,46 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.tcc;
+package io.seata.spring.proxy;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import io.seata.rm.tcc.config.TCCAutoProxyConfig;
+import io.seata.common.util.ReflectionUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 
 /**
- * Tcc Auto Proxy Creator
+ * Seata Proxy Auto Proxy Creator
  *
  * @author wang.liang
  */
-public class TccAutoProxyCreator extends AbstractAutoProxyCreator {
+public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
 
-    private final List<String> proxyBeanClasses;
-    private final List<String> proxyBeanNames;
+    private final Set<Class<?>> proxyBeanClasses;
+    private final Set<String> proxyBeanNames;
     private final int proxyInterceptorOrder;
 
-    private final TccAutoProxyAction tccAutoProxyAction;
+    private final SeataProxyHandler seataProxyHandler;
 
     private MethodInterceptor interceptor;
 
-    public TccAutoProxyCreator(TCCAutoProxyConfig config, TccAutoProxyAction tccAutoProxyAction) {
-        this.proxyBeanClasses = config.getProxyBeanClasses();
-        this.proxyBeanNames = config.getProxyBeanNames();
+    public SeataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
+        this.proxyBeanClasses = ReflectionUtil.classNameCollToClassSet(config.getTargetBeanClasses());
+        this.proxyBeanNames = config.getTargetBeanNames();
         this.proxyInterceptorOrder = config.getProxyInterceptorOrder();
-        this.tccAutoProxyAction = tccAutoProxyAction;
+
+        this.seataProxyHandler = seataProxyHandler;
     }
 
     @Override
-    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-        return proxyBeanClasses.contains(beanClass.getName()) || proxyBeanNames.contains(beanName);
+    protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+        // create an interceptor for the bean
+        this.interceptor = new SeataProxyInterceptor(beanName, this.seataProxyHandler, this.proxyInterceptorOrder);
+
+        // do wrap
+        return super.wrapIfNecessary(bean, beanName, cacheKey);
     }
 
     @Override
@@ -55,8 +61,7 @@ public class TccAutoProxyCreator extends AbstractAutoProxyCreator {
     }
 
     @Override
-    protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        this.interceptor = new TccAutoProxyInterceptor(beanName, tccAutoProxyAction, proxyInterceptorOrder);
-        return super.wrapIfNecessary(bean, beanName, cacheKey);
+    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        return proxyBeanClasses.contains(beanClass) || proxyBeanNames.contains(beanName);
     }
 }

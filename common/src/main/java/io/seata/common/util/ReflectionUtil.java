@@ -19,7 +19,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -60,6 +62,28 @@ public final class ReflectionUtil {
      */
     public static Class<?> getClassByName(String className) throws ClassNotFoundException {
         return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+    }
+
+    /**
+     * class name set to class set
+     *
+     * @param classNameColl the class name collection
+     * @return the class set
+     */
+    public static Set<Class<?>> classNameCollToClassSet(Collection<String> classNameColl) {
+        Set<Class<?>> classSet = new HashSet<>();
+        if (classNameColl != null) {
+            Class<?> clazz;
+            for (String className : classNameColl) {
+                try {
+                    clazz = getClassByName(className);
+                    classSet.add(clazz);
+                } catch (ClassNotFoundException ignore) {
+                    // do nothing
+                }
+            }
+        }
+        return classSet;
     }
 
     /**
@@ -243,4 +267,57 @@ public final class ReflectionUtil {
 
         return resultFields;
     }
+
+
+    //region toString
+
+    /**
+     * method to string
+     *
+     * @param clazz          the clazz
+     * @param methodName     the method name
+     * @param parameterTypes the parameter types
+     * @return the string
+     */
+    public static String methodToString(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+        return clazz.getName() + "." + methodName + parameterTypesToString(parameterTypes);
+    }
+
+    /**
+     * method to string
+     *
+     * @param method the method
+     * @return the string
+     */
+    public static String methodToString(Method method) {
+        String methodStr = methodToString(method.getDeclaringClass(), method.getName(), method.getParameterTypes());
+        if (Modifier.isStatic(method.getModifiers())) {
+            methodStr = "static " + methodStr;
+        }
+        return methodStr;
+    }
+
+    /**
+     * parameter types to string
+     *
+     * @param parameterTypes the parameter types
+     * @return the string
+     */
+    public static String parameterTypesToString(Class<?>[] parameterTypes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        if (parameterTypes != null) {
+            for (int i = 0; i < parameterTypes.length; i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                Class<?> c = parameterTypes[i];
+                sb.append((c == null) ? "null" : c.getName());
+            }
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    //endregion
 }

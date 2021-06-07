@@ -23,7 +23,7 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
  *
  * @author wang.liang
  */
-public interface TccAutoProxyAction {
+public interface TccSeataProxyAction {
 
 	/**
 	 * Prepare boolean.

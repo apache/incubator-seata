@@ -25,11 +25,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * The Default Tcc Auto Proxy Action Implement
+ * The Default Implement of the Tcc Seata Proxy Action
  *
  * @author wang.liang
  */
-public class DefaultTccAutoProxyActionImpl implements TccAutoProxyAction, ApplicationContextAware {
+public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
@@ -39,7 +39,7 @@ public class DefaultTccAutoProxyActionImpl implements TccAutoProxyAction, Applic
     }
 
     /**
-     * Prepare boolean.
+     * Prepare.
      *
      * @param actionContext the action context
      * @return the boolean
@@ -51,52 +51,46 @@ public class DefaultTccAutoProxyActionImpl implements TccAutoProxyAction, Applic
     }
 
     /**
-     * Commit boolean.
+     * Commit.
      *
      * @param actionContext the action context
      * @return the boolean
      */
     @Override
     public boolean commit(BusinessActionContext actionContext) throws Throwable {
-        String beanName = actionContext.getActionContext(Constants.TCC_PROXY_BEAN_NAME, String.class);
-
-        // get the parameters
+        // get the arguments
         @SuppressWarnings("unchecked")
-        String[] methodParameterTypeStrs = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_PARAMETER_TYPES, String[].class);
-        Class<?>[] methodParameterTypes = null;
-        Object[] methodArgs = null;
-        if (CollectionUtils.isNotEmpty(methodParameterTypeStrs)) {
-            methodParameterTypes = new Class<?>[methodParameterTypeStrs.length];
-
-            // get method parameters
-            methodArgs = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_ARGS, Object[].class);
-            // convert method parameters
+        Class<?>[] parameterTypes = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_PARAMETER_TYPES, Class[].class);
+        Object[] args = null;
+        if (CollectionUtils.isNotEmpty(parameterTypes)) {
+            // get method arguments
+            args = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_ARGS, Object[].class);
+            // convert method arguments
             Class<?> parameterClass;
-            for (int i = 0; i < methodParameterTypeStrs.length; ++i) {
-                if (methodArgs[i] == null) {
+            for (int i = 0; i < parameterTypes.length; ++i) {
+                if (args[i] == null) {
                     continue;
                 }
 
-                // convert type string to class
-                String type = methodParameterTypeStrs[i];
-                parameterClass = ReflectionUtil.getClassByName(type);
-                methodParameterTypes[i] = parameterClass;
+                // get the class of the parameter
+                parameterClass = parameterTypes[i];
 
-                // convert parameter by class
-                methodArgs[i] = ActionContextUtil.convertActionContext(methodArgs[i], parameterClass);
+                // convert argument by parameter class
+                args[i] = ActionContextUtil.convertActionContext(args[i], parameterClass);
             }
         }
 
-        // get the bean
-        Object bean = applicationContext.getBean(beanName);
-
-        // get the method
+        // get the target bean
+        String targetBeanName = actionContext.getActionContext(Constants.TCC_PROXY_TARGET_BEAN_NAME, String.class);
+        Object targetBean = applicationContext.getBean(targetBeanName);
+        // get the method of the target bean
         String methodName = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_NAME, String.class);
 
+        // invoke the method of the target bean
         try {
-            ReflectionUtil.invokeMethod(bean, methodName, methodParameterTypes, methodArgs);
+            ReflectionUtil.invokeMethod(targetBean, methodName, parameterTypes, args);
         }
-        // TODO: 等 PR #3803 (解决ReflectionUtil的BUG的PR) 合并后，修正这里的代码。
+        // TODO: 等 PR #3803 (解决ReflectionUtil的BUG的PR) 合并后，替换这里的代码。
         catch (NoSuchMethodException e) {
             throw e;
         }
@@ -108,7 +102,7 @@ public class DefaultTccAutoProxyActionImpl implements TccAutoProxyAction, Applic
     }
 
     /**
-     * rollback.
+     * Rollback.
      *
      * @param actionContext the action context
      * @return the boolean

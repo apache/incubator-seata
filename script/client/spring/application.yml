@@ -137,14 +137,15 @@ seata:
       name: ""
   log:
     exception-rate: 100
-  tcc:
-    fence:
-      enabled: true
+  tcc-fence:
+    enable: true
+    config:
       log-table-name: tcc_fence_log
       clean-mode: hour
       clean-period: 1
-    auto-proxy:
-      enabled: false
-      proxy-bean-classes: beanClass1,beanClass2
-      proxy-bean-names: beanName1,beanName2
-      proxy-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
+  proxy:
+    enabled: false
+    target-bean-classes: targetBeanClass1,targetBeanClass2
+    target-bean-names: targetBeanName1,targetBeanName2
+    proxy-handler-type: tcc
+    proxy-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000

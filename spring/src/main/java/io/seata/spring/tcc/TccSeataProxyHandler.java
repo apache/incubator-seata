@@ -21,45 +21,28 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
-import io.seata.core.context.RootContext;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import org.aopalliance.intercept.MethodInterceptor;
+import io.seata.rm.tcc.interceptor.ActionContextUtil;
+import io.seata.spring.proxy.SeataProxyHandler;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.core.Ordered;
 
 /**
- * TCC Auto Proxy Interceptor
+ * The Tcc Auto Proxy Handler
  *
  * @author wang.liang
  */
-public class TccAutoProxyInterceptor implements MethodInterceptor, Ordered {
+public class TccSeataProxyHandler implements SeataProxyHandler {
 
-    private final String beanName;
-    private final TccAutoProxyAction tccAutoProxyAction;
-    private final int orderNum;
+    private final TccSeataProxyAction tccSeataProxyAction;
 
-    public TccAutoProxyInterceptor(String beanName, TccAutoProxyAction tccAutoProxyAction, int orderNum) {
-        this.beanName = beanName;
-        this.tccAutoProxyAction = tccAutoProxyAction;
-        this.orderNum = orderNum;
+    public TccSeataProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
+        this.tccSeataProxyAction = tccSeataProxyAction;
     }
 
     @Override
-    public Object invoke(final MethodInvocation invocation) throws Throwable {
-        // ignored if the global transaction not exists
-        if (!RootContext.inGlobalTransaction()) {
-            return invocation.proceed();
-        }
-
-        // get method
+    public void doProxy(String targetBeanName, MethodInvocation invocation) {
         Method method = invocation.getMethod();
 
-        // check whether the method can be proxied
-        if (method.getReturnType() != Void.class) {
-            return invocation.proceed();
-        }
-
-        // get the context of the invocation
         String methodName = method.getName();
         Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] args = invocation.getArguments();
@@ -69,23 +52,19 @@ public class TccAutoProxyInterceptor implements MethodInterceptor, Ordered {
         BusinessActionContext actionContext = new BusinessActionContext();
         Map<String, Object> context = new HashMap<>();
         actionContext.setActionContext(context);
+
         // put the context of the invocation into actionContext
         // contain: object, method name, parameter types, arguments
-        context.put(Constants.TCC_PROXY_BEAN_NAME, this.beanName);
+        context.put(Constants.TCC_PROXY_TARGET_BEAN_NAME, targetBeanName);
         context.put(Constants.TCC_PROXY_METHOD_NAME, methodName);
         if (parameterTypes.length > 0) {
+            Object[] newArgs = ActionContextUtil.handleArgs(args);
+
             context.put(Constants.TCC_PROXY_METHOD_PARAMETER_TYPES, JSON.toJSONString(parameterTypes));
-            context.put(Constants.TCC_PROXY_METHOD_ARGS, JSON.toJSONString(args));
+            context.put(Constants.TCC_PROXY_METHOD_ARGS, JSON.toJSONString(newArgs));
         }
+
         // do prepare
-        tccAutoProxyAction.prepare(actionContext);
-
-        // the return type is Void.class, so return null
-        return null;
-    }
-
-    @Override
-    public int getOrder() {
-        return orderNum;
+        tccSeataProxyAction.prepare(actionContext);
     }
 }

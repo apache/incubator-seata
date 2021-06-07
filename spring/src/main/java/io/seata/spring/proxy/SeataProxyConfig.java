@@ -13,36 +13,41 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.config;
+package io.seata.spring.proxy;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.core.Ordered;
 
 /**
- * TCC Auto Proxy Config
+ * Seata Proxy Config
  *
  * @author wang.liang
  */
-public class TCCAutoProxyConfig {
+public class SeataProxyConfig {
 
     /**
-     * Tcc auto proxy enabled
+     * proxy enabled
      */
     private boolean enabled = false;
 
     /**
-     * TCC auto proxy bean classes
+     * target bean classes
      */
-    private List<String> proxyBeanClasses;
+    private Set<String> targetBeanClasses;
 
     /**
-     * TCC auto proxy bean names
+     * target bean names
      */
-    private List<String> proxyBeanNames;
+    private Set<String> targetBeanNames;
 
     /**
-     * TCC auto proxy interceptor order
+     * proxy handler type
+     */
+    private String proxyHandlerType = "tcc";
+
+    /**
+     * proxy interceptor order
      */
     private int proxyInterceptorOrder = Ordered.HIGHEST_PRECEDENCE + 1000;
 
@@ -55,20 +60,28 @@ public class TCCAutoProxyConfig {
         this.enabled = enabled;
     }
 
-    public List<String> getProxyBeanClasses() {
-        return proxyBeanClasses;
+    public Set<String> getTargetBeanClasses() {
+        return targetBeanClasses;
     }
 
-    public void setProxyBeanClasses(List<String> proxyBeanClasses) {
-        this.proxyBeanClasses = proxyBeanClasses;
+    public void setTargetBeanClasses(Set<String> targetBeanClasses) {
+        this.targetBeanClasses = targetBeanClasses;
     }
 
-    public List<String> getProxyBeanNames() {
-        return proxyBeanNames;
+    public Set<String> getTargetBeanNames() {
+        return targetBeanNames;
     }
 
-    public void setProxyBeanNames(List<String> proxyBeanNames) {
-        this.proxyBeanNames = proxyBeanNames;
+    public void setTargetBeanNames(Set<String> targetBeanNames) {
+        this.targetBeanNames = targetBeanNames;
+    }
+
+    public String getProxyHandlerType() {
+        return proxyHandlerType;
+    }
+
+    public void setProxyHandlerType(String proxyHandlerType) {
+        this.proxyHandlerType = proxyHandlerType;
     }
 
     public int getProxyInterceptorOrder() {
