@@ -37,7 +37,12 @@ public class PackageScannerChecker implements ScannerChecker {
     /**
      * The packages need to scan
      */
-    private static final Set<String> SCANNABLE_PACKAGE_SET = new HashSet<>();
+    private static final Set<String> SCANNABLE_PACKAGE_SET;
+
+    static {
+        SCANNABLE_PACKAGE_SET = new HashSet<>();
+        SCANNABLE_PACKAGE_SET.add("io.seata");
+    }
 
     /**
      * Add more packages.

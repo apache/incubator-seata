@@ -72,6 +72,26 @@ public interface Constants {
     String USE_TCC_FENCE = "useTCCFence";
 
     /**
+     * TCC Proxy Bean Name
+     */
+    String TCC_PROXY_BEAN_NAME = "proxyBeanName";
+
+    /**
+     * TCC Proxy Method Name
+     */
+    String TCC_PROXY_METHOD_NAME = "proxyMethodName";
+
+    /**
+     * TCC Proxy Method Parameter Types
+     */
+    String TCC_PROXY_METHOD_PARAMETER_TYPES = "proxyMethodParameterTypes";
+
+    /**
+     * TCC Proxy Method Arguments
+     */
+    String TCC_PROXY_METHOD_ARGS = "proxyMethodArgs";
+
+    /**
      * phase one method name
      */
     String PREPARE_METHOD = "sys::prepare";

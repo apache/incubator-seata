@@ -15,29 +15,34 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import javax.sql.DataSource;
+
+import io.seata.rm.tcc.config.TCCAutoProxyConfig;
 import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.spring.tcc.DefaultTccAutoProxyActionImpl;
+import io.seata.spring.tcc.TccAutoProxyAction;
+import io.seata.spring.tcc.TccAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import javax.sql.DataSource;
 
 /**
  * TCC fence auto configuration.
  *
  * @author kaka2code
  */
-@ConditionalOnExpression("${seata.enabled:true} && ${seata.tccFence.enabled:true} && ${seata.tcc-fence.enabled:true}")
+@ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", matchIfMissing = true)
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
-public class SeataTCCFenceAutoConfiguration {
+public class SeataTCCAutoConfiguration {
 
     public static final String TCC_FENCE_DATA_SOURCE_BEAN_NAME = "seataTCCFenceDataSource";
     public static final String TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataTCCFenceTransactionManager";
@@ -45,7 +50,8 @@ public class SeataTCCFenceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(TCCFenceConfig.class)
     @ConditionalOnBean({DataSource.class, PlatformTransactionManager.class})
-    @ConfigurationProperties(StarterConstants.TCC_FENCE_CONFIG_PREFIX_KEBAB_STYLE)
+    @ConditionalOnProperty(prefix = StarterConstants.TCC_FENCE_PREFIX, name = "enabled", matchIfMissing = true)
+    @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
     public TCCFenceConfig tccFenceConfig(
             DataSource dataSource,
             PlatformTransactionManager transactionManager,
@@ -55,4 +61,26 @@ public class SeataTCCFenceAutoConfiguration {
                 tccFenceTransactionManager != null ? tccFenceTransactionManager : transactionManager);
     }
 
+    @Configuration
+    @ConditionalOnProperty(prefix = StarterConstants.TCC_AUTO_PROXY_PREFIX_KEBAB_STYLE, name = "enabled")
+    static class TCCAutoProxyConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        public TCCAutoProxyConfig tccAutoProxyConfig() {
+            return new TCCAutoProxyConfig();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public TccAutoProxyAction tccAutoProxyAction() {
+            return new DefaultTccAutoProxyActionImpl();
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public TccAutoProxyCreator tccAutoProxyCreator(TCCAutoProxyConfig config, TccAutoProxyAction tccAutoProxyAction) {
+            return new TccAutoProxyCreator(config, tccAutoProxyAction);
+        }
+    }
 }

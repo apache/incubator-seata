@@ -220,7 +220,7 @@ public final class ActionContextUtil {
      * @return the action context of the target type
      */
     @SuppressWarnings("unchecked")
-    public static <T> T convertActionContext(String key, @Nullable Object value, @Nonnull Class<T> targetClazz) {
+    public static <T> T convertActionContext(@Nullable Object value, @Nonnull Class<T> targetClazz) {
         if (targetClazz.isPrimitive()) {
             throw new IllegalArgumentException("The targetClazz cannot be a primitive type, because the value may be null. Please use the wrapped type.");
         }
@@ -240,16 +240,10 @@ public final class ActionContextUtil {
         }
 
         // JSON to Object
-        try {
-            if (value instanceof CharSequence) {
-                return JSON.parseObject(value.toString(), targetClazz);
-            } else {
-                return JSON.parseObject(JSON.toJSONString(value), targetClazz);
-            }
-        } catch (RuntimeException e) {
-            String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
-                    key, value.getClass().getName(), targetClazz.getName());
-            throw new FrameworkException(e, errorMsg);
+        if (value instanceof CharSequence) {
+            return JSON.parseObject(value.toString(), targetClazz);
+        } else {
+            return JSON.parseObject(JSON.toJSONString(value), targetClazz);
         }
     }
 }
