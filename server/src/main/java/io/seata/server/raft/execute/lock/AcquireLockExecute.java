@@ -15,11 +15,14 @@
  */
 package io.seata.server.raft.execute.lock;
 
-import io.seata.server.lock.LockerManagerFactory;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.core.store.StoreMode;
+import io.seata.server.lock.LockManager;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
+import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 
 /**
@@ -27,14 +30,16 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  */
 public class AcquireLockExecute extends AbstractRaftMsgExecute {
 
+    private static final FileLockManager FILE_LOCK_MANAGER =
+        (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
+
     public AcquireLockExecute(RaftSessionSyncMsg sessionSyncMsg) {
         super(sessionSyncMsg);
     }
 
     @Override
     public Boolean execute(Object... args) throws Throwable {
-        GlobalSession globalSession =
-            raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
+        GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
         boolean include = false;
         if (branchSession != null) {
@@ -43,11 +48,12 @@ public class AcquireLockExecute extends AbstractRaftMsgExecute {
         } else {
             branchSession = SessionConverter.convertBranchSession(sessionSyncMsg.getBranchSession());
         }
-        Boolean owner = LockerManagerFactory.getLockManager().acquireLock(branchSession);
+        Boolean owner = FILE_LOCK_MANAGER.acquireLock(branchSession);
         logger.info("acquireLock xid: {}", branchSession.getXid());
         if (owner && !include) {
             globalSession.add(branchSession);
         }
         return owner;
     }
+
 }

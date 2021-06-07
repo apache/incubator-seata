@@ -15,16 +15,22 @@
  */
 package io.seata.server.raft.execute.lock;
 
-import io.seata.server.lock.LockerManagerFactory;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.core.store.StoreMode;
+import io.seata.server.lock.LockManager;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 
 /**
  * @author jianbin.chen
  */
 public class ReleaseLockExecute extends AbstractRaftMsgExecute {
+
+    private static final FileLockManager FILE_LOCK_MANAGER =
+        (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
 
     public ReleaseLockExecute(RaftSessionSyncMsg sessionSyncMsg) {
         super(sessionSyncMsg);
@@ -36,7 +42,7 @@ public class ReleaseLockExecute extends AbstractRaftMsgExecute {
             SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
             logger.info("releaseGlobalSessionLock xid: {}", globalSession.getXid());
-            return LockerManagerFactory.getLockManager().releaseGlobalSessionLock(globalSession);
+            return FILE_LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
         }
         return false;
     }
