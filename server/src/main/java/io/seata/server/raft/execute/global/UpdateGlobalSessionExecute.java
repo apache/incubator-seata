@@ -32,7 +32,7 @@ public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
     public Boolean execute(Object... args) throws Throwable {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
-            globalSession.setStatus(sessionSyncMsg.getGlobalStatus());
+            globalSession.setLocalStatus(sessionSyncMsg.getGlobalStatus());
             logger.info("xid: {},status: {}",globalSession.getXid(),globalSession.getStatus());
         }
         return true;

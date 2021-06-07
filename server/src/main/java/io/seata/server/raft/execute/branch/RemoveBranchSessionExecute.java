@@ -15,9 +15,17 @@
  */
 package io.seata.server.raft.execute.branch;
 
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalStatus;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+
+
+import static io.seata.core.model.GlobalStatus.AsyncCommitting;
+import static io.seata.core.model.GlobalStatus.CommitRetrying;
+import static io.seata.core.model.GlobalStatus.Committing;
 
 /**
  * @author jianbin.chen
@@ -32,7 +40,15 @@ public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
     public Boolean execute(Object... args) throws Throwable {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         if (globalSession != null) {
-            globalSession.removeBranch(sessionSyncMsg.getBranchSession().getBranchId());
+            GlobalStatus status = globalSession.getStatus();
+            BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
+            if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
+                if (!branchSession.unlock()) {
+                    throw new TransactionException("Unlock branch lock failed, xid = " + branchSession.getXid()
+                        + ", branchId = " + branchSession.getBranchId());
+                }
+            }
+            globalSession.remove(branchSession);
             logger.info("removeBranch xid: {},branchId: {}", globalSession.getXid(),
                 sessionSyncMsg.getBranchSession().getBranchId());
         }

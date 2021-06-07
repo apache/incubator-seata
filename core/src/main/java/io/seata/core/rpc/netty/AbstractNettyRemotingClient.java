@@ -33,6 +33,7 @@ import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.CliOptions;
+import com.alipay.sofa.jraft.rpc.CliClientService;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -127,7 +128,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
     private static volatile RaftLeader LEADER_ADDRESS;
-    private static volatile CliClientServiceImpl CLI_CLIENT_SERVICE;
+    private static volatile CliClientService CLI_CLIENT_SERVICE;
     private static volatile List<InetSocketAddress> ADDRESS_LIST;
 
     @Override

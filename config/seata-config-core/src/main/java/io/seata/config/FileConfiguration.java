@@ -392,7 +392,6 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            while (true) {
                 for (String dataId : dataIdMap.keySet()) {
                     try {
                         String currentConfig =
@@ -417,7 +416,6 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
-            }
         }
 
         @Override

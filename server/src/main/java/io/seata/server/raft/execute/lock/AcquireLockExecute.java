@@ -49,7 +49,8 @@ public class AcquireLockExecute extends AbstractRaftMsgExecute {
             branchSession = SessionConverter.convertBranchSession(sessionSyncMsg.getBranchSession());
         }
         Boolean owner = FILE_LOCK_MANAGER.acquireLock(branchSession);
-        logger.info("acquireLock xid: {}", branchSession.getXid());
+        logger.info("acquireLock xid: {}, branch id: {} , owner: {}", branchSession.getXid(),
+            branchSession.getBranchId(), owner);
         if (owner && !include) {
             globalSession.add(branchSession);
         }

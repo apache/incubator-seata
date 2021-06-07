@@ -33,6 +33,8 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
+import io.seata.server.lock.LockManager;
+import io.seata.server.storage.file.lock.FileLockManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -232,9 +234,13 @@ public class SessionHolder {
     }
 
     private static void lockBranchSessions(ArrayList<BranchSession> branchSessions) {
+        FileLockManager fileLockManager =
+            (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
         branchSessions.forEach(branchSession -> {
             try {
-                branchSession.lock();
+                if (StringUtils.isNotBlank(branchSession.getLockKey())) {
+                    fileLockManager.acquireLock(branchSession);
+                }
             } catch (TransactionException e) {
                 throw new ShouldNeverHappenException(e);
             }
