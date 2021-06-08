@@ -49,42 +49,48 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        // ignored if the global transaction not exists
-        if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch()) {
-            return invocation.proceed();
-        }
-
-        // get method
-        Method method = invocation.getMethod();
-
-        // check whether the method can be proxied
-        if (method.getReturnType() != Void.class) {
-            return invocation.proceed();
-        }
-
-        // if in the try method of the TCC branch, offer a suggestion
-        if (RootContext.inTccBranch() && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
-            LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to" +
-                        " transfer the `{}` to the commit method of the TCC action '{}'.",
-                    ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
-        }
-
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("`{}` is proxied by the handler '{}' in the '{}'.", ReflectionUtil.methodToString(method),
-                    this.seataProxyHandler.getClass().getName(), this.getClass().getName());
-        }
-
         try {
-            // do proxy
-            this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
-        } catch (Exception e) {
-            LOGGER.error("do proxy failed, bean: {}, handler: {}, error: {}", this.targetBeanName,
-                    this.seataProxyHandler.getClass().getName(), e.getMessage());
-            throw new FrameworkException(e, "do proxy failed: " + e.getMessage());
-        }
+            // ignored if the global transaction not exists
+            if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch() || !SeataProxyUtil.isNeedProxy()) {
+                return invocation.proceed();
+            }
 
-        // the return type is Void.class, so return null
-        return null;
+            // get method
+            Method method = invocation.getMethod();
+
+            // if in the try method of the TCC branch, offer a suggestion
+            if (RootContext.inTccBranch() && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
+                LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to" +
+                                " transfer the `{}` to the commit method of the TCC action '{}'.",
+                        ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
+            }
+
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("`{}` is proxied by the handler '{}' in the '{}'.", ReflectionUtil.methodToString(method),
+                        this.seataProxyHandler.getClass().getName(), this.getClass().getName());
+            }
+
+            try {
+                // do proxy
+                Object result = this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
+
+                // check the result, and print warn log
+                if (result == null && method.getReturnType() != void.class && method.getReturnType() != Void.class
+                        && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
+                    LOGGER.warn("The seata proxy result is null, but the return type of tye method `{}` is not `void.class`. " +
+                                "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method.",
+                            ReflectionUtil.methodToString(method));
+                }
+
+                return result;
+            } catch (Exception e) {
+                LOGGER.error("do proxy failed, bean: {}, handler: {}, error: {}", this.targetBeanName,
+                        this.seataProxyHandler.getClass().getName(), e.getMessage());
+                throw new FrameworkException(e, "do proxy failed: " + e.getMessage());
+            }
+        } finally {
+            SeataProxyUtil.enableProxy();
+        }
     }
 
     @Override

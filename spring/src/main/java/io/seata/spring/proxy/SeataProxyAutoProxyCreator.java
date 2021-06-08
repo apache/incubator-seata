@@ -55,6 +55,10 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+        if (this.shouldSkip(bean.getClass(), beanName)) {
+            return bean;
+        }
+
         // create an interceptor for the bean
         this.interceptor = new SeataProxyInterceptor(beanName, this.seataProxyHandler, this.proxyInterceptorOrder);
 
