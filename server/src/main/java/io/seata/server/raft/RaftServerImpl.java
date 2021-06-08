@@ -136,4 +136,11 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         return new RaftServerImpl(dataPath, groupId, serverId, nodeOptions);
     }
 
+    @Override
+    public void close() throws Exception {
+        if (this.raftGroupService != null) {
+            this.raftGroupService.shutdown();
+        }
+    }
+
 }

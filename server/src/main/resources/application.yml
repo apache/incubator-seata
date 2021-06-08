@@ -24,17 +24,5 @@ seata:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
   store:
-    # support: file 、 db 、 redis
-    mode: raft
-  server:
-    raft:
-      cluster: 10.57.241.59:7091,10.57.241.59:7092,10.57.241.59:7093
-      snapshotInterval: 10
-      applyBatch: 32
-      maxAppendBufferSize: 262144
-      maxReplicatorInflightMsgs: 256
-      disruptorBufferSize: 16384
-      electionTimeoutMs: 1000
-      reporterEnabled: false
-      reporterInitialDelay: 30
-
+    # support: file 、 db 、 redis 、 raft
+    mode: file

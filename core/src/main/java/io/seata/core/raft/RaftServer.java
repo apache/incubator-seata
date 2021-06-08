@@ -22,7 +22,7 @@ import com.alipay.sofa.jraft.option.NodeOptions;
 /**
  * @author funkye
  */
-public interface RaftServer {
+public interface RaftServer extends AutoCloseable {
 
     RaftServer init(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions)
         throws IOException;

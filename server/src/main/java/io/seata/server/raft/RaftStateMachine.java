@@ -78,6 +78,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     private String mode;
 
+    private static final KryoSerializerFactory FACTORY = KryoSerializerFactory.getInstance();
+
     private static final String BRANCH_SESSION_MAP = "branchSessionMap";
 
     public RaftStateMachine() {
@@ -94,12 +96,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 try {
                     ByteBuffer byteBuffer = iterator.getData();
                     if (byteBuffer != null && byteBuffer.hasRemaining()) {
-                        KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get();
+                        KryoInnerSerializer kryo = FACTORY.get();
                         try {
                             RaftSessionSyncMsg msg = kryo.deserialize(byteBuffer.array());
                             onExecuteRaft(msg);
                         } finally {
-                            KryoSerializerFactory.getInstance().returnKryo(kryo);
+                            FACTORY.returnKryo(kryo);
                         }
                     }
                 } catch (Throwable e) {
