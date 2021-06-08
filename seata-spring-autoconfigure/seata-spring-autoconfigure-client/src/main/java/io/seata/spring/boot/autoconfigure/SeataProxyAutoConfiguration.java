@@ -20,6 +20,7 @@ import io.seata.spring.proxy.SeataProxyConfig;
 import io.seata.spring.proxy.SeataProxyHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -32,13 +33,14 @@ public class SeataProxyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SeataProxyConfig tccAutoProxyConfig() {
+    @ConfigurationProperties(StarterConstants.PROXY_PREFIX)
+    public SeataProxyConfig seataProxyConfig() {
         return new SeataProxyConfig();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SeataProxyAutoProxyCreator tccAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
+    public SeataProxyAutoProxyCreator seataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
         return new SeataProxyAutoProxyCreator(config, seataProxyHandler);
     }
 }

@@ -65,17 +65,17 @@ public class SeataTCCAutoConfiguration {
     @Configuration
     @ConditionalOnMissingBean(SeataProxyHandler.class)
     @ConditionalOnProperty(prefix = StarterConstants.PROXY_PREFIX, name = "enabled")
-    static class TCCProxyHandlerConfiguration {
+    static class TccSeataProxyConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public TccSeataProxyAction tccAutoProxyAction() {
+        public TccSeataProxyAction tccSeataProxyAction() {
             return new DefaultTccSeataProxyActionImpl();
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public SeataProxyHandler tccAutoProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
+        public SeataProxyHandler tccSeataProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
             return new DefaultSeataProxyHandler(tccSeataProxyAction);
         }
     }
