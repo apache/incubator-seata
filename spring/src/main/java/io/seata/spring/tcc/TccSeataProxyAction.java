@@ -16,6 +16,7 @@
 package io.seata.spring.tcc;
 
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
 /**
@@ -23,6 +24,7 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
  *
  * @author wang.liang
  */
+@LocalTCC
 public interface TccSeataProxyAction {
 
     /**
@@ -31,7 +33,7 @@ public interface TccSeataProxyAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccAutoProxyAction", commitMethod = "commit", rollbackMethod = "rollback")
+    @TwoPhaseBusinessAction(name = "tccSeataProxyAction", useTCCFence = false, commitMethod = "commit", rollbackMethod = "rollback")
     boolean prepare(BusinessActionContext actionContext);
 
     /**

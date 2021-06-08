@@ -69,14 +69,14 @@ public class SeataTCCAutoConfiguration {
     static class TccSeataProxyConfiguration {
 
         @Bean
-        @ConditionalOnMissingBean
-        public TccSeataProxyAction tccSeataProxyAction() {
-            return new DefaultTccSeataProxyActionImpl();
+        public SeataProxyHandler defaultTccSeataProxyHandler() {
+            return new DefaultSeataProxyHandler();
         }
 
         @Bean
-        public SeataProxyHandler tccSeataProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
-            return new DefaultSeataProxyHandler(tccSeataProxyAction);
+        @ConditionalOnMissingBean
+        public TccSeataProxyAction defaultTccSeataProxyAction() {
+            return new DefaultTccSeataProxyActionImpl();
         }
     }
 }

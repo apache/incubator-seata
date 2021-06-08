@@ -15,11 +15,16 @@
  */
 package io.seata.spring.tcc;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import io.seata.common.Constants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -30,6 +35,8 @@ import org.springframework.context.ApplicationContextAware;
  * @author wang.liang
  */
 public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, ApplicationContextAware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTccSeataProxyActionImpl.class);
 
     private ApplicationContext applicationContext;
 
@@ -85,20 +92,23 @@ public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, Appl
         Object targetBean = applicationContext.getBean(targetBeanName);
         // get the method of the target bean
         String methodName = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_NAME, String.class);
+        Method method = ReflectionUtil.getMethod(targetBean.getClass(), methodName, parameterTypes);
 
         // invoke the method of the target bean
         try {
-            ReflectionUtil.invokeMethod(targetBean, methodName, parameterTypes, args);
+            ReflectionUtil.invokeMethod(targetBean, method, args);
+            LOGGER.info("commit the proxy operation '{}' success", ReflectionUtil.methodToString(method));
+            return true;
         }
-        // TODO: 等 PR #3803 (解决ReflectionUtil的BUG的PR) 合并后，替换这里的代码。
-        catch (NoSuchMethodException e) {
-            throw e;
-        }
+        // TODO: 等 PR #3803 (解决ReflectionUtil的BUG的PR) 合并后，将注释的代码放开。
         /* catch (InvocationTargetException e) {
-            throw e.getCause();
+            LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), e.getCause());
         }*/
+        catch (Exception e) {
+            LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), e);
+        }
 
-        return true;
+        return false;
     }
 
     /**
