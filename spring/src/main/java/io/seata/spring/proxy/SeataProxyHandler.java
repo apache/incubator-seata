@@ -30,5 +30,5 @@ public interface SeataProxyHandler {
      * @param targetBeanName the target bean name
      * @param invocation     the invocation of the bean
      */
-    void doProxy(String targetBeanName, MethodInvocation invocation);
+    void doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
 }

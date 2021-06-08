@@ -17,6 +17,7 @@ package io.seata.spring.proxy;
 
 import java.lang.reflect.Method;
 
+import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.logger.StackTraceLogger;
@@ -63,9 +64,9 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
 
         // if in the try method of the TCC branch, offer a suggestion
         if (RootContext.inTccBranch() && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
-            LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to transfer the `{}`" +
-                        " to the commit method of the TCC action '{}'.",
-                ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
+            LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to" +
+                        " transfer the `{}` to the commit method of the TCC action '{}'.",
+                    ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
         }
 
         if (LOGGER.isInfoEnabled()) {
@@ -73,8 +74,14 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
                     this.seataProxyHandler.getClass().getName(), this.getClass().getName());
         }
 
-        // do proxy
-        this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
+        try {
+            // do proxy
+            this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
+        } catch (Exception e) {
+            LOGGER.error("do proxy failed, bean: {}, handler: {}, error: {}", this.targetBeanName,
+                    this.seataProxyHandler.getClass().getName(), e.getMessage());
+            throw new FrameworkException(e, "do proxy failed: " + e.getMessage());
+        }
 
         // the return type is Void.class, so return null
         return null;

@@ -40,7 +40,7 @@ public class DefaultSeataProxyHandler implements SeataProxyHandler {
     }
 
     @Override
-    public void doProxy(String targetBeanName, MethodInvocation invocation) {
+    public void doProxy(String targetBeanName, MethodInvocation invocation) throws Exception {
         Method method = invocation.getMethod();
 
         String methodName = method.getName();
