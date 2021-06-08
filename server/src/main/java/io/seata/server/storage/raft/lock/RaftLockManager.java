@@ -45,12 +45,11 @@ import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_
 @LoadLevel(name = "raft")
 public class RaftLockManager extends AbstractLockManager {
 
-    private static final FileLockManager fileLockManager =
+    private static final FileLockManager FILE_LOCK_MANAGER =
         (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
 
-    @Override
-    public Locker getLocker(BranchSession branchSession) {
-        return fileLockManager.getLocker(branchSession);
+    public static LockManager getFileLockManager() {
+        return FILE_LOCK_MANAGER;
     }
 
     @Override
@@ -76,6 +75,11 @@ public class RaftLockManager extends AbstractLockManager {
     }
 
     @Override
+    public Locker getLocker(BranchSession branchSession) {
+        return FILE_LOCK_MANAGER.getLocker(branchSession);
+    }
+
+    @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
@@ -83,7 +87,7 @@ public class RaftLockManager extends AbstractLockManager {
         Closure closure = status -> {
             if (status.isOk()) {
                 try {
-                    completableFuture.complete(fileLockManager.releaseGlobalSessionLock(globalSession));
+                    completableFuture.complete(FILE_LOCK_MANAGER.releaseGlobalSessionLock(globalSession));
                 } catch (TransactionException e) {
                     completableFuture.completeExceptionally(e);
                 }
@@ -95,10 +99,6 @@ public class RaftLockManager extends AbstractLockManager {
         } catch (InterruptedException | ExecutionException e) {
             throw new StoreException(e);
         }
-    }
-
-    public static LockManager getFileLockManager(){
-        return fileLockManager;
     }
 
 }

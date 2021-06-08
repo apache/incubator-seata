@@ -186,8 +186,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                     sessionMap.put(k, session);
                 });
                 rootSessionMap.putAll(sessionMap);
-                if(CollectionUtils.isNotEmpty(branchSessionByteMap)) {
-                   LockManager fileLockManager =RaftLockManager.getFileLockManager();
+                if (CollectionUtils.isNotEmpty(branchSessionByteMap)) {
+                    LockManager fileLockManager = RaftLockManager.getFileLockManager();
                     branchSessionByteMap.forEach((k, v) -> {
                         BranchSession branchSession = new BranchSession();
                         branchSession.decode(v);

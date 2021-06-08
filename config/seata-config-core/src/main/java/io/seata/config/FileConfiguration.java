@@ -392,10 +392,11 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
+            while (true) {
                 for (String dataId : dataIdMap.keySet()) {
                     try {
                         String currentConfig =
-                                ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+                            ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
                         if (StringUtils.isNotBlank(currentConfig)) {
                             String oldConfig = listenedConfigMap.get(dataId);
                             if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
@@ -416,6 +417,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
+            }
         }
 
         @Override
