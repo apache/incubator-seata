@@ -17,7 +17,7 @@ public final class SeataProxyUtil {
     }
 
     public static void enableProxy() {
-        NEED_PROXY.set(null);
+        NEED_PROXY.remove();
     }
 
     public static boolean isNeedProxy() {
