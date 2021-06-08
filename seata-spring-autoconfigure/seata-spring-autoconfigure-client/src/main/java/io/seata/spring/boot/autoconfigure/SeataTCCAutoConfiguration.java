@@ -41,6 +41,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @author kaka2code
  * @author wang.liang
  */
+@Configuration
 @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", matchIfMissing = true)
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 public class SeataTCCAutoConfiguration {
@@ -74,7 +75,6 @@ public class SeataTCCAutoConfiguration {
         }
 
         @Bean
-        @ConditionalOnMissingBean
         public SeataProxyHandler tccSeataProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
             return new DefaultSeataProxyHandler(tccSeataProxyAction);
         }

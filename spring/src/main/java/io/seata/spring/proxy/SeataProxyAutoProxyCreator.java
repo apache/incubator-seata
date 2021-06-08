@@ -71,7 +71,7 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-        return PROXY_BEAN_CLASSES.contains(beanClass) || PROXY_BEAN_NAMES.contains(beanName);
+        return !PROXY_BEAN_CLASSES.contains(beanClass) && !PROXY_BEAN_NAMES.contains(beanName);
     }
 
     public static void addProxyBeanClasses(Collection<Class<?>> beanClasses) {
