@@ -92,25 +92,23 @@ public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, Appl
         Object targetBean = applicationContext.getBean(targetBeanName);
         // get the method of the target bean
         String methodName = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_NAME, String.class);
+        Method method = ReflectionUtil.getMethod(targetBean.getClass(), methodName, parameterTypes);
 
         // invoke the method of the target bean
         try {
-            ReflectionUtil.invokeMethod(targetBean, methodName, parameterTypes, args);
-            LOGGER.info("commit the proxy operation '{}' success",
-                    ReflectionUtil.methodToString(targetBean.getClass(), methodName, parameterTypes));
+            Object result = ReflectionUtil.invokeMethod(targetBean, method, args);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("commit the proxy operation '{}' success, the result is: {}",
+                        ReflectionUtil.methodToString(method), result);
+            }
             return true;
+        } catch (InvocationTargetException e) {
+            LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), e.getCause());
+            return false;
+        } catch (Exception e) {
+            LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), e);
+            return false;
         }
-        // TODO: 等 PR #3803 (解决ReflectionUtil的BUG的PR) 合并后，将注释的代码放开。
-        /* catch (InvocationTargetException e) {
-            LOGGER.error("commit the proxy operation '{}' failed",
-                    ReflectionUtil.methodToString(targetBean.getClass(), methodName, parameterTypes), e.getCause());
-        }*/
-        catch (Exception e) {
-            LOGGER.error("commit the proxy operation '{}' failed",
-                    ReflectionUtil.methodToString(targetBean.getClass(), methodName, parameterTypes), e);
-        }
-
-        return false;
     }
 
     /**
