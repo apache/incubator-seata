@@ -7,20 +7,20 @@ package io.seata.spring.proxy;
  */
 public final class SeataProxyUtil {
 
-	private SeataProxyUtil() {
-	}
+    private SeataProxyUtil() {
+    }
 
-	private static final ThreadLocal<Boolean> NEED_PROXY = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> NEED_PROXY = new ThreadLocal<>();
 
-	public static void disableProxy() {
-		NEED_PROXY.set(false);
-	}
+    public static void disableProxy() {
+        NEED_PROXY.set(false);
+    }
 
-	public static void enableProxy() {
-		NEED_PROXY.set(null);
-	}
+    public static void enableProxy() {
+        NEED_PROXY.set(null);
+    }
 
-	public static boolean isNeedProxy() {
-		return !Boolean.FALSE.equals(NEED_PROXY.get());
-	}
+    public static boolean isNeedProxy() {
+        return !Boolean.FALSE.equals(NEED_PROXY.get());
+    }
 }
