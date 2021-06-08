@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * TCC fence auto configuration.
+ * TCC auto configuration.
  *
  * @author kaka2code
  * @author wang.liang
