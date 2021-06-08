@@ -58,6 +58,12 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
             // get method
             Method method = invocation.getMethod();
 
+            // get annotation and check
+            SeataProxy annotation = method.getAnnotation(SeataProxy.class);
+            if (annotation != null && annotation.hidden()) {
+                return invocation.proceed();
+            }
+
             // if in the try method of the TCC branch, offer a suggestion
             if (RootContext.inTccBranch() && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
                 LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to" +
@@ -78,7 +84,7 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
                 if (result == null && method.getReturnType() != void.class && method.getReturnType() != Void.class
                         && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
                     LOGGER.warn("The seata proxy result is null, but the return type of tye method `{}` is not `void.class`. " +
-                                "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method.",
+                                    "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method.",
                             ReflectionUtil.methodToString(method));
                 }
 
