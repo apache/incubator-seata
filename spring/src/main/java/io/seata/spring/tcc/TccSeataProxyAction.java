@@ -19,34 +19,34 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
 /**
- * Tcc Auto Proxy Action
+ * Tcc Seata Proxy Action
  *
  * @author wang.liang
  */
 public interface TccSeataProxyAction {
 
-	/**
-	 * Prepare boolean.
-	 *
-	 * @param actionContext the action context
-	 * @return the boolean
-	 */
-	@TwoPhaseBusinessAction(name = "tccAutoProxyAction", commitMethod = "commit", rollbackMethod = "rollback")
-	boolean prepare(BusinessActionContext actionContext);
+    /**
+     * Prepare.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    @TwoPhaseBusinessAction(name = "tccAutoProxyAction", commitMethod = "commit", rollbackMethod = "rollback")
+    boolean prepare(BusinessActionContext actionContext);
 
-	/**
-	 * Commit boolean.
-	 *
-	 * @param actionContext the action context
-	 * @return the boolean
-	 */
-	boolean commit(BusinessActionContext actionContext) throws Throwable;
+    /**
+     * Commit.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean commit(BusinessActionContext actionContext) throws Throwable;
 
-	/**
-	 * Rollback boolean.
-	 *
-	 * @param actionContext the action context
-	 * @return the boolean
-	 */
-	boolean rollback(BusinessActionContext actionContext);
+    /**
+     * Rollback.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean rollback(BusinessActionContext actionContext);
 }

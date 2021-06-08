@@ -23,7 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 
 /**
- * Seata Proxy auto configuration.
+ * Seata Proxy Auto Configuration.
  *
  * @author wang.liang
  */

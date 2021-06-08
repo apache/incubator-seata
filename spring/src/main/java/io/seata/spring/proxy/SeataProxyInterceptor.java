@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 
 import io.seata.common.util.ReflectionUtil;
 import io.seata.core.context.RootContext;
+import io.seata.core.logger.StackTraceLogger;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -60,11 +61,11 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
             return invocation.proceed();
         }
 
-        // if in the TCC branch, offer a suggestion
-        if (RootContext.inTccBranch() && LOGGER.isWarnEnabled()) {
-            LOGGER.warn("Currently in the TCC branch, it's recommended to transfer the `{}`" +
-                            " to the commit method of current TCC action '{}'.",
-                    ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
+        // if in the try method of the TCC branch, offer a suggestion
+        if (RootContext.inTccBranch() && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
+            LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to transfer the `{}`" +
+                        " to the commit method of the TCC action '{}'.",
+                ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
         }
 
         // do proxy

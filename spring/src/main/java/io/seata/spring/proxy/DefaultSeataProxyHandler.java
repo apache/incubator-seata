@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.tcc;
+package io.seata.spring.proxy;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -23,19 +23,19 @@ import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
-import io.seata.spring.proxy.SeataProxyHandler;
+import io.seata.spring.tcc.TccSeataProxyAction;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * The Tcc Auto Proxy Handler
+ * The Default Seata Proxy Handler
  *
  * @author wang.liang
  */
-public class TccSeataProxyHandler implements SeataProxyHandler {
+public class DefaultSeataProxyHandler implements SeataProxyHandler {
 
     private final TccSeataProxyAction tccSeataProxyAction;
 
-    public TccSeataProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
+    public DefaultSeataProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
         this.tccSeataProxyAction = tccSeataProxyAction;
     }
 
@@ -54,7 +54,7 @@ public class TccSeataProxyHandler implements SeataProxyHandler {
         actionContext.setActionContext(context);
 
         // put the context of the invocation into actionContext
-        // contain: object, method name, parameter types, arguments
+        // contains: target bean name, method name, parameter types, arguments
         context.put(Constants.TCC_PROXY_TARGET_BEAN_NAME, targetBeanName);
         context.put(Constants.TCC_PROXY_METHOD_NAME, methodName);
         if (parameterTypes.length > 0) {

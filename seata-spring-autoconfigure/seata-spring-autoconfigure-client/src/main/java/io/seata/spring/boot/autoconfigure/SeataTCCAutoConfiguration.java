@@ -18,14 +18,14 @@ package io.seata.spring.boot.autoconfigure;
 import javax.sql.DataSource;
 
 import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.spring.proxy.DefaultSeataProxyHandler;
+import io.seata.spring.proxy.SeataProxyHandler;
 import io.seata.spring.tcc.DefaultTccSeataProxyActionImpl;
 import io.seata.spring.tcc.TccSeataProxyAction;
-import io.seata.spring.tcc.TccSeataProxyHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -63,8 +63,8 @@ public class SeataTCCAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnMissingBean(TccSeataProxyHandler.class)
-    @ConditionalOnExpression("${seata.proxy.enabled:false} && 'tcc'.equalsIgnoreCase(${seata.proxy.proxy-handler-type:tcc})")
+    @ConditionalOnMissingBean(SeataProxyHandler.class)
+    @ConditionalOnProperty(prefix = StarterConstants.PROXY_PREFIX, name = "enabled")
     static class TCCProxyHandlerConfiguration {
 
         @Bean
@@ -75,8 +75,8 @@ public class SeataTCCAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public TccSeataProxyHandler tccAutoProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
-            return new TccSeataProxyHandler(tccSeataProxyAction);
+        public SeataProxyHandler tccAutoProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
+            return new DefaultSeataProxyHandler(tccSeataProxyAction);
         }
     }
 }

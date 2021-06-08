@@ -147,5 +147,4 @@ seata:
     enabled: false
     target-bean-classes: targetBeanClass1,targetBeanClass2
     target-bean-names: targetBeanName1,targetBeanName2
-    proxy-handler-type: tcc
     proxy-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000

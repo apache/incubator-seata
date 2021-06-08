@@ -15,11 +15,15 @@
  */
 package io.seata.spring.proxy;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import io.seata.common.util.ReflectionUtil;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 
@@ -30,17 +34,20 @@ import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
  */
 public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
 
-    private final Set<Class<?>> proxyBeanClasses;
-    private final Set<String> proxyBeanNames;
-    private final int proxyInterceptorOrder;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataProxyAutoProxyCreator.class);
+
+    private static final Set<Class<?>> PROXY_BEAN_CLASSES = new HashSet<>();
+    private static final Set<String> PROXY_BEAN_NAMES = new HashSet<>();
 
     private final SeataProxyHandler seataProxyHandler;
+    private final int proxyInterceptorOrder;
 
     private MethodInterceptor interceptor;
 
     public SeataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
-        this.proxyBeanClasses = ReflectionUtil.classNameCollToClassSet(config.getTargetBeanClasses());
-        this.proxyBeanNames = config.getTargetBeanNames();
+        addProxyBeanClasses(ReflectionUtil.classNameCollToClassSet(config.getTargetBeanClasses()));
+        addProxyBeanNames(config.getTargetBeanNames());
+
         this.proxyInterceptorOrder = config.getProxyInterceptorOrder();
 
         this.seataProxyHandler = seataProxyHandler;
@@ -50,6 +57,8 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         // create an interceptor for the bean
         this.interceptor = new SeataProxyInterceptor(beanName, this.seataProxyHandler, this.proxyInterceptorOrder);
+
+        LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
 
         // do wrap
         return super.wrapIfNecessary(bean, beanName, cacheKey);
@@ -62,6 +71,26 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-        return proxyBeanClasses.contains(beanClass) || proxyBeanNames.contains(beanName);
+        return PROXY_BEAN_CLASSES.contains(beanClass) || PROXY_BEAN_NAMES.contains(beanName);
+    }
+
+    public static void addProxyBeanClasses(Collection<Class<?>> beanClasses) {
+        PROXY_BEAN_CLASSES.addAll(beanClasses);
+    }
+
+    public static void addProxyBeanClasses(Class<?>... beanClasses) {
+        addProxyBeanClasses(Arrays.asList(beanClasses));
+    }
+
+    public static void addProxyBeanClasses(String... beanClassNames) {
+        addProxyBeanClasses(ReflectionUtil.classNameCollToClassSet(Arrays.asList(beanClassNames)));
+    }
+
+    public static void addProxyBeanNames(Collection<String> beanNames) {
+        PROXY_BEAN_NAMES.addAll(beanNames);
+    }
+
+    public static void addProxyBeanNames(String... beanNames) {
+        addProxyBeanNames(Arrays.asList(beanNames));
     }
 }

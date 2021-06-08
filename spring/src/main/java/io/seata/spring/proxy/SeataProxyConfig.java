@@ -42,11 +42,6 @@ public class SeataProxyConfig {
     private Set<String> targetBeanNames;
 
     /**
-     * proxy handler type
-     */
-    private String proxyHandlerType = "tcc";
-
-    /**
      * proxy interceptor order
      */
     private int proxyInterceptorOrder = Ordered.HIGHEST_PRECEDENCE + 1000;
@@ -76,14 +71,6 @@ public class SeataProxyConfig {
         this.targetBeanNames = targetBeanNames;
     }
 
-    public String getProxyHandlerType() {
-        return proxyHandlerType;
-    }
-
-    public void setProxyHandlerType(String proxyHandlerType) {
-        this.proxyHandlerType = proxyHandlerType;
-    }
-
     public int getProxyInterceptorOrder() {
         return proxyInterceptorOrder;
     }
@@ -92,4 +79,3 @@ public class SeataProxyConfig {
         this.proxyInterceptorOrder = proxyInterceptorOrder;
     }
 }
-
