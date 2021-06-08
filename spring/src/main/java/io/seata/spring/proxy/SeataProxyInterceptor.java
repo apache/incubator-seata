@@ -68,6 +68,11 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
                 ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
         }
 
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("`{}` is proxied by the handler '{}' in the '{}'.", ReflectionUtil.methodToString(method),
+                    this.seataProxyHandler.getClass().getName(), this.getClass().getName());
+        }
+
         // do proxy
         this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
 
