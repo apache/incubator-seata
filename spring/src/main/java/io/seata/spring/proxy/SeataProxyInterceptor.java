@@ -18,6 +18,7 @@ package io.seata.spring.proxy;
 import java.lang.reflect.Method;
 
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.logger.StackTraceLogger;
@@ -58,6 +59,11 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
             // get method
             Method method = invocation.getMethod();
 
+            // check is not proxy
+            if (!this.needToProxy(method)) {
+                return invocation.proceed();
+            }
+
             // get annotation and check
             SeataProxy annotation = method.getAnnotation(SeataProxy.class);
             if (annotation != null && annotation.hidden()) {
@@ -97,6 +103,14 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
         } finally {
             SeataProxyUtil.enableProxy();
         }
+    }
+
+    private boolean needToProxy(Method method) {
+        if (method.getName().equals("toString") && CollectionUtils.isEmpty(method.getParameterTypes())) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
