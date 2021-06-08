@@ -32,9 +32,9 @@ import java.lang.annotation.Target;
 public @interface SeataProxy {
 
     /**
-     * do not proxy when the {@code hidden} is true
+     * do not proxy when the {@code skip} is true
      *
      * @return the boolean
      */
-    boolean hidden() default false;
+    boolean skip() default false;
 }

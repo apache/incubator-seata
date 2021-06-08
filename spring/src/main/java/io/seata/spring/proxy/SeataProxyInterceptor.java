@@ -52,28 +52,18 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
     public Object invoke(final MethodInvocation invocation) throws Throwable {
         try {
             // ignored if the global transaction not exists
-            if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch() || !SeataProxyUtil.isNeedProxy()) {
+            if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch() || !SeataProxyUtil.isNeedProxy() ||
+                    this.shouldSkip(invocation)) {
                 return invocation.proceed();
             }
 
             // get method
             Method method = invocation.getMethod();
 
-            // check is not proxy
-            if (!this.needToProxy(method)) {
-                return invocation.proceed();
-            }
-
-            // get annotation and check
-            SeataProxy annotation = method.getAnnotation(SeataProxy.class);
-            if (annotation != null && annotation.hidden()) {
-                return invocation.proceed();
-            }
-
             // if in the try method of the TCC branch, offer a suggestion
             if (RootContext.inTccBranch() && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
-                LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to" +
-                                " transfer the `{}` to the commit method of the TCC action '{}'.",
+                LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to " +
+                            "transfer the `{}` to the commit method of the TCC action '{}'.",
                         ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
             }
 
@@ -86,11 +76,11 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
                 // do proxy
                 Object result = this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
 
-                // check the result, and print warn log
+                // if the result is null and the return type is not void, print warn log
                 if (result == null && method.getReturnType() != void.class && method.getReturnType() != Void.class
                         && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
                     LOGGER.warn("The seata proxy result is null, but the return type of tye method `{}` is not `void.class`. " +
-                                    "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method.",
+                                "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method.",
                             ReflectionUtil.methodToString(method));
                 }
 
@@ -105,12 +95,27 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
         }
     }
 
-    private boolean needToProxy(Method method) {
-        if (method.getName().equals("toString") && CollectionUtils.isEmpty(method.getParameterTypes())) {
-            return false;
+    private boolean shouldSkip(MethodInvocation invocation) {
+        Method method = invocation.getMethod();
+
+        // skip `Object.toString()`
+        String methodName = method.getName();
+        if ("toString".equals(methodName) && CollectionUtils.isEmpty(method.getParameterTypes())) {
+            return true;
         }
 
-        return true;
+        // get annotation and skip if {@code skip() == true}
+        SeataProxy annotation = method.getAnnotation(SeataProxy.class);
+        if (annotation != null && annotation.skip()) {
+            return true;
+        }
+
+        // check by the handler
+        if (this.seataProxyHandler.shouldSkip(this.targetBeanName, invocation)) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override

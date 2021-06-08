@@ -31,4 +31,15 @@ public interface SeataProxyHandler {
      * @param invocation     the invocation of the bean
      */
     Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
+
+    /**
+     * check need to skip
+     *
+     * @param targetBeanName the target bean name
+     * @param invocation     the invocation of the bean
+     * @return the boolean
+     */
+    default boolean shouldSkip(String targetBeanName, MethodInvocation invocation) {
+        return false;
+    }
 }
