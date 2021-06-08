@@ -19,6 +19,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * @author jianbin.chen
@@ -31,18 +32,18 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(Object... args) {
-        logger.info("remove start session map size:{}", raftSessionManager.getSessionMap().size());
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
             try {
-                globalSession.clean();
+                RaftLockManager.getFileLockManager().releaseGlobalSessionLock(globalSession);
                 raftSessionManager.removeGlobalSession(globalSession);
-                logger.info("end xid: {}", globalSession.getXid());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("end xid: {}", globalSession.getXid());
+                }
             } catch (TransactionException e) {
                 logger.error("remove global fail error:{}", e.getMessage());
             }
         }
-        logger.info("remove end session map size:{}", raftSessionManager.getSessionMap().size());
         return true;
     }
 

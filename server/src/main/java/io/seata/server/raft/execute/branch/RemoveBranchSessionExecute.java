@@ -49,8 +49,10 @@ public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
                 }
             }
             globalSession.remove(branchSession);
-            logger.info("removeBranch xid: {},branchId: {}", globalSession.getXid(),
-                sessionSyncMsg.getBranchSession().getBranchId());
+            if (logger.isDebugEnabled()) {
+                logger.debug("removeBranch xid: {},branchId: {}", globalSession.getXid(),
+                    sessionSyncMsg.getBranchSession().getBranchId());
+            }
         }
         return true;
     }

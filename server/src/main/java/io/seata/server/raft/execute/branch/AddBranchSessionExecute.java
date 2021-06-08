@@ -15,25 +15,20 @@
  */
 package io.seata.server.raft.execute.branch;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.StoreMode;
-import io.seata.server.lock.LockManager;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
-import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * @author jianbin.chen
  */
 public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
-
-    private static final FileLockManager FILE_LOCK_MANAGER =
-        (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
 
     public AddBranchSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
         super(sessionSyncMsg);
@@ -46,12 +41,14 @@ public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
         BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
         if (branchSession == null) {
             branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
-            if (StringUtils.isNotBlank(branchSession.getLockKey())) {
-                FILE_LOCK_MANAGER.acquireLock(branchSession);
+            if (branchSession.getBranchType() == BranchType.AT && StringUtils.isNotBlank(branchSession.getLockKey())) {
+                RaftLockManager.getFileLockManager().acquireLock(branchSession);
             }
             globalSession.add(branchSession);
-            logger.info("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
-                branchTransactionDO.getBranchId());
+            if (logger.isDebugEnabled()) {
+                logger.debug("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
+                    branchTransactionDO.getBranchId());
+            }
         }
         return true;
     }

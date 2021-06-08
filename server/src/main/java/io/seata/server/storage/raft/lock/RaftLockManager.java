@@ -45,7 +45,7 @@ import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_
 @LoadLevel(name = "raft")
 public class RaftLockManager extends AbstractLockManager {
 
-    private FileLockManager fileLockManager =
+    private static final FileLockManager fileLockManager =
         (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
 
     @Override
@@ -95,6 +95,10 @@ public class RaftLockManager extends AbstractLockManager {
         } catch (InterruptedException | ExecutionException e) {
             throw new StoreException(e);
         }
+    }
+
+    public static LockManager getFileLockManager(){
+        return fileLockManager;
     }
 
 }

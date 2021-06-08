@@ -27,7 +27,6 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import com.alipay.sofa.jraft.storage.snapshot.local.LocalSnapshotWriter;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -38,6 +37,8 @@ import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
 import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
+import io.seata.server.lock.LockManager;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.raft.execute.RaftMsgExecute;
 import io.seata.server.raft.execute.branch.AddBranchSessionExecute;
 import io.seata.server.raft.execute.branch.RemoveBranchSessionExecute;
@@ -51,6 +52,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.storage.raft.lock.RaftLockManager;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,9 +133,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         maps.put(ROOT_SESSION_MANAGER_NAME, globalSessionByteMap);
         maps.put(BRANCH_SESSION_MAP, branchSessionByteMap);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {},index: {}",
-                globalSessionByteMap.size(), branchSessionByteMap.size(),
-                ((LocalSnapshotWriter)writer).getSnapshotIndex());
+            LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
+                branchSessionByteMap.size());
         }
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
         if (snapshot.save(maps)) {
@@ -164,12 +165,16 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         }
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(reader.getPath() + File.separator + "data");
         try {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
+            }
             Map<String, Object> maps = snapshot.load();
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
             Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
             Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
             // be sure to clear the data before loading it, because this is a full overwrite update
+            LockerManagerFactory.getLockManager().cleanAllLocks();
             rootSessionMap.clear();
             if (!globalSessionByteMap.isEmpty()) {
                 Map<String, GlobalSession> sessionMap = new HashMap<>();
@@ -180,18 +185,22 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 });
                 rootSessionMap.putAll(sessionMap);
                 if(CollectionUtils.isNotEmpty(branchSessionByteMap)) {
+                   LockManager fileLockManager =RaftLockManager.getFileLockManager();
                     branchSessionByteMap.forEach((k, v) -> {
                         BranchSession branchSession = new BranchSession();
                         branchSession.decode(v);
                         try {
-                            rootSessionMap.get(branchSession.getXid()).localAddBranch(branchSession);
+                            fileLockManager.acquireLock(branchSession);
+                            rootSessionMap.get(branchSession.getXid()).add(branchSession);
                         } catch (TransactionException e) {
                             LOGGER.error(e.getMessage());
                         }
                     });
                 }
             }
-            LOGGER.info("on snapshot load end index: {}",reader.load().getLastIncludedIndex());
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("on snapshot load end index: {}", reader.load().getLastIncludedIndex());
+            }
             return true;
         } catch (final Exception e) {
             LOGGER.error("fail to load snapshot from {}", snapshot.getPath());
