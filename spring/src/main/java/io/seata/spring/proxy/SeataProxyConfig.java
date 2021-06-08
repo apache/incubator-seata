@@ -29,7 +29,7 @@ public class SeataProxyConfig {
     /**
      * proxy enabled
      */
-    private boolean enabled = false;
+    private boolean enabled = true;
 
     /**
      * target bean classes

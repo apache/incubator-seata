@@ -270,7 +270,7 @@
       "name": "seata.proxy.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.proxy.SeataProxyConfig",
-      "defaultValue": false
+      "defaultValue": true
     },
     {
       "name": "seata.proxy.proxy-interceptor-order",

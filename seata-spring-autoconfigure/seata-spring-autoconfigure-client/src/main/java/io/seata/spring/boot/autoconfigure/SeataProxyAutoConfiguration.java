@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Bean;
  *
  * @author wang.liang
  */
-@ConditionalOnExpression("${seata.enabled:true} && ${seata.proxy.enabled:false}")
+@ConditionalOnExpression("${seata.enabled:true} && ${seata.proxy.enabled:true}")
 public class SeataProxyAutoConfiguration {
 
     @Bean
