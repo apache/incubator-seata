@@ -98,7 +98,7 @@ seata:
       maxAppendBufferSize: 262144
       maxReplicatorInflightMsgs: 256
       disruptorBufferSize: 16384
-      electionTimeoutMs: 2000
+      electionTimeoutMs: 1000
       reporterEnabled: false
       reporterInitialDelay: 30
     max-commit-retry-timeout: -1
