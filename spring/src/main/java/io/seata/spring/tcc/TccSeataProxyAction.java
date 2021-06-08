@@ -33,7 +33,7 @@ public interface TccSeataProxyAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccSeataProxyAction", useTCCFence = false, commitMethod = "commit", rollbackMethod = "rollback")
+    @TwoPhaseBusinessAction(name = "tccSeataProxyAction", useTCCFence = true, commitMethod = "commit", rollbackMethod = "rollback")
     boolean prepare(BusinessActionContext actionContext);
 
     /**
