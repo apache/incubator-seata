@@ -25,19 +25,20 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
 import io.seata.spring.tcc.TccSeataProxyAction;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * The Default Seata Proxy Handler
  *
  * @author wang.liang
  */
-public class DefaultSeataProxyHandler implements SeataProxyHandler {
+public class DefaultSeataProxyHandler implements SeataProxyHandler, ApplicationContextAware {
 
-    private final TccSeataProxyAction tccSeataProxyAction;
+    private ApplicationContext applicationContext;
 
-    public DefaultSeataProxyHandler(TccSeataProxyAction tccSeataProxyAction) {
-        this.tccSeataProxyAction = tccSeataProxyAction;
-    }
+    private TccSeataProxyAction tccSeataProxyAction;
 
     @Override
     public Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception {
@@ -65,9 +66,25 @@ public class DefaultSeataProxyHandler implements SeataProxyHandler {
         }
 
         // do prepare
-        tccSeataProxyAction.prepare(actionContext);
+        this.getTccSeataProxyAction().prepare(actionContext);
 
         // no data to return, so null is always returned
         return null;
+    }
+
+    private TccSeataProxyAction getTccSeataProxyAction() {
+        if (tccSeataProxyAction == null) {
+            synchronized (DefaultSeataProxyHandler.class) {
+                if (tccSeataProxyAction == null) {
+                    tccSeataProxyAction = applicationContext.getBean(TccSeataProxyAction.class);
+                }
+            }
+        }
+        return tccSeataProxyAction;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }
