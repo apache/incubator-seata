@@ -23,11 +23,14 @@ import org.springframework.core.Ordered;
  * Seata Proxy Config
  *
  * @author wang.liang
+ * @see SeataProxyAutoProxyCreator
  */
 public class SeataProxyConfig {
 
     /**
      * proxy enabled
+     *
+     * @see io.seata.spring.boot.autoconfigure.SeataProxyAutoConfiguration
      */
     private boolean enabled = true;
 
@@ -43,6 +46,8 @@ public class SeataProxyConfig {
 
     /**
      * proxy interceptor order
+     *
+     * @see SeataProxyInterceptor#orderNum
      */
     private int proxyInterceptorOrder = Ordered.HIGHEST_PRECEDENCE + 1000;
 

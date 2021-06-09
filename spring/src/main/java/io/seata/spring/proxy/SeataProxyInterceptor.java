@@ -33,6 +33,7 @@ import org.springframework.core.Ordered;
  * Seata Proxy Interceptor
  *
  * @author wang.liang
+ * @see SeataProxyHandler
  */
 public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
 
@@ -68,8 +69,8 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
             }
 
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("`{}` is proxied by the handler '{}' in the '{}'.", ReflectionUtil.methodToString(method),
-                        this.seataProxyHandler.getClass().getName(), this.getClass().getName());
+                LOGGER.info("the method `{}` is proxied by the proxy handler '{}' in the '{}'.", method.getName(),
+                        this.seataProxyHandler.getClass().getName(), SeataProxyInterceptor.class.getName());
             }
 
             try {
@@ -77,11 +78,13 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
                 Object result = this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
 
                 // if the result is null and the return type is not void, print warn log
-                if (result == null && method.getReturnType() != void.class && method.getReturnType() != Void.class
+                if (result == null
+                        && method.getReturnType() != void.class && method.getReturnType() != Void.class
                         && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
-                    LOGGER.warn("The seata proxy result is null, but the return type of tye method `{}` is not `void.class`. " +
-                                "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method.",
-                            ReflectionUtil.methodToString(method));
+                    LOGGER.warn("null is returned from `{}.doProxy(...)`, but the return type of `{}` is not `void.class`. " +
+                                "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method, " +
+                                "or add the `@{}(skip = true)` on the method.",
+                            this.seataProxyHandler.getClass().getName(), ReflectionUtil.methodToString(method), SeataProxy.class.getSimpleName());
                 }
 
                 return result;

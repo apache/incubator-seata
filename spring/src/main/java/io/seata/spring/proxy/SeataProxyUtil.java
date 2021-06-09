@@ -1,5 +1,7 @@
 package io.seata.spring.proxy;
 
+import org.aopalliance.intercept.MethodInvocation;
+
 /**
  * The Seata Proxy Util
  *
@@ -20,6 +22,10 @@ public final class SeataProxyUtil {
         NEED_PROXY.remove();
     }
 
+    /**
+     * @return the boolean
+     * @see SeataProxyInterceptor#invoke(MethodInvocation)
+     */
     public static boolean isNeedProxy() {
         return !Boolean.FALSE.equals(NEED_PROXY.get());
     }

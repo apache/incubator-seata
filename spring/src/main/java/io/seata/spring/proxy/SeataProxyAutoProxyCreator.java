@@ -48,9 +48,8 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
         addProxyBeanClasses(ReflectionUtil.classNameCollToClassSet(config.getTargetBeanClasses()));
         addProxyBeanNames(config.getTargetBeanNames());
 
-        this.proxyInterceptorOrder = config.getProxyInterceptorOrder();
-
         this.seataProxyHandler = seataProxyHandler;
+        this.proxyInterceptorOrder = config.getProxyInterceptorOrder();
     }
 
     @Override

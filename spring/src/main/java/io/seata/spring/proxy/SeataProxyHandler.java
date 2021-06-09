@@ -21,16 +21,9 @@ import org.aopalliance.intercept.MethodInvocation;
  * The interface SeataProxyHandler
  *
  * @author wang.liang
+ * @see SeataProxyInterceptor
  */
 public interface SeataProxyHandler {
-
-    /**
-     * do proxy the invocation
-     *
-     * @param targetBeanName the target bean name
-     * @param invocation     the invocation of the bean
-     */
-    Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
 
     /**
      * check need to skip
@@ -42,4 +35,12 @@ public interface SeataProxyHandler {
     default boolean shouldSkip(String targetBeanName, MethodInvocation invocation) {
         return false;
     }
+
+    /**
+     * do proxy the invocation
+     *
+     * @param targetBeanName the target bean name
+     * @param invocation     the invocation of the bean
+     */
+    Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
 }

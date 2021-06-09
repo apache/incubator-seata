@@ -30,9 +30,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * The Default Implement of the Tcc Seata Proxy Action
+ * The default implementation of the {@link TccSeataProxyAction}
  *
  * @author wang.liang
+ * @see TccSeataProxyHandler
+ * @see TccSeataProxyAction
  */
 public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, ApplicationContextAware {
 

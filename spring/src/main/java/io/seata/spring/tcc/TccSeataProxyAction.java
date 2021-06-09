@@ -23,6 +23,8 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
  * Tcc Seata Proxy Action
  *
  * @author wang.liang
+ * @see TccSeataProxyHandler
+ * @see io.seata.spring.proxy.SeataProxyInterceptor
  */
 @LocalTCC
 public interface TccSeataProxyAction {
