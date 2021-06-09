@@ -196,7 +196,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 public TransactionInfo getTransactionInfo() {
                     // reset the value of timeout
                     int timeout = globalTrxAnno.timeoutMills();
-                    if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
+                    if (timeout < 0) {
                         timeout = defaultGlobalTransactionTimeout;
                     }
 
