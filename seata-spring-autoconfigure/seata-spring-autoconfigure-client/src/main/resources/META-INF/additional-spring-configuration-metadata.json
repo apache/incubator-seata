@@ -269,7 +269,7 @@
     {
       "name": "seata.proxy.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.proxy.SeataProxyConfig",
+      "sourceType": "io.seata.spring.boot.autoconfigure.SeataProxyAutoConfiguration",
       "defaultValue": true
     },
     {

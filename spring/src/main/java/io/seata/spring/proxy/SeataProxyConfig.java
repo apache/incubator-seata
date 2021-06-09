@@ -23,16 +23,9 @@ import org.springframework.core.Ordered;
  * Seata Proxy Config
  *
  * @author wang.liang
- * @see SeataProxyScanner
+ * @see io.seata.spring.annotation.GlobalTransactionScanner
  */
 public class SeataProxyConfig {
-
-    /**
-     * proxy enabled
-     *
-     * @see io.seata.spring.boot.autoconfigure.SeataProxyAutoConfiguration
-     */
-    private boolean enabled = true;
 
     /**
      * target bean classes
@@ -51,14 +44,6 @@ public class SeataProxyConfig {
      */
     private int proxyInterceptorOrder = Ordered.HIGHEST_PRECEDENCE + 1000;
 
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 
     public Set<String> getTargetBeanClasses() {
         return targetBeanClasses;

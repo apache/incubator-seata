@@ -23,6 +23,8 @@ import io.seata.common.util.ReflectionUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
+import io.seata.spring.annotation.SeataInterceptor;
+import io.seata.spring.annotation.SeataInterceptorPosition;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -35,13 +37,13 @@ import org.springframework.core.Ordered;
  * @author wang.liang
  * @see SeataProxyHandler
  */
-public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
+public class SeataProxyInterceptor implements MethodInterceptor, SeataInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataProxyInterceptor.class);
 
     private final String targetBeanName;
     private final SeataProxyHandler seataProxyHandler;
-    private final int orderNum;
+    private int orderNum;
 
     public SeataProxyInterceptor(String targetBeanName, SeataProxyHandler seataProxyHandler, int orderNum) {
         this.targetBeanName = targetBeanName;
@@ -124,5 +126,15 @@ public class SeataProxyInterceptor implements MethodInterceptor, Ordered {
     @Override
     public int getOrder() {
         return orderNum;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.orderNum = order;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.BeforeTransaction;
     }
 }

@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Lazy;
  * Seata Proxy Bean Register
  *
  * @author wang.liang
- * @see SeataProxyScanner
+ * @see io.seata.spring.annotation.GlobalTransactionScanner
  */
 @Lazy(false)
 public class SeataProxyBeanRegister {
