@@ -33,6 +33,11 @@ import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
  * Seata Proxy Scanner
  *
  * @author wang.liang
+ * @see SeataProxy
+ * @see SeataProxyBeanRegister
+ * @see SeataProxyConfig
+ * @see SeataProxyHandler
+ * @see SeataProxyInterceptor
  */
 public class SeataProxyScanner extends AbstractAutoProxyCreator {
 
