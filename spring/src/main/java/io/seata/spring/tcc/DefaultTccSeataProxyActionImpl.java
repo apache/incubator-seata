@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import io.seata.common.Constants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.rm.tcc.TwoPhaseResult;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
 import org.slf4j.Logger;
@@ -102,15 +103,29 @@ public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, Appl
         Throwable th;
         try {
             Object result = ReflectionUtil.invokeMethod(targetBean, method, args);
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("commit the proxy operation '{}' success, the result is: {}",
-                        ReflectionUtil.methodToString(method), result);
+
+            Object ret = result;
+            if (ret instanceof TwoPhaseResult) {
+                ret = ((TwoPhaseResult)ret).isSuccess();
             }
-            return true;
+
+            if (!Boolean.FALSE.equals(ret)) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("commit the proxy operation '{}' success, the result is: {}",
+                            ReflectionUtil.methodToString(method), result);
+                }
+                return true;
+            } else {
+                LOGGER.error("commit the proxy operation '{}' failed, the result is: {}",
+                        ReflectionUtil.methodToString(method), result);
+                return false;
+            }
         } catch (InvocationTargetException e) {
             th = e.getCause();
+            //do not throw, print log and return false
         } catch (Throwable e) {
             th = e;
+            //do not throw, print log and return false
         }
 
         LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), th);

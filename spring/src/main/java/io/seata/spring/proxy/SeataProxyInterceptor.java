@@ -78,14 +78,29 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
                 // do proxy
                 Object result = this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
 
-                // if the result is null and the return type is not void, print warn log
-                if (result == null
-                        && method.getReturnType() != void.class && method.getReturnType() != Void.class
-                        && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
-                    LOGGER.warn("null is returned from `{}.doProxy(...)`, but the return type of `{}` is not `void.class`. " +
-                                "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method, " +
-                                "or add the `@{}(skip = true)` on the method.",
-                            this.seataProxyHandler.getClass().getName(), ReflectionUtil.methodToString(method), SeataProxy.class.getSimpleName());
+                // if the result is null, validate the return type
+                if (result == null) {
+                    Class<?> returnType = method.getReturnType();
+
+                    // if the return type
+                    if (returnType == boolean.class || returnType == Boolean.class) {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("`null` is returned from `{}.doProxy(...)`, but the return type is `{}.class`, " +
+                                         "so return `true` to replace the `null`.",
+                                    this.seataProxyHandler.getClass().getName(), returnType.getSimpleName());
+                        }
+                        // return `true` to replace the `null`
+                        return true;
+                    }
+
+                    // if the return type is not void, print warn log
+                    if (returnType != void.class && returnType != Void.class
+                            && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
+                        LOGGER.warn("`null` is returned from `{}.doProxy(...)`, but the return type of `{}` is not `void.class`. " +
+                                        "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method, " +
+                                        "or add the `@{}(skip = true)` on the method.",
+                                this.seataProxyHandler.getClass().getName(), ReflectionUtil.methodToString(method), SeataProxy.class.getSimpleName());
+                    }
                 }
 
                 return result;
