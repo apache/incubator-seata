@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
@@ -78,22 +79,32 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
     }
 
     public static void addProxyBeanClasses(Collection<Class<?>> beanClasses) {
-        PROXY_BEAN_CLASSES.addAll(beanClasses);
+        if (CollectionUtils.isNotEmpty(beanClasses)) {
+            PROXY_BEAN_CLASSES.addAll(beanClasses);
+        }
     }
 
     public static void addProxyBeanClasses(Class<?>... beanClasses) {
-        addProxyBeanClasses(Arrays.asList(beanClasses));
+        if (CollectionUtils.isNotEmpty(beanClasses)) {
+            addProxyBeanClasses(Arrays.asList(beanClasses));
+        }
     }
 
     public static void addProxyBeanClasses(String... beanClassNames) {
-        addProxyBeanClasses(ReflectionUtil.classNameCollToClassSet(Arrays.asList(beanClassNames)));
+        if (CollectionUtils.isNotEmpty(beanClassNames)) {
+            addProxyBeanClasses(ReflectionUtil.classNameCollToClassSet(Arrays.asList(beanClassNames)));
+        }
     }
 
     public static void addProxyBeanNames(Collection<String> beanNames) {
-        PROXY_BEAN_NAMES.addAll(beanNames);
+        if (CollectionUtils.isNotEmpty(beanNames)) {
+            PROXY_BEAN_NAMES.addAll(beanNames);
+        }
     }
 
     public static void addProxyBeanNames(String... beanNames) {
-        addProxyBeanNames(Arrays.asList(beanNames));
+        if (CollectionUtils.isNotEmpty(beanNames)) {
+            addProxyBeanNames(Arrays.asList(beanNames));
+        }
     }
 }
