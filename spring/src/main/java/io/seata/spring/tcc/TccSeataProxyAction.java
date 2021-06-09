@@ -34,23 +34,26 @@ public interface TccSeataProxyAction {
      *
      * @param actionContext the action context
      * @return the boolean
+     * @throws Exception the Exception
      */
     @TwoPhaseBusinessAction(name = "tccSeataProxyAction", useTCCFence = true, commitMethod = "commit", rollbackMethod = "rollback")
-    boolean prepare(BusinessActionContext actionContext);
+    boolean prepare(BusinessActionContext actionContext) throws Exception;
 
     /**
      * Commit.
      *
      * @param actionContext the action context
      * @return the boolean
+     * @throws Exception the Exception
      */
-    boolean commit(BusinessActionContext actionContext) throws Throwable;
+    boolean commit(BusinessActionContext actionContext) throws Exception;
 
     /**
      * Rollback.
      *
      * @param actionContext the action context
      * @return the boolean
+     * @throws Exception the Exception
      */
-    boolean rollback(BusinessActionContext actionContext);
+    boolean rollback(BusinessActionContext actionContext) throws Exception;
 }

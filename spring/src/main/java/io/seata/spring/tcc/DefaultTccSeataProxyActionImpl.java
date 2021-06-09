@@ -54,19 +54,21 @@ public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, Appl
      * @return the boolean
      */
     @Override
-    public boolean prepare(BusinessActionContext actionContext) {
+    public boolean prepare(BusinessActionContext actionContext) throws Exception {
         // do nothing, only report applicationData at the beginning of the TCC branch
         return true;
     }
 
     /**
      * Commit.
+     * Invoke the method intercepted in phase-1
      *
      * @param actionContext the action context
      * @return the boolean
+     * @throws Exception the Exception
      */
     @Override
-    public boolean commit(BusinessActionContext actionContext) throws Throwable {
+    public boolean commit(BusinessActionContext actionContext) throws Exception {
         // get the arguments
         @SuppressWarnings("unchecked")
         Class<?>[] parameterTypes = actionContext.getActionContext(Constants.TCC_PROXY_METHOD_PARAMETER_TYPES, Class[].class);
@@ -97,6 +99,7 @@ public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, Appl
         Method method = ReflectionUtil.getMethod(targetBean.getClass(), methodName, parameterTypes);
 
         // invoke the method of the target bean
+        Throwable th;
         try {
             Object result = ReflectionUtil.invokeMethod(targetBean, method, args);
             if (LOGGER.isInfoEnabled()) {
@@ -105,12 +108,13 @@ public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, Appl
             }
             return true;
         } catch (InvocationTargetException e) {
-            LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), e.getCause());
-            return false;
-        } catch (Exception e) {
-            LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), e);
-            return false;
+            th = e.getCause();
+        } catch (Throwable e) {
+            th = e;
         }
+
+        LOGGER.error("commit the proxy operation '{}' failed", ReflectionUtil.methodToString(method), th);
+        return false;
     }
 
     /**
@@ -120,7 +124,7 @@ public class DefaultTccSeataProxyActionImpl implements TccSeataProxyAction, Appl
      * @return the boolean
      */
     @Override
-    public boolean rollback(BusinessActionContext actionContext) {
+    public boolean rollback(BusinessActionContext actionContext) throws Exception {
         // do nothing, remove the TCC branch directly
         return true;
     }
