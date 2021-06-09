@@ -15,12 +15,16 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.List;
+
+import io.seata.spring.proxy.SeataProxyBeanRegister;
 import io.seata.spring.proxy.SeataProxyConfig;
 import io.seata.spring.proxy.SeataProxyHandler;
 import io.seata.spring.proxy.SeataProxyScanner;
 import io.seata.spring.tcc.DefaultTccSeataProxyActionImpl;
 import io.seata.spring.tcc.TccSeataProxyAction;
 import io.seata.spring.tcc.TccSeataProxyHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -49,8 +53,9 @@ public class SeataProxyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SeataProxyScanner seataProxyScanner(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
-        return new SeataProxyScanner(config, seataProxyHandler);
+    public SeataProxyScanner seataProxyScanner(SeataProxyConfig config, SeataProxyHandler seataProxyHandler,
+            @Autowired(required = false) List<SeataProxyBeanRegister> registers) {
+        return new SeataProxyScanner(config, registers, seataProxyHandler);
     }
 
     /**

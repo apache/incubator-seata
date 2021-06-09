@@ -18,6 +18,7 @@ package io.seata.spring.proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import io.seata.common.util.CollectionUtils;
@@ -45,9 +46,21 @@ public class SeataProxyScanner extends AbstractAutoProxyCreator {
 
     private MethodInterceptor interceptor;
 
-    public SeataProxyScanner(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
+    public SeataProxyScanner(SeataProxyConfig config, List<SeataProxyBeanRegister> registers, SeataProxyHandler seataProxyHandler) {
+        // beans info from config
         addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
         addProxyBeanNames(config.getTargetBeanNames());
+
+        // beans from registers
+        if (CollectionUtils.isNotEmpty(registers)) {
+            for(SeataProxyBeanRegister register : registers) {
+                if(register == null) {
+                    continue;
+                }
+                addProxyBeanClasses(register.getBeanClasses());
+                addProxyBeanNames(register.getBeanNames());
+            }
+        }
 
         this.seataProxyHandler = seataProxyHandler;
         this.proxyInterceptorOrder = config.getProxyInterceptorOrder();
