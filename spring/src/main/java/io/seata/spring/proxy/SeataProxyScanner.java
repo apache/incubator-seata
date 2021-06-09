@@ -53,8 +53,8 @@ public class SeataProxyScanner extends AbstractAutoProxyCreator {
 
         // beans from registers
         if (CollectionUtils.isNotEmpty(registers)) {
-            for(SeataProxyBeanRegister register : registers) {
-                if(register == null) {
+            for (SeataProxyBeanRegister register : registers) {
+                if (register == null) {
                     continue;
                 }
                 this.addProxyBeanClasses(register.getBeanClasses());
