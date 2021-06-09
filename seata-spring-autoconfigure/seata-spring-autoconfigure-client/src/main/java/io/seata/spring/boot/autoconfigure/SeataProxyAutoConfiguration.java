@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Lazy;
 public class SeataProxyAutoConfiguration {
 
     /**
-     * The configuration for the implementation of the {@link SeataProxyHandler}
+     * The implementation of the {@link SeataProxyHandler}
      *
      * @see io.seata.spring.proxy.SeataProxy
      * @see SeataProxyHandler
@@ -57,11 +57,6 @@ public class SeataProxyAutoConfiguration {
             return new DefaultTccSeataProxyActionImpl();
         }
 
-        /**
-         * The {@link io.seata.spring.proxy.SeataProxyAutoProxyCreator} will use the handler.
-         *
-         * @return the seata proxy handler
-         */
         @Bean
         public SeataProxyHandler tccSeataProxyHandler() {
             return new TccSeataProxyHandler();
