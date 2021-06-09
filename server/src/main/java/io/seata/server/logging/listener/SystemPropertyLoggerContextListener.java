@@ -38,7 +38,7 @@ public class SystemPropertyLoggerContextListener extends ContextAwareBase implem
         }
 
         Context context = getContext();
-        context.putProperty("PORT", System.getProperty(ConfigurationKeys.SERVER_PORT));
+        context.putProperty("RPC_PORT", System.getProperty(ConfigurationKeys.SERVER_RPC_PORT));
 
         started = true;
     }

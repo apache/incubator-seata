@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
 import io.seata.rm.tcc.api.BusinessActionContext;
@@ -155,8 +154,9 @@ public class DefaultRemotingParser {
     /**
      * parse the remoting bean info
      *
-     * @param bean     the bean
-     * @param beanName the bean name
+     * @param bean           the bean
+     * @param beanName       the bean name
+     * @param remotingParser the remoting parser
      * @return remoting desc
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName, RemotingParser remotingParser) {
@@ -180,13 +180,11 @@ public class DefaultRemotingParser {
                         tccResource.setTargetBean(targetBean);
                         tccResource.setPrepareMethod(m);
                         tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                        tccResource.setCommitMethod(ReflectionUtil
-                            .getMethod(interfaceClass, twoPhaseBusinessAction.commitMethod(),
-                                new Class[] {BusinessActionContext.class}));
+                        tccResource.setCommitMethod(interfaceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                                BusinessActionContext.class));
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                        tccResource.setRollbackMethod(ReflectionUtil
-                            .getMethod(interfaceClass, twoPhaseBusinessAction.rollbackMethod(),
-                                new Class[] {BusinessActionContext.class}));
+                        tccResource.setRollbackMethod(interfaceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                                BusinessActionContext.class));
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
                     }
