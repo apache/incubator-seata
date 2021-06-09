@@ -38,8 +38,8 @@ public class SeataProxyScanner extends AbstractAutoProxyCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataProxyScanner.class);
 
-    private static final Set<Class<?>> PROXY_BEAN_CLASSES = new HashSet<>();
-    private static final Set<String> PROXY_BEAN_NAMES = new HashSet<>();
+    private final Set<Class<?>> proxyBeanClasses = new HashSet<>();
+    private final Set<String> proxyBeanNames = new HashSet<>();
 
     private final SeataProxyHandler seataProxyHandler;
     private final int proxyInterceptorOrder;
@@ -48,8 +48,8 @@ public class SeataProxyScanner extends AbstractAutoProxyCreator {
 
     public SeataProxyScanner(SeataProxyConfig config, List<SeataProxyBeanRegister> registers, SeataProxyHandler seataProxyHandler) {
         // beans info from config
-        addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
-        addProxyBeanNames(config.getTargetBeanNames());
+        this.addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
+        this.addProxyBeanNames(config.getTargetBeanNames());
 
         // beans from registers
         if (CollectionUtils.isNotEmpty(registers)) {
@@ -57,8 +57,8 @@ public class SeataProxyScanner extends AbstractAutoProxyCreator {
                 if(register == null) {
                     continue;
                 }
-                addProxyBeanClasses(register.getBeanClasses());
-                addProxyBeanNames(register.getBeanNames());
+                this.addProxyBeanClasses(register.getBeanClasses());
+                this.addProxyBeanNames(register.getBeanNames());
             }
         }
 
@@ -89,7 +89,7 @@ public class SeataProxyScanner extends AbstractAutoProxyCreator {
             return false;
         }
 
-        return !PROXY_BEAN_CLASSES.contains(beanClass) && !PROXY_BEAN_NAMES.contains(beanName);
+        return !proxyBeanClasses.contains(beanClass) && !proxyBeanNames.contains(beanName);
     }
 
     @Override
@@ -98,28 +98,28 @@ public class SeataProxyScanner extends AbstractAutoProxyCreator {
     }
 
 
-    //region static methods
+    //region the methods for add proxy bean
 
-    public static void addProxyBeanClasses(Collection<Class<?>> beanClasses) {
-        CollectionUtils.addAll(PROXY_BEAN_CLASSES, beanClasses);
+    public void addProxyBeanClasses(Collection<Class<?>> beanClasses) {
+        CollectionUtils.addAll(proxyBeanClasses, beanClasses);
     }
 
-    public static void addProxyBeanClasses(Class<?>... beanClasses) {
-        CollectionUtils.addAll(PROXY_BEAN_CLASSES, beanClasses);
+    public void addProxyBeanClasses(Class<?>... beanClasses) {
+        CollectionUtils.addAll(proxyBeanClasses, beanClasses);
     }
 
-    public static void addProxyBeanClasses(String... beanClassNames) {
+    public void addProxyBeanClasses(String... beanClassNames) {
         if (CollectionUtils.isNotEmpty(beanClassNames)) {
             addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(Arrays.asList(beanClassNames)));
         }
     }
 
-    public static void addProxyBeanNames(Collection<String> beanNames) {
-        CollectionUtils.addAll(PROXY_BEAN_NAMES, beanNames);
+    public void addProxyBeanNames(Collection<String> beanNames) {
+        CollectionUtils.addAll(proxyBeanNames, beanNames);
     }
 
-    public static void addProxyBeanNames(String... beanNames) {
-        CollectionUtils.addAll(PROXY_BEAN_NAMES, beanNames);
+    public void addProxyBeanNames(String... beanNames) {
+        CollectionUtils.addAll(proxyBeanNames, beanNames);
     }
 
     //endregion
