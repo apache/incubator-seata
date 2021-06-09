@@ -46,7 +46,7 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
     private MethodInterceptor interceptor;
 
     public SeataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
-        addProxyBeanClasses(ReflectionUtil.classNameCollToClassSet(config.getTargetBeanClasses()));
+        addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
         addProxyBeanNames(config.getTargetBeanNames());
 
         this.seataProxyHandler = seataProxyHandler;
@@ -79,32 +79,24 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
     }
 
     public static void addProxyBeanClasses(Collection<Class<?>> beanClasses) {
-        if (CollectionUtils.isNotEmpty(beanClasses)) {
-            PROXY_BEAN_CLASSES.addAll(beanClasses);
-        }
+        CollectionUtils.addAll(PROXY_BEAN_CLASSES, beanClasses);
     }
 
     public static void addProxyBeanClasses(Class<?>... beanClasses) {
-        if (CollectionUtils.isNotEmpty(beanClasses)) {
-            addProxyBeanClasses(Arrays.asList(beanClasses));
-        }
+        CollectionUtils.addAll(PROXY_BEAN_CLASSES, beanClasses);
     }
 
     public static void addProxyBeanClasses(String... beanClassNames) {
         if (CollectionUtils.isNotEmpty(beanClassNames)) {
-            addProxyBeanClasses(ReflectionUtil.classNameCollToClassSet(Arrays.asList(beanClassNames)));
+            addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(Arrays.asList(beanClassNames)));
         }
     }
 
     public static void addProxyBeanNames(Collection<String> beanNames) {
-        if (CollectionUtils.isNotEmpty(beanNames)) {
-            PROXY_BEAN_NAMES.addAll(beanNames);
-        }
+        CollectionUtils.addAll(PROXY_BEAN_NAMES, beanNames);
     }
 
     public static void addProxyBeanNames(String... beanNames) {
-        if (CollectionUtils.isNotEmpty(beanNames)) {
-            addProxyBeanNames(Arrays.asList(beanNames));
-        }
+        CollectionUtils.addAll(PROXY_BEAN_NAMES, beanNames);
     }
 }

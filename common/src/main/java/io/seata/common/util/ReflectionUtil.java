@@ -82,14 +82,14 @@ public final class ReflectionUtil {
     /**
      * class name set to class set
      *
-     * @param classNameColl the class name collection
+     * @param classNames the class names
      * @return the class set
      */
-    public static Set<Class<?>> classNameCollToClassSet(Collection<String> classNameColl) {
+    public static Set<Class<?>> classNamesToClassSet(Collection<String> classNames) {
         Set<Class<?>> classSet = new HashSet<>();
-        if (classNameColl != null) {
+        if (classNames != null) {
             Class<?> clazz;
-            for (String className : classNameColl) {
+            for (String className : classNames) {
                 try {
                     clazz = getClassByName(className);
                     classSet.add(clazz);
