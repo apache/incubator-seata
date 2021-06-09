@@ -23,7 +23,7 @@ import org.springframework.core.Ordered;
  * Seata Proxy Config
  *
  * @author wang.liang
- * @see SeataProxyAutoProxyCreator
+ * @see SeataProxyScanner
  */
 public class SeataProxyConfig {
 

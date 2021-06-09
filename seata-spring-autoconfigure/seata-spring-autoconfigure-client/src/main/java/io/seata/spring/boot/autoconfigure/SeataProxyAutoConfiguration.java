@@ -15,9 +15,9 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.spring.proxy.SeataProxyAutoProxyCreator;
 import io.seata.spring.proxy.SeataProxyConfig;
 import io.seata.spring.proxy.SeataProxyHandler;
+import io.seata.spring.proxy.SeataProxyScanner;
 import io.seata.spring.tcc.DefaultTccSeataProxyActionImpl;
 import io.seata.spring.tcc.TccSeataProxyAction;
 import io.seata.spring.tcc.TccSeataProxyHandler;
@@ -32,6 +32,9 @@ import org.springframework.context.annotation.Lazy;
  * Seata Proxy Auto Configuration.
  *
  * @author wang.liang
+ * @see io.seata.spring.proxy.SeataProxy
+ * @see SeataProxyScanner
+ * @see SeataProxyHandler
  */
 @Configuration
 @ConditionalOnExpression("${seata.enabled:true} && ${seata.proxy.enabled:true}")
@@ -46,16 +49,12 @@ public class SeataProxyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SeataProxyAutoProxyCreator seataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
-        return new SeataProxyAutoProxyCreator(config, seataProxyHandler);
+    public SeataProxyScanner seataProxyScanner(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
+        return new SeataProxyScanner(config, seataProxyHandler);
     }
 
     /**
-     * The implementation of the {@link SeataProxyHandler}
-     *
-     * @see io.seata.spring.proxy.SeataProxy
-     * @see SeataProxyHandler
-     * @see io.seata.spring.proxy.SeataProxyAutoProxyCreator
+     * Create the implementation of the {@link SeataProxyHandler}
      */
     @Configuration
     @ConditionalOnMissingBean(SeataProxyHandler.class)

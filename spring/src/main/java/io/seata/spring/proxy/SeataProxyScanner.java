@@ -29,13 +29,13 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 
 /**
- * Seata Proxy Auto Proxy Creator
+ * Seata Proxy Scanner
  *
  * @author wang.liang
  */
-public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
+public class SeataProxyScanner extends AbstractAutoProxyCreator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeataProxyAutoProxyCreator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataProxyScanner.class);
 
     private static final Set<Class<?>> PROXY_BEAN_CLASSES = new HashSet<>();
     private static final Set<String> PROXY_BEAN_NAMES = new HashSet<>();
@@ -45,7 +45,7 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
 
     private MethodInterceptor interceptor;
 
-    public SeataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
+    public SeataProxyScanner(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
         addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
         addProxyBeanNames(config.getTargetBeanNames());
 
