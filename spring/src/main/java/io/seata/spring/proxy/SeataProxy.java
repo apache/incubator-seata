@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * @author wang.liang
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 public @interface SeataProxy {
 

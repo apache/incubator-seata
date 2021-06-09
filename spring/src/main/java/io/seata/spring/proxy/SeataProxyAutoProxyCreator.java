@@ -69,14 +69,23 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
     }
 
     @Override
+    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        // if has `@SeataProxy` on the bean class, and the `skip == false`, need to proxy
+        SeataProxy seataProxyAnno = beanClass.getAnnotation(SeataProxy.class);
+        if (seataProxyAnno != null && !seataProxyAnno.skip()) {
+            return false;
+        }
+
+        return !PROXY_BEAN_CLASSES.contains(beanClass) && !PROXY_BEAN_NAMES.contains(beanName);
+    }
+
+    @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource) {
         return new Object[]{interceptor};
     }
 
-    @Override
-    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-        return !PROXY_BEAN_CLASSES.contains(beanClass) && !PROXY_BEAN_NAMES.contains(beanName);
-    }
+
+    //region static methods
 
     public static void addProxyBeanClasses(Collection<Class<?>> beanClasses) {
         CollectionUtils.addAll(PROXY_BEAN_CLASSES, beanClasses);
@@ -99,4 +108,6 @@ public class SeataProxyAutoProxyCreator extends AbstractAutoProxyCreator {
     public static void addProxyBeanNames(String... beanNames) {
         CollectionUtils.addAll(PROXY_BEAN_NAMES, beanNames);
     }
+
+    //endregion
 }

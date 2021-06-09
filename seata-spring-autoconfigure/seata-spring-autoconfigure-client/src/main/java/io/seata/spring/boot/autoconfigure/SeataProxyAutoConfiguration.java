@@ -21,7 +21,6 @@ import io.seata.spring.proxy.SeataProxyHandler;
 import io.seata.spring.tcc.DefaultTccSeataProxyActionImpl;
 import io.seata.spring.tcc.TccSeataProxyAction;
 import io.seata.spring.tcc.TccSeataProxyHandler;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -36,8 +35,20 @@ import org.springframework.context.annotation.Lazy;
  */
 @Configuration
 @ConditionalOnExpression("${seata.enabled:true} && ${seata.proxy.enabled:true}")
-@AutoConfigureAfter({SeataTCCFenceAutoConfiguration.class})
 public class SeataProxyAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConfigurationProperties(StarterConstants.PROXY_PREFIX)
+    public SeataProxyConfig seataProxyConfig() {
+        return new SeataProxyConfig();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SeataProxyAutoProxyCreator seataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
+        return new SeataProxyAutoProxyCreator(config, seataProxyHandler);
+    }
 
     /**
      * The implementation of the {@link SeataProxyHandler}
@@ -51,28 +62,15 @@ public class SeataProxyAutoConfiguration {
     static class TccSeataProxyConfiguration {
 
         @Bean
+        public SeataProxyHandler tccSeataProxyHandler() {
+            return new TccSeataProxyHandler();
+        }
+
+        @Bean
         @Lazy(false)
         @ConditionalOnMissingBean
         public TccSeataProxyAction defaultTccSeataProxyAction() {
             return new DefaultTccSeataProxyActionImpl();
         }
-
-        @Bean
-        public SeataProxyHandler tccSeataProxyHandler() {
-            return new TccSeataProxyHandler();
-        }
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    @ConfigurationProperties(StarterConstants.PROXY_PREFIX)
-    public SeataProxyConfig seataProxyConfig() {
-        return new SeataProxyConfig();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public SeataProxyAutoProxyCreator seataProxyAutoProxyCreator(SeataProxyConfig config, SeataProxyHandler seataProxyHandler) {
-        return new SeataProxyAutoProxyCreator(config, seataProxyHandler);
     }
 }
