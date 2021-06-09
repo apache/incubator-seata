@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Lazy;
  */
 @Configuration
 @ConditionalOnExpression("${seata.enabled:true} && ${seata.proxy.enabled:true}")
-@AutoConfigureAfter({SeataTCCAutoConfiguration.class})
+@AutoConfigureAfter({SeataTCCFenceAutoConfiguration.class})
 public class SeataProxyAutoConfiguration {
 
     /**

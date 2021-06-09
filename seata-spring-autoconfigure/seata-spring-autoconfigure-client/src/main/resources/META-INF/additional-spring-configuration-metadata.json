@@ -242,7 +242,7 @@
       "name": "seata.tcc.fence.enabled",
       "type": "java.lang.Boolean",
       "description": "Whether enable tcc fence configuration.",
-      "sourceType": "io.seata.spring.boot.autoconfigure.SeataTCCAutoConfiguration",
+      "sourceType": "io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration",
       "defaultValue": true
     },
     {
