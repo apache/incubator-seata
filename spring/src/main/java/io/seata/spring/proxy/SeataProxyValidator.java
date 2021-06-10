@@ -15,21 +15,25 @@
  */
 package io.seata.spring.proxy;
 
+import io.seata.spring.proxy.desc.SeataProxyBeanDesc;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * The interface SeataProxyHandler
+ * The interface SeataProxyValidator
  *
  * @author wang.liang
  * @see SeataProxyInterceptor
  */
-public interface SeataProxyHandler {
+public interface SeataProxyValidator {
 
     /**
-     * do proxy the invocation
+     * check need to skip
      *
-     * @param targetBeanName the target bean name
+     * @param targetBeanDesc the target bean desc
      * @param invocation     the invocation of the bean
+     * @return the boolean
      */
-    Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
+    default boolean shouldSkip(SeataProxyBeanDesc targetBeanDesc, MethodInvocation invocation) {
+        return false;
+    }
 }

@@ -43,6 +43,9 @@ import io.seata.spring.proxy.SeataProxyBeanRegister;
 import io.seata.spring.proxy.SeataProxyConfig;
 import io.seata.spring.proxy.SeataProxyHandler;
 import io.seata.spring.proxy.SeataProxyInterceptor;
+import io.seata.spring.proxy.desc.SeataProxyBeanDesc;
+import io.seata.spring.proxy.desc.SeataProxyParser;
+import io.seata.spring.proxy.util.SeataProxyInterceptorUtil;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
@@ -80,6 +83,8 @@ import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         implements ConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {
 
+    //region static fields
+
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionScanner.class);
@@ -98,12 +103,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private static ConfigurableListableBeanFactory beanFactory;
 
-    private ApplicationContext applicationContext;
-
-    private MethodInterceptor interceptor;
-    private MethodInterceptor globalTransactionalInterceptor;
-
-    private final int mode;
+    //endregion
 
     //region the fields of the TM
 
@@ -119,6 +119,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     //region the fields for init the TM and RM
 
+    private final int mode;
+
     private final String applicationId;
     private final String txServiceGroup;
 
@@ -128,11 +130,21 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     //region the fields of the SeataProxy
 
+    private SeataProxyConfig seataProxyConfig;
+
     private final Set<Class<?>> proxyBeanClasses = new HashSet<>();
     private final Set<String> proxyBeanNames = new HashSet<>();
 
-    private SeataProxyHandler seataProxyHandler;
-    private int proxyInterceptorOrder = Ordered.HIGHEST_PRECEDENCE + 1000;
+    private final SeataProxyBeanRegister totalProxyBeanRegister = new SeataProxyBeanRegister();
+
+    //endregion
+
+    //region other fields
+
+    private ApplicationContext applicationContext;
+
+    private MethodInterceptor interceptor;
+    private MethodInterceptor globalTransactionalInterceptor;
 
     //endregion
 
@@ -173,7 +185,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param mode           the mode
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode) {
-        this(applicationId, txServiceGroup, mode, null, null, null, null);
+        this(applicationId, txServiceGroup, mode, null, null, null);
     }
 
     /**
@@ -184,7 +196,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param failureHandlerHook the failure handler hook
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, FailureHandler failureHandlerHook) {
-        this(applicationId, txServiceGroup, DEFAULT_MODE, failureHandlerHook, null, null, null);
+        this(applicationId, txServiceGroup, DEFAULT_MODE, failureHandlerHook, null, null);
     }
 
     /**
@@ -195,8 +207,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param failureHandlerHook the failure handler hook
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, FailureHandler failureHandlerHook,
-            SeataProxyConfig config, List<SeataProxyBeanRegister> registers, SeataProxyHandler seataProxyHandler) {
-        this(applicationId, txServiceGroup, DEFAULT_MODE, failureHandlerHook, config, registers, seataProxyHandler);
+            SeataProxyConfig config, List<SeataProxyBeanRegister> registers) {
+        this(applicationId, txServiceGroup, DEFAULT_MODE, failureHandlerHook, config, registers);
     }
 
     /**
@@ -208,7 +220,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param failureHandlerHook the failure handler hook
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, FailureHandler failureHandlerHook,
-            SeataProxyConfig config, List<SeataProxyBeanRegister> registers, SeataProxyHandler seataProxyHandler) {
+            SeataProxyConfig config, List<SeataProxyBeanRegister> registers) {
         setOrder(ORDER_NUM);
         setProxyTargetClass(true);
         this.applicationId = applicationId;
@@ -216,7 +228,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.mode = mode;
         this.failureHandlerHook = failureHandlerHook;
 
-        this.initSeataProxy(config, registers,seataProxyHandler);
+        this.initSeataProxy(config, registers);
     }
 
     /**
@@ -325,8 +337,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     isSeataAutoProxy = this.isSeataAutoProxy(bean, beanName);
                 }
                 if (isSeataAutoProxy) {
+                    // paser the bean desc
+                    SeataProxyBeanDesc beanDesc = SeataProxyParser.parserBeanDesc(totalProxyBeanRegister, bean, beanName);
                     // create an interceptor for the bean
-                    this.interceptor = new SeataProxyInterceptor(beanName, this.seataProxyHandler, this.proxyInterceptorOrder);
+                    this.interceptor = new SeataProxyInterceptor(beanDesc, seataProxyConfig.getProxyInterceptorOrder());
                 }
                 //check TCC proxy
                 else if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
@@ -613,15 +627,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     //region the methods for the SeataProxy
 
-    protected void initSeataProxy(SeataProxyConfig config, List<SeataProxyBeanRegister> registers, SeataProxyHandler seataProxyHandler) {
-        if (seataProxyHandler != null) {
-            if (config != null) {
-                this.proxyInterceptorOrder = config.getProxyInterceptorOrder();
+    protected void initSeataProxy(SeataProxyConfig config, List<SeataProxyBeanRegister> registers) {
+        if (config != null) {
+            this.seataProxyConfig = config;
 
-                // beans info from config
-                this.addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
-                this.addProxyBeanNames(config.getTargetBeanNames());
-            }
+            // beans info from config
+            this.addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
+            this.addProxyBeanNames(config.getTargetBeanNames());
 
             if (CollectionUtils.isNotEmpty(registers)) {
                 // beans from registers
@@ -629,17 +641,17 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     if (register == null) {
                         continue;
                     }
-                    this.addProxyBeanClasses(register.getBeanClasses());
-                    this.addProxyBeanNames(register.getBeanNames());
+                    this.addProxyBeanClasses(register.getBeanClassBeanDescMap().keySet());
+                    this.addProxyBeanNames(register.getBeanNameBeanDescMap().keySet());
+
+                    totalProxyBeanRegister.merge(register);
                 }
             }
-
-            this.seataProxyHandler = seataProxyHandler;
         }
     }
 
     protected boolean isSeataAutoProxy(Object bean, String beanName) {
-        if (seataProxyHandler == null) {
+        if (seataProxyConfig == null) {
             return false;
         }
 
@@ -647,7 +659,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
         // if has `@SeataProxy` on the bean class, and the `skip == false`, need to proxy
         SeataProxy seataProxyAnno = beanClass.getAnnotation(SeataProxy.class);
-        if (seataProxyAnno != null && !seataProxyAnno.skip()) {
+        if (seataProxyAnno != null && !SeataProxyInterceptorUtil.isShouldSkip(seataProxyAnno)) {
             return true;
         }
 
@@ -660,21 +672,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         CollectionUtils.addAll(proxyBeanClasses, beanClasses);
     }
 
-    protected void addProxyBeanClasses(Class<?>... beanClasses) {
-        CollectionUtils.addAll(proxyBeanClasses, beanClasses);
-    }
-
-    protected void addProxyBeanClasses(String... beanClassNames) {
-        if (CollectionUtils.isNotEmpty(beanClassNames)) {
-            addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(Arrays.asList(beanClassNames)));
-        }
-    }
-
     protected void addProxyBeanNames(Collection<String> beanNames) {
-        CollectionUtils.addAll(proxyBeanNames, beanNames);
-    }
-
-    protected void addProxyBeanNames(String... beanNames) {
         CollectionUtils.addAll(proxyBeanNames, beanNames);
     }
 

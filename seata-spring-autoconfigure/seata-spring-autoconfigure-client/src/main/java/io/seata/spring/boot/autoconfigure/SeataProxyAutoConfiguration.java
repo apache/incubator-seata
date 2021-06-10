@@ -54,6 +54,7 @@ public class SeataProxyAutoConfiguration {
     static class TccSeataProxyConfiguration {
 
         @Bean
+        @Lazy(false)
         public SeataProxyHandler tccSeataProxyHandler() {
             return new TccSeataProxyHandler();
         }

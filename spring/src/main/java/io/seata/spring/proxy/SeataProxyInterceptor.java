@@ -16,6 +16,8 @@
 package io.seata.spring.proxy;
 
 import java.lang.reflect.Method;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
@@ -25,6 +27,9 @@ import io.seata.core.logger.StackTraceLogger;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.spring.annotation.SeataInterceptor;
 import io.seata.spring.annotation.SeataInterceptorPosition;
+import io.seata.spring.proxy.desc.SeataProxyBeanDesc;
+import io.seata.spring.proxy.desc.SeataProxyMethodDesc;
+import io.seata.spring.proxy.util.SeataProxyInterceptorUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -41,20 +46,19 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataProxyInterceptor.class);
 
     private final String targetBeanName;
-    private final SeataProxyHandler seataProxyHandler;
+    private final SeataProxyBeanDesc targetBeanDesc;
     private int orderNum;
 
-    public SeataProxyInterceptor(String targetBeanName, SeataProxyHandler seataProxyHandler, int orderNum) {
-        this.targetBeanName = targetBeanName;
-        this.seataProxyHandler = seataProxyHandler;
+    public SeataProxyInterceptor(SeataProxyBeanDesc targetBeanDesc, int orderNum) {
+        targetBeanName = targetBeanDesc.getTargetBeanName();
+        this.targetBeanDesc = targetBeanDesc;
         this.orderNum = orderNum;
     }
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
         try {
-            // ignored if the global transaction not exists
-            if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch() || !SeataProxyUtil.isNeedProxy() ||
+            if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch() || !SeataProxyInterceptorUtil.isNeedProxy() ||
                     this.shouldSkip(invocation)) {
                 return invocation.proceed();
             }
@@ -69,48 +73,34 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
                         ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
             }
 
+            // get the proxy handler
+            SeataProxyHandler proxyHandler = this.getHandler(method);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("the method `{}` is proxied by the proxy handler '{}' in the '{}'.", method.getName(),
-                        this.seataProxyHandler.getClass().getName(), SeataProxyInterceptor.class.getName());
+                        proxyHandler.getClass().getName(), SeataProxyInterceptor.class.getName());
             }
-
+            // do proxy
+            Object result;
             try {
-                // do proxy
-                Object result = this.seataProxyHandler.doProxy(this.targetBeanName, invocation);
-
-                // if the result is null, validate the return type
-                if (result == null) {
-                    Class<?> returnType = method.getReturnType();
-
-                    // if the return type
-                    if (returnType == boolean.class || returnType == Boolean.class) {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("`null` is returned from `{}.doProxy(...)`, but the return type is `{}.class`, " +
-                                         "so return `true` to replace the `null`.",
-                                    this.seataProxyHandler.getClass().getName(), returnType.getSimpleName());
-                        }
-                        // return `true` to replace the `null`
-                        return true;
-                    }
-
-                    // if the return type is not void, print warn log
-                    if (returnType != void.class && returnType != Void.class
-                            && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
-                        LOGGER.warn("`null` is returned from `{}.doProxy(...)`, but the return type of `{}` is not `void.class`. " +
-                                        "If you do not want the method to be proxied, please use the `SeataProxyUtil.disableProxy()` before calling the method, " +
-                                        "or add the `@{}(skip = true)` on the method.",
-                                this.seataProxyHandler.getClass().getName(), ReflectionUtil.methodToString(method), SeataProxy.class.getSimpleName());
-                    }
-                }
-
-                return result;
+                result = proxyHandler.doProxy(this.targetBeanName, invocation);
             } catch (Exception e) {
                 LOGGER.error("do proxy failed, bean: {}, handler: {}, error: {}", this.targetBeanName,
-                        this.seataProxyHandler.getClass().getName(), e.getMessage());
+                        proxyHandler.getClass().getName(), e.getMessage());
                 throw new FrameworkException(e, "do proxy failed: " + e.getMessage());
             }
+
+            // get the proxy result handler
+            SeataProxyResultHandler resultHandler = this.getResultHandler(method);
+            // handle the result of the proxy handler
+            try {
+                return resultHandler.handle(result, targetBeanDesc, invocation, proxyHandler);
+            } catch (Exception e) {
+                LOGGER.error("handle proxy result failed, bean: {}, resultHandler: {}, error: {}", this.targetBeanName,
+                        resultHandler.getClass().getName(), e.getMessage());
+                throw new FrameworkException(e, "handle proxy result failed: " + e.getMessage());
+            }
         } finally {
-            SeataProxyUtil.enableProxy();
+            SeataProxyInterceptorUtil.enableProxy();
         }
     }
 
@@ -123,19 +113,64 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
             return true;
         }
 
-        // get annotation and skip if {@code skip() == true}
-        SeataProxy annotation = method.getAnnotation(SeataProxy.class);
-        if (annotation != null && annotation.skip()) {
+        // get method desc and validate
+        SeataProxyMethodDesc methodDesc = targetBeanDesc.getMethodDesc(method);
+        if (methodDesc != null && methodDesc.isShouldSkip()) {
             return true;
         }
 
-        // check by the handler
-        if (this.seataProxyHandler.shouldSkip(this.targetBeanName, invocation)) {
+        // check by the validator
+        SeataProxyValidator validator = this.getValidator(method);
+        if (validator != null && validator.shouldSkip(this.targetBeanDesc, invocation)) {
             return true;
         }
 
         return false;
     }
+
+    //region get the implementation
+
+    @Nullable
+    public SeataProxyValidator getValidator(Method method) {
+        SeataProxyMethodDesc methodDesc = SeataProxyInterceptorUtil.getMethodDesc(targetBeanDesc.getMethodDescMap(), method);
+        if (methodDesc != null) {
+            SeataProxyValidator validator = methodDesc.getValidator();
+            if (validator != null) {
+                return validator;
+            }
+        }
+
+        return SeataProxyInterceptorUtil.getDefaultValidator();
+    }
+
+    @Nonnull
+    public SeataProxyHandler getHandler(Method method) {
+        SeataProxyMethodDesc methodDesc = SeataProxyInterceptorUtil.getMethodDesc(targetBeanDesc.getMethodDescMap(), method);
+        if (methodDesc != null) {
+            SeataProxyHandler handler = methodDesc.getHandler();
+            if (handler != null) {
+                return handler;
+            }
+        }
+
+        return SeataProxyInterceptorUtil.getDefaultHandler();
+    }
+
+    @Nonnull
+    public SeataProxyResultHandler getResultHandler(Method method) {
+        SeataProxyMethodDesc methodDesc = SeataProxyInterceptorUtil.getMethodDesc(targetBeanDesc.getMethodDescMap(), method);
+        if (methodDesc != null) {
+            SeataProxyResultHandler resultHandler = methodDesc.getResultHandler();
+            if (resultHandler != null) {
+                return resultHandler;
+            }
+        }
+
+        return SeataProxyInterceptorUtil.getDefaultResultHandler();
+    }
+
+    //endregion
+
 
     @Override
     public int getOrder() {

@@ -32,9 +32,61 @@ import java.lang.annotation.Target;
 public @interface SeataProxy {
 
     /**
-     * do not proxy when the {@code skip} is true
+     * do not proxy when the skip() is true.
+     * Synonym for {@link #skip()}.
+     *
+     * @return the boolean
+     */
+    boolean value() default false;
+
+    /**
+     * do not proxy when the skip() is true.
+     * Synonym for {@link #value()}.
      *
      * @return the boolean
      */
     boolean skip() default false;
+
+    /**
+     * the validator class
+     *
+     * @return the class
+     */
+    Class<? extends SeataProxyValidator> validatorClass() default SeataProxyValidator.class;
+
+    /**
+     * the validator bean name
+     *
+     * @return the bean name
+     */
+    String validatorBeanName() default "";
+
+
+    /**
+     * the handler class
+     *
+     * @return the class
+     */
+    Class<? extends SeataProxyHandler> handlerClass() default SeataProxyHandler.class;
+
+    /**
+     * the handler bean name
+     *
+     * @return the bean name
+     */
+    String handlerBeanName() default "";
+
+    /**
+     * the result handler class
+     *
+     * @return the class
+     */
+    Class<? extends SeataProxyResultHandler> resultHandlerClass() default SeataProxyResultHandler.class;
+
+    /**
+     * the result handler bean name
+     *
+     * @return the bean name
+     */
+    String resultHandlerBeanName() default "";
 }

@@ -13,23 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.proxy;
+package io.seata.spring.proxy.desc;
 
-import org.aopalliance.intercept.MethodInvocation;
+import java.lang.reflect.Method;
+import java.util.Map;
+
+import io.seata.spring.proxy.desc.model.TestSeataProxyBean;
+import org.junit.jupiter.api.Test;
 
 /**
- * The interface SeataProxyHandler
- *
  * @author wang.liang
- * @see SeataProxyInterceptor
  */
-public interface SeataProxyHandler {
+class SeataProxyParserTest {
 
-    /**
-     * do proxy the invocation
-     *
-     * @param targetBeanName the target bean name
-     * @param invocation     the invocation of the bean
-     */
-    Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
+
+    @Test
+    void testParserMethods() {
+        Map<Method, SeataProxyMethodDesc> methodDescMap = SeataProxyParser.parserMethodDescMap(TestSeataProxyBean.class);
+        System.out.println(methodDescMap.size());
+    }
+
 }

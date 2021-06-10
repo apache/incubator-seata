@@ -15,6 +15,7 @@
  */
 package io.seata.common.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,6 +63,11 @@ public final class ReflectionUtil {
      * The cache CLASS_FIELDS_CACHE
      */
     private static final Map<Class<?>, Field[]> CLASS_FIELDS_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * The cache SINGLETON_CACHE
+     */
+    private static final Map<Class<?>, Object> SINGLETON_CACHE = new ConcurrentHashMap<>();
 
     //endregion
 
@@ -567,6 +573,153 @@ public final class ReflectionUtil {
     public static Object invokeStaticMethod(Class<?> targetClass, String staticMethodName)
             throws IllegalArgumentException, NoSuchMethodException, SecurityException, InvocationTargetException {
         return invokeStaticMethod(targetClass, staticMethodName, EMPTY_CLASS_ARRAY, EMPTY_ARGS);
+    }
+
+    /**
+     * Equals method
+     *
+     * @param m1 the method 1
+     * @param m2 the method 2
+     * @return the boolean
+     */
+    public static boolean equalsMethod(Method m1, Method m2) {
+        if (m1.equals(m2)) {
+            return true;
+        }
+
+        if (!m1.getName().equals(m2.getName()) || m1.getParameterCount() != m2.getParameterCount()) {
+            return false;
+        }
+
+        for (int i = 0; i < m1.getParameterCount(); ++i) {
+            if (!m1.getParameters()[i].equals(m2.getParameterTypes()[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Contains method
+     *
+     * @param methods the methods
+     * @param method  the method
+     * @return the boolean
+     */
+    public static boolean containsMethod(Collection<Method> methods, Method method) {
+        if (methods.contains(method)) {
+            return true;
+        }
+
+        for (Method m : methods) {
+            if (equalsMethod(m, method)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Contains method
+     *
+     * @param methodMap the method map
+     * @param method    the method
+     * @return the boolean
+     */
+    public static boolean containsMethod(Map<Method, ?> methodMap, Method method) {
+        if (methodMap.isEmpty()) {
+            return false;
+        }
+
+        return containsMethod(methodMap.keySet(), method);
+    }
+
+    /**
+     * Has method
+     *
+     * @param clazz  the class
+     * @param method the method
+     * @return the boolean
+     */
+    public static boolean hasMethod(Class<?> clazz, Method method) {
+        if (method.getDeclaringClass() == clazz) {
+            return true;
+        }
+
+        try {
+            clazz.getMethod(method.getName(), method.getParameterTypes());
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    //endregion
+
+
+    //region Annotation
+
+    /**
+     * get annotation from the method or super class method
+     *
+     * @param method          the method
+     * @param annotationClass the annotation class
+     * @param <T>             the annotation type
+     * @return the annotation
+     */
+    public static <T extends Annotation> T getAnnotation(final Method method, final Class<T> annotationClass) {
+        T annotation = method.getAnnotation(annotationClass);
+        if (annotation == null) {
+            Class<?> superClass = method.getDeclaringClass().getSuperclass();
+            Method m;
+            while (superClass != null && superClass != Object.class) {
+                try {
+                    m = superClass.getMethod(method.getName(), method.getParameterTypes());
+                    annotation = m.getAnnotation(annotationClass);
+                    if (annotation != null) {
+                        return annotation;
+                    }
+                } catch (NoSuchMethodException ignore) {
+                    // do nothing
+                }
+                superClass = superClass.getSuperclass();
+            }
+        }
+        return annotation;
+    }
+
+    //endregion
+
+
+    //region Instance
+
+
+    /**
+     * get singleton for the class
+     *
+     * @param clazz the clazz
+     * @param <T>   the type
+     * @return the singleton
+     * @throws IllegalArgumentException
+     */
+    public static <T> T getSingleton(Class<T> clazz) {
+        if (clazz == null) {
+            throw new IllegalArgumentException("clazz must be not null");
+        }
+
+        if (clazz.isInterface()) {
+            throw new IllegalArgumentException("clazz must be not an interface: " + clazz);
+        }
+
+        return (T)CollectionUtils.computeIfAbsent(SINGLETON_CACHE, clazz, key -> {
+            try {
+                return clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new IllegalArgumentException("new instance failed, class: " + clazz, e);
+            }
+        });
     }
 
     //endregion

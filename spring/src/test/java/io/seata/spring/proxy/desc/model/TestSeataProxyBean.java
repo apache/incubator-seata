@@ -13,23 +13,35 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.proxy;
+package io.seata.spring.proxy.desc.model;
 
-import org.aopalliance.intercept.MethodInvocation;
+import io.seata.spring.proxy.SeataProxy;
 
-/**
- * The interface SeataProxyHandler
- *
- * @author wang.liang
- * @see SeataProxyInterceptor
- */
-public interface SeataProxyHandler {
+public class TestSeataProxyBean extends TestSeataProxySuperBean {
 
-    /**
-     * do proxy the invocation
-     *
-     * @param targetBeanName the target bean name
-     * @param invocation     the invocation of the bean
-     */
-    Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
+    public static void testStatic() {
+    }
+
+    @Override
+    public void testHasNoAnnotation() {
+    }
+
+    @Override
+    public void testHasAnnotation() {
+    }
+
+    @Override
+    @SeataProxy(skip = false)
+    public void testOverrideAnnotation1() {
+    }
+
+    @Override
+    @SeataProxy(skip = true)
+    public void testOverrideAnnotation2() {
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

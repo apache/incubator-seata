@@ -15,33 +15,20 @@
  */
 package io.seata.spring.proxy;
 
-import org.aopalliance.intercept.MethodInvocation;
+import io.seata.spring.proxy.resulthandler.impl.DefaultSeataProxyResultHandlerImpl;
+import io.seata.spring.tcc.TccSeataProxyHandler;
 
 /**
- * The Seata Proxy Util
- *
  * @author wang.liang
  */
-public final class SeataProxyUtil {
+public interface SeataProxyConstants {
 
-    private SeataProxyUtil() {
-    }
+    String DEFAULT_VALIDATOR_BEAN_NAME = "defaultProxyValidator";
+    Class<? extends SeataProxyValidator> DEFAULT_VALIDATOR_CLASS = null;
 
-    private static final ThreadLocal<Boolean> NEED_PROXY = new ThreadLocal<>();
+    String DEFAULT_HANDLER_BEAN_NAME = "defaultProxyHandler";
+    Class<? extends SeataProxyHandler> DEFAULT_HANDLER_CLASS = TccSeataProxyHandler.class;
 
-    public static void disableProxy() {
-        NEED_PROXY.set(false);
-    }
-
-    public static void enableProxy() {
-        NEED_PROXY.remove();
-    }
-
-    /**
-     * @return the boolean
-     * @see SeataProxyInterceptor#invoke(MethodInvocation)
-     */
-    public static boolean isNeedProxy() {
-        return !Boolean.FALSE.equals(NEED_PROXY.get());
-    }
+    String DEFAULT_RESULT_HANDLER_BEAN_NAME = "defaultResultProxyHandler";
+    Class<? extends SeataProxyResultHandler> DEFAULT_RESULT_HANDLER_CLASS = DefaultSeataProxyResultHandlerImpl.class;
 }

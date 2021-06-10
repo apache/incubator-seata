@@ -15,21 +15,29 @@
  */
 package io.seata.spring.proxy;
 
+import io.seata.spring.proxy.desc.SeataProxyBeanDesc;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * The interface SeataProxyHandler
+ * The interface SeataProxyResultHandler
  *
  * @author wang.liang
  * @see SeataProxyInterceptor
+ * @see SeataProxyHandler
+ * @see io.seata.spring.proxy.resulthandler.impl.DefaultSeataProxyResultHandlerImpl
  */
-public interface SeataProxyHandler {
+public interface SeataProxyResultHandler {
 
     /**
-     * do proxy the invocation
+     * handle the result of the proxy handler
      *
-     * @param targetBeanName the target bean name
-     * @param invocation     the invocation of the bean
+     * @param proxyHandlerResult the result of the proxy handler
+     * @param beanDesc           the bean desc
+     * @param invocation         the invocation
+     * @param proxyHandler       the proxy handler
+     * @return the final result
+     * @throws Exception the Exception
      */
-    Object doProxy(String targetBeanName, MethodInvocation invocation) throws Exception;
+    Object handle(Object proxyHandlerResult, SeataProxyBeanDesc beanDesc, MethodInvocation invocation,
+                  SeataProxyHandler proxyHandler) throws Exception;
 }
