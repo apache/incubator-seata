@@ -100,7 +100,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -131,7 +131,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
                     row.add(new SqlSequenceExpr(sequence, function));
                 } else {
                     if (primaryKeyIndex.contains(i)) {
-                        throwError(expr);
+                        wrapSQLParsingException(expr);
                     }
                     row.add(NotPlaceholderExpr.get());
                 }

@@ -75,7 +75,7 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
                     list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -92,7 +92,7 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;

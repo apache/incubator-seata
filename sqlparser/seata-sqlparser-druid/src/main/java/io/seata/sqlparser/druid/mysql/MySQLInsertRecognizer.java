@@ -99,7 +99,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -125,7 +125,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
                     row.add(SqlMethodExpr.get());
                 } else {
                     if (primaryKeyIndex.contains(i)) {
-                        throwError(expr);
+                        wrapSQLParsingException(expr);
                     }
                     row.add(NotPlaceholderExpr.get());
                 }
@@ -161,7 +161,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;

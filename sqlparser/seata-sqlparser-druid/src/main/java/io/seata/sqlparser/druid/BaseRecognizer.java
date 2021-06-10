@@ -72,7 +72,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         }
     }
 
-    protected void throwError(SQLExpr expr) {
+    protected void wrapSQLParsingException(SQLExpr expr) {
         String errorMsg;
         try {
             errorMsg =

@@ -77,7 +77,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
                     list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -94,7 +94,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;

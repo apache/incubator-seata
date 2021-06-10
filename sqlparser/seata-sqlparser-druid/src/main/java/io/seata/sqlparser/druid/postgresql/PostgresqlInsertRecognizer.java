@@ -101,7 +101,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr) expr).getName());
             } else {
-                throwError(expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -141,7 +141,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                     row.add(SqlDefaultExpr.get());
                 } else {
                     if (primaryKeyIndex.contains(i)) {
-                        throwError(expr);
+                        wrapSQLParsingException(expr);
                     }
                     row.add(NotPlaceholderExpr.get());
                 }
