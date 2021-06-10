@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import io.seata.spring.proxy.desc.model.TestSeataProxyBean;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -29,8 +30,8 @@ class SeataProxyParserTest {
 
     @Test
     void testParserMethods() {
-        Map<Method, SeataProxyMethodDesc> methodDescMap = SeataProxyParser.parserMethodDescMap(TestSeataProxyBean.class);
-        System.out.println(methodDescMap.size());
+        Map<Method, SeataProxyMethodDesc> methodDescMap = SeataProxyParser.parserMethodDescMap(TestSeataProxyBean.class, null);
+        Assertions.assertEquals(5, methodDescMap.size());
     }
 
 }

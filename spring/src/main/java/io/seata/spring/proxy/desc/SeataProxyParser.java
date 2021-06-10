@@ -19,7 +19,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.seata.common.util.ReflectionUtil;
 import io.seata.spring.proxy.SeataProxy;
@@ -31,6 +33,7 @@ import io.seata.spring.proxy.SeataProxyBeanRegister;
  * @author wang.liang
  * @see SeataProxyBeanDesc
  * @see SeataProxyMethodDesc
+ * @see SeataProxyBeanRegister
  */
 public final class SeataProxyParser {
 
@@ -47,17 +50,24 @@ public final class SeataProxyParser {
      * @return the proxy bean desc
      */
     public static SeataProxyBeanDesc parserBeanDesc(SeataProxyBeanRegister totalRegister, @Nonnull Object bean, String beanName) {
-        SeataProxyBeanDesc registerBeanDesc = totalRegister.getBeanClassBeanDescMap().get(bean.getClass());
-        if (registerBeanDesc != null) {
-            return registerBeanDesc;
+        // get by bean name
+        SeataProxyBeanDesc registerBeanDesc = totalRegister.getBeanNameBeanDescMap().get(beanName);
+        if (registerBeanDesc == null) {
+            // get by bean class
+            registerBeanDesc = totalRegister.getBeanClassBeanDescMap().get(bean.getClass());
         }
 
-        registerBeanDesc = totalRegister.getBeanNameBeanDescMap().get(beanName);
-        if (registerBeanDesc != null) {
-            return registerBeanDesc;
+        if (registerBeanDesc == null) {
+            // create new
+            registerBeanDesc = new SeataProxyBeanDesc(beanName, bean.getClass());
         }
 
-        return new SeataProxyBeanDesc(bean, beanName);
+        // reset bean name and bean
+        registerBeanDesc.setTargetBeanName(beanName);
+        registerBeanDesc.setTargetBean(bean);
+
+        // return
+        return registerBeanDesc;
     }
 
     /**
@@ -66,10 +76,11 @@ public final class SeataProxyParser {
      * @param targetBeanClass the target bean class
      * @return the impl desc
      */
+    @Nullable
     public static SeataProxyImplementationDesc parserImplDesc(Class<?> targetBeanClass) {
         SeataProxy annotation = targetBeanClass.getAnnotation(SeataProxy.class);
         if (annotation == null) {
-            throw new IllegalArgumentException("the targetBean has no annotation `@SeataProxy`");
+            return null;
         }
         return new SeataProxyImplementationDesc(annotation);
     }
@@ -78,9 +89,10 @@ public final class SeataProxyParser {
      * Parser method desc map of the target bean class
      *
      * @param targetBeanClass the target bean class
+     * @param methodMatcher   the method matcher
      * @return the method desc map
      */
-    public static Map<Method, SeataProxyMethodDesc> parserMethodDescMap(Class<?> targetBeanClass) {
+    public static Map<Method, SeataProxyMethodDesc> parserMethodDescMap(Class<?> targetBeanClass, Predicate<Method> methodMatcher) {
         Map<Method, SeataProxyMethodDesc> methodDescMap = new HashMap<>();
 
         SeataProxyMethodDesc methodDesc;
@@ -101,8 +113,13 @@ public final class SeataProxyParser {
                 continue;
             }
 
+            // ignore the method override in the child class
             if (ReflectionUtil.containsMethod(methodDescMap, method)) {
-                // ignore the method override in the child class
+                continue;
+            }
+
+            // ignore the method is not matched
+            if (methodMatcher != null && !methodMatcher.test(method)) {
                 continue;
             }
 

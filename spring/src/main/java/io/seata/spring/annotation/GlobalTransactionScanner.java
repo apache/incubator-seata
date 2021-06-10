@@ -339,6 +339,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (isSeataAutoProxy) {
                     // paser the bean desc
                     SeataProxyBeanDesc beanDesc = SeataProxyParser.parserBeanDesc(totalProxyBeanRegister, bean, beanName);
+                    if (beanDesc.isAllMethodsSkip()) {
+                        LOGGER.warn("the proxy bean '{}' is skip, because all of the methods is skip", beanName);
+                        return bean;
+                    }
                     // create an interceptor for the bean
                     this.interceptor = new SeataProxyInterceptor(beanDesc, seataProxyConfig.getProxyInterceptorOrder());
                 }

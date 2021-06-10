@@ -17,7 +17,7 @@ package io.seata.spring.proxy.desc;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import javax.annotation.Nonnull;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
@@ -36,36 +36,39 @@ import io.seata.spring.proxy.util.SeataProxyInterceptorUtil;
  */
 public class SeataProxyBeanDesc {
 
-    private final Object targetBean;
-    private final String targetBeanName;
+    private Object targetBean;
+
+    private String targetBeanName;
 
     private final SeataProxyImplementationDesc implDesc;
 
     private final Map<Method, SeataProxyMethodDesc> methodDescMap;
 
 
-    public SeataProxyBeanDesc(Object targetBean, String targetBeanName, SeataProxyImplementationDesc implDesc, Map<Method, SeataProxyMethodDesc> methodDescMap) {
-        this.targetBean = targetBean;
+    public SeataProxyBeanDesc(String targetBeanName, Class<?> targetBeanClass, Predicate<Method> methodMatcher) {
         this.targetBeanName = targetBeanName;
-        this.implDesc = implDesc != null ? implDesc : SeataProxyParser.parserImplDesc(targetBean.getClass());
-
-        this.methodDescMap = SeataProxyParser.parserMethodDescMap(targetBean.getClass());
-        if (CollectionUtils.isNotEmpty(methodDescMap)) {
-            this.methodDescMap.putAll(methodDescMap);
-        }
+        this.implDesc = SeataProxyParser.parserImplDesc(targetBeanClass);
+        this.methodDescMap = SeataProxyParser.parserMethodDescMap(targetBeanClass, methodMatcher);
     }
 
-    public SeataProxyBeanDesc(@Nonnull Object targetBean, String targetBeanName) {
-        this(targetBean, targetBeanName, null, null);
+    public SeataProxyBeanDesc(String targetBeanName, Class<?> targetBeanClass) {
+        this(targetBeanName, targetBeanClass, null);
     }
 
+    public Object getTargetBean() {
+        return targetBean;
+    }
+
+    public void setTargetBean(Object targetBean) {
+        this.targetBean = targetBean;
+    }
 
     public String getTargetBeanName() {
         return targetBeanName;
     }
 
-    public Object getTargetBean() {
-        return this.targetBean;
+    public void setTargetBeanName(String targetBeanName) {
+        this.targetBeanName = targetBeanName;
     }
 
     @Nullable
@@ -83,6 +86,20 @@ public class SeataProxyBeanDesc {
 
     public void addMethodDesc(Method method, SeataProxyMethodDesc methodDesc) {
         this.methodDescMap.put(method, methodDesc);
+    }
+
+    public boolean isAllMethodsSkip() {
+        if (CollectionUtils.isEmpty(methodDescMap)) {
+            return true;
+        }
+
+        for (SeataProxyMethodDesc methodDesc : methodDescMap.values()) {
+            if (methodDesc != null && !methodDesc.isShouldSkip()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Nullable

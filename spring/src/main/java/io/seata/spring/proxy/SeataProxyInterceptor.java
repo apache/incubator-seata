@@ -115,7 +115,7 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
 
         // get method desc and validate
         SeataProxyMethodDesc methodDesc = targetBeanDesc.getMethodDesc(method);
-        if (methodDesc != null && methodDesc.isShouldSkip()) {
+        if (methodDesc == null || methodDesc.isShouldSkip()) {
             return true;
         }
 
