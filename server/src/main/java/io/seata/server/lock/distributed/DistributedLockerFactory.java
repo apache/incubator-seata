@@ -31,9 +31,9 @@ public class DistributedLockerFactory {
     private static final Map<String, DistributedLocker> DISTRIBUTED_LOCKER_MAP = new ConcurrentHashMap<>();
 
     /**
-     * Get the distributed locker by dbType
-     *dis
-     * @param lockerType the db type
+     * Get the distributed locker by lockerType
+     *
+     * @param lockerType the locker type
      * @return the distributed locker
      */
     public static DistributedLocker getDistributedLocker(String lockerType) {
