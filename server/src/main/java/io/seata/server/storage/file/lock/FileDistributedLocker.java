@@ -21,9 +21,8 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 
 /**
- * @description: The file distributed locker
- * @author: zhongxiang.wang
- * @date: 2021-05-25 22:23
+ * @description The file distributed locker
+ * @author  zhongxiang.wang
  */
 @LoadLevel(name = "file", scope = Scope.SINGLETON)
 public class FileDistributedLocker implements DistributedLocker {

@@ -27,9 +27,8 @@ import redis.clients.jedis.Transaction;
 import redis.clients.jedis.params.SetParams;
 
 /**
- * @description: Redis distributed lock
- * @author: zhongxiang.wang
- * @date: 2021-03-02 11:34
+ * @description Redis distributed lock
+ * @author  zhongxiang.wang
  */
 @LoadLevel(name = "redis", scope = Scope.SINGLETON)
 public class RedisDistributedLocker implements DistributedLocker {

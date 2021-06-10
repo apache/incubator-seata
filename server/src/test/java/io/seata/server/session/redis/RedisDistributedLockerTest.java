@@ -14,7 +14,7 @@ import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.redis.JedisPooledFactory;
 
 /**
- * @description: redis distributed lock test
+ * @description redis distributed lock test
  *
  * ！！！！！Please use a true redis server to run the following test case ！！！！！
  * The redis mock framework(jedis-mock) can not support set(lockKey, lockValue, SetParams.setParams().nx())，the nx() will not effective.
@@ -22,8 +22,7 @@ import io.seata.server.storage.redis.JedisPooledFactory;
  * We need a true redis server to test!
  * ！！！！！Please use a true redis server to run the following test case ！！！！！
  *
- * @author: zhongxiang.wang
- * @date: 2021-04-28 21:58
+ * @author  zhongxiang.wang
  */
 public class RedisDistributedLockerTest {
 

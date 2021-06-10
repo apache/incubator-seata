@@ -109,8 +109,8 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
-            String dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(dbType);
+            String lockerType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
         } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
