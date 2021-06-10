@@ -78,7 +78,7 @@ public final class StackTraceLogger {
         if (CollectionUtils.isEmpty(args)) {
             return new Object[]{cause};
         } else {
-            Object[] newArgs = Arrays.copyOf(args, args.length + 1);
+            Object[] newArgs = Arrays.copyOf(args, args.length + 1, Object[].class);
             newArgs[args.length] = cause;
             return newArgs;
         }
