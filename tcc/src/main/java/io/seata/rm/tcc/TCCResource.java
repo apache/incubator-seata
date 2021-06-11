@@ -24,6 +24,7 @@ import io.seata.core.model.Resource;
  * The type Tcc resource.
  *
  * @author zhangsen
+ * @author Yujianfei
  */
 public class TCCResource implements Resource {
 
@@ -44,6 +45,8 @@ public class TCCResource implements Resource {
     private String rollbackMethodName;
 
     private Method rollbackMethod;
+
+    private Class<?>[] argsClasses;
 
     @Override
     public String getResourceGroupId() {
@@ -213,6 +216,22 @@ public class TCCResource implements Resource {
         this.rollbackMethodName = rollbackMethodName;
     }
 
+    /**
+     * get args array
+     * @return class array
+     */
+    public Class<?>[] getArgsClasses() {
+        return argsClasses;
+    }
+
+    /**
+     * set args array
+     * @param argsClasses class array
+     */
+    public void setArgsClasses(Class<?>[] argsClasses) {
+        this.argsClasses = argsClasses;
+    }
+
     @Override
     public int hashCode() {
         return actionName.hashCode();
@@ -225,4 +244,5 @@ public class TCCResource implements Resource {
         }
         return this.actionName.equals(((TCCResource)obj).actionName);
     }
+
 }

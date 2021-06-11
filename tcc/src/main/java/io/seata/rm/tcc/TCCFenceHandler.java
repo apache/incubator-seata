@@ -39,6 +39,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * TCC Fence Handler(idempotent, non_rollback, suspend)
  *
  * @author kaka2code
+ * @author Yujianfei
  */
 public class TCCFenceHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceHandler.class);
@@ -93,7 +94,8 @@ public class TCCFenceHandler {
      * @param branchId              the branch transaction id
      * @return the boolean
      */
-    public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
+    public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
+                                      String xid, Long branchId, Object[] args) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
@@ -112,7 +114,7 @@ public class TCCFenceHandler {
                     }
                     return false;
                 }
-                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status);
+                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new FrameworkException(t);
@@ -130,7 +132,8 @@ public class TCCFenceHandler {
      * @param branchId              the branch transaction id
      * @return the boolean
      */
-    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
+    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
+                                        String xid, Long branchId, Object[] args) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
@@ -156,7 +159,7 @@ public class TCCFenceHandler {
                         return false;
                     }
                 }
-                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status);
+                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new FrameworkException(t);
@@ -192,11 +195,15 @@ public class TCCFenceHandler {
      * @param status                the tcc fence status
      * @return the boolean
      */
-    private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId, int status, TransactionStatus transactionStatus) throws Exception {
+    private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean,
+                                                             BusinessActionContext businessActionContext, String xid,
+                                                             Long branchId, int status,
+                                                             TransactionStatus transactionStatus,
+                                                             Object[] args) throws Exception {
         boolean result = TCC_FENCE_DAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
         if (result) {
             // invoke two phase method
-            Object ret = method.invoke(targetTCCBean, businessActionContext);
+            Object ret = method.invoke(targetTCCBean, args);
             if (null != ret) {
                 if (ret instanceof TwoPhaseResult) {
                     result = ((TwoPhaseResult) ret).isSuccess();

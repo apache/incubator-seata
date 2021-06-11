@@ -15,6 +15,7 @@
  */
 package io.seata.rm.tcc;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
@@ -33,11 +34,13 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
  * TCC resource manager
  *
  * @author zhangsen
+ * @author Yujianfei
  */
 public class TCCResourceManager extends AbstractResourceManager {
 
@@ -96,17 +99,18 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
+            Object[] args = this.getTwoPhaseArgs(commitMethod, tccResource, businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
-                    result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId);
+                    result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId, args);
                 } catch (FrameworkException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
             } else {
-                ret = commitMethod.invoke(targetTCCBean, businessActionContext);
+                ret = commitMethod.invoke(targetTCCBean, args);
                 if (ret != null) {
                     if (ret instanceof TwoPhaseResult) {
                         result = ((TwoPhaseResult)ret).isSuccess();
@@ -153,17 +157,18 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
+            Object[] args = this.getTwoPhaseArgs(rollbackMethod, tccResource, businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
-                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId);
+                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, args);
                 } catch (FrameworkException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
             } else {
-                ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
+                ret = rollbackMethod.invoke(targetTCCBean, args);
                 if (ret != null) {
                     if (ret instanceof TwoPhaseResult) {
                         result = ((TwoPhaseResult)ret).isSuccess();
@@ -194,7 +199,63 @@ public class TCCResourceManager extends AbstractResourceManager {
      */
     protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId,
                                                              String applicationData) {
-        //transfer tcc applicationData to actionContextMap
+        Map actionContextMap = this.getActionContextMap(applicationData);
+        //instance the action context
+        BusinessActionContext businessActionContext = new BusinessActionContext(
+            xid, String.valueOf(branchId), actionContextMap);
+        businessActionContext.setActionName(resourceId);
+        return businessActionContext;
+    }
+
+    private Object[] getTwoPhaseArgs(Method method, TCCResource tccResource,
+                                        BusinessActionContext businessActionContext) {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        // get parameter's key
+        String[] keys = new String[parameterAnnotations.length];
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (int j = 0; j < parameterAnnotations[i].length; j++) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
+                    BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
+                    String key = param.paramName();
+                    keys[i] = key;
+                }
+            }
+        }
+        Class<?>[] args = tccResource.getArgsClasses();
+        Object[] objects = new Object[args.length];
+        if (keys.length == 0) {
+            objects[0] = businessActionContext;
+        } else {
+            if (keys.length == args.length) {
+                for (int i = 0; i < args.length; i++) {
+                    objects[i] = businessActionContext.getActionContext(keys[i], args[i]);
+                }
+            } else {
+                for (int i = 0; i < args.length; i++) {
+                    if (args[i].equals(BusinessActionContext.class)) {
+                        objects[i] = businessActionContext;
+                        break;
+                    }
+                }
+                for (String key : keys) {
+                    for (int j = 0; j < objects.length; j++) {
+                        if (objects[j] == null) {
+                            objects[j] = businessActionContext.getActionContext(key, args[j]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return objects;
+    }
+
+    /**
+     * transfer tcc applicationData to actionContextMap
+     * @param applicationData applicationData
+     * @return Map
+     */
+    private Map getActionContextMap(String applicationData) {
         Map actionContextMap = null;
         if (StringUtils.isNotBlank(applicationData)) {
             Map tccContext = JSON.parseObject(applicationData, Map.class);
@@ -203,12 +264,7 @@ public class TCCResourceManager extends AbstractResourceManager {
         if (actionContextMap == null) {
             actionContextMap = new HashMap<>(2);
         }
-
-        //instance the action context
-        BusinessActionContext businessActionContext = new BusinessActionContext(
-            xid, String.valueOf(branchId), actionContextMap);
-        businessActionContext.setActionName(resourceId);
-        return businessActionContext;
+        return actionContextMap;
     }
 
     @Override

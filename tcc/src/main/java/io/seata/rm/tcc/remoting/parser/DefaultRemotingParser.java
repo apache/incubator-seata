@@ -26,7 +26,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
-import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
@@ -35,6 +34,7 @@ import io.seata.rm.tcc.remoting.RemotingParser;
  * parsing remoting bean
  *
  * @author zhangsen
+ * @author Yujianfei
  */
 public class DefaultRemotingParser {
 
@@ -181,10 +181,12 @@ public class DefaultRemotingParser {
                         tccResource.setPrepareMethod(m);
                         tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
                         tccResource.setCommitMethod(interfaceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
-                                BusinessActionContext.class));
+                                twoPhaseBusinessAction.argsClasses()));
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
                         tccResource.setRollbackMethod(interfaceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
-                                BusinessActionContext.class));
+                                twoPhaseBusinessAction.argsClasses()));
+                        // set argsClasses
+                        tccResource.setArgsClasses(twoPhaseBusinessAction.argsClasses());
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
                     }
