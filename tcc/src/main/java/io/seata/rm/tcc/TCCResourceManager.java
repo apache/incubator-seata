@@ -199,7 +199,15 @@ public class TCCResourceManager extends AbstractResourceManager {
      */
     protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId,
                                                              String applicationData) {
-        Map actionContextMap = this.getActionContextMap(applicationData);
+        Map actionContextMap = null;
+        if (StringUtils.isNotBlank(applicationData)) {
+            Map tccContext = JSON.parseObject(applicationData, Map.class);
+            actionContextMap = (Map)tccContext.get(Constants.TCC_ACTION_CONTEXT);
+        }
+        if (actionContextMap == null) {
+            actionContextMap = new HashMap<>(2);
+        }
+
         //instance the action context
         BusinessActionContext businessActionContext = new BusinessActionContext(
             xid, String.valueOf(branchId), actionContextMap);
@@ -248,23 +256,6 @@ public class TCCResourceManager extends AbstractResourceManager {
             }
         }
         return objects;
-    }
-
-    /**
-     * transfer tcc applicationData to actionContextMap
-     * @param applicationData applicationData
-     * @return Map
-     */
-    private Map getActionContextMap(String applicationData) {
-        Map actionContextMap = null;
-        if (StringUtils.isNotBlank(applicationData)) {
-            Map tccContext = JSON.parseObject(applicationData, Map.class);
-            actionContextMap = (Map)tccContext.get(Constants.TCC_ACTION_CONTEXT);
-        }
-        if (actionContextMap == null) {
-            actionContextMap = new HashMap<>(2);
-        }
-        return actionContextMap;
     }
 
     @Override
