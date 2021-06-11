@@ -144,7 +144,7 @@ seata:
       clean-mode: hour
       clean-period: 1
   proxy:
-    enabled: true
+    enabled: false
     target-bean-classes: targetBeanClass1,targetBeanClass2
     target-bean-names: targetBeanName1,targetBeanName2
     proxy-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000

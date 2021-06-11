@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Lazy;
  * @see SeataProxyHandler
  */
 @Configuration
-@ConditionalOnExpression("${seata.enabled:true} && ${seata.proxy.enabled:true}")
+@ConditionalOnExpression("${seata.enabled:true} && ${seata.proxy.enabled:false}")
 public class SeataProxyAutoConfiguration {
 
     @Bean
