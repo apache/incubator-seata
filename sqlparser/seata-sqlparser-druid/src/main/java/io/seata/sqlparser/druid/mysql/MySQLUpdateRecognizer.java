@@ -15,6 +15,8 @@
  */
 package io.seata.sqlparser.druid.mysql;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -27,15 +29,10 @@ import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
-import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type My sql update recognizer.
@@ -80,7 +77,7 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
                     list.add(((SQLPropertyExpr)expr).getOwnernName() + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -97,7 +94,7 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;

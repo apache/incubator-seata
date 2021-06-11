@@ -98,7 +98,7 @@
         <httpclient.version>4.5.8</httpclient.version>
         <httpcore.version>4.4.11</httpcore.version>
         <antlr4.version>4.8</antlr4.version>
-        <druid.version>1.1.23</druid.version>
+        <druid.version>1.2.6</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
         <mysql.client.version>5.1.35</mysql.client.version>
