@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
@@ -634,10 +633,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     protected void initSeataProxy(SeataProxyConfig config, List<SeataProxyBeanRegister> registers) {
         if (config != null) {
             this.seataProxyConfig = config;
-
-            // beans info from config
-            this.addProxyBeanClasses(ReflectionUtil.classNamesToClassSet(config.getTargetBeanClasses()));
-            this.addProxyBeanNames(config.getTargetBeanNames());
 
             if (CollectionUtils.isNotEmpty(registers)) {
                 // beans from registers

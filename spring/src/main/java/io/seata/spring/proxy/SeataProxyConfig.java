@@ -15,8 +15,6 @@
  */
 package io.seata.spring.proxy;
 
-import java.util.Set;
-
 import org.springframework.core.Ordered;
 
 /**
@@ -28,38 +26,12 @@ import org.springframework.core.Ordered;
 public class SeataProxyConfig {
 
     /**
-     * target bean classes
-     */
-    private Set<String> targetBeanClasses;
-
-    /**
-     * target bean names
-     */
-    private Set<String> targetBeanNames;
-
-    /**
      * proxy interceptor order
      *
      * @see SeataProxyInterceptor#orderNum
      */
     private int proxyInterceptorOrder = Ordered.HIGHEST_PRECEDENCE + 1000;
 
-
-    public Set<String> getTargetBeanClasses() {
-        return targetBeanClasses;
-    }
-
-    public void setTargetBeanClasses(Set<String> targetBeanClasses) {
-        this.targetBeanClasses = targetBeanClasses;
-    }
-
-    public Set<String> getTargetBeanNames() {
-        return targetBeanNames;
-    }
-
-    public void setTargetBeanNames(Set<String> targetBeanNames) {
-        this.targetBeanNames = targetBeanNames;
-    }
 
     public int getProxyInterceptorOrder() {
         return proxyInterceptorOrder;
