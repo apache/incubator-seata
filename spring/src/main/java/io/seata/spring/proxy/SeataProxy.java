@@ -47,6 +47,17 @@ public @interface SeataProxy {
      */
     boolean skip() default false;
 
+
+    /**
+     * scan the methods which annotated by {@link SeataProxy}
+     *
+     * @return the boolean
+     */
+    boolean onlyScanAnnotatedMethods() default false;
+
+
+    //region Implementation class related properties
+
     /**
      * the validator class
      *
@@ -89,4 +100,6 @@ public @interface SeataProxy {
      * @return the bean name
      */
     String resultHandlerBeanName() default "";
+
+    //endregion
 }

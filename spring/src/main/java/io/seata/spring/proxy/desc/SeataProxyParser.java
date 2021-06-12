@@ -95,6 +95,12 @@ public final class SeataProxyParser {
     public static Map<Method, SeataProxyMethodDesc> parserMethodDescMap(Class<?> targetBeanClass, Predicate<Method> methodFilter) {
         Map<Method, SeataProxyMethodDesc> methodDescMap = new HashMap<>();
 
+        boolean onlyScanAnnotatedMethods = false;
+        SeataProxy seataProxyAnnoOnClass = targetBeanClass.getAnnotation(SeataProxy.class);
+        if (seataProxyAnnoOnClass != null) {
+            onlyScanAnnotatedMethods = seataProxyAnnoOnClass.onlyScanAnnotatedMethods();
+        }
+
         SeataProxyMethodDesc methodDesc;
         Method[] methods = targetBeanClass.getMethods();
         for (Method method : methods) {
@@ -125,6 +131,10 @@ public final class SeataProxyParser {
 
             // create the methodDesc and put to the map
             methodDesc = new SeataProxyMethodDesc(method);
+            if (onlyScanAnnotatedMethods && methodDesc.getImplDesc() == null) {
+                continue;
+            }
+
             methodDescMap.put(method, methodDesc);
         }
 
