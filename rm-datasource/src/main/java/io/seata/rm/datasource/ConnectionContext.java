@@ -258,14 +258,14 @@ public class ConnectionContext {
      * @param autoCommitChanged the boolean
      */
     public void setAutoCommitChanged(boolean autoCommitChanged) {
-        this.applicationData.put(AUTO_COMMIT,autoCommitChanged);
+        this.applicationData.put(AUTO_COMMIT, autoCommitChanged);
         this.autoCommitChanged = autoCommitChanged;
     }
 
     /**
      * Gets applicationData.
      *
-     * @return the branch id
+     * @return the application data
      */
     public Map<String, Object> getApplicationData() {
         return applicationData;

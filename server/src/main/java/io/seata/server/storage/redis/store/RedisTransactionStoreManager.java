@@ -417,7 +417,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             List<Object> globals = pipeline.syncAndReturnAll();
             if (CollectionUtils.isEmpty(globals)) {
-                return null;
+                return Collections.EMPTY_LIST;
             }
             List<String> statusKeys = new ArrayList<>();
             for (int i = 0; i < statuses.length; i++) {

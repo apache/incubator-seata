@@ -381,6 +381,7 @@ public class LockStoreDataBaseDAO implements LockStore {
      *
      * @param conn    the conn
      * @param lockDOs the lock do
+     * @param failFast the fail fast
      * @return the boolean
      */
     protected Set<String> getLockOwners(Connection conn, List<LockDO> lockDOs, boolean failFast) {
