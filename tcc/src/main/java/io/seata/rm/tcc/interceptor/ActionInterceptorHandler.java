@@ -15,6 +15,13 @@
  */
 package io.seata.rm.tcc.interceptor;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
@@ -23,6 +30,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
@@ -30,12 +38,6 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -46,8 +48,6 @@ public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
 
-    private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
-
     /**
      * Handler the TCC Aspect
      *
@@ -55,13 +55,11 @@ public class ActionInterceptorHandler {
      * @param arguments      the arguments
      * @param businessAction the business action
      * @param targetCallback the target callback
-     * @return map map
+     * @return the business result
      * @throws Throwable the throwable
      */
-    public Map<String, Object> proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
+    public Object proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
-        Map<String, Object> ret = new HashMap<>(4);
-
         //TCC name
         String actionName = businessAction.name();
         BusinessActionContext actionContext = new BusinessActionContext();
@@ -85,21 +83,42 @@ public class ActionInterceptorHandler {
             }
             argIndex++;
         }
-        //share actionContext implicitly
-        ActionInterceptorHandler.setUpContext(actionContext);
+
+        // save the previous action context
+        BusinessActionContext previousActionContext = BusinessActionContextUtil.getContext();
         try {
-            //the final parameters of the try method
-            ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
-            //the final result
-            ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+            //share actionContext implicitly
+            BusinessActionContextUtil.setContext(actionContext);
+
+            if (businessAction.useTCCFence()) {
+                try {
+                    // Use TCC Fence, and return the business result
+                    return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
+                } catch (FrameworkException | UndeclaredThrowableException e) {
+                    Throwable originException = e.getCause();
+                    if (originException instanceof FrameworkException) {
+                        LOGGER.error("[{}] prepare TCC fence error: {}", xid, originException.getMessage());
+                    }
+                    throw originException;
+                }
+            } else {
+                //Execute business, and return the business result
+                return targetCallback.execute();
+            }
         } finally {
-            ActionInterceptorHandler.cleanUp();
-            //to report business action context finally.
-            if (businessAction.isDelayReport() && Boolean.TRUE.equals(actionContext.getUpdated())) {
+            try {
+                //to report business action context finally if the actionContext.getUpdated() is true
                 BusinessActionContextUtil.reportContext(actionContext);
+            } finally {
+                if (previousActionContext != null) {
+                    // recovery the previous action context
+                    BusinessActionContextUtil.setContext(previousActionContext);
+                } else {
+                    // clear the action context
+                    BusinessActionContextUtil.clear();
+                }
             }
         }
-        return ret;
     }
 
     /**
@@ -109,7 +128,7 @@ public class ActionInterceptorHandler {
      * @param arguments      the arguments
      * @param businessAction the business action
      * @param actionContext  the action context
-     * @return the string
+     * @return the branchId
      */
     protected String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction,
                                          BusinessActionContext actionContext) {
@@ -119,16 +138,15 @@ public class ActionInterceptorHandler {
         Map<String, Object> context = fetchActionRequestContext(method, arguments);
         context.put(Constants.ACTION_START_TIME, System.currentTimeMillis());
 
-        //init business context
+        //Init business context
         initBusinessContext(context, method, businessAction);
         //Init running environment context
         initFrameworkContext(context);
         actionContext.setDelayReport(businessAction.isDelayReport());
         actionContext.setActionContext(context);
 
-        //init applicationData
-        Map<String, Object> applicationContext = new HashMap<>(4);
-        applicationContext.put(Constants.TCC_ACTION_CONTEXT, context);
+        //Init applicationData
+        Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
@@ -173,6 +191,7 @@ public class ActionInterceptorHandler {
             context.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
             context.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
             context.put(Constants.ACTION_NAME, businessAction.name());
+            context.put(Constants.USE_TCC_FENCE, businessAction.useTCCFence());
         }
     }
 
@@ -181,7 +200,7 @@ public class ActionInterceptorHandler {
      *
      * @param method    the method
      * @param arguments the arguments
-     * @return map map
+     * @return the context
      */
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
         Map<String, Object> context = new HashMap<>(8);
@@ -190,43 +209,23 @@ public class ActionInterceptorHandler {
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
-                    BusinessActionContextParameter param = (BusinessActionContextParameter) parameterAnnotations[i][j];
+                    // get annotation
+                    BusinessActionContextParameter annotation = (BusinessActionContextParameter)parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
+
+                    // get param
                     Object paramObject = arguments[i];
-                    int index = param.index();
-                    //List, get by index
-                    if (index >= 0) {
-                        @SuppressWarnings("unchecked")
-                        Object targetParam = ((List<Object>) paramObject).get(index);
-                        if (param.isParamInProperty()) {
-                            context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
-                        } else {
-                            context.put(param.paramName(), targetParam);
-                        }
-                    } else {
-                        if (param.isParamInProperty()) {
-                            context.putAll(ActionContextUtil.fetchContextFromObject(paramObject));
-                        } else {
-                            context.put(param.paramName(), paramObject);
-                        }
+                    if (paramObject == null) {
+                        continue;
                     }
+
+                    // load param by the config of annotation, and then put to the context
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext("param", "", paramObject, annotation, context);
                 }
             }
         }
         return context;
-    }
-
-    public static BusinessActionContext getContext() {
-        return CONTEXT_HOLDER.get();
-    }
-
-    private static void cleanUp() {
-        CONTEXT_HOLDER.remove();
-    }
-
-    private static void setUpContext(BusinessActionContext context) {
-        CONTEXT_HOLDER.set(context);
     }
 }

@@ -30,6 +30,9 @@ import java.lang.annotation.Target;
  * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation, which added on the TCC interface. It can't be left out.
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
+ * @see BusinessActionContext
+ * @see BusinessActionContextUtil
+ * @see BusinessActionContextParameter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
@@ -63,4 +66,11 @@ public @interface TwoPhaseBusinessAction {
      * @return isDelayReport
      */
     boolean isDelayReport() default false;
+
+    /**
+     * whether use TCC fence (idempotent,non_rollback,suspend)
+     *
+     * @return the boolean
+     */
+    boolean useTCCFence() default false;
 }

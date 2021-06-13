@@ -15,10 +15,12 @@ jobs:
         java: [8, 11]
         os: [ ubuntu-18.04 ]
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK
-        uses: actions/setup-java@v1
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      - name: Setup Java JDK
+        uses: actions/setup-java@v2.1.0
         with:
+          distribution: 'zulu'
           java-version: ${{ matrix.java }}
       - name: Set up ENV
         # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
@@ -38,4 +40,4 @@ jobs:
              ./mvnw clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              fi
       - name: Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v1.5.0
