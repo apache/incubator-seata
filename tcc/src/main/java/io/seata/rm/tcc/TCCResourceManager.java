@@ -35,6 +35,7 @@ import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.interceptor.ActionContextUtil;
 
 /**
  * TCC resource manager
@@ -224,38 +225,39 @@ public class TCCResourceManager extends AbstractResourceManager {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
-                    String key = param.paramName();
+                    String key = ActionContextUtil.getParamName(param);
                     keys[i] = key;
+                    break;
                 }
             }
         }
-        Class<?>[] args = tccResource.getArgsClasses();
-        Object[] objects = new Object[args.length];
+        Class<?>[] argsClasses = tccResource.getArgsClasses();
+        Object[] args = new Object[argsClasses.length];
         if (keys.length == 0) {
-            objects[0] = businessActionContext;
+            args[0] = businessActionContext;
         } else {
-            if (keys.length == args.length) {
-                for (int i = 0; i < args.length; i++) {
-                    objects[i] = businessActionContext.getActionContext(keys[i], args[i]);
+            if (keys.length == argsClasses.length) {
+                for (int i = 0; i < argsClasses.length; i++) {
+                    args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
                 }
             } else {
-                for (int i = 0; i < args.length; i++) {
-                    if (args[i].equals(BusinessActionContext.class)) {
-                        objects[i] = businessActionContext;
+                for (int i = 0; i < argsClasses.length; i++) {
+                    if (argsClasses[i].equals(BusinessActionContext.class)) {
+                        args[i] = businessActionContext;
                         break;
                     }
                 }
                 for (String key : keys) {
-                    for (int j = 0; j < objects.length; j++) {
-                        if (objects[j] == null) {
-                            objects[j] = businessActionContext.getActionContext(key, args[j]);
+                    for (int j = 0; j < args.length; j++) {
+                        if (args[j] == null) {
+                            args[j] = businessActionContext.getActionContext(key, argsClasses[j]);
                             break;
                         }
                     }
                 }
             }
         }
-        return objects;
+        return args;
     }
 
     @Override

@@ -75,7 +75,7 @@ public @interface TwoPhaseBusinessAction {
     boolean useTCCFence() default false;
 
     /**
-     * prapare, commit, rollback method's args
+     * commit, rollback method's args
      *
      * @return the Class[]
      */
