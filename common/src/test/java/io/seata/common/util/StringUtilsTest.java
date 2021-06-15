@@ -105,10 +105,14 @@ public class StringUtilsTest {
         Assertions.assertEquals("true", StringUtils.toString(true));
 
         //case: date
-        Assertions.assertEquals("2021-06-15", StringUtils.toString(new Date(2021 - 1900, 6 - 1, 15)));
-        Assertions.assertEquals("2021-06-15 19:47", StringUtils.toString(new Date(2021 - 1900, 6 - 1, 15, 19, 47, 0)));
-        Assertions.assertEquals("2021-06-15 19:47:50", StringUtils.toString(new Date(2021 - 1900, 6 - 1, 15, 19, 47, 50)));
-        Assertions.assertEquals("1970-01-01 08:00:00.123", StringUtils.toString(new Date(123)));
+        Date date = new Date(2021 - 1900, 6 - 1, 15);
+        Assertions.assertEquals("2021-06-15", StringUtils.toString(date));
+        date.setTime(date.getTime() + 3600000);
+        Assertions.assertEquals("2021-06-15 01:00", StringUtils.toString(date));
+        date.setTime(date.getTime() + 50000);
+        Assertions.assertEquals("2021-06-15 01:00:50", StringUtils.toString(date));
+        date.setTime(date.getTime() + 12);
+        Assertions.assertEquals("2021-06-15 01:00:50.012", StringUtils.toString(date));
 
         //case: list, and cycle dependency
         List<Object> list = new ArrayList<>();
