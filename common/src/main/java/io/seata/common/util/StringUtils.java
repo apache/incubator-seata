@@ -161,21 +161,31 @@ public class StringUtils {
      * @param obj the obj
      * @return string string
      */
+    @SuppressWarnings("deprecation")
     public static String toString(final Object obj) {
         if (obj == null) {
             return "null";
         }
-        if (obj.getClass().isPrimitive()) {
-            return String.valueOf(obj);
-        }
         if (obj instanceof String) {
             return (String)obj;
         }
-        if (obj instanceof Number || obj instanceof Character || obj instanceof Boolean) {
+        if (obj instanceof Number || obj instanceof CharSequence || obj instanceof Boolean || obj instanceof Character) {
             return String.valueOf(obj);
         }
         if (obj instanceof Date) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(obj);
+            Date date = (Date)obj;
+            long time = date.getTime();
+            String pattern;
+            if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0 && time % 1000 == 0) {
+                pattern = "yyyy-MM-dd";
+            } else if (time % (60 * 1000) == 0) {
+                pattern = "yyyy-MM-dd HH:mm";
+            } else if (time % 1000 == 0) {
+                pattern = "yyyy-MM-dd HH:mm:ss";
+            } else {
+                pattern = "yyyy-MM-dd HH:mm:ss.SSS";
+            }
+            return new SimpleDateFormat(pattern).format(obj);
         }
         if (obj instanceof Collection) {
             Collection<?> col = (Collection<?>)obj;

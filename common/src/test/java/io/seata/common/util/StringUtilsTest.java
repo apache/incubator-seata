@@ -18,6 +18,7 @@ package io.seata.common.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,14 +96,19 @@ public class StringUtilsTest {
 
     @Test
     void testToStringAndCycleDependency() throws StackOverflowError {
-        //case: enum
-        Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
+        //case: string
+        Assertions.assertEquals("aaa", StringUtils.toString("aaa"));
 
-        //case: object, and cycle dependency
-        Assertions.assertEquals("(s=a;obj=null)", StringUtils.toString(CycleDependency.A));
-        CycleDependency obj = new CycleDependency("c");
-        obj.setObj(obj);
-        Assertions.assertEquals("(s=c;obj={s='c'})", StringUtils.toString(obj));
+        //case: number character boolean
+        Assertions.assertEquals("1", StringUtils.toString(1));
+        Assertions.assertEquals("bbb", StringUtils.toString(new StringBuilder("bbb")));
+        Assertions.assertEquals("true", StringUtils.toString(true));
+
+        //case: date
+        Assertions.assertEquals("2021-06-15", StringUtils.toString(new Date(2021 - 1900, 6 - 1, 15)));
+        Assertions.assertEquals("2021-06-15 19:47", StringUtils.toString(new Date(2021 - 1900, 6 - 1, 15, 19, 47, 0)));
+        Assertions.assertEquals("2021-06-15 19:47:50", StringUtils.toString(new Date(2021 - 1900, 6 - 1, 15, 19, 47, 50)));
+        Assertions.assertEquals("1970-01-01 08:00:00.123", StringUtils.toString(new Date(123)));
 
         //case: list, and cycle dependency
         List<Object> list = new ArrayList<>();
@@ -113,6 +119,15 @@ public class StringUtilsTest {
         Map<Object, Object> map = new HashMap<>();
         map.put(map, map);
         Assertions.assertEquals("{{(this Map)=(this Map)}->{(this Map)=(this Map)}}", StringUtils.toString(map));
+
+        //case: enum
+        Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
+
+        //case: object, and cycle dependency
+        Assertions.assertEquals("(s=a;obj=null)", StringUtils.toString(CycleDependency.A));
+        CycleDependency obj = new CycleDependency("c");
+        obj.setObj(obj);
+        Assertions.assertEquals("(s=c;obj={s='c'})", StringUtils.toString(obj));
     }
 
     static class CycleDependency {
