@@ -109,7 +109,11 @@ public class CollectionUtils {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (Object obj : col) {
-            sb.append(StringUtils.toString(obj));
+            if (obj == col) {
+                sb.append(obj.toString());
+            } else {
+                sb.append(StringUtils.toString(obj));
+            }
             sb.append(",");
         }
         sb.deleteCharAt(sb.length() - 1);
@@ -133,8 +137,18 @@ public class CollectionUtils {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         map.forEach((key, value) -> {
-            sb.append(StringUtils.toString(key)).append("->")
-                    .append(StringUtils.toString(value)).append(",");
+            if (key == map) {
+                sb.append(key.toString());
+            } else {
+                sb.append(StringUtils.toString(key));
+            }
+            sb.append("->");
+            if (value == map) {
+                sb.append(value.toString());
+            } else {
+                sb.append(StringUtils.toString(value));
+            }
+            sb.append(",");
         });
         sb.deleteCharAt(sb.length() - 1);
         sb.append("}");

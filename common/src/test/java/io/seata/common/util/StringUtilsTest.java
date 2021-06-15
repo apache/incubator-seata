@@ -17,6 +17,10 @@ package io.seata.common.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.seata.common.Constants;
 import io.seata.common.holder.ObjectHolder;
@@ -90,9 +94,25 @@ public class StringUtilsTest {
     }
 
     @Test
-    void testCycleDependency() throws StackOverflowError{
-        Assertions.assertEquals("s=a;", StringUtils.toString(CycleDependency.A));
+    void testToStringAndCycleDependency() throws StackOverflowError {
+        //case: enum
         Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
+
+        //case: object, and cycle dependency
+        Assertions.assertEquals("{s=a;obj=null}", StringUtils.toString(CycleDependency.A));
+        CycleDependency obj = new CycleDependency("c");
+        obj.setObj(obj);
+        Assertions.assertEquals("{s=c;obj={s='c'}}", StringUtils.toString(obj));
+
+        //case: list, and cycle dependency
+        List<Object> list = new ArrayList<>();
+        list.add(list);
+        Assertions.assertEquals("[[(this Collection)]]", StringUtils.toString(list));
+
+        //case: map, and cycle dependency
+        Map<Object, Object> map = new HashMap<>();
+        map.put(map, map);
+        Assertions.assertEquals("{{(this Map)=(this Map)}->{(this Map)=(this Map)}}", StringUtils.toString(map));
     }
 
     static class CycleDependency {
@@ -100,8 +120,18 @@ public class StringUtilsTest {
         public static final CycleDependency B = new CycleDependency("b");
 
         private String s;
+        private CycleDependency obj;
+
         private CycleDependency(String s) {
             this.s = s;
+        }
+
+        public CycleDependency getObj() {
+            return obj;
+        }
+
+        public void setObj(CycleDependency obj) {
+            this.obj = obj;
         }
 
         @Override
@@ -111,5 +141,4 @@ public class StringUtilsTest {
                     '}';
         }
     }
-
 }
