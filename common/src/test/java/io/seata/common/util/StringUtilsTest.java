@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import io.seata.common.Constants;
+import io.seata.common.holder.ObjectHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -90,7 +91,8 @@ public class StringUtilsTest {
 
     @Test
     void testCycleDependency() throws StackOverflowError{
-        StringUtils.toString(CycleDependency.A);
+        Assertions.assertEquals("s=a;", StringUtils.toString(CycleDependency.A));
+        Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
     }
 
     static class CycleDependency {

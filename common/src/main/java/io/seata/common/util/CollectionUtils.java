@@ -132,13 +132,11 @@ public class CollectionUtils {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        if (!map.isEmpty()) {
-            map.forEach((key, value) -> {
-                sb.append(StringUtils.toString(key)).append("->")
-                        .append(StringUtils.toString(value)).append(",");
-            });
-            sb.deleteCharAt(sb.length() - 1);
-        }
+        map.forEach((key, value) -> {
+            sb.append(StringUtils.toString(key)).append("->")
+                    .append(StringUtils.toString(value)).append(",");
+        });
+        sb.deleteCharAt(sb.length() - 1);
         sb.append("}");
         return sb.toString();
     }
