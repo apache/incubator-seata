@@ -45,14 +45,22 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataProxyInterceptor.class);
 
-    private final String targetBeanName;
     private final SeataProxyBeanDesc targetBeanDesc;
-    private int orderNum;
 
-    public SeataProxyInterceptor(SeataProxyBeanDesc targetBeanDesc, int orderNum) {
-        targetBeanName = targetBeanDesc.getTargetBeanName();
+    private final String targetBeanName;
+    private int orderNum;
+    private final SeataInterceptorPosition position;
+
+    public SeataProxyInterceptor(SeataProxyBeanDesc targetBeanDesc) {
+        if (targetBeanDesc == null) {
+            throw new IllegalArgumentException("targetBeanDesc must be not null");
+        }
+
         this.targetBeanDesc = targetBeanDesc;
-        this.orderNum = orderNum;
+
+        this.targetBeanName = targetBeanDesc.getTargetBeanName();
+        this.orderNum = targetBeanDesc.getInterceptorOrderNum();
+        this.position = targetBeanDesc.getInterceptorPosition();
     }
 
     @Override
@@ -69,7 +77,7 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
             // if in the try method of the TCC branch, offer a suggestion
             if (RootContext.inTccBranch() && LOGGER.isWarnEnabled() && StackTraceLogger.needToPrintLog()) {
                 LOGGER.warn("Currently in the try method of the TCC branch, it's recommended to " +
-                            "transfer the `{}` to the commit method of the TCC action '{}'.",
+                                "transfer the `{}` to the commit method of the TCC action '{}'.",
                         ReflectionUtil.methodToString(method), BusinessActionContextUtil.getContext().getActionName());
             }
 
@@ -184,6 +192,6 @@ public class SeataProxyInterceptor implements MethodInterceptor, SeataIntercepto
 
     @Override
     public SeataInterceptorPosition getPosition() {
-        return SeataInterceptorPosition.BeforeTransaction;
+        return position;
     }
 }

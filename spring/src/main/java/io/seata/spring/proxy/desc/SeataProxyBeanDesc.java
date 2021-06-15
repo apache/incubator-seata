@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.spring.annotation.SeataInterceptorPosition;
 import io.seata.spring.proxy.SeataProxyHandler;
 import io.seata.spring.proxy.SeataProxyResultHandler;
 import io.seata.spring.proxy.SeataProxyValidator;
@@ -37,11 +38,12 @@ import io.seata.spring.proxy.util.SeataProxyInterceptorUtil;
 public class SeataProxyBeanDesc {
 
     private Object targetBean;
-
     private String targetBeanName;
 
-    private final SeataProxyImplementationDesc implDesc;
+    private Integer interceptorOrderNum;
+    private SeataInterceptorPosition interceptorPosition = SeataInterceptorPosition.BeforeTransaction;
 
+    private final SeataProxyImplementationDesc implDesc;
     private final Map<Method, SeataProxyMethodDesc> methodDescMap;
 
 
@@ -102,6 +104,24 @@ public class SeataProxyBeanDesc {
         return true;
     }
 
+    public Integer getInterceptorOrderNum() {
+        return interceptorOrderNum;
+    }
+
+    public void setInterceptorOrderNum(Integer interceptorOrderNum) {
+        this.interceptorOrderNum = interceptorOrderNum;
+    }
+
+    public SeataInterceptorPosition getInterceptorPosition() {
+        return interceptorPosition;
+    }
+
+    public void setInterceptorPosition(SeataInterceptorPosition interceptorPosition) {
+        this.interceptorPosition = interceptorPosition;
+    }
+
+    //region the implementations
+
     @Nullable
     public SeataProxyValidator getValidator() {
         return implDesc == null ? null : implDesc.getValidator();
@@ -155,4 +175,6 @@ public class SeataProxyBeanDesc {
 
         return this.getResultHandler();
     }
+
+    //endregion
 }

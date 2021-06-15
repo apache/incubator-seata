@@ -342,8 +342,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         LOGGER.warn("the proxy bean '{}' is skip, because all of the methods is skip", beanName);
                         return bean;
                     }
+                    if (beanDesc.getInterceptorOrderNum() == null) {
+                       beanDesc.setInterceptorOrderNum(seataProxyConfig.getProxyInterceptorOrder());
+                    }
+
                     // create an interceptor for the bean
-                    this.interceptor = new SeataProxyInterceptor(beanDesc, seataProxyConfig.getProxyInterceptorOrder());
+                    this.interceptor = new SeataProxyInterceptor(beanDesc);
                 }
                 //check TCC proxy
                 else if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
