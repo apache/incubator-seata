@@ -99,10 +99,10 @@ public class StringUtilsTest {
         Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
 
         //case: object, and cycle dependency
-        Assertions.assertEquals("{s=a;obj=null}", StringUtils.toString(CycleDependency.A));
+        Assertions.assertEquals("(s=a;obj=null)", StringUtils.toString(CycleDependency.A));
         CycleDependency obj = new CycleDependency("c");
         obj.setObj(obj);
-        Assertions.assertEquals("{s=c;obj={s='c'}}", StringUtils.toString(obj));
+        Assertions.assertEquals("(s=c;obj={s='c'})", StringUtils.toString(obj));
 
         //case: list, and cycle dependency
         List<Object> list = new ArrayList<>();

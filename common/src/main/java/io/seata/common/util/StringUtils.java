@@ -189,7 +189,7 @@ public class StringUtils {
             return ((Enum)obj).name();
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("{");
+        sb.append("(");
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
             // ignore the static or synthetic fields
@@ -214,7 +214,7 @@ public class StringUtils {
         if (sb.length() > 1) {
             sb.deleteCharAt(sb.length() - 1);
         }
-        sb.append("}");
+        sb.append(")");
         return sb.toString();
     }
 
