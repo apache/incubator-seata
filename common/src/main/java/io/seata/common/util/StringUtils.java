@@ -200,7 +200,7 @@ public class StringUtils {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("(");
-        Field[] fields = obj.getClass().getDeclaredFields();
+        Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
         for (Field field : fields) {
             // ignore the static or synthetic fields
             if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
@@ -208,6 +208,10 @@ public class StringUtils {
             }
 
             field.setAccessible(true);
+
+            if (sb.length() > 1) {
+                sb.append("; ");
+            }
             sb.append(field.getName());
             sb.append("=");
             try {
@@ -219,10 +223,6 @@ public class StringUtils {
                 }
             } catch (Exception e) {
             }
-            sb.append(";");
-        }
-        if (sb.length() > 1) {
-            sb.deleteCharAt(sb.length() - 1);
         }
         sb.append(")");
         return sb.toString();

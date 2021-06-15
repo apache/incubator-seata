@@ -113,21 +113,25 @@ public class StringUtilsTest {
         //case: list, and cycle dependency
         List<Object> list = new ArrayList<>();
         list.add(list);
-        Assertions.assertEquals("[[(this Collection)]]", StringUtils.toString(list));
+        list.add("xxx");
+        list.add(111);
+        Assertions.assertEquals("[" + list.toString() + ", xxx, 111]", StringUtils.toString(list));
 
         //case: map, and cycle dependency
         Map<Object, Object> map = new HashMap<>();
         map.put(map, map);
-        Assertions.assertEquals("{{(this Map)=(this Map)}->{(this Map)=(this Map)}}", StringUtils.toString(map));
+        map.put("aaa", 111);
+        map.put("bbb", true);
+        Assertions.assertEquals("{" + map.toString() + "->" + map.toString() + ", aaa->111, bbb->true}", StringUtils.toString(map));
 
         //case: enum
         Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
 
         //case: object, and cycle dependency
-        Assertions.assertEquals("(s=a;obj=null)", StringUtils.toString(CycleDependency.A));
+        Assertions.assertEquals("(s=a; obj=null)", StringUtils.toString(CycleDependency.A));
         CycleDependency obj = new CycleDependency("c");
         obj.setObj(obj);
-        Assertions.assertEquals("(s=c;obj={s='c'})", StringUtils.toString(obj));
+        Assertions.assertEquals("(s=c; obj={s='c'})", StringUtils.toString(obj));
     }
 
     static class CycleDependency {
