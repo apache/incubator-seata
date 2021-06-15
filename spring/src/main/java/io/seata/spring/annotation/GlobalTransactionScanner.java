@@ -343,7 +343,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         return bean;
                     }
                     if (beanDesc.getInterceptorOrderNum() == null) {
-                       beanDesc.setInterceptorOrderNum(seataProxyConfig.getProxyInterceptorOrder());
+                        beanDesc.setInterceptorOrderNum(seataProxyConfig.getProxyInterceptorOrder());
                     }
 
                     // create an interceptor for the bean
