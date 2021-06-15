@@ -94,14 +94,17 @@ public class CollectionUtils {
     }
 
     /**
-     * To string.
+     * Collection To string.
      *
      * @param col the col
      * @return the string
      */
     public static String toString(Collection<?> col) {
-        if (isEmpty(col)) {
-            return "";
+        if (col == null) {
+            return "null";
+        }
+        if (col.isEmpty()) {
+            return "[]";
         }
         StringBuilder sb = new StringBuilder();
         sb.append("[");
@@ -111,6 +114,32 @@ public class CollectionUtils {
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append("]");
+        return sb.toString();
+    }
+
+    /**
+     * Map to string.
+     *
+     * @param map the map
+     * @return the string
+     */
+    public static String toString(Map<?, ?> map) {
+        if (map == null) {
+            return "null";
+        }
+        if (map.isEmpty()) {
+            return "{}";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        if (!map.isEmpty()) {
+            map.forEach((key, value) -> {
+                sb.append(StringUtils.toString(key)).append("->")
+                        .append(StringUtils.toString(value)).append(",");
+            });
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        sb.append("}");
         return sb.toString();
     }
 

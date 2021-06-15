@@ -188,14 +188,30 @@ public class CollectionUtilsTest {
 
     @Test
     public void testCollectionToString() {
+        List<String> nullCollection = null;
         List<String> emptyCollection = new ArrayList<>();
         List<String> filledCollection = new ArrayList<>();
 
         filledCollection.add("Foo");
         filledCollection.add("Bar");
 
-        Assertions.assertEquals("", CollectionUtils.toString(emptyCollection));
+        Assertions.assertEquals("null", CollectionUtils.toString(nullCollection));
+        Assertions.assertEquals("[]", CollectionUtils.toString(emptyCollection));
         Assertions.assertEquals("[Foo,Bar]", CollectionUtils.toString(filledCollection));
+    }
+
+    @Test
+    public void testMapToString() {
+        Map<Object, Object> nullMap = null;
+        Map<Object, Object> emptyMap = new HashMap<>();
+        Map<Object, Object> filledCollection = new HashMap<>();
+
+        filledCollection.put("aaa", "111");
+        filledCollection.put("bbb", "222");
+
+        Assertions.assertEquals("null", CollectionUtils.toString(nullMap));
+        Assertions.assertEquals("{}", CollectionUtils.toString(emptyMap));
+        Assertions.assertEquals("{aaa->111,bbb->222}", CollectionUtils.toString(filledCollection));
     }
 
     @Test

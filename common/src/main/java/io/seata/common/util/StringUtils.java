@@ -15,16 +15,17 @@
  */
 package io.seata.common.util;
 
-import io.seata.common.Constants;
-import io.seata.common.exception.ShouldNeverHappenException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+
+import io.seata.common.Constants;
+import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type String utils.
@@ -160,7 +161,7 @@ public class StringUtils {
      * @param obj the obj
      * @return string string
      */
-    public static String toString(Object obj) {
+    public static String toString(final Object obj) {
         if (obj == null) {
             return "null";
         }
@@ -177,34 +178,24 @@ public class StringUtils {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(obj);
         }
         if (obj instanceof Collection) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            if (!((Collection)obj).isEmpty()) {
-                for (Object o : (Collection)obj) {
-                    sb.append(toString(o)).append(",");
-                }
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("]");
-            return sb.toString();
+            Collection<?> col = (Collection<?>)obj;
+            return CollectionUtils.toString(col);
         }
         if (obj instanceof Map) {
-            Map<Object, Object> map = (Map)obj;
-            StringBuilder sb = new StringBuilder();
-            sb.append("{");
-            if (!map.isEmpty()) {
-                map.forEach((key, value) -> {
-                    sb.append(toString(key)).append("->")
-                        .append(toString(value)).append(",");
-                });
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("}");
-            return sb.toString();
+            Map<?, ?> map = (Map<?, ?>)obj;
+            return CollectionUtils.toString(map);
+        }
+        if (obj instanceof Enum) {
+            return ((Enum)obj).name();
         }
         StringBuilder sb = new StringBuilder();
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
+            // ignore the static or synthetic fields
+            if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
+                continue;
+            }
+
             field.setAccessible(true);
             sb.append(field.getName());
             sb.append("=");
