@@ -205,7 +205,7 @@ public final class ReflectionUtil {
      *
      * @param targetClazz the target class
      */
-    public static Field[] getAllFields(Class<?> targetClazz) {
+    public static Field[] getAllFields(final Class<?> targetClazz) {
         if (targetClazz == Object.class || targetClazz.isInterface()) {
             return EMPTY_FIELD_ARRAY;
         }
