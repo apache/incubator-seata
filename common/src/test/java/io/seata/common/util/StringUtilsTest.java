@@ -207,8 +207,8 @@ public class StringUtilsTest {
         @Override
         public String toString() {
             return "(" +
-                    "s=" + s + "" +
-                    (obj != this ? ", " + obj.toString() : "") +
+                    "s=" + s + "," +
+                    "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") +
                     ')';
         }
     }
