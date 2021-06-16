@@ -219,8 +219,13 @@ public class TCCResourceManager extends AbstractResourceManager {
     private Object[] getTwoPhaseArgs(Method method, TCCResource tccResource,
                                         BusinessActionContext businessActionContext) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        // get parameter's key
         String[] keys = new String[parameterAnnotations.length];
+        /*
+         * get parameter's key
+         * if method's parameter list is like
+         * (BusinessActionContext, @BusinessActionContextParameter("a") A a, @BusinessActionContextParameter("b") B b)
+         * the keys will be [null, a, b]
+         */
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
@@ -233,28 +238,11 @@ public class TCCResourceManager extends AbstractResourceManager {
         }
         Class<?>[] argsClasses = tccResource.getArgsClasses();
         Object[] args = new Object[argsClasses.length];
-        if (keys.length == 0) {
-            args[0] = businessActionContext;
-        } else {
-            if (keys.length == argsClasses.length) {
-                for (int i = 0; i < argsClasses.length; i++) {
-                    args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
-                }
+        for (int i = 0; i < argsClasses.length; i++) {
+            if (argsClasses[i].equals(BusinessActionContext.class)) {
+                args[i] = businessActionContext;
             } else {
-                for (int i = 0; i < argsClasses.length; i++) {
-                    if (argsClasses[i].equals(BusinessActionContext.class)) {
-                        args[i] = businessActionContext;
-                        break;
-                    }
-                }
-                for (String key : keys) {
-                    for (int j = 0; j < args.length; j++) {
-                        if (args[j] == null) {
-                            args[j] = businessActionContext.getActionContext(key, argsClasses[j]);
-                            break;
-                        }
-                    }
-                }
+                args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
             }
         }
         return args;
