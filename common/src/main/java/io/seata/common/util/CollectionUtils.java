@@ -108,7 +108,7 @@ public class CollectionUtils {
         }
 
         return CycleDependencyHandler.wrap(col, o -> {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(32);
             sb.append("[");
             for (Object obj : col) {
                 if (sb.length() > 1) {
@@ -140,7 +140,7 @@ public class CollectionUtils {
         }
 
         return CycleDependencyHandler.wrap(map, o -> {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(32);
             sb.append("{");
             map.forEach((key, value) -> {
                 if (sb.length() > 1) {

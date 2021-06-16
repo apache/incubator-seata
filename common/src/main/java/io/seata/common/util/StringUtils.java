@@ -206,7 +206,7 @@ public class StringUtils {
         //endregion
 
         return CycleDependencyHandler.wrap(obj, o -> {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(32);
             sb.append(obj.getClass().getSimpleName()).append("(");
             final int initialLength = sb.length();
 
