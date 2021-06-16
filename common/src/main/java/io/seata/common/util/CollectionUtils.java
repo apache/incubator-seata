@@ -99,27 +99,30 @@ public class CollectionUtils {
      * @param col the col
      * @return the string
      */
-    public static String toString(Collection<?> col) {
+    public static String toString(final Collection<?> col) {
         if (col == null) {
             return "null";
         }
         if (col.isEmpty()) {
             return "[]";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (Object obj : col) {
-            if (sb.length() > 1) {
-                sb.append(", ");
+
+        return CycleDependencyHandler.wrap(col, o -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            for (Object obj : col) {
+                if (sb.length() > 1) {
+                    sb.append(", ");
+                }
+                if (obj == col) {
+                    sb.append("(this ").append(obj.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(obj));
+                }
             }
-            if (obj == col) {
-                sb.append("(this ").append(obj.getClass().getSimpleName()).append(")");
-            } else {
-                sb.append(StringUtils.toString(obj));
-            }
-        }
-        sb.append("]");
-        return sb.toString();
+            sb.append("]");
+            return sb.toString();
+        });
     }
 
     /**
@@ -128,33 +131,36 @@ public class CollectionUtils {
      * @param map the map
      * @return the string
      */
-    public static String toString(Map<?, ?> map) {
+    public static String toString(final Map<?, ?> map) {
         if (map == null) {
             return "null";
         }
         if (map.isEmpty()) {
             return "{}";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        map.forEach((key, value) -> {
-            if (sb.length() > 1) {
-                sb.append(", ");
-            }
-            if (key == map) {
-                sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
-            } else {
-                sb.append(StringUtils.toString(key));
-            }
-            sb.append("->");
-            if (value == map) {
-                sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
-            } else {
-                sb.append(StringUtils.toString(value));
-            }
+
+        return CycleDependencyHandler.wrap(map, o -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{");
+            map.forEach((key, value) -> {
+                if (sb.length() > 1) {
+                    sb.append(", ");
+                }
+                if (key == map) {
+                    sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(key));
+                }
+                sb.append("->");
+                if (value == map) {
+                    sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(value));
+                }
+            });
+            sb.append("}");
+            return sb.toString();
         });
-        sb.append("}");
-        return sb.toString();
     }
 
     /**

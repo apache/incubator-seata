@@ -165,10 +165,10 @@ public class StringUtils {
         if (obj == null) {
             return "null";
         }
-        if (obj instanceof String) {
-            return (String)obj;
-        }
-        if (obj instanceof Number || obj instanceof CharSequence || obj instanceof Boolean || obj instanceof Character) {
+
+        //region Convert simple types to String directly
+
+        if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
             return obj.toString();
         }
         if (obj instanceof Date) {
@@ -186,6 +186,14 @@ public class StringUtils {
             }
             return new SimpleDateFormat(dateFormat).format(obj);
         }
+        if (obj instanceof Enum) {
+            return ((Enum)obj).name();
+        }
+
+        //endregion
+
+        //region Convert the Collection and Map
+
         if (obj instanceof Collection) {
             Collection<?> col = (Collection<?>)obj;
             return CollectionUtils.toString(col);
@@ -194,36 +202,38 @@ public class StringUtils {
             Map<?, ?> map = (Map<?, ?>)obj;
             return CollectionUtils.toString(map);
         }
-        if (obj instanceof Enum) {
-            return ((Enum)obj).name();
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(obj.getClass().getSimpleName()).append("(");
-        final int initialLength = sb.length();
 
-        // Gets all fields, excluding static or synthetic fields
-        Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
-        for (Field field : fields) {
-            field.setAccessible(true);
+        //endregion
 
-            if (sb.length() > initialLength) {
-                sb.append(", ");
-            }
-            sb.append(field.getName());
-            sb.append("=");
-            try {
-                Object f = field.get(obj);
-                if (f == obj) {
-                    sb.append("(this ").append(f.getClass().getSimpleName()).append(")");
-                } else {
-                    sb.append(toString(f));
+        return CycleDependencyHandler.wrap(obj, o -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append(obj.getClass().getSimpleName()).append("(");
+            final int initialLength = sb.length();
+
+            // Gets all fields, excluding static or synthetic fields
+            Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
+            for (Field field : fields) {
+                field.setAccessible(true);
+
+                if (sb.length() > initialLength) {
+                    sb.append(", ");
                 }
-            } catch (Exception e) {
+                sb.append(field.getName());
+                sb.append("=");
+                try {
+                    Object f = field.get(obj);
+                    if (f == obj) {
+                        sb.append("(this ").append(f.getClass().getSimpleName()).append(")");
+                    } else {
+                        sb.append(toString(f));
+                    }
+                } catch (Exception e) {
+                }
             }
-        }
 
-        sb.append(")");
-        return sb.toString();
+            sb.append(")");
+            return sb.toString();
+        });
     }
 
     /**

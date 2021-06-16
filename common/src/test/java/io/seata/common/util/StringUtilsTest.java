@@ -99,10 +99,10 @@ public class StringUtilsTest {
         //case: String
         Assertions.assertEquals("aaa", StringUtils.toString("aaa"));
 
-        //case: Number
-        Assertions.assertEquals("1", StringUtils.toString(1));
         //case: CharSequence
         Assertions.assertEquals("bbb", StringUtils.toString(new StringBuilder("bbb")));
+        //case: Number
+        Assertions.assertEquals("1", StringUtils.toString(1));
         //case: Boolean
         Assertions.assertEquals("true", StringUtils.toString(true));
         //case: Character
@@ -120,6 +120,9 @@ public class StringUtilsTest {
         date.setTime(date.getTime() + 12);
         Assertions.assertEquals("2021-06-15 01:01:50.012", StringUtils.toString(date));
 
+        //case: Enum
+        Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
+
         //case: List, and cycle dependency
         List<Object> list = new ArrayList<>();
         list.add("xxx");
@@ -133,9 +136,15 @@ public class StringUtilsTest {
         map.put("bbb", true);
         map.put("self", map);
         Assertions.assertEquals("{aaa->111, bbb->true, self->(this HashMap)}", StringUtils.toString(map));
+        Assertions.assertFalse(CycleDependencyHandler.isStarting());
+        //case: Map, and cycle dependency（deep case）
+        List<Object> list2 = new ArrayList<>();
+        list2.add(map);
+        list2.add('c');
+        map.put("list", list2);
+        Assertions.assertEquals("{aaa->111, bbb->true, self->(this HashMap), list->[(ref HashMap), c]}", StringUtils.toString(map));
+        Assertions.assertFalse(CycleDependencyHandler.isStarting());
 
-        //case: Enum
-        Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
 
         //case: Object
         Assertions.assertEquals("CycleDependency(s=a, obj=null)", StringUtils.toString(CycleDependency.A));
@@ -147,6 +156,33 @@ public class StringUtilsTest {
         CycleDependency obj2 = new CycleDependency("d");
         obj.setObj(obj2);
         Assertions.assertEquals("CycleDependency(s=c, obj=CycleDependency(s=d, obj=null))", StringUtils.toString(obj));
+        //case: AClass, and cycle dependency
+        TestClass a = new TestClass();
+        a.setObj(a);
+        Assertions.assertEquals("TestClass(obj=(this TestClass))", StringUtils.toString(a));
+        //case: AClass, and cycle dependency（deep case）
+        TestClass b = new TestClass();
+        TestClass c = new TestClass();
+        b.setObj(c);
+        c.setObj(a);
+        a.setObj(b);
+        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass))))", StringUtils.toString(a));
+    }
+
+    class TestClass {
+        private TestClass obj;
+
+        public String toString() {
+            return StringUtils.toString(this);
+        }
+
+        public TestClass getObj() {
+            return obj;
+        }
+
+        public void setObj(TestClass obj) {
+            this.obj = obj;
+        }
     }
 
     static class CycleDependency {
