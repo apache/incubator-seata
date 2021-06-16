@@ -26,18 +26,18 @@ import java.util.function.Function;
  */
 public class CycleDependencyHandler {
 
-    private static final ThreadLocal<Set<Object>> OBJECT_UNIQUE_CODE_SET_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<Set<Object>> OBJECT_SET_LOCAL = new ThreadLocal<>();
 
     public static boolean isStarting() {
-        return OBJECT_UNIQUE_CODE_SET_LOCAL.get() != null;
+        return OBJECT_SET_LOCAL.get() != null;
     }
 
     public static void start() {
-        OBJECT_UNIQUE_CODE_SET_LOCAL.set(new HashSet<>(8));
+        OBJECT_SET_LOCAL.set(new HashSet<>(8));
     }
 
     public static void end() {
-        OBJECT_UNIQUE_CODE_SET_LOCAL.remove();
+        OBJECT_SET_LOCAL.remove();
     }
 
     public static void addObject(Object obj) {
@@ -45,11 +45,11 @@ public class CycleDependencyHandler {
             return;
         }
 
-        // get object unique code set
-        Set<Object> objectUniqueCodeSet = OBJECT_UNIQUE_CODE_SET_LOCAL.get();
+        // get object set
+        Set<Object> objectSet = OBJECT_SET_LOCAL.get();
 
-        // add to object unique code set
-        objectUniqueCodeSet.add(getObjectUniqueCode(obj));
+        // add to object set
+        objectSet.add(getUniqueSubstituteObject(obj));
     }
 
     public static boolean hasObject(Object obj) {
@@ -57,13 +57,13 @@ public class CycleDependencyHandler {
             return false;
         }
 
-        // get object unique code set
-        Set<Object> objectUniqueCodeSet = OBJECT_UNIQUE_CODE_SET_LOCAL.get();
-        if (objectUniqueCodeSet.isEmpty()) {
+        // get object set
+        Set<Object> objectSet = OBJECT_SET_LOCAL.get();
+        if (objectSet.isEmpty()) {
             return false;
         }
 
-        return objectUniqueCodeSet.contains(getObjectUniqueCode(obj));
+        return objectSet.contains(getUniqueSubstituteObject(obj));
     }
 
     public static <O> String wrap(O obj, Function<O, String> function) {
@@ -90,13 +90,14 @@ public class CycleDependencyHandler {
     }
 
     /**
-     * get object unique code.
-     * Avoid throwing 'StackOverflowError' by 'Collection' and 'Map' during cycle dependency.
+     * get Unique Substitute Object.
+     * Avoid `obj.hashCode()` throwing `StackOverflowError` during cycle dependency.
      *
-     * @param obj
-     * @return
+     * @param obj the object
+     * @return the substitute object
      */
-    private static Object getObjectUniqueCode(Object obj) {
+    private static Object getUniqueSubstituteObject(Object obj) {
+        // TODO: help-me modify this method to achieve the real generation of the only alternative value
         return System.identityHashCode(obj);
     }
 
