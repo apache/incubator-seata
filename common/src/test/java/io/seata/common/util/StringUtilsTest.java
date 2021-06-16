@@ -121,7 +121,7 @@ public class StringUtilsTest {
         Assertions.assertEquals("2021-06-15 01:01:50.012", StringUtils.toString(date));
 
         //case: Enum
-        Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
+        Assertions.assertEquals("ObjectHolder.INSTANCE", StringUtils.toString(ObjectHolder.INSTANCE));
 
         //case: List, and cycle dependency
         List<Object> list = new ArrayList<>();

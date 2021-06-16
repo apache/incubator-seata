@@ -168,9 +168,6 @@ public class StringUtils {
 
         //region Convert simple types to String directly
 
-        if (obj instanceof String) {
-            return (String)obj;
-        }
         if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
             return obj.toString();
         }
@@ -190,7 +187,7 @@ public class StringUtils {
             return new SimpleDateFormat(dateFormat).format(obj);
         }
         if (obj instanceof Enum) {
-            return ((Enum)obj).name();
+            return obj.getClass().getSimpleName() + "." + ((Enum)obj).name();
         }
 
         //endregion
