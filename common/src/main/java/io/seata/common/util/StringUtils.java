@@ -168,6 +168,9 @@ public class StringUtils {
 
         //region Convert simple types to String directly
 
+        if (obj instanceof String) {
+            return (String)obj;
+        }
         if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
             return obj.toString();
         }

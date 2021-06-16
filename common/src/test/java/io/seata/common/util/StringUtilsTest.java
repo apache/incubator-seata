@@ -156,11 +156,11 @@ public class StringUtilsTest {
         CycleDependency obj2 = new CycleDependency("d");
         obj.setObj(obj2);
         Assertions.assertEquals("CycleDependency(s=c, obj=CycleDependency(s=d, obj=null))", StringUtils.toString(obj));
-        //case: AClass, and cycle dependency
+        //case: Object, and cycle dependency
         TestClass a = new TestClass();
         a.setObj(a);
         Assertions.assertEquals("TestClass(obj=(this TestClass))", StringUtils.toString(a));
-        //case: AClass, and cycle dependency（deep case）
+        //case: Object, and cycle dependency（deep case）
         TestClass b = new TestClass();
         TestClass c = new TestClass();
         b.setObj(c);
