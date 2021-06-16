@@ -170,22 +170,22 @@ public class StringUtils {
             return (String)obj;
         }
         if (obj instanceof Number || obj instanceof CharSequence || obj instanceof Boolean || obj instanceof Character) {
-            return String.valueOf(obj);
+            return obj.toString();
         }
         if (obj instanceof Date) {
             Date date = (Date)obj;
             long time = date.getTime();
-            String pattern;
+            String dateFormat;
             if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0 && time % 1000 == 0) {
-                pattern = "yyyy-MM-dd";
+                dateFormat = "yyyy-MM-dd";
             } else if (time % (60 * 1000) == 0) {
-                pattern = "yyyy-MM-dd HH:mm";
+                dateFormat = "yyyy-MM-dd HH:mm";
             } else if (time % 1000 == 0) {
-                pattern = "yyyy-MM-dd HH:mm:ss";
+                dateFormat = "yyyy-MM-dd HH:mm:ss";
             } else {
-                pattern = "yyyy-MM-dd HH:mm:ss.SSS";
+                dateFormat = "yyyy-MM-dd HH:mm:ss.SSS";
             }
-            return new SimpleDateFormat(pattern).format(obj);
+            return new SimpleDateFormat(dateFormat).format(obj);
         }
         if (obj instanceof Collection) {
             Collection<?> col = (Collection<?>)obj;
@@ -199,7 +199,8 @@ public class StringUtils {
             return ((Enum)obj).name();
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("(");
+        sb.append(obj.getClass().getSimpleName()).append("(");
+        final int initialLength = sb.length();
         Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
         for (Field field : fields) {
             // ignore the static or synthetic fields
@@ -209,15 +210,15 @@ public class StringUtils {
 
             field.setAccessible(true);
 
-            if (sb.length() > 1) {
-                sb.append("; ");
+            if (sb.length() > initialLength) {
+                sb.append(", ");
             }
             sb.append(field.getName());
             sb.append("=");
             try {
                 Object f = field.get(obj);
                 if (f == obj) {
-                    sb.append(f.toString());
+                    sb.append("(this ").append(f.getClass().getSimpleName()).append(")");
                 } else {
                     sb.append(toString(f));
                 }

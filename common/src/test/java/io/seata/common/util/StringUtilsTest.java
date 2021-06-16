@@ -96,46 +96,57 @@ public class StringUtilsTest {
 
     @Test
     void testToStringAndCycleDependency() throws StackOverflowError {
-        //case: string
+        //case: String
         Assertions.assertEquals("aaa", StringUtils.toString("aaa"));
 
-        //case: number character boolean
+        //case: Number
         Assertions.assertEquals("1", StringUtils.toString(1));
+        //case: CharSequence
         Assertions.assertEquals("bbb", StringUtils.toString(new StringBuilder("bbb")));
+        //case: Boolean
         Assertions.assertEquals("true", StringUtils.toString(true));
+        //case: Character
+        Assertions.assertEquals("2", StringUtils.toString('2'));
 
-        //case: date
+        //case: Date
         Date date = new Date(2021 - 1900, 6 - 1, 15);
         Assertions.assertEquals("2021-06-15", StringUtils.toString(date));
         date.setTime(date.getTime() + 3600000);
         Assertions.assertEquals("2021-06-15 01:00", StringUtils.toString(date));
+        date.setTime(date.getTime() + 60000);
+        Assertions.assertEquals("2021-06-15 01:01", StringUtils.toString(date));
         date.setTime(date.getTime() + 50000);
-        Assertions.assertEquals("2021-06-15 01:00:50", StringUtils.toString(date));
+        Assertions.assertEquals("2021-06-15 01:01:50", StringUtils.toString(date));
         date.setTime(date.getTime() + 12);
-        Assertions.assertEquals("2021-06-15 01:00:50.012", StringUtils.toString(date));
+        Assertions.assertEquals("2021-06-15 01:01:50.012", StringUtils.toString(date));
 
-        //case: list, and cycle dependency
+        //case: List, and cycle dependency
         List<Object> list = new ArrayList<>();
         list.add(list);
         list.add("xxx");
         list.add(111);
         Assertions.assertEquals("[" + list.toString() + ", xxx, 111]", StringUtils.toString(list));
 
-        //case: map, and cycle dependency
+        //case: Map, and cycle dependency
         Map<Object, Object> map = new HashMap<>();
         map.put(map, map);
         map.put("aaa", 111);
         map.put("bbb", true);
         Assertions.assertEquals("{" + map.toString() + "->" + map.toString() + ", aaa->111, bbb->true}", StringUtils.toString(map));
 
-        //case: enum
+        //case: Enum
         Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));
 
-        //case: object, and cycle dependency
-        Assertions.assertEquals("(s=a; obj=null)", StringUtils.toString(CycleDependency.A));
+        //case: Object
+        Assertions.assertEquals("CycleDependency(s=a, obj=null)", StringUtils.toString(CycleDependency.A));
+        //case: Object, and cycle dependency
         CycleDependency obj = new CycleDependency("c");
         obj.setObj(obj);
-        Assertions.assertEquals("(s=c; obj={s='c'})", StringUtils.toString(obj));
+        Assertions.assertEquals("CycleDependency(s=c, obj=(this CycleDependency))", StringUtils.toString(obj));
+        //case: Object
+        CycleDependency obj2 = new CycleDependency("d");
+        obj.setObj(obj2);
+        Assertions.assertEquals("CycleDependency(s=c, obj=CycleDependency(s=d, obj=null))", StringUtils.toString(obj));
     }
 
     static class CycleDependency {
@@ -159,9 +170,10 @@ public class StringUtilsTest {
 
         @Override
         public String toString() {
-            return "{" +
-                    "s='" + s + '\'' +
-                    '}';
+            return "(" +
+                    "s=" + s + "" +
+                    (obj != this ? ", " + obj.toString() : "") +
+                    ')';
         }
     }
 }
