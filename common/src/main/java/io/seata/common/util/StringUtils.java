@@ -201,13 +201,10 @@ public class StringUtils {
         StringBuilder sb = new StringBuilder();
         sb.append(obj.getClass().getSimpleName()).append("(");
         final int initialLength = sb.length();
+
+        // Gets all fields, excluding static or synthetic fields
         Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
         for (Field field : fields) {
-            // ignore the static or synthetic fields
-            if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
-                continue;
-            }
-
             field.setAccessible(true);
 
             if (sb.length() > initialLength) {
@@ -225,6 +222,7 @@ public class StringUtils {
             } catch (Exception e) {
             }
         }
+
         sb.append(")");
         return sb.toString();
     }

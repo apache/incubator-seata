@@ -122,17 +122,17 @@ public class StringUtilsTest {
 
         //case: List, and cycle dependency
         List<Object> list = new ArrayList<>();
-        list.add(list);
         list.add("xxx");
         list.add(111);
-        Assertions.assertEquals("[" + list.toString() + ", xxx, 111]", StringUtils.toString(list));
+        list.add(list);
+        Assertions.assertEquals("[xxx, 111, (this ArrayList)]", StringUtils.toString(list));
 
         //case: Map, and cycle dependency
         Map<Object, Object> map = new HashMap<>();
-        map.put(map, map);
         map.put("aaa", 111);
         map.put("bbb", true);
-        Assertions.assertEquals("{" + map.toString() + "->" + map.toString() + ", aaa->111, bbb->true}", StringUtils.toString(map));
+        map.put("self", map);
+        Assertions.assertEquals("{aaa->111, bbb->true, self->(this HashMap)}", StringUtils.toString(map));
 
         //case: Enum
         Assertions.assertEquals(ObjectHolder.INSTANCE.name(), StringUtils.toString(ObjectHolder.INSTANCE));

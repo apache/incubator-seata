@@ -113,7 +113,7 @@ public class CollectionUtils {
                 sb.append(", ");
             }
             if (obj == col) {
-                sb.append(obj.toString());
+                sb.append("(this ").append(obj.getClass().getSimpleName()).append(")");
             } else {
                 sb.append(StringUtils.toString(obj));
             }
@@ -142,13 +142,13 @@ public class CollectionUtils {
                 sb.append(", ");
             }
             if (key == map) {
-                sb.append(key.toString());
+                sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
             } else {
                 sb.append(StringUtils.toString(key));
             }
             sb.append("->");
             if (value == map) {
-                sb.append(value.toString());
+                sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
             } else {
                 sb.append(StringUtils.toString(value));
             }
