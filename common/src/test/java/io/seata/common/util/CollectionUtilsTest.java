@@ -229,14 +229,14 @@ public class CollectionUtilsTest {
     @Test
     public void testObjectMapToStringMap() {
         Map<String, Object> objMap = new HashMap<>();
-        Date now = new Date();
+        Date now = new Date(123);
         objMap.put("a", "aa");
         objMap.put("b", 22);
         objMap.put("c", now);
         Map<String, String> strMap = CollectionUtils.toStringMap(objMap);
         Assertions.assertEquals("aa", strMap.get("a"));
         Assertions.assertEquals("22", strMap.get("b"));
-        Assertions.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(now), strMap.get("c"));
+        Assertions.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(now), strMap.get("c"));
     }
 
     @Test
