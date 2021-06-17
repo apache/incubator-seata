@@ -188,7 +188,7 @@ public class StringUtilsTest {
         b.setObj(c);
         c.setObj(a);
         a.setObj(b);
-        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass))))", StringUtils.toString(a));
+        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass), s=null), s=null), s=null)", StringUtils.toString(a));
     }
 
     @Retention(RetentionPolicy.RUNTIME)
