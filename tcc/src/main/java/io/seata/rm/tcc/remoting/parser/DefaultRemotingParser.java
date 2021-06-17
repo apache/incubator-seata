@@ -15,6 +15,7 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,10 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.interceptor.ActionContextUtil;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
 
@@ -187,6 +191,8 @@ public class DefaultRemotingParser {
                                 twoPhaseBusinessAction.argsClasses()));
                         // set argsClasses
                         tccResource.setArgsClasses(twoPhaseBusinessAction.argsClasses());
+                        // set phase tow method's keys
+                        tccResource.setPhaseTwoMethodKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod()));
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
                     }
@@ -200,6 +206,28 @@ public class DefaultRemotingParser {
             remotingBeanDesc.setReference(true);
         }
         return remotingBeanDesc;
+    }
+
+    private String[] getTwoPhaseArgs(Method method) {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        String[] keys = new String[parameterAnnotations.length];
+        /*
+         * get parameter's key
+         * if method's parameter list is like
+         * (BusinessActionContext, @BusinessActionContextParameter("a") A a, @BusinessActionContextParameter("b") B b)
+         * the keys will be [null, a, b]
+         */
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (int j = 0; j < parameterAnnotations[i].length; j++) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
+                    BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
+                    String key = ActionContextUtil.getParamName(param);
+                    keys[i] = key;
+                    break;
+                }
+            }
+        }
+        return keys;
     }
 
     /**

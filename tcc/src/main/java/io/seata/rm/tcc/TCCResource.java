@@ -48,6 +48,8 @@ public class TCCResource implements Resource {
 
     private Class<?>[] argsClasses;
 
+    private String[] phaseTwoMethodKeys;
+
     @Override
     public String getResourceGroupId() {
         return resourceGroupId;
@@ -230,6 +232,22 @@ public class TCCResource implements Resource {
      */
     public void setArgsClasses(Class<?>[] argsClasses) {
         this.argsClasses = argsClasses;
+    }
+
+    /**
+     * get phase two method keys
+     * @return keys array
+     */
+    public String[] getPhaseTwoMethodKeys() {
+        return phaseTwoMethodKeys;
+    }
+
+    /**
+      * set phase two method keys
+      * @param phaseTwoMethodKeys keys array
+     */
+    public void setPhaseTwoMethodKeys(String[] phaseTwoMethodKeys) {
+        this.phaseTwoMethodKeys = phaseTwoMethodKeys;
     }
 
     @Override

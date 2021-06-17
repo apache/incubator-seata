@@ -100,7 +100,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
-            Object[] args = this.getTwoPhaseArgs(commitMethod, tccResource, businessActionContext);
+            Object[] args = this.getTwoPhaseArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -158,7 +158,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
-            Object[] args = this.getTwoPhaseArgs(rollbackMethod, tccResource, businessActionContext);
+            Object[] args = this.getTwoPhaseArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -216,26 +216,14 @@ public class TCCResourceManager extends AbstractResourceManager {
         return businessActionContext;
     }
 
-    private Object[] getTwoPhaseArgs(Method method, TCCResource tccResource,
-                                        BusinessActionContext businessActionContext) {
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        String[] keys = new String[parameterAnnotations.length];
-        /*
-         * get parameter's key
-         * if method's parameter list is like
-         * (BusinessActionContext, @BusinessActionContextParameter("a") A a, @BusinessActionContextParameter("b") B b)
-         * the keys will be [null, a, b]
-         */
-        for (int i = 0; i < parameterAnnotations.length; i++) {
-            for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
-                    BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
-                    String key = ActionContextUtil.getParamName(param);
-                    keys[i] = key;
-                    break;
-                }
-            }
-        }
+    /**
+     * get phase two method's args
+     * @param tccResource tccResource
+     * @param businessActionContext businessActionContext
+     * @return args
+     */
+    private Object[] getTwoPhaseArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
+        String[] keys = tccResource.getPhaseTwoMethodKeys();
         Class<?>[] argsClasses = tccResource.getArgsClasses();
         Object[] args = new Object[argsClasses.length];
         for (int i = 0; i < argsClasses.length; i++) {
