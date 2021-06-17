@@ -191,7 +191,7 @@ public class DefaultRemotingParser {
                                 twoPhaseBusinessAction.argsClasses()));
                         // set argsClasses
                         tccResource.setArgsClasses(twoPhaseBusinessAction.argsClasses());
-                        // set phase tow method's keys
+                        // set phase two method's keys
                         tccResource.setPhaseTwoMethodKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod()));
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
