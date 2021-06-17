@@ -67,7 +67,7 @@ public class CycleDependencyHandler {
     }
 
     public static <O> String wrap(O obj, Function<O, String> function) {
-        boolean isStarting = CycleDependencyHandler.isStarting();
+        boolean isStarting = isStarting();
         try {
             if (!isStarting) {
                 start();
