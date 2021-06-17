@@ -15,10 +15,13 @@
  */
 package io.seata.common.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -26,6 +29,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.sun.xml.internal.bind.v2.util.CollisionCheckStack;
 
 /**
  * Reflection tools
@@ -76,6 +81,11 @@ public final class ReflectionUtil {
     public static Class<?> getClassByName(String className) throws ClassNotFoundException {
         return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
     }
+
+    //endregion
+
+
+    //region Interface
 
     /**
      * get all interface of the clazz
@@ -548,6 +558,23 @@ public final class ReflectionUtil {
     //endregion
 
 
+    //region Annotation
+
+    /**
+     * get annotation values
+     *
+     * @param annotation the annotation
+     * @throws NoSuchFieldException the no such field exception
+     */
+    public static Map<String, Object> getAnnotationValues(Annotation annotation) throws NoSuchFieldException {
+        InvocationHandler h = Proxy.getInvocationHandler(annotation);
+        Field hField = h.getClass().getDeclaredField("memberValues");
+        return (Map<String, Object>)getFieldValue(h, hField);
+    }
+
+    //endregion
+
+
     //region toString
 
     /**
@@ -596,6 +623,20 @@ public final class ReflectionUtil {
      */
     public static String fieldToString(Field field) {
         return fieldToString(field.getDeclaringClass(), field.getName(), field.getType());
+    }
+
+    /**
+     * annotatio to string
+     * @param annotation the annotation
+     * @return the string
+     */
+    public static String annotationToString(Annotation annotation) {
+        if (annotation == null) {
+            return "null";
+        }
+
+        Map<String, Object> values = getAnnotationValues(annotation);
+        return CollectionUtils.toString(values);
     }
 
     /**

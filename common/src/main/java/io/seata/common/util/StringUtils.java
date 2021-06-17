@@ -20,7 +20,9 @@ import io.seata.common.exception.ShouldNeverHappenException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.sql.Ref;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -160,7 +162,8 @@ public class StringUtils {
      * @param obj the obj
      * @return string string
      */
-    public static String toString(Object obj) {
+    @SuppressWarnings("deprecation")
+    public static String toString(final Object obj) {
         if (obj == null) {
             return "null";
         }
@@ -176,50 +179,58 @@ public class StringUtils {
         if (obj instanceof Date) {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(obj);
         }
+        if (obj instanceof Enum) {
+            return obj.getClass().getSimpleName() + "." + ((Enum)obj).name();
+        }
+        if (obj instanceof Annotation) {
+            Annotation annotation = (Annotation)obj;
+            return ReflectionUtil.annotationToString(annotation);
+        }
+
+        //endregion
+
+        //region Convert the Collection and Map
+
         if (obj instanceof Collection) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            if (!((Collection)obj).isEmpty()) {
-                for (Object o : (Collection)obj) {
-                    sb.append(toString(o)).append(",");
-                }
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("]");
-            return sb.toString();
+            Collection<?> col = (Collection<?>)obj;
+            return CollectionUtils.toString(col);
         }
         if (obj instanceof Map) {
-            Map<Object, Object> map = (Map)obj;
-            StringBuilder sb = new StringBuilder();
-            sb.append("{");
-            if (!map.isEmpty()) {
-                map.forEach((key, value) -> {
-                    sb.append(toString(key)).append("->")
-                        .append(toString(value)).append(",");
-                });
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("}");
-            return sb.toString();
+            Map<?, ?> map = (Map<?, ?>)obj;
+            return CollectionUtils.toString(map);
         }
-        StringBuilder sb = new StringBuilder();
-        Field[] fields = obj.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            sb.append(field.getName());
-            sb.append("=");
-            try {
-                Object f = field.get(obj);
-                if (f.getClass() == obj.getClass()) {
-                    sb.append(f.toString());
-                } else {
-                    sb.append(toString(f));
+
+        //endregion
+
+        return CycleDependencyHandler.wrap(obj, o -> {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append(obj.getClass().getSimpleName()).append("(");
+            final int initialLength = sb.length();
+
+            // Gets all fields, excluding static or synthetic fields
+            Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
+            for (Field field : fields) {
+                field.setAccessible(true);
+
+                if (sb.length() > initialLength) {
+                    sb.append(", ");
                 }
-            } catch (Exception e) {
+                sb.append(field.getName());
+                sb.append("=");
+                try {
+                    Object f = field.get(obj);
+                    if (f == obj) {
+                        sb.append("(this ").append(f.getClass().getSimpleName()).append(")");
+                    } else {
+                        sb.append(toString(f));
+                    }
+                } catch (Exception ignore) {
+                }
             }
-            sb.append(";");
-        }
-        return sb.toString();
+
+            sb.append(")");
+            return sb.toString();
+        });
     }
 
     /**
