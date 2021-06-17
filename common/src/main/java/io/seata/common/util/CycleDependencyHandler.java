@@ -52,7 +52,7 @@ public class CycleDependencyHandler {
         objectSet.add(getUniqueSubstituteObject(obj));
     }
 
-    public static boolean hasObject(Object obj) {
+    public static boolean containsObject(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -72,7 +72,7 @@ public class CycleDependencyHandler {
             if (!isStarting) {
                 start();
             } else {
-                if (hasObject(obj)) {
+                if (containsObject(obj)) {
                     return toRefString(obj);
                 }
             }
@@ -89,6 +89,10 @@ public class CycleDependencyHandler {
         }
     }
 
+    public static String toRefString(Object obj) {
+        return "(ref " + obj.getClass().getSimpleName() + ")";
+    }
+
     /**
      * get Unique Substitute Object.
      * Avoid `obj.hashCode()` throwing `StackOverflowError` during cycle dependency.
@@ -97,11 +101,7 @@ public class CycleDependencyHandler {
      * @return the substitute object
      */
     private static Object getUniqueSubstituteObject(Object obj) {
-        // TODO: help-me modify this method to achieve the real generation of the only alternative value
+        // TODO: HELP-WANTED: Optimize this method to ensure uniqueness
         return System.identityHashCode(obj);
-    }
-
-    public static String toRefString(Object obj) {
-        return "(ref " + obj.getClass().getSimpleName() + ")";
     }
 }

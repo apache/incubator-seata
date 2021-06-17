@@ -227,7 +227,7 @@ public class StringUtils {
                     } else {
                         sb.append(toString(f));
                     }
-                } catch (Exception e) {
+                } catch (Exception ignore) {
                 }
             }
 
