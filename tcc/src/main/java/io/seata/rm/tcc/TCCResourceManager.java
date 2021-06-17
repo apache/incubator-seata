@@ -15,7 +15,6 @@
  */
 package io.seata.rm.tcc;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
@@ -34,8 +33,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextParameter;
-import io.seata.rm.tcc.interceptor.ActionContextUtil;
 
 /**
  * TCC resource manager
