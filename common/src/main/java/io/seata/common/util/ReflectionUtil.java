@@ -114,7 +114,7 @@ public final class ReflectionUtil {
     //region Field
 
     /**
-     * Gets all fields.
+     * Gets all fields, excluding static or synthetic fields
      *
      * @param targetClazz the target class
      */

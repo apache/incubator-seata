@@ -15,18 +15,17 @@
  */
 package io.seata.common.util;
 
-import io.seata.common.Constants;
-import io.seata.common.exception.ShouldNeverHappenException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.sql.Ref;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+
+import io.seata.common.Constants;
+import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type String utils.
@@ -167,17 +166,26 @@ public class StringUtils {
         if (obj == null) {
             return "null";
         }
-        if (obj.getClass().isPrimitive()) {
-            return String.valueOf(obj);
-        }
-        if (obj instanceof String) {
-            return (String)obj;
-        }
-        if (obj instanceof Number || obj instanceof Character || obj instanceof Boolean) {
-            return String.valueOf(obj);
+
+        //region Convert simple types to String directly
+
+        if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
+            return obj.toString();
         }
         if (obj instanceof Date) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(obj);
+            Date date = (Date)obj;
+            long time = date.getTime();
+            String dateFormat;
+            if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0 && time % 1000 == 0) {
+                dateFormat = "yyyy-MM-dd";
+            } else if (time % (60 * 1000) == 0) {
+                dateFormat = "yyyy-MM-dd HH:mm";
+            } else if (time % 1000 == 0) {
+                dateFormat = "yyyy-MM-dd HH:mm:ss";
+            } else {
+                dateFormat = "yyyy-MM-dd HH:mm:ss.SSS";
+            }
+            return new SimpleDateFormat(dateFormat).format(obj);
         }
         if (obj instanceof Enum) {
             return obj.getClass().getSimpleName() + "." + ((Enum)obj).name();
