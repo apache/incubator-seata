@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -190,9 +191,17 @@ public class StringUtils {
         if (obj instanceof Enum) {
             return obj.getClass().getSimpleName() + "." + ((Enum)obj).name();
         }
+        if (obj instanceof Class) {
+            return ReflectionUtil.classToString((Class<?>)obj);
+        }
+        if (obj instanceof Field) {
+            return ReflectionUtil.fieldToString((Field)obj);
+        }
+        if (obj instanceof Method) {
+            return ReflectionUtil.methodToString((Method)obj);
+        }
         if (obj instanceof Annotation) {
-            Annotation annotation = (Annotation)obj;
-            return ReflectionUtil.annotationToString(annotation);
+            return ReflectionUtil.annotationToString((Annotation)obj);
         }
 
         //endregion
@@ -200,12 +209,10 @@ public class StringUtils {
         //region Convert the Collection and Map
 
         if (obj instanceof Collection) {
-            Collection<?> col = (Collection<?>)obj;
-            return CollectionUtils.toString(col);
+            return CollectionUtils.toString((Collection<?>)obj);
         }
         if (obj instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>)obj;
-            return CollectionUtils.toString(map);
+            return CollectionUtils.toString((Map<?, ?>)obj);
         }
 
         //endregion

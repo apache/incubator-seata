@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sun.xml.internal.bind.v2.util.CollisionCheckStack;
-
 /**
  * Reflection tools
  *
@@ -568,8 +566,7 @@ public final class ReflectionUtil {
      */
     public static Map<String, Object> getAnnotationValues(Annotation annotation) throws NoSuchFieldException {
         InvocationHandler h = Proxy.getInvocationHandler(annotation);
-        Field hField = h.getClass().getDeclaredField("memberValues");
-        return (Map<String, Object>)getFieldValue(h, hField);
+        return (Map<String, Object>)getFieldValue(h, "memberValues");
     }
 
     //endregion
@@ -578,29 +575,13 @@ public final class ReflectionUtil {
     //region toString
 
     /**
-     * method to string
+     * class to string
      *
-     * @param clazz          the clazz
-     * @param methodName     the method name
-     * @param parameterTypes the parameter types
+     * @param clazz the class
      * @return the string
      */
-    public static String methodToString(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
-        return clazz.getName() + "." + methodName + parameterTypesToString(parameterTypes);
-    }
-
-    /**
-     * method to string
-     *
-     * @param method the method
-     * @return the string
-     */
-    public static String methodToString(Method method) {
-        String methodStr = methodToString(method.getDeclaringClass(), method.getName(), method.getParameterTypes());
-        if (Modifier.isStatic(method.getModifiers())) {
-            methodStr = "static " + methodStr;
-        }
-        return methodStr;
+    public static String classToString(Class<?> clazz) {
+        return "Class<" + clazz.getSimpleName() + ">";
     }
 
     /**
@@ -612,7 +593,7 @@ public final class ReflectionUtil {
      * @return the string
      */
     public static String fieldToString(Class<?> clazz, String fieldName, Class<?> fieldType) {
-        return fieldType.getName() + " field " + clazz.getName() + "." + fieldName;
+        return "Field<" + clazz.getSimpleName() + ".(" + fieldType.getSimpleName() + ")" + fieldName + ">";
     }
 
     /**
@@ -626,7 +607,35 @@ public final class ReflectionUtil {
     }
 
     /**
+     * method to string
+     *
+     * @param clazz          the clazz
+     * @param methodName     the method name
+     * @param parameterTypes the parameter types
+     * @return the string
+     */
+    public static String methodToString(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+        return "Method<" + clazz.getSimpleName() + "." + methodName + parameterTypesToString(parameterTypes) + ">";
+    }
+
+    /**
+     * method to string
+     *
+     * @param method the method
+     * @return the string
+     */
+    public static String methodToString(Method method) {
+        String methodStr = method.getDeclaringClass().getSimpleName() + "." + method.getName()
+                + parameterTypesToString(method.getParameterTypes());
+        if (Modifier.isStatic(method.getModifiers())) {
+            methodStr = "static " + methodStr;
+        }
+        return "Method<" + methodStr + ">";
+    }
+
+    /**
      * annotatio to string
+     *
      * @param annotation the annotation
      * @return the string
      */
@@ -635,8 +644,9 @@ public final class ReflectionUtil {
             return "null";
         }
 
-        Map<String, Object> values = getAnnotationValues(annotation);
-        return CollectionUtils.toString(values);
+        String annoStr = annotation.toString();
+        String annoValueStr = annoStr.substring(annoStr.indexOf('('));
+        return "@" + annotation.annotationType().getSimpleName() + annoValueStr;
     }
 
     /**
@@ -654,7 +664,7 @@ public final class ReflectionUtil {
                     sb.append(", ");
                 }
                 Class<?> c = parameterTypes[i];
-                sb.append((c == null) ? "null" : c.getName());
+                sb.append((c == null) ? "null" : c.getSimpleName());
             }
         }
         sb.append(")");
