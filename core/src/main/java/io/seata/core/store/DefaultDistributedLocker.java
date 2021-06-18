@@ -13,19 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.db.lock.distributed;
-
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.core.store.DistributedLockDO;
-import io.seata.core.store.DistributedLocker;
+package io.seata.core.store;
 
 /**
- * @description Oracle distributedLocker
+ * @description Default distributed locker
  * @author zhongxiang.wang
  */
-@LoadLevel(name = "oracle", scope = Scope.SINGLETON)
-public class OracleDistributedLocker implements DistributedLocker {
+public class DefaultDistributedLocker implements DistributedLocker{
 
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {

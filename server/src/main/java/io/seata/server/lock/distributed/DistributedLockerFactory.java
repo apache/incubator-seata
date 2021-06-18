@@ -15,11 +15,8 @@
  */
 package io.seata.server.lock.distributed;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.CollectionUtils;
+import io.seata.core.store.DefaultDistributedLocker;
 import io.seata.core.store.DistributedLocker;
 
 /**
@@ -28,7 +25,7 @@ import io.seata.core.store.DistributedLocker;
  */
 public class DistributedLockerFactory {
 
-    private static final Map<String, DistributedLocker> DISTRIBUTED_LOCKER_MAP = new ConcurrentHashMap<>();
+    private static volatile DistributedLocker DISTRIBUTED_LOCKER = null;
 
     /**
      * Get the distributed locker by lockerType
@@ -37,7 +34,16 @@ public class DistributedLockerFactory {
      * @return the distributed locker
      */
     public static DistributedLocker getDistributedLocker(String lockerType) {
-        return CollectionUtils.computeIfAbsent(DISTRIBUTED_LOCKER_MAP, lockerType, key -> EnhancedServiceLoader.load(DistributedLocker.class, lockerType));
+        if (DISTRIBUTED_LOCKER == null) {
+            synchronized (DistributedLocker.class) {
+                if (DISTRIBUTED_LOCKER == null) {
+                    DISTRIBUTED_LOCKER = EnhancedServiceLoader.load(DistributedLocker.class, lockerType);
+                    if (DISTRIBUTED_LOCKER == null) {
+                        DISTRIBUTED_LOCKER = new DefaultDistributedLocker();
+                    }
+                }
+            }
+        }
+        return DISTRIBUTED_LOCKER;
     }
-
 }

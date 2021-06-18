@@ -1,5 +1,1 @@
 io.seata.server.storage.redis.lock.RedisDistributedLocker
-io.seata.server.storage.file.lock.FileDistributedLocker
-io.seata.server.storage.db.lock.distributed.MysqlDistributedLocker
-io.seata.server.storage.db.lock.distributed.OracleDistributedLocker
-io.seata.server.storage.db.lock.distributed.PostgresqlDistributedLocker
