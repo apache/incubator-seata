@@ -186,7 +186,7 @@ public final class ReflectionUtil {
      * @return field value
      * @throws IllegalArgumentException if {@code target} is {@code null}
      * @throws SecurityException        the security exception
-     * @throws ClassCastException       if the class of the {@code var} is not equals to the field type
+     * @throws ClassCastException       if the type of the variable receiving the field value is not equals to the field type
      */
     public static <T> T getFieldValue(Object target, Field field)
             throws IllegalArgumentException, SecurityException {
@@ -216,7 +216,7 @@ public final class ReflectionUtil {
      * @throws IllegalArgumentException if {@code target} is {@code null}
      * @throws NoSuchFieldException     if the field named {@code fieldName} does not exist
      * @throws SecurityException        the security exception
-     * @throws ClassCastException       if the class of the {@code var} is not equals to the field type
+     * @throws ClassCastException       if the type of the variable receiving the field value is not equals to the field type
      */
     public static <T> T getFieldValue(Object target, String fieldName)
             throws IllegalArgumentException, NoSuchFieldException, SecurityException {
