@@ -16,6 +16,7 @@
 package io.seata.server.lock.distributed;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.core.store.DefaultDistributedLocker;
 import io.seata.core.store.DistributedLocker;
 
@@ -37,7 +38,11 @@ public class DistributedLockerFactory {
         if (DISTRIBUTED_LOCKER == null) {
             synchronized (DistributedLocker.class) {
                 if (DISTRIBUTED_LOCKER == null) {
-                    DISTRIBUTED_LOCKER = EnhancedServiceLoader.load(DistributedLocker.class, lockerType);
+                    try {
+                        DISTRIBUTED_LOCKER = EnhancedServiceLoader.load(DistributedLocker.class, lockerType);
+                    } catch (EnhancedServiceNotFoundException ex) {
+                        DISTRIBUTED_LOCKER = new DefaultDistributedLocker();
+                    }
                     if (DISTRIBUTED_LOCKER == null) {
                         DISTRIBUTED_LOCKER = new DefaultDistributedLocker();
                     }
