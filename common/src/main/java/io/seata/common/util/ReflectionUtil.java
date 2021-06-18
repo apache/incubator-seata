@@ -182,11 +182,13 @@ public final class ReflectionUtil {
      *
      * @param target the target
      * @param field  the field of the target
+     * @param <T>    the field type
      * @return field value
      * @throws IllegalArgumentException if {@code target} is {@code null}
      * @throws SecurityException        the security exception
+     * @throws ClassCastException       if the class of the {@code var} is not equals to the field type
      */
-    public static Object getFieldValue(Object target, Field field)
+    public static <T> T getFieldValue(Object target, Field field)
             throws IllegalArgumentException, SecurityException {
         if (target == null) {
             throw new IllegalArgumentException("target must be not null");
@@ -197,7 +199,7 @@ public final class ReflectionUtil {
                 field.setAccessible(true);
             }
             try {
-                return field.get(target);
+                return (T)field.get(target);
             } catch (IllegalAccessException ignore) {
                 // avoid other threads executing `field.setAccessible(false)`
             }
@@ -209,12 +211,14 @@ public final class ReflectionUtil {
      *
      * @param target    the target
      * @param fieldName the field name
+     * @param <T>       the field type
      * @return field value
      * @throws IllegalArgumentException if {@code target} is {@code null}
      * @throws NoSuchFieldException     if the field named {@code fieldName} does not exist
      * @throws SecurityException        the security exception
+     * @throws ClassCastException       if the class of the {@code var} is not equals to the field type
      */
-    public static Object getFieldValue(Object target, String fieldName)
+    public static <T> T getFieldValue(Object target, String fieldName)
             throws IllegalArgumentException, NoSuchFieldException, SecurityException {
         if (target == null) {
             throw new IllegalArgumentException("target must be not null");
