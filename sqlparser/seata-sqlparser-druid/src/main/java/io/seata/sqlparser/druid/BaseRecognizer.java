@@ -21,6 +21,8 @@ import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
+
+import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLRecognizer;
 
 /**
@@ -68,6 +70,18 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         } else {
             throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
         }
+    }
+
+    protected void wrapSQLParsingException(SQLExpr expr) {
+        String errorMsg;
+        try {
+            errorMsg =
+                new StringBuilder("Unknown SQLExpr: ").append(expr.getClass()).append(" ").append(expr).toString();
+        } catch (Exception e) {
+            // druid 1.2.6 SQLObjectImpl#toString exist NPE https://github.com/alibaba/druid/issues/4290
+            throw new SQLParsingException("Unknown SQLExpr: " + e.getMessage(), e);
+        }
+        throw new SQLParsingException(errorMsg);
     }
 
     @Override
