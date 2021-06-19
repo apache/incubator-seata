@@ -27,6 +27,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
+import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
@@ -191,7 +192,8 @@ public class DefaultRemotingParser {
                         // set argsClasses
                         tccResource.setArgsClasses(twoPhaseBusinessAction.argsClasses());
                         // set phase two method's keys
-                        tccResource.setPhaseTwoMethodKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod()));
+                        tccResource.setPhaseTwoMethodKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod(),
+                                twoPhaseBusinessAction.argsClasses()));
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
                     }
@@ -207,7 +209,7 @@ public class DefaultRemotingParser {
         return remotingBeanDesc;
     }
 
-    private String[] getTwoPhaseArgs(Method method) {
+    private String[] getTwoPhaseArgs(Method method, Class<?>[] argsClasses) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         String[] keys = new String[parameterAnnotations.length];
         /*
@@ -217,6 +219,10 @@ public class DefaultRemotingParser {
          * the keys will be [null, a, b]
          */
         for (int i = 0; i < parameterAnnotations.length; i++) {
+            if (parameterAnnotations[i].length == 0 && !(argsClasses[i].equals(BusinessActionContext.class))) {
+                throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
+                        "BusinessActionContextParameter");
+            }
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
