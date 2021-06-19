@@ -97,7 +97,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
-            Object[] args = this.getTwoPhaseArgs(tccResource, businessActionContext);
+            Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -155,7 +155,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
-            Object[] args = this.getTwoPhaseArgs(tccResource, businessActionContext);
+            Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -214,20 +214,40 @@ public class TCCResourceManager extends AbstractResourceManager {
     }
 
     /**
-     * get phase two method's args
+     * get phase two commit method's args
      * @param tccResource tccResource
      * @param businessActionContext businessActionContext
      * @return args
      */
-    private Object[] getTwoPhaseArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
-        String[] keys = tccResource.getPhaseTwoMethodKeys();
-        Class<?>[] argsClasses = tccResource.getArgsClasses();
-        Object[] args = new Object[argsClasses.length];
-        for (int i = 0; i < argsClasses.length; i++) {
-            if (argsClasses[i].equals(BusinessActionContext.class)) {
+    private Object[] getTwoPhaseCommitArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
+        String[] keys = tccResource.getPhaseTwoCommitKeys();
+        Class<?>[] argsCommitClasses = tccResource.getCommitArgsClasses();
+        Object[] args = new Object[argsCommitClasses.length];
+        for (int i = 0; i < argsCommitClasses.length; i++) {
+            if (argsCommitClasses[i].equals(BusinessActionContext.class)) {
                 args[i] = businessActionContext;
             } else {
-                args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
+                args[i] = businessActionContext.getActionContext(keys[i], argsCommitClasses[i]);
+            }
+        }
+        return args;
+    }
+
+    /**
+     * get phase two rollback method's args
+     * @param tccResource tccResource
+     * @param businessActionContext businessActionContext
+     * @return args
+     */
+    private Object[] getTwoPhaseRollbackArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
+        String[] keys = tccResource.getPhaseTwoRollbackKeys();
+        Class<?>[] argsRollbackClasses = tccResource.getRollbackArgsClasses();
+        Object[] args = new Object[argsRollbackClasses.length];
+        for (int i = 0; i < argsRollbackClasses.length; i++) {
+            if (argsRollbackClasses[i].equals(BusinessActionContext.class)) {
+                args[i] = businessActionContext;
+            } else {
+                args[i] = businessActionContext.getActionContext(keys[i], argsRollbackClasses[i]);
             }
         }
         return args;

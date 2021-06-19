@@ -46,9 +46,13 @@ public class TCCResource implements Resource {
 
     private Method rollbackMethod;
 
-    private Class<?>[] argsClasses;
+    private Class<?>[] commitArgsClasses;
 
-    private String[] phaseTwoMethodKeys;
+    private Class<?>[] rollbackArgsClasses;
+
+    private String[] phaseTwoCommitKeys;
+
+    private String[] phaseTwoRollbackKeys;
 
     @Override
     public String getResourceGroupId() {
@@ -219,35 +223,67 @@ public class TCCResource implements Resource {
     }
 
     /**
-     * get args array
+     * get commit method args
      * @return class array
      */
-    public Class<?>[] getArgsClasses() {
-        return argsClasses;
+    public Class<?>[] getCommitArgsClasses() {
+        return commitArgsClasses;
     }
 
     /**
-     * set args array
-     * @param argsClasses class array
+     * set commit method args
+     * @param commitArgsClasses commitArgsClasses
      */
-    public void setArgsClasses(Class<?>[] argsClasses) {
-        this.argsClasses = argsClasses;
+    public void setCommitArgsClasses(Class<?>[] commitArgsClasses) {
+        this.commitArgsClasses = commitArgsClasses;
     }
 
     /**
-     * get phase two method keys
+     * get rollback method args
+     * @return class array
+     */
+    public Class<?>[] getRollbackArgsClasses() {
+        return rollbackArgsClasses;
+    }
+
+    /**
+     * set rollback method args
+     * @param rollbackArgsClasses rollbackArgsClasses
+     */
+    public void setRollbackArgsClasses(Class<?>[] rollbackArgsClasses) {
+        this.rollbackArgsClasses = rollbackArgsClasses;
+    }
+
+    /**
+     * get commit method args key
      * @return keys array
      */
-    public String[] getPhaseTwoMethodKeys() {
-        return phaseTwoMethodKeys;
+    public String[] getPhaseTwoCommitKeys() {
+        return phaseTwoCommitKeys;
     }
 
     /**
-      * set phase two method keys
-      * @param phaseTwoMethodKeys keys array
+     * set commit method args key
+     * @param phaseTwoCommitKeys phaseTwoCommitKeys
      */
-    public void setPhaseTwoMethodKeys(String[] phaseTwoMethodKeys) {
-        this.phaseTwoMethodKeys = phaseTwoMethodKeys;
+    public void setPhaseTwoCommitKeys(String[] phaseTwoCommitKeys) {
+        this.phaseTwoCommitKeys = phaseTwoCommitKeys;
+    }
+
+    /**
+     * get rollback method args keys
+     * @return keys array
+     */
+    public String[] getPhaseTwoRollbackKeys() {
+        return phaseTwoRollbackKeys;
+    }
+
+    /**
+     * set rollback method args key
+     * @param phaseTwoRollbackKeys phaseTwoRollbackKeys
+     */
+    public void setPhaseTwoRollbackKeys(String[] phaseTwoRollbackKeys) {
+        this.phaseTwoRollbackKeys = phaseTwoRollbackKeys;
     }
 
     @Override
