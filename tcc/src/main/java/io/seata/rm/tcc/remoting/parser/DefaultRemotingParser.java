@@ -229,10 +229,10 @@ public class DefaultRemotingParser {
                     keys[i] = key;
                     break;
                 }
-                if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
-                    throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
-                            "BusinessActionContextParameter");
-                }
+            }
+            if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
+                throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
+                        "BusinessActionContextParameter");
             }
         }
         return keys;

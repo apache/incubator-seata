@@ -16,13 +16,9 @@ public class DefaultRemotingParserTest {
         Class<?> tccActionImpl = Class.forName("io.seata.rm.tcc.TccActionImpl");
         Class<?>[] argsCommitClasses = new Class[] {BusinessActionContext.class, TccParam.class, Integer.class};
         Method commitMethod = tccActionImpl.getMethod("commit", argsCommitClasses);
-        try {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             defaultRemotingParser.getTwoPhaseArgs(commitMethod, argsCommitClasses);
-        } catch (Exception e) {
-            Assertions.assertEquals("non-BusinessActionContext parameter shoud use annotation " +
-                            "BusinessActionContextParameter", e.getMessage());
-        }
-
+        });
         Class<?>[] argsRollbackClasses = new Class[] {BusinessActionContext.class, TccParam.class};
         Method rollbackMethod = tccActionImpl.getMethod("rollback", argsRollbackClasses);
         String[] keys = defaultRemotingParser.getTwoPhaseArgs(rollbackMethod, argsRollbackClasses);
