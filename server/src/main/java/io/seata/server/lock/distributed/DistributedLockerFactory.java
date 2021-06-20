@@ -15,6 +15,9 @@
  */
 package io.seata.server.lock.distributed;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.core.store.DefaultDistributedLocker;
@@ -25,6 +28,11 @@ import io.seata.core.store.DistributedLocker;
  * @author  zhongxiang.wang
  */
 public class DistributedLockerFactory {
+
+    /**
+     * The constant LOGGER.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributedLockerFactory.class);
 
     private static volatile DistributedLocker DISTRIBUTED_LOCKER = null;
 
@@ -41,7 +49,7 @@ public class DistributedLockerFactory {
                     try {
                         DISTRIBUTED_LOCKER = EnhancedServiceLoader.load(DistributedLocker.class, lockerType);
                     } catch (EnhancedServiceNotFoundException ex) {
-                        DISTRIBUTED_LOCKER = new DefaultDistributedLocker();
+                        LOGGER.error("Get distributed locker failed:{}", ex.getMessage(), ex);
                     }
                     if (DISTRIBUTED_LOCKER == null) {
                         DISTRIBUTED_LOCKER = new DefaultDistributedLocker();
