@@ -223,9 +223,11 @@ public class DefaultRemotingParser {
          */
         for (int i = 0; i < parameterAnnotations.length; i++) {
             if (parameterAnnotations[i].length == 0 && !(argsClasses[i].equals(BusinessActionContext.class))) {
+                // do not use annotation BusinessActionContextParameter but is non-BusinessActionContext
                 throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
                         "BusinessActionContextParameter");
             } else if (!argsClasses[i].equals(BusinessActionContextParameter.class)) {
+                // use non-BusinessActionContextParameter parameter
                 throw new IllegalArgumentException("commit or rollback method's parameter shoud use annotation " +
                         "BusinessActionContextParameter");
             }
