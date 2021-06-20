@@ -212,7 +212,7 @@ public class DefaultRemotingParser {
         return remotingBeanDesc;
     }
 
-    private String[] getTwoPhaseArgs(Method method, Class<?>[] argsClasses) {
+    protected String[] getTwoPhaseArgs(Method method, Class<?>[] argsClasses) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         String[] keys = new String[parameterAnnotations.length];
         /*
@@ -222,11 +222,6 @@ public class DefaultRemotingParser {
          * the keys will be [null, a, b]
          */
         for (int i = 0; i < parameterAnnotations.length; i++) {
-            /*if (parameterAnnotations[i].length == 0 && !(argsClasses[i].equals(BusinessActionContext.class))) {
-                // do not use annotation BusinessActionContextParameter but is non-BusinessActionContext
-                throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
-                        "BusinessActionContextParameter");
-            }*/
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];

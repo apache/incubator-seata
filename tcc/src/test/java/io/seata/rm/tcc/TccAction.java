@@ -19,6 +19,8 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import org.checkerframework.checker.units.qual.A;
+import org.junit.jupiter.params.ParameterizedTest;
 
 import java.util.List;
 
@@ -51,7 +53,8 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean commit(BusinessActionContext actionContext);
+    boolean commit(BusinessActionContext actionContext,
+                   @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a);
 
     /**
      * Rollback boolean.
@@ -59,5 +62,5 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean rollback(BusinessActionContext actionContext);
+    boolean rollback(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
 }
