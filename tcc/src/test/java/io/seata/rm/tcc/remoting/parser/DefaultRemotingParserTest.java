@@ -22,14 +22,8 @@ public class DefaultRemotingParserTest {
         Class<?>[] argsRollbackClasses = new Class[] {BusinessActionContext.class, TccParam.class};
         Method rollbackMethod = tccActionImpl.getMethod("rollback", argsRollbackClasses);
         String[] keys = defaultRemotingParser.getTwoPhaseArgs(rollbackMethod, argsRollbackClasses);
-        for (int i = 0; i < keys.length; i++) {
-            if (i == 0) {
-                Assertions.assertNull(keys[i]);
-            }
-            if (i == 1) {
-                Assertions.assertEquals("tccParam", keys[i]);
-            }
-        }
+        Assertions.assertNull(keys[0]);
+        Assertions.assertEquals("tccParam", keys[1]);
     }
 
 }
