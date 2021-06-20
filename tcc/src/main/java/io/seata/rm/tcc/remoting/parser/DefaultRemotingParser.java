@@ -222,21 +222,21 @@ public class DefaultRemotingParser {
          * the keys will be [null, a, b]
          */
         for (int i = 0; i < parameterAnnotations.length; i++) {
-            if (parameterAnnotations[i].length == 0 && !(argsClasses[i].equals(BusinessActionContext.class))) {
+            /*if (parameterAnnotations[i].length == 0 && !(argsClasses[i].equals(BusinessActionContext.class))) {
                 // do not use annotation BusinessActionContextParameter but is non-BusinessActionContext
                 throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
                         "BusinessActionContextParameter");
-            } else if (!argsClasses[i].equals(BusinessActionContextParameter.class)) {
-                // use non-BusinessActionContextParameter parameter
-                throw new IllegalArgumentException("commit or rollback method's parameter shoud use annotation " +
-                        "BusinessActionContextParameter");
-            }
+            }*/
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
                     String key = ActionContextUtil.getParamName(param);
                     keys[i] = key;
                     break;
+                }
+                if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
+                    throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
+                            "BusinessActionContextParameter");
                 }
             }
         }
