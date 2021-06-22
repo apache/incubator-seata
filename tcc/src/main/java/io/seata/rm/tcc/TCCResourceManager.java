@@ -240,7 +240,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     private Object[] getTwoPhaseMethodParams(String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
         Object[] args = new Object[argsClasses.length];
         for (int i = 0; i < argsClasses.length; i++) {
-            if (args[i].equals(BusinessActionContext.class)) {
+            if (argsClasses[i].equals(BusinessActionContext.class)) {
                 args[i] = businessActionContext;
             } else {
                 args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
