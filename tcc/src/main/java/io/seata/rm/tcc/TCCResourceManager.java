@@ -222,15 +222,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     private Object[] getTwoPhaseCommitArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
         String[] keys = tccResource.getPhaseTwoCommitKeys();
         Class<?>[] argsCommitClasses = tccResource.getCommitArgsClasses();
-        Object[] args = new Object[argsCommitClasses.length];
-        for (int i = 0; i < argsCommitClasses.length; i++) {
-            if (argsCommitClasses[i].equals(BusinessActionContext.class)) {
-                args[i] = businessActionContext;
-            } else {
-                args[i] = businessActionContext.getActionContext(keys[i], argsCommitClasses[i]);
-            }
-        }
-        return args;
+        return this.getTwoPhaseMethodParams(keys, argsCommitClasses, businessActionContext);
     }
 
     /**
@@ -242,12 +234,16 @@ public class TCCResourceManager extends AbstractResourceManager {
     private Object[] getTwoPhaseRollbackArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
         String[] keys = tccResource.getPhaseTwoRollbackKeys();
         Class<?>[] argsRollbackClasses = tccResource.getRollbackArgsClasses();
-        Object[] args = new Object[argsRollbackClasses.length];
-        for (int i = 0; i < argsRollbackClasses.length; i++) {
-            if (argsRollbackClasses[i].equals(BusinessActionContext.class)) {
+        return this.getTwoPhaseMethodParams(keys, argsRollbackClasses, businessActionContext);
+    }
+
+    private Object[] getTwoPhaseMethodParams(String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
+        Object[] args = new Object[argsClasses.length];
+        for (int i = 0; i < argsClasses.length; i++) {
+            if (args[i].equals(BusinessActionContext.class)) {
                 args[i] = businessActionContext;
             } else {
-                args[i] = businessActionContext.getActionContext(keys[i], argsRollbackClasses[i]);
+                args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
             }
         }
         return args;
