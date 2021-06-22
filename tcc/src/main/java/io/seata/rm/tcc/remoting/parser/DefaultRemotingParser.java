@@ -231,7 +231,7 @@ public class DefaultRemotingParser {
                 }
             }
             if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
-                throw new IllegalArgumentException("non-BusinessActionContext parameter shoud use annotation " +
+                throw new IllegalArgumentException("non-BusinessActionContext parameter should use annotation " +
                         "BusinessActionContextParameter");
             }
         }
