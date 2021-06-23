@@ -19,7 +19,7 @@ package io.seata.core.store.db.sql.distribute.lock;
  * @author chd
  */
 public class DistributeLockSqlFactory {
-    private static DistributeLockSql DISTRIBUTE_LOCK_SQL = new BaseDistributeLockSql();
+    private static final DistributeLockSql DISTRIBUTE_LOCK_SQL = new BaseDistributeLockSql();
 
     /**
      * get the lock store sql

@@ -38,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTE_LOCK_DB_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTE_LOCK_EXPIRE;
+import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTE_LOCK_DB_TABLE;
 
 /**
@@ -46,11 +48,13 @@ import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTE_LOCK_DB_TABLE
 public class DistributedLockStoreDAO implements DistributedLockStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedLockStoreDAO.class);
 
-    private DataSource distributedLockDataSource;
+    private final DataSource distributedLockDataSource;
 
-    private String distributeLockTable;
+    private final String distributeLockTable;
 
-    private String dbType;
+    private final Long expireTime;
+
+    private final String dbType;
 
     /**
      * Instantiates a new Log store data base dao.
@@ -60,6 +64,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
     public DistributedLockStoreDAO(DataSource distributedLockDataSource) {
         Configuration configuration = ConfigurationFactory.getInstance();
         distributeLockTable = configuration.getConfig(DISTRIBUTE_LOCK_DB_TABLE, DEFAULT_DISTRIBUTE_LOCK_DB_TABLE);
+        expireTime = configuration.getLong(DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTE_LOCK_EXPIRE);
         dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
 
         this.distributedLockDataSource = distributedLockDataSource;
@@ -82,7 +87,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                 return ret;
             }
 
-            if (distributedLockDOFromDB.getExpire() >= System.currentTimeMillis()) {
+            if (distributedLockDOFromDB.getExpireTime() >= System.currentTimeMillis()) {
                 LOGGER.info("the distribute lock for key :{} is holding by :{}, acquire lock failure.",
                         distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
                 connection.commit();
@@ -127,7 +132,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                 throw new ShouldNeverHappenException("distributeLockDO would not be null when release distribute lock");
             }
 
-            if (distributedLockDOFromDB.getExpire() >= System.currentTimeMillis()
+            if (distributedLockDOFromDB.getExpireTime() >= System.currentTimeMillis()
                     && !Objects.equals(distributedLockDOFromDB.getLockValue(), distributedLockDO.getLockValue())) {
                 LOGGER.warn("the distribute lock for key :{} is holding by :{}, skip the release lock.",
                         distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
@@ -169,7 +174,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
 
             while (resultSet.next()) {
                 DistributedLockDO distributedLock = new DistributedLockDO();
-                distributedLock.setExpire(resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE));
+                distributedLock.setExpireTime(resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE));
                 distributedLock.setLockValue(resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE));
                 distributedLock.setLockKey(key);
                 return distributedLock;
@@ -183,7 +188,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                 .getInsertSql(distributeLockTable))) {
             insertPst.setString(1, distributedLockDO.getLockKey());
             insertPst.setString(2, distributedLockDO.getLockValue());
-            insertPst.setLong(3, distributedLockDO.getExpire());
+            insertPst.setLong(3, distributedLockDO.getExpireTime());
             return insertPst.executeUpdate() > 0;
         }
     }
@@ -192,7 +197,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
         try (PreparedStatement updatePst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType)
                 .getUpdateSql(distributeLockTable))) {
             updatePst.setString(1, distributedLockDO.getLockValue());
-            updatePst.setLong(2, distributedLockDO.getExpire());
+            updatePst.setLong(2, distributedLockDO.getExpireTime());
             updatePst.setString(3, distributedLockDO.getLockKey());
             return updatePst.executeUpdate() > 0;
         }

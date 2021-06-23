@@ -225,7 +225,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
         DistributedLockDO distributedLockDO = new DistributedLockDO();
         distributedLockDO.setLockKey(key);
         distributedLockDO.setLockValue(lockValue);
-        distributedLockDO.setExpire(System.currentTimeMillis() + 15 * 60 * 1000);
+        distributedLockDO.setExpireTime(System.currentTimeMillis() + 15 * 60 * 1000);
         return distributedLockStore.acquireLock(distributedLockDO);
     }
 
@@ -234,7 +234,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
         DistributedLockDO distributedLockDO = new DistributedLockDO();
         distributedLockDO.setLockKey(key);
         distributedLockDO.setLockValue(lockValue);
-        distributedLockDO.setExpire(0L);
+        distributedLockDO.setExpireTime(0L);
         return distributedLockStore.releaseLock(distributedLockDO);
     }
 }
