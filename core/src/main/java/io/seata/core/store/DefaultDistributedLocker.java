@@ -13,24 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.oracle.keyword;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
+package io.seata.core.store;
 
 /**
- * @author will
+ * @description Default distributed locker
+ * @author zhongxiang.wang
  */
-public class OracleKeywordCheckerTest {
+public class DefaultDistributedLocker implements DistributedLocker {
 
-    @Test
-    public void testOracleKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
-        Assertions.assertNotNull(keywordChecker);
+    @Override
+    public boolean acquireLock(DistributedLockDO distributedLockDO) {
+        return true;
     }
 
+    @Override
+    public boolean releaseLock(DistributedLockDO distributedLockDO) {
+        return true;
+    }
 }
