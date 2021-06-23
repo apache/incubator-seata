@@ -15,12 +15,13 @@
  */
 package io.seata.core.store;
 
-import io.seata.common.util.StringUtils;
-
 /**
+ * @description: Distributed lock DO
+ * @author zhongxiang.wang 
  * @author chd
  */
 public class DistributedLockDO {
+
     /**
      * the key of distributed lock
      */
@@ -30,9 +31,9 @@ public class DistributedLockDO {
      */
     private String lockValue;
     /**
-     * the expire of distributed lock
+     * the expire time of distributed lock,time unit is milliseconds
      */
-    private Long expire;
+    private Long expireTime;
 
     public String getLockKey() {
         return lockKey;
@@ -50,16 +51,12 @@ public class DistributedLockDO {
         this.lockValue = lockValue;
     }
 
-    public Long getExpire() {
-        return expire;
+    public Long getExpireTime() {
+        return expireTime;
     }
 
-    public void setExpire(Long expire) {
-        this.expire = expire;
+    public void setExpireTime(Long expireTime) {
+        this.expireTime = expireTime;
     }
 
-    @Override
-    public String toString() {
-        return StringUtils.toString(this);
-    }
 }

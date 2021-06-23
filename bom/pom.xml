@@ -126,6 +126,7 @@
         <hessian.version>4.0.63</hessian.version>
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
+        <mariadb.version>2.7.2</mariadb.version>
     </properties>
 
     <dependencyManagement>
@@ -538,6 +539,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.mariadb.jdbc</groupId>
+                <artifactId>mariadb-java-client</artifactId>
+                <version>${mariadb.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -587,7 +593,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
                                 </configuration>
                             </execution>
                         </executions>
