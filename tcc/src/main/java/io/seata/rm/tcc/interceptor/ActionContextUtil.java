@@ -119,7 +119,12 @@ public final class ActionContextUtil {
                 actionContext.putAll(paramContext);
             }
         } else {
-            putObjectByParamName(paramName, paramValue, annotation, actionContext);
+            // get param name
+            String paramNameFromAnnotation = getParamNameFromAnnotation(annotation);
+            if (StringUtils.isNotBlank(paramNameFromAnnotation)) {
+                paramName = paramNameFromAnnotation;
+            }
+            putActionContextWithoutHandle(actionContext, paramName, paramValue);
         }
     }
 
@@ -155,28 +160,12 @@ public final class ActionContextUtil {
         return paramName;
     }
 
-    public static void putObjectByParamName(String paramName, Object paramValue, @Nonnull BusinessActionContextParameter annotation,
-            @Nonnull final Map<String, Object> actionContext) {
-        if (paramValue == null) {
-            return;
-        }
-
-        // get param name
-        String paramNameFromAnnotation = getParamNameFromAnnotation(annotation);
-        if (StringUtils.isNotBlank(paramNameFromAnnotation)) {
-            paramName = paramNameFromAnnotation;
-        }
-
-        // put into the context
-        actionContext.put(paramName, paramValue);
-    }
-
     /**
      * put the action context after handle
      *
      * @param actionContext the action context
      * @param key           the actionContext's key
-     * @param value         the actionContext's key
+     * @param value         the actionContext's value
      * @return the action context is changed
      */
     public static boolean putActionContext(Map<String, Object> actionContext, String key, Object value) {
@@ -184,7 +173,10 @@ public final class ActionContextUtil {
             return false;
         }
 
+        // handle value
         value = handleActionContext(value);
+
+        // put value
         Object previousValue = actionContext.put(key, value);
         return !value.equals(previousValue);
     }
@@ -200,6 +192,41 @@ public final class ActionContextUtil {
         boolean isChanged = false;
         for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
             if (putActionContext(actionContext, entry.getKey(), entry.getValue())) {
+                isChanged = true;
+            }
+        }
+        return isChanged;
+    }
+
+    /**
+     * put the action context without handle
+     *
+     * @param actionContext the action context
+     * @param key           the actionContext's key
+     * @param value         the actionContext's value
+     * @return the action context is changed
+     */
+    public static boolean putActionContextWithoutHandle(@Nonnull final Map<String, Object> actionContext, String key, Object value) {
+        if (value == null) {
+            return false;
+        }
+
+        // put value
+        Object previousValue = actionContext.put(key, value);
+        return !value.equals(previousValue);
+    }
+
+    /**
+     * put the action context without handle
+     *
+     * @param actionContext    the action context
+     * @param actionContextMap the actionContextMap
+     * @return the action context is changed
+     */
+    public static boolean putActionContextWithoutHandle(Map<String, Object> actionContext, @Nonnull Map<String, Object> actionContextMap) {
+        boolean isChanged = false;
+        for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
+            if (putActionContextWithoutHandle(actionContext, entry.getKey(), entry.getValue())) {
                 isChanged = true;
             }
         }
