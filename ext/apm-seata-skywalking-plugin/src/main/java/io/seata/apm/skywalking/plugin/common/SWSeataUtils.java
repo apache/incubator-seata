@@ -37,7 +37,7 @@ public class SWSeataUtils {
         if (SeataPluginConfig.Plugin.SEATA.SERVER) {
             return ComponentsDefine.SEATA.getName() + "/TC/" + requestSimpleName;
         }
-        if(SWSeataConstants.isTransactionManagerOperationName(requestSimpleName)){
+        if (SWSeataConstants.isTransactionManagerOperationName(requestSimpleName)) {
             return ComponentsDefine.SEATA.getName() + "/TM/" + requestSimpleName;
         }
         return ComponentsDefine.SEATA.getName() + "/RM/" + requestSimpleName;
