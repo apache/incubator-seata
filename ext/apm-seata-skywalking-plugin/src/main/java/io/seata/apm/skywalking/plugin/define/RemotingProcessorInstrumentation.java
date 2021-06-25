@@ -23,18 +23,15 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInst
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
-import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
-import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
+import static org.apache.skywalking.apm.agent.core.plugin.match.MultiClassNameMatch.byMultiClassMatch;
 
 /**
  * @author zhaoyuguang
  */
-public class RmBranchCommitProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String ENHANCE_CLASS = "io.seata.core.rpc.processor.client.RmBranchCommitProcessor";
+public class RemotingProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String INTERCEPTOR_CLASS = "io.seata.apm.skywalking.plugin.ClientProcessorProcessInterceptor";
+    private static final String INTERCEPTOR_CLASS = "io.seata.apm.skywalking.plugin.RemotingProcessorProcessInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
@@ -47,8 +44,7 @@ public class RmBranchCommitProcessorInstrumentation extends ClassInstanceMethods
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("process").and(takesArguments(2))
-                            .and(takesArgument(1, named("io.seata.core.protocol.RpcMessage")));
+                    return named("process");
                 }
 
                 @Override
@@ -66,7 +62,15 @@ public class RmBranchCommitProcessorInstrumentation extends ClassInstanceMethods
 
     @Override
     protected ClassMatch enhanceClass() {
-        return byName(ENHANCE_CLASS);
+        return byMultiClassMatch("io.seata.core.rpc.processor.client.ClientHeartbeatProcessor",
+            "io.seata.core.rpc.processor.client.ClientOnResponseProcessor",
+            "io.seata.core.rpc.processor.client.RmBranchCommitProcessor",
+            "io.seata.core.rpc.processor.client.RmBranchRollbackProcessor",
+            "io.seata.core.rpc.processor.client.RmUndoLogProcessor",
+            "io.seata.core.rpc.processor.server.RegRmProcessor",
+            "io.seata.core.rpc.processor.server.RegTmProcessor",
+            "io.seata.core.rpc.processor.server.ServerHeartbeatProcessor",
+            "io.seata.core.rpc.processor.server.ServerOnRequestProcessor",
+            "io.seata.core.rpc.processor.server.ServerOnResponseProcessor");
     }
-
 }

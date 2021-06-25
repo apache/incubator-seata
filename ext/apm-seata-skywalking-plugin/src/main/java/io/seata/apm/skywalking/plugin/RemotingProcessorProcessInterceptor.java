@@ -20,6 +20,7 @@ import org.apache.skywalking.apm.agent.core.context.CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
+import org.apache.skywalking.apm.agent.core.context.trace.SpanLayer;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
@@ -30,7 +31,7 @@ import java.lang.reflect.Method;
 /**
  * @author zhaoyuguang
  */
-public class ServerOnRequestProcessorProcessInterceptor implements InstanceMethodsAroundInterceptor {
+public class RemotingProcessorProcessInterceptor implements InstanceMethodsAroundInterceptor {
 
     @Override
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
@@ -44,7 +45,8 @@ public class ServerOnRequestProcessorProcessInterceptor implements InstanceMetho
             next.setHeadValue(rpcMessage.getHeadMap().get(next.getHeadKey()));
         }
         AbstractSpan activeSpan = ContextManager.createEntrySpan(operationName, contextCarrier);
-//        activeSpan.setComponent(ComponentsDefine.SEATA);
+        SpanLayer.asRPCFramework(activeSpan);
+        //        activeSpan.setComponent(ComponentsDefine.SEATA);
     }
 
     @Override

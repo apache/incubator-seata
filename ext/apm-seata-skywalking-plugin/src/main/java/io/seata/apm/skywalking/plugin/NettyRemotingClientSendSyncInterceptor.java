@@ -21,6 +21,7 @@ import org.apache.skywalking.apm.agent.core.context.CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
+import org.apache.skywalking.apm.agent.core.context.trace.SpanLayer;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
@@ -47,6 +48,7 @@ public class NettyRemotingClientSendSyncInterceptor implements InstanceMethodsAr
         AbstractSpan activeSpan = ContextManager.createExitSpan(operationName, contextCarrier, peer);
 //        activeSpan.setComponent(ComponentsDefine.SEATA);
         activeSpan.setPeer(peer);
+        SpanLayer.asRPCFramework(activeSpan);
         CarrierItem next = contextCarrier.items();
         while (next.hasNext()) {
             next = next.next();
