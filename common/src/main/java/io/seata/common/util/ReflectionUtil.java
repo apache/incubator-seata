@@ -583,6 +583,12 @@ public final class ReflectionUtil {
      * @return the boolean
      */
     public static boolean equalsMethod(Method m1, Method m2) {
+        if (m1 == null) {
+            return m2 == null;
+        } else if (m2 == null) {
+            return false;
+        }
+
         if (m1.equals(m2)) {
             return true;
         }
@@ -592,7 +598,7 @@ public final class ReflectionUtil {
         }
 
         for (int i = 0; i < m1.getParameterCount(); ++i) {
-            if (!m1.getParameters()[i].equals(m2.getParameterTypes()[i])) {
+            if (!m1.getParameterTypes()[i].equals(m2.getParameterTypes()[i])) {
                 return false;
             }
         }
