@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author : wangxb
- * @Description: Mock springmvc controller
+ * @description Mock springmvc controller
  */
 @Controller
 public class MockController {
