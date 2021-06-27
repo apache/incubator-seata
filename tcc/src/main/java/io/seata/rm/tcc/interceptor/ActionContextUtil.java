@@ -203,7 +203,8 @@ public final class ActionContextUtil {
      * @see BusinessActionContext#getActionContext(String, Class)
      */
     public static Object handleActionContext(@Nonnull Object actionContext) {
-        if (actionContext instanceof CharSequence || actionContext instanceof Number || actionContext instanceof Boolean) {
+        if (actionContext instanceof CharSequence || actionContext instanceof Number || actionContext instanceof Boolean
+                || actionContext instanceof Character) {
             return actionContext;
         } else {
             return JSON.toJSONString(actionContext);
@@ -241,7 +242,7 @@ public final class ActionContextUtil {
 
         // JSON to Object
         try {
-            if (value instanceof CharSequence) {
+            if (value instanceof CharSequence || value instanceof Character) {
                 return JSON.parseObject(value.toString(), targetClazz);
             } else {
                 return JSON.parseObject(JSON.toJSONString(value), targetClazz);

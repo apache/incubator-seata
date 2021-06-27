@@ -45,19 +45,19 @@ darwin=false;
 case "`uname`" in
   CYGWIN*) cygwin=true ;;
   Darwin*) darwin=true
-           if [ -z "$JAVA_VERSION" ] ; then
-             JAVA_VERSION="CurrentJDK"
-           else
-             echo "Using Java version: $JAVA_VERSION"
-           fi
-		   if [ -z "$JAVA_HOME" ]; then
-		      if [ -x "/usr/libexec/java_home" ]; then
-			      JAVA_HOME=`/usr/libexec/java_home`
-			  else
-			      JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
-			  fi
-           fi       
-           ;;
+    if [ -z "$JAVA_VERSION" ] ; then
+      JAVA_VERSION="CurrentJDK"
+    else
+      echo "Using Java version: $JAVA_VERSION"
+    fi
+    if [ -z "$JAVA_HOME" ]; then
+      if [ -x "/usr/libexec/java_home" ]; then
+        JAVA_HOME=`/usr/libexec/java_home`
+      else
+        JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
+      fi
+    fi
+  ;;
 esac
 
 if [ -z "$JAVA_HOME" ] ; then
@@ -117,6 +117,13 @@ if $cygwin; then
   [ -n "$REPO" ] && REPO=`cygpath --path --windows "$REPO"`
 fi
 
+if [ "$SKYWALKING_ENABLE" = "true" ]; then
+  SKYWALKING_OPTS="-javaagent:${BASEDIR}/ext/apm-skywalking/skywalking-agent.jar -Dskywalking_config=${BASEDIR}/ext/apm-skywalking/config/agent.config -Dskywalking.logging.dir=${BASEDIR}/logs"
+  JAVA_OPT="${JAVA_OPT} $SKYWALKING_OPTS"
+  echo "apm-skywalking enabled opts: $SKYWALKING_OPTS"
+else
+  echo "apm-skywalking not enabled"
+fi
 JAVA_OPT="${JAVA_OPT} -server -Xmx2048m -Xms2048m -Xmn1024m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
 JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc"
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
