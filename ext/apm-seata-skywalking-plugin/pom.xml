@@ -29,7 +29,7 @@
     <name>apm-seata-skywalking-plugin ${project.version}</name>
 
     <properties>
-        <skywalking.version>8.4.0</skywalking.version>
+        <skywalking.version>8.6.0</skywalking.version>
         <agent.dir>${project.build.directory}/ext/skywalking-agent/</agent.dir>
         <agent-plugins.dir>${agent.dir}/plugins/</agent-plugins.dir>
         <agent-config.dir>${agent.dir}/config</agent-config.dir>
