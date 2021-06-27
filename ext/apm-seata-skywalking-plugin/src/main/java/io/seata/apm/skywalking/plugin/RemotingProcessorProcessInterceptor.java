@@ -25,6 +25,7 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedI
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
 import io.seata.apm.skywalking.plugin.common.SWSeataUtils;
+import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 import java.lang.reflect.Method;
 
@@ -46,7 +47,7 @@ public class RemotingProcessorProcessInterceptor implements InstanceMethodsAroun
         }
         AbstractSpan activeSpan = ContextManager.createEntrySpan(operationName, contextCarrier);
         SpanLayer.asRPCFramework(activeSpan);
-        //        activeSpan.setComponent(ComponentsDefine.SEATA);
+        activeSpan.setComponent(ComponentsDefine.SEATA);
     }
 
     @Override

@@ -20,7 +20,7 @@ import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
-import io.seata.apm.skywalking.plugin.common.SWSeataConstants;
+import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 import java.lang.reflect.Method;
 
@@ -32,8 +32,8 @@ public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsArou
     @Override
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                              MethodInterceptResult result) throws Throwable {
-        AbstractSpan activeSpan = ContextManager.createLocalSpan(SWSeataConstants.SEATA_NAME + "/TC/doGlobalCommit");
-//        activeSpan.setComponent(ComponentsDefine.SEATA);
+        AbstractSpan activeSpan = ContextManager.createLocalSpan(ComponentsDefine.SEATA.getName() + "/TC/doGlobalCommit");
+        activeSpan.setComponent(ComponentsDefine.SEATA);
     }
 
     @Override
