@@ -201,11 +201,11 @@ public final class ReflectionUtil {
     }
 
     /**
-     * Gets all fields.
+     * Gets all fields, excluding static or synthetic fields
      *
      * @param targetClazz the target class
      */
-    public static Field[] getAllFields(Class<?> targetClazz) {
+    public static Field[] getAllFields(final Class<?> targetClazz) {
         if (targetClazz == Object.class || targetClazz.isInterface()) {
             return EMPTY_FIELD_ARRAY;
         }
@@ -220,8 +220,8 @@ public final class ReflectionUtil {
         fields = targetClazz.getDeclaredFields();
         LinkedList<Field> fieldList = new LinkedList<>(Arrays.asList(fields));
 
-        // remove un_used fields
-        fieldList.removeIf(field -> field.getName().contains("$"));
+        // remove the static or synthetic fields
+        fieldList.removeIf(f -> Modifier.isStatic(f.getModifiers()) || f.isSynthetic());
 
         // load super class all fields, and add to the field list
         Field[] superFields = getAllFields(targetClazz.getSuperclass());
