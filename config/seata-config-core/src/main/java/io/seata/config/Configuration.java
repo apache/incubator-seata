@@ -33,7 +33,7 @@ public interface Configuration {
      * @param timeoutMills the timeout mills
      * @return the short
      */
-    short getShort(String dataId, int defaultValue, long timeoutMills);
+    short getShort(String dataId, short defaultValue, long timeoutMills);
 
     /**
      * Gets short.
@@ -207,6 +207,7 @@ public interface Configuration {
     boolean putConfig(String dataId, String content, long timeoutMills);
 
     /**
+     * Get latest config.
      *
      * @param dataId       the data id
      * @param defaultValue the default value
