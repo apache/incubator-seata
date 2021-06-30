@@ -133,7 +133,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
         if (!seataConfig.isEmpty()) {
             seataConfig.put(dataId, content);
-            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr(), getAclToken()), configFuture));
+            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr(), getAclToken(), null), configFuture));
         } else {
             consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(dataId, content, getAclToken(), null), configFuture));
         }
@@ -149,7 +149,10 @@ public class ConsulConfiguration extends AbstractConfiguration {
             String property = seataConfig.getProperty(dataId);
             if (null == property) {
                 seataConfig.put(dataId, content);
-                consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr()), configFuture));
+                PutParams putParams = new PutParams();
+                //Setting CAS to 0 means that this is an atomic operation, created when key does not exist.
+                putParams.setCas(CAS);
+                consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr(), getAclToken(), putParams), configFuture));
             }
         } else {
             consulNotifierExecutor.execute(() -> {
@@ -167,7 +170,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
         if (!seataConfig.isEmpty()) {
             seataConfig.remove(dataId);
-            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr()), configFuture));
+            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr(), getAclToken(), null), configFuture));
         } else {
             consulNotifierExecutor.execute(() -> complete(getConsulClient().deleteKVValue(dataId, getAclToken()), configFuture));
         }
@@ -265,7 +268,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private void initSeataConfig() {
         String key = getConsulConfigKey();
 
-        Response<GetValue> kvValue = getConsulClient().getKVValue(key);
+        Response<GetValue> kvValue = getConsulClient().getKVValue(key, getAclToken());
         String config = kvValue.getValue().getDecodedValue();
 
         if (StringUtils.isNotBlank(config)) {
