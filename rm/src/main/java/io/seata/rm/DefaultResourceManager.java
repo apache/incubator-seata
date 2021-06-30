@@ -58,8 +58,8 @@ public class DefaultResourceManager implements ResourceManager {
     /**
      * only for mock
      *
-     * @param branchType
-     * @param rm
+     * @param branchType  branchType
+     * @param rm resource manager
      */
     public static void mockResourceManager(BranchType branchType, ResourceManager rm) {
         resourceManagers.put(branchType, rm);
@@ -134,8 +134,8 @@ public class DefaultResourceManager implements ResourceManager {
     /**
      * get ResourceManager by Resource Type
      *
-     * @param branchType
-     * @return
+     * @param branchType branch type
+     * @return resource manager
      */
     public ResourceManager getResourceManager(BranchType branchType) {
         ResourceManager rm = resourceManagers.get(branchType);

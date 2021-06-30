@@ -135,7 +135,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     protected T executeAutoCommitTrue(Object[] args) throws Throwable {
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         try {
-            connectionProxy.setAutoCommit(false);
+            connectionProxy.changeAutoCommit();
             return new LockRetryPolicy(connectionProxy).execute(() -> {
                 T result = executeAutoCommitFalse(args);
                 connectionProxy.commit();
@@ -172,10 +172,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     protected abstract TableRecords afterImage(TableRecords beforeImage) throws SQLException;
 
     private static class LockRetryPolicy extends ConnectionProxy.LockRetryPolicy {
-        private final ConnectionProxy connection;
 
         LockRetryPolicy(final ConnectionProxy connection) {
-            this.connection = connection;
+            super(connection);
         }
 
         @Override

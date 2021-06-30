@@ -69,6 +69,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONSUL_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "consul";
+    private static final String ACL_TOKEN = "aclToken";
     private static final String DEFAULT_CONSUL_CONFIG_KEY_VALUE = "seata.properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
             + FILE_CONFIG_SPLIT_CHAR;
@@ -120,7 +121,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         if (value == null) {
             ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
                     timeoutMills);
-            consulNotifierExecutor.execute(() -> complete(getConsulClient().getKVValue(dataId), configFuture));
+            consulNotifierExecutor.execute(() -> complete(getConsulClient().getKVValue(dataId, getAclToken()), configFuture));
             value = (String) configFuture.get();
         }
 
@@ -132,9 +133,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
         if (!seataConfig.isEmpty()) {
             seataConfig.put(dataId, content);
-            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr()), configFuture));
+            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr(), getAclToken()), configFuture));
         } else {
-            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(dataId, content), configFuture));
+            consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(dataId, content, getAclToken(), null), configFuture));
         }
 
         return (Boolean) configFuture.get();
@@ -155,7 +156,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
                 PutParams putParams = new PutParams();
                 //Setting CAS to 0 means that this is an atomic operation, created when key does not exist.
                 putParams.setCas(CAS);
-                complete(getConsulClient().setKVValue(dataId, content, putParams), configFuture);
+                complete(getConsulClient().setKVValue(dataId, content, getAclToken(), putParams), configFuture);
             });
         }
         return (Boolean) configFuture.get();
@@ -168,7 +169,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
             seataConfig.remove(dataId);
             consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(getConsulConfigKey(), getSeataConfigStr()), configFuture));
         } else {
-            consulNotifierExecutor.execute(() -> complete(getConsulClient().deleteKVValue(dataId), configFuture));
+            consulNotifierExecutor.execute(() -> complete(getConsulClient().deleteKVValue(dataId, getAclToken()), configFuture));
         }
         return (Boolean) configFuture.get();
     }
@@ -231,6 +232,17 @@ public class ConsulConfiguration extends AbstractConfiguration {
             }
         }
         return client;
+    }
+
+    /**
+     * get consul acl-token
+     *
+     * @return acl-token
+     */
+    private static String getAclToken() {
+        String aclToken = StringUtils.isNotBlank(System.getProperty(ACL_TOKEN)) ? System.getProperty(ACL_TOKEN)
+                : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
+        return StringUtils.isNotBlank(aclToken) ? aclToken : null;
     }
 
     /**
@@ -306,14 +318,14 @@ public class ConsulConfiguration extends AbstractConfiguration {
         public ConsulListener(String dataId, ConfigurationChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
-            this.consulIndex = getConsulClient().getKVValue(dataId).getConsulIndex();
+            this.consulIndex = getConsulClient().getKVValue(dataId, getAclToken()).getConsulIndex();
         }
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
-                Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);
+                Response<GetValue> response = getConsulClient().getKVValue(this.dataId, getAclToken(), queryParams);
                 Long currentIndex = response.getConsulIndex();
                 if (currentIndex != null && currentIndex > consulIndex) {
                     String value = response.getValue().getDecodedValue();

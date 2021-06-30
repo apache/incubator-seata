@@ -59,13 +59,14 @@ import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
+import static io.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
 
 /**
  * The type Global transactional interceptor.
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, SeataInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -74,6 +75,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
     private final FailureHandler failureHandler;
     private volatile boolean disable;
+    private int order;
+
     private static int degradeCheckPeriod;
     private static volatile boolean degradeCheck;
     private static int degradeCheckAllowTimes;
@@ -118,6 +121,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+        this.order = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.TM_INTERCEPTOR_ORDER, TM_INTERCEPTOR_ORDER);
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
@@ -167,7 +171,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             @Override
             public GlobalLockConfig getGlobalLockConfig() {
                 GlobalLockConfig config = new GlobalLockConfig();
-                config.setLockRetryInternal(globalLockAnno.lockRetryInternal());
+                config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
                 config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
                 return config;
             }
@@ -204,7 +208,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     transactionInfo.setTimeOut(timeout);
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(globalTrxAnno.propagation());
-                    transactionInfo.setLockRetryInternal(globalTrxAnno.lockRetryInternal());
+                    transactionInfo.setLockRetryInterval(globalTrxAnno.lockRetryInterval());
                     transactionInfo.setLockRetryTimes(globalTrxAnno.lockRetryTimes());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
@@ -329,5 +333,20 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 reachNum = 0;
             }
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.BeforeTransaction;
     }
 }

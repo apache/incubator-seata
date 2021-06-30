@@ -378,7 +378,6 @@ public class FileConfiguration extends AbstractConfiguration {
 
         /**
          * Instantiates a new FileListener.
-         *
          */
         FileListener() {}
 
@@ -388,7 +387,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 fileListener.onProcessEvent(new ConfigurationChangeEvent());
             }
 
-            dataIdMap .computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
+            dataIdMap.computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
         }
 
         @Override
