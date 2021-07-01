@@ -28,3 +28,5 @@
 - etcd3: 用于向 Etcd3 中添加配置
 - consul: 用于向 consul 中添加配置
 
+## 打包
+./mvnw -Prelease-seata -Dmaven.test.skip=true clean install -U

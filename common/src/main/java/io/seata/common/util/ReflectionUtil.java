@@ -16,24 +16,40 @@
 package io.seata.common.util;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Reflection tools
  *
  * @author zhangsen
  */
-public class ReflectionUtil {
+public final class ReflectionUtil {
+
+    private ReflectionUtil() {
+    }
 
     /**
      * The constant MAX_NEST_DEPTH.
      */
     public static final int MAX_NEST_DEPTH = 20;
+
+    /**
+     * The EMPTY_FIELD_ARRAY
+     */
+    public static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
+
+    /**
+     * The cache CLASS_FIELDS_CACHE
+     */
+    private static final Map<Class<?>, Field[]> CLASS_FIELDS_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Gets class by name.
@@ -55,10 +71,9 @@ public class ReflectionUtil {
      * @throws NoSuchFieldException the no such field exception
      * @throws SecurityException the security exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws IllegalAccessException the illegal access exception
      */
     public static Object getFieldValue(Object target, String fieldName)
-        throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException {
         Class<?> cl = target.getClass();
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && cl != null) {
@@ -81,13 +96,10 @@ public class ReflectionUtil {
      * @return object
      * @throws NoSuchMethodException the no such method exception
      * @throws SecurityException the security exception
-     * @throws IllegalAccessException the illegal access exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeMethod(Object target, String methodName)
-        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-        InvocationTargetException {
+            throws NoSuchMethodException, SecurityException, IllegalArgumentException {
         Class<?> cl = target.getClass();
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && cl != null) {
@@ -112,13 +124,10 @@ public class ReflectionUtil {
      * @return object
      * @throws NoSuchMethodException the no such method exception
      * @throws SecurityException the security exception
-     * @throws IllegalAccessException the illegal access exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeMethod(Object target, String methodName, Class<?>[] parameterTypes, Object[] args)
-        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-        InvocationTargetException {
+            throws NoSuchMethodException, SecurityException, IllegalArgumentException {
         Class<?> cl = target.getClass();
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && cl != null) {
@@ -143,14 +152,11 @@ public class ReflectionUtil {
      * @return object
      * @throws NoSuchMethodException the no such method exception
      * @throws SecurityException the security exception
-     * @throws IllegalAccessException the illegal access exception
      * @throws IllegalArgumentException the illegal argument exception
-     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeStaticMethod(Class<?> targetClass, String methodName, Class<?>[] parameterTypes,
                                             Object[] parameterValues)
-        throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-        InvocationTargetException {
+            throws NoSuchMethodException, SecurityException, IllegalArgumentException {
         int i = 0;
         while ((i++) < MAX_NEST_DEPTH && targetClass != null) {
             try {
@@ -161,21 +167,6 @@ public class ReflectionUtil {
             }
         }
         throw new NoSuchMethodException("class:" + targetClass + ", methodName:" + methodName);
-    }
-
-    /**
-     * get Method by name
-     *
-     * @param classType      the class type
-     * @param methodName     the method name
-     * @param parameterTypes the parameter types
-     * @return method
-     * @throws NoSuchMethodException the no such method exception
-     * @throws SecurityException the security exception
-     */
-    public static Method getMethod(Class<?> classType, String methodName, Class<?>[] parameterTypes)
-        throws NoSuchMethodException, SecurityException {
-        return classType.getMethod(methodName, parameterTypes);
     }
 
     /**
@@ -199,7 +190,7 @@ public class ReflectionUtil {
         return interfaces;
     }
 
-    public static void modifyStaticFinalField(Class cla, String modifyFieldName, Object newValue)
+    public static void modifyStaticFinalField(Class<?> cla, String modifyFieldName, Object newValue)
         throws NoSuchFieldException, IllegalAccessException {
         Field field = cla.getDeclaredField(modifyFieldName);
         field.setAccessible(true);
@@ -207,5 +198,49 @@ public class ReflectionUtil {
         modifiers.setAccessible(true);
         modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
         field.set(cla, newValue);
+    }
+
+    /**
+     * Gets all fields, excluding static or synthetic fields
+     *
+     * @param targetClazz the target class
+     */
+    public static Field[] getAllFields(final Class<?> targetClazz) {
+        if (targetClazz == Object.class || targetClazz.isInterface()) {
+            return EMPTY_FIELD_ARRAY;
+        }
+
+        // get from the cache
+        Field[] fields = CLASS_FIELDS_CACHE.get(targetClazz);
+        if (fields != null) {
+            return fields;
+        }
+
+        // load current class declared fields
+        fields = targetClazz.getDeclaredFields();
+        LinkedList<Field> fieldList = new LinkedList<>(Arrays.asList(fields));
+
+        // remove the static or synthetic fields
+        fieldList.removeIf(f -> Modifier.isStatic(f.getModifiers()) || f.isSynthetic());
+
+        // load super class all fields, and add to the field list
+        Field[] superFields = getAllFields(targetClazz.getSuperclass());
+        if (CollectionUtils.isNotEmpty(superFields)) {
+            fieldList.addAll(Arrays.asList(superFields));
+        }
+
+        // list to array
+        Field[] resultFields;
+        if (!fieldList.isEmpty()) {
+            resultFields = fieldList.toArray(new Field[0]);
+        } else {
+            // reuse the EMPTY_FIELD_ARRAY
+            resultFields = EMPTY_FIELD_ARRAY;
+        }
+
+        // set cache
+        CLASS_FIELDS_CACHE.put(targetClazz, resultFields);
+
+        return resultFields;
     }
 }

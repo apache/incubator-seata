@@ -251,7 +251,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String getStandardPkColumnName(String userColumnName) {
         String newUserColumnName = ColumnUtils.delEscape(userColumnName, getDbType());
         for (String cn : getTableMeta().getPrimaryKeyOnlyName()) {
-            if (cn.toUpperCase().equals(newUserColumnName.toUpperCase())) {
+            if (cn.equalsIgnoreCase(newUserColumnName)) {
                 return cn;
             }
         }
