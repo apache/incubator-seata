@@ -96,9 +96,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
             ps = conn.prepareStatement(sql);
             ps.setString(1, tccFenceDO.getXid());
             ps.setLong(2, tccFenceDO.getBranchId());
-            ps.setInt(3, tccFenceDO.getStatus());
-            ps.setTimestamp(4, now);
+            ps.setString(3, tccFenceDO.getActionName());
+            ps.setInt(4, tccFenceDO.getStatus());
             ps.setTimestamp(5, now);
+            ps.setTimestamp(6, now);
             return ps.executeUpdate() > 0;
         } catch (DuplicateKeyException e) {
             throw new TCCFenceException(String.format("Insert tcc fence record duplicate key exception. xid= %s, branchId= %s", tccFenceDO.getXid(), tccFenceDO.getBranchId()),
