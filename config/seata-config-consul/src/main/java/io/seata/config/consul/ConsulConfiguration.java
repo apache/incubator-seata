@@ -29,7 +29,6 @@ import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
@@ -138,7 +137,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
             return;
         }
         ConsulListener consulListener = new ConsulListener(dataId, listener);
-        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+        configListenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(consulListener);
 
         // Start config change listener for the dataId.

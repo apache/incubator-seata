@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
@@ -82,7 +81,7 @@ public class FileLocker extends AbstractLocker {
             if (previousLockTransactionId == null) {
                 //No existing lock, and now locked by myself
                 Set<String> keysInHolder = CollectionUtils.computeIfAbsent(bucketHolder, bucketLockMap,
-                    key -> new ConcurrentSet<>());
+                    key -> ConcurrentHashMap.newKeySet());
                 keysInHolder.add(pk);
             } else if (previousLockTransactionId == transactionId) {
                 // Locked by me before
