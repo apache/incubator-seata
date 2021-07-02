@@ -139,6 +139,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
      * Debug log.
      *
      * @param format the info
+     * @param arguments the arguments
      */
     protected void debugLog(String format, Object... arguments) {
         if (LOGGER.isDebugEnabled()) {
