@@ -97,8 +97,8 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant CHECK_LOCK_SQL.
      */
     private static final String CHECK_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACE_HOLD + ")";
-
+        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACE_HOLD + ")"
+        + " order by status desc ";
 
     @Override
     public String getInsertLockSQL(String lockTable) {
