@@ -32,6 +32,15 @@ public interface Locker {
     boolean acquireLock(List<RowLock> rowLock) ;
 
     /**
+     * Acquire lock boolean.
+     *
+     * @param rowLock the row lock
+     * @param autoCommit the auto commit
+     * @return the boolean
+     */
+    boolean acquireLock(List<RowLock> rowLock, boolean autoCommit);
+
+    /**
      * Release lock boolean.
      *
      * @param rowLock the row lock

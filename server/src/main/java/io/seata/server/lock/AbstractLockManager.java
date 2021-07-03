@@ -42,6 +42,11 @@ public abstract class AbstractLockManager implements LockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
+        return acquireLock(branchSession, true);
+    }
+
+    @Override
+    public boolean acquireLock(BranchSession branchSession, boolean autoCommit) throws TransactionException {
         if (branchSession == null) {
             throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
         }
@@ -56,7 +61,7 @@ public abstract class AbstractLockManager implements LockManager {
             // no lock
             return true;
         }
-        return getLocker(branchSession).acquireLock(locks);
+        return getLocker(branchSession).acquireLock(locks, autoCommit);
     }
 
     @Override

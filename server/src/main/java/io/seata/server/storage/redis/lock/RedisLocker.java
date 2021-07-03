@@ -127,20 +127,24 @@ public class RedisLocker extends AbstractLocker {
 
     @Override
     public boolean acquireLock(List<RowLock> rowLocks) {
+        return acquireLock(rowLocks, true);
+    }
+
+    @Override
+    public boolean acquireLock(List<RowLock> rowLocks, boolean autoCommit) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             return true;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            if (ACQUIRE_LOCK_SHA != null) {
+            if (ACQUIRE_LOCK_SHA != null && autoCommit) {
                 return acquireLockByLua(jedis, rowLocks);
             } else {
-                return acquireLockByPipeline(jedis, rowLocks);
+                return acquireLockByPipeline(jedis, rowLocks, autoCommit);
             }
         }
-
     }
 
-    private boolean acquireLockByPipeline(Jedis jedis, List<RowLock> rowLocks) {
+    private boolean acquireLockByPipeline(Jedis jedis, List<RowLock> rowLocks, boolean autoCommit) {
         String needLockXid = rowLocks.get(0).getXid();
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needLockDOS = convertToLockDO(rowLocks);
@@ -155,9 +159,12 @@ public class RedisLocker extends AbstractLocker {
         Pipeline pipeline1 = jedis.pipelined();
         needLockKeys.stream().forEachOrdered(needLockKey -> {
             pipeline1.hget(needLockKey, XID);
-            pipeline1.hget(needLockKey, STATUS);
+            if (!autoCommit) {
+                pipeline1.hget(needLockKey, STATUS);
+            }
         });
-        List<List<String>> existedLockInfos = Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), 2);
+        List<List<String>> existedLockInfos =
+            Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
         Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
         boolean failFast = false;
         boolean canLock = true;
@@ -169,22 +176,27 @@ public class RedisLocker extends AbstractLocker {
                 needAddLock.put(needLockKeys.get(i), needLockDOS.get(i));
             } else {
                 if (!StringUtils.equals(existedLockXid, needLockXid)) {
-                    String status = existedLockInfos.get(i).get(1);
-                    if (StringUtils.equals(status, String.valueOf(LockStatus.Rollbacking.getCode()))) {
-                        failFast = true;
-                        break;
+                    if (!autoCommit) {
+                        String status = existedLockInfos.get(i).get(1);
+                        if (StringUtils.equals(status, String.valueOf(LockStatus.Rollbacking.getCode()))) {
+                            failFast = true;
+                            break;
+                        }
                     }
                     // If not equals,means the rowkey is holding by another global transaction
                     if (canLock) {
                         canLock = false;
+                        if (autoCommit) {
+                            break;
+                        }
                     }
                 }
             }
         }
+        if (failFast) {
+            throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+        }
         if (canLock) {
-            if (failFast) {
-                throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
-            }
             return canLock;
         }
         if (needAddLock.isEmpty()) {

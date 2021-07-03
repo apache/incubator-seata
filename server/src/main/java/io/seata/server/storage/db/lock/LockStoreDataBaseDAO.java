@@ -101,6 +101,11 @@ public class LockStoreDataBaseDAO implements LockStore {
 
     @Override
     public boolean acquireLock(List<LockDO> lockDOs) {
+        return acquireLock(lockDOs, true);
+    }
+
+    @Override
+    public boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -139,9 +144,11 @@ public class LockStoreDataBaseDAO implements LockStore {
                         LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID,
                             dbBranchId);
                     }
-                    Integer status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
-                    if (status == LockStatus.Rollbacking.getCode()) {
-                        failFast = true;
+                    if (!autoCommit) {
+                        Integer status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
+                        if (status == LockStatus.Rollbacking.getCode()) {
+                            failFast = true;
+                        }
                     }
                     canLock &= false;
                     break;

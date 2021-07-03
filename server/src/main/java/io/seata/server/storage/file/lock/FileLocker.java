@@ -50,7 +50,7 @@ public class FileLocker extends AbstractLocker {
     /**
      * The Branch session.
      */
-    protected BranchSession branchSession = null;
+    protected BranchSession branchSession;
 
     /**
      * Instantiates a new Memory locker.
@@ -63,8 +63,13 @@ public class FileLocker extends AbstractLocker {
 
     @Override
     public boolean acquireLock(List<RowLock> rowLocks) {
+        return acquireLock(rowLocks, true);
+    }
+
+    @Override
+    public boolean acquireLock(List<RowLock> rowLocks, boolean autoCommit) {
         if (CollectionUtils.isEmpty(rowLocks)) {
-            //no lock
+            // no lock
             return true;
         }
         String resourceId = branchSession.getResourceId();
@@ -101,12 +106,15 @@ public class FileLocker extends AbstractLocker {
                 } catch (TransactionException e) {
                     throw new FrameworkException(e);
                 }
-                if (previousLockBranchSession.getLockStatus() == LockStatus.Rollbacking) {
+                if (!autoCommit && previousLockBranchSession.getLockStatus() == LockStatus.Rollbacking) {
                     failFast = true;
                     break;
                 }
                 if (canLock) {
                     canLock = false;
+                    if (autoCommit) {
+                        break;
+                    }
                 }
             }
         }

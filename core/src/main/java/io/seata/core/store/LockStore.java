@@ -43,6 +43,15 @@ public interface LockStore {
     boolean acquireLock(List<LockDO> lockDOs);
 
     /**
+     * Acquire lock boolean.
+     *
+     * @param lockDOs the lock d os
+     * @param autoCommit the auto commit
+     * @return the boolean
+     */
+    boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit);
+
+    /**
      * Un lock boolean.
      *
      * @param lockDO the lock do

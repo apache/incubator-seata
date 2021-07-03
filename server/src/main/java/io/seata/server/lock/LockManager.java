@@ -37,6 +37,16 @@ public interface LockManager {
     boolean acquireLock(BranchSession branchSession) throws TransactionException;
 
     /**
+     * Acquire lock boolean.
+     *
+     * @param branchSession the branch session
+     * @param autoCommit the auto commit
+     * @return the boolean
+     * @throws TransactionException the transaction exception
+     */
+    boolean acquireLock(BranchSession branchSession, boolean autoCommit) throws TransactionException;
+
+    /**
      * Un lock boolean.
      *
      * @param branchSession the branch session
