@@ -52,18 +52,6 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + " where ROWNUM <= ?";
 
     /**
-     * The constant QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_ORACLE.
-     */
-    public static final String QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_ORACLE = "select A.* from ("
-            + " select " + ALL_GLOBAL_COLUMNS
-            + "   from " + GLOBAL_TABLE_PLACEHOLD
-            + "  where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
-            + " and " + ServerTableColumnsName.GLOBAL_TABLE_XID + " in (" + XIDS_PLACEHOLD + ")"
-            + "  order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
-            + " ) A"
-            + " where ROWNUM <= ?";
-
-    /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE = "select A.* from ("
@@ -113,13 +101,6 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
         return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
             .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
-    }
-
-    @Override
-    public String getQueryGlobalTransactionSQLByXidsAndStatus(String globalTable, String xidsParamsPlaceHolder,
-        String paramsPlaceHolder) {
-        return QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_ORACLE.replace(xidsParamsPlaceHolder, XIDS_PLACEHOLD)
-            .replace(paramsPlaceHolder, PRAMETER_PLACEHOLD);
     }
 
     @Override

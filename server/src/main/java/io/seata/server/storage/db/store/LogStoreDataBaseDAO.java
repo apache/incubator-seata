@@ -186,41 +186,6 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public List<GlobalTransactionDO> queryGlobalTransactionDO(List<String> xids, int[] statuses, int limit) {
-        List<GlobalTransactionDO> ret = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = logStoreDataSource.getConnection();
-            conn.setAutoCommit(true);
-
-            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", statuses.length);
-            String xidsParamsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", xids.size());
-            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType)
-                .getQueryGlobalTransactionSQLByXidsAndStatus(globalTable, xidsParamsPlaceHolder, paramsPlaceHolder);
-            ps = conn.prepareStatement(sql);
-            int i = 0;
-            for (int status : statuses) {
-                ps.setInt(++i, status);
-            }
-            for (String xid : xids) {
-                ps.setString(++i, xid);
-            }
-            ps.setInt(++i, limit);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                ret.add(convertGlobalTransactionDO(rs));
-            }
-            return ret;
-        } catch (SQLException e) {
-            throw new DataAccessException(e);
-        } finally {
-            IOUtil.close(rs, ps, conn);
-        }
-    }
-
-    @Override
     public boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertGlobalTransactionSQL(globalTable);
         Connection conn = null;
@@ -237,8 +202,8 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setString(index++, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
             transactionName = transactionName.length() > transactionNameColumnSize ?
-                    transactionName.substring(0, transactionNameColumnSize) :
-                    transactionName;
+                transactionName.substring(0, transactionNameColumnSize) :
+                transactionName;
             ps.setString(index++, transactionName);
             ps.setInt(index++, globalTransactionDO.getTimeout());
             ps.setLong(index++, globalTransactionDO.getBeginTime());
@@ -375,8 +340,8 @@ public class LogStoreDataBaseDAO implements LogStore {
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         boolean shouldUpdateAppData = StringUtils.isNotBlank(branchTransactionDO.getApplicationData());
         String sql = shouldUpdateAppData ?
-                LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusAppDataSQL(branchTable) :
-                LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(branchTable);
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusAppDataSQL(branchTable) :
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(branchTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -462,7 +427,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         globalTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
         globalTransactionDO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
         globalTransactionDO.setTransactionServiceGroup(
-                rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+            rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
         globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
         globalTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
         globalTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
@@ -542,7 +507,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         } else if ("postgresql".equalsIgnoreCase(dbType)) {
             String sql = "select current_schema";
             try (PreparedStatement ps = conn.prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
+                ResultSet rs = ps.executeQuery()) {
                 String schema = null;
                 if (rs.next()) {
                     schema = rs.getString(1);

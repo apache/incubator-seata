@@ -71,17 +71,6 @@ public interface LogStoreSqls {
     String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
 
     /**
-     * Get query global transaction sql by status string.
-     *
-     * @param globalTable       the global table
-     * @param xidsParamsPlaceHolder the xids params place holder
-     * @param paramsPlaceHolder the params place holder
-     * @return the string
-     */
-    String getQueryGlobalTransactionSQLByXidsAndStatus(String globalTable, String xidsParamsPlaceHolder,
-        String paramsPlaceHolder);
-
-    /**
      * Get query global transaction for recovery sql string.
      *
      * @param globalTable the global table

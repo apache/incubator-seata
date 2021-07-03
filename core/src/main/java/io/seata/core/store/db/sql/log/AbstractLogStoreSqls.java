@@ -41,12 +41,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
 
     /**
-     * The constant PRAMETER_PLACEHOLD.
-     * format: ?, ?, ?
-     */
-    public static final String XIDS_PLACEHOLD = " #XIDS_PLACEHOLD# ";
-
-    /**
      * The constant ALL_GLOBAL_COLUMNS.
      * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
