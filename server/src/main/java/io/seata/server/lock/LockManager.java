@@ -15,8 +15,8 @@
  */
 package io.seata.server.lock;
 
-import java.util.Set;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.LockStatus;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
@@ -66,18 +66,19 @@ public interface LockManager {
     boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException;
 
     /**
-     * get lock owners .
-     *
-     * @param branchSession the branchSession
-     * @return the lock owners
-     */
-    Set<String> getLockOwners(BranchSession branchSession);
-
-    /**
      * Clean all locks.
      *
      * @throws TransactionException the transaction exception
      */
     void cleanAllLocks() throws TransactionException;
+
+    /**
+     * update lock status.
+     * @param xid the xid
+     * @param lockStatus the lock status
+     * @throws TransactionException the transaction exception
+     * @return the boolean
+     */
+    boolean updateLockStatus(String xid, LockStatus lockStatus) throws TransactionException;
 
 }

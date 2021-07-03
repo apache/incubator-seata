@@ -23,29 +23,35 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
-
+import io.seata.common.exception.StoreException;
 import io.seata.common.io.FileLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
+import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The redis lock store operation
@@ -76,6 +82,8 @@ public class RedisLocker extends AbstractLocker {
     private static final String TABLE_NAME = "tableName";
 
     private static final String PK = "pk";
+
+    private static final String STATUS = "status";
 
     private static final String ROW_KEY = "rowKey";
 
@@ -150,7 +158,7 @@ public class RedisLocker extends AbstractLocker {
         Pipeline pipeline1 = jedis.pipelined();
         needLockKeys.stream().forEachOrdered(needLockKey -> pipeline1.hget(needLockKey, XID));
         List<String> existedLockInfos = (List<String>) (List) pipeline1.syncAndReturnAll();
-        Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
+        Map<String, LockDO> needAddLock = new LinkedHashMap<>(needLockKeys.size(), 1);
 
         for (int i = 0; i < needLockKeys.size(); i++) {
             String existedLockXid = existedLockInfos.get(i);
@@ -169,34 +177,49 @@ public class RedisLocker extends AbstractLocker {
             return true;
         }
         Pipeline pipeline = jedis.pipelined();
-        List<String> readyKeys = new ArrayList<>();
         needAddLock.forEach((key, value) -> {
             pipeline.hsetnx(key, XID, value.getXid());
             pipeline.hsetnx(key, TRANSACTION_ID, value.getTransactionId().toString());
             pipeline.hsetnx(key, BRANCH_ID, value.getBranchId().toString());
+            pipeline.hsetnx(key, STATUS, String.valueOf(value.getStatus()));
             pipeline.hset(key, ROW_KEY, value.getRowKey());
             pipeline.hset(key, RESOURCE_ID, value.getResourceId());
             pipeline.hset(key, TABLE_NAME, value.getTableName());
             pipeline.hset(key, PK, value.getPk());
-            readyKeys.add(key);
         });
         List<Integer> results = (List<Integer>) (List) pipeline.syncAndReturnAll();
         List<List<Integer>> partitions = Lists.partition(results, 7);
 
         ArrayList<String> success = new ArrayList<>(partitions.size());
-        Integer status = SUCCEED;
-        for (int i = 0; i < partitions.size(); i++) {
-            if (Objects.equals(partitions.get(i).get(0),FAILED)) {
-                status = FAILED;
+        AtomicInteger status = new AtomicInteger(SUCCEED);
+        Map<String,Integer> resultMap=new HashMap<>(partitions.size());
+        AtomicInteger i= new AtomicInteger();
+        needAddLock.forEach((k, v) -> {
+            resultMap.put(k, partitions.get(i.get()).get(0));
+            i.getAndIncrement();
+        });
+        AtomicBoolean ownerRollbacking = new AtomicBoolean(false);
+        resultMap.forEach((k, v) -> {
+            if (Objects.equals(v, FAILED)) {
+                status.set(FAILED);
+                if (!ownerRollbacking.get()) {
+                    String lockStatus = jedis.hget(k, STATUS);
+                    if (StringUtils.equals(lockStatus, String.valueOf(LockStatus.Rollbacking.getCode()))) {
+                        ownerRollbacking.set(true);
+                    }
+                }
             } else {
-                success.add(readyKeys.get(i));
+                success.add(k);
             }
-        }
+        });
 
         //If someone has failed,all the lockkey which has been added need to be delete.
         if (FAILED.equals(status)) {
             if (success.size() > 0) {
                 jedis.del(success.toArray(new String[0]));
+            }
+            if (ownerRollbacking.get()) {
+                throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
             }
             return false;
         }
@@ -305,15 +328,10 @@ public class RedisLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> rowLocks) {
-        return CollectionUtils.isEmpty(isLockable(rowLocks,true));
-    }
-
-    public Set<String> isLockable(List<RowLock> rowLocks, boolean failFast) {
         if (CollectionUtils.isEmpty(rowLocks)) {
-            return null;
+            return true;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Set<String> xidOwners = null;
             List<LockDO> locks = convertToLockDO(rowLocks);
             Set<String> lockKeys = new HashSet<>();
             for (LockDO rowlock : locks) {
@@ -323,27 +341,25 @@ public class RedisLocker extends AbstractLocker {
             String xid = rowLocks.get(0).getXid();
             Pipeline pipeline = jedis.pipelined();
             lockKeys.forEach(key -> pipeline.hget(key, XID));
-            List<String> existedXids = (List<String>)(List)pipeline.syncAndReturnAll();
-            if (CollectionUtils.isNotEmpty(existedXids)) {
-                for (String existedXid : existedXids) {
-                    if (!existedXid.equals(xid)) {
-                        if (xidOwners == null) {
-                            xidOwners = new HashSet<>();
-                        }
-                        xidOwners.add(existedXid);
-                        if (failFast) {
-                            break;
-                        }
-                    }
-                }
-            }
-            return xidOwners;
+            List<String> existedXids = (List<String>) (List) pipeline.syncAndReturnAll();
+            return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
         }
     }
 
     @Override
-    public Set<String> getLockOwners(List<RowLock> rowLock) {
-        return isLockable(rowLock, false);
+    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String xidLockKey = buildXidLockKey(xid);
+            Map<String, String> branchAndLockKeys = jedis.hgetAll(xidLockKey);
+            if (CollectionUtils.isNotEmpty(branchAndLockKeys)) {
+                try (Pipeline pipeline = jedis.pipelined()) {
+                    branchAndLockKeys.values()
+                        .forEach(k -> pipeline.hset(k, STATUS, String.valueOf(lockStatus.getCode())));
+                    pipeline.sync();
+                }
+            }
+            return true;
+        }
     }
 
     private String buildXidLockKey(String xid) {

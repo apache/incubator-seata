@@ -36,13 +36,17 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.exception.BranchTransactionException;
+import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type Data base lock store.
@@ -134,9 +138,14 @@ public class LockStoreDataBaseDAO implements LockStore {
                         LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID,
                             dbBranchId);
                     }
+                    Integer status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
+                    if (status == LockStatus.Rollbacking.getCode()) {
+                        throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+                    }
                     canLock &= false;
                     break;
                 }
+
                 dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
             }
 
@@ -278,7 +287,7 @@ public class LockStoreDataBaseDAO implements LockStore {
         try {
             conn = lockStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            if (!getLockOwners(conn, lockDOs)) {
+            if (!checkLockable(conn, lockDOs)) {
                 return false;
             }
             return true;
@@ -290,16 +299,17 @@ public class LockStoreDataBaseDAO implements LockStore {
     }
 
     @Override
-    public Set<String> getLockOwners(List<LockDO> lockDOs) {
-        Connection conn = null;
-        try {
-            conn = lockStoreDataSource.getConnection();
+    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
+        String updateStatusLockByGlobalSql =
+            LockStoreSqlFactory.getLogStoreSql(dbType).getBatchUpdateStatusLockByGlobalSql(lockTable);
+        try (Connection conn = lockStoreDataSource.getConnection();
+            PreparedStatement ps = conn.prepareStatement(updateStatusLockByGlobalSql)) {
             conn.setAutoCommit(true);
-            return getLockOwners(conn, lockDOs, false);
+            ps.setInt(1, lockStatus.getCode());
+            ps.setString(2, xid);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DataAccessException(e);
-        } finally {
-            IOUtil.close(conn);
         }
     }
 
@@ -371,21 +381,7 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @param lockDOs the lock do
      * @return the boolean
      */
-    protected boolean getLockOwners(Connection conn, List<LockDO> lockDOs) {
-        Set<String> xidOwners = getLockOwners(conn, lockDOs, true);
-        return CollectionUtils.isEmpty(xidOwners);
-    }
-
-    /**
-     * Check lock boolean.
-     *
-     * @param conn    the conn
-     * @param lockDOs the lock do
-     * @param failFast the fail fast
-     * @return the boolean
-     */
-    protected Set<String> getLockOwners(Connection conn, List<LockDO> lockDOs, boolean failFast) {
-        Set<String> xidOwners = null;
+    protected boolean checkLockable(Connection conn, List<LockDO> lockDOs) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -404,16 +400,10 @@ public class LockStoreDataBaseDAO implements LockStore {
             while (rs.next()) {
                 String xid = rs.getString("xid");
                 if (!StringUtils.equals(xid, lockDOs.get(0).getXid())) {
-                    if (xidOwners == null) {
-                        xidOwners = new HashSet<>();
-                    }
-                    xidOwners.add(xid);
-                    if (failFast) {
-                        break;
-                    }
+                    return false;
                 }
             }
-            return xidOwners;
+            return true;
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {

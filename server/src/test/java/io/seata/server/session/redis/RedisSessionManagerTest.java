@@ -18,6 +18,7 @@ package io.seata.server.session.redis;
 
 import java.io.IOException;
 import java.util.List;
+
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
@@ -70,10 +71,7 @@ public class RedisSessionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session);
-        SessionCondition sessionCondition = new SessionCondition();
-        sessionCondition.setStatuses(new GlobalStatus[] {GlobalStatus.Begin});
-        sessionCondition.setXid(xid);
-        sessionManager.findGlobalSessions(sessionCondition);
+
         sessionManager.removeGlobalSession(session);
     }
 
@@ -243,7 +241,7 @@ public class RedisSessionManagerTest {
         Assertions.assertEquals(branchSession.getBranchId(),globalSessions.get(0).getBranchSessions().get(0).getBranchId());
         Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
-        condition.setXids(null);
+        condition.setXid(null);
         condition.setTransactionId(session.getTransactionId());
         globalSessions = sessionManager.findGlobalSessions(condition);
         Assertions.assertEquals(session.getXid(),globalSessions.get(0).getXid());

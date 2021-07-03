@@ -53,7 +53,6 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MOD
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_STATUS;
 
 /**
  * The redis transaction store manager
@@ -374,24 +373,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
-        List<GlobalSession> globalSessions = null;
-        if (CollectionUtils.isNotEmpty(sessionCondition.getXids())) {
-            if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-                globalSessions = readSession(sessionCondition.getXids(), sessionCondition.getStatuses(),
-                    sessionCondition.getLimit());
-            } else {
-                GlobalSession globalSession = this.readSession(sessionCondition.getXids().get(0), true);
-                if (globalSession != null) {
-                    globalSessions = new ArrayList<>();
-                    globalSessions.add(globalSession);
-                }
+        List<GlobalSession> globalSessions = new ArrayList<>();
+        if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
+            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), true);
+            if (globalSession != null) {
+                globalSessions.add(globalSession);
             }
             return globalSessions;
         } else if (sessionCondition.getTransactionId() != null) {
-            GlobalSession globalSession =
-                this.readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
+            GlobalSession globalSession = this
+                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
             if (globalSession != null) {
-                globalSessions = new ArrayList<>();
                 globalSessions.add(globalSession);
             }
             return globalSessions;
@@ -404,52 +396,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     /**
-     * Read session list.
-     *
-     * @param statuses the statuses
-     * @return the list
-     */
-    public List<GlobalSession> readSession(List<String> xids, GlobalStatus[] statuses, Integer limit) {
-        List<GlobalSession> requiredGlobalList = null;
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipeline = jedis.pipelined()) {
-            for (String xid : xids) {
-                pipeline.hgetAll(String.valueOf(XID.getTransactionId(xid)));
-            }
-            List<Object> globals = pipeline.syncAndReturnAll();
-            if (CollectionUtils.isEmpty(globals)) {
-                return Collections.EMPTY_LIST;
-            }
-            List<String> statusKeys = new ArrayList<>();
-            for (int i = 0; i < statuses.length; i++) {
-                statusKeys.add(String.valueOf(statuses[i].getCode()));
-            }
-            for (Object global : globals) {
-                if (global != null) {
-                    Map<String, String> map = (Map<String, String>)global;
-                    if (statusKeys.contains(map.get(GLOBAL_TABLE_STATUS))) {
-                        if (requiredGlobalList == null) {
-                            requiredGlobalList = new ArrayList<>();
-                        }
-                        requiredGlobalList.add(SessionConverter.convertGlobalSession(
-                            (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class)));
-                        if (limit != null && requiredGlobalList.size() == limit) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return requiredGlobalList;
-    }
-
-    /**
      * assemble the global session and branch session
      * @param globalTransactionDO the global transactionDo
      * @param branchTransactionDOs the branch transactionDos
      * @return the global session with branch session
      */
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
-            List<BranchTransactionDO> branchTransactionDOs) {
+        List<BranchTransactionDO> branchTransactionDOs) {
         GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
             for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
@@ -503,7 +456,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 if (branchInfo != null) {
                     Map<String, String> branchInfoMap = (Map<String, String>) branchInfo;
                     Optional<BranchTransactionDO> branchTransactionDO =
-                            Optional.ofNullable((BranchTransactionDO) BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
+                        Optional.ofNullable((BranchTransactionDO) BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
                     branchTransactionDO.ifPresent(branchTransactionDOs::add);
                 }
             }

@@ -15,19 +15,23 @@
  */
 package io.seata.server.storage.file.lock;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
+import io.seata.core.model.LockStatus;
 import io.seata.server.session.BranchSession;
+
+
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type Memory locker.
@@ -82,7 +86,7 @@ public class FileLocker extends AbstractLocker {
             if (previousLockBranchSession == null) {
                 // No existing lock, and now locked by myself
                 Set<String> keysInHolder = CollectionUtils.computeIfAbsent(bucketHolder, bucketLockMap,
-                    key -> new ConcurrentSet<>());
+                    key -> ConcurrentHashMap.newKeySet());
                 keysInHolder.add(pk);
             } else if (previousLockBranchSession.getTransactionId() == transactionId) {
                 // Locked by me before
@@ -94,6 +98,9 @@ public class FileLocker extends AbstractLocker {
                     branchSession.unlock();
                 } catch (TransactionException e) {
                     throw new FrameworkException(e);
+                }
+                if (previousLockBranchSession.getLockStatus() == LockStatus.Rollbacking) {
+                    throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
                 }
                 return false;
             }
@@ -125,22 +132,18 @@ public class FileLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> rowLocks) {
-        return CollectionUtils.isEmpty(getLockOwners(rowLocks, true));
-    }
-
-    public Set<String> getLockOwners(List<RowLock> rowLocks, boolean failFast) {
         if (CollectionUtils.isEmpty(rowLocks)) {
-            // no lock
-            return null;
+            //no lock
+            return true;
         }
-        Set<String> xids = null;
         Long transactionId = rowLocks.get(0).getTransactionId();
         String resourceId = rowLocks.get(0).getResourceId();
         ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = LOCK_MAP.get(resourceId);
         if (dbLockMap == null) {
-            return null;
+            return true;
         }
         for (RowLock rowLock : rowLocks) {
+            String xid = rowLock.getXid();
             String tableName = rowLock.getTableName();
             String pk = rowLock.getPk();
 
@@ -154,27 +157,22 @@ public class FileLocker extends AbstractLocker {
                 continue;
             }
             BranchSession branchSession = bucketLockMap.get().get(pk);
-            if (branchSession == null || branchSession.getTransactionId() == transactionId) {
+            Long lockingTransactionId = branchSession != null ? branchSession.getTransactionId() : null;
+            if (lockingTransactionId == null || lockingTransactionId.longValue() == transactionId) {
                 // Locked by me
                 continue;
             } else {
-                LOGGER
-                    .info("Global lock on [" + tableName + ":" + pk + "] is holding by " + branchSession.getTransactionId());
-                if (xids == null) {
-                    xids = new HashSet<>();
-                }
-                xids.add(branchSession.getXid());
-                if (failFast) {
-                    return xids;
-                }
+                LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + lockingTransactionId);
+                return false;
             }
         }
-        return xids;
+        return true;
     }
 
+
     @Override
-    public Set<String> getLockOwners(List<RowLock> rowLock) {
-        return getLockOwners(rowLock, false);
+    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
+        return true;
     }
 
     @Override

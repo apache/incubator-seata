@@ -16,7 +16,7 @@
 package io.seata.core.lock;
 
 import java.util.List;
-import java.util.Set;
+import io.seata.core.model.LockStatus;
 
 /**
  * The interface Locker.
@@ -71,10 +71,13 @@ public interface Locker {
     void cleanAllLocks();
 
     /**
-     * get lock owners
-     * @param rowLock the row lock
+     * update lock status .
+     *
+     * @param xid the xid
+     * @param lockStatus the lock status
      * @return the lock owners
      */
-    Set<String> getLockOwners(List<RowLock> rowLock);
+    boolean updateLockStatus(String xid, LockStatus lockStatus);
+
 }
 

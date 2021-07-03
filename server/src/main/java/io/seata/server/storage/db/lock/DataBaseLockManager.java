@@ -18,7 +18,6 @@ package io.seata.server.storage.db.lock;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
-
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;

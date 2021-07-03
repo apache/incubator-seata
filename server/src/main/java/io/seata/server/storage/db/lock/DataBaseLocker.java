@@ -16,14 +16,13 @@
 package io.seata.server.storage.db.lock;
 
 import java.util.List;
-import java.util.Set;
 import javax.sql.DataSource;
-
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
+import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockStore;
 
 /**
@@ -127,12 +126,8 @@ public class DataBaseLocker extends AbstractLocker {
     }
 
     @Override
-    public Set<String> getLockOwners(List<RowLock> rowLock) {
-        if (CollectionUtils.isEmpty(rowLock)) {
-            // no lock
-            return null;
-        }
-        return lockStore.getLockOwners(convertToLockDO(rowLock));
+    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
+        return lockStore.updateLockStatus(xid, lockStatus);
     }
 
     /**
@@ -143,4 +138,5 @@ public class DataBaseLocker extends AbstractLocker {
     public void setLockStore(LockStore lockStore) {
         this.lockStore = lockStore;
     }
+
 }

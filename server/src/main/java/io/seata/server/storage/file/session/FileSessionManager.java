@@ -18,7 +18,6 @@ package io.seata.server.storage.file.session;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,10 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -74,7 +73,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
         super(name);
         if (StringUtils.isNotBlank(sessionStoreFilePath)) {
             transactionStoreManager = new FileTransactionStoreManager(
-                    sessionStoreFilePath + File.separator + name, this);
+                sessionStoreFilePath + File.separator + name, this);
         } else {
             transactionStoreManager = new AbstractTransactionStoreManager() {
                 @Override
@@ -121,20 +120,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     @Override
     public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
-        List<GlobalStatus> statusKeys = null;
-        if (CollectionUtils.isNotEmpty(condition.getStatuses())) {
-            statusKeys = Arrays.asList(condition.getStatuses());
-        }
         for (GlobalSession globalSession : sessionMap.values()) {
-            if (CollectionUtils.isNotEmpty(statusKeys) && CollectionUtils.isNotEmpty(condition.getXids())) {
-                if (condition.getXids().contains(globalSession.getXid())
-                    && statusKeys.contains(globalSession.getStatus())) {
-                    found.add(globalSession);
-                    if (condition.getLimit() != null && found.size() == condition.getLimit()) {
-                        break;
-                    }
-                }
-            } else if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
+            if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
                 found.add(globalSession);
             }
         }
@@ -143,7 +130,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-            throws TransactionException {
+        throws TransactionException {
         globalSession.lock();
         try {
             return lockCallable.call();
@@ -205,7 +192,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     }
 
     private void restoreSessions(boolean isHistory, Set<String> removedGlobalBuffer, Map<String,
-            Map<Long, BranchSession>> unhandledBranchBuffer) {
+        Map<Long, BranchSession>> unhandledBranchBuffer) {
         if (!(transactionStoreManager instanceof ReloadableStore)) {
             return;
         }
@@ -217,7 +204,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     }
 
     private void restore(List<TransactionWriteStore> stores, Set<String> removedGlobalBuffer,
-                         Map<String, Map<Long, BranchSession>> unhandledBranchBuffer) {
+        Map<String, Map<Long, BranchSession>> unhandledBranchBuffer) {
         for (TransactionWriteStore store : stores) {
             TransactionStoreManager.LogOperation logOperation = store.getOperate();
             SessionStorable sessionStorable = store.getSessionRequest();
@@ -288,7 +275,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     GlobalSession foundGlobalSession = sessionMap.get(branchSession.getXid());
                     if (foundGlobalSession == null) {
                         unhandledBranchBuffer.computeIfAbsent(branchSession.getXid(), key -> new HashMap<>())
-                                .put(branchSession.getBranchId(), branchSession);
+                            .put(branchSession.getBranchId(), branchSession);
                     } else {
                         BranchSession existingBranch = foundGlobalSession.getBranch(branchSession.getBranchId());
                         if (existingBranch == null) {

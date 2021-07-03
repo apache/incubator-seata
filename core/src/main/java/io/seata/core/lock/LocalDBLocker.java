@@ -16,7 +16,7 @@
 package io.seata.core.lock;
 
 import java.util.List;
-import java.util.Set;
+import io.seata.core.model.LockStatus;
 
 /**
  * The type Local db locker.
@@ -41,8 +41,8 @@ public class LocalDBLocker extends AbstractLocker {
     }
 
     @Override
-    public Set<String> getLockOwners(List<RowLock> rowLock) {
-        return null;
+    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
+        return false;
     }
 
 }

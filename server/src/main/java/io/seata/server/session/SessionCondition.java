@@ -15,8 +15,6 @@
  */
 package io.seata.server.session;
 
-import java.util.ArrayList;
-import java.util.List;
 import io.seata.core.model.GlobalStatus;
 
 /**
@@ -26,11 +24,10 @@ import io.seata.core.model.GlobalStatus;
  */
 public class SessionCondition {
     private Long transactionId;
-    private List<String> xids;
+    private String xid;
     private GlobalStatus status;
     private GlobalStatus[] statuses;
     private long overTimeAliveMills;
-    private Integer limit;
 
     /**
      * Instantiates a new Session condition.
@@ -44,10 +41,7 @@ public class SessionCondition {
      * @param xid the xid
      */
     public SessionCondition(String xid) {
-        if (this.xids == null) {
-            this.xids = new ArrayList<>();
-        }
-        this.xids.add(xid);
+        this.xid = xid;
     }
 
     /**
@@ -122,19 +116,12 @@ public class SessionCondition {
         this.transactionId = transactionId;
     }
 
-    public List<String> getXids() {
-        return xids;
-    }
-
-    public void setXids(List<String> xids) {
-        this.xids = xids;
+    public String getXid() {
+        return xid;
     }
 
     public void setXid(String xid) {
-        if (this.xids == null) {
-            this.xids = new ArrayList<>();
-        }
-        this.xids.add(xid);
+        this.xid = xid;
     }
 
     public GlobalStatus[] getStatuses() {
@@ -144,13 +131,4 @@ public class SessionCondition {
     public void setStatuses(GlobalStatus[] statuses) {
         this.statuses = statuses;
     }
-
-    public Integer getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Integer limit) {
-        this.limit = limit;
-    }
-
 }
