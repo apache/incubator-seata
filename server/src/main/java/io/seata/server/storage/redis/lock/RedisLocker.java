@@ -163,7 +163,7 @@ public class RedisLocker extends AbstractLocker {
         List<List<String>> existedLockInfos = Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), 2);
         Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
         boolean failFast = false;
-        boolean permit = true;
+        boolean canLock = true;
         for (int i = 0; i < needLockKeys.size(); i++) {
             List<String> results = existedLockInfos.get(i);
             String existedLockXid = CollectionUtils.isEmpty(results) ? null : existedLockInfos.get(i).get(0);
@@ -178,17 +178,17 @@ public class RedisLocker extends AbstractLocker {
                         break;
                     }
                     // If not equals,means the rowkey is holding by another global transaction
-                    if (permit) {
-                        permit = false;
+                    if (canLock) {
+                        canLock = false;
                     }
                 }
             }
         }
-        if (permit) {
+        if (canLock) {
             if (failFast) {
                 throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
             }
-            return permit;
+            return canLock;
         }
         if (needAddLock.isEmpty()) {
             return true;

@@ -142,11 +142,9 @@ public class LockStoreDataBaseDAO implements LockStore {
                     Integer status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
                     if (status == LockStatus.Rollbacking.getCode()) {
                         failFast = true;
-                        break;
                     }
-                    if (canLock) {
-                        canLock &= false;
-                    }
+                    canLock &= false;
+                    break;
                 }
 
                 dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
