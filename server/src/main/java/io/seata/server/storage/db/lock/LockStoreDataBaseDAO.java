@@ -128,6 +128,7 @@ public class LockStoreDataBaseDAO implements LockStore {
             }
             rs = ps.executeQuery();
             String currentXID = lockDOs.get(0).getXid();
+            boolean failFast = false;
             while (rs.next()) {
                 String dbXID = rs.getString(ServerTableColumnsName.LOCK_TABLE_XID);
                 if (!StringUtils.equals(dbXID, currentXID)) {
@@ -140,17 +141,21 @@ public class LockStoreDataBaseDAO implements LockStore {
                     }
                     Integer status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
                     if (status == LockStatus.Rollbacking.getCode()) {
-                        throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+                        failFast = true;
+                        break;
                     }
-                    canLock &= false;
-                    break;
+                    if (canLock) {
+                        canLock &= false;
+                    }
                 }
 
                 dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
             }
-
             if (!canLock) {
                 conn.rollback();
+                if (failFast) {
+                    throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+                }
                 return false;
             }
             List<LockDO> unrepeatedLockDOs = null;

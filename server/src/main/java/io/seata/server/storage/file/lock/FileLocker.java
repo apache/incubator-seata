@@ -72,7 +72,8 @@ public class FileLocker extends AbstractLocker {
         ConcurrentMap<BucketLockMap, Set<String>> bucketHolder = branchSession.getLockHolder();
         ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = CollectionUtils.computeIfAbsent(
             LOCK_MAP, resourceId, key -> new ConcurrentHashMap<>());
-
+        boolean failFast = false;
+        boolean permit = true;
         for (RowLock lock : rowLocks) {
             String tableName = lock.getTableName();
             String pk = lock.getPk();
@@ -100,12 +101,18 @@ public class FileLocker extends AbstractLocker {
                     throw new FrameworkException(e);
                 }
                 if (previousLockBranchSession.getLockStatus() == LockStatus.Rollbacking) {
-                    throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+                    failFast = true;
+                    break;
                 }
-                return false;
+                if (permit) {
+                    permit = false;
+                }
             }
         }
-        return true;
+        if (failFast) {
+            throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+        }
+        return permit;
     }
 
     @Override
