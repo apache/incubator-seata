@@ -343,6 +343,7 @@ public class LockStoreDataBaseDAO implements LockStore {
             ps.setString(5, lockDO.getTableName());
             ps.setString(6, lockDO.getPk());
             ps.setString(7, lockDO.getRowKey());
+            ps.setInt(8, LockStatus.Locked.getCode());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);

@@ -54,7 +54,7 @@ public class ATCore extends AbstractCore {
     @Override
     protected void branchSessionLock(GlobalSession globalSession, BranchSession branchSession)
         throws TransactionException {
-        String applicationData = globalSession.getApplicationData();
+        String applicationData = branchSession.getApplicationData();
         boolean autoCommit = true;
         if (StringUtils.isNotBlank(applicationData)) {
             if (objectMapper == null) {
