@@ -196,7 +196,7 @@ public class RedisLocker extends AbstractLocker {
         if (failFast) {
             throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
         }
-        if (canLock) {
+        if (!canLock) {
             return canLock;
         }
         if (needAddLock.isEmpty()) {
@@ -208,7 +208,7 @@ public class RedisLocker extends AbstractLocker {
             pipeline.hsetnx(key, XID, value.getXid());
             pipeline.hsetnx(key, TRANSACTION_ID, value.getTransactionId().toString());
             pipeline.hsetnx(key, BRANCH_ID, value.getBranchId().toString());
-            pipeline.hsetnx(key, STATUS, String.valueOf(LockStatus.Locked));
+            pipeline.hsetnx(key, STATUS, String.valueOf(LockStatus.Locked.getCode()));
             pipeline.hset(key, ROW_KEY, value.getRowKey());
             pipeline.hset(key, RESOURCE_ID, value.getResourceId());
             pipeline.hset(key, TABLE_NAME, value.getTableName());
