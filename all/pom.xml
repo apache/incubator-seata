@@ -430,7 +430,7 @@
         <dependency>
             <groupId>com.alibaba.edas</groupId>
             <artifactId>edas-sdk</artifactId>
-            <version>provided</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>cglib</groupId>
