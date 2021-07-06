@@ -161,8 +161,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
-                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, args);
-                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, tccResource.getActionName());
+                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, args, tccResource.getActionName());
                 } catch (FrameworkException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }

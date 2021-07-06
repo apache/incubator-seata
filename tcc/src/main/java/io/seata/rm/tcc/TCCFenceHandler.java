@@ -135,9 +135,8 @@ public class TCCFenceHandler {
      * @param actionName            the action name
      * @return the boolean
      */
-    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId, String actionName) {
     public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
-                                        String xid, Long branchId, Object[] args) {
+                                        String xid, Long branchId, Object[] args, String actionName) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
