@@ -44,7 +44,7 @@ public @interface TwoPhaseBusinessAction {
     String name();
 
     /**
-     * commit methed name
+     * commit method name
      *
      * @return the string
      */
