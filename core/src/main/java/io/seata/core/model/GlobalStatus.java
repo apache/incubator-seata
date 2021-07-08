@@ -117,7 +117,13 @@ public enum GlobalStatus {
      * The Finished.
      */
     // Not managed in session MAP any more
-    Finished(15);
+    Finished(15),
+
+    /**
+     * All branches can be async rollbacked. The rollbacking is NOT done yet, but it can be seen as rollbacked for TM/RM
+     * client.
+     */
+    AsyncRollbacking(16);
 
     private int code;
 
