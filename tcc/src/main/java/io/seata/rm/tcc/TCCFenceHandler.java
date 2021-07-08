@@ -94,6 +94,7 @@ public class TCCFenceHandler {
      * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
+     * @param args                  commit method's parameters
      * @return the boolean
      */
     public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
@@ -132,6 +133,7 @@ public class TCCFenceHandler {
      * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
+     * @param args                  rollback method's parameters
      * @param actionName            the action name
      * @return the boolean
      */
