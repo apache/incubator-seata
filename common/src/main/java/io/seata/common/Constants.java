@@ -133,6 +133,11 @@ public interface Constants {
     String RETRY_COMMITTING = "RetryCommitting";
 
     /**
+     * The constant ASYNC_ROLLBACKING
+     */
+    String ASYNC_ROLLBACKING = "AsyncRollbacking";
+
+    /**
      * The constant ASYNC_COMMITTING
      */
     String ASYNC_COMMITTING = "AsyncCommitting";

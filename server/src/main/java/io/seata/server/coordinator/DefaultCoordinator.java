@@ -70,6 +70,7 @@ import io.seata.server.session.SessionHolder;
 import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.ASYNC_COMMITTING;
+import static io.seata.common.Constants.ASYNC_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
 
@@ -99,6 +100,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
         1000L);
+
+    /**
+     * The constant ASYNC_ROLLBACKING_RETRY_PERIOD.
+     */
+    protected static final long ASYNC_ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(
+        ConfigurationKeys.ASYNC_ROLLBACKING_RETRY_PERIOD, 1000L);
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
@@ -135,6 +142,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("AsyncCommitting", 1));
+
+    private ScheduledThreadPoolExecutor asyncRollbacking = new ScheduledThreadPoolExecutor(1,
+        new NamedThreadFactory("AsyncRollbacking", 1));
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
@@ -371,6 +381,30 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
+     * Handle async rollbacking.
+     */
+    protected void handleAsyncRollbacking() {
+        Collection<GlobalSession> asyncRollbackingSessions = SessionHolder.getAsyncRollbackingSessionManager()
+            .allSessions();
+        if (CollectionUtils.isEmpty(asyncRollbackingSessions)) {
+            return;
+        }
+        SessionHelper.forEach(asyncRollbackingSessions, asyncRollbackingSession -> {
+            try {
+                // Instruction reordering in DefaultCore#asyncRollback may cause this situation
+                if (GlobalStatus.AsyncRollbacking != asyncRollbackingSession.getStatus()) {
+                    //The function of this 'return' is 'continue'.
+                    return;
+                }
+                asyncRollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+                core.doGlobalRollback(asyncRollbackingSession, true);
+            } catch (TransactionException ex) {
+                LOGGER.error("Failed to async rollbacking [{}] {} {}", asyncRollbackingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
+            }
+        });
+    }
+
+    /**
      * Undo log delete.
      */
     protected void undoLogDelete() {
@@ -439,6 +473,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
+        asyncRollbacking.scheduleAtFixedRate(() -> {
+            boolean lock = SessionHolder.acquireDistributedLock(ASYNC_ROLLBACKING);
+            if (lock) {
+                try {
+                    handleAsyncRollbacking();
+                } catch (Exception e) {
+                    LOGGER.info("Exception async rollbacking ... ", e);
+                } finally {
+                    SessionHolder.releaseDistributedLock(ASYNC_ROLLBACKING);
+                }
+            }
+        }, 0, ASYNC_ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+
         timeoutCheck.scheduleAtFixedRate(() -> {
             boolean lock = SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK);
             if (lock) {
@@ -490,11 +537,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         // 1. first shutdown timed task
         retryRollbacking.shutdown();
         retryCommitting.shutdown();
+        asyncRollbacking.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            asyncRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {

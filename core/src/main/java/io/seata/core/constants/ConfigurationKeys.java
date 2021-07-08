@@ -314,6 +314,11 @@ public interface ConfigurationKeys {
     String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
 
     /**
+     * The constant ASYNC_ROLLBACKING_RETRY_PERIOD.
+     */
+    String ASYNC_ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "asyncRollbackingRetryPeriod";
+
+    /**
      * The constant TIMEOUT_RETRY_PERIOD.
      */
     String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
