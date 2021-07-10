@@ -278,17 +278,29 @@ public class DefaultCore implements Core {
         boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
             if (globalSession.getStatus() == GlobalStatus.Begin) {
-                globalSession.changeStatus(GlobalStatus.Rollbacking);
-                return true;
+                if(globalSession.canBeRollbackedAsync()){
+                    globalSession.asyncRollback();
+                    return false;
+                } else {
+                    globalSession.changeStatus(GlobalStatus.Rollbacking);
+                    return true;
+                }
             }
             return false;
         });
-        if (!shouldRollBack) {
-            return globalSession.getStatus();
-        }
 
-        doGlobalRollback(globalSession, false);
-        return globalSession.getStatus();
+        if (shouldRollBack) {
+            boolean success = doGlobalRollback(globalSession, false);
+            // If successful and all remaining branched can be rollbacked asynchronously, do async rollback.
+            if (success && globalSession.hasBranch() && globalSession.canBeRollbackedAsync()) {
+                globalSession.asyncRollback();
+                return GlobalStatus.Rollbacked;
+            } else {
+                return globalSession.getStatus();
+            }
+        } else {
+            return globalSession.getStatus() == GlobalStatus.AsyncRollbacking ? GlobalStatus.Rollbacked : globalSession.getStatus();
+        }
     }
 
     @Override
@@ -305,28 +317,47 @@ public class DefaultCore implements Core {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
             Boolean result = SessionHelper.forEach(globalSession.getReverseSortedBranches(), branchSession -> {
+                // if not retrying, skip the canBeRollbackedAsync branches
+                if (!retrying && branchSession.canBeRollbackedAsync()) {
+                    return CONTINUE;
+                }
+
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
                     return CONTINUE;
                 }
                 try {
-                    BranchStatus branchStatus = branchRollback(globalSession, branchSession);
+                    BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchRollback(globalSession, branchSession);
                     switch (branchStatus) {
                         case PhaseTwo_Rollbacked:
                             globalSession.removeBranch(branchSession);
                             LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return CONTINUE;
                         case PhaseTwo_RollbackFailed_Unretryable:
-                            SessionHelper.endRollbackFailed(globalSession);
-                            LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
-                            return false;
+                            if(globalSession.canBeRollbackedAsync()){
+                                LOGGER.error(
+                                    "Rollback branch transaction[{}], status: PhaseTwo_RollbackFailed_Unretryable, please check the business log.", branchSession.getBranchId());
+                                return CONTINUE;
+                            } else{
+                                SessionHelper.endRollbackFailed(globalSession);
+                                LOGGER.error("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                                return false;
+                            }
                         default:
-                            LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             if (!retrying) {
                                 globalSession.queueToRetryRollback();
+                                return false;
                             }
-                            return false;
+                            if(globalSession.canBeRollbackedAsync()){
+                                LOGGER.error("Rollback branch transaction[{}], status:{} and will retry later",
+                                    branchSession.getBranchId(), branchStatus);
+                                return CONTINUE;
+                            } else{
+                                LOGGER.error(
+                                    "Rollback branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                                return false;
+                            }
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex,
@@ -343,6 +374,12 @@ public class DefaultCore implements Core {
                 return result;
             }
 
+            //If has branch and not all remaining branches can be rollbacked asynchronously,
+            //do print log and return false
+            if (globalSession.hasBranch() && !globalSession.canBeRollbackedAsync()) {
+                LOGGER.info("Rollback global transaction is NOT done, xid = {}.", globalSession.getXid());
+                return false;
+            }
             // In db mode, there is a problem of inconsistent data in multiple copies, resulting in new branch
             // transaction registration when rolling back.
             // 1. New branch transaction and rollback branch transaction have no data association

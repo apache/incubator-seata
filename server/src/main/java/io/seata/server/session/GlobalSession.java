@@ -130,6 +130,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Can be rollbacked async boolean.
+     *
+     * @return the boolean
+     */
+    public boolean canBeRollbackedAsync() {
+        for (BranchSession branchSession : branchSessions) {
+            if (!branchSession.canBeRollbackedAsync()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Has AT branch
      *
      * @return the boolean
@@ -679,6 +693,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         this.setStatus(GlobalStatus.AsyncCommitting);
         SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+    }
+
+    public void asyncRollback() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getAsyncRollbackingSessionManager());
+        this.setStatus(GlobalStatus.AsyncRollbacking);
+        SessionHolder.getAsyncRollbackingSessionManager().addGlobalSession(this);
     }
 
     public void queueToRetryCommit() throws TransactionException {
