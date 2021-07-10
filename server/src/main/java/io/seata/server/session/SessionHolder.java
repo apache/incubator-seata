@@ -63,6 +63,10 @@ public class SessionHolder {
      */
     public static final String ASYNC_COMMITTING_SESSION_MANAGER_NAME = "async.commit.data";
     /**
+     * The constant ASYNC_ROLLBACKING_SESSION_MANAGER_NAME.
+     */
+    public static final String ASYNC_ROLLBACKING_SESSION_MANAGER_NAME = "async.rollback.data";
+    /**
      * The constant RETRY_COMMITTING_SESSION_MANAGER_NAME.
      */
     public static final String RETRY_COMMITTING_SESSION_MANAGER_NAME = "retry.commit.data";
@@ -83,6 +87,7 @@ public class SessionHolder {
 
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
+    private static SessionManager ASYNC_ROLLBACKING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
 
@@ -104,6 +109,8 @@ public class SessionHolder {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+            ASYNC_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+                new Object[] {ASYNC_ROLLBACKING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
@@ -121,6 +128,8 @@ public class SessionHolder {
                 new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
+            ASYNC_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+                new Class[] {String.class, String.class}, new Object[] {ASYNC_ROLLBACKING_SESSION_MANAGER_NAME, null});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
@@ -131,6 +140,8 @@ public class SessionHolder {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+            ASYNC_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.REDIS.getName(), new Object[] {ASYNC_ROLLBACKING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -175,6 +186,11 @@ public class SessionHolder {
                     case AsyncCommitting:
                         if (storeMode == StoreMode.FILE) {
                             queueToAsyncCommitting(globalSession);
+                        }
+                        break;
+                    case AsyncRollbacking:
+                        if (storeMode == StoreMode.FILE) {
+                            queueToAsyncRollbacking(globalSession);
                         }
                         break;
                     default: {
@@ -225,6 +241,15 @@ public class SessionHolder {
         try {
             globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
             getAsyncCommittingSessionManager().addGlobalSession(globalSession);
+        } catch (TransactionException e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    private static void queueToAsyncRollbacking(GlobalSession globalSession) {
+        try {
+            globalSession.addSessionLifecycleListener(getAsyncRollbackingSessionManager());
+            getAsyncRollbackingSessionManager().addGlobalSession(globalSession);
         } catch (TransactionException e) {
             throw new ShouldNeverHappenException(e);
         }
@@ -284,6 +309,18 @@ public class SessionHolder {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
         }
         return ASYNC_COMMITTING_SESSION_MANAGER;
+    }
+
+    /**
+     * Gets async rollbacking session manager.
+     *
+     * @return the async rollbacking session manager
+     */
+    public static SessionManager getAsyncRollbackingSessionManager() {
+        if (ASYNC_ROLLBACKING_SESSION_MANAGER == null) {
+            throw new ShouldNeverHappenException("SessionManager is NOT init!");
+        }
+        return ASYNC_ROLLBACKING_SESSION_MANAGER;
     }
 
     /**
@@ -369,6 +406,9 @@ public class SessionHolder {
         }
         if (ASYNC_COMMITTING_SESSION_MANAGER != null) {
             ASYNC_COMMITTING_SESSION_MANAGER.destroy();
+        }
+        if (ASYNC_ROLLBACKING_SESSION_MANAGER != null) {
+            ASYNC_ROLLBACKING_SESSION_MANAGER.destroy();
         }
         if (RETRY_COMMITTING_SESSION_MANAGER != null) {
             RETRY_COMMITTING_SESSION_MANAGER.destroy();
