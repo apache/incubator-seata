@@ -346,7 +346,8 @@ public class SessionHolder {
 
     /**
      * acquire lock
-     *
+     * 
+     * @param lockKey the lock key, should be distinct for each lock
      * @return the boolean
      */
     public static boolean acquireDistributedLock(String lockKey) {
