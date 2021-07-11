@@ -1,0 +1,225 @@
+package io.seata.sqlparser.druid.sqlserver;
+
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLDateExpr;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
+import io.seata.sqlparser.SQLParsingException;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.AbstractRecognizerTest;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * The type SqlServer insert recognizer test.
+ *
+ * @author GoodBoyCoder
+ */
+public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
+
+    private final int pkIndex = 0;
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.SQLSERVER;
+    }
+
+    @Test
+    public void testGetSqlType() {
+        String sql = "INSERT INTO t (id) values (?)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.INSERT);
+    }
+
+    @Test
+    public void testGetTableAlias() {
+        String sql = "INSERT INTO t (id) values (?)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        Assertions.assertNull(recognizer.getTableAlias());
+
+        sql = "INSERT INTO t t1 (id) values (?)";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        Assertions.assertEquals("t1", recognizer.getTableAlias());
+    }
+
+    /**
+     * Insert recognizer test 0.(test with constant)
+     */
+    @Test
+    public void insertRecognizerTest_0() {
+
+        String sql = "INSERT INTO t (name) VALUES ('name1')";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(sql, statement);
+
+        Assertions.assertEquals(sql, sqlServerInsertRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
+        Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
+        Assertions.assertEquals(Collections.singletonList("name"), sqlServerInsertRecognizer.getInsertColumns());
+        Assertions.assertEquals(1, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Collections.singletonList("name1"), sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+    }
+
+    /**
+     * Insert recognizer test 1.(test with multi constant)
+     */
+    @Test
+    public void insertRecognizerTest_1() {
+
+        String sql = "INSERT INTO t (name, age) VALUES ('name1', '18')";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(sql, statement);
+
+        Assertions.assertEquals(sql, sqlServerInsertRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
+        Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
+        Assertions.assertEquals(Arrays.asList("name", "age"), sqlServerInsertRecognizer.getInsertColumns());
+        Assertions.assertEquals(1, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Arrays.asList("name1", "18"), sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+    }
+
+    /**
+     * Insert recognizer test 2.(test with multi values)
+     */
+    @Test
+    public void insertRecognizerTest_2() {
+
+        String sql = "INSERT INTO t (name, age) VALUES ('name1', '18'), ('name2', '19'), ('name3', '20')";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(sql, statement);
+
+        Assertions.assertEquals(sql, sqlServerInsertRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
+        Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
+        Assertions.assertEquals(Arrays.asList("name", "age"), sqlServerInsertRecognizer.getInsertColumns());
+        Assertions.assertEquals(3, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Arrays.asList(Arrays.asList("name1", "18"), Arrays.asList("name2", "19"), Arrays.asList("name3", "20")),
+                sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)));
+    }
+
+    /**
+     * Insert recognizer test 3.(test with placeholder)
+     */
+    @Test
+    public void insertRecognizerTest_3() {
+
+        String sql = "INSERT INTO t (name) VALUES (?)";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(sql, statement);
+
+        Assertions.assertEquals(sql, sqlServerInsertRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
+        Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
+        Assertions.assertEquals(Collections.singletonList("name"), sqlServerInsertRecognizer.getInsertColumns());
+        Assertions.assertEquals(1, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Collections.singletonList("?"), sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+    }
+
+
+    @Test
+    public void testGetInsertColumns() {
+
+        //test for no column
+        String sql = "insert into t values (?)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        List<String> insertColumns = recognizer.getInsertColumns();
+        Assertions.assertNull(insertColumns);
+
+        //test for normal
+        sql = "insert into t(a) values (?)";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        insertColumns = recognizer.getInsertColumns();
+        Assertions.assertEquals(1, insertColumns.size());
+        Assertions.assertEquals(Collections.singletonList("a"), insertColumns);
+
+        //test for exception
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "insert into t(a) values (?)";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.SQLSERVER);
+            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
+            sqlInsertStatement.getColumns().add(new SQLDateExpr());
+
+            SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(s, sqlInsertStatement);
+            sqlServerInsertRecognizer.getInsertColumns();
+        });
+    }
+
+    @Test
+    public void testGetInsertRows() {
+        //test for null value
+        String sql = "insert into t(id, no, name, age, time) values (default, null, 'a', ?, now())";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
+        Assertions.assertEquals(1, insertRows.size());
+
+        //test for sequence
+        sql = "insert into t(id) values(next value for t1.id)";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
+        Assertions.assertEquals(1, insertRows.size());
+
+        //test for exception
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "insert into t(a) values (?)";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.SQLSERVER);
+            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
+            sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new MySqlOrderingExpr());
+
+            SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(s, sqlInsertStatement);
+            sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
+        });
+    }
+
+    @Test
+    public void testGetSQLType() {
+        String sql = "insert into t(a) values (?)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        Assertions.assertEquals(SQLType.INSERT, recognizer.getSQLType());
+    }
+
+    @Test
+    public void testGetInsertParamsValue() {
+        String sql = "insert into t(a) values (?)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        Assertions.assertNull(recognizer.getInsertParamsValue());
+    }
+    @Test
+    public void testGetDuplicateKeyUpdate() {
+        String sql = "insert into t(a) values (?)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        Assertions.assertNull(recognizer.getDuplicateKeyUpdate());
+    }
+}

@@ -40,6 +40,8 @@ public class SqlServerDeleteRecognizer extends BaseSqlServerRecognizer implement
 
     @Override
     public String getTableAlias() {
+        //there is different between getFrom() and getTableSource()
+        //when use "delete t1 from t t2", getTableSource().getAlias() will return null
         if (ast.getFrom() == null) {
             return ast.getTableSource().getAlias();
         }
@@ -60,8 +62,6 @@ public class SqlServerDeleteRecognizer extends BaseSqlServerRecognizer implement
             public boolean visit(SQLJoinTableSource x) {
                 throw new NotSupportYetException("not support the syntax of delete with join table");
             }
-
-
         };
         SQLTableSource tableSource;
         if (ast.getFrom() == null) {
