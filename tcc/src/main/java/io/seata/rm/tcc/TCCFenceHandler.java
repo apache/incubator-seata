@@ -39,7 +39,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  * TCC Fence Handler(idempotent, non_rollback, suspend)
  *
  * @author kaka2code
- * @author Yujianfei
  */
 public class TCCFenceHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceHandler.class);
