@@ -211,6 +211,9 @@ public class StringUtils {
         if (obj instanceof Collection) {
             return CollectionUtils.toString((Collection<?>)obj);
         }
+        if (obj.getClass().isArray()) {
+            return ArrayUtils.toString((Object[])obj);
+        }
         if (obj instanceof Map) {
             return CollectionUtils.toString((Map<?, ?>)obj);
         }
