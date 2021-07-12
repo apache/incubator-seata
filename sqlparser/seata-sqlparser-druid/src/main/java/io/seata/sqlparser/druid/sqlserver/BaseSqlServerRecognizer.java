@@ -2,6 +2,7 @@ package io.seata.sqlparser.druid.sqlserver;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerTop;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerOutputVisitor;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
