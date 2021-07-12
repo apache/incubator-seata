@@ -344,7 +344,8 @@ public final class ReflectionUtil {
     //region Method
 
     /**
-     * get method
+     * get method.
+     * If you want to get the public method, please use {@link Class#getMethod(String, Class[])}.
      *
      * @param clazz          the class
      * @param methodName     the method name
@@ -374,7 +375,8 @@ public final class ReflectionUtil {
     }
 
     /**
-     * get method
+     * get method.
+     * If you want to get the public method, please use {@link Class#getMethod(String, Class[])}.
      *
      * @param clazz      the class
      * @param methodName the method name
