@@ -90,7 +90,7 @@ public class ActionInterceptorHandler {
             if (businessAction.useTCCFence()) {
                 try {
                     // Use TCC Fence, and return the business result
-                    return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
+                    return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), actionName, targetCallback);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     Throwable originException = e.getCause();
                     if (originException instanceof FrameworkException) {

@@ -119,7 +119,7 @@ public final class ActionContextUtil {
                 actionContext.putAll(paramContext);
             }
         } else {
-            // get param name
+            // get param name from the annotation
             String paramNameFromAnnotation = getParamNameFromAnnotation(annotation);
             if (StringUtils.isNotBlank(paramNameFromAnnotation)) {
                 paramName = paramNameFromAnnotation;
