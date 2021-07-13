@@ -152,6 +152,18 @@ public class StringUtilsTest {
         list.add(list);
         Assertions.assertEquals("[xxx, 111, (this ArrayList)]", StringUtils.toString(list));
 
+        //case: Array
+        String[] strArr = new String[2];
+        strArr[0] = "11";
+        strArr[1] = "22";
+        Assertions.assertEquals("[11, 22]", StringUtils.toString(strArr));
+        //case: Array, and cycle dependency
+        Object[] array = new Object[3];
+        array[0] = 1;
+        array[1] = '2';
+        array[2] = array;
+        Assertions.assertEquals("[1, 2, (this Object[])]", StringUtils.toString(array));
+
         //case: Map, and cycle dependency
         Map<Object, Object> map = new HashMap<>();
         map.put("aaa", 111);
@@ -189,6 +201,12 @@ public class StringUtilsTest {
         c.setObj(a);
         a.setObj(b);
         Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass), s=null), s=null), s=null)", StringUtils.toString(a));
+
+        //final confirm: do not triggered the `toString` and `hashCode` methods
+        Assertions.assertFalse(TestClass.hashCodeTriggered);
+        Assertions.assertFalse(TestClass.toStringTriggered);
+        Assertions.assertFalse(CycleDependency.hashCodeTriggered);
+        Assertions.assertFalse(CycleDependency.toStringTriggered);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -198,11 +216,22 @@ public class StringUtilsTest {
     }
 
     @TestAnnotation(test = true)
-    class TestClass {
+    static class TestClass {
+        public static boolean hashCodeTriggered = false;
+        public static boolean toStringTriggered = false;
+
         private TestClass obj;
         private String s;
 
+        @Override
+        public int hashCode() {
+            hashCodeTriggered = true;
+            return super.hashCode();
+        }
+
+        @Override
         public String toString() {
+            toStringTriggered = true;
             return StringUtils.toString(this);
         }
 
@@ -216,6 +245,9 @@ public class StringUtilsTest {
     }
 
     static class CycleDependency {
+        public static boolean hashCodeTriggered = false;
+        public static boolean toStringTriggered = false;
+
         public static final CycleDependency A = new CycleDependency("a");
         public static final CycleDependency B = new CycleDependency("b");
 
@@ -235,7 +267,14 @@ public class StringUtilsTest {
         }
 
         @Override
+        public int hashCode() {
+            hashCodeTriggered = true;
+            return super.hashCode();
+        }
+
+        @Override
         public String toString() {
+            toStringTriggered = true;
             return "(" +
                     "s=" + s + "," +
                     "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") +
