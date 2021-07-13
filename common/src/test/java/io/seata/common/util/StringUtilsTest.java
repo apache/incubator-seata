@@ -17,6 +17,12 @@ package io.seata.common.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -95,7 +101,7 @@ public class StringUtilsTest {
     }
 
     @Test
-    void testToStringAndCycleDependency() throws StackOverflowError {
+    void testToStringAndCycleDependency() throws Exception {
         //case: String
         Assertions.assertEquals("aaa", StringUtils.toString("aaa"));
 
@@ -122,6 +128,22 @@ public class StringUtilsTest {
 
         //case: Enum
         Assertions.assertEquals("ObjectHolder.INSTANCE", StringUtils.toString(ObjectHolder.INSTANCE));
+
+        //case: Annotation
+        TestAnnotation annotation = TestClass.class.getAnnotation(TestAnnotation.class);
+        Assertions.assertEquals("@" + TestAnnotation.class.getSimpleName() + "(test=true)", StringUtils.toString(annotation));
+
+        //case: Class
+        Class<?> clazz = TestClass.class;
+        Assertions.assertEquals("Class<" + clazz.getSimpleName() + ">", StringUtils.toString(clazz));
+
+        //case: Method
+        Method method = clazz.getMethod("setObj", TestClass.class);
+        Assertions.assertEquals("Method<" + clazz.getSimpleName() + ".setObj(" + clazz.getSimpleName() + ")>", StringUtils.toString(method));
+
+        //case: Field
+        Field field = clazz.getDeclaredField("s");
+        Assertions.assertEquals("Field<" + clazz.getSimpleName() + ".(String)s>", StringUtils.toString(field));
 
         //case: List, and cycle dependency
         List<Object> list = new ArrayList<>();
@@ -159,18 +181,26 @@ public class StringUtilsTest {
         //case: Object, and cycle dependency
         TestClass a = new TestClass();
         a.setObj(a);
-        Assertions.assertEquals("TestClass(obj=(this TestClass))", StringUtils.toString(a));
+        Assertions.assertEquals("TestClass(obj=(this TestClass), s=null)", StringUtils.toString(a));
         //case: Object, and cycle dependency（deep case）
         TestClass b = new TestClass();
         TestClass c = new TestClass();
         b.setObj(c);
         c.setObj(a);
         a.setObj(b);
-        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass))))", StringUtils.toString(a));
+        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass), s=null), s=null), s=null)", StringUtils.toString(a));
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface TestAnnotation {
+        boolean test() default false;
+    }
+
+    @TestAnnotation(test = true)
     class TestClass {
         private TestClass obj;
+        private String s;
 
         public String toString() {
             return StringUtils.toString(this);
