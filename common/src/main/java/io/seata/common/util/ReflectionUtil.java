@@ -17,9 +17,11 @@ package io.seata.common.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,6 +67,16 @@ public final class ReflectionUtil {
     private static final Map<Class<?>, Field[]> CLASS_FIELDS_CACHE = new ConcurrentHashMap<>();
 
     /**
+     * The cache FIELD_CACHE: Class -> fieldName -> Field
+     */
+    private static final Map<Class<?>, Map<String, Field>> FIELD_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * The cache METHOD_CACHE: Class -> methodName|paramClassName1,paramClassName2,...,paramClassNameN -> Method
+     */
+    private static final Map<Class<?>, Map<String, Method>> METHOD_CACHE = new ConcurrentHashMap<>();
+
+    /**
      * The cache SINGLETON_CACHE
      */
     private static final Map<Class<?>, Object> SINGLETON_CACHE = new ConcurrentHashMap<>();
@@ -107,6 +119,11 @@ public final class ReflectionUtil {
         return classSet;
     }
 
+    //endregion
+
+
+    //region Interface
+
     /**
      * get all interface of the clazz
      *
@@ -134,7 +151,7 @@ public final class ReflectionUtil {
     //region Field
 
     /**
-     * Gets all fields.
+     * Gets all fields, excluding static or synthetic fields
      *
      * @param targetClazz the target class
      */
@@ -187,16 +204,28 @@ public final class ReflectionUtil {
      * @throws SecurityException    the security exception
      */
     public static Field getField(final Class<?> clazz, final String fieldName) throws NoSuchFieldException, SecurityException {
-        Class<?> cl = clazz;
-        while (cl != null && cl != Object.class && !cl.isInterface()) {
-            try {
-                return cl.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                cl = cl.getSuperclass();
+        Map<String, Field> fieldMap = CollectionUtils.computeIfAbsent(FIELD_CACHE, clazz, k -> new ConcurrentHashMap<>());
+        Field field = CollectionUtils.computeIfAbsent(fieldMap, fieldName, k -> {
+            Class<?> cl = clazz;
+            while (cl != null && cl != Object.class && !cl.isInterface()) {
+                try {
+                    return cl.getDeclaredField(fieldName);
+                } catch (NoSuchFieldException e) {
+                    cl = cl.getSuperclass();
+                }
             }
+            return null;
+        });
+
+        if (field == null) {
+            throw new NoSuchFieldException("field not found: " + clazz.getName() + ", field: " + fieldName);
         }
 
-        throw new NoSuchFieldException("field not found: " + clazz.getName() + ", field: " + fieldName);
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
+
+        return field;
     }
 
     /**
@@ -204,11 +233,13 @@ public final class ReflectionUtil {
      *
      * @param target the target
      * @param field  the field of the target
+     * @param <T>    the field type
      * @return field value
      * @throws IllegalArgumentException if {@code target} is {@code null}
      * @throws SecurityException        the security exception
+     * @throws ClassCastException       if the type of the variable receiving the field value is not equals to the field type
      */
-    public static Object getFieldValue(Object target, Field field)
+    public static <T> T getFieldValue(Object target, Field field)
             throws IllegalArgumentException, SecurityException {
         if (target == null) {
             throw new IllegalArgumentException("target must be not null");
@@ -219,7 +250,7 @@ public final class ReflectionUtil {
                 field.setAccessible(true);
             }
             try {
-                return field.get(target);
+                return (T)field.get(target);
             } catch (IllegalAccessException ignore) {
                 // avoid other threads executing `field.setAccessible(false)`
             }
@@ -231,12 +262,14 @@ public final class ReflectionUtil {
      *
      * @param target    the target
      * @param fieldName the field name
+     * @param <T>       the field type
      * @return field value
      * @throws IllegalArgumentException if {@code target} is {@code null}
      * @throws NoSuchFieldException     if the field named {@code fieldName} does not exist
      * @throws SecurityException        the security exception
+     * @throws ClassCastException       if the type of the variable receiving the field value is not equals to the field type
      */
-    public static Object getFieldValue(Object target, String fieldName)
+    public static <T> T getFieldValue(Object target, String fieldName)
             throws IllegalArgumentException, NoSuchFieldException, SecurityException {
         if (target == null) {
             throw new IllegalArgumentException("target must be not null");
@@ -362,7 +395,8 @@ public final class ReflectionUtil {
     //region Method
 
     /**
-     * get method
+     * get method.
+     * If you want to get the public method, please use {@link Class#getMethod(String, Class[])}.
      *
      * @param clazz          the class
      * @param methodName     the method name
@@ -379,20 +413,46 @@ public final class ReflectionUtil {
             throw new IllegalArgumentException("clazz must be not null");
         }
 
-        Class<?> cl = clazz;
-        while (cl != null) {
-            try {
-                return cl.getDeclaredMethod(methodName, parameterTypes);
-            } catch (NoSuchMethodException e) {
-                cl = cl.getSuperclass();
+        Map<String, Method> methodMap = CollectionUtils.computeIfAbsent(METHOD_CACHE, clazz, k -> new ConcurrentHashMap<>());
+
+        String cacheKey = generateMethodCacheKey(methodName, parameterTypes);
+        Method method = CollectionUtils.computeIfAbsent(methodMap, cacheKey, k -> {
+            Class<?> cl = clazz;
+            while (cl != null) {
+                try {
+                    return cl.getDeclaredMethod(methodName, parameterTypes);
+                } catch (NoSuchMethodException e) {
+                    cl = cl.getSuperclass();
+                }
             }
+            return null;
+        });
+
+        if (method == null) {
+            throw new NoSuchMethodException("method not found: " + methodToString(clazz, methodName, parameterTypes));
         }
 
-        throw new NoSuchMethodException("method not found: " + methodToString(clazz, methodName, parameterTypes));
+        if (!method.isAccessible()) {
+            method.setAccessible(true);
+        }
+
+        return method;
+    }
+
+    private static String generateMethodCacheKey(String methodName, Class<?>[] parameterTypes) {
+        StringBuilder key = new StringBuilder(methodName);
+        if (parameterTypes != null && parameterTypes.length > 0) {
+            key.append("|");
+            for (Class<?> parameterType : parameterTypes) {
+                key.append(parameterType.getName()).append(",");
+            }
+        }
+        return key.toString();
     }
 
     /**
-     * get method
+     * get method.
+     * If you want to get the public method, please use {@link Class#getMethod(String, Class[])}.
      *
      * @param clazz      the class
      * @param methodName the method name
@@ -668,6 +728,17 @@ public final class ReflectionUtil {
     //region Annotation
 
     /**
+     * get annotation values
+     *
+     * @param annotation the annotation
+     * @throws NoSuchFieldException the no such field exception
+     */
+    public static Map<String, Object> getAnnotationValues(Annotation annotation) throws NoSuchFieldException {
+        InvocationHandler h = Proxy.getInvocationHandler(annotation);
+        return (Map<String, Object>)getFieldValue(h, "memberValues");
+    }
+
+    /**
      * get annotation from the method or super class method
      *
      * @param method          the method
@@ -734,29 +805,13 @@ public final class ReflectionUtil {
     //region toString
 
     /**
-     * method to string
+     * class to string
      *
-     * @param clazz          the clazz
-     * @param methodName     the method name
-     * @param parameterTypes the parameter types
+     * @param clazz the class
      * @return the string
      */
-    public static String methodToString(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
-        return clazz.getName() + "." + methodName + parameterTypesToString(parameterTypes);
-    }
-
-    /**
-     * method to string
-     *
-     * @param method the method
-     * @return the string
-     */
-    public static String methodToString(Method method) {
-        String methodStr = methodToString(method.getDeclaringClass(), method.getName(), method.getParameterTypes());
-        if (Modifier.isStatic(method.getModifiers())) {
-            methodStr = "static " + methodStr;
-        }
-        return methodStr;
+    public static String classToString(Class<?> clazz) {
+        return "Class<" + clazz.getSimpleName() + ">";
     }
 
     /**
@@ -768,7 +823,7 @@ public final class ReflectionUtil {
      * @return the string
      */
     public static String fieldToString(Class<?> clazz, String fieldName, Class<?> fieldType) {
-        return fieldType.getName() + " field " + clazz.getName() + "." + fieldName;
+        return "Field<" + clazz.getSimpleName() + ".(" + fieldType.getSimpleName() + " " + fieldName + ")>";
     }
 
     /**
@@ -779,6 +834,49 @@ public final class ReflectionUtil {
      */
     public static String fieldToString(Field field) {
         return fieldToString(field.getDeclaringClass(), field.getName(), field.getType());
+    }
+
+    /**
+     * method to string
+     *
+     * @param clazz          the clazz
+     * @param methodName     the method name
+     * @param parameterTypes the parameter types
+     * @return the string
+     */
+    public static String methodToString(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+        return "Method<" + clazz.getSimpleName() + "." + methodName + parameterTypesToString(parameterTypes) + ">";
+    }
+
+    /**
+     * method to string
+     *
+     * @param method the method
+     * @return the string
+     */
+    public static String methodToString(Method method) {
+        String methodStr = method.getDeclaringClass().getSimpleName() + "." + method.getName()
+                + parameterTypesToString(method.getParameterTypes());
+        if (Modifier.isStatic(method.getModifiers())) {
+            methodStr = "static " + methodStr;
+        }
+        return "Method<" + methodStr + ">";
+    }
+
+    /**
+     * annotatio to string
+     *
+     * @param annotation the annotation
+     * @return the string
+     */
+    public static String annotationToString(Annotation annotation) {
+        if (annotation == null) {
+            return "null";
+        }
+
+        String annoStr = annotation.toString();
+        String annoValueStr = annoStr.substring(annoStr.indexOf('('));
+        return "@" + annotation.annotationType().getSimpleName() + annoValueStr;
     }
 
     /**
@@ -796,7 +894,7 @@ public final class ReflectionUtil {
                     sb.append(", ");
                 }
                 Class<?> c = parameterTypes[i];
-                sb.append((c == null) ? "null" : c.getName());
+                sb.append((c == null) ? "null" : c.getSimpleName());
             }
         }
         sb.append(")");
