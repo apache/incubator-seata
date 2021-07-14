@@ -174,9 +174,9 @@ public class StringUtils {
         if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
             return obj.toString();
         }
-		if (obj instanceof Charset) {
-			return ((Charset)obj).name();
-		}
+        if (obj instanceof Charset) {
+            return ((Charset)obj).name();
+        }
         if (obj instanceof Date) {
             Date date = (Date)obj;
             long time = date.getTime();
