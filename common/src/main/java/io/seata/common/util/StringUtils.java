@@ -171,11 +171,11 @@ public class StringUtils {
 
         //region Convert simple types to String directly
 
-        if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
-            return obj.toString();
+        if (obj instanceof CharSequence) {
+            return "\"" + obj + "\"";
         }
-        if (obj instanceof Charset) {
-            return ((Charset)obj).name();
+        if (obj instanceof Character) {
+            return "'" + obj + "'";
         }
         if (obj instanceof Date) {
             Date date = (Date)obj;
@@ -223,6 +223,11 @@ public class StringUtils {
         }
 
         //endregion
+
+        //the jdk classes
+        if (obj.getClass().getClassLoader() == null) {
+            return obj.toString();
+        }
 
         return CycleDependencyHandler.wrap(obj, o -> {
             StringBuilder sb = new StringBuilder(32);
