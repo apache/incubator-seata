@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -173,6 +174,9 @@ public class StringUtils {
         if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
             return obj.toString();
         }
+		if (obj instanceof Charset) {
+			return ((Charset)obj).name();
+		}
         if (obj instanceof Date) {
             Date date = (Date)obj;
             long time = date.getTime();

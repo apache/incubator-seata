@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -113,6 +114,8 @@ public class StringUtilsTest {
         Assertions.assertEquals("true", StringUtils.toString(true));
         //case: Character
         Assertions.assertEquals("2", StringUtils.toString('2'));
+        //case: Charset
+        Assertions.assertEquals("UTF-8", StringUtils.toString(StandardCharsets.UTF_8));
 
         //case: Date
         Date date = new Date(2021 - 1900, 6 - 1, 15);
