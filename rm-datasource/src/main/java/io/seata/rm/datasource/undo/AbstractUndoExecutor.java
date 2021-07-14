@@ -117,9 +117,8 @@ public abstract class AbstractUndoExecutor {
         if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
             return;
         }
-        try {
-            String undoSQL = buildUndoSQL();
-            PreparedStatement undoPST = conn.prepareStatement(undoSQL);
+        String undoSQL = buildUndoSQL();
+        try (PreparedStatement undoPST = conn.prepareStatement(undoSQL)) {
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
@@ -244,7 +243,7 @@ public abstract class AbstractUndoExecutor {
         Result<Boolean> afterEqualsCurrentResult = DataCompareUtils.isRecordsEquals(afterRecords, currentRecords);
         if (!afterEqualsCurrentResult.getResult()) {
 
-            // If current data is not equivalent to the after data, then compare the current data with the before 
+            // If current data is not equivalent to the after data, then compare the current data with the before
             // data, too. No need continue to undo if current data is equivalent to the before data snapshot
             Result<Boolean> beforeEqualsCurrentResult = DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords);
             if (beforeEqualsCurrentResult.getResult()) {
