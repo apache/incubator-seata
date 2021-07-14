@@ -138,11 +138,12 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     /**
      * Debug log.
      *
-     * @param info the info
+     * @param format the info
+     * @param arguments the arguments
      */
-    public void debugLog(String info) {
+    protected void debugLog(String format, Object... arguments) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(info);
+            LOGGER.debug(format, arguments);
         }
     }
 
@@ -193,7 +194,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
          */
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            debugLog("inactive:" + ctx);
+            debugLog("inactive:{}", ctx);
             if (messageExecutor.isShutdown()) {
                 return;
             }
@@ -245,7 +246,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
             if (evt instanceof IdleStateEvent) {
-                debugLog("idle:" + evt);
+                debugLog("idle:{}", evt);
                 IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
                 if (idleStateEvent.state() == IdleState.READER_IDLE) {
                     if (LOGGER.isInfoEnabled()) {

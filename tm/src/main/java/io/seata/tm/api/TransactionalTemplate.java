@@ -159,7 +159,7 @@ public class TransactionalTemplate {
 
     private GlobalLockConfig replaceGlobalLockConfig(TransactionInfo info) {
         GlobalLockConfig myConfig = new GlobalLockConfig();
-        myConfig.setLockRetryInternal(info.getLockRetryInternal());
+        myConfig.setLockRetryInterval(info.getLockRetryInterval());
         myConfig.setLockRetryTimes(info.getLockRetryTimes());
         return GlobalLockConfigHolder.setAndReturnPrevious(myConfig);
     }

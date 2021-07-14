@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -243,6 +244,10 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * the modify for test
+     *
+     * @param expr the expr
+     * @return the pk values by sequence
+     * @throws SQLException the sql exception
      */
     protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
         List<Object> pkValues = null;
@@ -259,22 +264,26 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         final String sql = sequenceable.getSequenceSql(expr);
         LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
 
-        ResultSet genKeys;
-        genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
-        pkValues = new ArrayList<>();
-        while (genKeys.next()) {
-            Object v = genKeys.getObject(1);
-            pkValues.add(v);
+        Connection conn = statementProxy.getConnection();
+        try (Statement ps = conn.createStatement();
+             ResultSet genKeys = ps.executeQuery(sql)) {
+
+            pkValues = new ArrayList<>();
+            while (genKeys.next()) {
+                Object v = genKeys.getObject(1);
+                pkValues.add(v);
+            }
+            return pkValues;
         }
-        return pkValues;
     }
 
     /**
      * check pk values for multi Pk
      * At most one null per row.
      * Method is not allowed.
-     * @param pkValues
-     * @return
+     *
+     * @param pkValues the pk values
+     * @return boolean
      */
     protected boolean checkPkValuesForMultiPk(Map<String, List<Object>> pkValues) {
         Set<String> pkNames = pkValues.keySet();
@@ -304,6 +313,13 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return true;
     }
 
+    /**
+     * Check pk values boolean.
+     *
+     * @param pkValues the pk values
+     * @param ps       the ps
+     * @return the boolean
+     */
     protected boolean checkPkValues(Map<String, List<Object>> pkValues, boolean ps) {
         Set<String> pkNames = pkValues.keySet();
         if (pkNames.size() == 1) {
@@ -315,7 +331,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * check pk values for single pk
-     * @param pkValues
+     * @param pkValues pkValues
      * @param ps       true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
      */

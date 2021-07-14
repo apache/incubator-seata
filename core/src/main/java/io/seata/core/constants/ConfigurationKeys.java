@@ -38,14 +38,29 @@ public interface ConfigurationKeys {
     String STORE_PREFIX = "store.";
 
     /**
+     * The constant MODE.
+     */
+    String MODE = "mode";
+
+    /**
      * The constant STORE_MODE.
      */
-    String STORE_MODE = STORE_PREFIX + "mode";
+    String STORE_MODE = STORE_PREFIX + MODE;
+
+    /**
+     * The constant STORE_LOCK_MODE.
+     */
+    String STORE_LOCK_MODE = STORE_PREFIX + "lock." + MODE;
+
+    /**
+     * The constant STORE_SESSION_MODE.
+     */
+    String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
      */
-    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
+    String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
 
     /**
      * The constant STORE_FILE_PREFIX
@@ -164,6 +179,11 @@ public interface ConfigurationKeys {
     String CLIENT_TABLE_META_CHECKER_INTERVAL = CLIENT_RM_PREFIX + "tableMetaCheckerInterval";
 
     /**
+     * The constant TCC_ACTION_INTERCEPTOR_ORDER.
+     */
+    String TCC_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "tccActionInterceptorOrder";
+
+    /**
      * The constant CLIENT_TM_PREFIX.
      */
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";
@@ -270,9 +290,9 @@ public interface ConfigurationKeys {
     String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
     /**
-     * The constant SERVER_PORT.
+     * The constant SERVER_RPC_PORT.
      */
-    String SERVER_PORT = SERVER_PREFIX + "port";
+    String SERVER_RPC_PORT = SERVER_PREFIX + "rpcPort";
 
     /**
      * The constant RECOVERY_PREFIX.
@@ -409,6 +429,11 @@ public interface ConfigurationKeys {
      * the constant RETRY_DEAD_THRESHOLD
      */
     String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
+
+    /**
+     * the constant DISTRIBUTED_LOCK_EXPIRE_TIME
+     */
+    String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.
@@ -618,6 +643,11 @@ public interface ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant GLOBAL_TRANSACTION_INTERCEPTOR_ORDER.
+     */
+    String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
      * The constant SEATA_ACCESS_KEY.

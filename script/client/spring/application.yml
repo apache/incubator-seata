@@ -5,6 +5,8 @@ seata:
   enable-auto-data-source-proxy: true
   data-source-proxy-mode: AT
   use-jdk-proxy: false
+  scan-packages: firstPackage,secondPackage
+  excludes-for-scanning: firstBeanNameForExclude,secondBeanNameForExclude
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
@@ -16,6 +18,7 @@ seata:
       saga-json-parser: fastjson
       saga-retry-persist-mode-update: false
       saga-compensate-persist-mode-update: false
+      tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
       lock:
         retry-interval: 10
         retry-times: 30
@@ -27,6 +30,7 @@ seata:
       degrade-check: false
       degrade-check-period: 2000
       degrade-check-allow-times: 10
+      interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
     undo:
       data-validation: true
       log-serialization: jackson
@@ -82,12 +86,14 @@ seata:
       group: SEATA_GROUP
       username: ""
       password: ""
+      data-id: seata.properties
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
       username: ""
       password: ""
+      node-path: /seata/seata.properties
     custom:
       name: ""
   registry:
@@ -131,3 +137,9 @@ seata:
       name: ""
   log:
     exception-rate: 100
+  tcc-fence:
+    enable: true
+    config:
+      log-table-name: tcc_fence_log
+      clean-mode: hour
+      clean-period: 1

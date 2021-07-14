@@ -39,11 +39,11 @@ public interface TccAction {
      * @param tccParam      the tcc param
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForTest" , commitMethod = "commit", rollbackMethod = "rollback")
-    public boolean prepare(BusinessActionContext actionContext,
-                           @BusinessActionContextParameter(paramName = "a") int a,
-                           @BusinessActionContextParameter(paramName = "b", index = 0) List b,
-                           @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
+    @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback")
+    boolean prepare(BusinessActionContext actionContext,
+                    @BusinessActionContextParameter("a") int a,
+                    @BusinessActionContextParameter(paramName = "b", index = 0) List b,
+                    @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
 
     /**
      * Commit boolean.
@@ -51,7 +51,8 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    public boolean commit(BusinessActionContext actionContext);
+    boolean commit(BusinessActionContext actionContext,
+                   @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a);
 
     /**
      * Rollback boolean.
@@ -59,5 +60,5 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    public boolean rollback(BusinessActionContext actionContext);
+    boolean rollback(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
 }

@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -63,9 +66,12 @@ import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+
+import static io.seata.common.Constants.RETRY_COMMITTING;
+import static io.seata.common.Constants.RETRY_ROLLBACKING;
+import static io.seata.common.Constants.ASYNC_COMMITTING;
+import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
+import static io.seata.common.Constants.UNDOLOG_DELETE;
 
 /**
  * The type Default coordinator.
@@ -236,13 +242,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
                         + globalSession.getTimeout());
             }
-            boolean shouldTimeout = SessionHolder.lockAndExecute(globalSession, () -> {
+            SessionHolder.lockAndExecute(globalSession, () -> {
                 if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
                     return false;
                 }
+
+                LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
+
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
-                globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+                globalSession.setStatus(GlobalStatus.TimeoutRollbacking);
+
+                globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+                SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
                 eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
@@ -254,14 +266,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
                 return true;
             });
-            if (!shouldTimeout) {
-                //The function of this 'return' is 'continue'.
-                return;
-            }
-            LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
-
-            globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-            SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
         });
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check end. ");
@@ -397,66 +401,66 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.retryRollbackingLock();
+            boolean lock = SessionHolder.acquireDistributedLock(RETRY_ROLLBACKING);
             if (lock) {
                 try {
                     handleRetryRollbacking();
                 } catch (Exception e) {
                     LOGGER.info("Exception retry rollbacking ... ", e);
                 } finally {
-                    SessionHolder.unRetryRollbackingLock();
+                    SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING);
                 }
             }
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.retryCommittingLock();
+            boolean lock = SessionHolder.acquireDistributedLock(RETRY_COMMITTING);
             if (lock) {
                 try {
                     handleRetryCommitting();
                 } catch (Exception e) {
                     LOGGER.info("Exception retry committing ... ", e);
                 } finally {
-                    SessionHolder.unRetryCommittingLock();
+                    SessionHolder.releaseDistributedLock(RETRY_COMMITTING);
                 }
             }
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.asyncCommittingLock();
+            boolean lock = SessionHolder.acquireDistributedLock(ASYNC_COMMITTING);
             if (lock) {
                 try {
                     handleAsyncCommitting();
                 } catch (Exception e) {
                     LOGGER.info("Exception async committing ... ", e);
                 } finally {
-                    SessionHolder.unAsyncCommittingLock();
+                    SessionHolder.releaseDistributedLock(ASYNC_COMMITTING);
                 }
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.txTimeoutCheckLock();
+            boolean lock = SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK);
             if (lock) {
                 try {
                     timeoutCheck();
                 } catch (Exception e) {
                     LOGGER.info("Exception timeout checking ... ", e);
                 } finally {
-                    SessionHolder.unTxTimeoutCheckLock();
+                    SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK);
                 }
             }
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         undoLogDelete.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.undoLogDeleteLock();
+            boolean lock = SessionHolder.acquireDistributedLock(UNDOLOG_DELETE);
             if (lock) {
                 try {
                     undoLogDelete();
                 } catch (Exception e) {
                     LOGGER.info("Exception undoLog deleting ... ", e);
                 } finally {
-                    SessionHolder.unUndoLogDeleteLock();
+                    SessionHolder.releaseDistributedLock(UNDOLOG_DELETE);
                 }
             }
         }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
