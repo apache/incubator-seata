@@ -230,7 +230,22 @@ public class StringUtils {
 
         return CycleDependencyHandler.wrap(obj, o -> {
             StringBuilder sb = new StringBuilder(32);
-            sb.append(obj.getClass().getSimpleName()).append("(");
+
+            // handle the anonymous class
+            String classSimpleName;
+            if (obj.getClass().isAnonymousClass()) {
+                if (!obj.getClass().getSuperclass().equals(Object.class)) {
+                    classSimpleName = obj.getClass().getSuperclass().getSimpleName();
+                } else {
+                    classSimpleName = obj.getClass().getInterfaces()[0].getSimpleName();
+                }
+                // Connect a '$', different from ordinary class
+                classSimpleName += "$";
+            } else {
+                classSimpleName = obj.getClass().getSimpleName();
+            }
+
+            sb.append(classSimpleName).append("(");
             final int initialLength = sb.length();
 
             // Gets all fields, excluding static or synthetic fields

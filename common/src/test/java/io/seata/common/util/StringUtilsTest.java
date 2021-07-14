@@ -207,6 +207,26 @@ public class StringUtilsTest {
         a.setObj(b);
         Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass), s=null), s=null), s=null)", StringUtils.toString(a));
 
+        //case: anonymous class from an interface
+        Object anonymousObj = new TestInterface() {
+            private String a = "aaa";
+
+            @Override
+            public void test() {
+            }
+        };
+        Assertions.assertEquals("TestInterface$(a=\"aaa\")", StringUtils.toString(anonymousObj));
+
+        //case: anonymous class from an abstract class
+        anonymousObj = new TestAbstractClass() {
+            private String a = "aaa";
+
+            @Override
+            public void test() {
+            }
+        };
+        Assertions.assertEquals("TestAbstractClass$(a=\"aaa\")", StringUtils.toString(anonymousObj));
+
         //final confirm: do not triggered the `toString` and `hashCode` methods
         Assertions.assertFalse(TestClass.hashCodeTriggered);
         Assertions.assertFalse(TestClass.toStringTriggered);
@@ -218,6 +238,14 @@ public class StringUtilsTest {
     @Target(ElementType.TYPE)
     @interface TestAnnotation {
         boolean test() default false;
+    }
+
+    interface TestInterface {
+        void test();
+    }
+
+    abstract class TestAbstractClass {
+        abstract void test();
     }
 
     @TestAnnotation(test = true)
