@@ -170,8 +170,11 @@ public class StringUtils {
 
         //region Convert simple types to String directly
 
-        if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
-            return obj.toString();
+        if (obj instanceof CharSequence) {
+            return "\"" + obj + "\"";
+        }
+        if (obj instanceof Character) {
+            return "'" + obj + "'";
         }
         if (obj instanceof Date) {
             Date date = (Date)obj;
@@ -220,9 +223,29 @@ public class StringUtils {
 
         //endregion
 
+        //the jdk classes
+        if (obj.getClass().getClassLoader() == null) {
+            return obj.toString();
+        }
+
         return CycleDependencyHandler.wrap(obj, o -> {
             StringBuilder sb = new StringBuilder(32);
-            sb.append(obj.getClass().getSimpleName()).append("(");
+
+            // handle the anonymous class
+            String classSimpleName;
+            if (obj.getClass().isAnonymousClass()) {
+                if (!obj.getClass().getSuperclass().equals(Object.class)) {
+                    classSimpleName = obj.getClass().getSuperclass().getSimpleName();
+                } else {
+                    classSimpleName = obj.getClass().getInterfaces()[0].getSimpleName();
+                }
+                // Connect a '$', different from ordinary class
+                classSimpleName += "$";
+            } else {
+                classSimpleName = obj.getClass().getSimpleName();
+            }
+
+            sb.append(classSimpleName).append("(");
             final int initialLength = sb.length();
 
             // Gets all fields, excluding static or synthetic fields

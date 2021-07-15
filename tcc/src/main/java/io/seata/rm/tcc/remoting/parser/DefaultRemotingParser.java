@@ -225,7 +225,7 @@ public class DefaultRemotingParser {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
-                    String key = ActionContextUtil.getParamName(param);
+                    String key = ActionContextUtil.getParamNameFromAnnotation(param);
                     keys[i] = key;
                     break;
                 }

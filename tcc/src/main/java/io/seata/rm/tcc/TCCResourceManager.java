@@ -22,10 +22,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
-
 import io.seata.common.Constants;
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -104,7 +103,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
                     result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId, args);
-                } catch (FrameworkException | UndeclaredThrowableException e) {
+                } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
             } else {
@@ -161,8 +160,9 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
-                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, args, tccResource.getActionName());
-                } catch (FrameworkException | UndeclaredThrowableException e) {
+                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId,
+                            args, tccResource.getActionName());
+                } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
             } else {

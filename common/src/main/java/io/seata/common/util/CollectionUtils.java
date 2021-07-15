@@ -174,7 +174,11 @@ public class CollectionUtils {
         if (CollectionUtils.isNotEmpty(param)) {
             param.forEach((key, value) -> {
                 if (value != null) {
-                    covertMap.put(key, StringUtils.toString(value));
+                    if (value instanceof CharSequence || value instanceof Character) {
+                        covertMap.put(key, value.toString());
+                    } else {
+                        covertMap.put(key, StringUtils.toString(value));
+                    }
                 }
             });
         }
