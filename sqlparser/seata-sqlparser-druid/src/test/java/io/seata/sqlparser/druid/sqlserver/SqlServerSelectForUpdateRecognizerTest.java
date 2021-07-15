@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 /**
+ * The type SqlServer select for update recognizer test.
+ *
  * @author GoodBoyCoder
  */
 public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTest {
