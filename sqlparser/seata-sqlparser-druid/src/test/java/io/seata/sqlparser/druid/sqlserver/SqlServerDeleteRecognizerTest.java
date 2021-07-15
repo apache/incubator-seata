@@ -1,6 +1,5 @@
 package io.seata.sqlparser.druid.sqlserver;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
@@ -164,24 +163,24 @@ public class SqlServerDeleteRecognizerTest extends AbstractRecognizerTest {
     @Test
     public void testGetSqlType() {
         String sql = "DELETE FROM t WHERE id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerDeleteRecognizer recognizer = new SqlServerDeleteRecognizer(sql, asts.get(0));
+        SqlServerDeleteRecognizer recognizer = new SqlServerDeleteRecognizer(sql, ast);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.DELETE);
     }
 
     @Test
     public void testGetTableAlias() {
         String sql = "DELETE FROM t WHERE id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerDeleteRecognizer recognizer = new SqlServerDeleteRecognizer(sql, asts.get(0));
+        SqlServerDeleteRecognizer recognizer = new SqlServerDeleteRecognizer(sql, ast);
         Assertions.assertNull(recognizer.getTableAlias());
 
         sql = "DELETE t1 FROM t t1 WHERE t1.id = ?";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        ast = getSQLStatement(sql);
 
-        recognizer = new SqlServerDeleteRecognizer(sql, asts.get(0));
+        recognizer = new SqlServerDeleteRecognizer(sql, ast);
         Assertions.assertEquals("t1", recognizer.getTableAlias());
     }
 

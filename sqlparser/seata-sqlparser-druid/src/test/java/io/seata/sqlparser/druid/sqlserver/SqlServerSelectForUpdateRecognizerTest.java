@@ -1,6 +1,5 @@
 package io.seata.sqlparser.druid.sqlserver;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import io.seata.sqlparser.SQLParsingException;
@@ -158,9 +157,9 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
     @Test
     public void testGetWhereCondition_1() {
         String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, asts.get(0));
+        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         String whereCondition = recognizer.getWhereCondition();
 
         Assertions.assertEquals("", whereCondition);
@@ -168,8 +167,8 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
         //test for select was null
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "select * from t WITH (ROWLOCK, UPDLOCK)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.SQLSERVER);
-            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            SQLStatement sqlStatement = getSQLStatement(s);
+            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatement;
             selectAst.setSelect(null);
             new SqlServerSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
         });
@@ -177,8 +176,8 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
         //test for query was null
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "select * from t";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.SQLSERVER);
-            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            SQLStatement sqlStatement = getSQLStatement(s);
+            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatement;
             selectAst.getSelect().setQuery(null);
             new SqlServerSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
         });
@@ -187,9 +186,9 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
     @Test
     public void testGetSqlType() {
         String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, asts.get(0));
+        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
     }
 
@@ -197,31 +196,31 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
     public void testGetTableAlias() {
         //test for no alias
         String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, asts.get(0));
+        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertNull(recognizer.getTableAlias());
 
         //test for alias
         sql = "SELECT * FROM t t1 WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        ast = getSQLStatement(sql);
 
-        recognizer = new SqlServerSelectForUpdateRecognizer(sql, asts.get(0));
+        recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertEquals("t1", recognizer.getTableAlias());
     }
 
     @Test
     public void testGetTableName() {
         String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, asts.get(0));
+        SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertEquals("t", recognizer.getTableName());
 
         //test for alias
         sql = "SELECT * FROM t t1 WITH (ROWLOCK, UPDLOCK)";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
-        recognizer = new SqlServerSelectForUpdateRecognizer(sql, asts.get(0));
+        ast = getSQLStatement(sql);
+        recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertEquals("t", recognizer.getTableName());
     }
 }

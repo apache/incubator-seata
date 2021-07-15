@@ -1,6 +1,5 @@
 package io.seata.sqlparser.druid.sqlserver;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLDateExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
@@ -33,24 +32,24 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
     @Test
     public void testGetSqlType() {
         String sql = "INSERT INTO t (id) values (?)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.INSERT);
     }
 
     @Test
     public void testGetTableAlias() {
         String sql = "INSERT INTO t (id) values (?)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
         Assertions.assertNull(recognizer.getTableAlias());
 
         sql = "INSERT INTO t t1 (id) values (?)";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        ast = getSQLStatement(sql);
 
-        recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        recognizer = new SqlServerInsertRecognizer(sql, ast);
         Assertions.assertEquals("t1", recognizer.getTableAlias());
     }
 
@@ -141,17 +140,17 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
 
         //test for no column
         String sql = "insert into t values (?)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
         List<String> insertColumns = recognizer.getInsertColumns();
         Assertions.assertNull(insertColumns);
 
         //test for normal
         sql = "insert into t(a) values (?)";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        ast = getSQLStatement(sql);
 
-        recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        recognizer = new SqlServerInsertRecognizer(sql, ast);
         insertColumns = recognizer.getInsertColumns();
         Assertions.assertEquals(1, insertColumns.size());
         Assertions.assertEquals(Collections.singletonList("a"), insertColumns);
@@ -159,8 +158,8 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.SQLSERVER);
-            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
+            SQLStatement sqlStatement = getSQLStatement(s);
+            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatement;
             sqlInsertStatement.getColumns().add(new SQLDateExpr());
 
             SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(s, sqlInsertStatement);
@@ -172,24 +171,24 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
     public void testGetInsertRows() {
         //test for null value
         String sql = "insert into t(id, no, name, age, time) values (default, null, 'a', ?, now())";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
         List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
         //test for sequence
         sql = "insert into t(id) values(next value for t1.id)";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
-        recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        ast = getSQLStatement(sql);
+        recognizer = new SqlServerInsertRecognizer(sql, ast);
         insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.SQLSERVER);
-            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
+            SQLStatement sqlStatement = getSQLStatement(s);
+            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatement;
             sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new MySqlOrderingExpr());
 
             SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(s, sqlInsertStatement);
@@ -200,26 +199,27 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
     @Test
     public void testGetSQLType() {
         String sql = "insert into t(a) values (?)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
         Assertions.assertEquals(SQLType.INSERT, recognizer.getSQLType());
     }
 
     @Test
     public void testGetInsertParamsValue() {
         String sql = "insert into t(a) values (?)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
         Assertions.assertNull(recognizer.getInsertParamsValue());
     }
+
     @Test
     public void testGetDuplicateKeyUpdate() {
         String sql = "insert into t(a) values (?)";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.SQLSERVER);
+        SQLStatement ast = getSQLStatement(sql);
 
-        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, asts.get(0));
+        SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
         Assertions.assertNull(recognizer.getDuplicateKeyUpdate());
     }
 }
