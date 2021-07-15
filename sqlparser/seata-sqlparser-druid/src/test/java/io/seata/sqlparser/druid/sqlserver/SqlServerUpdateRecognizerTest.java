@@ -257,6 +257,15 @@ public class SqlServerUpdateRecognizerTest extends AbstractRecognizerTest {
         updateValues = recognizer.getUpdateValues();
         Assertions.assertEquals(updateValues.size(), 1);
 
+        //test with top
+        Assertions.assertThrows(NotSupportYetException.class, () -> {
+            String s = "update top(1) t set a = ?";
+            SQLStatement sqlStatement1 = getSQLStatement(s);
+
+            SqlServerUpdateRecognizer sqlServerUpdateRecognizer = new SqlServerUpdateRecognizer(s, sqlStatement1);
+            sqlServerUpdateRecognizer.getUpdateValues();
+        });
+
         // test with error
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "update t set a = ?";

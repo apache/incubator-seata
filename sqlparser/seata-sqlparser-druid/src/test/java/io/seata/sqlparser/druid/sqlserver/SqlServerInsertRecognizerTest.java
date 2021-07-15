@@ -4,6 +4,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLDateExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.AbstractRecognizerTest;
@@ -183,6 +184,14 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         recognizer = new SqlServerInsertRecognizer(sql, ast);
         insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
+
+        //test for top
+        Assertions.assertThrows(NotSupportYetException.class, () -> {
+            String s = "insert top(1) into t(id) values(id1)";
+            SQLStatement sqlStatement = getSQLStatement(s);
+            SqlServerInsertRecognizer sqlServerInsertRecognizer = new SqlServerInsertRecognizer(s, sqlStatement);
+            sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
+        });
 
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
