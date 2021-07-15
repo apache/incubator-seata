@@ -76,45 +76,57 @@ class ActionInterceptorHandlerTest {
         // boolean h
         boolean h = false;
 
+
         // fetch context
         Map<String, Object> paramContext = actionInterceptorHandler.fetchActionRequestContext(prepareMethod,
                 new Object[]{null, intA, listB, arrayC, objD, objE, objF, g, h});
         System.out.println(paramContext);
 
-        // int a
+
+        // int a, case: @BusinessActionContextParameter("a")
         Assertions.assertEquals(11, paramContext.get("a"));
-        // list b
+
+        // list b, case: @BusinessActionContextParameter(paramName = "b", index = 0) + List
         Assertions.assertEquals("bb", paramContext.get("b"));
-        // array c
+
+        // array c, case: @BusinessActionContextParameter(value = "c", index = 1) + Array
         Assertions.assertEquals(33L, paramContext.get("c"));
-        // object d
-        Assertions.assertEquals(1, paramContext.get("num"));
-        Assertions.assertFalse(paramContext.containsKey("name"));
-        Assertions.assertEquals("aaa@ali.com", paramContext.get("email0"));
-        Assertions.assertFalse(paramContext.containsKey("remark"));
-        Assertions.assertEquals("yes", paramContext.get("flag"));
-        // object e
-        @SuppressWarnings("all")
+
+        // object d, case: @BusinessActionContextParameter(isParamInProperty = true)
+        Assertions.assertEquals(1, paramContext.get("num")); // case: @BusinessActionContextParameter
+        Assertions.assertFalse(paramContext.containsKey("name")); // case: no annotation
+        Assertions.assertEquals("aaa@ali.com", paramContext.get("email0")); // case: @BusinessActionContextParameter(paramName = "email0")
+        Assertions.assertFalse(paramContext.containsKey("remark")); // case: @BusinessActionContextParameter(paramName = "remark")
+        Assertions.assertEquals("yes", paramContext.get("flag")); // case: @BusinessActionContextParameter(isParamInProperty = true, fetcher = MockBooleanParameterFetcher.class)
+
+        // object e, case: @BusinessActionContextParameter(paramName = "e", isParamInProperty = true)
+        // map
         Map<String, Object> contextE = (Map)paramContext.get("e");
         Assertions.assertNotNull(contextE);
-        Assertions.assertEquals(2, contextE.get("num"));
-        Assertions.assertFalse(contextE.containsKey("name"));
-        Assertions.assertFalse(contextE.containsKey("email0"));
-        Assertions.assertEquals("bbb is an IT man", contextE.get("remark"));
-        Assertions.assertEquals("no", contextE.get("flag"));
-        // object f
-        @SuppressWarnings("all")
+        Assertions.assertEquals(3, contextE.size());
+        // fields in map
+        Assertions.assertEquals(2, contextE.get("num")); // case: @BusinessActionContextParameter
+        Assertions.assertFalse(contextE.containsKey("name")); // case: no annotation
+        Assertions.assertFalse(contextE.containsKey("email0")); // case: @BusinessActionContextParameter(paramName = "email0")
+        Assertions.assertEquals("bbb is an IT man", contextE.get("remark")); // case: @BusinessActionContextParameter(paramName = "remark")
+        Assertions.assertEquals("no", contextE.get("flag")); // case: @BusinessActionContextParameter(isParamInProperty = true, fetcher = MockBooleanParameterFetcher.class)
+
+        // object f, case: @BusinessActionContextParameter(paramName = "f", isParamInProperty = true, fetcher = MockObjectParameterFetcher.class)
+        // map
         Map<String, Object> contextF = (Map)paramContext.get("f");
         Assertions.assertNotNull(contextF);
         Assertions.assertEquals(2, contextF.size());
+        // fields in map
         Assertions.assertEquals(3, contextF.get("num"));
         Assertions.assertEquals("ccc", contextF.get("name"));
         Assertions.assertFalse(contextF.containsKey("email0"));
         Assertions.assertFalse(contextF.containsKey("remark"));
         Assertions.assertFalse(contextF.containsKey("flag"));
-        // boolean g
+
+        // boolean g, case: @BusinessActionContextParameter(paramName = "g", isParamInProperty = true, fetcher = MockBooleanParameterFetcher.class)
         Assertions.assertEquals("yes", paramContext.get("g"));
-        // boolean h
+
+        // boolean h, case: @BusinessActionContextParameter(paramName = "h", isParamInProperty = true, fetcher = MockBooleanParameterFetcher.class)
         Assertions.assertEquals("no", paramContext.get("h"));
     }
 }

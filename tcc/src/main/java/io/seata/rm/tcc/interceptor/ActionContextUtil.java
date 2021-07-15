@@ -83,7 +83,7 @@ public final class ActionContextUtil {
             }
 
             // fetch context from the fields
-            Map<String, Object> context = new HashMap<>(8);
+            Map<String, Object> context = new HashMap<>(fields.length);
             for (Field f : fields) {
                 // get annotation
                 BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
@@ -92,15 +92,14 @@ public final class ActionContextUtil {
                 }
 
                 // get the field value
-                f.setAccessible(true);
-                Object fieldValue = f.get(targetParam);
+                Object fieldValue = ReflectionUtil.getFieldValue(targetParam, f);
 
                 // load param by the config of annotation, and then put into the context
                 String fieldName = f.getName();
                 loadParamByAnnotationAndPutToContext(ParamType.FIELD, fieldName, fieldValue, annotation, context);
             }
             return context;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new FrameworkException(e, "fetchContextFromObject failover");
         }
     }
