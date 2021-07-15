@@ -16,6 +16,7 @@
 package io.seata.core.protocol.transaction;
 
 import io.seata.core.model.BranchType;
+import io.seata.core.model.RollbackType;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
@@ -29,6 +30,8 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
     private String xid;
 
     private BranchType branchType = BranchType.AT;
+
+    private RollbackType rollbackType = RollbackType.SyncRollback;
 
     private String resourceId;
 
@@ -70,6 +73,24 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
      */
     public void setBranchType(BranchType branchType) {
         this.branchType = branchType;
+    }
+
+    /**
+     * Gets rollback type.
+     *
+     * @return the rollback type
+     */
+    public RollbackType getRollbackType() {
+        return rollbackType;
+    }
+
+    /**
+     * Sets branch type.
+     *
+     * @param rollbackType the rollback type
+     */
+    public void setRollbackType(RollbackType rollbackType) {
+        this.rollbackType = rollbackType;
     }
 
     /**
@@ -144,6 +165,9 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
         result.append(",");
         result.append("branchType=");
         result.append(branchType);
+        result.append(",");
+        result.append("rollbackType=");
+        result.append(rollbackType);
         result.append(",");
         result.append("resourceId=");
         result.append(resourceId);

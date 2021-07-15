@@ -19,6 +19,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.RollbackType;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
@@ -58,6 +59,7 @@ public class SessionConverter {
         branchSession.setApplicationData(branchTransactionDO.getApplicationData());
         branchSession.setBranchId(branchTransactionDO.getBranchId());
         branchSession.setBranchType(BranchType.valueOf(branchTransactionDO.getBranchType()));
+        branchSession.setRollbackType(RollbackType.get(branchTransactionDO.getRollbackType()));
         branchSession.setResourceId(branchTransactionDO.getResourceId());
         branchSession.setClientId(branchTransactionDO.getClientId());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
@@ -95,6 +97,7 @@ public class SessionConverter {
         branchTransactionDO.setXid(branchSession.getXid());
         branchTransactionDO.setBranchId(branchSession.getBranchId());
         branchTransactionDO.setBranchType(branchSession.getBranchType().name());
+        branchTransactionDO.setRollbackType(branchSession.getRollbackType().value());
         branchTransactionDO.setClientId(branchSession.getClientId());
         branchTransactionDO.setResourceGroupId(branchSession.getResourceGroupId());
         branchTransactionDO.setTransactionId(branchSession.getTransactionId());

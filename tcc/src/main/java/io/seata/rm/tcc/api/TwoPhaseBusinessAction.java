@@ -47,6 +47,13 @@ public @interface TwoPhaseBusinessAction {
     String name();
 
     /**
+     * rollback type
+     *
+     * @return the commit type
+     */
+    TCCRollbackType rollbackType() default TCCRollbackType.SyncRollback;
+
+    /**
      * commit method name
      *
      * @return the string

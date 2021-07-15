@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
+import io.seata.core.model.RollbackType;
 
 /**
  * The type Tcc resource.
@@ -45,6 +46,8 @@ public class TCCResource implements Resource {
     private String rollbackMethodName;
 
     private Method rollbackMethod;
+
+    private RollbackType rollbackType;
 
     private Class<?>[] commitArgsClasses;
 
@@ -220,6 +223,24 @@ public class TCCResource implements Resource {
      */
     public void setRollbackMethodName(String rollbackMethodName) {
         this.rollbackMethodName = rollbackMethodName;
+    }
+
+    /**
+     * Gets rollback type.
+     *
+     * @return the rollback type
+     */
+    public RollbackType getRollbackType() {
+        return rollbackType;
+    }
+
+    /**
+     * Sets rollback type.
+     *
+     * @param rollbackType the rollback type
+     */
+    public void setRollbackType(RollbackType rollbackType) {
+        this.rollbackType = rollbackType;
     }
 
     /**

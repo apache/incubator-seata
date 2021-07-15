@@ -19,6 +19,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
+import io.seata.core.model.RollbackType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockWaitTimeoutException;
 import io.seata.rm.datasource.mock.MockConnection;
@@ -62,7 +63,7 @@ public class ConnectionProxyTest {
         Mockito.when(dataSourceProxy.getResourceId())
                 .thenReturn(TEST_RESOURCE_ID);
         ResourceManager rm = Mockito.mock(ResourceManager.class);
-        Mockito.when(rm.branchRegister(BranchType.AT, dataSourceProxy.getResourceId(), null, TEST_XID, null, lockKey))
+        Mockito.when(rm.branchRegister(BranchType.AT, RollbackType.SyncRollback, dataSourceProxy.getResourceId(), null, TEST_XID, null, lockKey))
                 .thenThrow(new TransactionException(TransactionExceptionCode.LockKeyConflict));
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);

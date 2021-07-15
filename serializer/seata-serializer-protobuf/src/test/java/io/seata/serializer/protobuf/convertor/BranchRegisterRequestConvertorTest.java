@@ -17,6 +17,7 @@ package io.seata.serializer.protobuf.convertor;
 
 import io.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.RollbackType;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,7 @@ public class BranchRegisterRequestConvertorTest {
         BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
         branchRegisterRequest.setApplicationData("data");
         branchRegisterRequest.setBranchType(BranchType.AT);
+        branchRegisterRequest.setRollbackType(RollbackType.SyncRollback);
         branchRegisterRequest.setLockKey("localKey");
         branchRegisterRequest.setResourceId("resourceId");
         branchRegisterRequest.setXid("xid");
@@ -46,6 +48,7 @@ public class BranchRegisterRequestConvertorTest {
         assertThat(real.getApplicationData()).isEqualTo(branchRegisterRequest.getApplicationData());
         assertThat(real.getXid()).isEqualTo(branchRegisterRequest.getXid());
         assertThat(real.getBranchType()).isEqualTo(branchRegisterRequest.getBranchType());
+        assertThat(real.getRollbackType()).isEqualTo(branchRegisterRequest.getRollbackType());
         assertThat(real.getLockKey()).isEqualTo(branchRegisterRequest.getLockKey());
         assertThat(real.getResourceId()).isEqualTo(branchRegisterRequest.getResourceId());
     }

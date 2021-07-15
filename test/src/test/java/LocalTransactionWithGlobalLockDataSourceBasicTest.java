@@ -18,6 +18,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
+import io.seata.core.model.RollbackType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.RMClient;
 import io.seata.rm.datasource.DataSourceManager;
@@ -199,7 +200,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     public static class MockDataSourceManager extends DataSourceManager {
 
         @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys)
+        public Long branchRegister(BranchType branchType, RollbackType rollbackType, String resourceId, String clientId, String xid, String applicationData, String lockKeys)
                 throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }

@@ -19,6 +19,7 @@ import java.util.Date;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
+import io.seata.core.model.RollbackType;
 
 /**
  * branch transaction data object
@@ -38,6 +39,8 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
     private String resourceId;
 
     private String branchType;
+
+    private Integer rollbackType = RollbackType.SyncRollback.value();
 
     private Integer status = BranchStatus.Unknown.getCode();
 
@@ -101,6 +104,24 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
      */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
+    }
+
+    /**
+     * Gets rollback type.
+     *
+     * @return the rollback type
+     */
+    public Integer getRollbackType() {
+        return rollbackType;
+    }
+
+    /**
+     * Sets rollback type.
+     *
+     * @param rollbackType the rollback type
+     */
+    public void setRollbackType(Integer rollbackType) {
+        this.rollbackType = rollbackType;
     }
 
     /**

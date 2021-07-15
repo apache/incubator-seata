@@ -23,6 +23,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
+import io.seata.core.model.RollbackType;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
@@ -47,6 +48,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
      * registry branch record
      *
      * @param branchType the branch type
+     * @param rollbackType the rollback type
      * @param resourceId the resource id
      * @param clientId   the client id
      * @param xid        the xid
@@ -55,13 +57,14 @@ public abstract class AbstractResourceManager implements ResourceManager {
      * @throws TransactionException TransactionException
      */
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, RollbackType rollbackType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
             request.setBranchType(branchType);
+            request.setRollbackType(rollbackType);
             request.setApplicationData(applicationData);
 
             BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);

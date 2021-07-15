@@ -28,6 +28,7 @@ public interface ResourceManagerOutbound {
      * Branch register long.
      *
      * @param branchType the branch type
+     * @param rollbackType the rollback type, @since above 1.4.2
      * @param resourceId the resource id
      * @param clientId   the client id
      * @param xid        the xid
@@ -36,8 +37,26 @@ public interface ResourceManagerOutbound {
      * @return the long
      * @throws TransactionException the transaction exception
      */
-    Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
+    Long branchRegister(BranchType branchType, RollbackType rollbackType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
         TransactionException;
+
+    /**
+     * Branch register long. Use the branch default rollbackType.
+     *
+     * @param branchType      the branch type
+     * @param resourceId      the resource id
+     * @param clientId        the client id
+     * @param xid             the xid
+     * @param applicationData the context
+     * @param lockKeys        the lock keys
+     * @return the long
+     * @throws TransactionException the transaction exception
+     */
+    default Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
+        TransactionException {
+        RollbackType rollbackType = RollbackType.getDefault(branchType);
+        return branchRegister(branchType, rollbackType, resourceId, clientId, xid, applicationData, lockKeys);
+    }
 
     /**
      * Branch report.

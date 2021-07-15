@@ -22,6 +22,7 @@ import io.seata.serializer.protobuf.generated.BranchTypeProto;
 import io.seata.serializer.protobuf.generated.GlobalLockQueryRequestProto;
 import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.RollbackType;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 
 /**
@@ -42,11 +43,14 @@ public class GlobalLockQueryRequestConvertor
         final String applicationData = globalLockQueryRequest.getApplicationData();
         final String lockKey = globalLockQueryRequest.getLockKey();
         BranchRegisterRequestProto branchRegisterRequestProto = BranchRegisterRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).setApplicationData(
-                applicationData == null ? "" : applicationData).setBranchType(
-                BranchTypeProto.valueOf(globalLockQueryRequest.getBranchType().name())).setLockKey(
-                lockKey == null ? "" : lockKey).setResourceId(globalLockQueryRequest.getResourceId()).setXid(
-                globalLockQueryRequest.getXid()).build();
+            .setAbstractTransactionRequest(abstractTransactionRequestProto)
+            .setApplicationData(applicationData == null ? "" : applicationData)
+            .setBranchType(BranchTypeProto.valueOf(globalLockQueryRequest.getBranchType().name()))
+            .setRollbackType(globalLockQueryRequest.getRollbackType().value())
+            .setLockKey(lockKey == null ? "" : lockKey)
+            .setResourceId(globalLockQueryRequest.getResourceId())
+            .setXid(globalLockQueryRequest.getXid())
+            .build();
 
         GlobalLockQueryRequestProto result = GlobalLockQueryRequestProto.newBuilder().setBranchRegisterRequest(
             branchRegisterRequestProto).build();
@@ -60,6 +64,7 @@ public class GlobalLockQueryRequestConvertor
         BranchRegisterRequestProto branchRegisterRequestProto = globalLockQueryRequestProto.getBranchRegisterRequest();
         branchRegisterRequest.setApplicationData(branchRegisterRequestProto.getApplicationData());
         branchRegisterRequest.setBranchType(BranchType.valueOf(branchRegisterRequestProto.getBranchType().name()));
+        branchRegisterRequest.setRollbackType(RollbackType.get(branchRegisterRequestProto.getRollbackType()));
         branchRegisterRequest.setLockKey(branchRegisterRequestProto.getLockKey());
         branchRegisterRequest.setResourceId(branchRegisterRequestProto.getResourceId());
         branchRegisterRequest.setXid(branchRegisterRequestProto.getXid());

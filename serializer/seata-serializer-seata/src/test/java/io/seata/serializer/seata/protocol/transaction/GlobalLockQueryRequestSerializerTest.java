@@ -17,6 +17,7 @@ package io.seata.serializer.seata.protocol.transaction;
 
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.RollbackType;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,7 @@ public class GlobalLockQueryRequestSerializerTest {
         GlobalLockQueryRequest globalLockQueryRequest = new GlobalLockQueryRequest();
         globalLockQueryRequest.setApplicationData("aaaa");
         globalLockQueryRequest.setBranchType(BranchType.TCC);
+        globalLockQueryRequest.setRollbackType(RollbackType.SyncRollback);
         globalLockQueryRequest.setLockKey("a:1,b,2");
         globalLockQueryRequest.setXid("aaa");
         globalLockQueryRequest.setResourceId("1s");
@@ -51,6 +53,7 @@ public class GlobalLockQueryRequestSerializerTest {
 
         assertThat(globalLockQueryRequest2.getApplicationData()).isEqualTo(globalLockQueryRequest.getApplicationData());
         assertThat(globalLockQueryRequest2.getBranchType()).isEqualTo(globalLockQueryRequest.getBranchType());
+        assertThat(globalLockQueryRequest2.getRollbackType()).isEqualTo(globalLockQueryRequest.getRollbackType());
         assertThat(globalLockQueryRequest2.getLockKey()).isEqualTo(globalLockQueryRequest.getLockKey());
         assertThat(globalLockQueryRequest2.getResourceId()).isEqualTo(globalLockQueryRequest.getResourceId());
         assertThat(globalLockQueryRequest2.getXid()).isEqualTo(globalLockQueryRequest.getXid());

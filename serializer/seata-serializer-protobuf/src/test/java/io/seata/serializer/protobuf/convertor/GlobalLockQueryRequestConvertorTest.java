@@ -17,6 +17,7 @@ package io.seata.serializer.protobuf.convertor;
 
 import io.seata.serializer.protobuf.generated.GlobalLockQueryRequestProto;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.RollbackType;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,7 @@ public class GlobalLockQueryRequestConvertorTest {
         GlobalLockQueryRequest globalLockQueryRequest = new GlobalLockQueryRequest();
         globalLockQueryRequest.setApplicationData("data");
         globalLockQueryRequest.setBranchType(BranchType.AT);
+        globalLockQueryRequest.setRollbackType(RollbackType.SyncRollback);
         globalLockQueryRequest.setLockKey("localKey");
         globalLockQueryRequest.setResourceId("resourceId");
         globalLockQueryRequest.setXid("xid");
@@ -46,6 +48,7 @@ public class GlobalLockQueryRequestConvertorTest {
         assertThat(real.getApplicationData()).isEqualTo(globalLockQueryRequest.getApplicationData());
         assertThat(real.getXid()).isEqualTo(globalLockQueryRequest.getXid());
         assertThat(real.getBranchType()).isEqualTo(globalLockQueryRequest.getBranchType());
+        assertThat(real.getRollbackType()).isEqualTo(globalLockQueryRequest.getRollbackType());
         assertThat(real.getLockKey()).isEqualTo(globalLockQueryRequest.getLockKey());
         assertThat(real.getResourceId()).isEqualTo(globalLockQueryRequest.getResourceId());
     }
