@@ -1,9 +1,11 @@
 package io.seata.sqlparser.druid.sqlserver;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerTop;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerOutputVisitor;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
@@ -69,5 +71,18 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
 
         executeVisit(where, new SQLServerOutputVisitor(sb));
         return sb.toString();
+    }
+
+    /**
+     * method to deal top expression
+     *
+     * @param ast the statement
+     */
+    public void dealTop(SQLStatement ast) {
+        if (ast instanceof SQLSelectStatement) {
+            //TODO do something
+        } else {
+            throw new NotSupportYetException("Top expr is not supported");
+        }
     }
 }

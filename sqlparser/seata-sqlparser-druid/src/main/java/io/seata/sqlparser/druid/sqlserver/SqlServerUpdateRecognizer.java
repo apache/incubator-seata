@@ -7,14 +7,16 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
-import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerUpdateStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-import io.seata.sqlparser.struct.*;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,15 +83,15 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
-                SQLExpr owner = ((SQLPropertyExpr)expr).getOwner();
+                SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    list.add(((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName());
+                    list.add(((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName());
                     //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
-                } else if (((SQLPropertyExpr)expr).getOwnernName().split("\\.").length > 1) {
-                    list.add(((SQLPropertyExpr)expr).getOwnernName() + "." + ((SQLPropertyExpr)expr).getName());
+                } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr) expr).getOwnernName() + "." + ((SQLPropertyExpr) expr).getName());
                 }
             } else {
                 wrapSQLParsingException(expr);
@@ -100,6 +102,10 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
 
     @Override
     public List<Object> getUpdateValues() {
+        if (ast.getTop() != null) {
+            //deal with top sql
+            dealTop(ast);
+        }
         List<SQLUpdateSetItem> updateSetItems = ast.getItems();
         List<Object> list = new ArrayList<>(updateSetItems.size());
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
@@ -115,7 +121,7 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
                 list.add(SqlMethodExpr.get());
             } else if (expr instanceof SQLDefaultExpr) {
                 list.add(SqlDefaultExpr.get());
-            }else if (expr instanceof SQLSequenceExpr) {
+            } else if (expr instanceof SQLSequenceExpr) {
                 //Supported only since 2012 version of SQL Server,use next value for
                 SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
                 String sequence = sequenceExpr.getSequence().getSimpleName();

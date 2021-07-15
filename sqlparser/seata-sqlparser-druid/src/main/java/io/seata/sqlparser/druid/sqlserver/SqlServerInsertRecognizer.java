@@ -49,7 +49,7 @@ public class SqlServerInsertRecognizer extends BaseSqlServerRecognizer implement
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else {
                 wrapSQLParsingException(expr);
             }
@@ -59,6 +59,10 @@ public class SqlServerInsertRecognizer extends BaseSqlServerRecognizer implement
 
     @Override
     public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
+        if (ast.getTop() != null) {
+            //deal with top sql
+            dealTop(ast);
+        }
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
@@ -78,7 +82,7 @@ public class SqlServerInsertRecognizer extends BaseSqlServerRecognizer implement
                     row.add(SqlMethodExpr.get());
                 } else if (expr instanceof SQLDefaultExpr) {
                     row.add(SqlDefaultExpr.get());
-                }else if (expr instanceof SQLSequenceExpr) {
+                } else if (expr instanceof SQLSequenceExpr) {
                     //Supported only since 2012 version of SQL Server,use next value for
                     SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
                     String sequence = sequenceExpr.getSequence().getSimpleName();

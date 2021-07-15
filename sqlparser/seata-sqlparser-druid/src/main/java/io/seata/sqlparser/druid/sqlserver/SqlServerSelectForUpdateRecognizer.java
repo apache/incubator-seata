@@ -47,11 +47,15 @@ public class SqlServerSelectForUpdateRecognizer extends BaseSqlServerRecognizer 
         if (select == null) {
             throw new SQLParsingException("should never happen!");
         }
-        SQLSelectQueryBlock selectQueryBlock = select.getQueryBlock();
+        SQLServerSelectQueryBlock selectQueryBlock = (SQLServerSelectQueryBlock) select.getQueryBlock();
         if (selectQueryBlock == null) {
             throw new SQLParsingException("should never happen!");
         }
-        return (SQLServerSelectQueryBlock) selectQueryBlock;
+        if (selectQueryBlock.getTop() != null) {
+            //deal with top sql
+            dealTop(ast);
+        }
+        return selectQueryBlock;
     }
 
     @Override
