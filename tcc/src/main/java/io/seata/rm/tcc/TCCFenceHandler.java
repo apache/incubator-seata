@@ -21,7 +21,7 @@ import java.util.Date;
 import javax.sql.DataSource;
 
 import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.common.exception.FrameworkException;
+import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
@@ -80,7 +80,7 @@ public class TCCFenceHandler {
                 }
             } catch (Throwable t) {
                 status.setRollbackOnly();
-                throw new FrameworkException(t);
+                throw new SkipCallbackWrapperException(t);
             }
         });
     }
@@ -119,7 +119,7 @@ public class TCCFenceHandler {
                 return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
-                throw new FrameworkException(t);
+                throw new SkipCallbackWrapperException(t);
             }
         });
     }
@@ -166,7 +166,7 @@ public class TCCFenceHandler {
                 return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
-                throw new FrameworkException(t);
+                throw new SkipCallbackWrapperException(t);
             }
         });
     }
