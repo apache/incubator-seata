@@ -15,9 +15,10 @@
  */
 package io.seata.rm.tcc;
 
-import java.util.List;
-
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+
+import java.util.List;
 
 /**
  * The type Tcc action.
@@ -40,12 +41,14 @@ public class TccActionImpl implements TccAction {
     }
 
     @Override
-    public boolean commit(BusinessActionContext actionContext) {
+    public boolean commit(BusinessActionContext actionContext,
+                          @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a) {
         return true;
     }
 
     @Override
-    public boolean rollback(BusinessActionContext actionContext) {
+    public boolean rollback(BusinessActionContext actionContext,
+                            @BusinessActionContextParameter("tccParam") TccParam param) {
         return true;
     }
 }

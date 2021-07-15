@@ -235,7 +235,7 @@ public final class ActionContextUtil {
      *
      * @param actionContext the action context
      * @param key           the actionContext's key
-     * @param value         the actionContext's key
+     * @param value         the actionContext's value
      * @return the action context is changed
      */
     public static boolean putActionContext(Map<String, Object> actionContext, String key, Object value) {
@@ -243,7 +243,10 @@ public final class ActionContextUtil {
             return false;
         }
 
+        // handle value
         value = handleActionContext(value);
+
+        // put value
         Object previousValue = actionContext.put(key, value);
         return !value.equals(previousValue);
     }
@@ -266,6 +269,41 @@ public final class ActionContextUtil {
     }
 
     /**
+     * put the action context without handle
+     *
+     * @param actionContext the action context
+     * @param key           the actionContext's key
+     * @param value         the actionContext's value
+     * @return the action context is changed
+     */
+    public static boolean putActionContextWithoutHandle(@Nonnull final Map<String, Object> actionContext, String key, Object value) {
+        if (value == null) {
+            return false;
+        }
+
+        // put value
+        Object previousValue = actionContext.put(key, value);
+        return !value.equals(previousValue);
+    }
+
+    /**
+     * put the action context without handle
+     *
+     * @param actionContext    the action context
+     * @param actionContextMap the actionContextMap
+     * @return the action context is changed
+     */
+    public static boolean putActionContextWithoutHandle(Map<String, Object> actionContext, @Nonnull Map<String, Object> actionContextMap) {
+        boolean isChanged = false;
+        for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
+            if (putActionContextWithoutHandle(actionContext, entry.getKey(), entry.getValue())) {
+                isChanged = true;
+            }
+        }
+        return isChanged;
+    }
+
+    /**
      * Handle the action context.
      * It is convenient to convert type in phase 2.
      *
@@ -275,7 +313,8 @@ public final class ActionContextUtil {
      * @see BusinessActionContext#getActionContext(String, Class)
      */
     public static Object handleActionContext(@Nonnull Object actionContext) {
-        if (actionContext instanceof CharSequence || actionContext instanceof Number || actionContext instanceof Boolean) {
+        if (actionContext instanceof CharSequence || actionContext instanceof Number || actionContext instanceof Boolean
+                || actionContext instanceof Character) {
             return actionContext;
         } else {
             return JSON.toJSONString(actionContext);
@@ -313,7 +352,7 @@ public final class ActionContextUtil {
 
         // JSON to Object
         try {
-            if (value instanceof CharSequence) {
+            if (value instanceof CharSequence || value instanceof Character) {
                 return JSON.parseObject(value.toString(), targetClazz);
             } else {
                 return JSON.parseObject(JSON.toJSONString(value), targetClazz);
