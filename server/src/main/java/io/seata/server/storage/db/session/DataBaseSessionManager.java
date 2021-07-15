@@ -25,8 +25,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.LockStatus;
-import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -99,9 +97,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
         session.setStatus(status);
-        if (GlobalStatus.Rollbacking == status) {
-            LockerManagerFactory.getLockManager().updateLockStatus(session.getXid(), LockStatus.Rollbacking);
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
