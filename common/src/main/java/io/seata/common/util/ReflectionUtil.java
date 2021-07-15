@@ -591,7 +591,7 @@ public final class ReflectionUtil {
      * @param clazz the clazz
      * @param <T>   the type
      * @return the singleton
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException the illegal argument exception
      */
     public static <T> T getSingleton(Class<T> clazz) {
         if (clazz == null) {

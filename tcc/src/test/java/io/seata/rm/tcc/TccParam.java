@@ -26,7 +26,7 @@ import io.seata.rm.tcc.parameterfetcher.MockBooleanParameterFetcher;
 public class TccParam {
 
     /**
-     * The Num.
+     * The Num, the 'value' or 'paramName' is not set for annotation.
      */
     @BusinessActionContextParameter
     protected int num;

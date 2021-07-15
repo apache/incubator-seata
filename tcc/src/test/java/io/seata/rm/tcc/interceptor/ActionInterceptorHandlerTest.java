@@ -15,16 +15,16 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccParam;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Action interceptor handler test.
@@ -36,7 +36,7 @@ class ActionInterceptorHandlerTest {
     /**
      * The Action interceptor handler.
      */
-    protected  ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+    protected ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     /**
      * Test business action context.
@@ -117,5 +117,4 @@ class ActionInterceptorHandlerTest {
         // boolean h
         Assertions.assertEquals("no", paramContext.get("h"));
     }
-
 }
