@@ -40,18 +40,24 @@ public final class ColumnUtils {
         /**
          * standard escape
          */
-        STANDARD('"'),
+        STANDARD('"', '"'),
         /**
          * mysql series escape
          */
-        MYSQL('`');
+        MYSQL('`', '`'),
+        /**
+         * sqlserver series escape
+         */
+        SQLSERVER('[', ']');
         /**
          * The Value.
          */
-        public final char value;
+        public final char leftValue;
+        public final char rightValue;
 
-        Escape(char value) {
-            this.value = value;
+        Escape(char left, char right) {
+            this.leftValue = left;
+            this.rightValue = right;
         }
     }
 
@@ -70,6 +76,9 @@ public final class ColumnUtils {
         List<String> newCols = delEscape(cols, Escape.STANDARD);
         if (isMysqlSeries(dbType)) {
             newCols = delEscape(newCols, Escape.MYSQL);
+        }
+        if (isSqlServerSeries(dbType)) {
+            newCols = delEscape(newCols, Escape.SQLSERVER);
         }
         return newCols;
     }
@@ -106,6 +115,9 @@ public final class ColumnUtils {
         if (isMysqlSeries(dbType)) {
             newColName = delEscape(newColName, Escape.MYSQL);
         }
+        if (isSqlServerSeries(dbType)) {
+            newColName = delEscape(newColName, Escape.SQLSERVER);
+        }
         return newColName;
     }
 
@@ -121,9 +133,9 @@ public final class ColumnUtils {
             return colName;
         }
 
-        if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
+        if (colName.charAt(0) == escape.leftValue && colName.charAt(colName.length() - 1) == escape.rightValue) {
             // like "scheme"."id" `scheme`.`id`
-            String str = escape.value + DOT + escape.value;
+            String str = escape.rightValue + DOT + escape.leftValue;
             int index = colName.indexOf(str);
             if (index > -1) {
                 return colName.substring(1, index) + DOT + colName.substring(index + str.length(), colName.length() - 1);
@@ -131,15 +143,15 @@ public final class ColumnUtils {
             return colName.substring(1, colName.length() - 1);
         } else {
             // like "scheme".id `scheme`.id
-            String str = escape.value + DOT;
+            String str = escape.rightValue + DOT;
             int index = colName.indexOf(str);
-            if (index > -1 && colName.charAt(0) == escape.value) {
+            if (index > -1 && colName.charAt(0) == escape.leftValue) {
                 return colName.substring(1, index) + DOT + colName.substring(index + str.length());
             }
             // like scheme."id" scheme.`id`
-            str = DOT + escape.value;
+            str = DOT + escape.leftValue;
             index = colName.indexOf(str);
-            if (index > -1 && colName.charAt(colName.length() - 1) == escape.value) {
+            if (index > -1 && colName.charAt(colName.length() - 1) == escape.rightValue) {
                 return colName.substring(0, index) + DOT + colName.substring(index + str.length(), colName.length() - 1);
             }
         }
@@ -185,6 +197,9 @@ public final class ColumnUtils {
         if (isMysqlSeries(dbType)) {
             return addEscape(colName, dbType, ColumnUtils.Escape.MYSQL);
         }
+        if (isSqlServerSeries(dbType)) {
+            return addEscape(colName, dbType, ColumnUtils.Escape.SQLSERVER);
+        }
         return addEscape(colName, dbType, ColumnUtils.Escape.STANDARD);
     }
 
@@ -199,7 +214,7 @@ public final class ColumnUtils {
         if (colName == null || colName.isEmpty()) {
             return colName;
         }
-        if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
+        if (colName.charAt(0) == escape.leftValue && colName.charAt(colName.length() - 1) == escape.rightValue) {
             return colName;
         }
 
@@ -213,23 +228,23 @@ public final class ColumnUtils {
 
         if (colName.contains(DOT)) {
             // like "scheme".id `scheme`.id
-            String str = escape.value + DOT;
+            String str = escape.rightValue + DOT;
             int dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
                 return new StringBuilder()
                         .append(colName.substring(0, dotIndex + str.length()))
-                        .append(escape.value)
+                        .append(escape.leftValue)
                         .append(colName.substring(dotIndex + str.length()))
-                        .append(escape.value).toString();
+                        .append(escape.rightValue).toString();
             }
             // like scheme."id" scheme.`id`
-            str = DOT + escape.value;
+            str = DOT + escape.leftValue;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
                 return new StringBuilder()
-                        .append(escape.value)
+                        .append(escape.leftValue)
                         .append(colName.substring(0, dotIndex))
-                        .append(escape.value)
+                        .append(escape.rightValue)
                         .append(colName.substring(dotIndex))
                         .toString();
             }
@@ -238,19 +253,19 @@ public final class ColumnUtils {
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
                 return new StringBuilder()
-                        .append(escape.value)
+                        .append(escape.leftValue)
                         .append(colName.substring(0, dotIndex))
-                        .append(escape.value)
+                        .append(escape.rightValue)
                         .append(DOT)
-                        .append(escape.value)
+                        .append(escape.leftValue)
                         .append(colName.substring(dotIndex + str.length()))
-                        .append(escape.value).toString();
+                        .append(escape.rightValue).toString();
             }
         }
 
         char[] buf = new char[colName.length() + 2];
-        buf[0] = escape.value;
-        buf[buf.length - 1] = escape.value;
+        buf[0] = escape.leftValue;
+        buf[buf.length - 1] = escape.rightValue;
 
         colName.getChars(0, colName.length(), buf, 1);
 
@@ -261,6 +276,10 @@ public final class ColumnUtils {
         return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
+    }
+
+    private static boolean isSqlServerSeries(String dbType) {
+        return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.SQLSERVER);
     }
 
 }
