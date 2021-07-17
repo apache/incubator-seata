@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
@@ -66,34 +65,23 @@ public class FileLocker extends AbstractLocker {
         long transactionId = branchSession.getTransactionId();
 
         ConcurrentMap<BucketLockMap, Set<String>> bucketHolder = branchSession.getLockHolder();
-        ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = LOCK_MAP.get(resourceId);
-        if (dbLockMap == null) {
-            LOCK_MAP.putIfAbsent(resourceId, new ConcurrentHashMap<>());
-            dbLockMap = LOCK_MAP.get(resourceId);
-        }
+        ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = CollectionUtils.computeIfAbsent(
+            LOCK_MAP, resourceId, key -> new ConcurrentHashMap<>());
 
         for (RowLock lock : rowLocks) {
             String tableName = lock.getTableName();
             String pk = lock.getPk();
-            ConcurrentMap<Integer, BucketLockMap> tableLockMap = dbLockMap.get(tableName);
-            if (tableLockMap == null) {
-                dbLockMap.putIfAbsent(tableName, new ConcurrentHashMap<>());
-                tableLockMap = dbLockMap.get(tableName);
-            }
+            ConcurrentMap<Integer, BucketLockMap> tableLockMap = CollectionUtils.computeIfAbsent(dbLockMap, tableName,
+                key -> new ConcurrentHashMap<>());
+
             int bucketId = pk.hashCode() % BUCKET_PER_TABLE;
-            BucketLockMap bucketLockMap = tableLockMap.get(bucketId);
-            if (bucketLockMap == null) {
-                tableLockMap.putIfAbsent(bucketId, new BucketLockMap());
-                bucketLockMap = tableLockMap.get(bucketId);
-            }
+            BucketLockMap bucketLockMap = CollectionUtils.computeIfAbsent(tableLockMap, bucketId,
+                key -> new BucketLockMap());
             Long previousLockTransactionId = bucketLockMap.get().putIfAbsent(pk, transactionId);
             if (previousLockTransactionId == null) {
                 //No existing lock, and now locked by myself
-                Set<String> keysInHolder = bucketHolder.get(bucketLockMap);
-                if (keysInHolder == null) {
-                    bucketHolder.putIfAbsent(bucketLockMap, new ConcurrentSet<>());
-                    keysInHolder = bucketHolder.get(bucketLockMap);
-                }
+                Set<String> keysInHolder = CollectionUtils.computeIfAbsent(bucketHolder, bucketLockMap,
+                    key -> ConcurrentHashMap.newKeySet());
                 keysInHolder.add(pk);
             } else if (previousLockTransactionId == transactionId) {
                 // Locked by me before
@@ -119,7 +107,7 @@ public class FileLocker extends AbstractLocker {
             return true;
         }
         ConcurrentMap<BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
-        if (lockHolder == null || lockHolder.size() == 0) {
+        if (CollectionUtils.isEmpty(lockHolder)) {
             return true;
         }
         for (Map.Entry<BucketLockMap, Set<String>> entry : lockHolder.entrySet()) {
@@ -147,7 +135,6 @@ public class FileLocker extends AbstractLocker {
             return true;
         }
         for (RowLock rowLock : rowLocks) {
-            String xid = rowLock.getXid();
             String tableName = rowLock.getTableName();
             String pk = rowLock.getPk();
 

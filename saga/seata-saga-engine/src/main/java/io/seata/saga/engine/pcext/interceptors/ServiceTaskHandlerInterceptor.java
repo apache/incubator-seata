@@ -22,6 +22,7 @@ import java.util.Map;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.evaluation.EvaluatorFactory;
@@ -35,6 +36,7 @@ import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
@@ -119,12 +121,21 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         stateInstance.setMachineInstanceId(stateMachineInstance.getId());
         stateInstance.setStateMachineInstance(stateMachineInstance);
-        stateInstance.setName(state.getName());
+        Object isForCompensation = state.isForCompensation();
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
+            stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, state.getName()));
+            StateInstance lastRetriedStateInstance = LoopTaskUtils.findOutLastRetriedStateInstance(stateMachineInstance,
+                stateInstance.getName());
+            stateInstance.setStateIdRetriedFor(
+                lastRetriedStateInstance == null ? null : lastRetriedStateInstance.getId());
+        } else {
+            stateInstance.setName(state.getName());
+            stateInstance.setStateIdRetriedFor(
+                (String)context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
+        }
         stateInstance.setGmtStarted(new Date());
+        stateInstance.setGmtUpdated(stateInstance.getGmtStarted());
         stateInstance.setStatus(ExecutionStatus.RU);
-
-        stateInstance.setStateIdRetriedFor(
-            (String)context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
 
         if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
 
@@ -139,7 +150,6 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setServiceMethod(state.getServiceMethod());
         stateInstance.setServiceType(state.getServiceType());
 
-        Object isForCompensation = state.isForCompensation();
         if (isForCompensation != null && (Boolean)isForCompensation) {
             CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
             StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(state.getName());
@@ -159,7 +169,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             && StringUtils.isEmpty(stateInstance.getStateIdRetriedFor()) && !state.isForCompensation()) {
 
             List<StateInstance> stateList = stateMachineInstance.getStateList();
-            if (stateList != null && stateList.size() > 0) {
+            if (CollectionUtils.isNotEmpty(stateList)) {
                 for (int i = stateList.size() - 1; i >= 0; i--) {
                     StateInstance executedState = stateList.get(i);
 
@@ -241,7 +251,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             try {
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
                     stateMachineConfig.getExpressionFactoryManager(), state, serviceOutputParams);
-                if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
+                if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                     contextVariables.putAll(outputVariablesToContext);
                 }
             } catch (Exception e) {
@@ -285,10 +295,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private void decideExecutionStatus(ProcessContext context, StateInstance stateInstance, ServiceTaskStateImpl state,
                                        Exception exp) {
-
         Map<String, String> statusMatchList = state.getStatus();
-        if (statusMatchList != null && statusMatchList.size() > 0) {
-
+        if (CollectionUtils.isNotEmpty(statusMatchList)) {
             if (state.isAsync()) {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
@@ -297,7 +305,6 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                         state.getServiceMethod(), state.getName(), stateInstance.getId());
                 }
             } else {
-
                 StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
@@ -307,11 +314,12 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
-                            for (String expressionStr : statusMatchList.keySet()) {
-
-                                String statusVal = statusMatchList.get(expressionStr);
-                                Evaluator evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(),
-                                    expressionStr);
+                            String expressionStr, statusVal;
+                            Evaluator evaluator;
+                            for (Map.Entry<String, String> entry : statusMatchList.entrySet()) {
+                                expressionStr = entry.getKey();
+                                statusVal = entry.getValue();
+                                evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
                                 if (evaluator != null) {
                                     statusEvaluators.put(evaluator, statusVal);
                                 }

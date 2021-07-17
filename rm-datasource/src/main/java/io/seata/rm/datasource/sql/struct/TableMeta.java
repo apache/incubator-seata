@@ -17,7 +17,7 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,11 +39,11 @@ public class TableMeta {
      * key: column name
      */
 
-    private Map<String, ColumnMeta> allColumns = new LinkedHashMap<String, ColumnMeta>();
+    private Map<String, ColumnMeta> allColumns = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     /**
      * key: index name
      */
-    private Map<String, IndexMeta> allIndexes = new LinkedHashMap<String, IndexMeta>();
+    private Map<String, IndexMeta> allIndexes = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * Gets table name.
@@ -113,15 +113,14 @@ public class TableMeta {
      * @return the primary key map
      */
     public Map<String, ColumnMeta> getPrimaryKeyMap() {
-        Map<String, ColumnMeta> pk = new HashMap<String, ColumnMeta>();
-        for (Entry<String, IndexMeta> entry : allIndexes.entrySet()) {
-            IndexMeta index = entry.getValue();
+        Map<String, ColumnMeta> pk = new HashMap<>();
+        allIndexes.forEach((key, index) -> {
             if (index.getIndextype().value() == IndexType.PRIMARY.value()) {
                 for (ColumnMeta col : index.getValues()) {
                     pk.put(col.getColumnName(), col);
                 }
             }
-        }
+        });
 
         if (pk.size() < 1) {
             throw new NotSupportYetException(String.format("%s needs to contain the primary key.", tableName));
@@ -146,8 +145,9 @@ public class TableMeta {
 
     /**
      * Gets add escape pk name.
-     * @param dbType
-     * @return
+     *
+     * @param dbType the db type
+     * @return escape pk name list
      */
     public List<String> getEscapePkNameList(String dbType) {
         return ColumnUtils.addEscape(getPrimaryKeyOnlyName(), dbType);

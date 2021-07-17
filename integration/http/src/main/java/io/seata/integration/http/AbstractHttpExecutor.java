@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Abstract http executor.
@@ -114,14 +114,15 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
 
-    private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest, Map<String, String> headers) throws IOException {
+    private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest,
+            Map<String, String> headers) throws IOException {
         CloseableHttpResponse response;
         String xid = RootContext.getXID();
         if (xid != null) {
             headers.put(RootContext.KEY_XID, xid);
         }
         if (!headers.isEmpty()) {
-            headers.keySet().forEach(key -> httpUriRequest.addHeader(key, headers.get(key)));
+            headers.forEach(httpUriRequest::addHeader);
         }
         response = httpClient.execute(httpUriRequest);
         int statusCode = response.getStatusLine().getStatusCode();
@@ -148,14 +149,10 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
 
     public static Map<String, String> convertParamOfBean(Object sourceParam) {
-        return convert(JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class));
+        return CollectionUtils.toStringMap(JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class));
     }
 
-    public static <T> Map<String, String> convertParamOfJsonString(String jsonstr, Class<T> returnType) {
-        return convertParamOfBean(JSON.parseObject(jsonstr, returnType));
-    }
-
-    public static Map<String, String> convert(Map<String, Object> param) {
-        return param.keySet().stream().filter(key -> param.get(key) != null && param.get(key) != null).collect(Collectors.toMap(key -> key, key -> param.get(key).toString()));
+    public static <T> Map<String, String> convertParamOfJsonString(String jsonStr, Class<T> returnType) {
+        return convertParamOfBean(JSON.parseObject(jsonStr, returnType));
     }
 }

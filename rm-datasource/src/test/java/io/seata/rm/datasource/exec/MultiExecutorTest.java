@@ -15,27 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import com.alibaba.druid.mock.MockStatement;
-import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.util.JdbcConstants;
-import com.google.common.collect.Lists;
-import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.mock.MockExecuteHandlerImpl;
-import io.seata.rm.datasource.sql.SQLVisitorFactory;
-import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.SQLType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -44,6 +23,27 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.alibaba.druid.mock.MockStatement;
+import com.alibaba.druid.mock.MockStatementBase;
+import com.alibaba.druid.pool.DruidDataSource;
+import com.google.common.collect.Lists;
+
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.rm.datasource.sql.SQLVisitorFactory;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.JdbcConstants;
 
 public class MultiExecutorTest {
 
@@ -108,11 +108,12 @@ public class MultiExecutorTest {
         List<SQLUndoLog> items = connectionProxy.getContext().getUndoItems();
         Assertions.assertTrue(items.stream().allMatch(t -> Objects.equals(t.getSqlType(), SQLType.UPDATE) && Objects.equals(t.getTableName(), "table_update_executor_test")));
         Assertions.assertEquals(items.size(), 1);
-        items.clear();
+        connectionProxy.getContext().reset();
 
 
         //same table delete
-        sql = "delete from table_update_executor_test where id = 2;delete from table_update_executor_test where id = 3";
+        sql = "delete from table_update_executor_test where id = 2;" +
+                "delete from table_update_executor_test where id = 3";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -129,7 +130,7 @@ public class MultiExecutorTest {
         Set<String> itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
         Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
         Assertions.assertEquals(items.size(), 1);
-        items.clear();
+        connectionProxy.getContext().reset();
 
 
         //multi table update
@@ -151,7 +152,7 @@ public class MultiExecutorTest {
         Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
         Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
         Assertions.assertEquals(items.size(), 2);
-        items.clear();
+        connectionProxy.getContext().reset();
 
 
         // multi table delete
@@ -174,9 +175,38 @@ public class MultiExecutorTest {
         Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
         Assertions.assertEquals(items.size(), 2);
 
+        // contains limit delete
+        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 2 limit 1;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
+
+        // contains order by and limit delete
+        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 2 order by id desc limit 1;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
 
 
+        //contains order by update
+        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
 
+        //contains order by and limit update
+        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc limit 1;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
     }
 }
 

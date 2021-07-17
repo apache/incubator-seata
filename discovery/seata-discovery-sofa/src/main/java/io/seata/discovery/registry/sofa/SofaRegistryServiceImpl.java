@@ -146,8 +146,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         subscriberRegistration.setScopeEnum(ScopeEnum.global);
         subscriberRegistration.setGroup(registryProps.getProperty(PRO_GROUP_KEY));
 
-        LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
-        LISTENER_SERVICE_MAP.get(cluster).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
+                .add(listener);
         getRegistryInstance().register(subscriberRegistration);
     }
 
@@ -169,8 +169,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                 if (instances == null && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
                     CLUSTER_ADDRESS_MAP.remove(clusterName);
                 } else {
-                    List<InetSocketAddress> tranformData = flatData(instances);
-                    List<InetSocketAddress> newAddressList = new ArrayList<>(tranformData);
+                    List<InetSocketAddress> newAddressList = flatData(instances);
                     CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                 }
                 respondRegistries.countDown();

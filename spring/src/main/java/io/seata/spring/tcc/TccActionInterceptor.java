@@ -16,9 +16,13 @@
 package io.seata.spring.tcc;
 
 import java.lang.reflect.Method;
-import java.util.Map;
-import io.seata.common.Constants;
-import io.seata.common.util.StringUtils;
+import javax.annotation.Nullable;
+
+import io.seata.common.DefaultValues;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -30,17 +34,28 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.core.Ordered;
+
+import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.core.constants.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 
 /**
  * TCC Interceptor
  *
  * @author zhangsen
+ * @author wang.liang
  */
-public class TccActionInterceptor implements MethodInterceptor {
+public class TccActionInterceptor implements MethodInterceptor, ConfigurationChangeListener, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
+    private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
+            DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+
+    private volatile boolean disable = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     /**
      * remoting bean info
@@ -64,8 +79,8 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        if (!RootContext.inGlobalTransaction()) {
-            //not in transaction
+        if (!RootContext.inGlobalTransaction() || disable || RootContext.inSagaBranch()) {
+            //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
         Method method = getActionInterfaceMethod(invocation);
@@ -75,24 +90,26 @@ public class TccActionInterceptor implements MethodInterceptor {
             //save the xid
             String xid = RootContext.getXID();
             //save the previous branchType
-            String previousBranchType = RootContext.getBranchType();
-            RootContext.bindBranchType(BranchType.TCC);
-            try {
-                Object[] methodArgs = invocation.getArguments();
-                //Handler the TCC Aspect
-                Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
-                        invocation::proceed);
-                //return the final result
-                return ret.get(Constants.TCC_METHOD_RESULT);
+            BranchType previousBranchType = RootContext.getBranchType();
+            //if not TCC, bind TCC branchType
+            if (BranchType.TCC != previousBranchType) {
+                RootContext.bindBranchType(BranchType.TCC);
             }
-            finally {
-                RootContext.unbindBranchType();
-                //restore the TCC branchType if exists
-                if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
-                    RootContext.bindBranchType(BranchType.TCC);
+            try {
+                //Handler the TCC Aspect, and return the business result
+                return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessAction,
+                        invocation::proceed);
+            } finally {
+                //if not TCC, unbind branchType
+                if (BranchType.TCC != previousBranchType) {
+                    RootContext.unbindBranchType();
                 }
+                //MDC remove branchId
+                MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
+
+        //not TCC try method
         return invocation.proceed();
     }
 
@@ -110,7 +127,7 @@ public class TccActionInterceptor implements MethodInterceptor {
             } else {
                 interfaceType = remotingDesc.getInterfaceClass();
             }
-            if (interfaceType == null && remotingDesc.getInterfaceClassName() != null) {
+            if (interfaceType == null && remotingDesc != null && remotingDesc.getInterfaceClassName() != null) {
                 interfaceType = Class.forName(remotingDesc.getInterfaceClassName(), true,
                     Thread.currentThread().getContextClassLoader());
             }
@@ -120,7 +137,7 @@ public class TccActionInterceptor implements MethodInterceptor {
             return interfaceType.getMethod(invocation.getMethod().getName(),
                 invocation.getMethod().getParameterTypes());
         } catch (NoSuchMethodException e) {
-            if (interfaceType != null && !invocation.getMethod().getName().equals("toString")) {
+            if (interfaceType != null && !"toString".equals(invocation.getMethod().getName())) {
                 LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), interfaceType.getName());
             }
             return invocation.getMethod();
@@ -137,6 +154,7 @@ public class TccActionInterceptor implements MethodInterceptor {
      * @return proxy interface
      * @throws Exception the exception
      */
+    @Nullable
     protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
         if (DubboUtil.isDubboProxyName(proxyBean.getClass().getName())) {
             //dubbo javaassist proxy
@@ -145,5 +163,19 @@ public class TccActionInterceptor implements MethodInterceptor {
             //jdk/cglib proxy
             return SpringProxyUtils.getTargetInterface(proxyBean);
         }
+    }
+
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                disable, event.getNewValue());
+            disable = Boolean.parseBoolean(event.getNewValue().trim());
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER_NUM;
     }
 }

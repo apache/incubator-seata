@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
+import io.seata.common.util.BlobUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -46,7 +47,7 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,7 +69,7 @@ public abstract class AbstractUndoExecutor {
      * template of check sql
      * TODO support multiple primary key
      */
-    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s";
+    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s FOR UPDATE";
 
     /**
      * Switch of undo data validation
@@ -162,7 +163,7 @@ public abstract class AbstractUndoExecutor {
             if (type == JDBCType.BLOB.getVendorTypeNumber()) {
                 SerialBlob serialBlob = (SerialBlob) value;
                 if (serialBlob != null) {
-                    undoPST.setBlob(undoIndex, serialBlob.getBinaryStream());
+                    undoPST.setBytes(undoIndex, BlobUtils.blob2Bytes(serialBlob));
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
@@ -343,7 +344,7 @@ public abstract class AbstractUndoExecutor {
      * Parse pk values Field List.
      *
      * @param records the records
-     * @return List<List < Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     * @return each element represents a row. And inside a row list contains pk columns(Field).
      */
     protected Map<String, List<Field>> parsePkValues(TableRecords records) {
         return parsePkValues(records.getRows(), records.getTableMeta().getPrimaryKeyOnlyName());
@@ -354,7 +355,7 @@ public abstract class AbstractUndoExecutor {
      *
      * @param rows       pk rows
      * @param pkNameList pk column name
-     * @return List<List   <   Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     * @return each element represents a row. And inside a row list contains pk columns(Field).
      */
     protected Map<String, List<Field>> parsePkValues(List<Row> rows, List<String> pkNameList) {
         List<Field> pkFieldList = new ArrayList<>();
@@ -377,7 +378,7 @@ public abstract class AbstractUndoExecutor {
      *
      * @param conn the connection
      * @return the db type
-     * @throws SQLException
+     * @throws SQLException SQLException
      */
     protected String getDbType(Connection conn) throws SQLException {
         return JdbcUtils.getDbType(conn.getMetaData().getURL());

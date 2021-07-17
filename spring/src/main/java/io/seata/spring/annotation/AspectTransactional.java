@@ -15,6 +15,9 @@
  */
 package io.seata.spring.annotation;
 
+import java.util.Arrays;
+import io.seata.common.DefaultValues;
+import io.seata.common.util.StringUtils;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionInfo;
 
@@ -27,7 +30,7 @@ public class AspectTransactional {
      *
      * @return timeoutMills in MILLISECONDS.
      */
-    private int timeoutMills = TransactionInfo.DEFAULT_TIME_OUT;
+    private int timeoutMills = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 
     /**
      * Given name of the global transaction instance.
@@ -71,11 +74,29 @@ public class AspectTransactional {
      */
     private Propagation propagation = Propagation.REQUIRED;
 
+    /**
+     * customized global lock retry interval(unit: ms)
+     * you may use this to override global config of "client.rm.lock.retryInterval"
+     * note: 0 or negative number will take no effect(which mean fall back to global config)
+     *
+     * @return int
+     */
+    int lockRetryInterval = 0;
+
+    /**
+     * customized global lock retry times
+     * you may use this to override global config of "client.rm.lock.retryTimes"
+     * note: negative number will take no effect(which mean fall back to global config)
+     *
+     * @return int
+     */
+    int lockRetryTimes = -1;
+
     public AspectTransactional() {}
 
     public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
         String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
-        Propagation propagation) {
+        Propagation propagation, int lockRetryInterval, int lockRetryTimes) {
         this.timeoutMills = timeoutMills;
         this.name = name;
         this.rollbackFor = rollbackFor;
@@ -83,6 +104,8 @@ public class AspectTransactional {
         this.noRollbackFor = noRollbackFor;
         this.noRollbackForClassName = noRollbackForClassName;
         this.propagation = propagation;
+        this.lockRetryInterval = lockRetryInterval;
+        this.lockRetryTimes = lockRetryTimes;
     }
 
     public int getTimeoutMills() {
@@ -139,6 +162,27 @@ public class AspectTransactional {
 
     public void setPropagation(Propagation propagation) {
         this.propagation = propagation;
+    }
+
+    public int getLockRetryInterval() {
+        return lockRetryInterval;
+    }
+
+    public void setLockRetryInterval(int lockRetryInterval) {
+        this.lockRetryInterval = lockRetryInterval;
+    }
+
+    public int getLockRetryTimes() {
+        return lockRetryTimes;
+    }
+
+    public void setLockRetryTimes(int lockRetryTimes) {
+        this.lockRetryTimes = lockRetryTimes;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 
 }

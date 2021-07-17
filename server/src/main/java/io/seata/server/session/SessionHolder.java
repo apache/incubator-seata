@@ -18,19 +18,28 @@ package io.seata.server.session;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.DistributedLockDO;
+import io.seata.core.store.DistributedLocker;
+import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.core.store.StoreMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
  * The type Session holder.
@@ -67,20 +76,28 @@ public class SessionHolder {
      */
     public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
 
+    /**
+     * The redis distributed lock expire time
+     */
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME,10000);
+
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
 
+    private static DistributedLocker DISTRIBUTED_LOCKER;
+
     /**
      * Init.
      *
-     * @param mode the store mode: file, db
+     * @param mode the store mode: file, db, redis
      * @throws IOException the io exception
      */
-    public static void init(String mode) throws IOException {
+    public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+            mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+                CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
@@ -91,6 +108,9 @@ public class SessionHolder {
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            String lockerType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
         } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
@@ -105,6 +125,8 @@ public class SessionHolder {
                 new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -113,72 +135,62 @@ public class SessionHolder {
                 StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
-        reload();
+        reload(storeMode);
     }
+
+    //region reload
 
     /**
      * Reload.
      */
-    protected static void reload() {
+    protected static void reload(StoreMode storeMode) {
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
-            ((Reloadable)ROOT_SESSION_MANAGER).reload();
+            ((Reloadable) ROOT_SESSION_MANAGER).reload();
+        }
 
-            Collection<GlobalSession> reloadedSessions = ROOT_SESSION_MANAGER.allSessions();
-            if (reloadedSessions != null && !reloadedSessions.isEmpty()) {
-                reloadedSessions.forEach(globalSession -> {
-                    GlobalStatus globalStatus = globalSession.getStatus();
-                    switch (globalStatus) {
-                        case UnKnown:
-                        case Committed:
-                        case CommitFailed:
-                        case Rollbacked:
-                        case RollbackFailed:
-                        case TimeoutRollbacked:
-                        case TimeoutRollbackFailed:
-                        case Finished:
-                            throw new ShouldNeverHappenException("Reloaded Session should NOT be " + globalStatus);
-                        case AsyncCommitting:
-                            try {
-                                globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-                                getAsyncCommittingSessionManager().addGlobalSession(globalSession);
-                            } catch (TransactionException e) {
-                                throw new ShouldNeverHappenException(e);
-                            }
-                            break;
-                        default: {
-                            ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
-                            branchSessions.forEach(branchSession -> {
-                                try {
-                                    branchSession.lock();
-                                } catch (TransactionException e) {
-                                    throw new ShouldNeverHappenException(e);
-                                }
-                            });
+        Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
+        if (CollectionUtils.isNotEmpty(allSessions)) {
+            List<GlobalSession> removeGlobalSessions = new ArrayList<>();
+            Iterator<GlobalSession> iterator = allSessions.iterator();
+            while (iterator.hasNext()) {
+                GlobalSession globalSession = iterator.next();
+                GlobalStatus globalStatus = globalSession.getStatus();
+                switch (globalStatus) {
+                    case UnKnown:
+                    case Committed:
+                    case CommitFailed:
+                    case Rollbacked:
+                    case RollbackFailed:
+                    case TimeoutRollbacked:
+                    case TimeoutRollbackFailed:
+                    case Finished:
+                        removeGlobalSessions.add(globalSession);
+                        break;
+                    case AsyncCommitting:
+                        if (storeMode == StoreMode.FILE) {
+                            queueToAsyncCommitting(globalSession);
+                        }
+                        break;
+                    default: {
+                        if (storeMode == StoreMode.FILE) {
+                            lockBranchSessions(globalSession.getSortedBranches());
 
                             switch (globalStatus) {
                                 case Committing:
                                 case CommitRetrying:
-                                    try {
-                                        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-                                        getRetryCommittingSessionManager().addGlobalSession(globalSession);
-                                    } catch (TransactionException e) {
-                                        throw new ShouldNeverHappenException(e);
-                                    }
+                                    queueToRetryCommit(globalSession);
                                     break;
                                 case Rollbacking:
                                 case RollbackRetrying:
                                 case TimeoutRollbacking:
                                 case TimeoutRollbackRetrying:
-                                    try {
-                                        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-                                        getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-                                    } catch (TransactionException e) {
-                                        throw new ShouldNeverHappenException(e);
-                                    }
+                                    queueToRetryRollback(globalSession);
                                     break;
                                 case Begin:
                                     globalSession.setActive(true);
@@ -186,13 +198,69 @@ public class SessionHolder {
                                 default:
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                             }
-                            break;
                         }
+                        break;
                     }
-                });
+                }
+            }
+            for (GlobalSession globalSession : removeGlobalSessions) {
+                removeInErrorState(globalSession);
             }
         }
     }
+
+    private static void removeInErrorState(GlobalSession globalSession) {
+        try {
+            LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
+            ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Remove global session succeed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Remove global session failed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus(), e);
+        }
+    }
+
+    private static void queueToAsyncCommitting(GlobalSession globalSession) {
+        try {
+            globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
+            getAsyncCommittingSessionManager().addGlobalSession(globalSession);
+        } catch (TransactionException e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    private static void lockBranchSessions(ArrayList<BranchSession> branchSessions) {
+        branchSessions.forEach(branchSession -> {
+            try {
+                branchSession.lock();
+            } catch (TransactionException e) {
+                throw new ShouldNeverHappenException(e);
+            }
+        });
+    }
+
+    private static void queueToRetryCommit(GlobalSession globalSession) {
+        try {
+            globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
+            getRetryCommittingSessionManager().addGlobalSession(globalSession);
+        } catch (TransactionException e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    private static void queueToRetryRollback(GlobalSession globalSession) {
+        try {
+            globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
+            getRetryRollbackingSessionManager().addGlobalSession(globalSession);
+        } catch (TransactionException e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    //endregion
+
+    //region get session manager
 
     /**
      * Gets root session manager.
@@ -242,6 +310,8 @@ public class SessionHolder {
         return RETRY_ROLLBACKING_SESSION_MANAGER;
     }
 
+    //endregion
+
     /**
      * Find global session.
      *
@@ -273,6 +343,24 @@ public class SessionHolder {
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException {
         return getRootSessionManager().lockAndExecute(globalSession, lockCallable);
+    }
+
+    /**
+     * acquire lock
+     *
+     * @return the boolean
+     */
+    public static boolean acquireDistributedLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
+    }
+
+    /**
+     * release lock
+     *
+     * @return the boolean
+     */
+    public static boolean releaseDistributedLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     public static void destroy() {

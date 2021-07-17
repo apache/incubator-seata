@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.routers.EndStateRouter;
 import io.seata.saga.engine.pcext.routers.TaskStateRouter;
@@ -40,7 +41,7 @@ import io.seata.saga.statelang.domain.StateMachine;
  */
 public class StateMachineProcessRouter implements ProcessRouter {
 
-    private Map<String, StateRouter> stateRouters = new ConcurrentHashMap<String, StateRouter>();
+    private final Map<String, StateRouter> stateRouters = new ConcurrentHashMap<>();
 
     @Override
     public Instruction route(ProcessContext context) throws FrameworkException {
@@ -73,7 +74,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
         List<StateRouterInterceptor> executedInterceptors = null;
         Exception exception = null;
         try {
-            if (interceptors != null && interceptors.size() > 0) {
+            if (CollectionUtils.isNotEmpty(interceptors)) {
                 executedInterceptors = new ArrayList<>(interceptors.size());
                 for (StateRouterInterceptor interceptor : interceptors) {
                     executedInterceptors.add(interceptor);
@@ -87,8 +88,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
             exception = e;
             throw e;
         } finally {
-
-            if (executedInterceptors != null && executedInterceptors.size() > 0) {
+            if (CollectionUtils.isNotEmpty(executedInterceptors)) {
                 for (int i = executedInterceptors.size() - 1; i >= 0; i--) {
                     StateRouterInterceptor interceptor = executedInterceptors.get(i);
                     interceptor.postRoute(context, state, instruction, exception);
@@ -105,7 +105,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
     }
 
     public void initDefaultStateRouters() {
-        if (this.stateRouters.size() == 0) {
+        if (this.stateRouters.isEmpty()) {
             TaskStateRouter taskStateRouter = new TaskStateRouter();
             this.stateRouters.put(DomainConstants.STATE_TYPE_SERVICE_TASK, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, taskStateRouter);
@@ -113,6 +113,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
             this.stateRouters.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, taskStateRouter);
+            this.stateRouters.put(DomainConstants.STATE_TYPE_LOOP_START, taskStateRouter);
 
             this.stateRouters.put(DomainConstants.STATE_TYPE_SUCCEED, new EndStateRouter());
             this.stateRouters.put(DomainConstants.STATE_TYPE_FAIL, new EndStateRouter());

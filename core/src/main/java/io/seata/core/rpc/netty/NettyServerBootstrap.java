@@ -17,7 +17,6 @@ package io.seata.core.rpc.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -73,9 +72,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
                     nettyServerConfig.getServerWorkerThreads()));
         }
-
-        // init listenPort in constructor so that getListenPort() will always get the exact port
-        setListenPort(nettyServerConfig.getDefaultListenPort());
     }
 
     /**
@@ -151,11 +147,10 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             });
 
         try {
-            ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
+            this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started, listen port: {}", listenPort);
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
-            future.channel().closeFuture().sync();
         } catch (Exception exx) {
             throw new RuntimeException(exx);
         }

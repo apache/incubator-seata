@@ -15,24 +15,28 @@
  */
 package io.seata.rm.datasource;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 
 /**
  * The type Data source proxy.
@@ -41,9 +45,11 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CH
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
-    private String resourceGroupId;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT";
+
+    private String resourceGroupId;
 
     private String jdbcUrl;
 
@@ -60,7 +66,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * Table meta checker interval
      */
-    private static final long TABLE_META_CHECKER_INTERVAL = 60000L;
+    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
+            ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
 
     private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("tableMetaChecker", 1, true));
@@ -81,7 +88,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * @param resourceGroupId  the resource group id
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
-        super(targetDataSource);
+        if (targetDataSource instanceof SeataDataSourceProxy) {
+            LOGGER.info("Unwrap the target data source, because the type is: {}", targetDataSource.getClass().getName());
+            targetDataSource = ((SeataDataSourceProxy) targetDataSource).getTargetDataSource();
+        }
+        this.targetDataSource = targetDataSource;
         init(targetDataSource, resourceGroupId);
     }
 
@@ -106,6 +117,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
+
+        //Set the default branch type to 'AT' in the RootContext.
+        RootContext.setDefaultBranchType(this.getBranchType());
     }
 
     /**

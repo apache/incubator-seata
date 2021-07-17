@@ -20,16 +20,15 @@ import java.util.HashSet;
 import java.util.Set;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationCache;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
-import io.seata.spring.interceptor.GlobalTransactionalInterceptor;
 import io.seata.spring.tcc.TccActionInterceptor;
-import io.seata.spring.util.GlobalTransactionalCheck;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
@@ -50,7 +49,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
 /**
  * The type Global transaction scanner.
@@ -58,8 +57,8 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANS
  * @author slievrly
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-    implements InitializingBean, ApplicationContextAware,
-    DisposableBean {
+        implements InitializingBean, ApplicationContextAware,
+                   DisposableBean {
 
     private static final long serialVersionUID = 1L;
 
@@ -80,7 +79,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String txServiceGroup;
     private final int mode;
     private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+            ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     private final FailureHandler failureHandlerHook;
 
@@ -221,8 +220,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     if (interceptor == null) {
                         if (globalTransactionalInterceptor == null) {
                             globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                            ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                                new GlobalTransactionalCheck());
+                            ConfigurationCache.addConfigListener(
+                                    ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                                    (ConfigurationChangeListener)globalTransactionalInterceptor);
                         }
                         interceptor = globalTransactionalInterceptor;
                     }
@@ -279,7 +279,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
-        throws BeansException {
+            throws BeansException {
         return new Object[]{interceptor};
     }
 

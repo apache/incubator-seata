@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * The type Collection utils.
@@ -73,24 +74,115 @@ public class CollectionUtils {
     }
 
     /**
-     * To string string.
+     * Is empty boolean.
+     *
+     * @param map the map
+     * @return the boolean
+     */
+    public static boolean isEmpty(Map<?, ?> map) {
+        return !isNotEmpty(map);
+    }
+
+    /**
+     * Is not empty boolean.
+     *
+     * @param map the map
+     * @return the boolean
+     */
+    public static boolean isNotEmpty(Map<?, ?> map) {
+        return map != null && !map.isEmpty();
+    }
+
+    /**
+     * Collection To string.
      *
      * @param col the col
      * @return the string
      */
-    public static String toString(Collection<?> col) {
-        if (isEmpty(col)) {
-            return "";
+    public static String toString(final Collection<?> col) {
+        if (col == null) {
+            return "null";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (Object obj : col) {
-            sb.append(StringUtils.toString(obj));
-            sb.append(",");
+        if (col.isEmpty()) {
+            return "[]";
         }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append("]");
-        return sb.toString();
+
+        return CycleDependencyHandler.wrap(col, o -> {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append("[");
+            for (Object obj : col) {
+                if (sb.length() > 1) {
+                    sb.append(", ");
+                }
+                if (obj == col) {
+                    sb.append("(this ").append(obj.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(obj));
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        });
+    }
+
+    /**
+     * Map to string.
+     *
+     * @param map the map
+     * @return the string
+     */
+    public static String toString(final Map<?, ?> map) {
+        if (map == null) {
+            return "null";
+        }
+        if (map.isEmpty()) {
+            return "{}";
+        }
+
+        return CycleDependencyHandler.wrap(map, o -> {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append("{");
+            map.forEach((key, value) -> {
+                if (sb.length() > 1) {
+                    sb.append(", ");
+                }
+                if (key == map) {
+                    sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(key));
+                }
+                sb.append("->");
+                if (value == map) {
+                    sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(value));
+                }
+            });
+            sb.append("}");
+            return sb.toString();
+        });
+    }
+
+    /**
+     * To string map
+     *
+     * @param param map
+     * @return the string map
+     */
+    public static Map<String, String> toStringMap(Map<String, Object> param) {
+        Map<String, String> covertMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(param)) {
+            param.forEach((key, value) -> {
+                if (value != null) {
+                    if (value instanceof CharSequence || value instanceof Character) {
+                        covertMap.put(key, value.toString());
+                    } else {
+                        covertMap.put(key, StringUtils.toString(value));
+                    }
+                }
+            });
+        }
+        return covertMap;
     }
 
     /**
@@ -168,13 +260,35 @@ public class CollectionUtils {
     }
 
     /**
+     * Compute if absent.
+     * Use this method if you are frequently using the same key,
+     * because the get method has no lock.
+     *
+     * @param map             the map
+     * @param key             the key
+     * @param mappingFunction the mapping function
+     * @param <K>             the type of key
+     * @param <V>             the type of value
+     * @return the value
+     */
+    public static <K, V> V computeIfAbsent(Map<K, V> map, K key, Function<? super K, ? extends V> mappingFunction) {
+        V value = map.get(key);
+        if (value != null) {
+            return value;
+        }
+        return map.computeIfAbsent(key, mappingFunction);
+    }
+
+    /**
      * To upper list list.
      *
      * @param sourceList the source list
      * @return the list
      */
     public static List<String> toUpperList(List<String> sourceList) {
-        if (isEmpty(sourceList)) { return sourceList; }
+        if (isEmpty(sourceList)) {
+            return sourceList;
+        }
         List<String> destList = new ArrayList<>(sourceList.size());
         for (String element : sourceList) {
             if (element != null) {
@@ -184,5 +298,36 @@ public class CollectionUtils {
             }
         }
         return destList;
+    }
+
+    /**
+     * Get the last item.
+     * <p>
+     * 'IndexOutOfBoundsException' may be thrown, because the `list.size()` and `list.get(size - 1)` are not atomic.
+     * This method can avoid the 'IndexOutOfBoundsException' cause by concurrency.
+     * </p>
+     *
+     * @param list the list
+     * @param <T>  the type of item
+     * @return the last item
+     */
+    public static <T> T getLast(List<T> list) {
+        if (isEmpty(list)) {
+            return null;
+        }
+
+        int size;
+        while (true) {
+            size = list.size();
+            if (size == 0) {
+                return null;
+            }
+
+            try {
+                return list.get(size - 1);
+            } catch (IndexOutOfBoundsException ex) {
+                // catch the exception and continue to retry
+            }
+        }
     }
 }

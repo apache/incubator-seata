@@ -15,9 +15,6 @@
  */
 package io.seata.core.exception;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * The enum Transaction exception code.
  *
@@ -121,13 +118,6 @@ public enum TransactionExceptionCode {
     FailedStore
     ;
 
-    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length * 2);
-
-    static {
-        for (TransactionExceptionCode code : values()) {
-            MAP.put(code.ordinal(), code);
-        }
-    }
 
     /**
      * Get transaction exception code.
@@ -146,13 +136,13 @@ public enum TransactionExceptionCode {
      * @return the transaction exception code
      */
     public static TransactionExceptionCode get(int ordinal) {
-        TransactionExceptionCode code = MAP.get(ordinal);
-
-        if (code == null) {
+        TransactionExceptionCode value = null;
+        try {
+            value = TransactionExceptionCode.values()[ordinal];
+        } catch (Exception e) {
             throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
         }
-
-        return code;
+        return value;
     }
 
 }
