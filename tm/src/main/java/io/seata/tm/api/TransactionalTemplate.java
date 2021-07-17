@@ -17,7 +17,6 @@ package io.seata.tm.api;
 
 import java.util.List;
 
-import java.util.List;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
