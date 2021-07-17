@@ -255,6 +255,36 @@ public class ColumnUtilsTest {
         cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
         Assertions.assertEquals("\"schEme\".\"id\"", cols.get(0));
 
+        //SqlServer
+        cols = new ArrayList<>();
+        cols.add("id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("id", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("[id]");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("[id]", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("from");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("[from]", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("scheme.id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("scheme.id", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("[scheme].id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("[scheme].id", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("scheme.[id]");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("scheme.[id]", cols.get(0));
     }
 
 }
