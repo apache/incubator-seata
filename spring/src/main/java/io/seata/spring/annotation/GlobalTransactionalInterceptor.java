@@ -76,7 +76,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final FailureHandler failureHandler;
     private volatile boolean disable;
     private int order;
-    private final AspectTransactional aspectTransactional;
+    protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
     private static volatile boolean degradeCheck;
     private static int degradeCheckAllowTimes;
@@ -109,6 +109,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
+    public GlobalTransactionalInterceptor(){
+        this(null);
+    }
+
     //endregion
 
     /**
@@ -118,21 +122,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      *            the failure handler
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
-        this(failureHandler,null);
-    }
-
-    public GlobalTransactionalInterceptor() {
-        this(null,null);
-    }
-
-    /**
-     * Instantiates a new Global transactional interceptor.
-     *
-     * @param failureHandler
-     *            the failure handler
-     */
-    public GlobalTransactionalInterceptor(FailureHandler failureHandler, AspectTransactional aspectTransactional) {
-        this.aspectTransactional = aspectTransactional;
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
@@ -166,16 +155,19 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
             boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
-                if (aspectTransactional != null) {
-                    AspectTransactional transactional = this.aspectTransactional;
+                if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
+                    AspectTransactional transactional;
                     if (globalTransactionalAnnotation != null) {
                         transactional = new AspectTransactional(globalTransactionalAnnotation.timeoutMills(),
                             globalTransactionalAnnotation.name(), globalTransactionalAnnotation.rollbackFor(),
                             globalTransactionalAnnotation.noRollbackForClassName(),
                             globalTransactionalAnnotation.noRollbackFor(),
                             globalTransactionalAnnotation.noRollbackForClassName(),
-                            globalTransactionalAnnotation.propagation(), globalLockAnnotation.lockRetryInterval(),
-                            globalLockAnnotation.lockRetryTimes());
+                            globalTransactionalAnnotation.propagation(),
+                            globalTransactionalAnnotation.lockRetryInterval(),
+                            globalTransactionalAnnotation.lockRetryTimes());
+                    } else {
+                        transactional = this.aspectTransactional;
                     }
                     return handleGlobalTransaction(methodInvocation, transactional);
                 } else if (globalLockAnnotation != null) {
@@ -186,8 +178,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return methodInvocation.proceed();
     }
 
-    Object handleGlobalLock(final MethodInvocation methodInvocation,
-        final GlobalLock globalLockAnno) throws Throwable {
+    private Object handleGlobalLock(final MethodInvocation methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
             public Object execute() throws Throwable {

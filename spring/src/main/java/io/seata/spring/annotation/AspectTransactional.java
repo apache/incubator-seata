@@ -15,11 +15,9 @@
  */
 package io.seata.spring.annotation;
 
-import java.util.Arrays;
 import io.seata.common.DefaultValues;
 import io.seata.common.util.StringUtils;
 import io.seata.tm.api.transaction.Propagation;
-import io.seata.tm.api.transaction.TransactionInfo;
 
 /**
  * @author funkye
