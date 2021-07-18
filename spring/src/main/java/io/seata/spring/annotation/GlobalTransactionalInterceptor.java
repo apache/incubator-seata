@@ -109,7 +109,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    public GlobalTransactionalInterceptor(){
+    public GlobalTransactionalInterceptor() {
         this(null);
     }
 
@@ -128,13 +128,13 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.order =
             ConfigurationFactory.getInstance().getInt(ConfigurationKeys.TM_INTERCEPTOR_ORDER, TM_INTERCEPTOR_ORDER);
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
-                DEFAULT_TM_DEGRADE_CHECK);
+            DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
             ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
-            degradeCheckPeriod = ConfigurationFactory.getInstance().getInt(
-                    ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
-            degradeCheckAllowTimes = ConfigurationFactory.getInstance().getInt(
-                    ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
+            degradeCheckPeriod = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
+            degradeCheckAllowTimes = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
             EVENT_BUS.register(this);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startDegradeCheck();
