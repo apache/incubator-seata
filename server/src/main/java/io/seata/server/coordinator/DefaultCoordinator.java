@@ -22,7 +22,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.netty.channel.Channel;
 import io.seata.common.XID;
-import io.seata.server.session.*;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHelper;
+import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -354,7 +356,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
-        LOGGER.info("size = {}", asyncCommittingSessions.size());
         SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
                 // Instruction reordering in DefaultCore#asyncCommit may cause this situation
@@ -362,6 +363,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     //The function of this 'return' is 'continue'.
                     return;
                 }
+                LOGGER.error("commit {} {}", XID.getIpAddressAndPort(), asyncCommittingSession.getXid());
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {

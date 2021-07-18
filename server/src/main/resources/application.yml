@@ -25,13 +25,4 @@ seata:
     type: file
   store:
     # support: file 、 db 、 redis
-    mode: db
-    db:
-      datasource: druid
-      db-type: mysql
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
-      user: root
-      password: chd
-  server:
-    distributed-lock-expire-time: 100000
+    mode: file
