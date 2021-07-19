@@ -91,15 +91,16 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                         && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
-                    String type = method.getName().substring(METHOD_PREFIX.length());
-                    if (!ObjectWrapper.supportType(type)) {
-                        type = null;
+                    ObjectWrapper.ConfigType type = ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
+                    Object defaultValue = null;
+                    if (args.length > 1 && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
+                        defaultValue = args[1];
                     }
-                    if (null == wrapper) {
+                    if (null == wrapper || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
                         Object result = method.invoke(originalConfiguration, args);
                         // The wrapper.data only exists in the cache when it is not null.
                         if (result != null) {
-                            wrapper = new ObjectWrapper(result, type);
+                            wrapper = new ObjectWrapper(result, type, defaultValue);
                             CONFIG_CACHE.put(rawDataId, wrapper);
                         }
                     }
@@ -118,43 +119,46 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     private static class ObjectWrapper {
-
-        static final String INT = "Int";
-        static final String BOOLEAN = "Boolean";
-        static final String DURATION = "Duration";
-        static final String LONG = "Long";
-        static final String SHORT = "Short";
-
         private final Object data;
-        private final String type;
+        private final ConfigType type;
+        private Object lastDefaultValue;
 
-        ObjectWrapper(Object data, String type) {
+        ObjectWrapper(Object data, ConfigType type) {
+            this(data, type, null);
+        }
+
+        ObjectWrapper(Object data, ConfigType type, Object lastDefaultValue) {
             this.data = data;
             this.type = type;
+            this.lastDefaultValue = lastDefaultValue;
         }
 
         public Object getData() {
             return data;
         }
 
-        public String getType() {
+        public ConfigType getType() {
             return type;
         }
 
-        public Object convertData(String aType) {
+        public Object getLastDefaultValue() {
+            return lastDefaultValue;
+        }
+
+        public Object convertData(ConfigType aType) {
             if (data != null && Objects.equals(type, aType)) {
                 return data;
             }
             if (data != null) {
-                if (INT.equals(aType)) {
+                if (ConfigType.INT.equals(aType)) {
                     return Integer.parseInt(data.toString());
-                } else if (BOOLEAN.equals(aType)) {
+                } else if (ConfigType.BOOLEAN.equals(aType)) {
                     return Boolean.parseBoolean(data.toString());
-                } else if (DURATION.equals(aType)) {
+                } else if (ConfigType.DURATION.equals(aType)) {
                     return DurationUtil.parse(data.toString());
-                } else if (LONG.equals(aType)) {
+                } else if (ConfigType.LONG.equals(aType)) {
                     return Long.parseLong(data.toString());
-                } else if (SHORT.equals(aType)) {
+                } else if (ConfigType.SHORT.equals(aType)) {
                     return Short.parseShort(data.toString());
                 }
                 return String.valueOf(data);
@@ -163,12 +167,52 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
 
         public static boolean supportType(String type) {
-            return INT.equalsIgnoreCase(type)
-                    || BOOLEAN.equalsIgnoreCase(type)
-                    || DURATION.equalsIgnoreCase(type)
-                    || LONG.equalsIgnoreCase(type)
-                    || SHORT.equalsIgnoreCase(type);
+            return getTypeByName(type) != null;
+        }
+
+        public static ConfigType getTypeByName(String postfix) {
+            return ConfigType.fromCode(postfix);
+        }
+
+        public enum ConfigType {
+
+            INT("Int"),
+
+            BOOLEAN("Boolean"),
+
+            DURATION("Duration"),
+
+            LONG("Long"),
+
+            SHORT("Short"),
+
+            STRING("Config");
+
+            private static final Map<String, ConfigType> CODE_TO_VALUE = new HashMap<>();
+
+            static {
+                for (ConfigType configType : ConfigType.values()) {
+                    CODE_TO_VALUE.put(configType.code.toUpperCase(), configType);
+                }
+            }
+
+            private String code;
+
+            ConfigType(String code) {
+                this.code = code;
+            }
+
+            public String getCode() {
+                return code;
+            }
+
+            public static ConfigType fromCode(String code) {
+                return CODE_TO_VALUE.get(code.toUpperCase());
+            }
+
+            public static ConfigType fromString(String name) {
+                return ConfigType.valueOf(name);
+            }
         }
     }
-
 }

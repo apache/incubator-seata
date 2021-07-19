@@ -51,4 +51,16 @@ class FileConfigurationTest {
         Assertions.assertTrue(countDownLatch.await(2000, TimeUnit.MILLISECONDS));
     }
 
+    @Test
+    void testDiffDefaultValue() {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
+        int intValue1 = fileConfig.getInt("int.not.exist", 100);
+        int intValue2 = fileConfig.getInt("int.not.exist", 200);
+        Assertions.assertNotEquals(intValue1, intValue2);
+        String strValue1 = fileConfig.getConfig("str.not.exist", "en");
+        String strValue2 = fileConfig.getConfig("str.not.exist", "us");
+        Assertions.assertNotEquals(strValue1, strValue2);
+
+    }
+
 }
