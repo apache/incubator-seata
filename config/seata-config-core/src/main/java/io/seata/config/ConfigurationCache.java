@@ -121,7 +121,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     private static class ObjectWrapper {
         private final Object data;
         private final ConfigType type;
-        private Object lastDefaultValue;
+        private final Object lastDefaultValue;
 
         ObjectWrapper(Object data, ConfigType type) {
             this(data, type, null);
@@ -174,7 +174,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             return ConfigType.fromCode(postfix);
         }
 
-        public enum ConfigType {
+        enum ConfigType {
 
             INT("Int"),
 
