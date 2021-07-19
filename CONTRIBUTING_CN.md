@@ -19,7 +19,7 @@
 
 老实说，我们把每一个 Seata 用户都视为非常善良的贡献者。在体验了 Seata 之后，您可能会对项目有一些反馈。然后随时通过 [NEW ISSUE](https://github.com/seata/seata/issues/new/choose)打开一个问题。
 
-因为我们在一个分布式的方式合作项目Seata，我们对此表示赞赏写得很好的，详细的，外显的问题报告。为了让沟通更高效，我们希望每个人都可以搜索您的问题是否在搜索列表中。如果您发现它存在，请在现有问题下的评论中添加您的详细信息，而不是打开一个全新的问题。
+因为我们在一个分布式的方式合作项目Seata，我们欣赏写得很好的，详细的，准确的问题报告。为了让沟通更高效，我们希望每个人都可以搜索您的问题是否在搜索列表中。如果您发现它存在，请在现有问题下的评论中添加您的详细信息，而不是打开一个全新的问题。
 
 为了使问题细节尽可能标准，我们为问题报告者设置了一个[问题模板](./.github/ISSUE_TEMPLATE) 请务必按照说明填写模板中的字段。
 
@@ -47,7 +47,7 @@
 * 如果您发现一些多余的代码，请尝试删除它们！
 * 如果您发现缺少一些测试用例，请尝试添加它们！
 * 如果您可以增强功能，请**不要**犹豫！
-* 如果您发现代码隐含，请尝试添加注释以使其清晰！
+* 如果您发现代码晦涩难懂，请尝试添加注释以使其清晰！
 * 如果您发现代码丑陋，请尝试重构它！
 * 如果您能帮助改进文档，那就再好不过了！
 * 如果您发现文档不正确，只需执行并修复它！
@@ -70,9 +70,9 @@
 
 1. **FORK** Seata 到您的存储库。要完成这项工作，您只需单击 [seata/seata](https://github.com/seata/seata) 主页右侧的 Fork 按钮。然后你将在 中得到你的存储库`https://github.com/<your-username>/seata`，其中your-username是你的 GitHub 用户名。
 
-1. **克隆** 您自己的存储库以在本地开发. 用于 `git clone git@github.com:<your-username>/seata.git` 将存储库克隆到本地计算机。 然后您可以创建新分支来完成您希望进行的更改。
+2. **克隆** 您自己的存储库以在本地开发. 用于 `git clone git@github.com:<your-username>/seata.git` 将存储库克隆到本地计算机。 然后您可以创建新分支来完成您希望进行的更改。
 
-1. **设置远程** 将上游设置为 `git@github.com:seata/seata.git` 使用以下两个命令：
+3. **设置远程** 将上游设置为 `git@github.com:seata/seata.git` 使用以下两个命令：
 
 ```
 git remote add upstream git@github.com:seata/seata.git
@@ -119,7 +119,7 @@ upstream   no-pushing (push)
 
 * 文档：xxxx。例如，“docs：添加有关 Seata 集群安装的文档”。
 * 特征：xxxx。例如，“特征：在AT模式下支持oracle”。
-* 错误修正：xxxx。例如，“错误修正：在输入 nil 参数时修复恐慌”。
+* 错误修正：xxxx。例如，“错误修正：在输入 nil 参数时修复故障（宕机）”。
 * 重构：xxxx。例如，“重构：简化以使代码更具可读性”。
 * 测试：xxx。例如，“测试：为 func InsertIntoArray 添加单元测试用例”。
 * 其他可读和显式的表达方式。
@@ -130,7 +130,7 @@ upstream   no-pushing (push)
 * ~~更新~~
 * ~~添加文档~~
 
-如果您迷路了，请参阅 [如何编写 Git 提交消息](http://chris.beams.io/posts/git-commit/) 作为开始。
+如果你不知道该怎么做，请参阅 [如何编写 Git 提交消息](http://chris.beams.io/posts/git-commit/) 作为开始。
 
 #### 提交内容
 
