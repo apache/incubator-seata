@@ -174,18 +174,39 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             return ConfigType.fromCode(postfix);
         }
 
+        /**
+         * Config Cache Operation type
+         */
         enum ConfigType {
 
+            /**
+             * getInt
+             */
             INT("Int"),
 
+            /**
+             * getBoolean
+             */
             BOOLEAN("Boolean"),
 
+            /**
+             * getDuration
+             */
             DURATION("Duration"),
 
+            /**
+             * getLong
+             */
             LONG("Long"),
 
+            /**
+             * getShort
+             */
             SHORT("Short"),
 
+            /**
+             * getConfig
+             */
             STRING("Config");
 
             private static final Map<String, ConfigType> CODE_TO_VALUE = new HashMap<>();
