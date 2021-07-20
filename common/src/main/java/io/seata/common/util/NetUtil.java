@@ -137,7 +137,7 @@ public class NetUtil {
      * Gets local address.
      * not support ipv6
      * if match the preferredNetworks rule return the first
-     * if all not match preferredNetworks rule return the last valid ip
+     * if all not match preferredNetworks rule return the first valid ip
      * @return the local address
      */
     public static InetAddress getLocalAddress(String... preferredNetworks) {
@@ -163,7 +163,9 @@ public class NetUtil {
                                 try {
                                     InetAddress address = addresses.nextElement();
                                     if (isValidAddress(address)) {
-                                        localAddress = address;
+                                        if (null == localAddress) {
+                                            localAddress = address;
+                                        }
                                         //check preferredNetworks
                                         if (preferredNetworks.length > 0) {
                                             String ip = address.getHostAddress();
@@ -172,7 +174,7 @@ public class NetUtil {
                                                     continue;
                                                 }
                                                 if (ip.matches(regex) || ip.startsWith(regex)) {
-                                                    return localAddress;
+                                                    return address;
                                                 }
                                             }
                                         }
