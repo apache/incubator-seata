@@ -51,4 +51,33 @@ class FileConfigurationTest {
         Assertions.assertTrue(countDownLatch.await(2000, TimeUnit.MILLISECONDS));
     }
 
+    @Test
+    void testDiffDefaultValue() {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
+        int intValue1 = fileConfig.getInt("int.not.exist", 100);
+        int intValue2 = fileConfig.getInt("int.not.exist", 200);
+        Assertions.assertNotEquals(intValue1, intValue2);
+        String strValue1 = fileConfig.getConfig("str.not.exist", "en");
+        String strValue2 = fileConfig.getConfig("str.not.exist", "us");
+        Assertions.assertNotEquals(strValue1, strValue2);
+        boolean bolValue1 = fileConfig.getBoolean("boolean.not.exist", true);
+        boolean bolValue2 = fileConfig.getBoolean("boolean.not.exist", false);
+        Assertions.assertNotEquals(bolValue1, bolValue2);
+
+        String value = "QWERT";
+        System.setProperty("mockDataId1", value);
+        String content1 = fileConfig.getConfig("mockDataId1");
+        Assertions.assertEquals(content1, value);
+        String content2 = fileConfig.getConfig("mockDataId1", "hehe");
+        Assertions.assertEquals(content2, value);
+
+        String content3 = fileConfig.getConfig("mockDataId2");
+        Assertions.assertNull(content3);
+        String content4 = fileConfig.getConfig("mockDataId2", value);
+        Assertions.assertEquals(content4, value);
+        String content5 = fileConfig.getConfig("mockDataId2");
+        Assertions.assertEquals(content5, value);
+
+    }
+
 }
