@@ -231,7 +231,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 return CODE_TO_VALUE.get(code.toUpperCase());
             }
 
-            public static ConfigType fromString(String name) {
+            public static ConfigType fromName(String name) {
                 return ConfigType.valueOf(name);
             }
         }
