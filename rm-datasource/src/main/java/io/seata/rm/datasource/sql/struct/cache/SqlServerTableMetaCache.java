@@ -90,7 +90,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
             catalogName = connection.getCatalog();
         }
         if (StringUtils.isBlank(schemaName)) {
-            catalogName = connection.getSchema();
+            schemaName = connection.getSchema();
         }
         //get pure tableName
         String pureTableName = schemaTable[schemaTable.length - 1];
