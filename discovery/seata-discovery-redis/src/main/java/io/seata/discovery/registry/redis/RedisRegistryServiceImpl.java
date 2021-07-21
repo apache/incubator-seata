@@ -34,6 +34,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisRegistryServiceImpl.class);
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String REDIS_FILEKEY_PREFIX = "registry.redis.";
+    private static final String REGISTRY_TYPE = "redis";
     private static final String DEFAULT_CLUSTER = "default";
     private static final String REGISTRY_CLUSTER_KEY = "cluster";
     private String clusterName;
@@ -140,6 +142,11 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     @Override
     public void register(InetSocketAddress address) {
         NetUtil.validAddress(address);
+        doRegister(address);
+        RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, this::doRegister);
+    }
+
+    private void doRegister(InetSocketAddress address) {
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
@@ -183,6 +190,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (clusterName == null) {
             return null;
         }
+        return lookupByCluster(clusterName);
+    }
+    // default visible for test
+    List<InetSocketAddress> lookupByCluster(String clusterName) {
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             String redisRegistryKey = REDIS_FILEKEY_PREFIX + clusterName;
             Map<String, String> instances;
@@ -235,7 +246,11 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         @Override
         public void onMessage(String key, String msg) {
             for (RedisListener listener : redisListeners) {
-                listener.onEvent(msg);
+                try {
+                    listener.onEvent(msg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
