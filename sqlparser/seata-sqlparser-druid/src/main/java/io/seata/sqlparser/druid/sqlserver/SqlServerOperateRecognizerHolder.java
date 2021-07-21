@@ -54,7 +54,7 @@ public class SqlServerOperateRecognizerHolder implements SQLOperateRecognizerHol
                         }
                         return "";
                     }).collect(Collectors.toList());
-            if (hintsTexts.containsAll(Arrays.asList(SqlServerSelectForUpdateRecognizer.LOCK_1, SqlServerSelectForUpdateRecognizer.LOCK_2))) {
+            if (hintsTexts.contains("UPDLOCK")) {
                 return new SqlServerSelectForUpdateRecognizer(sql, ast);
             }
         }

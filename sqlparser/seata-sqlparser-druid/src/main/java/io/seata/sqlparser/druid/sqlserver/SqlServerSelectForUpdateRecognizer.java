@@ -19,11 +19,6 @@ import java.util.List;
  * @author GoodBoyCoder
  */
 public class SqlServerSelectForUpdateRecognizer extends BaseSqlServerRecognizer implements SQLSelectRecognizer {
-    /**
-     * lock for update query
-     */
-    public static final String LOCK_1 = "UPDLOCK";
-    public static final String LOCK_2 = "ROWLOCK";
 
     private final SQLSelectStatement ast;
 

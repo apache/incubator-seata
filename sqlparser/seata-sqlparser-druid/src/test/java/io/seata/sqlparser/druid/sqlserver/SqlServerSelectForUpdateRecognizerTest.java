@@ -27,7 +27,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
      */
     @Test
     public void selectForUpdateRecognizerTest_0() {
-        String sql = "SELECT name FROM t1 WITH (ROWLOCK, UPDLOCK) WHERE id = 'id1' ";
+        String sql = "SELECT name FROM t1 WITH (UPDLOCK) WHERE id = 'id1' ";
 
         SQLStatement statement = getSQLStatement(sql);
         SqlServerSelectForUpdateRecognizer sqlServerUpdateRecognizer = new SqlServerSelectForUpdateRecognizer(sql, statement);
@@ -43,7 +43,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
      */
     @Test
     public void selectForUpdateRecognizerTest_1() {
-        String sql = "SELECT name FROM t1 WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
+        String sql = "SELECT name FROM t1 WITH (UPDLOCK) WHERE id = ?";
 
         SQLStatement statement = getSQLStatement(sql);
         SqlServerSelectForUpdateRecognizer sqlServerUpdateRecognizer = new SqlServerSelectForUpdateRecognizer(sql, statement);
@@ -70,7 +70,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
      */
     @Test
     public void selectForUpdateRecognizerTest_2() {
-        String sql = "SELECT name1, name2 FROM t1 WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
+        String sql = "SELECT name1, name2 FROM t1 WITH (UPDLOCK) WHERE id = ?";
 
         SQLStatement statement = getSQLStatement(sql);
         SqlServerSelectForUpdateRecognizer sqlServerUpdateRecognizer = new SqlServerSelectForUpdateRecognizer(sql, statement);
@@ -98,7 +98,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
     @Test
     public void selectForUpdateRecognizerTest_3() {
 
-        String sql = "SELECT name1, name2 FROM t1 WITH (ROWLOCK, UPDLOCK) WHERE id IN (?,?)";
+        String sql = "SELECT name1, name2 FROM t1 WITH (UPDLOCK) WHERE id IN (?,?)";
 
         SQLStatement statement = getSQLStatement(sql);
         SqlServerSelectForUpdateRecognizer sqlServerUpdateRecognizer = new SqlServerSelectForUpdateRecognizer(sql, statement);
@@ -129,7 +129,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
     @Test
     public void selectForUpdateRecognizerTest_4() {
 
-        String sql = "SELECT name1, name2 FROM t1 WITH (ROWLOCK, UPDLOCK) WHERE id between ? and ?";
+        String sql = "SELECT name1, name2 FROM t1 WITH (UPDLOCK) WHERE id between ? and ?";
 
         SQLStatement statement = getSQLStatement(sql);
         SqlServerSelectForUpdateRecognizer sqlServerUpdateRecognizer = new SqlServerSelectForUpdateRecognizer(sql, statement);
@@ -156,7 +156,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
 
     @Test
     public void testGetWhereCondition_1() {
-        String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK)";
+        String sql = "SELECT * FROM t WITH (UPDLOCK)";
         SQLStatement ast = getSQLStatement(sql);
 
         SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
@@ -166,7 +166,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
 
         //test for select was null
         Assertions.assertThrows(SQLParsingException.class, () -> {
-            String s = "select * from t WITH (ROWLOCK, UPDLOCK)";
+            String s = "select * from t WITH (UPDLOCK)";
             SQLStatement sqlStatement = getSQLStatement(s);
             SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatement;
             selectAst.setSelect(null);
@@ -185,7 +185,7 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
 
     @Test
     public void testGetSqlType() {
-        String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
+        String sql = "SELECT * FROM t WITH (UPDLOCK) WHERE id = ?";
         SQLStatement ast = getSQLStatement(sql);
 
         SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
@@ -195,14 +195,14 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
     @Test
     public void testGetTableAlias() {
         //test for no alias
-        String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
+        String sql = "SELECT * FROM t WITH (UPDLOCK) WHERE id = ?";
         SQLStatement ast = getSQLStatement(sql);
 
         SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertNull(recognizer.getTableAlias());
 
         //test for alias
-        sql = "SELECT * FROM t t1 WITH (ROWLOCK, UPDLOCK) WHERE id = ?";
+        sql = "SELECT * FROM t t1 WITH (UPDLOCK) WHERE id = ?";
         ast = getSQLStatement(sql);
 
         recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
@@ -211,14 +211,14 @@ public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTe
 
     @Test
     public void testGetTableName() {
-        String sql = "SELECT * FROM t WITH (ROWLOCK, UPDLOCK)";
+        String sql = "SELECT * FROM t WITH (UPDLOCK)";
         SQLStatement ast = getSQLStatement(sql);
 
         SqlServerSelectForUpdateRecognizer recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertEquals("t", recognizer.getTableName());
 
         //test for alias
-        sql = "SELECT * FROM t t1 WITH (ROWLOCK, UPDLOCK)";
+        sql = "SELECT * FROM t t1 WITH (UPDLOCK)";
         ast = getSQLStatement(sql);
         recognizer = new SqlServerSelectForUpdateRecognizer(sql, ast);
         Assertions.assertEquals("t", recognizer.getTableName());
