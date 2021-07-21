@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
+import java.util.StringJoiner;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
@@ -39,9 +39,12 @@ import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
+
+import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
 
 /**
  * The type Base transactional executor.
@@ -375,20 +378,26 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        StringBuilder sql = new StringBuilder()
-            .append("SELECT * FROM ")
-            .append(getFromTableInSQL())
-            .append(" WHERE ");
+        StringBuilder prefix = new StringBuilder("SELECT ");
+        StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         // build check sql
         String firstKey = pkValuesMap.keySet().stream().findFirst().get();
         int rowSize = pkValuesMap.get(firstKey).size();
-        sql.append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
-
-        PreparedStatement ps = null;
+        suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
+        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
+        List<String> insertColumns = recognizer.getInsertColumns();
+        for (String columnName : insertColumns) {
+            selectSQLJoin.add(columnName);
+        }
+        for (String pk : pkColumnNameList) {
+            selectSQLJoin.add(pk);
+        }
+        PreparedStatement ps;
         ResultSet rs = null;
         try {
-            ps = statementProxy.getConnection().prepareStatement(sql.toString());
+            ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString());
 
             int paramIndex = 1;
             for (int r = 0; r < rowSize; r++) {
