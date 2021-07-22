@@ -75,6 +75,30 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
+        StringJoiner selectSQLJoin = buildStringJoinerSql(paramAppenderList);
+        if (ONLY_CARE_UPDATE_COLUMNS) {
+            if (!containsPK(updateColumns)) {
+                selectSQLJoin.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
+            }
+            for (String columnName : updateColumns) {
+                selectSQLJoin.add(columnName);
+            }
+        } else {
+            for (String columnName : tableMeta.getAllColumns().keySet()) {
+                selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));
+            }
+        }
+        return selectSQLJoin.toString();
+    }
+
+    /**
+     * build base “select for update” sql
+     *
+     * @param paramAppenderList paramList to append
+     * @return base sql stringJoiner
+     */
+    protected StringJoiner buildStringJoinerSql(ArrayList<List<Object>> paramAppenderList) {
+        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
@@ -91,20 +115,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             suffix.append(limit);
         }
         suffix.append(" FOR UPDATE");
-        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        if (ONLY_CARE_UPDATE_COLUMNS) {
-            if (!containsPK(updateColumns)) {
-                selectSQLJoin.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
-            }
-            for (String columnName : updateColumns) {
-                selectSQLJoin.add(columnName);
-            }
-        } else {
-            for (String columnName : tableMeta.getAllColumns().keySet()) {
-                selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));
-            }
-        }
-        return selectSQLJoin.toString();
+        return new StringJoiner(", ", prefix.toString(), suffix.toString());
     }
 
     @Override
