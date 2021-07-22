@@ -388,11 +388,15 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
-        for (String columnName : insertColumns) {
-            selectSQLJoin.add(columnName);
-        }
-        for (String pk : pkColumnNameList) {
-            selectSQLJoin.add(pk);
+        if (CollectionUtils.isNotEmpty(insertColumns)) {
+            for (String columnName : insertColumns) {
+                selectSQLJoin.add(columnName);
+            }
+            for (String pk : pkColumnNameList) {
+                selectSQLJoin.add(pk);
+            }
+        } else {
+            selectSQLJoin.add(" * ");
         }
         PreparedStatement ps;
         ResultSet rs = null;
