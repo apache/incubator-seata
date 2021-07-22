@@ -24,10 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -44,6 +47,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
 
+
 import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
 
 /**
@@ -54,6 +58,9 @@ import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
  * @author sharajava
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
+
+    private static final boolean ONLY_CARE_UPDATE_COLUMNS = ConfigurationFactory.getInstance().getBoolean(
+            ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
 
     /**
      * The Statement proxy.
@@ -388,7 +395,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
-        if (CollectionUtils.isNotEmpty(insertColumns)) {
+        if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
             for (String columnName : insertColumns) {
                 selectSQLJoin.add(columnName);
             }
