@@ -230,12 +230,15 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
          */
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            ChannelManager.releaseRpcContext(ctx.channel());
-            if (cause instanceof DecoderException && null == ChannelManager.getContextFromIdentified(ctx.channel())) {
-                return;
+            try {
+                if (cause instanceof DecoderException && null == ChannelManager.getContextFromIdentified(ctx.channel())) {
+                    return;
+                }
+                LOGGER.error("exceptionCaught:{}, channel:{}", cause.getMessage(), ctx.channel());
+                super.exceptionCaught(ctx, cause);
+            } finally {
+                ChannelManager.releaseRpcContext(ctx.channel());
             }
-            LOGGER.error("exceptionCaught:{}, channel:{}", cause.getMessage(), ctx.channel());
-            super.exceptionCaught(ctx, cause);
         }
 
         /**
