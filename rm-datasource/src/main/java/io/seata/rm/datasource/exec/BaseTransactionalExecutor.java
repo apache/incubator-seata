@@ -405,10 +405,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } else {
             selectSQLJoin.add(" * ");
         }
-        PreparedStatement ps;
         ResultSet rs = null;
-        try {
-            ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString());
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
 
             int paramIndex = 1;
             for (int r = 0; r < rowSize; r++) {
