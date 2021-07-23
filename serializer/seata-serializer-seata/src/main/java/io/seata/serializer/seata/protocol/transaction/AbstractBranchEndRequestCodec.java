@@ -68,9 +68,8 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
         }
 
         // 5. Application Data
-        byte[] applicationDataBytes = null;
         if (applicationData != null) {
-            applicationDataBytes = applicationData.getBytes(UTF8);
+            byte[] applicationDataBytes = applicationData.getBytes(UTF8);
             out.writeInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
                 out.writeBytes(applicationDataBytes);
