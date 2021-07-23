@@ -20,9 +20,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -396,11 +398,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
-            for (String columnName : insertColumns) {
+            Set<String> columns = new HashSet<>(recognizer.getInsertColumns());
+            columns.addAll(pkColumnNameList);
+            for (String columnName : columns) {
                 selectSQLJoin.add(columnName);
-            }
-            for (String pk : pkColumnNameList) {
-                selectSQLJoin.add(pk);
             }
         } else {
             selectSQLJoin.add(" * ");
