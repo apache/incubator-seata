@@ -17,7 +17,9 @@ package io.seata.common.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -168,8 +170,11 @@ public class StringUtils {
 
         //region Convert simple types to String directly
 
-        if (obj instanceof CharSequence || obj instanceof Number || obj instanceof Boolean || obj instanceof Character) {
-            return obj.toString();
+        if (obj instanceof CharSequence) {
+            return "\"" + obj + "\"";
+        }
+        if (obj instanceof Character) {
+            return "'" + obj + "'";
         }
         if (obj instanceof Date) {
             Date date = (Date)obj;
@@ -189,25 +194,58 @@ public class StringUtils {
         if (obj instanceof Enum) {
             return obj.getClass().getSimpleName() + "." + ((Enum)obj).name();
         }
+        if (obj instanceof Class) {
+            return ReflectionUtil.classToString((Class<?>)obj);
+        }
+        if (obj instanceof Field) {
+            return ReflectionUtil.fieldToString((Field)obj);
+        }
+        if (obj instanceof Method) {
+            return ReflectionUtil.methodToString((Method)obj);
+        }
+        if (obj instanceof Annotation) {
+            return ReflectionUtil.annotationToString((Annotation)obj);
+        }
 
         //endregion
 
         //region Convert the Collection and Map
 
         if (obj instanceof Collection) {
-            Collection<?> col = (Collection<?>)obj;
-            return CollectionUtils.toString(col);
+            return CollectionUtils.toString((Collection<?>)obj);
+        }
+        if (obj.getClass().isArray()) {
+            return ArrayUtils.toString((Object[])obj);
         }
         if (obj instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>)obj;
-            return CollectionUtils.toString(map);
+            return CollectionUtils.toString((Map<?, ?>)obj);
         }
 
         //endregion
 
+        //the jdk classes
+        if (obj.getClass().getClassLoader() == null) {
+            return obj.toString();
+        }
+
         return CycleDependencyHandler.wrap(obj, o -> {
             StringBuilder sb = new StringBuilder(32);
-            sb.append(obj.getClass().getSimpleName()).append("(");
+
+            // handle the anonymous class
+            String classSimpleName;
+            if (obj.getClass().isAnonymousClass()) {
+                if (!obj.getClass().getSuperclass().equals(Object.class)) {
+                    classSimpleName = obj.getClass().getSuperclass().getSimpleName();
+                } else {
+                    classSimpleName = obj.getClass().getInterfaces()[0].getSimpleName();
+                }
+                // Connect a '$', different from ordinary class
+                classSimpleName += "$";
+            } else {
+                classSimpleName = obj.getClass().getSimpleName();
+            }
+
+            sb.append(classSimpleName).append("(");
             final int initialLength = sb.length();
 
             // Gets all fields, excluding static or synthetic fields
