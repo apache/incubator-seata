@@ -94,10 +94,6 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
-        if (value != null) {
-            return value;
-        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
                 timeoutMills);
         consulNotifierExecutor.execute(() -> complete(getConsulClient().getKVValue(dataId, getAclToken()), configFuture));

@@ -226,7 +226,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
+        String value = getConfigFromSys(dataId);
         if (value != null) {
             return value;
         }

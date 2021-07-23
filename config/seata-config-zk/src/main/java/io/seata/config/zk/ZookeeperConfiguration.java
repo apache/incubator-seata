@@ -122,16 +122,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
+        String value = seataConfig.getProperty(dataId);
         if (value != null) {
             return value;
         }
-
-        value = seataConfig.getProperty(dataId);
-        if (value != null) {
-            return value;
-        }
-
         FutureTask<String> future = new FutureTask<>(() -> {
             String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
             if (!zkClient.exists(path)) {
