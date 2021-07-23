@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.core.exception.DecodeException;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
@@ -80,17 +81,20 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        Object decoded = super.decode(ctx, in);
-        if (decoded instanceof ByteBuf) {
-            ByteBuf frame = (ByteBuf) decoded;
-            try {
-                return decodeFrame(frame);
-            } catch (Exception e) {
-                LOGGER.error("Decode frame error!", e);
-                throw e;
-            } finally {
-                frame.release();
+        Object decoded;
+        try {
+            decoded = super.decode(ctx, in);
+            if (decoded instanceof ByteBuf) {
+                ByteBuf frame = (ByteBuf)decoded;
+                try {
+                    return decodeFrame(frame);
+                } finally {
+                    frame.release();
+                }
             }
+        } catch (Exception exx) {
+            LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
+            throw new DecodeException(exx);
         }
         return decoded;
     }
