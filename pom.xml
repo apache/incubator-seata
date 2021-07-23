@@ -28,6 +28,7 @@
         <module>common</module>
         <module>config</module>
         <module>core</module>
+        <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
         <module>integration/dubbo</module>
@@ -174,12 +175,11 @@
         <dependencies>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-bom</artifactId>
+                <artifactId>seata-dependencies</artifactId>
                 <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
