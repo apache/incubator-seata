@@ -51,7 +51,8 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean commit(BusinessActionContext actionContext);
+    boolean commit(BusinessActionContext actionContext,
+                   @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a);
 
     /**
      * Rollback boolean.
@@ -59,5 +60,5 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean rollback(BusinessActionContext actionContext);
+    boolean rollback(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
 }
