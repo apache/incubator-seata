@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
+import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -200,6 +201,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             String[] urlParams = paramUrl.split("&");
             for (String urlParam : urlParams) {
                 if (urlParam.contains("currentSchema")) {
+                    if (urlParam.contains(Constants.DBKEYS_SPLIT_CHAR)) {
+                        urlParam = urlParam.replace(Constants.DBKEYS_SPLIT_CHAR, "!");
+                    }
                     paramsBuilder.append(urlParam);
                     break;
                 }
