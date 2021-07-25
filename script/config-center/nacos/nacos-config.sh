@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Copyright 1999-2019 Seata.io Group.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,33 +41,22 @@ do
   esac
 done
 
-urlencode() {
-  for ((i=0; i < ${#1}; i++))
-  do
-    char="${1:$i:1}"
-    case $char in
-    [a-zA-Z0-9.~_-]) printf $char ;;
-    *) printf '%%%02X' "'$char" ;;
-    esac
-  done
-}
-
-if [[ -z ${host} ]]; then
+if [ -z ${host} ]; then
     host=localhost
 fi
-if [[ -z ${port} ]]; then
+if [ -z ${port} ]; then
     port=8848
 fi
-if [[ -z ${group} ]]; then
+if [ -z ${group} ]; then
     group="SEATA_GROUP"
 fi
-if [[ -z ${tenant} ]]; then
+if [ -z ${tenant} ]; then
     tenant=""
 fi
-if [[ -z ${username} ]]; then
+if [ -z ${username} ]; then
     username=""
 fi
-if [[ -z ${password} ]]; then
+if [ -z ${password} ]; then
     password=""
 fi
 
@@ -80,22 +69,24 @@ echo "set group=$group"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$(urlencode $1)&group=$group&content=$(urlencode $2)&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
-  if [[ -z $(cat "${tempLog}") ]]; then
+  dataId=`echo $1 | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
+  content=`echo $2 | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
+  curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$dataId&group=$group&content=$content&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
+  if [ -z $(cat "${tempLog}") ]; then
     echo " Please check the cluster status. "
     exit 1
   fi
-  if [[ $(cat "${tempLog}") =~ "true" ]]; then
+  if [ "$(cat "${tempLog}")" == "true" ]; then
     echo "Set $1=$2 successfully "
   else
     echo "Set $1=$2 failure "
-    (( failCount++ ))
+    failCount=`expr $failCount + 1`
   fi
 }
 
 count=0
 for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
-  (( count++ ))
+    count=`expr $count + 1`
 	key=${line%%=*}
     value=${line#*=}
 	addConfig "${key}" "${value}"
@@ -105,7 +96,7 @@ echo "========================================================================="
 echo " Complete initialization parameters,  total-count:$count ,  failure-count:$failCount "
 echo "========================================================================="
 
-if [[ ${failCount} -eq 0 ]]; then
+if [ ${failCount} -eq 0 ]; then
 	echo " Init nacos config finished, please start seata-server. "
 else
 	echo " init nacos config fail. "
