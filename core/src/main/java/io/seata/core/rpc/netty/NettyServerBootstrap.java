@@ -40,7 +40,8 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVER_PORT;
+import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 
 /**
  * Rpc server bootstrap.
@@ -129,8 +130,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             LOGGER.error("server port set error:{}", exx.getMessage());
         }
         if (port <= 0) {
-            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT);
-            port = SERVICE_DEFAULT_PORT;
+            String serverPort = System.getProperty(SERVER_PORT);
+            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, serverPort);
+            port = Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT;
         }
         return port;
     }
@@ -164,7 +166,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
         try {
             this.serverBootstrap.bind(listenPort).sync();
-            LOGGER.info("Server started, listen port: {}", listenPort);
+            LOGGER.info("Server started, listen port: {}", getListenPort());
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
         } catch (Exception exx) {

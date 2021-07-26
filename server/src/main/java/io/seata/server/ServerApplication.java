@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 
+import static io.seata.common.DefaultValues.SERVER_PORT;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 
 /**
@@ -44,6 +45,7 @@ public class ServerApplication {
             Environment environment = context.getBean(Environment.class);
             String serverPort = environment.getProperty("server.port");
             int servicePort = Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT;
+            System.setProperty(SERVER_PORT, serverPort);
             System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(servicePort));
         }
 

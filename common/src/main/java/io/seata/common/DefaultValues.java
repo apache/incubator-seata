@@ -91,6 +91,8 @@ public interface DefaultValues {
 
     int SERVICE_OFFSET_SPRING_BOOT = 1000;
 
+    String SERVER_PORT = "seata.server.port";
+
     String SERVER_DEFAULT_STORE_MODE = "file";
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
