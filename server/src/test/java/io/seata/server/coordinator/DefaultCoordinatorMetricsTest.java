@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import io.seata.core.exception.TransactionException;
@@ -35,6 +37,7 @@ import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static io.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessageSender;
@@ -47,6 +50,12 @@ import static io.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessa
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class DefaultCoordinatorMetricsTest {
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context){
+        EnhancedServiceLoader.unloadAll();
+    }
+
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         SessionHolder.init(null);
@@ -146,7 +155,6 @@ public class DefaultCoordinatorMetricsTest {
                     .getValue(), 0);
         } finally {
             coordinator.destroy();
-            SessionHolder.destroy();
         }
     }
 

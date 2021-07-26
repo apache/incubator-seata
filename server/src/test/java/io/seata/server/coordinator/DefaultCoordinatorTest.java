@@ -17,6 +17,7 @@ package io.seata.server.coordinator;
 
 import io.netty.channel.Channel;
 import io.seata.common.XID;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
@@ -100,6 +101,7 @@ public class DefaultCoordinatorTest {
 
     @BeforeAll
     public static void beforeClass(ApplicationContext context) throws Exception {
+        EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         RemotingServer remotingServer = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(remotingServer);
