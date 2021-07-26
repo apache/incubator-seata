@@ -22,7 +22,7 @@ import io.seata.common.util.NumberUtils;
  */
 public class PortHelper {
 
-    public static int getPortFromEnvAndStartup(String[] args) {
+    public static int getPortFromEnvOrStartup(String[] args) {
         if (ContainerHelper.isRunningInContainer()) {
             return ContainerHelper.getPort();
         } else if (args != null && args.length >= 2) {

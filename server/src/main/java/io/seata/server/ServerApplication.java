@@ -33,7 +33,7 @@ public class ServerApplication {
     public static void main(String[] args) {
         // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
         // port: env,-h > -D > default
-        int port = PortHelper.getPortFromEnvAndStartup(args);
+        int port = PortHelper.getPortFromEnvOrStartup(args);
         if (port != 0) {
             System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(port));
         }
