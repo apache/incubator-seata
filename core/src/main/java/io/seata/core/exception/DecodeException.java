@@ -13,23 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.parser.spi;
-
-import io.protostuff.runtime.Delegate;
+package io.seata.core.exception;
 
 /**
- * The interface Protostuff delegate.
- *
- * @param <T> the type parameter
- * @author jsbxyyx
+ * @author slievrly
  */
-public interface ProtostuffDelegate<T> {
+public class DecodeException extends Exception {
 
-    /**
-     * Delegate create.
-     *
-     * @return delegate
-     */
-    Delegate<T> create();
-
+    public DecodeException(Throwable throwable) {
+        super(throwable);
+    }
 }
