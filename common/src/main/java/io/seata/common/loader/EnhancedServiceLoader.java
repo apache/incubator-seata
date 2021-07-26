@@ -153,6 +153,59 @@ public class EnhancedServiceLoader {
     }
 
     /**
+     * Unload all.
+     */
+    public static void unloadAll() {
+        InnerEnhancedServiceLoader.removeAllServiceLoader();
+    }
+
+    /**
+     * Unload.
+     *
+     * @param <S>     the type parameter
+     * @param service the service
+     */
+    public static <S> void unload(Class<S> service) {
+        InnerEnhancedServiceLoader.removeServiceLoader(service);
+    }
+
+    /**
+     * Unload.
+     *
+     * @param <S>          the type parameter
+     * @param service      the service
+     * @param activateName the activate name
+     */
+    public static <S> void unload(Class<S> service, String activateName) {
+
+        if (activateName == null) {
+            throw new IllegalArgumentException("activateName is null");
+        }
+        InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(service);
+        ConcurrentMap<Class<?>, ExtensionDefinition> classToDefinitionMap = serviceLoader.classToDefinitionMap;
+        List<ExtensionDefinition> extensionDefinitions = new ArrayList<>();
+        for (Map.Entry<Class<?>, ExtensionDefinition> entry : classToDefinitionMap.entrySet()) {
+            String name = entry.getValue().getName();
+            if (null == name) {
+                continue;
+            }
+            if (name.equals(activateName)) {
+                extensionDefinitions.add(entry.getValue());
+                classToDefinitionMap.remove(entry.getKey());
+            }
+        }
+        serviceLoader.nameToDefinitionsMap.remove(activateName);
+        if (CollectionUtils.isNotEmpty(extensionDefinitions)) {
+            for (ExtensionDefinition definition : extensionDefinitions) {
+                serviceLoader.definitionToInstanceMap.remove(definition);
+
+            }
+        }
+
+    }
+
+
+    /**
      * Get all the extension classes, follow {@linkplain LoadLevel} defined and sort order
      *
      * @param <S>     the type parameter
@@ -176,7 +229,6 @@ public class EnhancedServiceLoader {
     static <S> List<Class> getAllExtensionClass(Class<S> service, ClassLoader loader) {
         return InnerEnhancedServiceLoader.getServiceLoader(service).getAllExtensionClass(loader);
     }
-
     /**
      * Cannot use TCCL, in the pandora container will cause the class in the plugin not to be loaded
      *
@@ -215,10 +267,22 @@ public class EnhancedServiceLoader {
          */
         private static <S> InnerEnhancedServiceLoader<S> getServiceLoader(Class<S> type) {
             if (type == null) {
-                throw new IllegalArgumentException("Enhanced Service type == null");
+                throw new IllegalArgumentException("Enhanced Service type is null");
             }
             return (InnerEnhancedServiceLoader<S>)CollectionUtils.computeIfAbsent(SERVICE_LOADERS, type,
                 key -> new InnerEnhancedServiceLoader<>(type));
+        }
+
+        private static <S> InnerEnhancedServiceLoader<S> removeServiceLoader(Class<S> type) {
+            if (type == null) {
+                throw new IllegalArgumentException("Enhanced Service type is null");
+            }
+            return (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.remove(type);
+        }
+
+        private static void removeAllServiceLoader() {
+
+            SERVICE_LOADERS.clear();
         }
 
         /**
