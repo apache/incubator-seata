@@ -69,8 +69,8 @@ echo "set group=$group"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  dataId=`echo $1 | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
-  content=`echo $2 | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
+  dataId=`echo $1 | tr -d '\n' | xxd -p | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
+  content=`echo $2 | tr -d '\n' | xxd -p | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
   curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$dataId&group=$group&content=$content&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
   if [ -z $(cat "${tempLog}") ]; then
     echo " Please check the cluster status. "
