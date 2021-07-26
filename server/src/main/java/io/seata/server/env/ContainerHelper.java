@@ -85,7 +85,7 @@ public class ContainerHelper {
      * @return the env
      */
     public static int getPort() {
-        return NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
+        return NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), 0);
     }
 
     /**

@@ -68,8 +68,6 @@ public class Server {
                 new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-        //server port
-        nettyRemotingServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getSessionStoreMode());
