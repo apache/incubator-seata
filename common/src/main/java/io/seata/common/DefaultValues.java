@@ -89,7 +89,7 @@ public interface DefaultValues {
 
     int SERVICE_DEFAULT_PORT = 8091;
 
-    int SERVICE_OFFSET_SPRING_BOOT = -1000;
+    int SERVICE_OFFSET_SPRING_BOOT = 1000;
 
     String SERVER_DEFAULT_STORE_MODE = "file";
 
