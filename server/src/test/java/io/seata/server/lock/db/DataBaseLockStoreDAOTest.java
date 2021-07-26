@@ -24,6 +24,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -35,6 +39,8 @@ import java.util.List;
 /**
  * @author zhangsen
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class DataBaseLockStoreDAOTest {
 
     static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;
@@ -42,7 +48,7 @@ public class DataBaseLockStoreDAOTest {
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start(){
+    public static void start(ApplicationContext context){
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/lock");

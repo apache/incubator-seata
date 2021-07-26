@@ -33,7 +33,9 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.metrics.Measurement;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
-
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static io.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessageSender;
 
@@ -42,6 +44,8 @@ import static io.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessa
  *
  * @author zhengyangyong
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class DefaultCoordinatorMetricsTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {

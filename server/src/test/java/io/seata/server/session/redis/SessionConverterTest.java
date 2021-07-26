@@ -26,12 +26,17 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * The session converter utils
  *
  * @author wangzhongxiang
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class SessionConverterTest {
 
     @Test

@@ -53,9 +53,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 
@@ -64,6 +68,8 @@ import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_D
  *
  * @author leizhiyuan
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class DefaultCoordinatorTest {
     private static DefaultCoordinator defaultCoordinator;
 
@@ -93,7 +99,7 @@ public class DefaultCoordinatorTest {
         DEFAULT_SESSION_STORE_FILE_DIR);
 
     @BeforeAll
-    public static void beforeClass() throws Exception {
+    public static void beforeClass(ApplicationContext context) throws Exception {
         XID.setIpAddress(NetUtil.getLocalIp());
         RemotingServer remotingServer = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(remotingServer);
@@ -224,7 +230,7 @@ public class DefaultCoordinatorTest {
 
     @AfterEach
     public void tearDown() throws IOException {
-        SessionHolder.destroy();
+        //SessionHolder.destroy();
         deleteDataFile();
     }
 

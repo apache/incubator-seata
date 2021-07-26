@@ -27,6 +27,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
@@ -34,12 +38,14 @@ import redis.embedded.RedisServer;
 /**
  * @author funkye
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class RedisLockManagerTest {
     static RedisServer server = null;
     static LockManager lockManager = null;
 
     @BeforeAll
-    public static void start() throws IOException {
+    public static void start(ApplicationContext context) throws IOException {
         int port = 6789;
         server = RedisServer.builder().setting("maxheap 8M").setting("maxmemory 8M").port(port)
             .setting("bind localhost").build();

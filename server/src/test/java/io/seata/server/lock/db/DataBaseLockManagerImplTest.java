@@ -27,6 +27,10 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -38,6 +42,8 @@ import java.sql.Statement;
 /**
  * @author zhangsen
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class DataBaseLockManagerImplTest {
 
     static LockManager lockManager = null;
@@ -47,7 +53,7 @@ public class DataBaseLockManagerImplTest {
     static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;
 
     @BeforeAll
-    public static void start(){
+    public static void start(ApplicationContext context){
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/db_lock");

@@ -19,18 +19,22 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import io.seata.common.XID;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.server.storage.file.session.FileSessionManager;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import io.seata.server.storage.file.session.FileSessionManager;
-import java.util.stream.Stream;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
 /**
@@ -39,14 +43,19 @@ import java.util.stream.Stream;
  * @author tianming.xm @gmail.com
  * @since 2019 /1/22
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class FileSessionManagerTest {
+
 
     private static List<SessionManager> sessionManagerList;
 
-    static {
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context){
         try {
             sessionManagerList = Arrays.asList(new FileSessionManager("root.data", "."),
-                        new FileSessionManager("test", null));
+                new FileSessionManager("test", null));
         } catch (IOException e) {
             e.printStackTrace();
         }

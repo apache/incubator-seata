@@ -24,8 +24,8 @@ import io.seata.core.store.DefaultDistributedLocker;
 import io.seata.core.store.DistributedLocker;
 
 /**
+ * @author zhongxiang.wang
  * @description Distributed locker factory
- * @author  zhongxiang.wang
  */
 public class DistributedLockerFactory {
 
@@ -58,5 +58,9 @@ public class DistributedLockerFactory {
             }
         }
         return DISTRIBUTED_LOCKER;
+    }
+
+    public static void cleanLocker() {
+        DISTRIBUTED_LOCKER = null;
     }
 }

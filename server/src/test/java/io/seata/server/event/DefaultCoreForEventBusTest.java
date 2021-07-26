@@ -31,12 +31,17 @@ import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Test events come from Default Core.
  *
  * @author zhengyangyong
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class DefaultCoreForEventBusTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {

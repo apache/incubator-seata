@@ -21,9 +21,14 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.stream.Stream;
 
@@ -34,6 +39,8 @@ import java.util.stream.Stream;
  * @author zhimo.xiao @gmail.com
  * @since 2019 /1/23
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
 public class FileLockManagerImplTest {
 
     private LockManager lockManager = new FileLockManagerForTest();
@@ -44,6 +51,11 @@ public class FileLockManagerImplTest {
 
     private static final String lockKey = "tb_1:13";
 
+
+    @BeforeAll
+    public static void setup(ApplicationContext context){
+
+    }
     /**
      * Acquire lock test.
      *

@@ -27,14 +27,21 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * The type Default core test.
@@ -42,6 +49,9 @@ import org.junit.jupiter.params.provider.MethodSource;
  * @author zhimo.xiao @gmail.com
  * @since 2019 /1/23
  */
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@DependsOn("configProperties")
 public class DefaultCoreTest {
 
     private static DefaultCore core;
@@ -73,7 +83,7 @@ public class DefaultCoreTest {
      * @throws Exception the exception
      */
     @BeforeAll
-    public static void initSessionManager() throws Exception {
+    public static void initSessionManager(ApplicationContext context) throws Exception {
         SessionHolder.init(null);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);
