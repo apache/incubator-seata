@@ -87,6 +87,8 @@ public interface DefaultValues {
 
     boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
+    //currently not use and will be delete in the next version
+    @Deprecated
     int SERVICE_DEFAULT_PORT = 8091;
 
     int SERVICE_OFFSET_SPRING_BOOT = 1000;
