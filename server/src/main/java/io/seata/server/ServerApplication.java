@@ -20,8 +20,11 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.PortHelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.Environment;
 
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 
 /**
  * @author spilledyear@outlook.com
@@ -35,11 +38,16 @@ public class ServerApplication {
         if (port != 0) {
             System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(port));
         }
-        if (StringUtils.isBlank(System.getProperty(ConfigurationKeys.SERVER_RPC_PORT))) {
-            System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(SERVER_DEFAULT_PORT));
-        }
 
         // run the spring-boot application
-        SpringApplication.run(ServerApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(ServerApplication.class, args);
+        if (StringUtils.isBlank(System.getProperty(ConfigurationKeys.SERVER_RPC_PORT))) {
+            Environment environment = context.getBean(Environment.class);
+            String serverPort = environment.getProperty("server.port");
+            int servicePort = Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT;
+            System.setProperty(ConfigurationKeys.SERVER_RPC_PORT,
+                Integer.toString(servicePort > 0 ? servicePort : SERVICE_DEFAULT_PORT));
+        }
+
     }
 }

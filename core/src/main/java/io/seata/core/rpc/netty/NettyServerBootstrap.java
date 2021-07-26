@@ -40,7 +40,7 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
 
 /**
  * Rpc server bootstrap.
@@ -129,8 +129,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             LOGGER.error("server port set error:{}", exx.getMessage());
         }
         if (port <= 0) {
-            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVER_DEFAULT_PORT);
-            port = SERVER_DEFAULT_PORT;
+            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT);
+            port = SERVICE_DEFAULT_PORT;
         }
         return port;
     }

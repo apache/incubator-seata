@@ -24,7 +24,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
 
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 
@@ -45,7 +45,7 @@ public class ParameterParser {
     @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
     private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
-    private int port = SERVER_DEFAULT_PORT;
+    private int port = SERVICE_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db, redis", order = 3)
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
