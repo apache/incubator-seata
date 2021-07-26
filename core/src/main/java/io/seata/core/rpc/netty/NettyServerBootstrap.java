@@ -131,8 +131,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         }
         if (port <= 0) {
             String serverPort = System.getProperty(SERVER_PORT);
-            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, serverPort);
-            port = Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT;
+            int defaultPort = Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT;
+            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, defaultPort);
+            port = defaultPort;
         }
         return port;
     }
