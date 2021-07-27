@@ -1,4 +1,4 @@
--- for AT mode you must to init this sql for you business database. the seata server not need it.
+-- for AT mode you must to init this sql for your business database. the seata server not need it.
 CREATE TABLE IF NOT EXISTS `undo_log`
 (
     `branch_id`     BIGINT       NOT NULL COMMENT 'branch transaction id',
