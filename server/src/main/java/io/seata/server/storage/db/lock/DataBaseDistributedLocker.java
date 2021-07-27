@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.db.distributed.lock;
+package io.seata.server.storage.db.lock;
 
 
 import java.sql.Connection;
@@ -41,37 +41,58 @@ import io.seata.core.store.db.sql.distribute.lock.DistributeLockSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTE_LOCK_DB_TABLE;
 import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTE_LOCK_DB_TABLE;
 
 /**
  * @author chd
  */
 @LoadLevel(name = "db", scope = Scope.SINGLETON)
-public class DistributedLockStoreDAO implements DistributedLocker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributedLockStoreDAO.class);
-
-    private final DataSource distributedLockDataSource;
+public class DataBaseDistributedLocker implements DistributedLocker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataBaseDistributedLocker.class);
 
     private final String distributeLockTable;
 
-    private final String dbType;
+    private DataSource distributedLockDataSource;
+
+    private String dbType;
+
+    private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
+
+    /**
+     * weather the distribute lock demotion
+     * using for 1.5.0 only and will remove in 1.6.0
+     */
+    @Deprecated
+    private boolean demotion;
 
     /**
      * Instantiates a new Log store data base dao.
      */
-    public DistributedLockStoreDAO() {
-        Configuration configuration = ConfigurationFactory.getInstance();
-        distributeLockTable = configuration.getConfig(DISTRIBUTE_LOCK_DB_TABLE, DEFAULT_DISTRIBUTE_LOCK_DB_TABLE);
-        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+    public DataBaseDistributedLocker() {
+        distributeLockTable = CONFIGURATION.getConfig(DISTRIBUTE_LOCK_DB_TABLE);
+        if (null == distributeLockTable) {
+            demotion = true;
+            CONFIGURATION.addConfigListener(DISTRIBUTE_LOCK_DB_TABLE, (event) -> {
+                String newValue = event.getNewValue();
+                if (StringUtils.isNotBlank(newValue)) {
+                    init();
+                }
+            });
 
-        String datasourceType = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-        this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();;
+            LOGGER.error("The distribute lock table is not config, please create the target table and config it");
+            return;
+        }
+
+        init();
     }
 
 
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
+        if (demotion) {
+            return true;
+        }
+
         Connection connection = null;
         boolean originalAutoCommit = false;
         try {
@@ -119,6 +140,10 @@ public class DistributedLockStoreDAO implements DistributedLocker {
 
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
+        if (demotion) {
+            return true;
+        }
+
         Connection connection = null;
         boolean originalAutoCommit = false;
         try {
@@ -208,5 +233,21 @@ public class DistributedLockStoreDAO implements DistributedLocker {
             updatePst.setString(3, distributedLockDO.getLockKey());
             return updatePst.executeUpdate() > 0;
         }
+    }
+
+    private void init() {
+        dbType = CONFIGURATION.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+
+        String datasourceType = CONFIGURATION.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        try (Connection conn = distributedLockDataSource.getConnection();
+             PreparedStatement pst = conn.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getTestTableExistsSql(distributeLockTable))) {
+            pst.executeQuery();
+        } catch (SQLException se) {
+            LOGGER.error("Test query from distribute lock failure, message = {}", se.getMessage(), se);
+            return;
+        }
+
+        demotion = true;
     }
 }

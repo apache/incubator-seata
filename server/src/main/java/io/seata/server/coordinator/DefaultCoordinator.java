@@ -363,7 +363,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     //The function of this 'return' is 'continue'.
                     return;
                 }
-                LOGGER.error("commit {} {}", XID.getIpAddressAndPort(), asyncCommittingSession.getXid());
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
@@ -413,7 +412,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             } finally {
                 try {
                     SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING);
-                } catch (Exception ignored) {}
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
             }
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
@@ -428,7 +429,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             } finally {
                 try {
                     SessionHolder.releaseDistributedLock(RETRY_COMMITTING);
-                } catch (Exception ignored) {}
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
             }
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
@@ -443,7 +446,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             } finally {
                 try {
                     SessionHolder.releaseDistributedLock(ASYNC_COMMITTING);
-                } catch (Exception ignored) {}
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
@@ -458,7 +463,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             } finally {
                 try {
                     SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK);
-                } catch (Exception ignored) {}
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
             }
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
@@ -473,7 +480,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             } finally {
                 try {
                     SessionHolder.releaseDistributedLock(UNDOLOG_DELETE);
-                } catch (Exception ignored) {}
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
             }
         }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }

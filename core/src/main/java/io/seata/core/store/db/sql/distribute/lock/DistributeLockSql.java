@@ -21,6 +21,12 @@ package io.seata.core.store.db.sql.distribute.lock;
  */
 public interface DistributeLockSql {
     /**
+     * Get the table table exists sql
+     * @param distributeLockTable the table name of the distribute lock table
+     * @return the sql
+     */
+    String getTestTableExistsSql(String distributeLockTable);
+    /**
      * Get the select distribute lock sql
      * @param distributeLockTable the table name of the distribute lock table
      * @return the sql
