@@ -72,7 +72,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
         distributeLockTable = CONFIGURATION.getConfig(DISTRIBUTE_LOCK_DB_TABLE);
         if (null == distributeLockTable) {
             demotion = true;
-            CONFIGURATION.addConfigListener(DISTRIBUTE_LOCK_DB_TABLE, (event) -> {
+            CONFIGURATION.addConfigListener(DISTRIBUTE_LOCK_DB_TABLE, event -> {
                 String newValue = event.getNewValue();
                 if (StringUtils.isNotBlank(newValue)) {
                     init();
