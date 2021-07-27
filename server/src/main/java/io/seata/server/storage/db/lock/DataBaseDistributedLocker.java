@@ -31,6 +31,8 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
@@ -50,13 +52,13 @@ import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTE_LOCK_DB_TABLE
 public class DataBaseDistributedLocker implements DistributedLocker {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataBaseDistributedLocker.class);
 
-    private final String distributeLockTable;
+    private final String dbType;
+
+    private final String datasourceType;
+
+    private String distributeLockTable;
 
     private DataSource distributedLockDataSource;
-
-    private String dbType;
-
-    private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
     /**
      * weather the distribute lock demotion
@@ -69,13 +71,24 @@ public class DataBaseDistributedLocker implements DistributedLocker {
      * Instantiates a new Log store data base dao.
      */
     public DataBaseDistributedLocker() {
-        distributeLockTable = CONFIGURATION.getConfig(DISTRIBUTE_LOCK_DB_TABLE);
+        Configuration configuration = ConfigurationFactory.getInstance();
+
+        distributeLockTable = configuration.getConfig(DISTRIBUTE_LOCK_DB_TABLE);
+        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        datasourceType = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+
         if (StringUtils.isBlank(distributeLockTable)) {
             demotion = true;
-            CONFIGURATION.addConfigListener(DISTRIBUTE_LOCK_DB_TABLE, event -> {
-                String newValue = event.getNewValue();
-                if (StringUtils.isNotBlank(newValue)) {
-                    init();
+            configuration.addConfigListener(DISTRIBUTE_LOCK_DB_TABLE, new ConfigurationChangeListener() {
+                @Override
+                public void onChangeEvent(ConfigurationChangeEvent event) {
+                    String newValue = event.getNewValue();
+                    if (StringUtils.isNotBlank(newValue) && newValue.equalsIgnoreCase(distributeLockTable)) {
+                        distributeLockTable = newValue;
+                        init();
+
+                        configuration.removeConfigListener(DISTRIBUTE_LOCK_DB_TABLE, this);
+                    }
                 }
             });
 
@@ -236,11 +249,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     }
 
     private void init() {
-        dbType = CONFIGURATION.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-
-        String datasourceType = CONFIGURATION.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-
         demotion = true;
     }
 }
