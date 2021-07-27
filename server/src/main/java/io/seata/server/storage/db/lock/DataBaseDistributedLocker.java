@@ -240,13 +240,6 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
         String datasourceType = CONFIGURATION.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        try (Connection conn = distributedLockDataSource.getConnection();
-             PreparedStatement pst = conn.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getTestTableExistsSql(distributeLockTable))) {
-            pst.executeQuery();
-        } catch (SQLException se) {
-            LOGGER.error("Test query from distribute lock failure, message = {}", se.getMessage(), se);
-            return;
-        }
 
         demotion = true;
     }

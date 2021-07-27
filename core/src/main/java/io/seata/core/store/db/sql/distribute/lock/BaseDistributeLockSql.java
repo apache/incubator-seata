@@ -26,8 +26,6 @@ public class BaseDistributeLockSql implements DistributeLockSql {
     protected static final String ALL_COLUMNS = ServerTableColumnsName.DISTRIBUTE_LOCK_KEY + "," +
             ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE + "," + ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE;
 
-    protected static final String TEST_TABLE_EXISTS_SQL = "SELECT 1 FROM " + DISTRIBUTE_LOCK_TABLE_PLACE_HOLD;
-
     protected static final String SELECT_FOR_UPDATE_SQL = "SELECT " + ALL_COLUMNS + " FROM " + DISTRIBUTE_LOCK_TABLE_PLACE_HOLD
             + " WHERE " + ServerTableColumnsName.DISTRIBUTE_LOCK_KEY + " = ? FOR UPDATE";
 
@@ -38,10 +36,6 @@ public class BaseDistributeLockSql implements DistributeLockSql {
             + ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE + "=?, " + ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE + "=?"
             + " WHERE " + ServerTableColumnsName.DISTRIBUTE_LOCK_KEY + "=?";
 
-    @Override
-    public String getTestTableExistsSql(String distributeLockTable) {
-        return TEST_TABLE_EXISTS_SQL.replace(DISTRIBUTE_LOCK_TABLE_PLACE_HOLD, distributeLockTable);
-    }
 
     @Override
     public String getSelectDistributeForUpdateSql(String distributeLockTable) {
