@@ -30,10 +30,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
+import io.seata.config.*;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.DistributedLockDO;
@@ -79,15 +76,14 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
         if (StringUtils.isBlank(distributeLockTable)) {
             demotion = true;
-            configuration.addConfigListener(DISTRIBUTE_LOCK_DB_TABLE, new ConfigurationChangeListener() {
+            ConfigurationCache.addConfigListener(DISTRIBUTE_LOCK_DB_TABLE, new ConfigurationChangeListener() {
                 @Override
                 public void onChangeEvent(ConfigurationChangeEvent event) {
                     String newValue = event.getNewValue();
                     if (StringUtils.isNotBlank(newValue) && newValue.equalsIgnoreCase(distributeLockTable)) {
                         distributeLockTable = newValue;
                         init();
-
-                        configuration.removeConfigListener(DISTRIBUTE_LOCK_DB_TABLE, this);
+                        ConfigurationCache.removeConfigListener(DISTRIBUTE_LOCK_DB_TABLE, this);
                     }
                 }
             });
