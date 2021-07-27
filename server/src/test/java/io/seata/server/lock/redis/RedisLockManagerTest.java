@@ -15,25 +15,28 @@
  */
 package io.seata.server.lock.redis;
 
+import io.seata.server.storage.redis.lock.RedisLockManager;
 import java.io.IOException;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.github.fppt.jedismock.RedisServer;
+
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.storage.redis.JedisPooledFactory;
-import io.seata.server.storage.redis.lock.RedisLockManager;
 import io.seata.server.storage.redis.lock.RedisLocker;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.embedded.RedisServer;
 
 /**
  * @author funkye
@@ -46,14 +49,12 @@ public class RedisLockManagerTest {
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        int port = 6789;
-        server = RedisServer.builder().setting("maxheap 8M").setting("maxmemory 8M").port(port)
-            .setting("bind localhost").build();
+        server = RedisServer.newRedisServer(6789);
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", port, 60000));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
         lockManager = new RedisLockManagerForTest();
     }
 

@@ -151,8 +151,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.kstyrc</groupId>
-            <artifactId>embedded-redis</artifactId>
+            <groupId>com.github.fppt</groupId>
+            <artifactId>jedis-mock</artifactId>
             <scope>test</scope>
         </dependency>
 

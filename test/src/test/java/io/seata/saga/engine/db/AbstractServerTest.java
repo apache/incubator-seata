@@ -15,6 +15,11 @@
  */
 package io.seata.saga.engine.db;
 
+import java.io.File;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
@@ -25,12 +30,6 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract Server Test
