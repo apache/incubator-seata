@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import io.netty.channel.Channel;
 import io.seata.common.XID;
 import io.seata.server.session.GlobalSession;
@@ -87,19 +88,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * The constant COMMITTING_RETRY_PERIOD.
      */
     protected static final long COMMITTING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.COMMITING_RETRY_PERIOD,
-        1000L);
+            1000L);
 
     /**
      * The constant ASYNC_COMMITTING_RETRY_PERIOD.
      */
     protected static final long ASYNC_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
-        ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD, 1000L);
+            ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD, 1000L);
 
     /**
      * The constant ROLLBACKING_RETRY_PERIOD.
      */
     protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
-        1000L);
+            1000L);
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
@@ -110,7 +111,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * The Transaction undo log delete period.
      */
     protected static final long UNDO_LOG_DELETE_PERIOD = CONFIG.getLong(
-        ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
+            ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
 
     /**
      * The Transaction undo log delay delete period
@@ -120,28 +121,28 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
-        ConfigurationKeys.MAX_COMMIT_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
+            ConfigurationKeys.MAX_COMMIT_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
 
     private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
-        ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
+            ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
 
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
+            ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
     private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("RetryRollbacking", 1));
+            new NamedThreadFactory("RetryRollbacking", 1));
 
     private ScheduledThreadPoolExecutor retryCommitting = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("RetryCommitting", 1));
+            new NamedThreadFactory("RetryCommitting", 1));
 
     private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("AsyncCommitting", 1));
+            new NamedThreadFactory("AsyncCommitting", 1));
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("TxTimeoutCheck", 1));
+            new NamedThreadFactory("TxTimeoutCheck", 1));
 
     private ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("UndoLogDelete", 1));
+            new NamedThreadFactory("UndoLogDelete", 1));
 
     private RemotingServer remotingServer;
 
@@ -161,18 +162,18 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext)
-        throws TransactionException {
+            throws TransactionException {
         response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
-            request.getTransactionName(), request.getTimeout()));
+                request.getTransactionName(), request.getTimeout()));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction applicationId: {},transactionServiceGroup: {}, transactionName: {},timeout:{},xid:{}",
-                rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout(), response.getXid());
+                    rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout(), response.getXid());
         }
     }
 
     @Override
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext)
-        throws TransactionException {
+            throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.commit(request.getXid()));
     }
@@ -186,14 +187,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     protected void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext)
-        throws TransactionException {
+            throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.getStatus(request.getXid()));
     }
 
     @Override
     protected void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext)
-        throws TransactionException {
+            throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.globalReport(request.getXid(), request.getGlobalStatus()));
     }
@@ -203,33 +204,31 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                                     RpcContext rpcContext) throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setBranchId(
-            core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                request.getXid(), request.getApplicationData(), request.getLockKey()));
+                core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
+                        request.getXid(), request.getApplicationData(), request.getLockKey()));
     }
 
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext)
-        throws TransactionException {
+            throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(request.getBranchId()));
         core.branchReport(request.getBranchType(), request.getXid(), request.getBranchId(), request.getStatus(),
-            request.getApplicationData());
+                request.getApplicationData());
     }
 
     @Override
     protected void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext)
-        throws TransactionException {
+            throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setLockable(
-            core.lockQuery(request.getBranchType(), request.getResourceId(), request.getXid(), request.getLockKey()));
+                core.lockQuery(request.getBranchType(), request.getResourceId(), request.getXid(), request.getLockKey()));
     }
 
     /**
      * Timeout check.
-     *
-     * @throws TransactionException the transaction exception
      */
-    protected void timeoutCheck() throws TransactionException {
+    protected void timeoutCheck() {
         Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
         if (CollectionUtils.isEmpty(allSessions)) {
             return;
@@ -240,8 +239,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(allSessions, globalSession -> {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
-                    globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
-                        + globalSession.getTimeout());
+                        globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
+                                + globalSession.getTimeout());
             }
             SessionHolder.lockAndExecute(globalSession, () -> {
                 if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
@@ -352,7 +351,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void handleAsyncCommitting() {
         Collection<GlobalSession> asyncCommittingSessions = SessionHolder.getAsyncCommittingSessionManager()
-            .allSessions();
+                .allSessions();
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
@@ -383,7 +382,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         short saveDays = CONFIG.getShort(ConfigurationKeys.TRANSACTION_UNDO_LOG_SAVE_DAYS,
-            UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
+                UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
         for (Map.Entry<String, Channel> channelEntry : rmChannels.entrySet()) {
             String resourceId = channelEntry.getKey();
             UndoLogDeleteRequest deleteRequest = new UndoLogDeleteRequest();
@@ -401,90 +400,20 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Init.
      */
     public void init() {
-        retryRollbacking.scheduleAtFixedRate(() -> {
-            try {
-                boolean lock = SessionHolder.acquireDistributedLock(RETRY_ROLLBACKING);
-                if (lock) {
-                    handleRetryRollbacking();
-                }
-            } catch (Exception e) {
-                LOGGER.info("Exception retry rollbacking ... ", e);
-            } finally {
-                try {
-                    SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING);
-                } catch (Exception ex) {
-                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
-                }
-            }
-        }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        retryRollbacking.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking),
+                0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        retryCommitting.scheduleAtFixedRate(() -> {
-            try {
-                boolean lock = SessionHolder.acquireDistributedLock(RETRY_COMMITTING);
-                if (lock) {
-                    handleRetryCommitting();
-                }
-            } catch (Exception e) {
-                LOGGER.info("Exception retry committing ... ", e);
-            } finally {
-                try {
-                    SessionHolder.releaseDistributedLock(RETRY_COMMITTING);
-                } catch (Exception ex) {
-                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
-                }
-            }
-        }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        retryCommitting.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(RETRY_COMMITTING, this::handleRetryCommitting),
+                0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        asyncCommitting.scheduleAtFixedRate(() -> {
-            try {
-                boolean lock = SessionHolder.acquireDistributedLock(ASYNC_COMMITTING);
-                if (lock) {
-                    handleAsyncCommitting();
-                }
-            } catch (Exception e) {
-                LOGGER.info("Exception async committing ... ", e);
-            } finally {
-                try {
-                    SessionHolder.releaseDistributedLock(ASYNC_COMMITTING);
-                } catch (Exception ex) {
-                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
-                }
-            }
-        }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        asyncCommitting.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting),
+                0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        timeoutCheck.scheduleAtFixedRate(() -> {
-            try {
-                boolean lock = SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK);
-                if (lock) {
-                    timeoutCheck();
-                }
-            } catch (Exception e) {
-                LOGGER.info("Exception timeout checking ... ", e);
-            } finally {
-                try {
-                    SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK);
-                } catch (Exception ex) {
-                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
-                }
-            }
-        }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        timeoutCheck.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck),
+                0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        undoLogDelete.scheduleAtFixedRate(() -> {
-            try {
-                boolean lock = SessionHolder.acquireDistributedLock(UNDOLOG_DELETE);
-                if (lock) {
-                    undoLogDelete();
-                }
-            } catch (Exception e) {
-                LOGGER.info("Exception undoLog deleting ... ", e);
-            } finally {
-                try {
-                    SessionHolder.releaseDistributedLock(UNDOLOG_DELETE);
-                } catch (Exception ex) {
-                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
-                }
-            }
-        }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+        undoLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
+                UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override

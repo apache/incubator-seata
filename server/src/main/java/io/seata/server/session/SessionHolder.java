@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +43,7 @@ import io.seata.core.store.DistributedLocker;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.core.store.StoreMode;
 
+import static io.seata.common.Constants.UNDOLOG_DELETE;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
@@ -371,6 +376,32 @@ public class SessionHolder {
         return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
+    /**
+     * Execute the function after get the distribute lock
+     * @param key   the distribute lock key
+     * @param func  the function to be call
+     * @return whether the func be call
+     */
+    public static boolean distributeLockAndExecute(String key, NoArgsFunc func) {
+        boolean lock = false;
+        try {
+            if (lock = acquireDistributedLock(key)) {
+                func.call();
+            }
+        } catch (Exception e) {
+            LOGGER.info("Exception running function with key = {}", key, e);
+        } finally {
+            if (lock) {
+                try {
+                    SessionHolder.releaseDistributedLock(key);
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
+            }
+        }
+        return lock;
+    }
+
     public static void destroy() {
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
@@ -384,5 +415,10 @@ public class SessionHolder {
         if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
             RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
         }
+    }
+
+    @FunctionalInterface
+    public static interface NoArgsFunc {
+        public void call();
     }
 }
