@@ -15,7 +15,10 @@
  */
 package io.seata.config;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.util.CollectionUtils;
