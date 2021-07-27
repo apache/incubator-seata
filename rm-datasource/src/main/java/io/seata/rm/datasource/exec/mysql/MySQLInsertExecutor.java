@@ -23,6 +23,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.rm.datasource.sql.constant.SqlConstants;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
@@ -141,7 +142,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
                 LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, " +
                         "statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
-                ResultSet firstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+                ResultSet firstId = genKeys = statementProxy.getTargetStatement().executeQuery(SqlConstants.SELECT_LAST_INSERT_ID);
 
                 // If there is batch insert
                 // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
@@ -198,7 +199,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         if (RESOURCE_ID_STEP_CACHE.containsKey(resourceId)) {
             step = RESOURCE_ID_STEP_CACHE.get(resourceId);
         } else {
-            ResultSet increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
+            ResultSet increment = statementProxy.getTargetStatement().executeQuery(SqlConstants.SHOW_VARIABLES_AUTO_INCREMENT);
 
             increment.next();
             step = new BigDecimal(increment.getString(2));

@@ -22,13 +22,10 @@ import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.rm.datasource.sql.constant.SqlConstants;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.struct.Defaultable;
-import io.seata.sqlparser.struct.Sequenceable;
-import io.seata.sqlparser.struct.SqlMethodExpr;
-import io.seata.sqlparser.struct.SqlSequenceExpr;
-import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.struct.*;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +58,8 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     }
 
     @Override
-    public Map<String,List<Object>> getPkValues() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = null;
+    public Map<String, List<Object>> getPkValues() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = null;
         Boolean isContainsPk = containsPK();
         //when there is only one pk in the table
         if (isContainsPk) {
@@ -77,8 +74,8 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     }
 
     @Override
-    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = parsePkValuesFromStatement();
+    public Map<String, List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = parsePkValuesFromStatement();
         String pkKey = pkValuesMap.keySet().iterator().next();
         List<Object> pkValues = pkValuesMap.get(pkKey);
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
@@ -94,6 +91,7 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
 
     /**
      * get primary key values by default
+     *
      * @return
      * @throws SQLException
      */
@@ -104,16 +102,16 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
         ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
         String columnDef = pkMeta.getColumnDef();
         // sample: nextval('test_id_seq'::regclass)
-        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
-        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
+        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, SqlConstants.APOSTROPHE, SqlConstants.APOSTROPHE);
+        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", SqlConstants.LEFT_PARENTHESES);
         if (StringUtils.isBlank(seq)) {
             throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
         }
-        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
+        return getPkValuesBySequence(new SqlSequenceExpr(SqlConstants.APOSTROPHE + seq + SqlConstants.APOSTROPHE, function));
     }
 
     @Override
     public String getSequenceSql(SqlSequenceExpr expr) {
-        return "SELECT currval(" + expr.getSequence() + ")";
+        return SqlConstants.PG_CURRVAL_PREFIX + expr.getSequence() + SqlConstants.RIGHT_PARENTHESES;
     }
 }

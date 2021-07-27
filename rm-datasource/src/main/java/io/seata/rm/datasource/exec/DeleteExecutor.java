@@ -15,28 +15,28 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.constant.SqlConstants;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 /**
  * The type Delete executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
@@ -47,7 +47,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
+    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -63,21 +63,21 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
-        StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(WHERE).append(whereCondition);
+            suffix.append(SqlConstants.WHERE_TEM).append(whereCondition);
         }
         String orderBy = visitor.getOrderBy();
         if (StringUtils.isNotBlank(orderBy)) {
             suffix.append(orderBy);
         }
-        ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
+        ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder) statementProxy : null;
         String limit = visitor.getLimit(parametersHolder, paramAppenderList);
         if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);
         }
-        suffix.append(" FOR UPDATE");
-        StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
+        suffix.append(SqlConstants.FOR_UPDATE_TEM);
+        StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, SqlConstants.SELECT_TEM, suffix.toString());
         for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
         }

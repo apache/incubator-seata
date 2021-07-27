@@ -17,10 +17,9 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
-
-
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.constant.SqlConstants;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.ParametersHolder;
@@ -58,7 +57,7 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
             sqlRecognizer = recognizer;
             SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) recognizer;
 
-            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
+            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder) statementProxy : null;
             if (StringUtils.isNotBlank(visitor.getLimit(parametersHolder, paramAppenderList))) {
                 throw new NotSupportYetException("Multi delete SQL with limit condition is not support yet !");
             }
@@ -73,16 +72,16 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
                 break;
             }
             if (whereCondition.length() > 0) {
-                whereCondition.append(" OR ");
+                whereCondition.append(SqlConstants.OR_TEM);
             }
             whereCondition.append(whereConditionStr);
         }
-        StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
         if (whereCondition.length() > 0) {
-            suffix.append(" WHERE ").append(whereCondition);
+            suffix.append(SqlConstants.WHERE_TEM).append(whereCondition);
         }
-        suffix.append(" FOR UPDATE");
-        final StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
+        suffix.append(SqlConstants.FOR_UPDATE_TEM);
+        final StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, SqlConstants.SELECT_TEM, suffix.toString());
         for (String column : tmeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
         }

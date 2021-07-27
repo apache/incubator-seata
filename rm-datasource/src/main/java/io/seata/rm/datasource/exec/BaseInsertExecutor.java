@@ -15,17 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Objects;
-
 import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -33,17 +22,20 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.constant.SqlConstants;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.struct.Null;
-import io.seata.sqlparser.struct.Sequenceable;
-import io.seata.sqlparser.struct.SqlDefaultExpr;
-import io.seata.sqlparser.struct.SqlMethodExpr;
-import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.struct.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
 
 /**
  * The Base Insert Executor.
@@ -52,8 +44,6 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> implements InsertExecutor<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseInsertExecutor.class);
-
-    protected static final String PLACEHOLDER = "?";
 
     /**
      * Instantiates a new Abstract dml base executor.
@@ -158,7 +148,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                     }
                     int currentRowPlaceholderNum = -1;
                     for (Object r : row) {
-                        if (PLACEHOLDER.equals(r)) {
+                        if (SqlConstants.PLACEHOLDER.equals(r)) {
                             totalPlaceholderNum += 1;
                             currentRowPlaceholderNum += 1;
                         }
@@ -174,11 +164,11 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                         }
                         pkIndex = entry.getValue();
                         Object pkValue = row.get(pkIndex);
-                        if (PLACEHOLDER.equals(pkValue)) {
+                        if (SqlConstants.PLACEHOLDER.equals(pkValue)) {
                             int currentRowNotPlaceholderNumBeforePkIndex = 0;
                             for (int n = 0, len = row.size(); n < len; n++) {
                                 Object r = row.get(n);
-                                if (n < pkIndex && !PLACEHOLDER.equals(r)) {
+                                if (n < pkIndex && !SqlConstants.PLACEHOLDER.equals(r)) {
                                     currentRowNotPlaceholderNumBeforePkIndex++;
                                 }
                             }

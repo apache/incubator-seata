@@ -15,31 +15,28 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.StringJoiner;
-
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.common.DefaultValues;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.constant.SqlConstants;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
 
 /**
  * The type MultiSql executor.
@@ -53,7 +50,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static final boolean ONLY_CARE_UPDATE_COLUMNS = CONFIG.getBoolean(
-        ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
+            ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
 
     /**
      * Instantiates a new Multi update executor.
@@ -82,7 +79,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
 
-            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
+            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder) statementProxy : null;
             if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit(parametersHolder, paramAppenderList))) {
                 throw new NotSupportYetException("Multi update SQL with limit condition is not support yet !");
             }
@@ -100,21 +97,21 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
                 noWhereCondition = true;
             } else {
                 if (whereCondition.length() > 0) {
-                    whereCondition.append(" OR ");
+                    whereCondition.append(SqlConstants.OR_TEM);
                 }
                 whereCondition.append(whereConditionStr);
             }
         }
-        StringBuilder prefix = new StringBuilder("SELECT ");
-        final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_TEM);
+        final StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
         if (noWhereCondition) {
             //select all rows
             paramAppenderList.clear();
         } else {
-            suffix.append(" WHERE ").append(whereCondition);
+            suffix.append(SqlConstants.WHERE_TEM).append(whereCondition);
         }
-        suffix.append(" FOR UPDATE");
-        final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
+        suffix.append(SqlConstants.FOR_UPDATE_TEM);
+        final StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, prefix, suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {
                 selectSQLAppender.add(getColumnNamesInSQL(tmeta.getEscapePkNameList(getDbType())));
@@ -159,9 +156,9 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) sqlRecognizer;
             updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
         }
-        StringBuilder prefix = new StringBuilder("SELECT ");
-        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
-        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
+        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_TEM);
+        String suffix = SqlConstants.FROM_TEM + getFromTableInSQL() + SqlConstants.WHERE_TEM + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
+        StringJoiner selectSQLJoiner = new StringJoiner(SqlConstants.JOINER_DELIMITER, prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {
                 selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
