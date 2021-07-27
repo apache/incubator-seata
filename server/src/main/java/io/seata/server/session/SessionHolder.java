@@ -352,10 +352,6 @@ public class SessionHolder {
      * @return the boolean
      */
     public static boolean acquireDistributedLock(String lockKey) {
-        // never do acquire lock before the server init finished
-        if (null == XID.getIpAddress() || 0 == XID.getPort()) {
-            return false;
-        }
         return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
@@ -365,10 +361,6 @@ public class SessionHolder {
      * @return the boolean
      */
     public static boolean releaseDistributedLock(String lockKey) {
-        // never do release lock before the server init finished
-        if (null == XID.getIpAddress() || 0 == XID.getPort()) {
-            return false;
-        }
         return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
