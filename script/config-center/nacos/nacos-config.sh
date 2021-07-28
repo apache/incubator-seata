@@ -66,11 +66,27 @@ contentType="content-type:application/json;charset=UTF-8"
 echo "set nacosAddr=$nacosAddr"
 echo "set group=$group"
 
+urlencode() {
+  local length="${#1}"
+  i=0
+  while :
+  do
+    [ $length -gt $i ]&&{
+    local c="${1:$i:1}"
+    case $c in
+    [a-zA-Z0-9.~_-]) printf "$c" ;;
+    *) printf '%%%02X' "'$c" ;; 
+    esac
+    }||break
+    let i++
+  done
+}
+
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  dataId=`echo $1 | tr -d '\n' | xxd -p | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
-  content=`echo $2 | tr -d '\n' | xxd -p | sed 's/\(..\)/%\1/g' | xargs | sed 's/[[:space:]]//g'`
+  dataId=`urlencode $1`
+  content=`urlencode $2`
   curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$dataId&group=$group&content=$content&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
   if [ -z $(cat "${tempLog}") ]; then
     echo " Please check the cluster status. "
