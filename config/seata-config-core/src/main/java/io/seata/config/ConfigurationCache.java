@@ -71,7 +71,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             if (CollectionUtils.isNotEmpty(listenerSet)) {
                 for (ConfigurationChangeListener listener : listeners) {
                     if (listenerSet.remove(listener)) {
-                        ConfigurationFactory.getInstance().addConfigListener(dataId, listener);
+                        ConfigurationFactory.getInstance().removeConfigListener(dataId, listener);
                     }
                 }
             }
