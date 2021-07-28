@@ -15,6 +15,12 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
@@ -25,12 +31,6 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * The type MultiSql executor.
@@ -72,16 +72,16 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
                 break;
             }
             if (whereCondition.length() > 0) {
-                whereCondition.append(SqlConstants.OR_TEM);
+                whereCondition.append(SqlConstants.OR);
             }
             whereCondition.append(whereConditionStr);
         }
-        StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(SqlConstants.FROM).append(getFromTableInSQL());
         if (whereCondition.length() > 0) {
-            suffix.append(SqlConstants.WHERE_TEM).append(whereCondition);
+            suffix.append(SqlConstants.WHERE).append(whereCondition);
         }
-        suffix.append(SqlConstants.FOR_UPDATE_TEM);
-        final StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, SqlConstants.SELECT_TEM, suffix.toString());
+        suffix.append(SqlConstants.FOR_UPDATE);
+        final StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, SqlConstants.SELECT, suffix.toString());
         for (String column : tmeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
         }

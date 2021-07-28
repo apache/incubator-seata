@@ -15,6 +15,11 @@
  */
 package io.seata.rm.datasource.exec.oracle;
 
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -30,11 +35,6 @@ import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The type Oracle insert executor.
@@ -93,6 +93,6 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
 
     @Override
     public String getSequenceSql(SqlSequenceExpr expr) {
-        return SqlConstants.SELECT_TEM + expr.getSequence() + SqlConstants.ORACLE_CURRVAL_SUFFIX;
+        return SqlConstants.SELECT + expr.getSequence() + SqlConstants.ORACLE_CURRVAL_SUFFIX;
     }
 }

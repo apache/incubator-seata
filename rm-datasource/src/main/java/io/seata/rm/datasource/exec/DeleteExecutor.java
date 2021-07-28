@@ -15,6 +15,12 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
@@ -24,12 +30,6 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * The type Delete executor.
@@ -63,9 +63,9 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
-        StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(SqlConstants.FROM).append(getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(SqlConstants.WHERE_TEM).append(whereCondition);
+            suffix.append(SqlConstants.WHERE).append(whereCondition);
         }
         String orderBy = visitor.getOrderBy();
         if (StringUtils.isNotBlank(orderBy)) {
@@ -76,8 +76,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);
         }
-        suffix.append(SqlConstants.FOR_UPDATE_TEM);
-        StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, SqlConstants.SELECT_TEM, suffix.toString());
+        suffix.append(SqlConstants.FOR_UPDATE);
+        StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, SqlConstants.SELECT, suffix.toString());
         for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
         }

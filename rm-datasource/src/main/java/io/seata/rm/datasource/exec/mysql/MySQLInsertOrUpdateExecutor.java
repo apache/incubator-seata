@@ -15,6 +15,15 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -28,7 +37,11 @@ import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.constant.SqlConstants;
-import io.seata.rm.datasource.sql.struct.*;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
@@ -36,11 +49,6 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
 
 /**
  * @author: yangyicong
@@ -215,7 +223,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 wherePrimaryList.add(k + SqlConstants.EQUAL_TEM + primaryValueMap.get(k).get(finalI) + SqlConstants.SPACE);
                 paramAppenderTempList.add(primaryValueMap.get(k).get(finalI));
             });
-            afterImageSql.append(SqlConstants.OR_PREFIX).append(Joiner.on(SqlConstants.AND_TEM).join(wherePrimaryList)).append(SqlConstants.RIGHT_PARENTHESES_SUFFIX);
+            afterImageSql.append(SqlConstants.OR_PREFIX).append(Joiner.on(SqlConstants.AND).join(wherePrimaryList)).append(SqlConstants.RIGHT_PARENTHESES);
         }
         return buildTableRecords2(tmeta, afterImageSql.toString(), paramAppenderList);
     }
@@ -242,7 +250,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL + SqlConstants.FOR_UPDATE_TEM)) {
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL + SqlConstants.FOR_UPDATE)) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
                     List<Object> paramAppender = paramAppenderList.get(i);
@@ -272,7 +280,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         int insertNum = recognizer.getInsertParamsValue().size();
         Map<String, ArrayList<Object>> imageParamperterMap = buildImageParamperters(recognizer);
         StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_ALL);
-        StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(SqlConstants.FROM).append(getFromTableInSQL());
         boolean[] isContainWhere = {false};
         for (int i = 0; i < insertNum; i++) {
             int finalI = i;
@@ -284,7 +292,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
                         if (imageParamperterMap.get(columnName) == null && m.getColumnDef() != null) {
-                            uniqueList.add(columnName + SqlConstants.DEFAULT_PREFIX + columnName + SqlConstants.RIGHT_PARENTHESES_TEM);
+                            uniqueList.add(columnName + SqlConstants.DEFAULT_PREFIX + columnName + SqlConstants.RIGHT_PARENTHESES);
                             columnIsNull = false;
                             continue;
                         }
@@ -303,9 +311,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     }
                     if (!columnIsNull) {
                         if (isContainWhere[0]) {
-                            suffix.append(SqlConstants.OR_PREFIX).append(Joiner.on(SqlConstants.AND_TEM).join(uniqueList)).append(SqlConstants.RIGHT_PARENTHESES_SUFFIX);
+                            suffix.append(SqlConstants.OR_PREFIX).append(Joiner.on(SqlConstants.AND).join(uniqueList)).append(SqlConstants.RIGHT_PARENTHESES);
                         } else {
-                            suffix.append(SqlConstants.WHERE_PREFIX).append(Joiner.on(SqlConstants.AND_TEM).join(uniqueList)).append(SqlConstants.RIGHT_PARENTHESES_SUFFIX);
+                            suffix.append(SqlConstants.WHERE_PREFIX).append(Joiner.on(SqlConstants.AND).join(uniqueList)).append(SqlConstants.RIGHT_PARENTHESES);
                             isContainWhere[0] = true;
                         }
                     }

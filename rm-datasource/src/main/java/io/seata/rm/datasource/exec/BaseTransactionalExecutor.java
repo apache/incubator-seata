@@ -15,6 +15,18 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -33,13 +45,11 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.sqlparser.*;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.WhereRecognizer;
 
 /**
  * The type Base transactional executor.
@@ -141,9 +151,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         //process batch operation
         if (StringUtils.isNotBlank(whereCondition) && CollectionUtils.isNotEmpty(paramAppenderList) && paramAppenderList.size() > 1) {
             StringBuilder whereConditionSb = new StringBuilder();
-            whereConditionSb.append(SqlConstants.LEFT_PARENTHESES_TEM).append(whereCondition).append(SqlConstants.RIGHT_PARENTHESES_TEM);
+            whereConditionSb.append(SqlConstants.LEFT_PARENTHESES).append(whereCondition).append(SqlConstants.RIGHT_PARENTHESES);
             for (int i = 1; i < paramAppenderList.size(); i++) {
-                whereConditionSb.append(SqlConstants.OR_PREFIX).append(whereCondition).append(SqlConstants.RIGHT_PARENTHESES_TEM);
+                whereConditionSb.append(SqlConstants.OR_PREFIX).append(whereCondition).append(SqlConstants.RIGHT_PARENTHESES);
             }
             whereCondition = whereConditionSb.toString();
         }
@@ -378,12 +388,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_TEM);
-        StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
+        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT);
+        StringBuilder suffix = new StringBuilder(SqlConstants.FROM).append(getFromTableInSQL());
         // build check sql
         String firstKey = pkValuesMap.keySet().stream().findFirst().get();
         int rowSize = pkValuesMap.get(firstKey).size();
-        suffix.append(SqlConstants.WHERE_TEM).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
+        suffix.append(SqlConstants.WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
         StringJoiner selectSQLJoin = new StringJoiner(SqlConstants.JOINER_DELIMITER, prefix.toString(), suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {

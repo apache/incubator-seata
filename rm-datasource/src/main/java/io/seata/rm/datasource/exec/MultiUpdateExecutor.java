@@ -15,6 +15,16 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
+
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.IOUtil;
@@ -31,12 +41,6 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
 
 /**
  * The type MultiSql executor.
@@ -97,20 +101,20 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
                 noWhereCondition = true;
             } else {
                 if (whereCondition.length() > 0) {
-                    whereCondition.append(SqlConstants.OR_TEM);
+                    whereCondition.append(SqlConstants.OR);
                 }
                 whereCondition.append(whereConditionStr);
             }
         }
-        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_TEM);
-        final StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
+        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT);
+        final StringBuilder suffix = new StringBuilder(SqlConstants.FROM).append(getFromTableInSQL());
         if (noWhereCondition) {
             //select all rows
             paramAppenderList.clear();
         } else {
-            suffix.append(SqlConstants.WHERE_TEM).append(whereCondition);
+            suffix.append(SqlConstants.WHERE).append(whereCondition);
         }
-        suffix.append(SqlConstants.FOR_UPDATE_TEM);
+        suffix.append(SqlConstants.FOR_UPDATE);
         final StringJoiner selectSQLAppender = new StringJoiner(SqlConstants.JOINER_DELIMITER, prefix, suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {
@@ -156,8 +160,8 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) sqlRecognizer;
             updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
         }
-        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_TEM);
-        String suffix = SqlConstants.FROM_TEM + getFromTableInSQL() + SqlConstants.WHERE_TEM + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
+        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT);
+        String suffix = SqlConstants.FROM + getFromTableInSQL() + SqlConstants.WHERE + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
         StringJoiner selectSQLJoiner = new StringJoiner(SqlConstants.JOINER_DELIMITER, prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {

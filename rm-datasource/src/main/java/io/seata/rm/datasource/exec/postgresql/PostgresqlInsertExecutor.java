@@ -15,6 +15,11 @@
  */
 package io.seata.rm.datasource.exec.postgresql;
 
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -25,15 +30,14 @@ import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.constant.SqlConstants;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.struct.*;
+import io.seata.sqlparser.struct.Defaultable;
+import io.seata.sqlparser.struct.Sequenceable;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The type Postgresql insert executor.

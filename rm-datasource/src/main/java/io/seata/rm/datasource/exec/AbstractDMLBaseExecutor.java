@@ -15,6 +15,16 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.AbstractConnectionProxy;
@@ -26,16 +36,6 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * The type Abstract dml base executor.
@@ -106,7 +106,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         }
         if (CollectionUtils.isNotEmpty(sqlRecognizers)) {
             List<SQLRecognizer> distinctSQLRecognizer = sqlRecognizers.stream().filter(
-                distinctByKey(t -> t.getTableName())).collect(Collectors.toList());
+                    distinctByKey(t -> t.getTableName())).collect(Collectors.toList());
             for (SQLRecognizer sqlRecognizer : distinctSQLRecognizer) {
                 if (getTableMeta(sqlRecognizer.getTableName()).getPrimaryKeyOnlyName().size() > 1) {
                     return true;

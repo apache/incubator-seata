@@ -15,6 +15,14 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 import io.seata.common.DefaultValues;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -30,14 +38,6 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * The type Update executor.
@@ -76,11 +76,11 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_TEM);
-        StringBuilder suffix = new StringBuilder(SqlConstants.FROM_TEM).append(getFromTableInSQL());
+        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT);
+        StringBuilder suffix = new StringBuilder(SqlConstants.FROM).append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(SqlConstants.WHERE_TEM).append(whereCondition);
+            suffix.append(SqlConstants.WHERE).append(whereCondition);
         }
         String orderBy = recognizer.getOrderBy();
         if (StringUtils.isNotBlank(orderBy)) {
@@ -91,7 +91,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);
         }
-        suffix.append(SqlConstants.FOR_UPDATE_TEM);
+        suffix.append(SqlConstants.FOR_UPDATE);
         StringJoiner selectSQLJoin = new StringJoiner(SqlConstants.JOINER_DELIMITER, prefix.toString(), suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(updateColumns)) {
@@ -126,9 +126,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
-        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT_TEM);
+        StringBuilder prefix = new StringBuilder(SqlConstants.SELECT);
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
-        String suffix = SqlConstants.FROM_TEM + getFromTableInSQL() + SqlConstants.WHERE_TEM + whereSql;
+        String suffix = SqlConstants.FROM + getFromTableInSQL() + SqlConstants.WHERE + whereSql;
         StringJoiner selectSQLJoiner = new StringJoiner(SqlConstants.JOINER_DELIMITER, prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
