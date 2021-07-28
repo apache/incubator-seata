@@ -67,18 +67,15 @@ echo "set nacosAddr=$nacosAddr"
 echo "set group=$group"
 
 urlencode() {
-  local length="${#1}"
+  length="${#1}"
   i=0
-  while :
-  do
-    [ $length -gt $i ]&&{
-    local c="${1:$i:1}"
-    case $c in
-    [a-zA-Z0-9.~_-]) printf "$c" ;;
-    *) printf '%%%02X' "'$c" ;; 
+  while [ $length -gt $i ]; do
+    char="${1:$i:1}"
+    case $char in
+    [a-zA-Z0-9.~_-]) printf $char ;;
+    *) printf '%%%02X' "'$char" ;;
     esac
-    }||break
-    let i++
+    i=`expr $i + 1`
   done
 }
 
