@@ -30,7 +30,9 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -233,10 +235,29 @@ class NettyClientChannelManager {
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             return Collections.emptyList();
         }
-
+        availInetSocketAddressList.removeIf(address -> isServerAddressConnect(address.toString()));
         return availInetSocketAddressList.stream()
                                          .map(NetUtil::toStringAddress)
                                          .collect(Collectors.toList());
+    }
+
+    private boolean isServerAddressConnect(String serverAddress) {
+        String[] address_port = serverAddress.split(":");
+        Socket sc = new Socket();
+        try {
+            sc.connect(new InetSocketAddress(address_port[0], Integer.parseInt(address_port[1])), 1000);
+        } catch (IOException e) {
+            LOGGER.error("can not connect to this server address '{}', please check sever grouplist", serverAddress);
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                sc.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {
