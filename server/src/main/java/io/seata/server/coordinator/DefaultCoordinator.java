@@ -22,12 +22,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHelper;
-import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHelper;
+import io.seata.server.session.SessionHolder;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -128,26 +128,26 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
-    private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("RetryRollbacking", 1));
 
-    private ScheduledThreadPoolExecutor retryCommitting = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledThreadPoolExecutor retryCommitting = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("RetryCommitting", 1));
 
-    private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("AsyncCommitting", 1));
 
-    private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("TxTimeoutCheck", 1));
 
-    private ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("UndoLogDelete", 1));
 
-    private RemotingServer remotingServer;
+    private final RemotingServer remotingServer;
 
-    private DefaultCore core;
+    private final DefaultCore core;
 
-    private EventBus eventBus = EventBusManager.get();
+    private final EventBus eventBus = EventBusManager.get();
 
     /**
      * Instantiates a new Default coordinator.
@@ -292,9 +292,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
-                    /**
-                     * Prevent thread safety issues
-                     */
+                    // Prevent thread safety issues
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
                     //The function of this 'return' is 'continue'.
@@ -325,9 +323,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
-                    /**
-                     * Prevent thread safety issues
-                     */
+                    // Prevent thread safety issues
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
                     //The function of this 'return' is 'continue'.
