@@ -235,20 +235,19 @@ class NettyClientChannelManager {
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             return Collections.emptyList();
         }
-        availInetSocketAddressList.removeIf(address -> isServerAddressConnect(address.toString()));
+        availInetSocketAddressList.removeIf(address -> !isServerAddressConnect(address.toString()));
         return availInetSocketAddressList.stream()
                                          .map(NetUtil::toStringAddress)
                                          .collect(Collectors.toList());
     }
 
     private boolean isServerAddressConnect(String serverAddress) {
-        String[] address_port = serverAddress.split(":");
+        String[] addressPort = serverAddress.split("/")[1].split(":");
         Socket sc = new Socket();
         try {
-            sc.connect(new InetSocketAddress(address_port[0], Integer.parseInt(address_port[1])), 1000);
+            sc.connect(new InetSocketAddress(addressPort[0], Integer.parseInt(addressPort[1])), 50);
         } catch (IOException e) {
-            LOGGER.error("can not connect to this server address '{}', please check sever grouplist", serverAddress);
-            e.printStackTrace();
+            LOGGER.warn("can not connect to this server address '{}', please check it", serverAddress);
             return false;
         } finally {
             try {
