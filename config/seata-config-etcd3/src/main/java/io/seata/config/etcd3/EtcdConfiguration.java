@@ -38,7 +38,6 @@ import io.etcd.jetcd.op.CmpTarget;
 import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.watch.WatchResponse;
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -108,10 +107,6 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
-        if (value != null) {
-            return value;
-        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
             timeoutMills);
         etcdConfigExecutor.execute(
@@ -157,7 +152,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
             return;
         }
         EtcdListener etcdListener = new EtcdListener(dataId, listener);
-        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+        configListenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(etcdListener);
         etcdListener.onProcessEvent(new ConfigurationChangeEvent());
     }
