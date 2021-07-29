@@ -64,6 +64,16 @@ public final class ReflectionUtil {
      */
     private static final Map<Class<?>, Field[]> CLASS_FIELDS_CACHE = new ConcurrentHashMap<>();
 
+    /**
+     * The cache FIELD_CACHE: Class -> fieldName -> Field
+     */
+    private static final Map<Class<?>, Map<String, Field>> FIELD_CACHE = new ConcurrentHashMap<>();
+
+    /**
+     * The cache METHOD_CACHE: Class -> methodName|paramClassName1,paramClassName2,...,paramClassNameN -> Method
+     */
+    private static final Map<Class<?>, Map<String, Method>> METHOD_CACHE = new ConcurrentHashMap<>();
+
     //endregion
 
 
@@ -165,16 +175,28 @@ public final class ReflectionUtil {
      * @throws SecurityException    the security exception
      */
     public static Field getField(final Class<?> clazz, final String fieldName) throws NoSuchFieldException, SecurityException {
-        Class<?> cl = clazz;
-        while (cl != null && cl != Object.class && !cl.isInterface()) {
-            try {
-                return cl.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                cl = cl.getSuperclass();
+        Map<String, Field> fieldMap = CollectionUtils.computeIfAbsent(FIELD_CACHE, clazz, k -> new ConcurrentHashMap<>());
+        Field field = CollectionUtils.computeIfAbsent(fieldMap, fieldName, k -> {
+            Class<?> cl = clazz;
+            while (cl != null && cl != Object.class && !cl.isInterface()) {
+                try {
+                    return cl.getDeclaredField(fieldName);
+                } catch (NoSuchFieldException e) {
+                    cl = cl.getSuperclass();
+                }
             }
+            return null;
+        });
+
+        if (field == null) {
+            throw new NoSuchFieldException("field not found: " + clazz.getName() + ", field: " + fieldName);
         }
 
-        throw new NoSuchFieldException("field not found: " + clazz.getName() + ", field: " + fieldName);
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
+
+        return field;
     }
 
     /**
@@ -362,16 +384,36 @@ public final class ReflectionUtil {
             throw new IllegalArgumentException("clazz must be not null");
         }
 
-        Class<?> cl = clazz;
-        while (cl != null) {
-            try {
-                return cl.getDeclaredMethod(methodName, parameterTypes);
-            } catch (NoSuchMethodException e) {
-                cl = cl.getSuperclass();
+        Map<String, Method> methodMap = CollectionUtils.computeIfAbsent(METHOD_CACHE, clazz, k -> new ConcurrentHashMap<>());
+
+        String key = methodName;
+        if (parameterTypes != null && parameterTypes.length > 0) {
+            key += "|";
+            for (Class<?> parameterType : parameterTypes) {
+                key += parameterType.getName() + ",";
             }
         }
+        Method method = CollectionUtils.computeIfAbsent(methodMap, key, k -> {
+            Class<?> cl = clazz;
+            while (cl != null) {
+                try {
+                    return cl.getDeclaredMethod(methodName, parameterTypes);
+                } catch (NoSuchMethodException e) {
+                    cl = cl.getSuperclass();
+                }
+            }
+            return null;
+        });
 
-        throw new NoSuchMethodException("method not found: " + methodToString(clazz, methodName, parameterTypes));
+        if (method == null) {
+            throw new NoSuchMethodException("method not found: " + methodToString(clazz, methodName, parameterTypes));
+        }
+
+        if (!method.isAccessible()) {
+            method.setAccessible(true);
+        }
+
+        return method;
     }
 
     /**
