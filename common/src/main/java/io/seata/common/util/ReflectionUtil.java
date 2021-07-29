@@ -386,14 +386,8 @@ public final class ReflectionUtil {
 
         Map<String, Method> methodMap = CollectionUtils.computeIfAbsent(METHOD_CACHE, clazz, k -> new ConcurrentHashMap<>());
 
-        String key = methodName;
-        if (parameterTypes != null && parameterTypes.length > 0) {
-            key += "|";
-            for (Class<?> parameterType : parameterTypes) {
-                key += parameterType.getName() + ",";
-            }
-        }
-        Method method = CollectionUtils.computeIfAbsent(methodMap, key, k -> {
+        String cacheKey = generateMethodCacheKey(methodName, parameterTypes);
+        Method method = CollectionUtils.computeIfAbsent(methodMap, cacheKey, k -> {
             Class<?> cl = clazz;
             while (cl != null) {
                 try {
@@ -414,6 +408,17 @@ public final class ReflectionUtil {
         }
 
         return method;
+    }
+
+    private static String generateMethodCacheKey(String methodName, Class<?>[] parameterTypes) {
+        StringBuilder key = new StringBuilder(methodName);
+        if (parameterTypes != null && parameterTypes.length > 0) {
+            key.append("|");
+            for (Class<?> parameterType : parameterTypes) {
+                key.append(parameterType.getName()).append(",");
+            }
+        }
+        return key.toString();
     }
 
     /**
