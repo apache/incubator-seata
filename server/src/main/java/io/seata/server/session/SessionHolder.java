@@ -114,23 +114,27 @@ public class SessionHolder {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
         } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                                      + separator + XID.getPort();
+                + separator + XID.getPort();
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
+                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
+                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
+                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
             if (StoreMode.RAFT.equals(storeMode) || StoreMode.RAFT.getName()
                 .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
-            }else {
+                DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.RAFT.getName());
+            } else {
                 DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
             }
         } else if (StoreMode.REDIS.equals(storeMode)) {

@@ -21,7 +21,6 @@ import java.util.List;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.Disposable;
 
 /**

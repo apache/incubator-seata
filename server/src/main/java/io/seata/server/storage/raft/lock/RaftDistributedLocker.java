@@ -25,15 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @description Redis distributed lock
- * @author  zhongxiang.wang
+ * @description raft distributed lock
+ * @author  funkye
  */
 @LoadLevel(name = "raft", scope = Scope.SINGLETON)
 public class RaftDistributedLocker implements DistributedLocker {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(
             RedisDistributedLocker.class);
-    private static final String SUCCESS = "OK";
 
     /**
      * Acquire the distributed lock
