@@ -54,6 +54,7 @@ public class RaftDistributedLocker implements DistributedLocker {
      */
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
-            return true;
+        return true;
     }
+    
 }

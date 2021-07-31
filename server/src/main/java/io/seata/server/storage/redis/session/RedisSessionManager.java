@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
 public class RedisSessionManager extends AbstractSessionManager
-    implements Initialize {
+        implements Initialize {
     /**
      * The constant LOGGER.
      */
@@ -92,6 +92,10 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
+        if (!StringUtils.isEmpty(taskName)) {
+            return;
+        }
+        session.setStatus(status);
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
@@ -101,16 +105,13 @@ public class RedisSessionManager extends AbstractSessionManager
     /**
      * remove globalSession 1. rootSessionManager remove normal globalSession 2. retryCommitSessionManager and
      * retryRollbackSessionManager remove retry expired globalSession
-     * 
+     *
      * @param session
      *            the session
      * @throws TransactionException
      */
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
@@ -119,6 +120,9 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
+        if (!StringUtils.isEmpty(taskName)) {
+            return;
+        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, session);
         if (!ret) {
             throw new StoreException("addBranchSession failed.");
@@ -127,6 +131,9 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException {
+        if (!StringUtils.isEmpty(taskName)) {
+            return;
+        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");
@@ -135,6 +142,9 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void removeBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
+        if (!StringUtils.isEmpty(taskName)) {
+            return;
+        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeBranchSession failed.");
@@ -160,13 +170,13 @@ public class RedisSessionManager extends AbstractSessionManager
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
-                GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
+                                                                               GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             // all data
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.UnKnown, GlobalStatus.Begin,
-                GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
-                GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
-                GlobalStatus.AsyncCommitting}));
+                                                                               GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
+                                                                               GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
+                                                                               GlobalStatus.AsyncCommitting}));
         }
     }
 
@@ -178,7 +188,7 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-        throws TransactionException {
+            throws TransactionException {
         return lockCallable.call();
     }
 }
