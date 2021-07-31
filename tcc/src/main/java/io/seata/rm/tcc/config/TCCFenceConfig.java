@@ -15,6 +15,10 @@
  */
 package io.seata.rm.tcc.config;
 
+import java.util.Date;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.rpc.Disposable;
@@ -30,11 +34,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
-import java.util.Date;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 /**
  * TCC Fence Config
  *
@@ -43,31 +42,37 @@ import java.util.concurrent.TimeUnit;
 public class TCCFenceConfig implements InitializingBean, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceConfig.class);
+
+    /**
+     * TCC fence clean mode
+     */
+    private TCCFenceCleanMode cleanMode;
+
+    /**
+     * TCC fence clean period
+     */
+    private int cleanPeriod;
+
+    /**
+     * TCC fence log table name
+     */
+    private String logTableName;
+
     /**
      * TCC fence datasource
      */
     private final DataSource dataSource;
+
     /**
      * TCC fence transactionManager
      */
     private final PlatformTransactionManager transactionManager;
+
     /**
      * TCC fence clean scheduled thread pool
      */
     private final ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("tccFenceClean", 1));
-    /**
-     * TCC fence clean mode
-     */
-    private TCCFenceCleanMode cleanMode;
-    /**
-     * TCC fence clean period
-     */
-    private int cleanPeriod;
-    /**
-     * TCC fence log table name
-     */
-    private String logTableName;
 
     public TCCFenceConfig(final DataSource dataSource, final PlatformTransactionManager transactionManager) {
         this.dataSource = dataSource;

@@ -15,6 +15,12 @@
  */
 package io.seata.rm.tcc.store.db;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
@@ -26,13 +32,6 @@ import io.seata.rm.tcc.store.TCCFenceStore;
 import io.seata.rm.tcc.store.db.sql.TCCFenceStoreSqls;
 import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Date;
-
 /**
  * The type TCC Fence store data base dao
  *
@@ -40,11 +39,12 @@ import java.util.Date;
  */
 public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
-    private static volatile TCCFenceStoreDataBaseDAO instance = null;
     /**
      * TCC fence log table name
      */
     private String logTableName = TCCFenceConstant.DEFAULT_LOG_TABLE_NAME;
+
+    private static volatile TCCFenceStoreDataBaseDAO instance = null;
 
     private TCCFenceStoreDataBaseDAO() {}
 
