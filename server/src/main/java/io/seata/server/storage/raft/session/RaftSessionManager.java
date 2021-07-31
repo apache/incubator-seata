@@ -54,6 +54,7 @@ public class RaftSessionManager extends AbstractSessionManager {
         this.name = name;
     }
 
+    @Override
     public void addGlobalSession(GlobalSession globalSession) throws TransactionException {
         if (RaftServerFactory.getInstance().isLeader()) {
             Closure closure = status -> {

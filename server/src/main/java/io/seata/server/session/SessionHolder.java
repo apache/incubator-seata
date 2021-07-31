@@ -32,18 +32,16 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.RaftServerFactory;
+import io.seata.core.store.DistributedLockDO;
+import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.StoreMode;
 import io.seata.server.lock.LockManager;
+import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.storage.file.lock.FileLockManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.RETRY_COMMITTING;
-import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
-import static io.seata.common.Constants.UNDOLOG_DELETE;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static java.io.File.separator;
@@ -79,10 +77,17 @@ public class SessionHolder {
      */
     public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
 
+    /**
+     * The redis distributed lock expire time
+     */
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME,10000);
+
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
+
+    private static DistributedLocker DISTRIBUTED_LOCKER;
 
     /**
      * Init.
@@ -104,9 +109,12 @@ public class SessionHolder {
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-        } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
+
+            String lockerType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
+        } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                + separator + XID.getPort();
+                                      + separator + XID.getPort();
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
@@ -122,6 +130,8 @@ public class SessionHolder {
                 .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
+            }else {
+                DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
             }
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
@@ -131,6 +141,8 @@ public class SessionHolder {
                 StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
@@ -353,93 +365,21 @@ public class SessionHolder {
     }
 
     /**
-     * retry rollbacking lock
+     * acquire lock
      *
      * @return the boolean
      */
-    public static boolean retryRollbackingLock() {
-        return getRootSessionManager().scheduledLock(RETRY_ROLLBACKING);
+    public static boolean acquireDistributedLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     /**
-     * retry committing lock
+     * release lock
      *
      * @return the boolean
      */
-    public static boolean retryCommittingLock() {
-        return getRootSessionManager().scheduledLock(RETRY_COMMITTING);
-    }
-
-    /**
-     * async committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean asyncCommittingLock() {
-        return getRootSessionManager().scheduledLock(ASYNC_COMMITTING);
-    }
-
-    /**
-     * tx timeout check lOck
-     *
-     * @return the boolean
-     */
-    public static boolean txTimeoutCheckLock() {
-        return getRootSessionManager().scheduledLock(TX_TIMEOUT_CHECK);
-    }
-
-    /**
-     * undolog delete lock
-     *
-     * @return the boolean
-     */
-    public static boolean undoLogDeleteLock() {
-        return getRootSessionManager().scheduledLock(UNDOLOG_DELETE);
-    }
-
-    /**
-     * un retry rollbacking lock
-     *
-     * @return the boolean
-     */
-    public static boolean unRetryRollbackingLock() {
-        return getRootSessionManager().unScheduledLock(RETRY_ROLLBACKING);
-    }
-
-    /**
-     * un retry committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean unRetryCommittingLock() {
-        return getRootSessionManager().unScheduledLock(RETRY_COMMITTING);
-    }
-
-    /**
-     * un async committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean unAsyncCommittingLock() {
-        return getRootSessionManager().unScheduledLock(ASYNC_COMMITTING);
-    }
-
-    /**
-     * un tx timeout check lOck
-     *
-     * @return the boolean
-     */
-    public static boolean unTxTimeoutCheckLock() {
-        return getRootSessionManager().unScheduledLock(TX_TIMEOUT_CHECK);
-    }
-
-    /**
-     * un undolog delete lock
-     *
-     * @return the boolean
-     */
-    public static boolean unUndoLogDeleteLock() {
-        return getRootSessionManager().unScheduledLock(UNDOLOG_DELETE);
+    public static boolean releaseDistributedLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     public static void destroy() {
