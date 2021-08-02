@@ -262,17 +262,10 @@ class NettyClientChannelManager {
 
     private boolean isServerAddressConnect(String serverAddress) {
         String[] addressPort = serverAddress.split("/")[1].split(":");
-        Socket sc = new Socket();
-        try {
+        try (Socket sc = new Socket()) {
             sc.connect(new InetSocketAddress(addressPort[0], Integer.parseInt(addressPort[1])), CONNECT_ADDRESS_TIMEOUT);
         } catch (IOException e) {
             return false;
-        } finally {
-            try {
-                sc.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return true;
     }
