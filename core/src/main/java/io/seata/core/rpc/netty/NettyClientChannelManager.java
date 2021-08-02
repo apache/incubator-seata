@@ -237,11 +237,11 @@ class NettyClientChannelManager {
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                                                                             .lookup(transactionServiceGroup);
-        List<InetSocketAddress> currentInetSocketAddressList = new ArrayList<>();
-        currentInetSocketAddressList.addAll(availInetSocketAddressList);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             return Collections.emptyList();
         }
+        List<InetSocketAddress> currentInetSocketAddressList = new ArrayList<>();
+        currentInetSocketAddressList.addAll(availInetSocketAddressList);
         for (InetSocketAddress address : currentInetSocketAddressList) {
             boolean canConnect = false;
             for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
