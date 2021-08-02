@@ -242,7 +242,7 @@ class NettyClientChannelManager {
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             return Collections.emptyList();
         }
-        for (InetSocketAddress address : availInetSocketAddressList) {
+        for (InetSocketAddress address : currentInetSocketAddressList) {
             boolean canConnect = false;
             for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
                 if (isServerAddressConnect(address.toString())) {
@@ -251,11 +251,11 @@ class NettyClientChannelManager {
                 }
             }
             if (!canConnect) {
-                availInetSocketAddressList.remove(address);
+                currentInetSocketAddressList.remove(address);
                 LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
             }
         }
-        return availInetSocketAddressList.stream()
+        return currentInetSocketAddressList.stream()
                 .map(NetUtil::toStringAddress)
                 .collect(Collectors.toList());
     }
