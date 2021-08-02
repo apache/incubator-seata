@@ -242,7 +242,7 @@ class NettyClientChannelManager {
         }
         List<InetSocketAddress> currentInetSocketAddressList = new ArrayList<>();
         currentInetSocketAddressList.addAll(availInetSocketAddressList);
-        for (InetSocketAddress address : currentInetSocketAddressList) {
+        for (InetSocketAddress address : availInetSocketAddressList) {
             boolean canConnect = false;
             for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
                 if (isServerAddressConnect(address.toString())) {
