@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +58,10 @@ class NettyClientChannelManager {
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
 
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
+
+    private static final int TRY_CONNECT_COUNT = 3;
+
+    private static final int CONNECT_ADDRESS_TIMEOUT = 50;
 
     private Function<String, NettyPoolKey> poolKeyFunction;
 
@@ -232,22 +237,35 @@ class NettyClientChannelManager {
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                                                                             .lookup(transactionServiceGroup);
+        List<InetSocketAddress> currentInetSocketAddressList = new ArrayList<>();
+        currentInetSocketAddressList.addAll(availInetSocketAddressList);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             return Collections.emptyList();
         }
-        availInetSocketAddressList.removeIf(address -> !isServerAddressConnect(address.toString()));
+        for (InetSocketAddress address : availInetSocketAddressList) {
+            boolean canConnect = false;
+            for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
+                if (isServerAddressConnect(address.toString())) {
+                    canConnect = true;
+                    break;
+                }
+            }
+            if (!canConnect) {
+                availInetSocketAddressList.remove(address);
+                LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
+            }
+        }
         return availInetSocketAddressList.stream()
-                                         .map(NetUtil::toStringAddress)
-                                         .collect(Collectors.toList());
+                .map(NetUtil::toStringAddress)
+                .collect(Collectors.toList());
     }
 
     private boolean isServerAddressConnect(String serverAddress) {
         String[] addressPort = serverAddress.split("/")[1].split(":");
         Socket sc = new Socket();
         try {
-            sc.connect(new InetSocketAddress(addressPort[0], Integer.parseInt(addressPort[1])), 50);
+            sc.connect(new InetSocketAddress(addressPort[0], Integer.parseInt(addressPort[1])), CONNECT_ADDRESS_TIMEOUT);
         } catch (IOException e) {
-            LOGGER.warn("can not connect to this server address '{}', please check it", serverAddress);
             return false;
         } finally {
             try {

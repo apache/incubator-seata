@@ -24,6 +24,7 @@ import io.seata.config.ConfigurationFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The type File registry service.
@@ -36,6 +37,10 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final String POSTFIX_GROUPLIST = ".grouplist";
     private static final String ENDPOINT_SPLIT_CHAR = ";";
     private static final String IP_PORT_SPLIT_CHAR = ":";
+
+    private static final Object LOCK_OBJ = new Object();
+
+    private static final List<InetSocketAddress> CLUSTER_ADDRESS_LIST = new CopyOnWriteArrayList<>();
 
     private FileRegistryServiceImpl() {
     }
@@ -82,21 +87,24 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         if (clusterName == null) {
             return null;
         }
-        String endpointStr = CONFIG.getConfig(
-            PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
-        if (StringUtils.isNullOrEmpty(endpointStr)) {
-            throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");
-        }
-        String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
-        List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();
-        for (String endpoint : endpoints) {
-            String[] ipAndPort = endpoint.split(IP_PORT_SPLIT_CHAR);
-            if (ipAndPort.length != 2) {
-                throw new IllegalArgumentException("endpoint format should like ip:port");
+        synchronized (LOCK_OBJ) {
+            String endpointStr = CONFIG.getConfig(
+                    PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
+            if (StringUtils.isNullOrEmpty(endpointStr)) {
+                throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");
             }
-            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
+            String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
+            for (String endpoint : endpoints) {
+                String[] ipAndPort = endpoint.split(IP_PORT_SPLIT_CHAR);
+                if (ipAndPort.length != 2) {
+                    throw new IllegalArgumentException("endpoint format should like ip:port");
+                }
+                if (!CLUSTER_ADDRESS_LIST.contains(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])))) {
+                    CLUSTER_ADDRESS_LIST.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
+                }
+            }
         }
-        return inetSocketAddresses;
+        return CLUSTER_ADDRESS_LIST;
     }
 
     @Override
