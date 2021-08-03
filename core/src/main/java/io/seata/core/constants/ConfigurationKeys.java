@@ -132,6 +132,14 @@ public interface ConfigurationKeys {
      */
     String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
 
+    /**
+     * The constant CLIENT_TLS_PREFIX.
+     */
+    String CLIENT_TLS_PREFIX = CLIENT_PREFIX + "tls.";
+    /**
+     * The constant CLIENT_TLS_TRUST_CERTIFICATE_PATH.
+     */
+    String CLIENT_TLS_TRUST_CERTIFICATE_PATH = CLIENT_TLS_PREFIX + "trustCertificatePath";
 
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
@@ -441,6 +449,31 @@ public interface ConfigurationKeys {
     String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
 
     /**
+     * The constant SERVER_TLS_PREFIX.
+     */
+    String SERVER_TLS_PREFIX = SERVER_PREFIX + "tls.";
+
+    /**
+     * The constant SERVER_CERTIFICATE_TYPE
+     */
+    String SERVER_CERTIFICATE_TYPE = SERVER_TLS_PREFIX + "certificateType";
+
+    /**
+     * The constant SERVER_CERTIFICATE_PATH
+     */
+    String SERVER_CERTIFICATE_PATH = SERVER_TLS_PREFIX + "certificatePath";
+
+    /**
+     * The constant SERVER_CERTIFICATE_PASSWORD
+     */
+    String SERVER_CERTIFICATE_PASSWORD = SERVER_TLS_PREFIX + "certificatePassword";
+
+    /**
+     * The constant SERVER_KEY_FILE_PATH
+     */
+    String SERVER_KEY_FILE_PATH = SERVER_TLS_PREFIX + "keyFilePath";
+
+    /**
      * The constant MIN_SERVER_POOL_SIZE.
      */
     String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";
@@ -474,6 +507,16 @@ public interface ConfigurationKeys {
      * The constant TRANSPORT_HEARTBEAT
      */
     String TRANSPORT_HEARTBEAT = TRANSPORT_PREFIX + "heartbeat";
+
+    /**
+     * The constant ENABLE_TLS
+     */
+    String ENABLE_TLS = TRANSPORT_PREFIX + "enableTls";
+
+    /**
+     * The constant TLS_VERSION
+     */
+    String TLS_VERSION = TRANSPORT_PREFIX + "tlsVersion";
 
     /**
      * The constant THREAD_FACTORY_PREFIX

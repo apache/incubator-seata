@@ -266,6 +266,12 @@
       "description": "TCC fence log clean period.",
       "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
       "defaultValue": 1
+    },
+    {
+      "name": "seata.client.tls.trust-certificate-path",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TlsProperties",
+      "defaultValue": null
     }
   ],
   "hints": [

@@ -16,13 +16,20 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
+
+import javax.net.ssl.SSLException;
+import java.io.File;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TLS;
 
 /**
  * The type Netty client config.
@@ -441,5 +448,60 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     public static boolean isEnableClientBatchSendRequest() {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
+    }
+
+    /**
+     * Get whether enable tls.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableTls() {
+        return CONFIG.getBoolean(ConfigurationKeys.ENABLE_TLS, DEFAULT_ENABLE_TLS);
+    }
+
+    /**
+     * Get the client SslContext.
+     *
+     * @return the SslContext
+     */
+    public SslContext getSslContext() {
+        SslContext sslContext = null;
+        String trustCertificatePath = getTrustCertificatePath();
+        File trustCertificate = null;
+        if (trustCertificatePath != null) {
+            trustCertificate = new File(trustCertificatePath);
+        }
+        String tlsVersion = getTlsVersion();
+        try {
+            SslContextBuilder sslContextBuilder = SslContextBuilder.forClient()
+                .trustManager(trustCertificate).clientAuth(ClientAuth.NONE);
+            if (tlsVersion != null) {
+                sslContextBuilder.protocols(tlsVersion);
+            }
+            sslContext = sslContextBuilder.build();
+        } catch (SSLException e) {
+            e.printStackTrace();
+        }
+        return sslContext;
+    }
+
+    /**
+     * Get trusted certificate path. The file should contain an X.509
+     * certificate in PEM format. {@code null} uses the system default.
+     *
+     * @return the String
+     */
+    private String getTrustCertificatePath() {
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_TLS_TRUST_CERTIFICATE_PATH);
+    }
+
+    /**
+     * Get the TLS protocol version to enable
+     * or {@code null} to enable the default version.
+     *
+     * @return the String
+     */
+    private String getTlsVersion() {
+        return CONFIG.getConfig(ConfigurationKeys.TLS_VERSION);
     }
 }

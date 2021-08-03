@@ -23,6 +23,7 @@ import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBPropert
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.ServerTlsProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_CERTIFICATE_TYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -53,6 +55,12 @@ public class ServerPropertiesTest {
     @Test
     public void testServerRecoveryProperties() {
         assertEquals(context.getBean(ServerRecoveryProperties.class).getAsynCommittingRetryPeriod(), 1000);
+    }
+
+    @Test
+    public void testServerTlsProperties() {
+        assertEquals(context.getBean(ServerTlsProperties.class).getCertificateType(),
+                DEFAULT_SERVER_CERTIFICATE_TYPE);
     }
 
     @Test

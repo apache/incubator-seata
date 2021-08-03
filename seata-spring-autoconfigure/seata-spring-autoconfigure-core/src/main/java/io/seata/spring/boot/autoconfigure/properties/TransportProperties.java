@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TLS;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -53,6 +54,16 @@ public class TransportProperties {
      * enable client batch send request
      */
     private boolean enableClientBatchSendRequest = DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable TLS
+     */
+    private boolean enableTls = DEFAULT_ENABLE_TLS;
+
+    /**
+     * version of TLS
+     */
+    private String tlsVersion = null;
 
     public String getType() {
         return type;
@@ -105,6 +116,24 @@ public class TransportProperties {
 
     public TransportProperties setEnableClientBatchSendRequest(boolean enableClientBatchSendRequest) {
         this.enableClientBatchSendRequest = enableClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableTls(){
+        return enableTls;
+    }
+
+    public TransportProperties setEnableTls(boolean enableTls) {
+        this.enableTls = enableTls;
+        return this;
+    }
+
+    public String getTlsVersion(){
+        return tlsVersion;
+    }
+
+    public TransportProperties setTlsVersion(String tlsVersion) {
+        this.tlsVersion = tlsVersion;
         return this;
     }
 }
