@@ -239,18 +239,13 @@ class NettyClientChannelManager {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                                                                             .lookup(transactionServiceGroup);
 
-        Map<String,List<InetSocketAddress>> addressMap= RegistryFactory.getInstance()
-                                                                              .getAddressMap();
-        List<InetSocketAddress> currentInetSocketAddressList = addressMap.get(transactionServiceGroup);
+        List<InetSocketAddress> currentInetSocketAddressList= RegistryFactory.getInstance()
+                                                                              .getAddressList(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
-            if (currentInetSocketAddressList != null) {
+            if (CollectionUtils.isEmpty(currentInetSocketAddressList)) {
                 currentInetSocketAddressList.clear();
             }
             return Collections.emptyList();
-        }
-        if (currentInetSocketAddressList == null) {
-            currentInetSocketAddressList = new ArrayList<>();
-            addressMap.put(transactionServiceGroup, currentInetSocketAddressList);
         }
         for (InetSocketAddress address : availInetSocketAddressList) {
             boolean canConnect = false;
@@ -269,8 +264,38 @@ class NettyClientChannelManager {
             }
         }
         return currentInetSocketAddressList.stream()
+                .filter(inetSocketAddress -> availInetSocketAddressList.contains(inetSocketAddress))
                 .map(NetUtil::toStringAddress)
                 .collect(Collectors.toList());
+    }
+
+
+    void checkAvailServerList(String transactionServiceGroup) throws Exception {
+        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
+                                                                             .lookup(transactionServiceGroup);
+        if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            LOGGER.warn("get empty server address list when TM client init");
+            return;
+        }
+        List<InetSocketAddress> currentInetSocketAddressList= RegistryFactory.getInstance()
+                                                                            .getAddressList(transactionServiceGroup);
+        for (InetSocketAddress address : availInetSocketAddressList) {
+            boolean canConnect = false;
+            for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
+                if (isServerAddressConnect(address.toString())) {
+                    canConnect = true;
+                    break;
+                }
+            }
+            if (canConnect) {
+                if (!currentInetSocketAddressList.contains(address)) {
+                    currentInetSocketAddressList.add(address);
+                }
+                break;
+            } else {
+                LOGGER.warn("can not connect to this server address '{}' when TM client init", address.toString());
+            }
+        }
     }
 
     private boolean isServerAddressConnect(String serverAddress) {

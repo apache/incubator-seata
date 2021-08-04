@@ -15,6 +15,9 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +30,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.RejectedPolicies;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.core.auth.AuthSigner;
 import io.seata.core.protocol.AbstractMessage;
@@ -35,6 +39,7 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
+import io.seata.discovery.registry.RegistryFactory;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,9 +178,19 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     public void init() {
         // registry processor
         registerProcessor();
+        checkAddressList(this.transactionServiceGroup);
         if (initialized.compareAndSet(false, true)) {
             super.init();
         }
+    }
+
+    public void checkAddressList(String transactionServiceGroup) {
+        try {
+            getClientChannelManager().checkAvailServerList(transactionServiceGroup);
+        } catch (Exception e) {
+            LOGGER.error("Failed to check available servers when TM Client init: {}", e.getMessage(), e);
+        }
+        return;
     }
 
     @Override
