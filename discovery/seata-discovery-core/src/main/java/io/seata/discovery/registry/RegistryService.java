@@ -16,9 +16,8 @@
 package io.seata.discovery.registry;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
@@ -45,6 +44,10 @@ public interface RegistryService<T> {
 
     Set<String> SERVICE_GROUP_NAME = new HashSet<>();
 
+    /**
+     * Service node health check
+     */
+    Map<String,List<InetSocketAddress>> CURRENT_ADDRESS_MAP = new HashMap<>();
     /**
      * Register.
      *
@@ -107,5 +110,9 @@ public interface RegistryService<T> {
             SERVICE_GROUP_NAME.add(key);
         }
         return ConfigurationFactory.getInstance().getConfig(key);
+    }
+
+    default Map<String,List<InetSocketAddress>> getAddressMap(){
+        return CURRENT_ADDRESS_MAP;
     }
 }

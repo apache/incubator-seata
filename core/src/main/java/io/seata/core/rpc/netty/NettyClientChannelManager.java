@@ -36,6 +36,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -237,11 +238,20 @@ class NettyClientChannelManager {
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                                                                             .lookup(transactionServiceGroup);
+
+        Map<String,List<InetSocketAddress>> addressMap= RegistryFactory.getInstance()
+                                                                              .getAddressMap();
+        List<InetSocketAddress> currentInetSocketAddressList = addressMap.get(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            if (currentInetSocketAddressList != null) {
+                currentInetSocketAddressList.clear();
+            }
             return Collections.emptyList();
         }
-        List<InetSocketAddress> currentInetSocketAddressList = new ArrayList<>();
-        currentInetSocketAddressList.addAll(availInetSocketAddressList);
+        if (currentInetSocketAddressList == null) {
+            currentInetSocketAddressList = new ArrayList<>();
+            addressMap.put(transactionServiceGroup, currentInetSocketAddressList);
+        }
         for (InetSocketAddress address : availInetSocketAddressList) {
             boolean canConnect = false;
             for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
@@ -250,8 +260,11 @@ class NettyClientChannelManager {
                     break;
                 }
             }
-            if (!canConnect) {
-                currentInetSocketAddressList.remove(address);
+            if (canConnect) {
+                if (!currentInetSocketAddressList.contains(address)) {
+                    currentInetSocketAddressList.add(address);
+                }
+            } else {
                 LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
             }
         }
