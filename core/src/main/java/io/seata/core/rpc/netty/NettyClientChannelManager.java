@@ -235,10 +235,10 @@ class NettyClientChannelManager {
 
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
-                                                                            .lookup(transactionServiceGroup);
+                .lookup(transactionServiceGroup);
 
-        List<InetSocketAddress> currentInetSocketAddressList= RegistryFactory.getInstance()
-                                                                              .getAddressList(transactionServiceGroup);
+        List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
+                .getAddressList(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             if (CollectionUtils.isEmpty(currentInetSocketAddressList)) {
                 currentInetSocketAddressList.clear();
@@ -258,6 +258,9 @@ class NettyClientChannelManager {
                     currentInetSocketAddressList.add(address);
                 }
             } else {
+                if (currentInetSocketAddressList.contains(address)){
+                    currentInetSocketAddressList.remove(address);
+                }
                 LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
             }
         }
@@ -270,7 +273,7 @@ class NettyClientChannelManager {
 
     void checkAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
-                                                                             .lookup(transactionServiceGroup);
+                .lookup(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             LOGGER.warn("get empty server address list when TM client init");
             return;
