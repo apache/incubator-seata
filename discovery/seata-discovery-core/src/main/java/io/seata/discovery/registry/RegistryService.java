@@ -16,7 +16,11 @@
 package io.seata.discovery.registry;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.seata.config.ConfigurationCache;
@@ -113,15 +117,10 @@ public interface RegistryService<T> {
         return ConfigurationFactory.getInstance().getConfig(key);
     }
 
-    default Map<String,List<InetSocketAddress>> getAddressMap(){
-        return CURRENT_ADDRESS_MAP;
-    }
-
-    default List<InetSocketAddress> getAddressList(String transactionServiceGroup){
-        if (CURRENT_ADDRESS_MAP.get(transactionServiceGroup) == null){
-            CURRENT_ADDRESS_MAP.put(transactionServiceGroup,new CopyOnWriteArrayList<>());
+    default List<InetSocketAddress> getAddressList(String transactionServiceGroup) {
+        if (CURRENT_ADDRESS_MAP.get(transactionServiceGroup) == null) {
+            CURRENT_ADDRESS_MAP.put(transactionServiceGroup, new CopyOnWriteArrayList<>());
         }
         return CURRENT_ADDRESS_MAP.get(transactionServiceGroup);
     }
-
 }
