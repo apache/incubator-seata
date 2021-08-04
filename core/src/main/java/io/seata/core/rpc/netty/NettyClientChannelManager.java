@@ -227,7 +227,7 @@ class NettyClientChannelManager {
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
-            LOGGER.error("{} register RM failed.",FrameworkErrorCode.RegisterRM.getErrCode(), exx);
+            LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);
             throw new FrameworkException("can not register RM,err:" + exx.getMessage());
         }
         return channelFromPool;
@@ -258,7 +258,7 @@ class NettyClientChannelManager {
                     currentInetSocketAddressList.add(address);
                 }
             } else {
-                if (currentInetSocketAddressList.contains(address)){
+                if (currentInetSocketAddressList.contains(address)) {
                     currentInetSocketAddressList.remove(address);
                 }
                 LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
@@ -278,8 +278,8 @@ class NettyClientChannelManager {
             LOGGER.warn("get empty server address list when TM client init");
             return;
         }
-        List<InetSocketAddress> currentInetSocketAddressList= RegistryFactory.getInstance()
-                                                                            .getAddressList(transactionServiceGroup);
+        List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
+                .getAddressList(transactionServiceGroup);
         for (InetSocketAddress address : availInetSocketAddressList) {
             boolean canConnect = false;
             for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
