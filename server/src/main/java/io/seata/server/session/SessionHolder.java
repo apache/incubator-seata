@@ -112,7 +112,7 @@ public class SessionHolder {
 
             String lockerType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
-        } else if (StoreMode.FILE.equals(storeMode)) {
+        } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator + XID.getPort();
             if (StringUtils.isBlank(sessionStorePath)) {

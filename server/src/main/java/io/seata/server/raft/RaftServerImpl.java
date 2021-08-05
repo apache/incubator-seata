@@ -21,11 +21,9 @@ import java.util.concurrent.TimeUnit;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
-import com.alipay.sofa.jraft.RaftServiceFactory;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.PeerId;
-import com.alipay.sofa.jraft.option.CliOptions;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
@@ -38,6 +36,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.raft.AbstractRaftServer;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServer;
+import io.seata.core.raft.RaftServerFactory;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +75,7 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         nodeOptions.setEnableMetrics(reporterEnabled);
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
-        this.cliService = RaftServiceFactory.createAndInitCliService(new CliOptions());
+        this.cliService = RaftServerFactory.getCliServiceInstance();
         ConfigurationCache.addConfigListener(SERVER_RAFT_CLUSTER, this);
         this.node = this.raftGroupService.start();
         if (reporterEnabled) {
