@@ -22,7 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -44,6 +47,8 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+
+import javax.annotation.PostConstruct;
 
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
@@ -92,20 +97,58 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return instance;
     }
 
+
+    /*
+    Map for LogOperation Global Operation
+    */
+    public static volatile ImmutableMap<LogOperation, Function<GlobalTransactionDO, Boolean>> globalMap;
+
+    /*
+    Map for LogOperation Branch Operation
+     */
+    public static volatile ImmutableMap<LogOperation, Function<BranchTransactionDO, Boolean>> branchMap;
+
+    /**
+     * init globalMap
+     *
+     * @param
+     * @return void
+     */
+    @PostConstruct
+    public void initGlobalMap() {
+        if (CollectionUtils.isEmpty(branchMap)) {
+            globalMap = ImmutableMap.<LogOperation, Function<GlobalTransactionDO, Boolean>>builder()
+                    .put(LogOperation.GLOBAL_ADD, this::insertGlobalTransactionDO)
+                    .put(LogOperation.GLOBAL_UPDATE, this::updateGlobalTransactionDO)
+                    .put(LogOperation.GLOBAL_REMOVE, this::deleteGlobalTransactionDO)
+                    .build();
+        }
+    }
+
+    /**
+     * init branchMap
+     *
+     * @param
+     * @return void
+     */
+    @PostConstruct
+    public void initBranchMap() {
+        if (CollectionUtils.isEmpty(branchMap)) {
+            branchMap = ImmutableMap.<LogOperation, Function<BranchTransactionDO, Boolean>>builder()
+                    .put(LogOperation.BRANCH_ADD, this::insertBranchTransactionDO)
+                    .put(LogOperation.BRANCH_UPDATE, this::updateBranchTransactionDO)
+                    .put(LogOperation.BRANCH_REMOVE, this::deleteBranchTransactionDO)
+                    .build();
+        }
+    }
+
+
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-        if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
-            return insertGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
-        } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
-            return updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
-        } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            return deleteGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
-        } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
-            return insertBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
-        } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
-            return updateBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
-        } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
-            return deleteBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
+        if (globalMap.containsKey(logOperation) || branchMap.containsKey(logOperation)) {
+            return globalMap.containsKey(logOperation) ?
+                    globalMap.get(logOperation).apply(SessionConverter.convertGlobalTransactionDO(session)) :
+                    branchMap.get(logOperation).apply(SessionConverter.convertBranchTransactionDO(session));
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
