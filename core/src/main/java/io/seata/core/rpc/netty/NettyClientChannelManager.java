@@ -238,7 +238,7 @@ class NettyClientChannelManager {
                 .lookup(transactionServiceGroup);
 
         List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
-                .getAddressList(transactionServiceGroup);
+                .getCheckedAddressList(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             if (CollectionUtils.isEmpty(currentInetSocketAddressList)) {
                 currentInetSocketAddressList.clear();
@@ -264,8 +264,8 @@ class NettyClientChannelManager {
                 LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
             }
         }
+        currentInetSocketAddressList.removeIf(inetSocketAddress -> !availInetSocketAddressList.contains(inetSocketAddress));
         return currentInetSocketAddressList.stream()
-                .filter(inetSocketAddress -> availInetSocketAddressList.contains(inetSocketAddress))
                 .map(NetUtil::toStringAddress)
                 .collect(Collectors.toList());
     }
@@ -279,7 +279,7 @@ class NettyClientChannelManager {
             return;
         }
         List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
-                .getAddressList(transactionServiceGroup);
+                .getCheckedAddressList(transactionServiceGroup);
         for (InetSocketAddress address : availInetSocketAddressList) {
             boolean canConnect = false;
             for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
@@ -289,9 +289,7 @@ class NettyClientChannelManager {
                 }
             }
             if (canConnect) {
-                if (!currentInetSocketAddressList.contains(address)) {
-                    currentInetSocketAddressList.add(address);
-                }
+                currentInetSocketAddressList.add(address);
                 break;
             } else {
                 LOGGER.warn("can not connect to this server address '{}' when TM client init", address.toString());

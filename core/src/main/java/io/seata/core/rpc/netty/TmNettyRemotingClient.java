@@ -185,7 +185,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         } catch (Exception e) {
             LOGGER.error("Failed to check available servers when TM Client init: {}", e.getMessage(), e);
         }
-        return;
     }
 
     @Override
