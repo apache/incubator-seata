@@ -18,22 +18,10 @@ package io.seata.core.rpc.netty;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.netty.tls.ServerCertificateType;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 
 import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
@@ -336,58 +324,11 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the SslContext
      */
     public SslContext getSslContext() {
-        SslContext sslContext = null;
-        String certificateType = getServerCertificateType();
-        String tlsVersion = getTlsVersion();
-        if ("PKCS12".equalsIgnoreCase(certificateType) || "JKS".equalsIgnoreCase(certificateType)) {
-            String certificatePath = getServerCertificatePath();
-            String certificatePassword = getServerCertificatePassword();
-            InputStream certificateFile = null;
-            try {
-                certificateFile = new FileInputStream(certificatePath);
-                KeyStore keyStore = KeyStore.getInstance(certificateType);
-                keyStore.load(certificateFile, certificatePassword.toCharArray());
-                String algorithm = KeyManagerFactory.getDefaultAlgorithm();
-                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(algorithm);
-                keyManagerFactory.init(keyStore, certificatePassword.toCharArray());
-
-                SslContextBuilder sslContextBuilder = SslContextBuilder.forServer(keyManagerFactory)
-                    .clientAuth(ClientAuth.NONE);
-                if (tlsVersion != null) {
-                    sslContextBuilder.protocols(tlsVersion);
-                }
-                sslContext = sslContextBuilder.build();
-                return sslContext;
-            } catch (KeyStoreException | IOException | NoSuchAlgorithmException |
-                    UnrecoverableKeyException | CertificateException e) {
-                e.printStackTrace();
-            } finally {
-                if (certificateFile != null) {
-                    try {
-                        certificateFile.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        if ("PEM".equalsIgnoreCase(certificateType)) {
-            File certificateFile = new File(getServerCertificatePath());
-            File keyFile = new File(getServerKeyFilePath());
-            try {
-                SslContextBuilder sslContextBuilder = SslContextBuilder.forServer(certificateFile, keyFile)
-                    .clientAuth(ClientAuth.NONE);
-                if (tlsVersion != null) {
-                    sslContextBuilder.protocols(tlsVersion);
-                }
-                sslContext = sslContextBuilder.build();
-                return sslContext;
-            } catch (SSLException e) {
-                e.printStackTrace();
-            }
-        }
-        throw new IllegalArgumentException("unknown certificateType:" + certificateType);
+        return ServerCertificateType.valueOf(getServerCertificateType())
+            .getSslContext(getTlsVersion(), getServerCertificatePath(),
+                 getServerCertificatePassword(), getServerKeyFilePath());
     }
+
     /**
      * Get the certificate type, support PKCS12, JKS and PEM.
      *

@@ -466,12 +466,12 @@ public class NettyClientConfig extends NettyBaseConfig {
      */
     public SslContext getSslContext() {
         SslContext sslContext = null;
+        String tlsVersion = getTlsVersion();
         String trustCertificatePath = getTrustCertificatePath();
         File trustCertificate = null;
         if (trustCertificatePath != null) {
             trustCertificate = new File(trustCertificatePath);
         }
-        String tlsVersion = getTlsVersion();
         try {
             SslContextBuilder sslContextBuilder = SslContextBuilder.forClient()
                 .trustManager(trustCertificate).clientAuth(ClientAuth.NONE);
