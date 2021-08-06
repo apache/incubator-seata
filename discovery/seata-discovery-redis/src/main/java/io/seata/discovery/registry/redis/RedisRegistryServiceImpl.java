@@ -38,10 +38,7 @@ import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPubSub;
-import redis.clients.jedis.Protocol;
+import redis.clients.jedis.*;
 
 /**
  * The type Redis registry service.
@@ -142,8 +139,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource()) {
-            jedis.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
-            jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            Pipeline pipelined = jedis.pipelined();
+            pipelined.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
+            pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            pipelined.sync();
         }
     }
 
@@ -152,8 +151,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource()) {
-            jedis.hdel(getRedisRegistryKey(), serverAddr);
-            jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.UN_REGISTER);
+            Pipeline pipelined = jedis.pipelined();
+            pipelined.hdel(getRedisRegistryKey(), serverAddr);
+            pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.UN_REGISTER);
+            pipelined.sync();
         }
     }
 
