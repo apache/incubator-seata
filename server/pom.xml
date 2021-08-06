@@ -151,6 +151,13 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
+        <!--HBase-->
+        <dependency>
+            <groupId>com.aliyun.hbase</groupId>
+            <artifactId>alihbase-client</artifactId>
+            <version>2.8.4</version>
+        </dependency>
+
         <!-- logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>

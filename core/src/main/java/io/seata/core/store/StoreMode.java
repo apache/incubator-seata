@@ -35,7 +35,13 @@ public enum StoreMode {
     /**
      * redis store
      */
-    REDIS("redis");
+    REDIS("redis"),
+
+
+    /**
+     * hbase store
+     */
+    HBASE("hbase");
 
     private String name;
 

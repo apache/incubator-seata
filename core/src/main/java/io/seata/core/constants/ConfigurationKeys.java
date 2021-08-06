@@ -225,6 +225,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_PREFIX = "store.redis.";
 
     /**
+     * The constant STORE_HBASE_PREFIX.
+     */
+    String STORE_HBASE_PREFIX = "store.hbase.";
+
+    /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
     String STORE_DB_GLOBAL_TABLE = STORE_DB_PREFIX + "globalTable";
@@ -624,6 +629,31 @@ public interface ConfigurationKeys {
      * STORE_REDIS_SENTINEL_MASTERNAME.
      */
     String STORE_REDIS_SENTINEL_MASTERNAME = STORE_REDIS_SENTINEL_PREFIX + "masterName";
+
+    /**
+     * STORE_HBASE_ZOOKEEPER_QUORUM
+     */
+    String STORE_HBASE_ZOOKEEPER_QUORUM = STORE_HBASE_PREFIX + "zookeeperQuorum";
+
+    /**
+     * STORE_HBASE_PROPERTY_CLIENTPORT
+     */
+    String STORE_HBASE_PROPERTY_CLIENTPORT = STORE_HBASE_PREFIX + "propertyClientPort";
+
+    /**
+     * STORE_HBASE_POOL_PREFIX
+     */
+    String STORE_HBASE_POOL_PREFIX = STORE_HBASE_PREFIX + "pool.";
+
+    /**
+     * STORE_HBASE_POOL_TYPE
+     */
+    String STORE_HBASE_POOL_TYPE = STORE_HBASE_POOL_PREFIX + "type";
+
+    /**
+     * STORE_HBASE_POOL_SIZE
+     */
+    String STORE_HBASE_POOL_SIZE = STORE_HBASE_POOL_PREFIX + "size";
 
     /**
      * STORE_REDIS_SENTINEL_HOST.

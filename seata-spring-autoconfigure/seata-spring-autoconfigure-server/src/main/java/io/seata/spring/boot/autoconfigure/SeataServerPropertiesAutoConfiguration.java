@@ -19,28 +19,12 @@ import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerUndoProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
 
 
 /**
@@ -64,5 +48,7 @@ public class SeataServerPropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(STORE_REDIS_PREFIX, StoreRedisProperties.class);
         PROPERTY_BEAN_MAP.put(STORE_REDIS_SINGLE_PREFIX, StoreRedisProperties.Single.class);
         PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
+        PROPERTY_BEAN_MAP.put(STORE_HBASE_PREFIX, StoreHBaseProperties.class);
+        PROPERTY_BEAN_MAP.put(STORE_HBASE_POOL_PREFIX, StoreHBaseProperties.Pool.class);
     }
 }

@@ -146,6 +146,12 @@ seata:
       sentinel:
         master-name:
         sentinel-hosts:
+    hbase:
+      pool:
+        type: Reusable
+        size: 1
+      zookeeper-quorum: hadoop1
+      property-clientPort: 2181
   metrics:
     enabled: false
     registry-type: compact

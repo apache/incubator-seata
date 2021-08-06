@@ -74,6 +74,8 @@ public interface StarterConstants {
     String STORE_REDIS_PREFIX = STORE_PREFIX + ".redis";
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
+    String STORE_HBASE_PREFIX = STORE_PREFIX + ".hbase";
+    String STORE_HBASE_POOL_PREFIX = STORE_HBASE_PREFIX + ".pool";
 
 
     int MAP_CAPACITY = 64;

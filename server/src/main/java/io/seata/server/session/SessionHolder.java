@@ -137,6 +137,16 @@ public class SessionHolder {
                 StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
+        } else if (StoreMode.HBASE.equals(storeMode)) {
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.HBASE.getName());
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                    StoreMode.HBASE.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                    StoreMode.HBASE.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                    StoreMode.HBASE.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.HBASE.getName());
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
