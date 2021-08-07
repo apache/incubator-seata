@@ -290,7 +290,9 @@ public abstract class AbstractNettyRemoting implements Disposable {
                             String pid = name.split("@")[0];
                             long idx = System.currentTimeMillis();
                             try {
-                                Runtime.getRuntime().exec("jstack " + pid + " > " + idx + ".log");
+                                String jstackFile = idx + ".log";
+                                LOGGER.info("jstack command will dump to "+ jstackFile);
+                                Runtime.getRuntime().exec("jstack " + pid + " > " + jstackFile);
                             } catch (IOException exx) {
                                 LOGGER.error(exx.getMessage());
                             }
