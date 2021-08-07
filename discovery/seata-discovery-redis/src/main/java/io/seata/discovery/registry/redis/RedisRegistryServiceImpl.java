@@ -143,8 +143,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     public void register(InetSocketAddress address) {
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
-        try (Jedis jedis = jedisPool.getResource()) {
-            Pipeline pipelined = jedis.pipelined();
+        try (Pipeline pipelined = jedisPool.getResource().pipelined()) {
             pipelined.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
             pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
             pipelined.sync();
@@ -155,8 +154,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     public void unregister(InetSocketAddress address) {
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
-        try (Jedis jedis = jedisPool.getResource()) {
-            Pipeline pipelined = jedis.pipelined();
+        try (Pipeline pipelined = jedisPool.getResource().pipelined()) {
             pipelined.hdel(getRedisRegistryKey(), serverAddr);
             pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.UN_REGISTER);
             pipelined.sync();
