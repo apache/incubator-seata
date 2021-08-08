@@ -2,7 +2,7 @@
 
 如果你有兴趣寻找关于Seata的漏洞，我们会热烈欢迎。首先，我们非常鼓励这种意愿。这是为您提供的贡献指南列表。
 
-[[English Contributing Document](./CONTRIBUTING_CN.md)]
+[[English Contributing Document](./CONTRIBUTING.md)]
 
 ## 话题
 
