@@ -143,7 +143,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     public void register(InetSocketAddress address) {
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
-        try (Pipeline pipelined = jedisPool.getResource().pipelined()) {
+        try (Jedis jedis = jedisPool.getResource();
+             Pipeline pipelined = jedis.pipelined()) {
             pipelined.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
             pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
             pipelined.sync();
@@ -154,7 +155,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     public void unregister(InetSocketAddress address) {
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
-        try (Pipeline pipelined = jedisPool.getResource().pipelined()) {
+        try (Jedis jedis = jedisPool.getResource();
+             Pipeline pipelined = jedis.pipelined()) {
             pipelined.hdel(getRedisRegistryKey(), serverAddr);
             pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.UN_REGISTER);
             pipelined.sync();
@@ -168,21 +170,14 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 .add(listener);
         threadPoolExecutor.scheduleAtFixedRate(() -> {
             try {
-                Map<String, String> instances;
                 try (Jedis jedis = jedisPool.getResource()) {
-                    instances = jedis.hgetAll(redisRegistryKey);
-                    if (instances != null && !instances.isEmpty()) {
-                        Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
-                                .map(NetUtil::toInetSocketAddress)
-                                .collect(Collectors.toSet());
-                        CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
-                    }
+                    updateClusterAddressMap(jedis, redisRegistryKey);
                     jedis.subscribe(new NotifySub(LISTENER_SERVICE_MAP.get(cluster)), redisRegistryKey);
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
-        },0,1, TimeUnit.MILLISECONDS);
+        }, 0, 1, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -197,15 +192,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             String redisRegistryKey = REDIS_FILEKEY_PREFIX + clusterName;
-            Map<String, String> instances;
             try (Jedis jedis = jedisPool.getResource()) {
-                instances = jedis.hgetAll(redisRegistryKey);
-            }
-            if (instances != null && !instances.isEmpty()) {
-                Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
-                        .map(NetUtil::toInetSocketAddress)
-                        .collect(Collectors.toSet());
-                CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
+                updateClusterAddressMap(jedis, redisRegistryKey);
             }
             subscribe(clusterName, msg -> {
                 String[] msgr = msg.split("-");
@@ -249,6 +237,16 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             for (RedisListener listener : redisListeners) {
                 listener.onEvent(msg);
             }
+        }
+    }
+
+    private void updateClusterAddressMap(Jedis jedis, String redisRegistryKey) {
+        Map<String, String> instances = jedis.hgetAll(redisRegistryKey);
+        if (instances != null && !instances.isEmpty()) {
+            Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
+                    .map(NetUtil::toInetSocketAddress)
+                    .collect(Collectors.toSet());
+            CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
         }
     }
 
