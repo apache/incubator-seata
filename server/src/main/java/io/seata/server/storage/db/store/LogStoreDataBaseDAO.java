@@ -516,6 +516,8 @@ public class LogStoreDataBaseDAO implements LogStore {
             } catch (SQLException e) {
                 throw new StoreException(e);
             }
+        } else if ("sqlserver".equalsIgnoreCase(dbType)) {
+            return conn.getSchema();
         } else {
             return conn.getMetaData().getUserName();
         }
