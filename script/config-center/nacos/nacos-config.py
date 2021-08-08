@@ -6,7 +6,7 @@ import sys
 import urllib.parse
 
 if len(sys.argv) < 2:
-    print ('python nacos-config.py nacosAddr')
+    print ('python nacos-config.py nacosHost')
     exit()
 
 headers = {
@@ -16,7 +16,7 @@ headers = {
 hasError = False
 for line in open('../config.txt'):
     pair = line.rstrip("\n").split('=')
-    if len(pair) < 2:
+    if len(pair) < 2 or pair[1] == '':
         continue
     print (line),
     url_prefix = sys.argv[1]
@@ -24,6 +24,11 @@ for line in open('../config.txt'):
     if len(sys.argv) == 3:
         namespace=sys.argv[2]
         url_postfix = '/nacos/v1/cs/configs?dataId={0}&group=SEATA_GROUP&content={1}&tenant={2}'.format(urllib.parse.quote(str(pair[0])),urllib.parse.quote(str(pair[1])).strip(),namespace)
+    elif len(sys.argv) == 5:
+        namespace=sys.argv[2]
+        username=sys.argv[3]
+        password=sys.argv[4]
+        url_postfix = '/nacos/v1/cs/configs?dataId={0}&group=SEATA_GROUP&content={1}&tenant={2}&username={3}&password{4}'.format(urllib.parse.quote(str(pair[0])),urllib.parse.quote(str(pair[1])).strip(),namespace,username,password)
     else:
         url_postfix = '/nacos/v1/cs/configs?dataId={}&group=SEATA_GROUP&content={}'.format(urllib.parse.quote(str(pair[0])),urllib.parse.quote(str(pair[1]))).strip()
     conn.request("POST", url_postfix, headers=headers)
