@@ -149,13 +149,13 @@ upstream   no-pushing (push)
 
 ### PR说明
 
-PR 是更改 Seata 项目文件的唯一方法。为了帮助审稿人更好地理解你的目的，PR 描述不能太详细。我们鼓励贡献者遵循 [PR 模板](./.github/PULL_REQUEST_TEMPLATE.md) 来完成拉取请求。
+PR 是更改 Seata 项目文件的唯一方法。为了帮助审查人更好地理解你的目的，PR 描述不能太详细。我们鼓励贡献者遵循 [PR 模板](./.github/PULL_REQUEST_TEMPLATE.md) 来完成拉取请求。
 
 ## 测试用例贡献
 
 任何测试用例都会受到欢迎。目前，Seata 功能测试用例是高优先级的。
 
-* 对于单元测试，您需要xxxTest.java在同一模块的 test 目录中创建一个名为的测试文件。推荐你使用junit5 UT框架
+* 对于单元测试，您需要在同一模块的 test 目录中创建一个名为 xxxTest.java 的测试文件。推荐你使用junit5 UT框架
 
 * 对于集成测试，您可以将集成测试放在 test 目录或 seata-test 模块中。推荐使用mockito测试框架。
 
@@ -169,7 +169,7 @@ PR 是更改 Seata 项目文件的唯一方法。为了帮助审稿人更好地�
 * 帮助审查其他人在 PR 中的代码；
 * 讨论 Seata 以使事情更清楚；
 * 在Github之外宣传Seata技术；
-* 在 Seata 上写博客等等。
+* 写关于 Seata 的博客等等。
 
 
 ## 代码风格
