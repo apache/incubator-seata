@@ -15,11 +15,16 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
@@ -32,10 +37,6 @@ import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeoutException;
 
 /**
  * The type abstract remoting server.
@@ -229,11 +230,15 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
          */
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("channel exx:" + cause.getMessage() + ",channel:" + ctx.channel());
+            try {
+                if (cause instanceof DecoderException && null == ChannelManager.getContextFromIdentified(ctx.channel())) {
+                    return;
+                }
+                LOGGER.error("exceptionCaught:{}, channel:{}", cause.getMessage(), ctx.channel());
+                super.exceptionCaught(ctx, cause);
+            } finally {
+                ChannelManager.releaseRpcContext(ctx.channel());
             }
-            ChannelManager.releaseRpcContext(ctx.channel());
-            super.exceptionCaught(ctx, cause);
         }
 
         /**
