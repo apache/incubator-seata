@@ -2,15 +2,15 @@
 -- the table to store GlobalSession data
 CREATE TABLE [global_table]
 (
-    [xid]                       varchar(128)  NOT NULL,
+    [xid]                       nvarchar(128)  NOT NULL,
     [transaction_id]            bigint        NULL,
     [status]                    tinyint       NOT NULL,
-    [application_id]            varchar(32)   NULL,
-    [transaction_service_group] varchar(32)   NULL,
-    [transaction_name]          varchar(128)  NULL,
+    [application_id]            nvarchar(32)   NULL,
+    [transaction_service_group] nvarchar(32)   NULL,
+    [transaction_name]          nvarchar(128)  NULL,
     [timeout]                   int           NULL,
     [begin_time]                bigint        NULL,
-    [application_data]          varchar(2000) NULL,
+    [application_data]          nvarchar(2000) NULL,
     [gmt_create]                datetime      NULL,
     [gmt_modified]              datetime      NULL,
     PRIMARY KEY CLUSTERED ([xid])
@@ -35,14 +35,14 @@ GO
 CREATE TABLE [branch_table]
 (
     [branch_id]         bigint        NOT NULL,
-    [xid]               varchar(128)  NOT NULL,
+    [xid]               nvarchar(128)  NOT NULL,
     [transaction_id]    bigint        NULL,
-    [resource_group_id] varchar(32)   NULL,
-    [resource_id]       varchar(256)  NULL,
+    [resource_group_id] nvarchar(32)   NULL,
+    [resource_id]       nvarchar(256)  NULL,
     [branch_type]       varchar(8)    NULL,
     [status]            tinyint       NULL,
-    [client_id]         varchar(64)   NULL,
-    [application_data]  varchar(2000) NULL,
+    [client_id]         nvarchar(64)   NULL,
+    [application_data]  nvarchar(2000) NULL,
     [gmt_create]        datetime      NULL,
     [gmt_modified]      datetime      NULL,
     PRIMARY KEY CLUSTERED ([branch_id])
@@ -59,13 +59,13 @@ GO
 -- the table to store lock data
 CREATE TABLE [lock_table]
 (
-    [row_key]        varchar(128) NOT NULL,
-    [xid]            varchar(128) NULL,
+    [row_key]        nvarchar(128) NOT NULL,
+    [xid]            nvarchar(128) NULL,
     [transaction_id] bigint       NULL,
     [branch_id]      bigint       NOT NULL,
-    [resource_id]    varchar(256) NULL,
-    [table_name]     varchar(32)  NULL,
-    [pk]             varchar(36)  NULL,
+    [resource_id]    nvarchar(256) NULL,
+    [table_name]     nvarchar(32)  NULL,
+    [pk]             nvarchar(36)  NULL,
     [gmt_create]     datetime     NULL,
     [gmt_modified]   datetime     NULL,
     PRIMARY KEY CLUSTERED ([row_key])
