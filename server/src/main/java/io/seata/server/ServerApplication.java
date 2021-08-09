@@ -15,13 +15,13 @@
  */
 package io.seata.server;
 
+import java.io.FileNotFoundException;
+
 import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.PortHelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
 
 import static io.seata.common.DefaultValues.SERVER_PORT;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
@@ -31,7 +31,7 @@ import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
  */
 @SpringBootApplication
 public class ServerApplication {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
         // port: env,-h > -D > default
         int port = PortHelper.getPortFromEnvOrStartup(args);
@@ -39,15 +39,14 @@ public class ServerApplication {
             System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(port));
         }
 
-        // run the spring-boot application
-        ConfigurableApplicationContext context = SpringApplication.run(ServerApplication.class, args);
         if (StringUtils.isBlank(System.getProperty(ConfigurationKeys.SERVER_RPC_PORT))) {
-            Environment environment = context.getBean(Environment.class);
-            String serverPort = environment.getProperty("server.port");
-            int servicePort = Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT;
-            System.setProperty(SERVER_PORT, serverPort);
+            int serverPort = PortHelper.getPortFromYml();
+            int servicePort = serverPort + SERVICE_OFFSET_SPRING_BOOT;
+            System.setProperty(SERVER_PORT, String.valueOf(serverPort));
             System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(servicePort));
         }
+        // run the spring-boot application
+        SpringApplication.run(ServerApplication.class, args);
 
     }
 }
