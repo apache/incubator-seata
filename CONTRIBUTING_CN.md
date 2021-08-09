@@ -119,11 +119,11 @@ upstream   no-pushing (push)
 
 提交消息可以帮助审稿人更好地理解提交 PR 的目的是什么。它还可以帮助加快代码审查过程。我们鼓励贡献者使用显式的提交信息，而不是模糊的信息。一般来说，我们提倡以下提交消息类型：
 
-* 文档：xxxx。例如，“docs：添加有关 Seata 集群安装的文档”。
-* 特征：xxxx。例如，“特征：在AT模式下支持oracle”。
-* 错误修正：xxxx。例如，“错误修正：在输入 nil 参数时修复故障（宕机）”。
-* 重构：xxxx。例如，“重构：简化以使代码更具可读性”。
-* 测试：xxx。例如，“测试：为 func InsertIntoArray 添加单元测试用例”。
+* docs: xxxx. For example, "docs: add docs about Seata cluster installation".
+* feature: xxxx.For example, "feature: support oracle in AT mode".
+* bugfix: xxxx. For example, "bugfix: fix panic when input nil parameter".
+* refactor: xxxx. For example, "refactor: simplify to make codes more readable".
+* test: xxx. For example, "test: add unit test case for func InsertIntoArray".
 * 其他可读和显式的表达方式。
 
 另一方面，我们不鼓励贡献者通过以下方式提交消息：
