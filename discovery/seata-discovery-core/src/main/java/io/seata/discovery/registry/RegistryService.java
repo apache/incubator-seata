@@ -118,7 +118,6 @@ public interface RegistryService<T> {
     }
 
     default List<InetSocketAddress> getCheckedAddressList(String transactionServiceGroup) {
-        CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,k->new CopyOnWriteArrayList<>());
-        return CURRENT_ADDRESS_MAP.get(transactionServiceGroup);
+        return CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,k->new CopyOnWriteArrayList<>());
     }
 }
