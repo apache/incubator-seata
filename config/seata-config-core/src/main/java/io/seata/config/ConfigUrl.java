@@ -3,17 +3,31 @@ package io.seata.config;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * use url to config tne configuration center
+ *
+ * @author liujian
+ */
 public class ConfigUrl {
 
-    /** config url */
+    /**
+     * config url
+     */
     private String url;
-    /** config type */
+    /**
+     * config type
+     */
     private String protocol;
-    /** config serverAddr */
+    /**
+     * config serverAddr
+     */
     private String host;
     private int port;
     private String path;
-    /** config center paramters */
+    /**
+     * config center paramters
+     */
     private Map<String, String> parameters = new HashMap<>();
 
 
@@ -71,7 +85,7 @@ public class ConfigUrl {
                 this.port = Integer.parseInt(url.substring(index + 1));
             }
             this.host = url;
-        }else {
+        } else {
             throw new IllegalArgumentException("url == null");
         }
     }
@@ -92,6 +106,7 @@ public class ConfigUrl {
     public void setUrl(String url) {
         this.url = url;
     }
+
     public String getUrl() {
         return url;
     }

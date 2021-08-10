@@ -8,19 +8,28 @@ import java.util.Map;
 
 /**
  * use url to config tne register center
+ *
  * @author liujian
  */
 public class RegistryURL {
 
-    /** register url */
+    /**
+     * register url
+     */
     private String url;
-    /** register type */
+    /**
+     * register type
+     */
     private String protocol;
-    /** serverAddr */
+    /**
+     * serverAddr
+     */
     private String host;
     private int port;
     private String path;
-    /** register center paramters */
+    /**
+     * register center paramters
+     */
     private Map<String, String> parameters = new HashMap<>();
 
     private static RegistryURL instance;
@@ -77,7 +86,7 @@ public class RegistryURL {
                 this.port = Integer.parseInt(url.substring(index + 1));
             }
             this.host = url;
-        }else {
+        } else {
             throw new IllegalArgumentException("url == null");
         }
     }
@@ -105,6 +114,7 @@ public class RegistryURL {
     public String getPath() {
         return path;
     }
+
     public String getProtocol() {
         return protocol;
     }

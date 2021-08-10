@@ -107,9 +107,9 @@ public final class ConfigurationFactory {
             throw new NotSupportYetException("config type can not be null");
         }
         ConfigType configType;
-        if (StringUtils.equals(configTypeName,ConfigurationKeys.URL)){
+        if (StringUtils.equals(configTypeName, ConfigurationKeys.URL)) {
             configType = ConfigType.getType(CONFIG_URL.getProtocol());
-        }else {
+        } else {
             configType = ConfigType.getType(configTypeName);
         }
         Configuration extConfiguration = null;
