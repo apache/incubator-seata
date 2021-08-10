@@ -117,7 +117,7 @@ public interface RegistryService<T> {
         return ConfigurationFactory.getInstance().getConfig(key);
     }
 
-    default List<InetSocketAddress> getCheckedAddressList(String transactionServiceGroup) {
+    default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
         return CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new CopyOnWriteArrayList<>());
     }
 }

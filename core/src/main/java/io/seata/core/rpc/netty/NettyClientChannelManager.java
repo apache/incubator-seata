@@ -238,7 +238,7 @@ class NettyClientChannelManager {
                 .lookup(transactionServiceGroup);
 
         List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
-                .getCheckedAddressList(transactionServiceGroup);
+                .aliveLookup(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             if (CollectionUtils.isEmpty(currentInetSocketAddressList)) {
                 currentInetSocketAddressList.clear();
@@ -279,7 +279,7 @@ class NettyClientChannelManager {
             return;
         }
         List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
-                .getCheckedAddressList(transactionServiceGroup);
+                .aliveLookup(transactionServiceGroup);
         for (InetSocketAddress address : availInetSocketAddressList) {
             boolean canConnect = false;
             for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
