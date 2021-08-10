@@ -20,7 +20,6 @@ import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public class SqlServerUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, State.Normal, conn);
+        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
