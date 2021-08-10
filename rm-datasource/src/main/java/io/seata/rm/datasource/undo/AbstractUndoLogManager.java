@@ -382,6 +382,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     }
 
     /**
+     * Construct a lock query sql
+     *
+     * @return sql
+     */
+    protected String buildSelectUndoSql() {
+        return SELECT_UNDO_LOG_SQL;
+    }
+
+    /**
      * insert uodo log when global finished
      *
      * @param xid           the xid
