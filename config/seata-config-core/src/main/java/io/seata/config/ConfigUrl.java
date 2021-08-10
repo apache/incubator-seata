@@ -15,6 +15,8 @@
  */
 package io.seata.config;
 
+import io.seata.common.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,9 +52,10 @@ public class ConfigUrl {
     public static ConfigUrl getInstance() {
         if (instance == null) {
             synchronized (ConfigUrl.class) {
-                String url = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG
-                        + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL);
-                instance = new ConfigUrl(url);
+                if (StringUtils.equals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(getConfigTypeKey()), ConfigurationKeys.URL)) {
+                    String url = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(getConfigUrlKey());
+                    instance = new ConfigUrl(url);
+                }
             }
         }
         return instance;
@@ -140,4 +143,13 @@ public class ConfigUrl {
     public String getPassword() {
         return this.parameters.get("password");
     }
+
+    public static String getConfigTypeKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE;
+    }
+
+    public static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
+    }
+
 }

@@ -15,6 +15,7 @@
  */
 package io.seata.discovery.registry;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
 
@@ -52,9 +53,10 @@ public class RegistryURL {
     public static RegistryURL getInstance() {
         if (instance == null) {
             synchronized (RegistryURL.class) {
-                String url = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY
-                        + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL);
-                instance = new RegistryURL(url);
+                if (StringUtils.equals(getRegistryTypeKey(), ConfigurationKeys.URL)) {
+                    String url = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(getRegistryUrlKey());
+                    instance = new RegistryURL(url);
+                }
             }
         }
         return instance;
@@ -141,4 +143,13 @@ public class RegistryURL {
     public int getPort() {
         return port;
     }
+
+    public static String getRegistryUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
+    }
+
+    public static String getRegistryTypeKey() {
+        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE;
+    }
+
 }
