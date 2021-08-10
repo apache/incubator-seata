@@ -173,8 +173,17 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     public void init() {
         // registry processor
         registerProcessor();
+        checkAddressList(this.transactionServiceGroup);
         if (initialized.compareAndSet(false, true)) {
             super.init();
+        }
+    }
+
+    public void checkAddressList(String transactionServiceGroup) {
+        try {
+            getClientChannelManager().checkAvailServerList(transactionServiceGroup);
+        } catch (Exception e) {
+            LOGGER.error("Failed to check available servers when TM Client init: {}", e.getMessage(), e);
         }
     }
 
