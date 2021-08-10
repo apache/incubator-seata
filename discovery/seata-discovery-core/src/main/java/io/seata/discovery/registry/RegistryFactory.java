@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
 
@@ -30,7 +31,7 @@ import io.seata.config.ConfigurationKeys;
 public class RegistryFactory {
 
     private static volatile RegistryService instance = null;
-
+    private static final RegistryURL REGISTRY_URL = RegistryURL.getInstance();
     /**
      * Gets instance.
      *
@@ -49,11 +50,14 @@ public class RegistryFactory {
 
     private static RegistryService buildRegistryService() {
         RegistryType registryType;
-        String registryTypeName = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(
-            ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+        String registryTypeName = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
         try {
-            registryType = RegistryType.getType(registryTypeName);
+            if (StringUtils.equals(registryTypeName, ConfigurationKeys.URL)) {
+                registryType = RegistryType.getType(REGISTRY_URL.getProtocol());
+            } else {
+                registryType = RegistryType.getType(registryTypeName);
+            }
         } catch (Exception exx) {
             throw new NotSupportYetException("not support registry type: " + registryTypeName);
         }

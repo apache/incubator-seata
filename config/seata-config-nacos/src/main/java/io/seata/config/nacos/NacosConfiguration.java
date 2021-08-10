@@ -36,12 +36,7 @@ import com.alibaba.nacos.api.exception.NacosException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
+import io.seata.config.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +64,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private static final ConfigUrl CONFIG_URL = ConfigUrl.getInstance();
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
@@ -97,7 +93,11 @@ public class NacosConfiguration extends AbstractConfiguration {
     private NacosConfiguration() {
         if (configService == null) {
             try {
-                configService = NacosFactory.createConfigService(getConfigProperties());
+                if (StringUtils.equals(FILE_CONFIG.getConfig(getConfigUrlKey()),ConfigurationKeys.URL)){
+                    configService = NacosFactory.createConfigService(getConfigPropertiesWithUrl());
+                }else {
+                    configService = NacosFactory.createConfigService(getConfigProperties());
+                }
                 initSeataConfig();
             } catch (NacosException e) {
                 throw new RuntimeException(e);
@@ -242,8 +242,48 @@ public class NacosConfiguration extends AbstractConfiguration {
         return properties;
     }
 
+    private static Properties getConfigPropertiesWithUrl() {
+        Properties properties = new Properties();
+        if (System.getProperty(ENDPOINT_KEY) != null) {
+            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
+            properties.put(ACCESS_KEY, Objects.toString(System.getProperty(ACCESS_KEY), ""));
+            properties.put(SECRET_KEY, Objects.toString(System.getProperty(SECRET_KEY), ""));
+        } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
+        } else {
+            String address = CONFIG_URL.getHost();
+            if (address != null) {
+                properties.setProperty(PRO_SERVER_ADDR_KEY, address);
+            }
+        }
+        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
+            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
+        } else {
+            String namespace = CONFIG_URL.getParameters().get(PRO_NAMESPACE_KEY);
+            if (namespace == null) {
+                namespace = DEFAULT_NAMESPACE;
+            }
+            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
+                : CONFIG_URL.getUsername();
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
+                    : CONFIG_URL.getPassword();
+            if (StringUtils.isNotBlank(password)) {
+                properties.setProperty(USER_NAME, userName);
+                properties.setProperty(PASSWORD, password);
+            }
+        }
+        return properties;
+    }
+
     private static String getNacosNameSpaceFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
+    }
+
+    private static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE;
     }
 
     private static String getNacosAddrFileKey() {
@@ -269,11 +309,19 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getNacosGroup() {
-        return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
+        if (StringUtils.equals(FILE_CONFIG.getConfig(getConfigUrlKey()), ConfigurationKeys.URL)) {
+            return CONFIG_URL.getParameters().get(GROUP_KEY);
+        } else {
+            return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
+        }
     }
 
     private static String getNacosDataId() {
-        return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
+        if (StringUtils.equals(FILE_CONFIG.getConfig(getConfigUrlKey()), ConfigurationKeys.URL)) {
+            return CONFIG_URL.getParameters().get(NACOS_DATA_ID_KEY) != null ? CONFIG_URL.getParameters().get(NACOS_DATA_ID_KEY) : DEFAULT_DATA_ID;
+        } else {
+            return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
+        }
     }
 
     private static String getSeataConfigStr() {

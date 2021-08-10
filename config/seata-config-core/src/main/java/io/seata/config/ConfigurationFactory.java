@@ -81,7 +81,7 @@ public final class ConfigurationFactory {
     private static final String FILE_TYPE = "file";
 
     private static volatile Configuration instance = null;
-
+    private static final ConfigUrl CONFIG_URL = ConfigUrl.getInstance();
     /**
      * Gets instance.
      *
@@ -106,8 +106,12 @@ public final class ConfigurationFactory {
         if (StringUtils.isBlank(configTypeName)) {
             throw new NotSupportYetException("config type can not be null");
         }
-        ConfigType configType = ConfigType.getType(configTypeName);
-
+        ConfigType configType;
+        if (StringUtils.equals(configTypeName,ConfigurationKeys.URL)){
+            configType = ConfigType.getType(CONFIG_URL.getProtocol());
+        }else {
+            configType = ConfigType.getType(configTypeName);
+        }
         Configuration extConfiguration = null;
         Configuration configuration;
         if (ConfigType.File == configType) {

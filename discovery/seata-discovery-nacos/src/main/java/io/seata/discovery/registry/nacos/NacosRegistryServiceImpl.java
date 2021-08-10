@@ -26,6 +26,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
+import io.seata.discovery.registry.RegistryURL;
 import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
@@ -55,6 +56,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private static final RegistryURL REGISTRY_URL = RegistryURL.getInstance();
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
@@ -166,7 +168,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public static NamingService getNamingInstance() throws Exception {
         if (naming == null) {
             synchronized (NacosRegistryServiceImpl.class) {
-                if (naming == null) {
+                if (StringUtils.equals(FILE_CONFIG.getConfig(getRegistryType()),ConfigurationKeys.URL)) {
+                    naming = NacosFactory.createNamingService(getNamingPropertiesWithUrl());
+                } else {
                     naming = NacosFactory.createNamingService(getNamingProperties());
                 }
             }
@@ -206,16 +210,63 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return properties;
     }
 
+    private static Properties getNamingPropertiesWithUrl() {
+        Properties properties = new Properties();
+        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
+        } else {
+            properties.setProperty(PRO_SERVER_ADDR_KEY, REGISTRY_URL.getHost());
+        }
+        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
+            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
+        } else {
+            String namespace = "";
+            if (StringUtils.isNotBlank(REGISTRY_URL.getParameters().get(PRO_NAMESPACE_KEY))) {
+                namespace = REGISTRY_URL.getParameters().get(PRO_NAMESPACE_KEY);
+            }
+            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ?
+                System.getProperty(USER_NAME) : REGISTRY_URL.getUsername();
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ?
+                    System.getProperty(PASSWORD) : REGISTRY_URL.getPassword();
+            if (StringUtils.isNotBlank(password)) {
+                properties.setProperty(USER_NAME, userName);
+                properties.setProperty(PASSWORD, password);
+            }
+        }
+        return properties;
+    }
+
     private static String getClusterName() {
-        return FILE_CONFIG.getConfig(getNacosClusterFileKey(), DEFAULT_CLUSTER);
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getRegistryUrlKey()))) {
+            return StringUtils.isNotBlank(REGISTRY_URL.getParameters().get(REGISTRY_CLUSTER)) ?
+                    REGISTRY_URL.getParameters().get(REGISTRY_CLUSTER) : DEFAULT_CLUSTER;
+        } else {
+            return FILE_CONFIG.getConfig(getNacosClusterFileKey(), DEFAULT_CLUSTER);
+        }
     }
 
     private static String getServiceName() {
-        return FILE_CONFIG.getConfig(getNacosApplicationFileKey(), DEFAULT_APPLICATION);
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getRegistryUrlKey()))) {
+            return StringUtils.isNotBlank(REGISTRY_URL.getParameters().get(PRO_APPLICATION_KEY)) ?
+                    REGISTRY_URL.getParameters().get(PRO_APPLICATION_KEY) : DEFAULT_APPLICATION;
+        } else {
+            return FILE_CONFIG.getConfig(getNacosApplicationFileKey(), DEFAULT_APPLICATION);
+        }
     }
 
     private static String getServiceGroup() {
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getRegistryUrlKey()))) {
+            return StringUtils.isNotBlank(REGISTRY_URL.getParameters().get(PRO_GROUP_KEY)) ?
+                    REGISTRY_URL.getParameters().get(PRO_GROUP_KEY) : DEFAULT_GROUP;
+        }
         return FILE_CONFIG.getConfig(getNacosApplicationGroupKey(), DEFAULT_GROUP);
+    }
+
+    private static String getRegistryUrlKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, ConfigurationKeys.URL);
     }
 
     private static String getNacosAddrFileKey() {
@@ -245,4 +296,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PASSWORD);
     }
+
+    private static String getRegistryType() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, ConfigurationKeys.FILE_ROOT_TYPE);
+    }
+
+
 }

@@ -41,4 +41,6 @@ public interface ConfigurationKeys {
      * The constant FILE_ROOT_TYPE.
      */
     String FILE_ROOT_TYPE = "type";
+
+    String URL = "url";
 }
