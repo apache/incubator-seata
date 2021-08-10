@@ -12,12 +12,15 @@ import java.util.Map;
  */
 public class RegistryURL {
 
+    /** register url */
     private String url;
+    /** register type */
     private String protocol;
+    /** serverAddr */
     private String host;
     private int port;
     private String path;
-    // parameters
+    /** register center paramters */
     private Map<String, String> parameters = new HashMap<>();
 
     private static RegistryURL instance;
@@ -40,7 +43,6 @@ public class RegistryURL {
     public void valueOf(String url) {
         if (url != null && (url.trim().length() != 0)) {
             int index = url.indexOf(63);
-            // 参数解析
             if (index > 0) {
                 String[] params = url.substring(index + 1).split("&");
                 for (String param : params) {
@@ -57,7 +59,6 @@ public class RegistryURL {
                 }
                 url = url.substring(0, index);
             }
-            // protocol解析
             index = url.indexOf("://");
             if (index >= 0) {
                 if (index == 0) {
@@ -66,19 +67,15 @@ public class RegistryURL {
                 this.protocol = url.substring(0, index);
                 url = url.substring(index + 3);
             }
-            // 解析path
             index = url.indexOf(47);
             if (index >= 0) {
                 this.path = url.substring(index + 1);
                 url = url.substring(0, index);
             }
-            // 解析port
             index = url.lastIndexOf(58);
             if (index >= 0 && index < url.length() - 1) {
                 this.port = Integer.parseInt(url.substring(index + 1));
-                //url = url.substring(0, index);
             }
-            //解析host
             this.host = url;
         }else {
             throw new IllegalArgumentException("url == null");

@@ -5,17 +5,15 @@ import java.util.Map;
 
 public class ConfigUrl {
 
+    /** config url */
     private String url;
+    /** config type */
     private String protocol;
+    /** config serverAddr */
     private String host;
     private int port;
     private String path;
-
-    private String username;
-
-    private String password;
-
-    // parameters
+    /** config center paramters */
     private Map<String, String> parameters = new HashMap<>();
 
 
@@ -39,7 +37,6 @@ public class ConfigUrl {
     public void valueOf(String url) {
         if (url != null && (url.trim().length() != 0)) {
             int index = url.indexOf(63);
-            // 参数解析
             if (index > 0) {
                 String[] params = url.substring(index + 1).split("&");
                 for (String param : params) {
@@ -56,7 +53,6 @@ public class ConfigUrl {
                 }
                 url = url.substring(0, index);
             }
-            // protocol解析
             index = url.indexOf("://");
             if (index >= 0) {
                 if (index == 0) {
@@ -65,19 +61,15 @@ public class ConfigUrl {
                 this.protocol = url.substring(0, index);
                 url = url.substring(index + 3);
             }
-            // 解析path
             index = url.indexOf(47);
             if (index >= 0) {
                 this.path = url.substring(index + 1);
                 url = url.substring(0, index);
             }
-            // 解析port
             index = url.lastIndexOf(58);
             if (index >= 0 && index < url.length() - 1) {
                 this.port = Integer.parseInt(url.substring(index + 1));
-                //url = url.substring(0, index);
             }
-            //解析host
             this.host = url;
         }else {
             throw new IllegalArgumentException("url == null");
@@ -99,6 +91,17 @@ public class ConfigUrl {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+    public String getUrl() {
+        return url;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public String getUsername() {
