@@ -351,13 +351,13 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             Table table = connection.getTable(TableName.valueOf(tableName));
             Get get = new Get(Bytes.toBytes(rowKey));
             Result result = table.get(get);
-            List<Map<String, String>> branchMapList = new ArrayList<>();
+
             Map<String, String> map = new HashMap<String, String>();
 
             String branchId = null;
-            boolean newBranch = false;
-            Map<String, String> branchesMap = null;
-            Map<String, String> branchMap = null;
+            boolean newBranch;
+            Map<String, String> branchesMap = new HashMap<>();
+            Map<String, String> branchMap = new HashMap<>();
 
             List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
 
@@ -391,9 +391,12 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
                     key = key.split("_")[1];
 
                     if (newBranch) {
-                        BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
-                        branchTransactionDOs.add(branchTransactionDO);
-                        branchMap = new HashMap<>();
+                        if (branchTransactionDOs != null){
+                            BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
+                            branchTransactionDOs.add(branchTransactionDO);
+                        }
+                        branchMap.put(key, value);
+
                     } else {
                         branchMap.put(key, value);
                     }
