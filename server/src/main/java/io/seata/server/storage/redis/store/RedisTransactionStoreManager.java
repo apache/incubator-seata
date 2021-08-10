@@ -47,9 +47,6 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
-
-import javax.annotation.PostConstruct;
-
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
@@ -108,13 +105,19 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     public static volatile ImmutableMap<LogOperation, Function<BranchTransactionDO, Boolean>> branchMap;
 
+
+    public RedisTransactionStoreManager() {
+        super();
+        initGlobalMap();
+        initBranchMap();
+    }
+
     /**
      * init globalMap
      *
      * @param
      * @return void
      */
-    @PostConstruct
     public void initGlobalMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
             globalMap = ImmutableMap.<LogOperation, Function<GlobalTransactionDO, Boolean>>builder()
@@ -131,7 +134,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param
      * @return void
      */
-    @PostConstruct
     public void initBranchMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
             branchMap = ImmutableMap.<LogOperation, Function<BranchTransactionDO, Boolean>>builder()
