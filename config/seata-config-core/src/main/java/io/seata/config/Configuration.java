@@ -16,7 +16,10 @@
 package io.seata.config;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Set;
+
+import io.seata.common.util.StringUtils;
 
 /**
  * The interface Configuration.
@@ -25,6 +28,7 @@ import java.util.Set;
  */
 public interface Configuration {
 
+    Map<String, String> ENV_MAP = System.getenv();
     /**
      * Gets short.
      *
@@ -291,7 +295,14 @@ public interface Configuration {
      * @param dataId the data id
      * @return the config from sys pro
      */
-    default String getConfigFromSysPro(String dataId) {
+    default String getConfigFromSys(String dataId) {
+        if (StringUtils.isBlank(dataId)) {
+            return null;
+        }
+        String content = ENV_MAP.get(dataId);
+        if (null != content) {
+            return content;
+        }
         return System.getProperty(dataId);
     }
 
