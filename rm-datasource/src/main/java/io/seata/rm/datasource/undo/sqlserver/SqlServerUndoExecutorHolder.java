@@ -1,13 +1,15 @@
 package io.seata.rm.datasource.undo.sqlserver;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoExecutorHolder;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author GoodBoyCoder
- * @date 2021-08-09
  */
+@LoadLevel(name = JdbcConstants.SQLSERVER)
 public class SqlServerUndoExecutorHolder implements UndoExecutorHolder {
     @Override
     public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {

@@ -12,7 +12,7 @@ public abstract class BaseSqlServerUndoExecutor extends AbstractUndoExecutor {
      * template of check sql
      * TODO support multiple primary key
      */
-    private static final String CHECK_SQL_TEMPLATE_SQLSERVER = "SELECT * FROM %s WITH(UPLOCK) WHERE %s";
+    private static final String CHECK_SQL_TEMPLATE_SQLSERVER = "SELECT * FROM %s WITH(UPDLOCK) WHERE %s";
 
     /**
      * Instantiates a new Abstract undo executor.

@@ -103,6 +103,6 @@ public class SqlServerUndoLogManager extends AbstractUndoLogManager {
     @Override
     protected String buildSelectUndoSql() {
         return "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WITH(UPDLOCK) WHERE "
-                + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID;
+                + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
     }
 }
