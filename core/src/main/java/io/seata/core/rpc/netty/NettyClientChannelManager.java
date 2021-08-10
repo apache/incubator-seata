@@ -258,9 +258,7 @@ class NettyClientChannelManager {
                     currentInetSocketAddressList.add(address);
                 }
             } else {
-                if (currentInetSocketAddressList.contains(address)) {
-                    currentInetSocketAddressList.remove(address);
-                }
+                currentInetSocketAddressList.remove(address);
                 LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
             }
         }
