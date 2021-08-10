@@ -119,7 +119,7 @@ public class TransportProperties {
         return this;
     }
 
-    public boolean isEnableTls(){
+    public boolean isEnableTls() {
         return enableTls;
     }
 
@@ -128,7 +128,7 @@ public class TransportProperties {
         return this;
     }
 
-    public String getTlsVersion(){
+    public String getTlsVersion() {
         return tlsVersion;
     }
 
