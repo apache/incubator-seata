@@ -35,7 +35,9 @@ public enum StoreMode {
     /**
      * redis store
      */
-    REDIS("redis");
+    REDIS("redis"),
+
+    ELASTICSEARCH("elasticsearch");
 
     private String name;
 
@@ -73,5 +75,5 @@ public enum StoreMode {
             return false;
         }
     }
-    
+
 }
