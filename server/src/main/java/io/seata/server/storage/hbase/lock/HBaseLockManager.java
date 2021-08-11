@@ -37,6 +37,16 @@ public class HBaseLockManager extends AbstractLockManager implements Initialize 
     }
 
     @Override
+    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+        try {
+            return getLocker().releaseLock(branchSession.getXid(), branchSession.getBranchId());
+        } catch (Exception t) {
+            LOGGER.error("unLock error, xid {}, branchId:{}", branchSession.getXid(), branchSession.getBranchId(), t);
+            return false;
+        }
+    }
+
+    @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         List<BranchSession> branchSessions = globalSession.getBranchSessions();
         if (CollectionUtils.isEmpty(branchSessions)) {

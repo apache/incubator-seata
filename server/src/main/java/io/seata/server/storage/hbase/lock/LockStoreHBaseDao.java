@@ -3,6 +3,7 @@ package io.seata.server.storage.hbase.lock;
 import io.seata.common.XID;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.*;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
@@ -48,12 +49,9 @@ public class LockStoreHBaseDao implements LockStore {
     }
 
     /**
-     * 流程为：首先判断当前needlocks的rowkey查出来的已经有加锁了的lockdo,如果没加锁，就去给他加锁，要是加锁过程中出现问题
-     * 则刚加的锁全部回滚。
      * @param needLockDOS
      * @return
      */
-
     @Override
     public boolean acquireLock(List<LockDO> needLockDOS) {
         Long transactionId = needLockDOS.get(0).getTransactionId();
@@ -66,6 +64,8 @@ public class LockStoreHBaseDao implements LockStore {
         needLockDOS.forEach(lockDO -> needLockKeys.add(lockDO.getBranchId()));
 
         List<LockDO> existedLockInfos = readLocksByTransactionId(transactionId);
+        String currentXID = needLockDOS.get(0).getXid();
+        boolean canLock = true;
         Map<Long, LockDO> existedLockMap = new HashMap<>();
         for (LockDO lockDO : existedLockInfos) {
             existedLockMap.put(lockDO.getBranchId(), lockDO);
@@ -89,7 +89,7 @@ public class LockStoreHBaseDao implements LockStore {
         //lock
         if (unrepeatedLockDOs.size() == 1) {
             LockDO lockDO = unrepeatedLockDOs.get(0);
-            if (!doAcquireLock( lockDO)) {
+            if (!doAcquireLock(lockDO)) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Global lock acquire failed, xid {} branchId {} pk {}", lockDO.getXid(), lockDO.getBranchId(), lockDO.getPk());
                 }
@@ -98,7 +98,7 @@ public class LockStoreHBaseDao implements LockStore {
         } else {
             List<LockDO> successLocks = new ArrayList<>();
             for (LockDO lockDO : unrepeatedLockDOs) {
-                if (!doAcquireLock( lockDO)) {
+                if (!doAcquireLock(lockDO)) {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Global lock acquire failed, xid {} branchId {} pk {}", lockDO.getXid(), lockDO.getBranchId(), lockDO.getPk());
                     }
@@ -124,7 +124,7 @@ public class LockStoreHBaseDao implements LockStore {
         try {
             Long transcationId = lockDOs.get(0).getTransactionId();
             table = connection.getTable(TableName.valueOf(tableName));
-            Delete delete = new Delete(Bytes.toBytes(transcationId));
+            Delete delete = new Delete(Bytes.toBytes(String.valueOf(transcationId)));
             for (LockDO lockDO : lockDOs) {
                 Long branchId = lockDO.getBranchId();
                 delete.addColumns(Bytes.toBytes(lockCF), Bytes.toBytes(branchId + "_xid"));
@@ -139,7 +139,8 @@ public class LockStoreHBaseDao implements LockStore {
             table.delete(delete);
             return true;
         } catch (IOException e) {
-            throw new StoreException(e);
+            LOGGER.error("error deleting locks ! ");
+            return false;
         } finally {
             IOUtil.close(table);
         }
@@ -150,7 +151,7 @@ public class LockStoreHBaseDao implements LockStore {
     public boolean unLock(String xid, Long branchId) {
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Delete delete = new Delete(Bytes.toBytes(XID.getTransactionId(xid)));
+            Delete delete = new Delete(Bytes.toBytes(String.valueOf(XID.getTransactionId(xid))));
             delete.addColumns(Bytes.toBytes(lockCF), Bytes.toBytes(branchId + "_xid"));
             delete.addColumns(Bytes.toBytes(lockCF), Bytes.toBytes(branchId + "_transactionId"));
             delete.addColumns(Bytes.toBytes(lockCF), Bytes.toBytes(branchId + "_branchId"));
@@ -162,7 +163,7 @@ public class LockStoreHBaseDao implements LockStore {
             table.delete(delete);
             return true;
         } catch (IOException e) {
-            LOGGER.error("error deleting locks ! xid:{}, branchId:{} ",xid,branchId);
+            LOGGER.error("error deleting the lock ! xid:{}, branchId:{} ",xid,branchId);
             return false;
 
         } finally {
@@ -175,7 +176,7 @@ public class LockStoreHBaseDao implements LockStore {
     public boolean unLock(String xid, List<Long> branchIds) {
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Delete delete = new Delete(Bytes.toBytes(XID.getTransactionId(xid)));
+            Delete delete = new Delete(Bytes.toBytes(String.valueOf(XID.getTransactionId(xid))));
             for (Long branchId : branchIds) {
                 delete.addColumns(Bytes.toBytes(lockCF), Bytes.toBytes(branchId + "_xid"));
                 delete.addColumns(Bytes.toBytes(lockCF), Bytes.toBytes(branchId + "_transactionId"));
@@ -204,7 +205,6 @@ public class LockStoreHBaseDao implements LockStore {
 
     private boolean checkLockable(List<LockDO> lockDOs) {
         //query
-
         Long transactionId = lockDOs.get(0).getTransactionId();
         if (StringUtils.isBlank(transactionId.toString()))
             LOGGER.error("the transactionID is null!");
@@ -225,15 +225,22 @@ public class LockStoreHBaseDao implements LockStore {
         Long transactionId = lockDO.getTransactionId();
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Put put = new Put(Bytes.toBytes(transactionId));
+            Put put = new Put(Bytes.toBytes(String.valueOf(transactionId)));
             Long branchId = lockDO.getBranchId();
-            put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_xid"),Bytes.toBytes(lockDO.getXid()));
-            put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_transactionId"),Bytes.toBytes(lockDO.getTransactionId()));
-            put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_branchId"),Bytes.toBytes(lockDO.getBranchId()));
-            put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_resourceId"),Bytes.toBytes(lockDO.getResourceId()));
-            put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_tableName"),Bytes.toBytes(lockDO.getTableName()));
-            put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_pk"),Bytes.toBytes(lockDO.getPk()));
-            put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_rowKey"),Bytes.toBytes(lockDO.getRowKey()));
+            if (StringUtils.isNotBlank(lockDO.getXid()))
+                put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_xid"),Bytes.toBytes(lockDO.getXid()));
+            if (lockDO.getTransactionId() != 0)
+                put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_transactionId"),Bytes.toBytes(String.valueOf(lockDO.getTransactionId())));
+            if (lockDO.getBranchId() != 0)
+                put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_branchId"),Bytes.toBytes(String.valueOf(lockDO.getBranchId())));
+            if (StringUtils.isNotBlank(lockDO.getResourceId()))
+                put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_resourceId"),Bytes.toBytes(lockDO.getResourceId()));
+            if (StringUtils.isNotBlank(lockDO.getTableName()))
+                put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_tableName"),Bytes.toBytes(lockDO.getTableName()));
+            if (StringUtils.isNotBlank(lockDO.getPk()))
+                put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_pk"),Bytes.toBytes(lockDO.getPk()));
+            if (StringUtils.isNotBlank(lockDO.getRowKey()))
+                put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_rowKey"),Bytes.toBytes(lockDO.getRowKey()));
 
             table.put(put);
             return true;
@@ -252,7 +259,7 @@ public class LockStoreHBaseDao implements LockStore {
             for (LockDO lockDO : lockDOs) {
                 Long transactionId = lockDO.getTransactionId();
                 Long branchId = lockDO.getBranchId();
-                Put put = new Put(Bytes.toBytes(transactionId));
+                Put put = new Put(Bytes.toBytes(String.valueOf(transactionId)));
                 put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_xid"),Bytes.toBytes(lockDO.getXid()));
                 put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_transactionId"),Bytes.toBytes(lockDO.getTransactionId()));
                 put.addColumn(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_branchId"),Bytes.toBytes(lockDO.getBranchId()));
@@ -277,7 +284,7 @@ public class LockStoreHBaseDao implements LockStore {
 
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Get get = new Get(Bytes.toBytes(transactionId));
+            Get get = new Get(Bytes.toBytes(String.valueOf(transactionId)));
             get.addFamily(Bytes.toBytes(lockCF));
 
             Map<String, String> locksMap = new HashMap<>();
@@ -302,40 +309,16 @@ public class LockStoreHBaseDao implements LockStore {
                     lockMap.put(key.split("_")[1], locksMap.get(key));
                 }
             }
-            LockDO lockDO = (LockDO) BeanUtils.mapToObject(lockMap, LockDO.class);
-            selectLockDOs.add(lockDO);
+            if (lockMap.size() != 0){
+                LockDO lockDO = (LockDO) BeanUtils.mapToObject(lockMap, LockDO.class);
+                selectLockDOs.add(lockDO);
+            }
             return selectLockDOs;
         } catch (IOException e) {
             throw new StoreException(e);
         }   finally {
             IOUtil.close(table);
         }
-    }
-
-    private boolean deleteLocks(List<LockDO> lockDOS) {
-        try {
-            table = connection.getTable(TableName.valueOf(tableName));
-            Long transactionId = lockDOS.get(0).getTransactionId();
-
-            Delete delete = new Delete(Bytes.toBytes(transactionId));
-            for (LockDO lockDO : lockDOS) {
-                Long branchId = lockDO.getBranchId();
-                delete.addColumns(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_xid"));
-                delete.addColumns(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_transactionId"));
-                delete.addColumns(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_branchId"));
-                delete.addColumns(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_resourceId"));
-                delete.addColumns(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_tableName"));
-                delete.addColumns(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_pk"));
-                delete.addColumns(Bytes.toBytes(lockCF),Bytes.toBytes(branchId + "_rowKey"));
-            }
-            table.delete(delete);
-            return true;
-        } catch (IOException e){
-            throw new StoreException(e);
-        } finally {
-            IOUtil.close(table);
-        }
-
     }
 
 }

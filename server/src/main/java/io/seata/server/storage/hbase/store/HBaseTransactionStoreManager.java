@@ -17,6 +17,7 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 
+import javafx.scene.input.DataFormat;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.TableName;
@@ -27,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -42,12 +45,12 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      *  The HBase Table
      */
-    protected String tableName = "seata:session";
+    protected String tableName = "seata:table";
 
     /**
      * GlobalStatus_GlobalTransactionID
      */
-    protected String statusTableName = "statusTable";
+    protected String statusTableName = "seata:statusTable";
 
     /**
      * The Global Family.
@@ -112,7 +115,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         Long branchId = branchTransactionDO.getBranchId();
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Delete delete = new Delete(Bytes.toBytes(rowKey));
+            Delete delete = new Delete(Bytes.toBytes(rowKey.toString()));
             delete.addColumns(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_xid"));
             delete.addColumns(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_branchId"));
             delete.addColumns(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_transactionId"));
@@ -141,7 +144,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         Long branchId = branchTransactionDO.getBranchId();
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Get get = new Get(Bytes.toBytes(rowKey));
+            Get get = new Get(Bytes.toBytes(rowKey.toString()));
             get.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_status"));
             Result result = table.get(get);
             String previousBranchStatus = Bytes.toString(CellUtil.cloneValue(result.getColumnLatestCell(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_status"))));
@@ -150,8 +153,8 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             }
 
             Date now = new Date();
-            Put put = new Put(Bytes.toBytes(rowKey));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_status"), Bytes.toBytes(branchTransactionDO.getStatus()));
+            Put put = new Put(Bytes.toBytes(rowKey.toString()));
+            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_status"), Bytes.toBytes(String.valueOf(branchTransactionDO.getStatus())));
             if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData()))
                 put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_applicationData"), Bytes.toBytes(branchTransactionDO.getApplicationData()));
             put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_gmtModified"), Bytes.toBytes(now.toString()));
@@ -171,18 +174,28 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         try {
             table = connection.getTable(TableName.valueOf(tableName));
             Date now = new Date();
-            Put put = new Put(Bytes.toBytes(rowKey));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_xid"), Bytes.toBytes(branchTransactionDO.getXid()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_branchId"), Bytes.toBytes(branchTransactionDO.getBranchId()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_transactionId"), Bytes.toBytes(branchTransactionDO.getTransactionId()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_resourceGroupId"), Bytes.toBytes(branchTransactionDO.getResourceGroupId()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_resourceId"), Bytes.toBytes(branchTransactionDO.getResourceId()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_branchType"), Bytes.toBytes(branchTransactionDO.getBranchType()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_status"), Bytes.toBytes(branchTransactionDO.getStatus()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_clientId"), Bytes.toBytes(branchTransactionDO.getClientId()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_applicationData"), Bytes.toBytes(branchTransactionDO.getApplicationData()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_gmtCreate"), Bytes.toBytes(now.toString()));
-            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_gmtModified"), Bytes.toBytes(now.toString()));
+            DateFormat df = new SimpleDateFormat("yy-MM-dd hh:mm:ss");
+            String time = df.format(now);
+            Put put = new Put(Bytes.toBytes(rowKey.toString()));
+            if (StringUtils.isNotBlank(branchTransactionDO.getXid()))
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_xid"), Bytes.toBytes(branchTransactionDO.getXid()));
+            if (branchTransactionDO.getBranchId() != 0)
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_branchId"), Bytes.toBytes(String.valueOf(branchTransactionDO.getBranchId())));
+            if (branchTransactionDO.getTransactionId() != 0)
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_transactionId"), Bytes.toBytes(String.valueOf(branchTransactionDO.getTransactionId())));
+            if (StringUtils.isNotBlank(branchTransactionDO.getResourceGroupId()))
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_resourceGroupId"), Bytes.toBytes(branchTransactionDO.getResourceGroupId()));
+            if (StringUtils.isNotBlank(branchTransactionDO.getResourceId()))
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_resourceId"), Bytes.toBytes(branchTransactionDO.getResourceId()));
+            if (StringUtils.isNotBlank(branchTransactionDO.getBranchType()))
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_branchType"), Bytes.toBytes(branchTransactionDO.getBranchType()));
+            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_status"), Bytes.toBytes(String.valueOf(branchTransactionDO.getStatus())));
+            if (StringUtils.isNotBlank(branchTransactionDO.getClientId()))
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_clientId"), Bytes.toBytes(branchTransactionDO.getClientId()));
+            if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData()))
+                put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_applicationData"), Bytes.toBytes(branchTransactionDO.getApplicationData()));
+            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_gmtCreate"), Bytes.toBytes(String.valueOf((new Date()).getTime())));
+            put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_gmtModified"), Bytes.toBytes(String.valueOf((new Date()).getTime())));
 
             table.put(put);
             return true;
@@ -204,7 +217,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             statusTransactionIdTable.delete(statusDelete);
 
             table = connection.getTable(TableName.valueOf(tableName));
-            Delete delete = new Delete(Bytes.toBytes(rowKey));
+            Delete delete = new Delete(Bytes.toBytes(rowKey.toString()));
             delete.addFamily(Bytes.toBytes(globalCF));
             table.delete(delete);
 
@@ -227,15 +240,14 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             statusTransactionIdTable.delete(delete);
 
             table = connection.getTable(TableName.valueOf(tableName));
-            Date now = new Date();
-            Put put = new Put(Bytes.toBytes(rowKey));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("status"), Bytes.toBytes(globalTransactionDO.getStatus()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("gmtModified"), Bytes.toBytes(now.toString()));
+            Put put = new Put(Bytes.toBytes(rowKey.toString()));
+            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("status"), Bytes.toBytes(String.valueOf(globalTransactionDO.getStatus())));
+            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("gmtModified"), Bytes.toBytes(String.valueOf(new Date().getTime())));
             table.put(put);
 
             String newStatusTransactionId = buildStatusRowKey(globalTransactionDO.getStatus(), rowKey);
             Put statusPut = new Put(Bytes.toBytes(newStatusTransactionId));
-            statusPut.addColumn(Bytes.toBytes(transactionIdCF), Bytes.toBytes("transactionId"), Bytes.toBytes(rowKey));
+            statusPut.addColumn(Bytes.toBytes(transactionIdCF), Bytes.toBytes("transactionId"), Bytes.toBytes(String.valueOf(rowKey)));
             statusTransactionIdTable.put(statusPut);
 
             return true;
@@ -247,28 +259,38 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        Long rowKey = globalTransactionDO.getTransactionId();
+        String  rowKey = String.valueOf(globalTransactionDO.getTransactionId());
         try {
             table = connection.getTable(TableName.valueOf(tableName));
             Date now = new Date();
+            DateFormat df = new SimpleDateFormat("yy-MM-dd hh:mm:ss");
+            String time = df.format(now);
             Put put = new Put(Bytes.toBytes(rowKey));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("xid"), Bytes.toBytes(globalTransactionDO.getXid()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("transactionId"), Bytes.toBytes(globalTransactionDO.getTransactionId()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("status"), Bytes.toBytes(globalTransactionDO.getStatus()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("applicationId"), Bytes.toBytes(globalTransactionDO.getApplicationId()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("transactionServiceGroup"), Bytes.toBytes(globalTransactionDO.getTransactionServiceGroup()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("transactionName"), Bytes.toBytes(globalTransactionDO.getTransactionName()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("timeout"), Bytes.toBytes(globalTransactionDO.getTimeout()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("beginTime"), Bytes.toBytes(globalTransactionDO.getBeginTime()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("applicationData"), Bytes.toBytes(globalTransactionDO.getApplicationData()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("gmtCreate"), Bytes.toBytes(now.toString()));
-            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("gmtModified"), Bytes.toBytes(now.toString()));
+            if (StringUtils.isNotBlank(globalTransactionDO.getXid()))
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("xid"), Bytes.toBytes(globalTransactionDO.getXid()));
+            if (globalTransactionDO.getTransactionId() != 0)
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("transactionId"), Bytes.toBytes(String.valueOf(globalTransactionDO.getTransactionId())));
+            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("status"), Bytes.toBytes(String.valueOf(globalTransactionDO.getStatus())));
+            if (StringUtils.isNotBlank(globalTransactionDO.getApplicationId()))
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("applicationId"), Bytes.toBytes(globalTransactionDO.getApplicationId()));
+            if (StringUtils.isNotBlank(globalTransactionDO.getTransactionServiceGroup()))
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("transactionServiceGroup"), Bytes.toBytes(globalTransactionDO.getTransactionServiceGroup()));
+            if (StringUtils.isNotBlank(globalTransactionDO.getTransactionName()))
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("transactionName"), Bytes.toBytes(globalTransactionDO.getTransactionName()));
+            if (globalTransactionDO.getTimeout() != 0)
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("timeout"), Bytes.toBytes(String.valueOf(globalTransactionDO.getTimeout())));
+            if (globalTransactionDO.getBeginTime() != 0)
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("beginTime"), Bytes.toBytes(String.valueOf(globalTransactionDO.getBeginTime())));
+            if (StringUtils.isNotBlank(globalTransactionDO.getApplicationData()))
+                put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("applicationData"), Bytes.toBytes(globalTransactionDO.getApplicationData()));
+            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("gmtCreate"), Bytes.toBytes(String.valueOf(new Date().getTime())));
+            put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("gmtModified"), Bytes.toBytes(String.valueOf(new Date().getTime())));
             table.put(put);
 
             statusTransactionIdTable = connection.getTable(TableName.valueOf(statusTableName));
             String statusRowKey = buildStatusRowKey(globalTransactionDO.getStatus(), globalTransactionDO.getTransactionId());
             Put statusPut = new Put(Bytes.toBytes(statusRowKey));
-            statusPut.addColumn(Bytes.toBytes(transactionIdCF), Bytes.toBytes("transactionId"), Bytes.toBytes(globalTransactionDO.getTransactionId()));
+            statusPut.addColumn(Bytes.toBytes(transactionIdCF), Bytes.toBytes("transactionId"), Bytes.toBytes(String.valueOf(globalTransactionDO.getTransactionId())));
             statusTransactionIdTable.put(statusPut);
 
             return true;
@@ -350,6 +372,8 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         try {
             Table table = connection.getTable(TableName.valueOf(tableName));
             Get get = new Get(Bytes.toBytes(rowKey));
+            get.addFamily(Bytes.toBytes(globalCF));
+            get.addFamily(Bytes.toBytes(branchesCF));
             Result result = table.get(get);
 
             Map<String, String> map = new HashMap<String, String>();
@@ -378,32 +402,21 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             if (withBranchSessions) {
 
                 for (String key : branchesMap.keySet()) {
-                    if (StringUtils.isBlank(branchId)) {
+                    if (StringUtils.isBlank(branchId))
                         branchId = key.split("_")[0];
-                        newBranch = true;
+                    if (StringUtils.equals(branchId, key.split("_")[0])) {
+                        branchMap.put(key.split("_")[1], branchesMap.get(key));
                     } else {
-                        if (!branchId.equals(key.split("_")[0]))
-                            newBranch = true;
-                        else
-                            newBranch = false;
-                    }
-                    String value = branchMap.get(key);
-                    key = key.split("_")[1];
+                        BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
+                        branchTransactionDOs.add(branchTransactionDO);
 
-                    if (newBranch) {
-                        if (branchTransactionDOs != null){
-                            BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
-                            branchTransactionDOs.add(branchTransactionDO);
-                        }
-                        branchMap.put(key, value);
-
-                    } else {
-                        branchMap.put(key, value);
+                        branchMap.put(key.split("_")[1], branchesMap.get(key));
                     }
                 }
-
-                BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
-                branchTransactionDOs.add(branchTransactionDO);
+                if (branchMap.size() != 0){
+                    BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
+                    branchTransactionDOs.add(branchTransactionDO);
+                }
 
             }
 
