@@ -25,8 +25,7 @@ import java.util.List;
 @LoadLevel(name = "elasticsearch", scope = Scope.PROTOTYPE)
 public class ElasticSearchSessionManager extends AbstractSessionManager
     implements Initialize {
-    //开始没脑子的SessionManager处理
-    //Session层好像是全部一样的 Ctrl C Ctrl V go
+
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchSessionManager.class);
 
@@ -55,7 +54,6 @@ public class ElasticSearchSessionManager extends AbstractSessionManager
     @Override
     public void init() {
         transactionStoreManager = ElasticSearchTransactionStoreManager.getInstance();
-        //进行实例化
     }
 
     @Override

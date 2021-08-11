@@ -116,13 +116,13 @@ public class ElasticSearchLocker extends AbstractLocker {
     }
 
     private boolean acquireLockDO(List<LockDO> lockDOs){
-        //实际的DO层
+
         RestHighLevelClient client = clientConnect.ClientConnect();
         if (lockDOs.size() > 1) {
             lockDOs = lockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
         }
         try{
-            //query
+
             boolean canlock = true;
             Set<String> esExistLockRowKeys = new HashSet<>();
             String currentXid = lockDOs.get(0).getXid();
@@ -147,7 +147,6 @@ public class ElasticSearchLocker extends AbstractLocker {
                     Map<String, Object> source = searchHit.getSourceAsMap();
                     Object EsXid = findSourceValue(source, ES_INDEX_LOCK_XID);
                     if (EsXid != null && currentXid != null && !StringUtils.equals(currentXid, String.valueOf(EsXid))) {
-                        //被其他锁持有
                         if (LOGGER.isInfoEnabled()) {
                             Object EsPk = findSourceValue(source, ES_INDEX_LOCK_PK);
                             Object EsBranchId = findSourceValue(source, ES_INDEX_LOCK_BRANCH_ID);

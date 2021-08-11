@@ -71,7 +71,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
             }
         }
         return instance;
-    }//实例化对象，没搞太明白
+    }
 
 
     @Override
@@ -143,7 +143,6 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
                 .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
         return globalTransactionDOS.stream().map(globalTransactionDO ->
                 getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid()))).collect(Collectors.toList());
-        //上面几行没看明白
     }
 
     @Override
@@ -178,7 +177,6 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
             GetResponse response = client.get(request, RequestOptions.DEFAULT);
             String index = response.getIndex();
             String id = response.getId();
-            //id此时即为xid
             GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
             if (response.isExists()) {
                 long version = response.getVersion();
@@ -195,8 +193,6 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private GlobalTransactionDO queryGlobalTransactionDO(long transactionId){
-        //传transactionid 进来的query方法
-        //暂时没写 晚点写 不是依靠主键（id）来查询 和上面的有一些不同
         GlobalTransactionDO res;
         RestHighLevelClient client = clientConnect.ClientConnect();
         SearchRequest request = new SearchRequest();
@@ -238,7 +234,6 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private List<GlobalTransactionDO> queryGlobalTransaction(int[] statues){
-        //暂时没写，学会查询后再写 2021-07-31 20:52 学会了QAQ
         List<GlobalTransactionDO> res = null;
         GlobalTransactionDO globalTransactionDO;
         RestHighLevelClient client = clientConnect.ClientConnect();
@@ -277,7 +272,6 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private List<BranchTransactionDO> queryBranchTransactionDO(String xid){
-        //暂时没写 晚点写 同理 而且返回的不一样
         List<BranchTransactionDO> res = null;
         BranchTransactionDO branchTransactionDO;
         RestHighLevelClient client = clientConnect.ClientConnect();
@@ -316,8 +310,6 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids){
-        //暂时没写 学会了查询后再写
-        //学会了 Multi-Search termsQuery
         List<BranchTransactionDO> res = null;
         BranchTransactionDO branchTransactionDO;
         RestHighLevelClient client = clientConnect.ClientConnect();
@@ -361,8 +353,6 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
         request.index(DEFAULT_GLOBAL_INDEX);
         request.id(globalTransactionDO.getXid());
         Map<String, Object> jsonMap;
-        //是否能通过 Map<string, string> 传 Map<string, object> 然后ES自己自动转换？ 如果可以！便可以简化代码
-        //jsonmap 出了问题 不能remove 0 应该remove一个primarykey的
         jsonMap = ElasticSearchUtils.toESjsonMap(globalTransactionDO,ES_INDEX_GLOBAL_XID);
         request.source(jsonMap);
         try{
