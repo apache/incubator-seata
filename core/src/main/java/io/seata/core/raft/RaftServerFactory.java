@@ -38,6 +38,7 @@ import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_AUTO_JOIN;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
@@ -59,18 +60,18 @@ public class RaftServerFactory {
 
     private Boolean raftMode = false;
 
-    private io.seata.config.Configuration config = ConfigurationFactory.getInstance();
+    private static final io.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
 
     public static RaftServerFactory getInstance() {
-        return SingletonHandler.instance;
+        return SingletonHandler.INSTANCE;
     }
 
     public static CliService getCliServiceInstance() {
-        return SingletonHandler.cliService;
+        return SingletonHandler.CLI_SERVICE;
     }
 
     public void init(String host, int port) {
-        String initConfStr = config.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isBlank(initConfStr)) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("initialize SofaJRaft fail , server.raft.cluster is null");
@@ -88,12 +89,12 @@ public class RaftServerFactory {
         if (!serverId.parse(serverIdStr)) {
             throw new IllegalArgumentException("fail to parse serverId:" + serverIdStr);
         }
-        String mode = config.getConfig(ConfigurationKeys.STORE_MODE);
+        String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         StoreMode storeMode = StoreMode.get(mode);
         if (storeMode.equals(StoreMode.RAFT)) {
             raftMode = true;
         }
-        final String dataPath = config.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+        final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                                 + separator + serverIdStr.split(colon)[1];
         final NodeOptions nodeOptions = new NodeOptions();
         // set the election timeout to 1 second
@@ -101,42 +102,44 @@ public class RaftServerFactory {
         // enable the CLI service.
         nodeOptions.setDisableCli(false);
         // snapshot should be made every 30 seconds
-        Integer snapshotInterval = config.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
+        Integer snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         RaftOptions raftOptions = new RaftOptions();
         raftOptions
-                .setApplyBatch(config.getInt(SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
+                .setApplyBatch(CONFIG.getInt(SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
         raftOptions.setMaxAppendBufferSize(
-                config.getInt(SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
+                CONFIG.getInt(SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
         raftOptions.setDisruptorBufferSize(
-                config.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
-        raftOptions.setMaxReplicatorInflightMsgs(config.getInt(
+                CONFIG.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
+        raftOptions.setMaxReplicatorInflightMsgs(CONFIG.getInt(
                 SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
         nodeOptions.setRaftOptions(raftOptions);
         nodeOptions.setElectionTimeoutMs(
-                config.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
+                CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
         // set up the initial cluster configuration
         nodeOptions.setInitialConf(initConf);
         raftServer = EnhancedServiceLoader.load(AbstractRaftServer.class, RAFT_TAG,
                 new Object[] {dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions});
         stateMachine = raftServer.getAbstractRaftStateMachine();
         LOGGER.info("started counter server at port:{}", raftServer.node.getNodeId().getPeerId().getPort());
-        List<PeerId> currentPeers = null;
-        try {
-            currentPeers = SingletonHandler.cliService.getPeers(SEATA_RAFT_GROUP, initConf);
-        } catch (Exception e) {
-            // In the first deployment, the leader cannot be found
-        }
-        if (CollectionUtils.isNotEmpty(currentPeers)) {
-            if (!currentPeers.contains(serverId)) {
-                Status status = SingletonHandler.cliService.addPeer(SEATA_RAFT_GROUP, initConf, serverId);
-                if (!status.isOk()) {
-                    LOGGER.error("failed to join the RAFT cluster: {}. Please check the status of the cluster",
-                        initConfStr);
+        // whether to join an existing cluster
+        if (CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false)) {
+            List<PeerId> currentPeers = null;
+            try {
+                currentPeers = getCliServiceInstance().getPeers(SEATA_RAFT_GROUP, initConf);
+            } catch (Exception e) {
+                // In the first deployment, the leader cannot be found
+            }
+            if (CollectionUtils.isNotEmpty(currentPeers)) {
+                if (!currentPeers.contains(serverId)) {
+                    Status status = getCliServiceInstance().addPeer(SEATA_RAFT_GROUP, initConf, serverId);
+                    if (!status.isOk()) {
+                        LOGGER.error("failed to join the RAFT cluster: {}. Please check the status of the cluster",
+                            initConfStr);
+                    }
                 }
             }
         }
-
     }
 
     public AbstractRaftServer getRaftServer() {
@@ -169,8 +172,8 @@ public class RaftServerFactory {
     }
 
     private static class SingletonHandler {
-        private static final RaftServerFactory instance = new RaftServerFactory();
-        private static final CliService cliService = RaftServiceFactory.createAndInitCliService(new CliOptions());
+        private static final RaftServerFactory INSTANCE = new RaftServerFactory();
+        private static final CliService CLI_SERVICE = RaftServiceFactory.createAndInitCliService(new CliOptions());
     }
-    
+
 }

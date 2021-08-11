@@ -30,6 +30,8 @@ public class ServerRaftProperties {
 
     private String cluster;
 
+    private Boolean autoJoin = false;
+
     private Integer snapshotInterval = 600;
 
     private Integer applyBatch = 32;
@@ -124,6 +126,15 @@ public class ServerRaftProperties {
 
     public ServerRaftProperties setReporterInitialDelay(Integer reporterInitialDelay) {
         this.reporterInitialDelay = reporterInitialDelay;
+        return this;
+    }
+
+    public Boolean getAutoJoin() {
+        return autoJoin;
+    }
+
+    public ServerRaftProperties setAutoJoin(Boolean autoJoin) {
+        this.autoJoin = autoJoin;
         return this;
     }
 
