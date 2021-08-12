@@ -1,1 +1,2 @@
 io.seata.sqlparser.antlr.mysql.MySQLOperateRecognizerHolder
+io.seata.sqlparser.antlr.oracle.OracleOperateRecognizerHolder

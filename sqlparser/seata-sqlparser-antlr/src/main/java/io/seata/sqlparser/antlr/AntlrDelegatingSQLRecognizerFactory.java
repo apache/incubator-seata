@@ -42,7 +42,7 @@ public class AntlrDelegatingSQLRecognizerFactory implements SQLRecognizerFactory
      */
     void setClassLoader() {
         try {
-            Class<?> recognizerFactoryImplClass = ClassLoader.getSystemClassLoader().loadClass("io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory");
+            Class<?> recognizerFactoryImplClass = ClassLoader.getSystemClassLoader().loadClass("io.seata.sqlparser.antlr.oracle.AntlrOracleRecognizerFactory");
             Constructor<?> implConstructor = recognizerFactoryImplClass.getDeclaredConstructor();
             implConstructor.setAccessible(true);
             try {

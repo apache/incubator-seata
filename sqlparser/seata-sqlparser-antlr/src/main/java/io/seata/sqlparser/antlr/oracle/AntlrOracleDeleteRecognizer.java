@@ -18,7 +18,7 @@ package io.seata.sqlparser.antlr.oracle;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.antlr.oracle.listener.SelectSpecificationSqlListener;
+import io.seata.sqlparser.antlr.oracle.listener.DeleteSpecificationSqlListener;
 import io.seata.sqlparser.antlr.oracle.parser.OracleLexer;
 import io.seata.sqlparser.antlr.oracle.parser.OracleParser;
 import io.seata.sqlparser.antlr.oracle.stream.ANTLRNoCaseStringStream;
@@ -31,10 +31,10 @@ import java.util.List;
 /**
  * @author YechenGu
  */
-public class AntlrOracleSelectRecognizer implements SQLSelectRecognizer {
+public class AntlrOracleDeleteRecognizer implements SQLSelectRecognizer {
     private OracleContext oracleContext;
 
-    public AntlrOracleSelectRecognizer(String sql) {
+    public AntlrOracleDeleteRecognizer(String sql) {
         OracleLexer lexer= new OracleLexer(new ANTLRNoCaseStringStream(sql));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         OracleParser parser= new OracleParser(tokenStream);
@@ -43,12 +43,12 @@ public class AntlrOracleSelectRecognizer implements SQLSelectRecognizer {
         OracleContext context = new OracleContext();
         context.setOriginalSQL(sql);
         ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(new SelectSpecificationSqlListener(context),scriptContext);
+        walker.walk(new DeleteSpecificationSqlListener(context),scriptContext);
     }
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.SELECT;
+        return SQLType.DELETE;
     }
 
     @Override

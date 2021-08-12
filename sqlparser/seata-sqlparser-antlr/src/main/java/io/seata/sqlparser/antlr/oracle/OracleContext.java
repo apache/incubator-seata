@@ -15,8 +15,6 @@
  */
 package io.seata.sqlparser.antlr.oracle;
 
-import io.seata.sqlparser.antlr.oracle.OracleContext;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,9 +73,15 @@ public class OracleContext {
     public List<OracleContext.SQL> updateWhereCondition = new ArrayList<>();
 
     /**
-     * Update column collection
+     * Update column name object value collection
      */
-    public List<OracleContext.SQL> updateColumns = new ArrayList<>();
+    public List<OracleContext.SQL> updateColumnNames = new ArrayList<>();
+
+
+    /**
+     * Update object value collection
+     */
+    public List<OracleContext.SQL> updateColumnValues = new ArrayList<>();
 
     /**
      * sql object information collection
@@ -127,10 +131,16 @@ public class OracleContext {
         updateWhereCondition.add(sql);
     }
 
-    public void addUpdateColumn(String columnName) {
-        OracleContext.SQL sql = new OracleContext.SQL();
+    public void addUpdateColumnNames(String columnName) {
+        SQL sql = new OracleContext.SQL();
         sql.setUpdateColumn(columnName);
-        updateColumns.add(sql);
+        updateColumnNames.add(sql);
+    }
+
+    public void addUpdateValues(String columnName) {
+        SQL sql = new OracleContext.SQL();
+        sql.setUpdateValue(columnName);
+        updateColumnValues.add(sql);
     }
 
 
@@ -145,6 +155,7 @@ public class OracleContext {
         private String updateWhereCondition;
         private String updateWhereColumn;
         private String updateColumn;
+        private String updateValue;
         private Integer sqlType;
         private String sql;
 
@@ -228,6 +239,14 @@ public class OracleContext {
             this.updateColumn = updateColumn;
         }
 
+        public String getUpdateValue() {
+            return updateValue;
+        }
+
+        public void setUpdateValue(String updateValue) {
+            this.updateValue = updateValue;
+        }
+
         public Integer getSqlType() {
             return sqlType;
         }
@@ -270,8 +289,12 @@ public class OracleContext {
         return updateWhereCondition;
     }
 
-    public List<OracleContext.SQL> getUpdateColumn() {
-        return updateColumns;
+    public List<SQL> getUpdateColumnNames() {
+        return updateColumnNames;
+    }
+
+    public List<SQL> getUpdateColumnValues() {
+        return updateColumnValues;
     }
 
     public String getTableName() {

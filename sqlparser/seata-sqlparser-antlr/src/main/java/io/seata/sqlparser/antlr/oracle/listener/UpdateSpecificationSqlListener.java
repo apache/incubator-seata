@@ -58,7 +58,7 @@ public class UpdateSpecificationSqlListener extends OracleBaseListener {
         // Get each single where condition
         OracleParser.Logical_expressionContext logicalExpressionContext = expressionContext.logical_expression();
 
-        // Judge whether it is a complicated where clause
+        // Judge whether it is a complicated where-clause
         if (logicalExpressionContext.children.size() > 1){
             List<OracleParser.Logical_expressionContext> logical_expressionContexts = logicalExpressionContext.logical_expression();
             while (true){
@@ -89,9 +89,10 @@ public class UpdateSpecificationSqlListener extends OracleBaseListener {
 
     @Override
     public void enterColumn_based_update_set_clause(OracleParser.Column_based_update_set_clauseContext ctx){
-        StatementSqlVisitor visitor = new StatementSqlVisitor();
-        String text = visitor.visit(ctx).toString();
-        oracleContext.addUpdateColumn(text);
+        OracleParser.Column_nameContext columnNameContext = ctx.column_name();
+        oracleContext.addUpdateColumnNames(columnNameContext.getText());
+        OracleParser.ExpressionContext expressionContext = ctx.expression();
+        oracleContext.addUpdateValues(expressionContext.getText());
         super.enterColumn_based_update_set_clause(ctx);
     }
 }

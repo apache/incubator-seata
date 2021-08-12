@@ -72,7 +72,8 @@ public class OracleUpdateRecognizerTest {
         walker.walk(new UpdateSpecificationSqlListener(context),scriptContext);
 
         Assertions.assertEquals("t1",context.getTableName());
-        Assertions.assertEquals("name1 = 'name1'",context.getUpdateColumn().get(0).getUpdateColumn());
+        Assertions.assertEquals("name1",context.getUpdateColumnNames().get(0).getUpdateColumn());
+        Assertions.assertEquals("'name1'",context.getUpdateColumnValues().get(0).getUpdateValue());
         Assertions.assertEquals("id = ?",context.getWhereCondition());
     }
 
@@ -90,7 +91,7 @@ public class OracleUpdateRecognizerTest {
         walker.walk(new UpdateSpecificationSqlListener(context),scriptContext);
 
         Assertions.assertEquals("t1",context.getTableName());
-        Assertions.assertEquals("name2 = 'name2'",context.getUpdateColumn().get(1).getUpdateColumn());
+        Assertions.assertEquals("'name2'",context.getUpdateColumnValues().get(1).getUpdateValue());
         Assertions.assertEquals("id between 1 and 2",context.getUpdateWhereCondition().get(0).getUpdateWhereColumn());
     }
 }

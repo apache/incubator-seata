@@ -16,9 +16,9 @@
 package io.seata.sqlparser.antlr.oracle;
 
 import io.seata.sqlparser.ParametersHolder;
-import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.antlr.oracle.listener.SelectSpecificationSqlListener;
+import io.seata.sqlparser.SQLUpdateRecognizer;
+import io.seata.sqlparser.antlr.oracle.listener.UpdateSpecificationSqlListener;
 import io.seata.sqlparser.antlr.oracle.parser.OracleLexer;
 import io.seata.sqlparser.antlr.oracle.parser.OracleParser;
 import io.seata.sqlparser.antlr.oracle.stream.ANTLRNoCaseStringStream;
@@ -27,14 +27,15 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author YechenGu
  */
-public class AntlrOracleSelectRecognizer implements SQLSelectRecognizer {
+public class AntlrOracleUpdateRecognizer implements SQLUpdateRecognizer {
     private OracleContext oracleContext;
 
-    public AntlrOracleSelectRecognizer(String sql) {
+    public AntlrOracleUpdateRecognizer(String sql) {
         OracleLexer lexer= new OracleLexer(new ANTLRNoCaseStringStream(sql));
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         OracleParser parser= new OracleParser(tokenStream);
@@ -43,12 +44,12 @@ public class AntlrOracleSelectRecognizer implements SQLSelectRecognizer {
         OracleContext context = new OracleContext();
         context.setOriginalSQL(sql);
         ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(new SelectSpecificationSqlListener(context),scriptContext);
+        walker.walk(new UpdateSpecificationSqlListener(context),scriptContext);
     }
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.SELECT;
+        return SQLType.UPDATE;
     }
 
     @Override
@@ -65,6 +66,28 @@ public class AntlrOracleSelectRecognizer implements SQLSelectRecognizer {
     public String getOriginalSQL() {
         return oracleContext.getOriginalSQL();
     }
+
+    @Override
+    public List<String> getUpdateColumns() {
+        List<OracleContext.SQL> updateColumnNames = oracleContext.getUpdateColumnNames();
+        ArrayList<String> list = new ArrayList<>();
+        for (OracleContext.SQL sql : updateColumnNames){
+            list.add(sql.getUpdateColumn());
+        }
+        return list;
+    }
+
+    @Override
+    public List<Object> getUpdateValues() {
+        List<OracleContext.SQL> updateColumnValues = oracleContext.getUpdateColumnValues();
+
+        if (updateColumnValues.isEmpty()){
+            return new ArrayList<>();
+        }
+
+        return updateColumnValues.stream().map(updateValues -> updateValues.getUpdateValue()).collect(Collectors.toList());
+    }
+
 
     @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
