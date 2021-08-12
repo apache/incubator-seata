@@ -16,6 +16,7 @@
 package io.seata.server;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
@@ -31,7 +32,7 @@ import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
  */
 @SpringBootApplication
 public class ServerApplication {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
         // port: env,-h > -D > default
         int port = PortHelper.getPortFromEnvOrStartup(args);
@@ -40,7 +41,7 @@ public class ServerApplication {
         }
 
         if (StringUtils.isBlank(System.getProperty(ConfigurationKeys.SERVER_RPC_PORT))) {
-            int serverPort = PortHelper.getPortFromYml();
+            int serverPort = PortHelper.getPortFromConfigFile();
             int servicePort = serverPort + SERVICE_OFFSET_SPRING_BOOT;
             System.setProperty(SERVER_PORT, String.valueOf(serverPort));
             System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(servicePort));

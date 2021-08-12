@@ -18,10 +18,12 @@ package io.seata.server.env;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NumberUtils;
@@ -48,27 +50,78 @@ public class PortHelper {
         return 0;
     }
 
-    public static int getPortFromYml() throws FileNotFoundException {
+    /**
+     * get config from configFile
+     * -Dspring.config.location > classpath:application.properties > classpath:application.yml
+     *
+     * @return
+     * @throws IOException
+     */
+    public static int getPortFromConfigFile() throws IOException {
 
         int port = 8080;
-        File applicationFile = ResourceUtils.getFile("classpath:application.yml");
-        Map<String, Object> yamlMap = new Yaml().load(new FileInputStream(applicationFile));
-        Map<String, Object> configMap = new HashMap<>();
-        bulidFlatMap(yamlMap, null, configMap);
-        if (CollectionUtils.isNotEmpty(configMap)) {
-            for (Map.Entry<String, Object> entry : configMap.entrySet()) {
-                String key = entry.getKey();
-                if ("server.port".equals(key)) {
-                    try {
-                        port = Integer.parseInt(entry.getValue().toString());
-                        break;
-                    } catch (NumberFormatException exx) {
-                        //ignore
+        File configFile = null;
+        File startupConfigFile = getConfigFromStartup();
+        if (null != startupConfigFile) {
+            configFile = startupConfigFile;
+        } else {
+            try {
+                File propertiesFile = ResourceUtils.getFile("classpath:application.properties");
+                configFile = propertiesFile;
+            } catch (FileNotFoundException exx) {
+                File ymlFile = ResourceUtils.getFile("classpath:application.yml");
+                configFile = ymlFile;
+            }
+        }
+        String fileName = configFile.getName();
+        String portNum = null;
+        if (fileName.endsWith("yml")) {
+            Map<String, Object> configMap = new HashMap<>();
+            Map<String, Object> yamlMap = new Yaml().load(new FileInputStream(configFile));
+            bulidFlatMap(yamlMap, null, configMap);
+            if (CollectionUtils.isNotEmpty(configMap)) {
+                for (Map.Entry<String, Object> entry : configMap.entrySet()) {
+                    String key = entry.getKey();
+                    if ("server.port".equals(key)) {
+                        portNum = entry.getValue().toString();
                     }
                 }
             }
+        } else {
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(configFile));
+            portNum = properties.getProperty("server.port");
+        }
+        if (null != portNum) {
+            try {
+                port = Integer.parseInt(portNum);
+            } catch (NumberFormatException exx) {
+                //ignore
+            }
         }
         return port;
+
+    }
+
+    private static File getConfigFromStartup() {
+
+        String configLocation = System.getProperty("spring.config.location");
+        if (StringUtils.isNotBlank(configLocation)) {
+            try {
+                File configFile = ResourceUtils.getFile(configLocation);
+                if (!configFile.isFile()) {
+                    return null;
+                }
+                String fileName = configFile.getName();
+                if (!(fileName.endsWith("yml") || fileName.endsWith("properties"))) {
+                    return null;
+                }
+                return configFile;
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        }
+        return null;
 
     }
 
