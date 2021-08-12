@@ -165,6 +165,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             return getPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
             return getDefaultResourceId() + "/" + userName;
+        } else if (JdbcConstants.SQLSERVER.equals(dbType)) {
+            return getSqlServerResourceId();
         } else {
             return getDefaultResourceId();
         }
@@ -211,6 +213,40 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
             if (paramsBuilder.length() > 0) {
                 jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder);
+            }
+            return jdbcUrlBuilder.toString();
+        } else {
+            return jdbcUrl;
+        }
+    }
+
+    /**
+     * The general form of the connection URL for SqlServer is
+     * jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
+     * required connection properties: [INSTANCENAME]、[databaseName,database]
+     *
+     * @return resourceId
+     */
+    private String getSqlServerResourceId() {
+        if (jdbcUrl.contains(";")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf(';')));
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf(';') + 1);
+            String[] urlParams = paramUrl.split(";");
+            for (String urlParam : urlParams) {
+                String[] paramSplit = urlParam.split("=");
+                String propertyName = paramSplit[0];
+                if ("INSTANCENAME".equalsIgnoreCase(propertyName)
+                        || "databaseName".equalsIgnoreCase(propertyName)
+                        || "database".equalsIgnoreCase(propertyName)) {
+                    paramsBuilder.append(urlParam);
+                }
+            }
+
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append(";");
                 jdbcUrlBuilder.append(paramsBuilder);
             }
             return jdbcUrlBuilder.toString();
