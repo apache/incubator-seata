@@ -1,0 +1,56 @@
+
+package com.demo.utils;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * A helper class to load YAML content as a type-safe object.
+ */
+@RequiredArgsConstructor
+public final class Yamls {
+    public interface Builder {
+    }
+
+    public interface AsTypeBuilder extends Builder {
+        <T> T as(final Class<T> klass);
+    }
+
+
+    public static AsTypeBuilder load(final String file) throws IOException {
+        final InputStream inputStream = new ClassPathResource(Envs.resolve(file)).getInputStream();
+
+        return new AsTypeBuilder() {
+            @Override
+            public <T> T as(final Class<T> klass) {
+                return new Yaml().loadAs(inputStream, klass);
+            }
+        };
+    }
+
+    public static AsTypeBuilder load(final File file) throws IOException {
+        final InputStream inputStream = new FileInputStream(file);
+
+        return new AsTypeBuilder() {
+            @Override
+            public <T> T as(final Class<T> klass) {
+                return new Yaml().loadAs(inputStream, klass);
+            }
+        };
+    }
+
+    public static AsTypeBuilder load(final StringBuilder content) {
+        return new AsTypeBuilder() {
+            @Override
+            public <T> T as(final Class<T> klass) {
+                return new Yaml().loadAs(content.toString(), klass);
+            }
+        };
+    }
+}

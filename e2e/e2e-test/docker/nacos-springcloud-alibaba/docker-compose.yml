@@ -1,0 +1,72 @@
+# networks暂时配置为host偷懒
+version: "2.1"
+services:
+  seata-server:
+    image: seataio/seata-server:1.3.0
+    hostname: seata-server
+    volumes:
+      - ./volume/seata/resources:/seata-server/resources
+    networks:
+      - host
+    ports:
+      - "8091:8091"
+    depends_on:
+      - nacos
+    environment:
+      - SEATA_PORT=8091
+      - STORE_MODE=db
+#    entrypoint: ['sh','/seata-server/resources/nacos-config2.sh','-h nacos-server -p 8848 -g SEATA_GROUP -t 5a3c7d6c-f497-4d68-a71a-2e5e3340b3ca -u nacos -w nacos']
+  mysql:
+    hostname: mysql
+    image: nacos/nacos-mysql:5.7
+    env_file:
+      - ./mysql.env
+    volumes:
+      - ./mysql-sql:/home/xjl/seata/mysql
+      - ./mysql:/var/lib/mysql
+    networks:
+      - host
+    ports:
+      - "3306:3306"
+  consumer:
+    image: consumer:0.0.1
+    hostname: consumer
+    networks:
+      - host
+    ports:
+      - "8081:8081"
+    depends_on:
+      - nacos
+      - seata-server
+  provider:
+    image: provider:0.0.1
+    hostname: provider
+    networks:
+      - host
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nacos
+      - mysql
+      - seata-server
+  nacos:
+    hostname: nacos-server
+    networks:
+      - host
+    image: nacos/nacos-server:1.3.1
+    env_file:
+      - ./nacos-standlone-mysql.env
+#    volumes:
+#      - ./standalone-logs/:/home/nacos/logs
+#      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9555:9555"
+    depends_on:
+      - mysql
+    restart: on-failure
+
+
+networks:
+  host:
