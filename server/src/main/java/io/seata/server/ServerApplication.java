@@ -15,7 +15,6 @@
  */
 package io.seata.server;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import io.seata.common.util.StringUtils;
