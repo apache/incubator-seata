@@ -198,7 +198,7 @@ public class CollectionUtilsTest {
 
         Assertions.assertEquals("null", CollectionUtils.toString(nullCollection));
         Assertions.assertEquals("[]", CollectionUtils.toString(emptyCollection));
-        Assertions.assertEquals("[Foo, Bar, (this ArrayList)]", CollectionUtils.toString(filledCollection));
+        Assertions.assertEquals("[\"Foo\", \"Bar\", (this ArrayList)]", CollectionUtils.toString(filledCollection));
     }
 
     @Test
@@ -213,7 +213,7 @@ public class CollectionUtilsTest {
 
         Assertions.assertEquals("null", CollectionUtils.toString(nullMap));
         Assertions.assertEquals("{}", CollectionUtils.toString(emptyMap));
-        Assertions.assertEquals("{aaa->111, bbb->222, self->(this HashMap)}", CollectionUtils.toString(filledMap));
+        Assertions.assertEquals("{\"aaa\"->\"111\", \"bbb\"->\"222\", \"self\"->(this HashMap)}", CollectionUtils.toString(filledMap));
     }
 
     @Test

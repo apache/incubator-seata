@@ -74,6 +74,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-all</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -172,6 +178,81 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>2.3.0</version>
+                <configuration>
+                    <from>
+                        <image>${IMAGE_NAME}</image>
+                    </from>
+                    <to>
+                        <image>docker.io/seataio/seata-server</image>
+                        <tags>
+                            ${image.tags}
+                        </tags>
+                        <auth>
+                            <username>${REGISTRY_USERNAME}</username>
+                            <password>${REGISTRY_PASSWORD}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <appRoot>/seata-server</appRoot>
+                        <workingDirectory>/seata-server</workingDirectory>
+                        <mainClass>io.seata.server.ServerApplication</mainClass>
+                        <ports>
+                            <port>8091</port>
+                        </ports>
+                        <jvmFlags>
+                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
+                            <jvmFlag>-server</jvmFlag>
+                            <jvmFlag>-Xss512k</jvmFlag>
+                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
+                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
+                            <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
+                            <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
+                            <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
+                            <jvmFlag>-XX:MaxDirectMemorySize=1024m</jvmFlag>
+                            <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
+                            <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
+                            <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
+                            <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
+                            <!--gc-->
+                            <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
+                            <jvmFlag>-XX:+CMSParallelRemarkEnabled</jvmFlag>
+                            <jvmFlag>-XX:+UseCMSInitiatingOccupancyOnly</jvmFlag>
+                            <jvmFlag>-XX:CMSInitiatingOccupancyFraction=75</jvmFlag>
+                            <jvmFlag>-Xloggc:/var/log/seata_gc.log</jvmFlag>
+                            <jvmFlag>-verbose:gc</jvmFlag>
+                            <!--netty-->
+                            <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
+                            <!--log-->
+                            <jvmFlag>-Dlogback.color.disable-for-bat=true</jvmFlag>
+                        </jvmFlags>
+                        <labels>
+                            <name>seata-server</name>
+                        </labels>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>target/lib/jdbc</from>
+                                <into>/seata-server/libs/jdbc</into>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                    <skip>${image.publish.skip}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

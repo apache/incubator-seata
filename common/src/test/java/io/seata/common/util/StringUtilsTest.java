@@ -17,6 +17,13 @@ package io.seata.common.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -95,18 +102,22 @@ public class StringUtilsTest {
     }
 
     @Test
-    void testToStringAndCycleDependency() throws StackOverflowError {
+    void testToStringAndCycleDependency() throws Exception {
         //case: String
-        Assertions.assertEquals("aaa", StringUtils.toString("aaa"));
+        Assertions.assertEquals("\"aaa\"", StringUtils.toString("aaa"));
 
         //case: CharSequence
-        Assertions.assertEquals("bbb", StringUtils.toString(new StringBuilder("bbb")));
+        Assertions.assertEquals("\"bbb\"", StringUtils.toString(new StringBuilder("bbb")));
         //case: Number
         Assertions.assertEquals("1", StringUtils.toString(1));
         //case: Boolean
         Assertions.assertEquals("true", StringUtils.toString(true));
         //case: Character
-        Assertions.assertEquals("2", StringUtils.toString('2'));
+        Assertions.assertEquals("'2'", StringUtils.toString('2'));
+        //case: Charset
+        Assertions.assertEquals("UTF-8", StringUtils.toString(StandardCharsets.UTF_8));
+        //case: Thread
+        Assertions.assertEquals("Thread[main,5,main]", StringUtils.toString(Thread.currentThread()));
 
         //case: Date
         Date date = new Date(2021 - 1900, 6 - 1, 15);
@@ -123,56 +134,137 @@ public class StringUtilsTest {
         //case: Enum
         Assertions.assertEquals("ObjectHolder.INSTANCE", StringUtils.toString(ObjectHolder.INSTANCE));
 
+        //case: Annotation
+        TestAnnotation annotation = TestClass.class.getAnnotation(TestAnnotation.class);
+        Assertions.assertEquals("@" + TestAnnotation.class.getSimpleName() + "(test=true)", StringUtils.toString(annotation));
+
+        //case: Class
+        Class<?> clazz = TestClass.class;
+        Assertions.assertEquals("Class<" + clazz.getSimpleName() + ">", StringUtils.toString(clazz));
+
+        //case: Method
+        Method method = clazz.getMethod("setObj", TestClass.class);
+        Assertions.assertEquals("Method<" + clazz.getSimpleName() + ".setObj(" + clazz.getSimpleName() + ")>", StringUtils.toString(method));
+
+        //case: Field
+        Field field = clazz.getDeclaredField("s");
+        Assertions.assertEquals("Field<" + clazz.getSimpleName() + ".(String s)>", StringUtils.toString(field));
+
         //case: List, and cycle dependency
         List<Object> list = new ArrayList<>();
         list.add("xxx");
         list.add(111);
         list.add(list);
-        Assertions.assertEquals("[xxx, 111, (this ArrayList)]", StringUtils.toString(list));
+        Assertions.assertEquals("[\"xxx\", 111, (this ArrayList)]", StringUtils.toString(list));
+
+        //case: Array
+        String[] strArr = new String[2];
+        strArr[0] = "11";
+        strArr[1] = "22";
+        Assertions.assertEquals("[\"11\", \"22\"]", StringUtils.toString(strArr));
+        //case: Array, and cycle dependency
+        Object[] array = new Object[3];
+        array[0] = 1;
+        array[1] = '2';
+        array[2] = array;
+        Assertions.assertEquals("[1, '2', (this Object[])]", StringUtils.toString(array));
 
         //case: Map, and cycle dependency
         Map<Object, Object> map = new HashMap<>();
         map.put("aaa", 111);
         map.put("bbb", true);
         map.put("self", map);
-        Assertions.assertEquals("{aaa->111, bbb->true, self->(this HashMap)}", StringUtils.toString(map));
+        Assertions.assertEquals("{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap)}", StringUtils.toString(map));
         Assertions.assertFalse(CycleDependencyHandler.isStarting());
         //case: Map, and cycle dependency（deep case）
         List<Object> list2 = new ArrayList<>();
         list2.add(map);
         list2.add('c');
         map.put("list", list2);
-        Assertions.assertEquals("{aaa->111, bbb->true, self->(this HashMap), list->[(ref HashMap), c]}", StringUtils.toString(map));
+        Assertions.assertEquals("{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap), \"list\"->[(ref HashMap), 'c']}", StringUtils.toString(map));
         Assertions.assertFalse(CycleDependencyHandler.isStarting());
 
 
         //case: Object
-        Assertions.assertEquals("CycleDependency(s=a, obj=null)", StringUtils.toString(CycleDependency.A));
+        Assertions.assertEquals("CycleDependency(s=\"a\", obj=null)", StringUtils.toString(CycleDependency.A));
         //case: Object, and cycle dependency
         CycleDependency obj = new CycleDependency("c");
         obj.setObj(obj);
-        Assertions.assertEquals("CycleDependency(s=c, obj=(this CycleDependency))", StringUtils.toString(obj));
+        Assertions.assertEquals("CycleDependency(s=\"c\", obj=(this CycleDependency))", StringUtils.toString(obj));
         //case: Object
         CycleDependency obj2 = new CycleDependency("d");
         obj.setObj(obj2);
-        Assertions.assertEquals("CycleDependency(s=c, obj=CycleDependency(s=d, obj=null))", StringUtils.toString(obj));
+        Assertions.assertEquals("CycleDependency(s=\"c\", obj=CycleDependency(s=\"d\", obj=null))", StringUtils.toString(obj));
         //case: Object, and cycle dependency
         TestClass a = new TestClass();
         a.setObj(a);
-        Assertions.assertEquals("TestClass(obj=(this TestClass))", StringUtils.toString(a));
+        Assertions.assertEquals("TestClass(obj=(this TestClass), s=null)", StringUtils.toString(a));
         //case: Object, and cycle dependency（deep case）
         TestClass b = new TestClass();
         TestClass c = new TestClass();
         b.setObj(c);
         c.setObj(a);
         a.setObj(b);
-        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass))))", StringUtils.toString(a));
+        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass), s=null), s=null), s=null)", StringUtils.toString(a));
+
+        //case: anonymous class from an interface
+        Object anonymousObj = new TestInterface() {
+            private String a = "aaa";
+
+            @Override
+            public void test() {
+            }
+        };
+        Assertions.assertEquals("TestInterface$(a=\"aaa\")", StringUtils.toString(anonymousObj));
+
+        //case: anonymous class from an abstract class
+        anonymousObj = new TestAbstractClass() {
+            private String a = "aaa";
+
+            @Override
+            public void test() {
+            }
+        };
+        Assertions.assertEquals("TestAbstractClass$(a=\"aaa\")", StringUtils.toString(anonymousObj));
+
+        //final confirm: do not triggered the `toString` and `hashCode` methods
+        Assertions.assertFalse(TestClass.hashCodeTriggered);
+        Assertions.assertFalse(TestClass.toStringTriggered);
+        Assertions.assertFalse(CycleDependency.hashCodeTriggered);
+        Assertions.assertFalse(CycleDependency.toStringTriggered);
     }
 
-    class TestClass {
-        private TestClass obj;
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface TestAnnotation {
+        boolean test() default false;
+    }
 
+    interface TestInterface {
+        void test();
+    }
+
+    abstract class TestAbstractClass {
+        abstract void test();
+    }
+
+    @TestAnnotation(test = true)
+    static class TestClass {
+        public static boolean hashCodeTriggered = false;
+        public static boolean toStringTriggered = false;
+
+        private TestClass obj;
+        private String s;
+
+        @Override
+        public int hashCode() {
+            hashCodeTriggered = true;
+            return super.hashCode();
+        }
+
+        @Override
         public String toString() {
+            toStringTriggered = true;
             return StringUtils.toString(this);
         }
 
@@ -186,6 +278,9 @@ public class StringUtilsTest {
     }
 
     static class CycleDependency {
+        public static boolean hashCodeTriggered = false;
+        public static boolean toStringTriggered = false;
+
         public static final CycleDependency A = new CycleDependency("a");
         public static final CycleDependency B = new CycleDependency("b");
 
@@ -205,7 +300,14 @@ public class StringUtilsTest {
         }
 
         @Override
+        public int hashCode() {
+            hashCodeTriggered = true;
+            return super.hashCode();
+        }
+
+        @Override
         public String toString() {
+            toStringTriggered = true;
             return "(" +
                     "s=" + s + "," +
                     "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") +
