@@ -13,31 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.sql.distribute.lock;
+package io.seata.core.store.db.sql.distributed.lock;
 
 /**
  * @author chd
  * @since 1.5.0
  */
-public interface DistributeLockSql {
+public interface DistributedLockSql {
     /**
      * Get the select distribute lock sql
-     * @param distributeLockTable the table name of the distribute lock table
+     * @param distributedLockTable the table name of the distribute lock table
      * @return the sql
      */
-    String getSelectDistributeForUpdateSql(String distributeLockTable);
+    String getSelectDistributeForUpdateSql(String distributedLockTable);
 
     /**
      * Get insert distribute lock sql
-     * @param distributeLockTable the table name of the distribute lock table
+     * @param distributedLockTable the table name of the distribute lock table
      * @return the sql
      */
-    String getInsertSql(String distributeLockTable);
+    String getInsertSql(String distributedLockTable);
 
     /**
      * Get update distribute lock sql
-     * @param distributeLockTable the table name of the distribute lock table
+     * @param distributedLockTable the table name of the distribute lock table
      * @return the sql
      */
-    String getUpdateSql(String distributeLockTable);
+    String getUpdateSql(String distributedLockTable);
 }

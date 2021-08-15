@@ -395,19 +395,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Init.
      */
     public void init() {
-        retryRollbacking.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking),
+        retryRollbacking.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking),
                 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        retryCommitting.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(RETRY_COMMITTING, this::handleRetryCommitting),
+        retryCommitting.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(RETRY_COMMITTING, this::handleRetryCommitting),
                 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        asyncCommitting.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting),
+        asyncCommitting.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting),
                 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        timeoutCheck.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck),
+        timeoutCheck.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck),
                 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        undoLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributeLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
+        undoLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
                 UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 

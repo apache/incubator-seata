@@ -196,15 +196,15 @@ public interface ServerTableColumnsName {
 
 
     /**
-     * The constant distribute_lock column name lock key
+     * The constant distributed_lock column name lock key
      */
-    String DISTRIBUTE_LOCK_KEY = "lock_key";
+    String DISTRIBUTED_LOCK_KEY = "lock_key";
     /**
-     * The constant distribute_lock column name lock value
+     * The constant distributed_lock column name lock value
      */
-    String DISTRIBUTE_LOCK_VALUE = "lock_value";
+    String DISTRIBUTED_LOCK_VALUE = "lock_value";
     /**
-     * The constant distribute_lock column name expire
+     * The constant distributed_lock column name expire
      */
-    String DISTRIBUTE_LOCK_EXPIRE = "expire";
+    String DISTRIBUTED_LOCK_EXPIRE = "expire";
 }

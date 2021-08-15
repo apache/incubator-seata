@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `lock_table`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE IF NOT EXISTS `distribute_lock`
+CREATE TABLE IF NOT EXISTS `distributed_lock`
 (
     `lock_key`       CHAR(20) NOT NULL,
     `lock_value`     VARCHAR(20) NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `distribute_lock`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
-INSERT INTO `distribute_lock` (lock_key, lock_value, expire) VALUES ('AsyncCommitting', ' ', 0);
-INSERT INTO `distribute_lock` (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
-INSERT INTO `distribute_lock` (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
-INSERT INTO `distribute_lock` (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('AsyncCommitting', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);

@@ -13,13 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.sql.distribute.lock;
+package io.seata.core.store.db.sql.distributed.lock;
 
 /**
  * @author chd
  */
-public class DistributeLockSqlFactory {
-    private static final DistributeLockSql DISTRIBUTE_LOCK_SQL = new BaseDistributeLockSql();
+public class DistributedLockSqlFactory {
+    private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
 
     /**
      * get the lock store sql
@@ -27,7 +27,7 @@ public class DistributeLockSqlFactory {
      * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase, it's useless now, but maybe useful later
      * @return lock store sql
      */
-    public static DistributeLockSql getDistributeLogStoreSql(String dbType) {
-        return DISTRIBUTE_LOCK_SQL;
+    public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
+        return DISTRIBUTED_LOCK_SQL;
     }
 }

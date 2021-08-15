@@ -370,7 +370,7 @@ public class SessionHolder {
      * @param func  the function to be call
      * @return whether the func be call
      */
-    public static boolean distributeLockAndExecute(String key, NoArgsFunc func) {
+    public static boolean distributedLockAndExecute(String key, NoArgsFunc func) {
         boolean lock = false;
         try {
             if (lock = acquireDistributedLock(key)) {
