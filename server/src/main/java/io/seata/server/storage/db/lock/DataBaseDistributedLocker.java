@@ -20,15 +20,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 import java.util.Objects;
 
-import javax.sql.DataSource;
-
-import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
@@ -146,7 +145,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                 if (originalAutoCommit) {
                     connection.setAutoCommit(true);
                 }
-                JdbcUtils.close(connection);
+                IOUtil.close(connection);
             } catch (SQLException ignore) { }
         }
     }
@@ -199,7 +198,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                 if (originalAutoCommit) {
                     connection.setAutoCommit(true);
                 }
-                JdbcUtils.close(connection);
+                IOUtil.close(connection);
             } catch (SQLException ignore) { }
         }
     }
