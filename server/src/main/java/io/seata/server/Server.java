@@ -57,6 +57,15 @@ public class Server {
         //Because, here we need to parse the parameters needed for startup.
         ParameterParser parameterParser = new ParameterParser(args);
 
+
+        //127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+            XID.setIpAddress(parameterParser.getHost());
+        } else {
+            XID.setIpAddress(NetUtil.getLocalIp());
+        }
+        XID.setPort(parameterParser.getPort());
+
         //initialize the metrics
         MetricsManager.get().init();
 
@@ -80,14 +89,6 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
-
-        //127.0.0.1 and 0.0.0.0 are not valid here.
-        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-            XID.setIpAddress(parameterParser.getHost());
-        } else {
-            XID.setIpAddress(NetUtil.getLocalIp());
-        }
-        XID.setPort(nettyRemotingServer.getListenPort());
 
         nettyRemotingServer.init();
     }

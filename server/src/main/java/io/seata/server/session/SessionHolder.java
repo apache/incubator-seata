@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,8 +110,7 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
-            String lockerType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.DB.getName());
         } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
@@ -348,6 +348,7 @@ public class SessionHolder {
     /**
      * acquire lock
      *
+     * @param lockKey the lock key, should be distinct for each lock
      * @return the boolean
      */
     public static boolean acquireDistributedLock(String lockKey) {
@@ -363,6 +364,32 @@ public class SessionHolder {
         return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
+    /**
+     * Execute the function after get the distribute lock
+     * @param key   the distribute lock key
+     * @param func  the function to be call
+     * @return whether the func be call
+     */
+    public static boolean distributedLockAndExecute(String key, NoArgsFunc func) {
+        boolean lock = false;
+        try {
+            if (lock = acquireDistributedLock(key)) {
+                func.call();
+            }
+        } catch (Exception e) {
+            LOGGER.info("Exception running function with key = {}", key, e);
+        } finally {
+            if (lock) {
+                try {
+                    SessionHolder.releaseDistributedLock(key);
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
+            }
+        }
+        return lock;
+    }
+
     public static void destroy() {
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
@@ -376,5 +403,10 @@ public class SessionHolder {
         if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
             RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
         }
+    }
+
+    @FunctionalInterface
+    public static interface NoArgsFunc {
+        public void call();
     }
 }
