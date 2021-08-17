@@ -9,21 +9,18 @@ import urllib.parse
 
 def get_params() -> dict:
     params = {
+        '--host': '',
         '-n': 'public',
+        '-g': 'SEATA_GROUP',
         '-u': '',
         '-p': ''
     }
-    inputs, args = opts.getopt(sys.argv[2:], 'n:u:p:')
+    inputs, args = opts.getopt(sys.argv[1:], shortopts='n:g:u:p:', longopts=['host='])
+    # print(inputs)
     for k, v in inputs:
         params[k] = v
-    print(params)
+    # print(params)
     return params
-
-
-if len(sys.argv) < 2:
-    print(
-        'python nacos-config.py host:port [-n namespace] [-u username] [-p password]')
-    exit()
 
 headers = {
     'content-type': "application/x-www-form-urlencoded"
@@ -32,11 +29,19 @@ headers = {
 hasError = False
 
 params = get_params()
-url_prefix = sys.argv[1]
+
+url_prefix = params['--host']
+
+if url_prefix == '':
+    print('python nacos-config.py --host host:port [-n namespace] [-g group] [-u username] [-p password]')
+    exit()
+
 namespace = params['-n']
 username = params['-u']
 password = params['-p']
-url_postfix_base = f'/nacos/v1/cs/configs?group=SEATA_GROUP&tenant={namespace}'
+group = params['-g']
+url_postfix_base = f'/nacos/v1/cs/configs?group={group}&tenant={namespace}'
+
 if username != '' and password != '':
     url_postfix_base += f'&username={username}&password={password}'
 
