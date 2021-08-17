@@ -64,6 +64,7 @@
         <spring.version>4.3.23.RELEASE</spring.version>
         <netty4.version>4.1.30.Final</netty4.version>
         <dubbo.version>2.7.4</dubbo.version>
+        <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
@@ -221,6 +222,11 @@
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo</artifactId>
                 <version>${dubbo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baidu</groupId>
+                <artifactId>brpc-java</artifactId>
+                <version>${brpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>

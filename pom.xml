@@ -38,6 +38,7 @@
         <module>integration/grpc</module>
         <module>integration/http</module>
         <module>integration/hsf</module>
+        <module>integration/brpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>spring</module>
