@@ -10,7 +10,7 @@ import urllib.parse
 def get_params() -> dict:
     params = {
         '--host': '',
-        '-n': 'public',
+        '-n': '',
         '-g': 'SEATA_GROUP',
         '-u': '',
         '-p': ''
