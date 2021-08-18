@@ -9,18 +9,23 @@ import urllib.parse
 
 def get_params() -> dict:
     params = {
-        '--host': '',
+        '-h': '127.0.0.1',
+        '-o': '8848',
         '-n': '',
         '-g': 'SEATA_GROUP',
         '-u': '',
         '-p': ''
     }
-    inputs, args = opts.getopt(sys.argv[1:], shortopts='n:g:u:p:', longopts=['host='])
+    inputs, args = opts.getopt(sys.argv[1:], shortopts='h:o:n:g:u:p:')
     # print(inputs)
     for k, v in inputs:
         params[k] = v
-    # print(params)
+    print(params)
     return params
+
+def error_exit():
+    print('python nacos-config.py [-h host] [-o port] [-n namespace] [-g group] [-u username] [-p password]')
+    exit()
 
 headers = {
     'content-type': "application/x-www-form-urlencoded"
@@ -30,12 +35,7 @@ hasError = False
 
 params = get_params()
 
-url_prefix = params['--host']
-
-if url_prefix == '':
-    print('python nacos-config.py --host host:port [-n namespace] [-g group] [-u username] [-p password]')
-    exit()
-
+url_prefix = f"{params['-h']}:{params['-o']}"
 namespace = params['-n']
 username = params['-u']
 password = params['-p']
@@ -45,6 +45,9 @@ url_postfix_base = f'/nacos/v1/cs/configs?group={group}&tenant={namespace}'
 if username != '' and password != '':
     url_postfix_base += f'&username={username}&password={password}'
 
+if url_prefix == ':':
+    error_exit()
+
 for line in open('../config.txt'):
     pair = line.rstrip("\n").split('=')
     if len(pair) < 2 or pair[0] == '' or pair[1] == '':
@@ -53,10 +56,11 @@ for line in open('../config.txt'):
     conn = http.client.HTTPConnection(url_prefix)
     conn.request("POST", url_postfix, headers=headers)
     res = conn.getresponse()
-    data = res.read()
-    if data.decode("utf-8") != "true":
+    data = res.read().decode("utf-8")
+    if data != "true":
         hasError = True
-    print(f"{pair[0]}={pair[1]} {'fail' if hasError else 'success'}")
+    print(f"{pair[0]}={pair[1]} {data if hasError else 'success'}")
+
 if hasError:
     print("init nacos config fail.")
 else:
