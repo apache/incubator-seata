@@ -15,8 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import javax.sql.DataSource;
-
 import io.seata.rm.tcc.config.TCCFenceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,6 +27,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.sql.DataSource;
 
 /**
  * TCC fence auto configuration.
