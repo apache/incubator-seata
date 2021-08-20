@@ -90,7 +90,6 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
-        //127.0.0.1 and 0.0.0.0 are not valid here.
 
         nettyRemotingServer.init();
     }

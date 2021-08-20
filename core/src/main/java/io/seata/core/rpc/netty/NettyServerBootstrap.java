@@ -172,7 +172,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
-            LOGGER.error(exx.getMessage(),exx);
+            LOGGER.error(exx.getMessage(), exx);
         }
     }
 }
