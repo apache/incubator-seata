@@ -16,7 +16,7 @@ A **distributed transaction solution** with high performance and ease of use for
 
 Let's imagine a traditional monolithic application. Its business is built up with 3 modules. They use a single local data source.
 
-Naturally, data consistency will be guaranteed by the local transaction.
+Naturally, data consistency is guaranteed by the local transaction.
 
 ![Monolithic App](https://cdn.nlark.com/lark/0/2018/png/18862/1545296770244-4cedf37e-9dc6-4fc0-a97f-f4240b9d8640.png) 
 
