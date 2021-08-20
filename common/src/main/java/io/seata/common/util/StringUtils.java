@@ -45,6 +45,11 @@ public class StringUtils {
     public static final String EMPTY = "";
 
     /**
+     * Space string
+     */
+    public static final String SPACE = " ";
+
+    /**
      * Is empty boolean.
      *
      * @param str the str
