@@ -18,6 +18,8 @@ package io.seata.sqlparser.druid.mysql;
 import java.util.ArrayList;
 import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
@@ -73,8 +75,8 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName());
                     //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
-                } else if (((SQLPropertyExpr)expr).getOwnernName().split("\\.").length > 1) {
-                    list.add(((SQLPropertyExpr)expr).getOwnernName() + "." + ((SQLPropertyExpr)expr).getName());
+                } else if (((SQLPropertyExpr)expr).getOwnerName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr)expr).getOwnerName() + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
                 wrapSQLParsingException(expr);
@@ -147,13 +149,27 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     }
 
     @Override
-    public String getLimit(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        return super.getLimit(ast, getSQLType(), parametersHolder, paramAppenderList);
+    public String getLimitCondition() {
+        SQLLimit limit = ast.getLimit();
+        return super.getLimitCondition(limit);
     }
 
     @Override
-    public String getOrderBy() {
-        return super.getOrderBy(ast, getSQLType());
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLLimit limit = ast.getLimit();
+        return super.getLimitCondition(limit, parametersHolder, paramAppenderList);
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        SQLOrderBy sqlOrderBy = ast.getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = ast.getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
 }
