@@ -225,6 +225,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     public void onLeaderStop(final Status status) {
         this.leaderTerm.set(-1);
         super.onLeaderStop(status);
+        LOGGER.info("session map: {} ",SessionHolder.getRootSessionManager().allSessions().size());
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) throws Throwable {

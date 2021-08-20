@@ -37,7 +37,9 @@ import io.seata.core.raft.AbstractRaftServer;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServer;
 import io.seata.core.raft.RaftServerFactory;
+import io.seata.server.session.SessionHolder;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -52,6 +54,8 @@ import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
  */
 @LoadLevel(name = RAFT_TAG)
 public class RaftServerImpl extends AbstractRaftServer implements ConfigurationChangeListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerImpl.class);
 
     public RaftServerImpl(final String dataPath, final String groupId, final PeerId serverId,
         final NodeOptions nodeOptions) throws IOException {
@@ -140,6 +144,10 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         if (this.raftGroupService != null) {
             this.raftGroupService.shutdown();
         }
+        if (cliService != null) {
+            cliService.shutdown();
+        }
+        LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
     }
 
 }

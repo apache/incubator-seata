@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -31,6 +30,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.raft.RaftServer;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
@@ -115,9 +115,6 @@ public class SessionHolder {
         } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator + XID.getPort();
-            if (StringUtils.isBlank(sessionStorePath)) {
-                throw new StoreException("the {store.file.dir} is empty.");
-            }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -371,6 +368,7 @@ public class SessionHolder {
     /**
      * acquire lock
      *
+     * @param lockKey the lock key, should be distinct for each lock
      * @return the boolean
      */
     public static boolean acquireDistributedLock(String lockKey) {
@@ -386,7 +384,41 @@ public class SessionHolder {
         return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
+    /**
+     * Execute the function after get the distribute lock
+     * @param key   the distribute lock key
+     * @param func  the function to be call
+     * @return whether the func be call
+     */
+    public static boolean distributedLockAndExecute(String key, NoArgsFunc func) {
+        boolean lock = false;
+        try {
+            if (lock = acquireDistributedLock(key)) {
+                func.call();
+            }
+        } catch (Exception e) {
+            LOGGER.info("Exception running function with key = {}", key, e);
+        } finally {
+            if (lock) {
+                try {
+                    SessionHolder.releaseDistributedLock(key);
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
+            }
+        }
+        return lock;
+    }
+
     public static void destroy() {
+        RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
+        if (raftServer != null) {
+            try {
+                raftServer.close();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+            }
+        }
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
         }
@@ -399,5 +431,10 @@ public class SessionHolder {
         if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
             RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
         }
+    }
+
+    @FunctionalInterface
+    public static interface NoArgsFunc {
+        public void call();
     }
 }

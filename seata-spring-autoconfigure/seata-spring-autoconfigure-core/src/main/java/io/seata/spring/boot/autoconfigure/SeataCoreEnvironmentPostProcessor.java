@@ -38,15 +38,12 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.ConfigurableEnvironment;
 
 
-import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
@@ -66,7 +63,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
@@ -75,13 +71,12 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
 
 /**
  * @author xingfudeshi@gmail.com
+ * @author wang.liang
  */
-@ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-@ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
-@Configuration
-public class SeataCorePropertiesAutoConfiguration {
-    static {
+public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, ConfigProperties.class);
         PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
         PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, RegistryProperties.class);
@@ -110,9 +105,8 @@ public class SeataCorePropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
     }
 
-    @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
-    @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
-    public SpringApplicationContextProvider springApplicationContextProvider() {
-        return new SpringApplicationContextProvider();
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
