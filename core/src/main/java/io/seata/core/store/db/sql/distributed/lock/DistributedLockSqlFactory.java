@@ -13,23 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.parser.spi;
-
-import io.protostuff.runtime.Delegate;
+package io.seata.core.store.db.sql.distributed.lock;
 
 /**
- * The interface Protostuff delegate.
- *
- * @param <T> the type parameter
- * @author jsbxyyx
+ * @author chd
  */
-public interface ProtostuffDelegate<T> {
+public class DistributedLockSqlFactory {
+    private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
 
     /**
-     * Delegate create.
+     * get the lock store sql
      *
-     * @return delegate
+     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase, it's useless now, but maybe useful later
+     * @return lock store sql
      */
-    Delegate<T> create();
-
+    public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
+        return DISTRIBUTED_LOCK_SQL;
+    }
 }
