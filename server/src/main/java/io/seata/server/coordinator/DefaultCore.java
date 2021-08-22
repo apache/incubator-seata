@@ -337,11 +337,11 @@ public class DefaultCore implements Core {
                             LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return CONTINUE;
                         case PhaseTwo_RollbackFailed_Unretryable:
-                            if(globalSession.canBeRollbackedAsync()){
+                            if (globalSession.canBeRollbackedAsync()) {
                                 LOGGER.error(
                                     "Rollback branch transaction[{}], status: PhaseTwo_RollbackFailed_Unretryable, please check the business log.", branchSession.getBranchId());
                                 return CONTINUE;
-                            } else{
+                            } else {
                                 SessionHelper.endRollbackFailed(globalSession);
                                 LOGGER.error("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                                 return false;
@@ -351,11 +351,11 @@ public class DefaultCore implements Core {
                                 globalSession.queueToRetryRollback();
                                 return false;
                             }
-                            if(globalSession.canBeRollbackedAsync()){
+                            if (globalSession.canBeRollbackedAsync()) {
                                 LOGGER.error("Rollback branch transaction[{}], status:{} and will retry later",
                                     branchSession.getBranchId(), branchStatus);
                                 return CONTINUE;
-                            } else{
+                            } else {
                                 LOGGER.error(
                                     "Rollback branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                                 return false;

@@ -128,9 +128,9 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             branchRegisterRequest.setApplicationData(new String(bs, UTF8));
         }
 
-        try{
+        try {
             branchRegisterRequest.setRollbackType(RollbackType.get(in.get()));
-        }catch (BufferUnderflowException e){
+        } catch (BufferUnderflowException e) {
             // If current request is from an older version of the client, set the default rollbackType.
             RollbackType rollbackType = RollbackType.getDefault(branchRegisterRequest.getBranchType());
             branchRegisterRequest.setRollbackType(rollbackType);
