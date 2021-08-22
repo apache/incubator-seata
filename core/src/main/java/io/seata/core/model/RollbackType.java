@@ -49,7 +49,7 @@ public enum RollbackType {
      *
      * @return the value
      */
-    public int value(){
+    public int value() {
         return value;
     }
 
@@ -59,7 +59,7 @@ public enum RollbackType {
      * @param value the value
      * @return the rollback type
      */
-    public static RollbackType get(byte value){
+    public static RollbackType get(byte value) {
         return get((int) value);
     }
 
