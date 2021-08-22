@@ -438,8 +438,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         asyncCommitting.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting),
                 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        asyncRollbacking.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::handleAsyncRollbacking),
-                0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        asyncRollbacking.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(ASYNC_ROLLBACKING, this::handleAsyncRollbacking),
+                0, ASYNC_ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck),
                 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
