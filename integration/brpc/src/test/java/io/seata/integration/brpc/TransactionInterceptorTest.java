@@ -45,6 +45,7 @@ public class TransactionInterceptorTest {
         assertThat(echoResponse.getXid()).isEqualTo(DEFAULT_XID);
         RootContext.unbind();
         RootContext.unbindBranchType();
+        rpcClientA.stop();
         rpcServerB.shutdown();
     }
 
