@@ -57,13 +57,13 @@ for line in open('../config.txt'):
     pair = get_pair(line.rstrip("\n"))
     if len(pair) < 2 or pair[0] == '' or pair[1] == '':
         continue
-    # url_postfix = url_postfix_base + f'&dataId={urllib.parse.quote(str(pair[0]))}&content={urllib.parse.quote(str(pair[1])).strip()}'
-    # conn = http.client.HTTPConnection(url_prefix)
-    # conn.request("POST", url_postfix, headers=headers)
-    # res = conn.getresponse()
-    # data = res.read().decode("utf-8")
-    # if data != "true":
-    #     hasError = True
+    url_postfix = url_postfix_base + f'&dataId={urllib.parse.quote(str(pair[0]))}&content={urllib.parse.quote(str(pair[1])).strip()}'
+    conn = http.client.HTTPConnection(url_prefix)
+    conn.request("POST", url_postfix, headers=headers)
+    res = conn.getresponse()
+    data = res.read().decode("utf-8")
+    if data != "true":
+        hasError = True
     print(f"{pair[0]}={pair[1]} {data if hasError else 'success'}")
 
 if hasError:
