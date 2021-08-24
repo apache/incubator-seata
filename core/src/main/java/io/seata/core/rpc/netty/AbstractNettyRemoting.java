@@ -42,7 +42,6 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -289,9 +288,11 @@ public abstract class AbstractNettyRemoting implements Disposable {
                         if (allowDumpStack) {
                             String name = ManagementFactory.getRuntimeMXBean().getName();
                             String pid = name.split("@")[0];
-                            int idx = new Random().nextInt(100);
+                            long idx = System.currentTimeMillis();
                             try {
-                                Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
+                                String jstackFile = idx + ".log";
+                                LOGGER.info("jstack command will dump to " + jstackFile);
+                                Runtime.getRuntime().exec("jstack " + pid + " > " + jstackFile);
                             } catch (IOException exx) {
                                 LOGGER.error(exx.getMessage());
                             }
