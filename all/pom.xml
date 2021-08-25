@@ -732,6 +732,7 @@
                                     <include>io.seata:seata-compressor-zip</include>
                                     <include>io.seata:seata-compressor-lz4</include>
                                     <include>io.seata:seata-compressor-deflater</include>
+                                    <include>io.seata:seata-compressor-zstd</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

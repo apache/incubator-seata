@@ -53,7 +53,12 @@ public enum CompressorType {
     /**
      * The deflater.
      */
-    DEFLATER((byte) 6);
+    DEFLATER((byte) 6),
+
+    /**
+     * The zstd.
+     */
+    ZSTD((byte) 7);
 
     private final byte code;
 
