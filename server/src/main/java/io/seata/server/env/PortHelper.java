@@ -80,7 +80,10 @@ public class PortHelper {
             Map<String, Object> yamlMap = new Yaml().load(new FileInputStream(configFile));
             bulidFlatMap(yamlMap, null, configMap);
             if (CollectionUtils.isNotEmpty(configMap)) {
-                portNum = configMap.get("server.port").toString();
+                Object serverPort = configMap.get("server.port");
+                if (null != serverPort) {
+                    portNum = serverPort.toString();
+                }
             }
         } else {
             Properties properties = new Properties();
