@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -85,7 +84,7 @@ public class ContainerHelper {
      * @return the env
      */
     public static int getPort() {
-        return NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
+        return NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), 0);
     }
 
     /**

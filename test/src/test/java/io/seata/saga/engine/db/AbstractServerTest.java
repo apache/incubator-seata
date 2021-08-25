@@ -61,8 +61,6 @@ public abstract class AbstractServerTest {
                 System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
                 nettyServer = new NettyRemotingServer(workingThreads);
-                //server port
-                nettyServer.setListenPort(parameterParser.getPort());
                 UUIDGenerator.init(parameterParser.getServerNode());
                 //log store mode : file、db
                 SessionHolder.init(parameterParser.getStoreMode());
