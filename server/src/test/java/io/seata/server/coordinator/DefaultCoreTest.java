@@ -18,16 +18,17 @@ package io.seata.server.coordinator;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.server.ServerApplication;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -38,20 +39,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * The type Default core test.
  *
  * @author zhimo.xiao @gmail.com
- * @since 2019 /1/23
  */
-@SpringBootTest
+@SpringBootTest(classes = ServerApplication.class, properties = {"server.port=7091"})
 @ExtendWith(SpringExtension.class)
-@DependsOn("configProperties")
 public class DefaultCoreTest {
 
     private static DefaultCore core;
@@ -77,6 +75,9 @@ public class DefaultCoreTest {
 
     private GlobalSession globalSession;
 
+    @LocalServerPort
+    private static int port;
+
     /**
      * Init session manager.
      *
@@ -84,6 +85,8 @@ public class DefaultCoreTest {
      */
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
+        System.out.println("port:"+port);
+        System.setProperty(ConfigurationKeys.SERVER_RPC_PORT,"8091");
         SessionHolder.init(null);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);
