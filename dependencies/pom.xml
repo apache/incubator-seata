@@ -128,6 +128,7 @@
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
         <mariadb.version>2.7.2</mariadb.version>
+        <zstd.version>1.5.0-4</zstd.version>
     </properties>
 
     <dependencyManagement>
@@ -548,6 +549,11 @@
                 <groupId>org.mariadb.jdbc</groupId>
                 <artifactId>mariadb-java-client</artifactId>
                 <version>${mariadb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.luben</groupId>
+                <artifactId>zstd-jni</artifactId>
+                <version>${zstd.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
