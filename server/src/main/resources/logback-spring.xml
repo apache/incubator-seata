@@ -27,7 +27,7 @@
     <conversionRule conversionWord="wEx2" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
     <!-- common properties -->
-    <springProperty name="PORT" source="server.port" defaultValue="9091"/>
+    <springProperty name="PORT" source="server.port" defaultValue="7091"/>
     <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-server"/>
 
 
