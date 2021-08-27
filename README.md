@@ -6,7 +6,6 @@
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
 [![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent.svg)](https://search.maven.org/search?q=io.seata)
-[![](https://img.shields.io/twitter/follow/seataio.svg?label=Follow&style=social&logoWidth=0)](https://twitter.com/intent/follow?screen_name=seataio)
 
 
 ## What is Seata?
@@ -18,19 +17,19 @@ Let's imagine a traditional monolithic application. Its business is built up wit
 
 Naturally, data consistency will be guaranteed by the local transaction.
 
-![Monolithic App](https://cdn.nlark.com/lark/0/2018/png/18862/1545296770244-4cedf37e-9dc6-4fc0-a97f-f4240b9d8640.png) 
+![Monolithic App](https://img.alicdn.com/imgextra/i3/O1CN01FTtjyG1H4vvVh1sNY_!!6000000000705-0-tps-1106-678.jpg) 
 
 Things have changed in a microservices architecture. The 3 modules mentioned above are designed to be 3 services on top of 3 different data sources ([Pattern: Database per service](http://microservices.io/patterns/data/database-per-service.html)). Data consistency within every single service is naturally guaranteed by the local transaction. 
 
 **But how about the whole business logic scope?**
 
-![Microservices Problem](https://cdn.nlark.com/lark/0/2018/png/18862/1545296781231-4029da9c-8803-43a4-ac2f-6c8b1e2ea448.png) 
+![Microservices Problem](https://img.alicdn.com/imgextra/i1/O1CN01DXkc3o1te9mnJcHOr_!!6000000005926-0-tps-1268-804.jpg) 
 
 ### How Seata do?
 
 Seata is just a solution to the problem mentioned above. 
 
-![Seata solution](https://cdn.nlark.com/lark/0/2018/png/18862/1545296791074-3bce7bce-025e-45c3-9386-7b95135dade8.png)
+![Seata solution](https://img.alicdn.com/imgextra/i1/O1CN01FheliH1k5VHIRob3p_!!6000000004632-0-tps-1534-908.jpg)
 
 Firstly, how to define a **Distributed Transaction**?
 
@@ -92,12 +91,12 @@ For more details about principle and design, please go to [Seata wiki page](http
 ```
 ## Quick Start
 
-[Quick Start](https://github.com/seata/seata/wiki/Quick-Start)
+[Quick Start](https://seata.io/zh-cn/docs/ops/deploy-guide-beginner.html)
 
 ## Documentation
 
 
-You can view the full documentation from the wiki: [Seata wiki page](https://github.com/seata/seata/wiki).
+You can view the full documentation from Seata Official Website: [Seata Website page](https://seata.io/zh-cn/docs/overview/what-is-seata.html).
 
 ## Reporting bugs
 
@@ -106,12 +105,10 @@ Please follow the [template](https://github.com/seata/seata/blob/develop/.github
 
 ## Contributing
 
-Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING](./CONTRIBUTING.md) about how to contribute to this project.
+Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING](./CONTRIBUTING.md) and[CONTRIBUTING-CN](./CONTRIBUTING_CN.md)about how to contribute to this project.
 
 
 ## Contact
-
-* [Twitter](https://twitter.com/seataio): Follow along for latest Seata news on Twitter.
 
 * Mailing list: 
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
@@ -122,13 +119,13 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 
 ## Seata ecosystem
 
+* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website
 * [Seata Ecosystem Entry](https://github.com/seata) - A GitHub group `seata` to gather all Seata relevant projects
 * [Seata GoLang](https://github.com/opentrx/seata-golang) - Seata GoLang client and server
 * [Seata Samples](https://github.com/seata/seata-samples) - Samples for Seata
 * [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s
 * [Awesome Seata](https://github.com/seata/awesome-seata) - Seata's slides and video address in meetup
-* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website
 
 ## Contributors
 
