@@ -15,12 +15,11 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.server;
 
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-
-import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 
 /**
