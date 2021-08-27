@@ -52,14 +52,7 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
 
     @Override
     public void environmentPrepared(ConfigurableEnvironment environment) {
-        // port: -D > -h > env > yml > default
-
-        // -Dserver.servicePort=8091
-        String dPort = environment.getProperty(SERVER_SERVICE_PORT_CAMEL);
-        if (StringUtils.isNotBlank(dPort)) {
-            setTargetPort(dPort);
-            return;
-        }
+        // port: -h > - D> env > yml > default
 
         //-p 8091
         if (args != null && args.length >= 2) {
@@ -69,6 +62,13 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
                     return;
                 }
             }
+        }
+
+        // -Dserver.servicePort=8091
+        String dPort = environment.getProperty(SERVER_SERVICE_PORT_CAMEL);
+        if (StringUtils.isNotBlank(dPort)) {
+            setTargetPort(dPort);
+            return;
         }
 
         //docker -e SEATA_PORT=8091
@@ -115,7 +115,7 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
      */
     @Override
     public int getOrder() {
-        return -1;
+        return 1;
     }
 
     class ServerPropertiesBeanPostProcessor implements BeanFactoryPostProcessor {
