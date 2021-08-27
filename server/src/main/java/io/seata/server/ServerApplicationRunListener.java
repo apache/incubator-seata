@@ -109,7 +109,7 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
     }
 
     /**
-     * higher than EventPublishingRunListener
+     * lower than EventPublishingRunListener
      *
      * @return
      */
