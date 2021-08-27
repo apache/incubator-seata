@@ -37,7 +37,7 @@ We say, a **Distributed Transaction** is a **Global Transaction** which is made 
 
 ![Global & Branch](https://cdn.nlark.com/lark/0/2018/png/18862/1545015454979-a18e16f6-ed41-44f1-9c7a-bd82c4d5ff99.png) 
 
-There are 3 basic components in Seata: 
+There are three roles in Seata Framework: 
 
 - **Transaction Coordinator(TC):** Maintain status of global and branch transactions, drive the global commit or rollback.
 - **Transaction Manager(TM):** Define the scope of global transaction: begin a global transaction, commit or rollback a global transaction.
@@ -59,17 +59,18 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ### History
 
-##### Ant Financial
-
-- **XTS**: Extended Transaction Service. Ant Financial middleware team developed the distributed transaction middleware since 2007, which is widely used in Ant Financial and solves the problems of data consistency across databases and services.
-
-- **DTX**: Distributed Transaction Extended. Since 2013, XTS has been published on the Ant Financial Cloud, with the name of DTX .
-
 ##### Alibaba
 
 - **TXC**: Taobao Transaction Constructor. Alibaba middleware team started this project since 2014 to meet the distributed transaction problems caused by application architecture change from monolithic to microservices.
 - **GTS**: Global Transaction Service. TXC as an Aliyun middleware product with new name GTS was published since 2016.
 - **Fescar**: we started the open source project Fescar based on TXC/GTS since 2019 to work closely with the community in the future.
+
+
+##### Ant Financial
+
+- **XTS**: Extended Transaction Service. Ant Financial middleware team developed the distributed transaction middleware since 2007, which is widely used in Ant Financial and solves the problems of data consistency across databases and services.
+
+- **DTX**: Distributed Transaction Extended. Since 2013, XTS has been published on the Ant Financial Cloud, with the name of DTX .
 
 
 ##### Seata Community
