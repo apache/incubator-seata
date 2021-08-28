@@ -19,10 +19,6 @@ package io.seata.server;
 import java.util.Properties;
 
 import io.seata.common.util.StringUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -30,11 +26,10 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
 /**
  * @author slievrly
@@ -52,7 +47,7 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
 
     @Override
     public void environmentPrepared(ConfigurableEnvironment environment) {
-        // port: -h > - D> env > yml > default
+        // port: -h > -D > env > yml > default
 
         //-p 8091
         if (args != null && args.length >= 2) {
@@ -118,22 +113,4 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
         return 1;
     }
 
-    class ServerPropertiesBeanPostProcessor implements BeanFactoryPostProcessor {
-
-        @Override
-        public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-            BeanDefinition beanDefinition = beanFactory.getBeanDefinition("serverProperties");
-            if (null != beanDefinition) {
-                int port = SERVICE_DEFAULT_PORT;
-                try {
-                    port = Integer.parseInt(targetPort);
-                } catch (NumberFormatException exx) {
-                    //ignore
-                }
-
-                beanDefinition.getPropertyValues().add("servicePort", port);
-
-            }
-        }
-    }
 }
