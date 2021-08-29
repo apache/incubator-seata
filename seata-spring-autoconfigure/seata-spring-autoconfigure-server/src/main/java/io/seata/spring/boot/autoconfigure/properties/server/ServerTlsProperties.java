@@ -32,7 +32,7 @@ public class ServerTlsProperties {
 
     private String keyFilePath;
 
-    public String getCertificateType(){
+    public String getCertificateType() {
         return this.certificateType;
     }
 
