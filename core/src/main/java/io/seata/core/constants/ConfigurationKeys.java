@@ -132,7 +132,6 @@ public interface ConfigurationKeys {
      */
     String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
 
-
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
      */
@@ -297,7 +296,17 @@ public interface ConfigurationKeys {
     /**
      * The constant SERVER_RPC_PORT.
      */
-    String SERVER_RPC_PORT = SERVER_PREFIX + "rpcPort";
+    String SERVER_SERVICE_PORT_CAMEL = SERVER_PREFIX + "servicePort";
+
+    /**
+     * The constant SERVER_SERVICE_PORT_CONFIG.
+     */
+    String SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "service-port";
+
+    /**
+     * The constant ENV_SEATA_PORT_KEY.
+     */
+    String ENV_SEATA_PORT_KEY = "SEATA_PORT";
 
     /**
      * The constant RECOVERY_PREFIX.

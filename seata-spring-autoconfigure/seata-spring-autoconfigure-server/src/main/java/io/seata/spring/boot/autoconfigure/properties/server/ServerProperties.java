@@ -15,10 +15,10 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.server;
 
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 
@@ -33,6 +33,7 @@ public class ServerProperties {
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
     private Boolean enableCheckAuth = true;
     private Integer retryDeadThreshold = 130000;
+    private Integer servicePort;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -76,6 +77,15 @@ public class ServerProperties {
 
     public ServerProperties setRetryDeadThreshold(Integer retryDeadThreshold) {
         this.retryDeadThreshold = retryDeadThreshold;
+        return this;
+    }
+
+    public Integer getServicePort() {
+        return servicePort;
+    }
+
+    public ServerProperties setServicePort(Integer servicePort) {
+        this.servicePort = servicePort;
         return this;
     }
 }
