@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 
+import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+
 /**
  * @author xingfudeshi@gmail.com
  * @author wang.liang
@@ -37,7 +39,6 @@ public class ContainerHelper {
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     private static final String ENV_SEATA_IP_KEY = "SEATA_IP";
     private static final String ENV_SERVER_NODE_KEY = "SERVER_NODE";
-    private static final String ENV_SEATA_PORT_KEY = "SEATA_PORT";
     private static final String ENV_STORE_MODE_KEY = "STORE_MODE";
     private static final String ENV_LOCK_STORE_MODE_KEY = "LOCK_STORE_MODE";
     private static final String ENV_SESSION_STORE_MODE_KEY = "SESSION_STORE_MODE";
