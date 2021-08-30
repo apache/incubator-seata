@@ -52,6 +52,7 @@ class FileConfigurationTest {
         Thread.sleep(2000);
         boolean currentValue = fileConfig.getBoolean("service.disableGlobalTransaction");
         Assertions.assertNotEquals(value, currentValue);
+        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
     }
 
     @Test
