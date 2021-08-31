@@ -15,6 +15,8 @@
  */
 package io.seata.core.event;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
 public class GuavaEventBus implements EventBus {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuavaEventBus.class);
     private final com.google.common.eventbus.EventBus eventBus;
+    private static Set<Object> subscriberSet = new HashSet<>();
 
     public GuavaEventBus(String identifier) {
         this(identifier, false);
@@ -42,7 +45,7 @@ public class GuavaEventBus implements EventBus {
             this.eventBus = new com.google.common.eventbus.EventBus(identifier);
         } else {
             final ExecutorService eventExecutor = new ThreadPoolExecutor(1, 1, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(2048), new NamedThreadFactory(identifier, 1), (r, executor) -> {
+                new ArrayBlockingQueue<>(2048), new NamedThreadFactory(identifier, 1, true), (r, executor) -> {
 
                 LOGGER.warn("eventBus executor queue is full, size:{}", executor.getQueue().size());
             });
@@ -52,16 +55,42 @@ public class GuavaEventBus implements EventBus {
 
     @Override
     public void register(Object subscriber) {
-        this.eventBus.register(subscriber);
+        if (!subscriberSet.contains(subscriber)) {
+            synchronized (GuavaEventBus.class) {
+                if (!subscriberSet.contains(subscriber)) {
+                    subscriberSet.add(subscriber);
+                    this.eventBus.register(subscriber);
+                }
+            }
+        }
     }
 
     @Override
     public void unregister(Object subscriber) {
-        this.eventBus.unregister(subscriber);
+        if (subscriberSet.contains(subscriber)) {
+            synchronized (GuavaEventBus.class) {
+                if (subscriberSet.contains(subscriber)) {
+                    subscriberSet.remove(subscriber);
+                    this.eventBus.unregister(subscriber);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void unregisterAll() {
+        for (Object subscriber : subscriberSet) {
+            unregister(subscriber);
+        }
     }
 
     @Override
     public void post(Event event) {
         this.eventBus.post(event);
+    }
+
+    @Override
+    public Set<Object> getSubscribers() {
+        return subscriberSet;
     }
 }

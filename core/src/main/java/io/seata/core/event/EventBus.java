@@ -15,6 +15,8 @@
  */
 package io.seata.core.event;
 
+import java.util.Set;
+
 /**
  * The interface for event bus.
  *
@@ -25,5 +27,9 @@ public interface EventBus {
 
     void unregister(Object subscriber);
 
+    void unregisterAll();
+
     void post(Event event);
+
+    Set<Object> getSubscribers();
 }

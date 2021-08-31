@@ -35,6 +35,7 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
+import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import java.io.File;
@@ -104,7 +105,8 @@ public class DefaultCoordinatorTest {
         EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         RemotingServer remotingServer = new MockServerMessageSender();
-        defaultCoordinator = new DefaultCoordinator(remotingServer);
+        defaultCoordinator =DefaultCoordinator.getInstance(null);
+        defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
     }
 
@@ -232,6 +234,7 @@ public class DefaultCoordinatorTest {
 
     @AfterEach
     public void tearDown() throws IOException {
+        MetricsManager.get().getRegistry().clearUp();
         //SessionHolder.destroy();
         deleteDataFile();
     }
@@ -247,7 +250,7 @@ public class DefaultCoordinatorTest {
     }
 
     private static void deleteAndCreateDataFile() throws IOException {
-        SessionHolder.destroy();
+        //SessionHolder.destroy();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }

@@ -64,7 +64,7 @@ public abstract class AbstractServerTest {
                 //log store mode : file、db
                 SessionHolder.init(parameterParser.getStoreMode());
 
-                DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
+                DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyServer);
                 coordinator.init();
                 nettyServer.setHandler(coordinator);
                 // register ShutdownHook

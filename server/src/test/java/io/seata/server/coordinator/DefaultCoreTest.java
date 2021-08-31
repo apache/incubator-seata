@@ -18,7 +18,6 @@ package io.seata.server.coordinator;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -48,7 +47,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  *
  * @author zhimo.xiao @gmail.com
  */
-@SpringBootTest(classes = ServerApplication.class, properties = {"server.port=7091"})
+@SpringBootTest(classes = ServerApplication.class)
 @ExtendWith(SpringExtension.class)
 public class DefaultCoreTest {
 
@@ -85,8 +84,7 @@ public class DefaultCoreTest {
      */
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
-        System.out.println("port:"+port);
-        System.setProperty(ConfigurationKeys.SERVER_RPC_PORT,"8091");
+        //System.setProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL,"8091");
         SessionHolder.init(null);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);
