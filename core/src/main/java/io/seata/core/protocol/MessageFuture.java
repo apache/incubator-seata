@@ -56,10 +56,13 @@ public class MessageFuture {
         Object result = null;
         try {
             result = origin.get(timeout, unit);
+            if (result instanceof TimeoutException) {
+                throw (TimeoutException)result;
+            }
         } catch (ExecutionException e) {
             throw new ShouldNeverHappenException("Should not get results in a multi-threaded environment", e);
         } catch (TimeoutException e) {
-            throw new TimeoutException("cost " + (System.currentTimeMillis() - start) + " ms");
+            throw new TimeoutException(String.format("%s ,cost: %d ms", e.getMessage(), System.currentTimeMillis() - start));
         }
 
         if (result instanceof RuntimeException) {
