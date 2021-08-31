@@ -62,29 +62,6 @@ public class Server {
         //Because, here we need to parse the parameters needed for startup.
         ParameterParser parameterParser = new ParameterParser(args);
 
-        //initialize the metrics
-        MetricsManager.get().init();
-
-        System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
-
-        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
-                NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
-                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
-
-        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-        //server port
-        nettyRemotingServer.setListenPort(parameterParser.getPort());
-        UUIDGenerator.init(parameterParser.getServerNode());
-        //log store mode : file, db, redis
-        SessionHolder.init(parameterParser.getSessionStoreMode());
-        LockerManagerFactory.init(parameterParser.getLockStoreMode());
-        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
-        coordinator.init();
-        nettyRemotingServer.setHandler(coordinator);
-        // register ShutdownHook
-        ShutdownHook.getInstance().addDisposable(coordinator);
-        ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
@@ -98,6 +75,28 @@ public class Server {
             }
         }
         XID.setPort(nettyRemotingServer.getListenPort());
+
+        //initialize the metrics
+        MetricsManager.get().init();
+
+        System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
+
+        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
+                NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
+                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
+
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        UUIDGenerator.init(parameterParser.getServerNode());
+        //log store mode : file, db, redis
+        SessionHolder.init(parameterParser.getSessionStoreMode());
+        LockerManagerFactory.init(parameterParser.getLockStoreMode());
+        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
+        coordinator.init();
+        nettyRemotingServer.setHandler(coordinator);
+        // register ShutdownHook
+        ShutdownHook.getInstance().addDisposable(coordinator);
+        ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
         nettyRemotingServer.init();
     }

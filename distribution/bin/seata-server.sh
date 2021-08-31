@@ -124,7 +124,14 @@ if [ "$SKYWALKING_ENABLE" = "true" ]; then
 else
   echo "apm-skywalking not enabled"
 fi
-JAVA_OPT="${JAVA_OPT} -server -Xmx2048m -Xms2048m -Xmn1024m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
+JVM_XMX=$JVM_XMX
+JVM_XMS=$JVM_XMS
+JVM_XMN=$JVM_XMN
+JVM_XSS=$JVM_XSS
+JVM_MetaspaceSize=$JVM_MetaspaceSize
+JVM_MaxMetaspaceSize=$JVM_MaxMetaspaceSize
+JVM_MaxDirectMemorySize=$JVM_MaxDirectMemorySize
+JAVA_OPT="${JAVA_OPT} -server -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xmn${JVM_XMN:="1024m"} -Xss${JVM_XSS:="512k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
 JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc"
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
 JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.pid=${$} -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"

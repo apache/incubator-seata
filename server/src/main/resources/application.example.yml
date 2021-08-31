@@ -1,5 +1,5 @@
 server:
-  port: 9091
+  port: 7091
 
 spring:
   application:
@@ -92,6 +92,7 @@ seata:
       address-wait-time: 3000
 
   server:
+    service-port: 8091
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
