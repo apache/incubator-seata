@@ -21,12 +21,10 @@ import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -41,19 +39,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 public class BranchSessionTest {
 
-    @Autowired
-    private ApplicationContext context;
-
     @BeforeAll
     public static void setUp(ApplicationContext context) {
 
     }
 
-    @Test
-    public void test(){
-
-    }
-    
     /**
      * Codec test.
      *
@@ -80,7 +70,7 @@ public class BranchSessionTest {
      *
      * @return the object [ ] [ ]
      */
-    private static Stream<Arguments> branchSessionProvider() {
+     static Stream<Arguments> branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(1L);
@@ -91,8 +81,6 @@ public class BranchSessionTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return Stream.of(
-                Arguments.of(branchSession)
-        );
+        return Stream.of(Arguments.of(branchSession));
     }
 }

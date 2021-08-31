@@ -38,7 +38,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -74,9 +73,6 @@ public class DefaultCoreTest {
 
     private GlobalSession globalSession;
 
-    @LocalServerPort
-    private static int port;
-
     /**
      * Init session manager.
      *
@@ -84,7 +80,6 @@ public class DefaultCoreTest {
      */
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
-        //System.setProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL,"8091");
         SessionHolder.init(null);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);

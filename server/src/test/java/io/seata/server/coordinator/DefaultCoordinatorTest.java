@@ -235,7 +235,6 @@ public class DefaultCoordinatorTest {
     @AfterEach
     public void tearDown() throws IOException {
         MetricsManager.get().getRegistry().clearUp();
-        //SessionHolder.destroy();
         deleteDataFile();
     }
 
@@ -250,7 +249,6 @@ public class DefaultCoordinatorTest {
     }
 
     private static void deleteAndCreateDataFile() throws IOException {
-        //SessionHolder.destroy();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }

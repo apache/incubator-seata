@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
-
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
@@ -76,13 +74,10 @@ public class DefaultCoordinatorMetricsTest {
             MetricsManager.get().getRegistry().measure().forEach(
                 measurement -> measurements.put(measurement.getId().toString(), measurement));
 
-            if (measurements.size() > 0) {
-                System.out.println(JSON.toJSONString(measurements));
-            }
             Assertions.assertEquals(1, measurements.size());
-            Assertions.assertEquals(1.0,
+            Assertions.assertEquals(1,
                 measurements.get("seata.transaction(applicationId=null,group=null,meter=counter,role=tc,status=active)")
-                    .getValue(), 0.0);
+                    .getValue(), 0);
 
             //commit this transaction
             GlobalCommitRequest commitRequest = new GlobalCommitRequest();
@@ -166,7 +161,6 @@ public class DefaultCoordinatorMetricsTest {
                 .getValue(), 0);
         } finally {
             // call SpringContextShutdownHook
-            //coordinator.destroy();
         }
     }
 
