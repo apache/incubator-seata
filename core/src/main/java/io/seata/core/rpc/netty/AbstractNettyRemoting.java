@@ -109,9 +109,12 @@ public abstract class AbstractNettyRemoting implements Disposable {
             @Override
             public void run() {
                 for (Map.Entry<Integer, MessageFuture> entry : futures.entrySet()) {
-                    if (entry.getValue().isTimeout()) {
+                    MessageFuture future = entry.getValue();
+                    if (future.isTimeout()) {
                         futures.remove(entry.getKey());
-                        entry.getValue().setResultMessage(null);
+                        RpcMessage rpcMessage = future.getRequestMessage();
+                        future.setResultMessage(new TimeoutException(String
+                            .format("msgId: %s ,msgType: %s ,msg: %s ,request timeout", rpcMessage.getId(), String.valueOf(rpcMessage.getMessageType()), rpcMessage.getBody().toString())));
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("timeout clear future: {}", entry.getValue().getRequestMessage().getBody());
                         }
