@@ -389,7 +389,7 @@ public class DefaultCore implements Core {
             // The second query can solve the first problem, and if it is the second problem, it may cause a rollback
             // failure due to data changes.
             GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
-            if (globalSessionTwice != null && globalSessionTwice.hasBranch()) {
+            if (globalSessionTwice != null && globalSessionTwice.hasBranch() && !globalSessionTwice.canBeRollbackedAsync()) {
                 LOGGER.info("Rollbacking global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
