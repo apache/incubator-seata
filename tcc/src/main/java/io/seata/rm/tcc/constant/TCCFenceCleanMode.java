@@ -15,6 +15,8 @@
  */
 package io.seata.rm.tcc.constant;
 
+import io.seata.common.util.StringUtils;
+
 /**
  * TCC Fence clean mode
  *
@@ -38,4 +40,19 @@ public enum TCCFenceCleanMode {
      * Clean by minutes
      */
     Minute;
+
+    /**
+     * Valueof TCC Fence Clean Mode
+     *
+     * @param cleanModel the Clean Mode
+     * @return the Clean Mode
+     */
+    public static TCCFenceCleanMode valueof(String cleanModel) {
+        for (TCCFenceCleanMode mode : values()) {
+            if (StringUtils.equalsIgnoreCase(mode.name(), cleanModel)) {
+                return mode;
+            }
+        }
+        throw new IllegalArgumentException("unknown TCC Fence Clean Mode:" + cleanModel);
+    }
 }

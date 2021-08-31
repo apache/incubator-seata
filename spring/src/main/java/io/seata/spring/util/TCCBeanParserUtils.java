@@ -15,15 +15,22 @@
  */
 package io.seata.spring.util;
 
+import io.seata.common.DefaultValues;
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
 import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
 import io.seata.spring.tcc.TccActionInterceptor;
+import io.seata.spring.tcc.TccFenceCleaner;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Method;
 
 /**
@@ -32,6 +39,8 @@ import java.lang.reflect.Method;
  * @author zhangsen
  */
 public class TCCBeanParserUtils {
+
+    private static TCCFenceConfig tccFenceConfig = null;
 
     private TCCBeanParserUtils() {
     }
@@ -44,7 +53,7 @@ public class TCCBeanParserUtils {
      * @param applicationContext the application context
      * @return boolean boolean
      */
-    public static boolean isTccAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
+    public static boolean isTccAutoProxy(Object bean, String beanName, ApplicationContext applicationContext, TccFenceCleaner tccFenceCleaner) {
         boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
         //get RemotingBean description
         RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
@@ -52,7 +61,7 @@ public class TCCBeanParserUtils {
         if (isRemotingBean) {
             if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
                 //LocalTCC
-                return isTccProxyTargetBean(remotingDesc);
+                return isTccProxyTargetBean(remotingDesc, applicationContext, tccFenceCleaner);
             } else {
                 // sofa:reference / dubbo:reference, factory bean
                 return false;
@@ -62,12 +71,12 @@ public class TCCBeanParserUtils {
                 //check FactoryBean
                 if (isRemotingFactoryBean(bean, beanName, applicationContext)) {
                     remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                    return isTccProxyTargetBean(remotingDesc);
+                    return isTccProxyTargetBean(remotingDesc, applicationContext, tccFenceCleaner);
                 } else {
                     return false;
                 }
             } else {
-                return isTccProxyTargetBean(remotingDesc);
+                return isTccProxyTargetBean(remotingDesc, applicationContext, tccFenceCleaner);
             }
         }
     }
@@ -105,7 +114,7 @@ public class TCCBeanParserUtils {
      * @param remotingDesc the remoting desc
      * @return boolean boolean
      */
-    public static boolean isTccProxyTargetBean(RemotingDesc remotingDesc) {
+    public static boolean isTccProxyTargetBean(RemotingDesc remotingDesc, ApplicationContext applicationContext, TccFenceCleaner tccFenceCleaner) {
         if (remotingDesc == null) {
             return false;
         }
@@ -117,6 +126,10 @@ public class TCCBeanParserUtils {
         for (Method method : methods) {
             twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
             if (twoPhaseBusinessAction != null) {
+                // init tcc fence config if enable useTccFence
+                if (twoPhaseBusinessAction.useTCCFence() && applicationContext != null && tccFenceConfig == null) {
+                    initTccFenceConfig(applicationContext, tccFenceCleaner);
+                }
                 isTccClazz = true;
                 break;
             }
@@ -132,6 +145,34 @@ public class TCCBeanParserUtils {
         }
         // sofa:reference /  dubbo:reference, AOP
         return remotingDesc.isReference();
+    }
+
+    /**
+     * new TccFenceConfig and init tcc fence clean task
+     * @param applicationContext the applicationContext
+     * @param tccFenceCleaner the tccFenceCleaner
+     */
+    private static void initTccFenceConfig(ApplicationContext applicationContext, TccFenceCleaner tccFenceCleaner) {
+        DataSource dataSource;
+        PlatformTransactionManager transactionManager;
+        if (applicationContext.containsBean(DefaultValues.TCC_FENCE_DATA_SOURCE_BEAN_NAME)) {
+            dataSource = (DataSource) applicationContext.getBean(DefaultValues.TCC_FENCE_DATA_SOURCE_BEAN_NAME);
+        } else if (applicationContext.containsBean(DefaultValues.DEFAULT_DATA_SOURCE_BEAN_NAME)) {
+            dataSource = (DataSource) applicationContext.getBean(DefaultValues.DEFAULT_DATA_SOURCE_BEAN_NAME);
+        } else {
+            throw new TCCFenceException(FrameworkErrorCode.DateSourceNeedInjected);
+        }
+
+        if (applicationContext.containsBean(DefaultValues.TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME)) {
+            transactionManager = (PlatformTransactionManager) applicationContext.getBean(DefaultValues.TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME);
+        } else if (applicationContext.containsBean(DefaultValues.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME)) {
+            transactionManager = (PlatformTransactionManager) applicationContext.getBean(DefaultValues.DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
+        } else {
+            throw new TCCFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
+        }
+        // new TCCFenceConfig and init Clean Task
+        tccFenceConfig = new TCCFenceConfig(dataSource, transactionManager,
+                tccFenceCleaner.getCleanMode(), tccFenceCleaner.getCleanPeriod(), tccFenceCleaner.getLogTableName());
     }
 
     /**

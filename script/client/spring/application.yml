@@ -138,8 +138,6 @@ seata:
   log:
     exception-rate: 100
   tcc-fence:
-    enable: true
-    config:
-      log-table-name: tcc_fence_log
-      clean-mode: hour
-      clean-period: 1
+    log-table-name: tcc_fence_log
+    clean-mode: hour
+    clean-period: 1

@@ -26,7 +26,6 @@ import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -40,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kaka2code
  */
-public class TCCFenceConfig implements InitializingBean, Disposable {
+public class TCCFenceConfig implements Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceConfig.class);
 
@@ -75,9 +74,17 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
     private final ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("tccFenceClean", 1));
 
-    public TCCFenceConfig(final DataSource dataSource, final PlatformTransactionManager transactionManager) {
+    public TCCFenceConfig(final DataSource dataSource, final PlatformTransactionManager transactionManager,
+            TCCFenceCleanMode cleanMode,
+            int cleanPeriod,
+            String logTableName) {
         this.dataSource = dataSource;
         this.transactionManager = transactionManager;
+        this.cleanMode = cleanMode;
+        this.cleanPeriod = cleanPeriod;
+        this.logTableName = logTableName;
+
+        afterPropertiesSet();
     }
 
     public DataSource getDataSource() {
@@ -152,7 +159,9 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
         tccFenceClean.shutdown();
     }
 
-    @Override
+    /**
+     * check database config and init clean task
+     */
     public void afterPropertiesSet() {
         // set log table name
         if (logTableName != null) {

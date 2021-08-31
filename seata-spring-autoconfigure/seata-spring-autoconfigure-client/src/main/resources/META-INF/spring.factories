@@ -1,6 +1,5 @@
 # Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=
 
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
