@@ -23,13 +23,36 @@ import java.util.Set;
  * @author zhengyangyong
  */
 public interface EventBus {
+    /**
+     * Register.
+     *
+     * @param subscriber the subscriber
+     */
     void register(Object subscriber);
 
+    /**
+     * Unregister.
+     *
+     * @param subscriber the subscriber
+     */
     void unregister(Object subscriber);
 
+    /**
+     * Unregister all.
+     */
     void unregisterAll();
 
+    /**
+     * Post.
+     *
+     * @param event the event
+     */
     void post(Event event);
 
+    /**
+     * Gets subscribers.
+     *
+     * @return the subscribers
+     */
     Set<Object> getSubscribers();
 }
