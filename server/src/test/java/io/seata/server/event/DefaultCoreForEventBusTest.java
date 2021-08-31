@@ -32,6 +32,7 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.metrics.MetricsManager;
+import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,7 @@ public class DefaultCoreForEventBusTest {
                 AtomicInteger counter = eventCounters.computeIfAbsent(event.getStatus(),
                     status -> new AtomicInteger(0));
                 counter.addAndGet(1);
-                System.out.println("current status:" + event.getName() + "," + event.getStatus() + "," + eventCounters.size());
+                //System.out.println("current status:" + event.getName() + "," + event.getStatus() + "," + eventCounters.size());
                 if (null != downLatch) {
                     downLatch.countDown();
                 }
@@ -98,6 +99,7 @@ public class DefaultCoreForEventBusTest {
         RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(null);
         coordinator.setRemotingServer(remotingServer);
+        SessionHolder.init(null);
         GlobalTransactionEventSubscriber subscriber = null;
         try {
             DefaultCore core = new DefaultCore(remotingServer);
