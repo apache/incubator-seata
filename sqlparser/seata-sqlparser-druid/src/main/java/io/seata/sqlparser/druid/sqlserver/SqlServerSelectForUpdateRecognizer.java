@@ -104,4 +104,24 @@ public class SqlServerSelectForUpdateRecognizer extends BaseSqlServerRecognizer 
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where);
     }
+
+    @Override
+    public String getLimitCondition() {
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
 }
