@@ -64,7 +64,6 @@ public class SqlServerUndoInsertExecutor extends BaseSqlServerUndoExecutor {
         for (Field pkField : pkValueList) {
             undoIndex++;
             undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
-            System.out.println(undoIndex);
         }
     }
 }

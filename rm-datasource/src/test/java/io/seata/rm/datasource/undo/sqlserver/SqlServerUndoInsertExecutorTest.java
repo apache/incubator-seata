@@ -1,5 +1,6 @@
 package io.seata.rm.datasource.undo.sqlserver;
 
+import com.alibaba.druid.mock.MockPreparedStatement;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -8,7 +9,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BaseExecutorTest;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     private static SqlServerUndoInsertExecutor executor;
 
     @BeforeAll
-    public static void init(){
+    public static void init() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
@@ -85,14 +84,14 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     }
 
     @Test
-    public void undoPrepareTest() throws SQLException{
+    public void undoPrepareTest() throws SQLException {
         String sql = executor.buildUndoSQL().toUpperCase();
         MockConnection connection = new MockConnection(new MockDriver(), "", null);
-        PreparedStatement undoPST = connection.prepareStatement(sql);
+        MockPreparedStatement undoPST = (MockPreparedStatement) connection.prepareStatement(sql);
 
         List<Field> fieldList = new ArrayList<>();
         fieldList.add(new Field("id", 1, "12345"));
-        fieldList.add(new Field("id", 1, "12346"));
         executor.undoPrepare(undoPST, new ArrayList<>(), fieldList);
+        Assertions.assertEquals(1, undoPST.getParameters().size());
     }
 }
