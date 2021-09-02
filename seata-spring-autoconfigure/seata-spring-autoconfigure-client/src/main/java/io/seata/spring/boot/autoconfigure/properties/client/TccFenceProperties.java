@@ -20,7 +20,7 @@ import io.seata.rm.tcc.constant.TCCFenceCleanMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX_KEBAB_STYLE;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
 
 /**
  * TCC Fence properties
@@ -28,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREF
  * @author dmego
  */
 @Component
-@ConfigurationProperties(prefix = TCC_FENCE_PREFIX_KEBAB_STYLE)
+@ConfigurationProperties(prefix = TCC_FENCE_PREFIX)
 public class TccFenceProperties {
 
     /**
