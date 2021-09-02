@@ -1,0 +1,98 @@
+package io.seata.rm.datasource.undo.sqlserver;
+
+import io.seata.rm.datasource.mock.MockConnection;
+import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.BaseExecutorTest;
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
+import io.seata.sqlparser.SQLType;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * @author GoodBoyCoder
+ */
+public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
+    private static SqlServerUndoInsertExecutor executor;
+
+    @BeforeAll
+    public static void init(){
+        TableMeta tableMeta = Mockito.mock(TableMeta.class);
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
+        Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
+
+        TableRecords beforeImage = new TableRecords();
+        beforeImage.setTableName("table_name");
+        beforeImage.setTableMeta(tableMeta);
+        List<Row> beforeRows = new ArrayList<>();
+        Row row0 = new Row();
+        addField(row0, "id", 1, "12345");
+        addField(row0, "age", 1, "1");
+        beforeRows.add(row0);
+        Row row1 = new Row();
+        addField(row1, "id", 1, "12346");
+        addField(row1, "age", 1, "1");
+        beforeRows.add(row1);
+        beforeImage.setRows(beforeRows);
+
+        TableRecords afterImage = new TableRecords();
+        afterImage.setTableName("table_name");
+        afterImage.setTableMeta(tableMeta);
+        List<Row> afterRows = new ArrayList<>();
+        Row row2 = new Row();
+        addField(row2, "id", 1, "12345");
+        addField(row2, "age", 1, "2");
+        afterRows.add(row2);
+        Row row3 = new Row();
+        addField(row3, "id", 1, "12346");
+        addField(row3, "age", 1, "2");
+        afterRows.add(row3);
+        afterImage.setRows(afterRows);
+
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setSqlType(SQLType.INSERT);
+        sqlUndoLog.setTableMeta(tableMeta);
+        sqlUndoLog.setTableName("table_name");
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
+
+        executor = new SqlServerUndoInsertExecutor(sqlUndoLog);
+    }
+
+    @Test
+    public void buildUndoSQL() {
+        String sql = executor.buildUndoSQL().toUpperCase();
+        Assertions.assertNotNull(sql);
+        Assertions.assertEquals(sql, "DELETE FROM TABLE_NAME WHERE ID = ?");
+    }
+
+    @Test
+    public void getUndoRows() {
+        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getAfterImage());
+    }
+
+    @Test
+    public void undoPrepareTest() throws SQLException{
+        String sql = executor.buildUndoSQL().toUpperCase();
+        MockConnection connection = new MockConnection(new MockDriver(), "", null);
+        PreparedStatement undoPST = connection.prepareStatement(sql);
+
+        List<Field> fieldList = new ArrayList<>();
+        fieldList.add(new Field("id", 1, "12345"));
+        fieldList.add(new Field("id", 1, "12346"));
+        executor.undoPrepare(undoPST, new ArrayList<>(), fieldList);
+    }
+}

@@ -28,7 +28,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 public class SqlServerUndoExecutorHolder implements UndoExecutorHolder {
     @Override
     public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
-        return null;
+        return new SqlServerUndoInsertExecutor(sqlUndoLog);
     }
 
     @Override
