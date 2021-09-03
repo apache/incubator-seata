@@ -97,6 +97,17 @@
       ]
     },
     {
+      "name": "seata.config.nacos.data-type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.config.ConfigNacosDataType"
+          }
+        }
+      ]
+    },
+    {
       "name": "seata.registry.type",
       "providers": [
         {

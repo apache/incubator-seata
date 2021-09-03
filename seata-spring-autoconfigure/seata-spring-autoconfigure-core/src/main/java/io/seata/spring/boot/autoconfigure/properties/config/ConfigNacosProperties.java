@@ -32,6 +32,10 @@ public class ConfigNacosProperties {
     private String username = "";
     private String password = "";
     private String dataId = "seata.properties";
+    /**
+     * properties, yaml
+     */
+    private String dataType = "properties";
 
     public String getServerAddr() {
         return serverAddr;
@@ -85,5 +89,15 @@ public class ConfigNacosProperties {
     public ConfigNacosProperties setDataId(String dataId) {
         this.dataId = dataId;
         return this;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public ConfigNacosProperties setDataType(String dataType) {
+        this.dataType = dataType;
+        return this;
+
     }
 }
