@@ -3,7 +3,7 @@ package io.seata.config;
 /**
  * The enum Config Nacos Data type.
  *
- * @author slievrly
+ * @author zhixing
  */
 public enum  ConfigNacosDataType {
     /**
