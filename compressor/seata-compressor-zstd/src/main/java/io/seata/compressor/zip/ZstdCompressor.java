@@ -13,21 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server;
+package io.seata.compressor.zip;
 
-import java.io.IOException;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.compressor.Compressor;
 
 /**
- * @author spilledyear@outlook.com
+ * the Zstd Compressor
+ *
+ * @author chd
  */
-@SpringBootApplication
-public class ServerApplication {
-    public static void main(String[] args) throws IOException {
-        // run the spring-boot application
-        SpringApplication.run(ServerApplication.class, args);
+@LoadLevel(name = "ZSTD")
+public class ZstdCompressor implements Compressor {
 
+    @Override
+    public byte[] compress(byte[] bytes) {
+        return ZstdUtil.compress(bytes);
     }
+
+    @Override
+    public byte[] decompress(byte[] bytes) {
+        return ZstdUtil.decompress(bytes);
+    }
+
 }

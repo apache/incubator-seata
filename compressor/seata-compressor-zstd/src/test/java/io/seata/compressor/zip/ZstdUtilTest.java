@@ -13,21 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server;
+package io.seata.compressor.zip;
 
-import java.io.IOException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * @author spilledyear@outlook.com
+ * the Zstd Util test
+ *
+ * @author chd
  */
-@SpringBootApplication
-public class ServerApplication {
-    public static void main(String[] args) throws IOException {
-        // run the spring-boot application
-        SpringApplication.run(ServerApplication.class, args);
+public class ZstdUtilTest {
 
+    @Test
+    public void test_compress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            ZstdUtil.compress(null);
+        });
+    }
+
+    @Test
+    public void test_decompress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            ZstdUtil.decompress(null);
+        });
     }
 }
