@@ -15,9 +15,9 @@
  */
 package io.seata.core.event;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class GuavaEventBus implements EventBus {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuavaEventBus.class);
     private final com.google.common.eventbus.EventBus eventBus;
-    private static Set<Object> subscriberSet = new HashSet<>();
+    private static Set<Object> subscriberSet = ConcurrentHashMap.newKeySet();
 
     public GuavaEventBus(String identifier) {
         this(identifier, false);
@@ -55,27 +55,18 @@ public class GuavaEventBus implements EventBus {
 
     @Override
     public void register(Object subscriber) {
-        if (!subscriberSet.contains(subscriber)) {
-            synchronized (GuavaEventBus.class) {
-                if (!subscriberSet.contains(subscriber)) {
-                    subscriberSet.add(subscriber);
-                    this.eventBus.register(subscriber);
-                }
-            }
+        if (subscriberSet.add(subscriber)) {
+            this.eventBus.register(subscriber);
         }
     }
 
     @Override
     public void unregister(Object subscriber) {
-        if (subscriberSet.contains(subscriber)) {
-            synchronized (GuavaEventBus.class) {
-                if (subscriberSet.contains(subscriber)) {
-                    subscriberSet.remove(subscriber);
-                    this.eventBus.unregister(subscriber);
-                }
-            }
+        if (subscriberSet.remove(subscriber)) {
+            this.eventBus.unregister(subscriber);
         }
     }
+
 
     @Override
     public void unregisterAll() {
