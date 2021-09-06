@@ -177,7 +177,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
             return;
         }
         ConsulListener consulListener = new ConsulListener(dataId, listener);
-        CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+        CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(consulListener);
 
         // Start config change listener for the dataId.
