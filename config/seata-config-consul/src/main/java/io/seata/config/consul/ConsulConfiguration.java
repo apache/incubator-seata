@@ -110,7 +110,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        value = seataConfig.getProperty(dataId);
+        String value = seataConfig.getProperty(dataId);
 
         if (value == null) {
             ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
