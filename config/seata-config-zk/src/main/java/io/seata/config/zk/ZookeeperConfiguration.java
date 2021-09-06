@@ -15,12 +15,26 @@
  */
 package io.seata.config.zk;
 
-import java.io.ByteArrayInputStream;
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.config.AbstractConfiguration;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationChangeType;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.processor.ConfigProcessor;
+import org.I0Itec.zkclient.IZkDataListener;
+import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.serialize.ZkSerializer;
+import org.apache.zookeeper.CreateMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.lang.reflect.Constructor;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -32,23 +46,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationChangeType;
-import io.seata.config.ConfigurationFactory;
-import org.I0Itec.zkclient.IZkDataListener;
-import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.serialize.ZkSerializer;
-import org.apache.zookeeper.CreateMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
@@ -73,10 +70,12 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final String AUTH_PASSWORD = "password";
     private static final String SERIALIZER_KEY = "serializer";
     private static final String CONFIG_PATH_KEY = "nodePath";
+    private static final String CONFIG_DATA_TYPE_KEY = "dataType";
     private static final int THREAD_POOL_NUM = 1;
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
     private static final String DEFAULT_CONFIG_PATH = ROOT_PATH + "/seata.properties";
+    private static final String DEFAULT_CONFIG_DATA_TYPE = "properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
             + FILE_CONFIG_SPLIT_CHAR;
     private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
@@ -263,8 +262,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         String configPath = getConfigPath();
         String config = zkClient.readData(configPath, true);
         if (StringUtils.isNotBlank(config)) {
-            try (Reader reader = new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
-                seataConfig.load(reader);
+            try {
+                seataConfig = ConfigProcessor.loadConfig(config,getZkDataType());
             } catch (IOException e) {
                 LOGGER.error("init config properties error", e);
             }
@@ -275,6 +274,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     private static String getConfigPath() {
         return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
+    }
+    private static String getZkDataType() {
+        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_DATA_TYPE_KEY, DEFAULT_CONFIG_DATA_TYPE);
     }
 
     private static String getSeataConfigStr() {
@@ -314,8 +316,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             if (s.equals(getConfigPath())) {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(o.toString())) {
-                    try (Reader reader = new InputStreamReader(new ByteArrayInputStream(o.toString().getBytes()), StandardCharsets.UTF_8)) {
-                        seataConfigNew.load(reader);
+                    try {
+                        seataConfigNew = ConfigProcessor.loadConfig(o.toString(),getZkDataType());
+
                     } catch (IOException e) {
                         LOGGER.error("load config properties error", e);
                         return;

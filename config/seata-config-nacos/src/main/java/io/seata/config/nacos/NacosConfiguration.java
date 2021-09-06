@@ -22,18 +22,22 @@ import com.alibaba.nacos.api.exception.NacosException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.*;
+import io.seata.config.AbstractConfiguration;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
+import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.core.io.InputStreamResource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -295,7 +299,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             String nacosDataId = getNacosDataId();
             String config = configService.getConfig(nacosDataId, getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
             if (StringUtils.isNotBlank(config)) {
-                seataConfig = loadConfig(config);
+                seataConfig = ConfigProcessor.loadConfig(config,getNacosDataType());
 
                 NacosListener nacosListener = new NacosListener(nacosDataId, null);
                 configService.addListener(nacosDataId, getNacosGroup(), nacosListener);
@@ -305,26 +309,6 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
     }
 
-    private static Properties loadConfig(String config) throws IOException {
-        final ConfigNacosDataType dataType = ConfigNacosDataType.getType(getNacosDataType());
-        Properties properties = new Properties();
-        switch (dataType) {
-            case properties:
-                try (Reader reader = new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
-                    properties.load(reader);
-                }
-                break;
-            case yaml:
-                final YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-                InputStreamResource inputStreamResource = new InputStreamResource(new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8)));
-                yamlPropertiesFactoryBean.setResources(inputStreamResource);
-                properties = yamlPropertiesFactoryBean.getObject();
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + dataType);
-        }
-        return properties;
-    }
 
     @Override
     public String getTypeName() {
@@ -365,7 +349,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(configInfo)) {
                     try {
-                        seataConfigNew = loadConfig(configInfo);
+                        seataConfigNew = ConfigProcessor.loadConfig(configInfo,getNacosDataType());
                     } catch (IOException e) {
                         LOGGER.error("load config properties error", e);
                         return;
