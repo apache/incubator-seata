@@ -38,7 +38,6 @@ import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
@@ -111,11 +110,6 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
-        if (value != null) {
-            return value;
-        }
-
         value = seataConfig.getProperty(dataId);
 
         if (value == null) {

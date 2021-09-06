@@ -35,6 +35,11 @@ public class TCCFenceDO {
     private Long branchId;
 
     /**
+     * the action name
+     */
+    private String actionName;
+
+    /**
      * the tcc fence status
      * tried: 1; committed: 2; rollbacked: 3; suspended: 4
      */
@@ -64,6 +69,14 @@ public class TCCFenceDO {
 
     public void setBranchId(Long branchId) {
         this.branchId = branchId;
+    }
+
+    public String getActionName() {
+        return actionName;
+    }
+
+    public void setActionName(String actionName) {
+        this.actionName = actionName;
     }
 
     public Integer getStatus() {
