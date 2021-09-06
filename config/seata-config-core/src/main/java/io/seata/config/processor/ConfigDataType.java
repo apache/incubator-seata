@@ -29,7 +29,6 @@ public enum ConfigDataType {
      * data type properties
      */
     properties;
-
     /**
      * Gets type.
      *
