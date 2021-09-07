@@ -178,6 +178,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                             break;
                         }
                     }
+                    colTemp.clear();
                 }
             }
         }
