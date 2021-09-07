@@ -159,21 +159,4 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
         }
         return pkValues;
     }
-
-    @Override
-    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
-        final String sql = getSequenceSql(expr);
-
-        Connection conn = statementProxy.getConnection();
-        try (Statement ps = conn.createStatement();
-             ResultSet genKeys = ps.executeQuery(sql)) {
-
-            List<Object> pkValues = new ArrayList<>();
-            while (genKeys.next()) {
-                Object v = genKeys.getObject(1);
-                pkValues.add(v);
-            }
-            return pkValues;
-        }
-    }
 }
