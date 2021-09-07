@@ -15,11 +15,6 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -29,6 +24,14 @@ import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Table meta cache.
@@ -147,19 +150,37 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
                 }
             }
-
+            if (tm.getAllIndexes().isEmpty()) {
+                throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
+            }
+            List<String> pkcol = new ArrayList<>();
             while (rsPrimary.next()) {
                 String pkIndexName = rsPrimary.getString("PK_NAME");
                 if (tm.getAllIndexes().containsKey(pkIndexName)) {
                     IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                     index.setIndextype(IndexType.PRIMARY);
+                }else{
+                    pkcol.add(rsPrimary.getString("COLUMN_NAME"));
                 }
             }
-            if (tm.getAllIndexes().isEmpty()) {
-                throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
+            if(!pkcol.isEmpty()){
+                List<String> colTemp = new ArrayList<>();
+                for (Map.Entry<String, IndexMeta> entry : tm.getAllIndexes().entrySet()) {
+                    IndexMeta index = entry.getValue();
+                    if (index.getIndextype().value() == IndexType.UNIQUE.value()) {
+                        for (ColumnMeta col : index.getValues()) {
+                            if(pkcol.contains(col.getColumnName())){
+                                colTemp.add(col.getColumnName());
+                            }
+                        }
+                        if(!colTemp.isEmpty() && colTemp.size() == pkcol.size()){
+                            index.setIndextype(IndexType.PRIMARY);
+                            break;
+                        }
+                    }
+                }
             }
         }
-
         return tm;
     }
 }
