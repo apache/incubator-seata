@@ -15,22 +15,20 @@
  */
 package io.seata.server.session;
 
+import java.io.IOException;
+import java.util.stream.Stream;
+
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.storage.file.session.FileSessionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.io.IOException;
-import java.util.stream.Stream;
 
 /**
  * The type Global session test.
@@ -39,7 +37,6 @@ import java.util.stream.Stream;
  * @since 2019 /1/23
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class GlobalSessionTest {
 
 

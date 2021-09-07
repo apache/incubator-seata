@@ -15,6 +15,13 @@
  */
 package io.seata.server.lock.db;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
@@ -24,23 +31,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author zhangsen
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class DataBaseLockStoreDAOTest {
 
     static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;

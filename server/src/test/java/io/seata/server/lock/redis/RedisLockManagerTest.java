@@ -15,26 +15,22 @@
  */
 package io.seata.server.lock.redis;
 
-import io.seata.server.storage.redis.lock.RedisLockManager;
 import java.io.IOException;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import com.github.fppt.jedismock.RedisServer;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.server.storage.redis.lock.RedisLockManager;
 import io.seata.server.storage.redis.lock.RedisLocker;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -42,7 +38,6 @@ import redis.clients.jedis.JedisPoolConfig;
  * @author funkye
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class RedisLockManagerTest {
     static RedisServer server = null;
     static LockManager lockManager = null;

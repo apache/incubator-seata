@@ -33,13 +33,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * The type Default core test.
@@ -47,7 +45,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  * @author zhimo.xiao @gmail.com
  */
 @SpringBootTest(classes = ServerApplication.class)
-@ExtendWith(SpringExtension.class)
 public class DefaultCoreTest {
 
     private static DefaultCore core;

@@ -15,27 +15,25 @@
  */
 package io.seata.server.lock.db;
 
-import io.seata.common.util.IOUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
-import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
-import io.seata.server.storage.file.lock.FileLockManager;
-import io.seata.server.lock.LockManager;
-import io.seata.server.storage.db.lock.DataBaseLocker;
-import io.seata.server.session.BranchSession;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import io.seata.common.util.IOUtil;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.Locker;
+import io.seata.server.lock.LockManager;
+import io.seata.server.session.BranchSession;
+import io.seata.server.storage.db.lock.DataBaseLocker;
+import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
+import io.seata.server.storage.file.lock.FileLockManager;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 
 
@@ -43,7 +41,6 @@ import java.sql.Statement;
  * @author zhangsen
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class DataBaseLockManagerImplTest {
 
     static LockManager lockManager = null;

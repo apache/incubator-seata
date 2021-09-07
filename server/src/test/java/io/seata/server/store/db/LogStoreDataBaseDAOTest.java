@@ -43,7 +43,6 @@ import java.util.List;
  * @author zhangsen
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class LogStoreDataBaseDAOTest {
 
     static LogStoreDataBaseDAO logStoreDataBaseDAO  = null;

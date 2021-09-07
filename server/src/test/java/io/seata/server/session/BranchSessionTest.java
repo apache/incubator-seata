@@ -21,13 +21,11 @@ import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * The type Branch session test.
@@ -36,7 +34,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  * @since 2019 /1/23
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class BranchSessionTest {
 
     @BeforeAll

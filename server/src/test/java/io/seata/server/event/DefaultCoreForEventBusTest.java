@@ -36,10 +36,8 @@ import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Test events come from Default Core.
@@ -47,7 +45,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  * @author zhengyangyong
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class DefaultCoreForEventBusTest {
 
     @BeforeAll

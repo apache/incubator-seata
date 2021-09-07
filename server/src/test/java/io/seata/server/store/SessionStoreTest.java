@@ -34,16 +34,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * The type Session store test.
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class SessionStoreTest {
 
     @BeforeAll
