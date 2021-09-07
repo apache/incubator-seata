@@ -128,7 +128,8 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
             LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
         }
 
-        if (statementProxy.getUpdateCount() > 1 && pkValues.size() == 1) {
+        int updateCount = statementProxy.getUpdateCount();
+        if (updateCount > 1 && pkValues.size() == 1) {
             //insert multiple rows of values at once, only the latest ID will be returned
             //just like 'insert into test values(?, ?), (?, ?),...'
             Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
@@ -149,9 +150,9 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
             if (increment < 1) {
                 throw new SQLException("the increment for " + getTableMeta().getTableName() + " is illegal");
             }
-            long beginAt = (long) pkValues.get(0) - (long) (statementProxy.getUpdateCount() - 1) * increment;
+            long beginAt = (long) pkValues.get(0) - (long) (updateCount - 1) * increment;
             pkValues = new ArrayList<>();
-            for (int i = 0; i < statementProxy.getUpdateCount(); i++) {
+            for (int i = 0; i < updateCount; i++) {
                 pkValues.add(beginAt);
                 beginAt += increment;
             }
