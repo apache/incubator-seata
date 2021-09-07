@@ -31,7 +31,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -227,7 +226,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
+        String value = getConfigFromSys(dataId);
         if (value != null) {
             return value;
         }
@@ -263,7 +262,7 @@ public class FileConfiguration extends AbstractConfiguration {
         if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+        configListenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(listener);
         listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
 
@@ -378,7 +377,6 @@ public class FileConfiguration extends AbstractConfiguration {
 
         /**
          * Instantiates a new FileListener.
-         *
          */
         FileListener() {}
 
@@ -388,12 +386,13 @@ public class FileConfiguration extends AbstractConfiguration {
                 fileListener.onProcessEvent(new ConfigurationChangeEvent());
             }
 
-            dataIdMap .computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
+            dataIdMap.computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
         }
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            while (true) {
+            Boolean enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
+            while (enabled) {
                 for (String dataId : dataIdMap.keySet()) {
                     try {
                         String currentConfig =
@@ -418,6 +417,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
+                enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
             }
         }
 

@@ -15,20 +15,54 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import io.seata.common.executor.Initialize;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.undo.parser.spi.FstSerializer;
+import org.nustaq.serialization.FSTObjectSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * fst serializer
  * @author funkye
  */
 @LoadLevel(name = FstUndoLogParser.NAME)
-public class FstUndoLogParser implements UndoLogParser {
+public class FstUndoLogParser implements UndoLogParser, Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FstUndoLogParser.class);
 
     public static final String NAME = "fst";
 
     private FstSerializerFactory fstFactory = FstSerializerFactory.getDefaultFactory();
+
+    @Override
+    public void init() {
+        try {
+            List<FstSerializer> serializers = EnhancedServiceLoader.loadAll(FstSerializer.class);
+            if (CollectionUtils.isNotEmpty(serializers)) {
+                for (FstSerializer serializer : serializers) {
+                    if (serializer != null) {
+                        Class type = serializer.type();
+                        FSTObjectSerializer ser = serializer.ser();
+                        boolean alsoForAllSubclasses = serializer.alsoForAllSubclasses();
+                        if (type != null && ser != null) {
+                            fstFactory.registerSerializer(type, ser, alsoForAllSubclasses);
+                            LOGGER.info("fst undo log parser load [{}].", serializer.getClass().getName());
+                        }
+                    }
+                }
+            }
+        } catch (EnhancedServiceNotFoundException e) {
+            LOGGER.warn("FstSerializer not found children class.", e);
+        }
+    }
 
     @Override
     public String getName() {

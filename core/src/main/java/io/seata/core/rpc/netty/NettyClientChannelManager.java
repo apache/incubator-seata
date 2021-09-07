@@ -30,7 +30,9 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,6 +57,10 @@ class NettyClientChannelManager {
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
 
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
+
+    private static final int TRY_CONNECT_COUNT = 3;
+
+    private static final int CONNECT_ADDRESS_TIMEOUT = 50;
 
     private Function<String, NettyPoolKey> poolKeyFunction;
 
@@ -221,7 +227,7 @@ class NettyClientChannelManager {
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
-            LOGGER.error("{} register RM failed.",FrameworkErrorCode.RegisterRM.getErrCode(), exx);
+            LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);
             throw new FrameworkException("can not register RM,err:" + exx.getMessage());
         }
         return channelFromPool;
@@ -229,14 +235,74 @@ class NettyClientChannelManager {
 
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
-                                                                            .lookup(transactionServiceGroup);
+                .lookup(transactionServiceGroup);
+
+        List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
+                .aliveLookup(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            if (CollectionUtils.isEmpty(currentInetSocketAddressList)) {
+                currentInetSocketAddressList.clear();
+            }
             return Collections.emptyList();
         }
+        for (InetSocketAddress address : availInetSocketAddressList) {
+            boolean canConnect = false;
+            for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
+                if (isServerAddressConnect(address.toString())) {
+                    canConnect = true;
+                    break;
+                }
+            }
+            if (canConnect) {
+                if (!currentInetSocketAddressList.contains(address)) {
+                    currentInetSocketAddressList.add(address);
+                }
+            } else {
+                currentInetSocketAddressList.remove(address);
+                LOGGER.warn("can not connect to this server address '{}', please check it", address.toString());
+            }
+        }
+        currentInetSocketAddressList.removeIf(inetSocketAddress -> !availInetSocketAddressList.contains(inetSocketAddress));
+        return currentInetSocketAddressList.stream()
+                .map(NetUtil::toStringAddress)
+                .collect(Collectors.toList());
+    }
 
-        return availInetSocketAddressList.stream()
-                                         .map(NetUtil::toStringAddress)
-                                         .collect(Collectors.toList());
+
+    void checkAvailServerList(String transactionServiceGroup) throws Exception {
+        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
+                .lookup(transactionServiceGroup);
+        if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            LOGGER.warn("get empty server address list when TM client init");
+            return;
+        }
+        List<InetSocketAddress> currentInetSocketAddressList = RegistryFactory.getInstance()
+                .aliveLookup(transactionServiceGroup);
+        for (InetSocketAddress address : availInetSocketAddressList) {
+            boolean canConnect = false;
+            for (int tryCount = 0; tryCount < TRY_CONNECT_COUNT; tryCount++) {
+                if (isServerAddressConnect(address.toString())) {
+                    canConnect = true;
+                    break;
+                }
+            }
+            if (canConnect) {
+                currentInetSocketAddressList.add(address);
+                break;
+            } else {
+                LOGGER.warn("can not connect to this server address '{}' when TM client init", address.toString());
+            }
+        }
+    }
+
+    private boolean isServerAddressConnect(String serverAddress) {
+        String[] addressPort = serverAddress.split("/")[1].split(":");
+        try (Socket sc = new Socket()) {
+            sc.connect(new InetSocketAddress(addressPort[0], Integer.parseInt(addressPort[1])), CONNECT_ADDRESS_TIMEOUT);
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {
@@ -246,7 +312,7 @@ class NettyClientChannelManager {
             int i = 0;
             for (; i < NettyClientConfig.getMaxCheckAliveRetry(); i++) {
                 try {
-                    Thread.sleep(NettyClientConfig.getCheckAliveInternal());
+                    Thread.sleep(NettyClientConfig.getCheckAliveInterval());
                 } catch (InterruptedException exx) {
                     LOGGER.error(exx.getMessage());
                 }

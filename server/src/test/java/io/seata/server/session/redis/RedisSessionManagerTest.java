@@ -13,11 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.session.redis;
 
-import io.seata.server.session.SessionCondition;
 import java.io.IOException;
+import java.util.List;
+
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
@@ -27,11 +27,11 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
-import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -329,6 +329,7 @@ public class RedisSessionManagerTest {
         sessionManager.removeBranchSession(session,branchSession);
         sessionManager.removeGlobalSession(session);
     }
+
 
     @AfterAll
     public static void after() {

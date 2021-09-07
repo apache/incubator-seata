@@ -15,10 +15,10 @@
  */
 package io.seata.server;
 
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
@@ -28,7 +28,7 @@ import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.env.ContainerHelper;
-import io.seata.server.env.PortHelper;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
@@ -44,13 +44,8 @@ public class Server {
      * The entry point of application.
      *
      * @param args the input arguments
-     * @throws IOException the io exception
      */
-    public static void main(String[] args) throws IOException {
-        // get port first, use to logback.xml
-        int port = PortHelper.getPort(args);
-        System.setProperty(ConfigurationKeys.SERVER_PORT, Integer.toString(port));
-
+    public static void start(String[] args) {
         // create logger
         final Logger logger = LoggerFactory.getLogger(Server.class);
         if (ContainerHelper.isRunningInContainer()) {
@@ -61,6 +56,15 @@ public class Server {
         //Note that the parameter parser should always be the first line to execute.
         //Because, here we need to parse the parameters needed for startup.
         ParameterParser parameterParser = new ParameterParser(args);
+
+
+        //127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+            XID.setIpAddress(parameterParser.getHost());
+        } else {
+            XID.setIpAddress(NetUtil.getLocalIp());
+        }
+        XID.setPort(parameterParser.getPort());
 
         //initialize the metrics
         MetricsManager.get().init();
@@ -73,12 +77,10 @@ public class Server {
                 new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-        //server port
-        nettyRemotingServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db, redis
-        SessionHolder.init(parameterParser.getStoreMode());
-
+        SessionHolder.init(parameterParser.getSessionStoreMode());
+        LockerManagerFactory.init(parameterParser.getLockStoreMode());
         DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
@@ -86,21 +88,6 @@ public class Server {
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
-        //127.0.0.1 and 0.0.0.0 are not valid here.
-        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-            XID.setIpAddress(parameterParser.getHost());
-        } else {
-            XID.setIpAddress(NetUtil.getLocalIp());
-        }
-        XID.setPort(nettyRemotingServer.getListenPort());
-
-        try {
-            nettyRemotingServer.init();
-        } catch (Throwable e) {
-            logger.error("nettyServer init error:{}", e.getMessage(), e);
-            System.exit(-1);
-        }
-
-        System.exit(0);
+        nettyRemotingServer.init();
     }
 }

@@ -15,8 +15,12 @@
  */
 package io.seata.sqlparser.druid.mysql;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
@@ -26,18 +30,12 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
-import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * The type My sql insert recognizer.
@@ -61,7 +59,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.INSERT;
+        return CollectionUtils.isNotEmpty(ast.getDuplicateKeyUpdate()) ? SQLType.INSERT_ON_DUPLICATE_UPDATE : SQLType.INSERT;
     }
 
     @Override
@@ -101,7 +99,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -127,12 +125,45 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
                     row.add(SqlMethodExpr.get());
                 } else {
                     if (primaryKeyIndex.contains(i)) {
-                        throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                        wrapSQLParsingException(expr);
                     }
                     row.add(NotPlaceholderExpr.get());
                 }
             }
         }
         return rows;
+    }
+
+    @Override
+    public List<String> getInsertParamsValue() {
+        List<SQLInsertStatement.ValuesClause> valuesList = ast.getValuesList();
+        List<String> list = new ArrayList<>();
+        for (SQLInsertStatement.ValuesClause m: valuesList) {
+            String values = m.toString().replace("VALUES", "").trim();
+            // when all params is constant, the length of values less than 1
+            if (values.length() > 1) {
+                values = values.substring(1,values.length() - 1);
+            }
+            list.add(values);
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> getDuplicateKeyUpdate() {
+        List<SQLExpr> columnSQLExprs = ast.getDuplicateKeyUpdate();
+        if (columnSQLExprs.isEmpty()) {
+            return null;
+        }
+        List<String> list = new ArrayList<>(columnSQLExprs.size());
+        for (SQLExpr exprLeft : columnSQLExprs) {
+            SQLExpr expr = ((SQLBinaryOpExpr)exprLeft).getLeft();
+            if (expr instanceof SQLIdentifierExpr) {
+                list.add(((SQLIdentifierExpr)expr).getName());
+            } else {
+                wrapSQLParsingException(expr);
+            }
+        }
+        return list;
     }
 }

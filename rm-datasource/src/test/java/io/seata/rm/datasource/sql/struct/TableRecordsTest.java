@@ -15,23 +15,24 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import com.alibaba.druid.mock.MockStatement;
-import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.util.JdbcConstants;
-
-import com.google.common.collect.Lists;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.mock.MockDriver;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.alibaba.druid.mock.MockStatement;
+import com.alibaba.druid.mock.MockStatementBase;
+import com.alibaba.druid.pool.DruidDataSource;
+import com.google.common.collect.Lists;
+
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * the table records test
