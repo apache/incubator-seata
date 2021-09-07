@@ -13,77 +13,54 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.exec;
+package io.seata.rm.datasource.exec.sqlserver;
 
-import java.sql.SQLException;
+import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.ColumnUtils;
+import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.DeleteExecutor;
+import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.SQLDeleteRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
-import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.sqlparser.SQLDeleteRecognizer;
-import io.seata.sqlparser.SQLRecognizer;
-
 /**
- * The type Delete executor.
- *
- * @author sharajava
+ * The type SqlServer Delete executor.
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author GoodBoyCoder
  */
-public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
-
+public class SqlServerDeleteExecutor<T, S extends Statement> extends DeleteExecutor<T, S> {
     /**
-     * Instantiates a new Delete executor.
+     * Instantiates a new sql Server Delete executor.
      *
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
-                          SQLRecognizer sqlRecognizer) {
+    public SqlServerDeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
-    protected TableRecords beforeImage() throws SQLException {
-        SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
-        TableMeta tmeta = getTableMeta(visitor.getTableName());
-        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        String selectSQL = buildBeforeImageSQL(visitor, tmeta, paramAppenderList);
-        return buildTableRecords(tmeta, selectSQL, paramAppenderList);
-    }
-
     protected String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
-        String orderByCondition = buildOrderCondition(visitor, paramAppenderList);
-        String limitCondition = buildLimitCondition(visitor, paramAppenderList);
-        StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(" FROM ")
+                .append(getFromTableInSQL())
+                .append(" WITH(UPDLOCK) ");
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
-        if (StringUtils.isNotBlank(orderByCondition)) {
-            suffix.append(" ").append(orderByCondition);
-        }
-        if (StringUtils.isNotBlank(limitCondition)) {
-            suffix.append(" ").append(limitCondition);
-        }
-        suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
         for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
         }
         return selectSQLAppender.toString();
-    }
-
-    @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        return TableRecords.empty(getTableMeta());
     }
 }
