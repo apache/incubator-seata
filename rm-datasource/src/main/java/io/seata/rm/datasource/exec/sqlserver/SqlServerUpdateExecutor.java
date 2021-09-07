@@ -25,6 +25,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
@@ -33,7 +34,7 @@ import java.util.StringJoiner;
  * @date 2021-07-21
  */
 @LoadLevel(name = JdbcConstants.SQLSERVER, scope = Scope.PROTOTYPE)
-public class SqlServerUpdateExecutor extends UpdateExecutor {
+public class SqlServerUpdateExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
     /**
      * Instantiates a new SqlServer Update executor.
      *
@@ -41,7 +42,7 @@ public class SqlServerUpdateExecutor extends UpdateExecutor {
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public SqlServerUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    public SqlServerUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
