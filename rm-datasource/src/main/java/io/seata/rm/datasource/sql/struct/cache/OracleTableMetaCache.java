@@ -164,21 +164,22 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 }
             }
             if (!pkcol.isEmpty()) {
-                List<String> colTemp = new ArrayList<>();
+                int times = 0;
                 for (Map.Entry<String, IndexMeta> entry : tm.getAllIndexes().entrySet()) {
                     IndexMeta index = entry.getValue();
                     if (index.getIndextype().value() == IndexType.UNIQUE.value()) {
                         for (ColumnMeta col : index.getValues()) {
                             if (pkcol.contains(col.getColumnName())) {
-                                colTemp.add(col.getColumnName());
+                                times++;
                             }
                         }
-                        if (!colTemp.isEmpty() && colTemp.size() == pkcol.size()) {
+                        if (times == pkcol.size()) {
                             index.setIndextype(IndexType.PRIMARY);
                             break;
+                        } else {
+                            times = 0;
                         }
                     }
-                    colTemp.clear();
                 }
             }
         }
