@@ -16,6 +16,7 @@
 package io.seata.config.processor;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -26,9 +27,42 @@ import java.util.Properties;
  * @author zhixing
  */
 public class ConfigProcessor {
-
-    public static Properties loadConfig(String config,String dataType) throws IOException {
+    private static final String SEPARATOR = ".";
+    /**
+     * processing configuration
+     *
+     * @param config config string
+     * @param dataType the data type
+     * @return the properties
+     * @throws IOException IOException
+     */
+    public static Properties processConfig(String config, String dataType) throws IOException {
         return EnhancedServiceLoader.load(Processor.class, dataType).processor(config);
+    }
+
+    /**
+     * resolver config data type
+     *
+     * @param dataType the configured data type
+     * @param dataId the configured data id
+     * @param defaultDataType the default data type
+     * @return data type
+     */
+    public static String resolverConfigDataType(String dataType,String dataId,String defaultDataType){
+        if(StringUtils.isNotBlank(dataType)){
+            return dataType;
+        }
+        if(!dataId.contains(SEPARATOR)){
+            return defaultDataType;
+        }
+        String[] splitString = dataId.split("\\"+SEPARATOR);
+        try {
+            ConfigDataType configDataType = ConfigDataType.getType(splitString[splitString.length - 1]);
+            return configDataType.name();
+        }catch (IllegalArgumentException e){
+            return defaultDataType;
+        }
+
     }
 
 }

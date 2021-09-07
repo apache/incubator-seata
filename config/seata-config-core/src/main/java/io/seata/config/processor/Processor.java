@@ -28,8 +28,9 @@ public interface Processor {
     /**
      * processing configuration
      *
-     * @param config
+     * @param config  config String
      * @return the properties
+     * @throws IOException IOException
      */
     Properties processor(String config) throws IOException;
 }

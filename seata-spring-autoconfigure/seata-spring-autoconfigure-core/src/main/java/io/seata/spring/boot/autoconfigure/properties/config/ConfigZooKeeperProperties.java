@@ -32,7 +32,7 @@ public class ConfigZooKeeperProperties {
     private String username = "";
     private String password = "";
     private String nodePath = "/seata/seata.properties";
-    private String dataType = "properties";
+    private String dataType = "";
 
     public String getServerAddr() {
         return serverAddr;

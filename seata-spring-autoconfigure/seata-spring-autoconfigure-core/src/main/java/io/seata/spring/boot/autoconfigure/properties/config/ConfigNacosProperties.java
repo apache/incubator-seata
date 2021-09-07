@@ -35,7 +35,7 @@ public class ConfigNacosProperties {
     /**
      * properties, yaml
      */
-    private String dataType = "properties";
+    private String dataType = "";
 
     public String getServerAddr() {
         return serverAddr;

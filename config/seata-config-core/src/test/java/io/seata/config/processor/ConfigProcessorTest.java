@@ -25,7 +25,7 @@ import java.util.Properties;
 class ConfigProcessorTest {
 
     @Test
-    void loadConfig() throws IOException {
+    void processConfig() throws IOException {
         String yamlString ="store:\n" +
                 "  mode: db\n" +
                 "  db: \n" +
@@ -36,8 +36,31 @@ class ConfigProcessorTest {
                 "    user: root\n" +
                 "    password: 'root'\n";
 
-        final Properties properties = ConfigProcessor.loadConfig(yamlString,"yaml");
+        final Properties properties = ConfigProcessor.processConfig(yamlString,"yaml");
         Assertions.assertEquals(properties.getProperty("store.mode"),"db");
 
     }
+
+
+    @Test
+    void resolverConfigDataType(){
+        String dataType ;
+
+        dataType = ConfigProcessor.resolverConfigDataType("yaml","a.yaml","properties");
+        Assertions.assertEquals(dataType,"yaml");
+
+        dataType = ConfigProcessor.resolverConfigDataType("","a.yaml","properties");
+        Assertions.assertEquals(dataType,"yaml");
+
+        dataType = ConfigProcessor.resolverConfigDataType("","a.txt","properties");
+        Assertions.assertEquals(dataType,"properties");
+
+        dataType = ConfigProcessor.resolverConfigDataType("","a","properties");
+        Assertions.assertEquals(dataType,"properties");
+
+    }
+
+
+
+
 }

@@ -279,7 +279,8 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getNacosDataType() {
-        return FILE_CONFIG.getConfig(getNacosDataTypeKey(), DEFAULT_DATA_TYPE);
+        String dataType = FILE_CONFIG.getConfig(getNacosDataTypeKey());
+        return ConfigProcessor.resolverConfigDataType(dataType, getNacosDataId(), DEFAULT_DATA_TYPE);
     }
 
     private static String getSeataConfigStr() {
@@ -300,7 +301,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             String nacosDataId = getNacosDataId();
             String config = configService.getConfig(nacosDataId, getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
             if (StringUtils.isNotBlank(config)) {
-                seataConfig = ConfigProcessor.loadConfig(config,getNacosDataType());
+                seataConfig = ConfigProcessor.processConfig(config,getNacosDataType());
 
                 NacosListener nacosListener = new NacosListener(nacosDataId, null);
                 configService.addListener(nacosDataId, getNacosGroup(), nacosListener);
@@ -350,7 +351,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(configInfo)) {
                     try {
-                        seataConfigNew = ConfigProcessor.loadConfig(configInfo,getNacosDataType());
+                        seataConfigNew = ConfigProcessor.processConfig(configInfo,getNacosDataType());
                     } catch (IOException e) {
                         LOGGER.error("load config properties error", e);
                         return;

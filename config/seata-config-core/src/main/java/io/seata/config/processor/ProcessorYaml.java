@@ -35,7 +35,7 @@ import java.util.Properties;
 public class ProcessorYaml implements Processor {
     @Override
     public Properties processor(String config) {
-        Properties properties =new Properties();
+        Properties properties = new Properties();
         Map<String, Object> configMap = asMap(new Yaml().load(config));
         properties.putAll(getFlattenedMap(configMap));
         return properties;
@@ -44,7 +44,7 @@ public class ProcessorYaml implements Processor {
 
     private static Map<String, Object> asMap(Object object) {
         // YAML can have numbers as keys
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, Object> result = new LinkedHashMap<>();
         if (!(object instanceof Map)) {
             // A document can be a text literal
             result.put("document", object);
@@ -60,8 +60,7 @@ public class ProcessorYaml implements Processor {
             Object key = entry.getKey();
             if (key instanceof CharSequence) {
                 result.put(key.toString(), value);
-            }
-            else {
+            } else {
                 // It has to be a map key in this case
                 result.put("[" + key.toString() + "]", value);
             }
@@ -69,8 +68,8 @@ public class ProcessorYaml implements Processor {
         return result;
     }
 
-    protected static final Map<String, Object> getFlattenedMap(Map<String, Object> source) {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+    private static Map<String, Object> getFlattenedMap(Map<String, Object> source) {
+        Map<String, Object> result = new LinkedHashMap<>();
         buildFlattenedMap(result, source, null);
         return result;
     }
@@ -81,22 +80,19 @@ public class ProcessorYaml implements Processor {
             if (StringUtils.isNotBlank(path)) {
                 if (key.startsWith("[")) {
                     key = path + key;
-                }
-                else {
+                } else {
                     key = path + '.' + key;
                 }
             }
             Object value = entry.getValue();
             if (value instanceof String) {
                 result.put(key, value);
-            }
-            else if (value instanceof Map) {
+            } else if (value instanceof Map) {
                 // Need a compound key
                 @SuppressWarnings("unchecked")
                 Map<String, Object> map = (Map<String, Object>) value;
                 buildFlattenedMap(result, map, key);
-            }
-            else if (value instanceof Collection) {
+            } else if (value instanceof Collection) {
                 // Need a compound key
                 @SuppressWarnings("unchecked")
                 Collection<Object> collection = (Collection<Object>) value;
@@ -105,8 +101,7 @@ public class ProcessorYaml implements Processor {
                     buildFlattenedMap(result,
                             Collections.singletonMap("[" + (count++) + "]", object), key);
                 }
-            }
-            else {
+            } else {
                 result.put(key, (value != null ? value : ""));
             }
         }
