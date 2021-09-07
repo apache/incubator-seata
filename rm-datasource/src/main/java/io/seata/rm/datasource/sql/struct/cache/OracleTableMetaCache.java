@@ -159,21 +159,21 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 if (tm.getAllIndexes().containsKey(pkIndexName)) {
                     IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                     index.setIndextype(IndexType.PRIMARY);
-                }else{
+                } else {
                     pkcol.add(rsPrimary.getString("COLUMN_NAME"));
                 }
             }
-            if(!pkcol.isEmpty()){
+            if (!pkcol.isEmpty()) {
                 List<String> colTemp = new ArrayList<>();
                 for (Map.Entry<String, IndexMeta> entry : tm.getAllIndexes().entrySet()) {
                     IndexMeta index = entry.getValue();
                     if (index.getIndextype().value() == IndexType.UNIQUE.value()) {
                         for (ColumnMeta col : index.getValues()) {
-                            if(pkcol.contains(col.getColumnName())){
+                            if (pkcol.contains(col.getColumnName())) {
                                 colTemp.add(col.getColumnName());
                             }
                         }
-                        if(!colTemp.isEmpty() && colTemp.size() == pkcol.size()){
+                        if (!colTemp.isEmpty() && colTemp.size() == pkcol.size()) {
                             index.setIndextype(IndexType.PRIMARY);
                             break;
                         }
