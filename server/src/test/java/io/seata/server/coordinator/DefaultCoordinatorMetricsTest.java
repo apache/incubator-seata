@@ -66,7 +66,7 @@ public class DefaultCoordinatorMetricsTest {
             request.setTransactionName("test_transaction");
             GlobalBeginResponse response = new GlobalBeginResponse();
             coordinator.doGlobalBegin(request, response, new RpcContext());
-            Thread.sleep(2000);
+
             Map<String, Measurement> measurements = new HashMap<>();
             MetricsManager.get().getRegistry().measure().forEach(
                 measurement -> measurements.put(measurement.getId().toString(), measurement));

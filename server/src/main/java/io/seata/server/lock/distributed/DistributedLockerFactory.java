@@ -45,18 +45,16 @@ public class DistributedLockerFactory {
         if (DISTRIBUTED_LOCKER == null) {
             synchronized (DistributedLocker.class) {
                 if (DISTRIBUTED_LOCKER == null) {
-                    DistributedLocker distributedLocker = null;
                     try {
                         if (!"file".equals(lockerType)) {
-                            distributedLocker = EnhancedServiceLoader.load(DistributedLocker.class, lockerType);
+                            DISTRIBUTED_LOCKER = EnhancedServiceLoader.load(DistributedLocker.class, lockerType);
                         }
                     } catch (EnhancedServiceNotFoundException ex) {
                         LOGGER.error("Get distributed locker failed:{}", ex.getMessage(), ex);
                     }
-                    if (distributedLocker == null) {
-                        distributedLocker = new DefaultDistributedLocker();
+                    if (DISTRIBUTED_LOCKER == null) {
+                        DISTRIBUTED_LOCKER = new DefaultDistributedLocker();
                     }
-                    DISTRIBUTED_LOCKER = distributedLocker;
                 }
             }
         }

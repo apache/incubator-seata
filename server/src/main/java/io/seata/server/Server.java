@@ -22,8 +22,6 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.NettyRemotingServer;
@@ -35,9 +33,6 @@ import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
 /**
  * The type Server.
@@ -62,6 +57,14 @@ public class Server {
         //Because, here we need to parse the parameters needed for startup.
         ParameterParser parameterParser = new ParameterParser(args);
 
+
+        //127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+            XID.setIpAddress(parameterParser.getHost());
+        } else {
+            XID.setIpAddress(NetUtil.getLocalIp());
+        }
+
         //initialize the metrics
         MetricsManager.get().init();
 
@@ -84,17 +87,6 @@ public class Server {
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
-        //127.0.0.1 and 0.0.0.0 are not valid here.
-        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-            XID.setIpAddress(parameterParser.getHost());
-        } else {
-            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERED_NETWORKS);
-            if (StringUtils.isNotBlank(preferredNetworks)) {
-                XID.setIpAddress(NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)));
-            } else {
-                XID.setIpAddress(NetUtil.getLocalIp());
-            }
-        }
         nettyRemotingServer.init();
     }
 }
