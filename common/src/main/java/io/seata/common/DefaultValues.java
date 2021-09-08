@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -77,6 +75,11 @@ public interface DefaultValues {
      */
     String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
+    /**
+     * the constant DEFAULT_DISTRIBUTED_LOCK_DB_TABLE
+     */
+    String DEFAULT_DISTRIBUTED_LOCK_DB_TABLE = "distributed_lock";
+
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
@@ -89,9 +92,15 @@ public interface DefaultValues {
 
     boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
-    int SERVER_DEFAULT_PORT = 8091;
+    //currently not use and will be delete in the next version
+    @Deprecated
+    int SERVICE_DEFAULT_PORT = 8091;
+
+    int SERVICE_OFFSET_SPRING_BOOT = 1000;
+
+    String SERVER_PORT = "seata.server.port";
+
     String SERVER_DEFAULT_STORE_MODE = "file";
-    long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
@@ -119,4 +128,19 @@ public interface DefaultValues {
      * the constant DEFAULT_RETRY_DEAD_THRESHOLD
      */
     int DEFAULT_RETRY_DEAD_THRESHOLD = 2 * 60 * 1000 + 10 * 1000;
+
+    /**
+     * the constant TM_INTERCEPTOR_ORDER
+     */
+    int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+  
+    /**
+     * the constant TCC_ACTION_INTERCEPTOR_ORDER
+     */
+    int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+
+    /**
+     * the constant DEFAULT_DISTRIBUTED_LOCK_EXPIRE
+     */
+    int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;
 }

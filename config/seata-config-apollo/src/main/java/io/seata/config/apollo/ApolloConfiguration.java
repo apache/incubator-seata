@@ -28,7 +28,6 @@ import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import com.ctrip.framework.apollo.model.ConfigChange;
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -55,7 +54,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final String APP_ID = "appId";
     private static final String APOLLO_META = "apolloMeta";
     private static final String APOLLO_SECRET = "apolloAccesskeySecret";
-    private static final String APOLLO_CLUSTER = "seata";
+    private static final String APOLLO_CLUSTER = "cluster";
     private static final String APOLLO_CONFIG_SERVICE = "apolloConfigService";
     private static final String PROP_APP_ID = "app.id";
     private static final String PROP_APOLLO_META = "apollo.meta";
@@ -117,10 +116,6 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
-        if (value != null) {
-            return value;
-        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
                 timeoutMills);
         configOperateExecutor.submit(() -> {
@@ -150,7 +145,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
         if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(listener);
     }
 
@@ -173,22 +168,38 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private void readyApolloConfig() {
         Properties properties = System.getProperties();
         if (!properties.containsKey(PROP_APP_ID)) {
-            System.setProperty(PROP_APP_ID, FILE_CONFIG.getConfig(getApolloAppIdFileKey()));
+            String appId = FILE_CONFIG.getConfig(getApolloAppIdFileKey());
+            if (StringUtils.isNotBlank(appId)) {
+                System.setProperty(PROP_APP_ID, appId);
+            }
         }
         if (!properties.containsKey(PROP_APOLLO_META)) {
-            System.setProperty(PROP_APOLLO_META, FILE_CONFIG.getConfig(getApolloMetaFileKey()));
+            String apolloMeta = FILE_CONFIG.getConfig(getApolloMetaFileKey());
+            if (StringUtils.isNotBlank(apolloMeta)) {
+                System.setProperty(PROP_APOLLO_META, apolloMeta);
+            }
         }
         if (!properties.containsKey(PROP_APOLLO_SECRET)) {
-            String secretKey = FILE_CONFIG.getConfig(getApolloSecretFileKey());
-            if (!StringUtils.isBlank(secretKey)) {
-                System.setProperty(PROP_APOLLO_SECRET, secretKey);
+            String apolloAccesskeySecret = FILE_CONFIG.getConfig(getApolloSecretFileKey());
+            if (StringUtils.isNotBlank(apolloAccesskeySecret)) {
+                System.setProperty(PROP_APOLLO_SECRET, apolloAccesskeySecret);
             }
         }
         if (!properties.containsKey(APOLLO_CLUSTER)) {
-            System.setProperty(PROP_APOLLO_CLUSTER, FILE_CONFIG.getConfig(getApolloCluster()));
+            String apolloCluster = FILE_CONFIG.getConfig(getApolloCluster());
+            if (StringUtils.isNotBlank(apolloCluster)) {
+                System.setProperty(PROP_APOLLO_CLUSTER, apolloCluster);
+            }
         }
         if (!properties.containsKey(APOLLO_CONFIG_SERVICE)) {
-            System.setProperty(PROP_APOLLO_CONFIG_SERVICE, FILE_CONFIG.getConfig(getApolloConfigService()));
+            String apolloConfigService = FILE_CONFIG.getConfig(getApolloConfigService());
+            if (StringUtils.isNotBlank(apolloConfigService)) {
+                System.setProperty(PROP_APOLLO_CONFIG_SERVICE, apolloConfigService);
+            } else {
+                if (StringUtils.isBlank(System.getProperty(PROP_APOLLO_META))) {
+                    throw new RuntimeException("Apollo configuration initialized failed,please check the value of apolloMeta and apolloConfigService");
+                }
+            }
         }
     }
 

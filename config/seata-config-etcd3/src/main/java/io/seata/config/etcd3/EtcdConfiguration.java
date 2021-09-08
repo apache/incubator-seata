@@ -15,6 +15,20 @@
  */
 package io.seata.config.etcd3;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KeyValue;
@@ -42,25 +56,6 @@ import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import static io.netty.util.CharsetUtil.UTF_8;
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
@@ -81,7 +76,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static final String CONFIG_TYPE = "etcd3";
     private static final String DEFAULT_ETCD_CONFIG_KEY_VALUE = "seata.properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-            + FILE_CONFIG_SPLIT_CHAR;
+        + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private ExecutorService etcdConfigExecutor;
@@ -121,20 +116,15 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
+        String value = seataConfig.getProperty(dataId);
         if (value != null) {
             return value;
         }
-
-        value = seataConfig.getProperty(dataId);
-        if (value != null) {
-            return value;
-        }
-
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
-                timeoutMills);
-        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
-        return (String) configFuture.get();
+            timeoutMills);
+        etcdConfigExecutor.execute(
+            () -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
+        return (String)configFuture.get();
     }
 
     @Override
@@ -152,9 +142,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
         etcdConfigExecutor.execute(() -> complete(
-                getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)),
-                configFuture));
-        return (Boolean) configFuture.get();
+            getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)),
+            configFuture));
+        return (Boolean)configFuture.get();
     }
 
     @Override
@@ -168,17 +158,17 @@ public class EtcdConfiguration extends AbstractConfiguration {
         }
 
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT,
-                timeoutMills);
+            timeoutMills);
         etcdConfigExecutor.execute(() -> {
             //use etcd transaction to ensure the atomic operation
             complete(client.getKVClient().txn()
-                    //whether the key exists
-                    .If(new Cmp(ByteSequence.from(dataId, UTF_8), Cmp.Op.EQUAL, CmpTarget.version(VERSION_NOT_EXIST)))
-                    //not exist,then will create
-                    .Then(Op.put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8), PutOption.DEFAULT))
-                    .commit(), configFuture);
+                //whether the key exists
+                .If(new Cmp(ByteSequence.from(dataId, UTF_8), Cmp.Op.EQUAL, CmpTarget.version(VERSION_NOT_EXIST)))
+                //not exist,then will create
+                .Then(Op.put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8), PutOption.DEFAULT))
+                .commit(), configFuture);
         });
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
@@ -196,7 +186,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
         etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().delete(ByteSequence.from(dataId, UTF_8)), configFuture));
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
@@ -205,7 +195,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
             return;
         }
         EtcdListener etcdListener = new EtcdListener(dataId, listener);
-        CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+        CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(etcdListener);
         etcdListener.onProcessEvent(new ConfigurationChangeEvent());
     }
@@ -219,7 +209,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
         if (CollectionUtils.isNotEmpty(configListeners)) {
             ConfigurationChangeListener target;
             for (ConfigurationChangeListener entry : configListeners) {
-                target = ((EtcdListener) entry).getTargetListener();
+                target = ((EtcdListener)entry).getTargetListener();
                 if (listener.equals(target)) {
                     entry.onShutDown();
                     configListeners.remove(entry);
@@ -244,7 +234,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
             synchronized (EtcdConfiguration.class) {
                 if (client == null) {
                     client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
-                            .build();
+                        .build();
                 }
             }
         }
@@ -262,7 +252,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
         try {
             T response = completableFuture.get();
             if (response instanceof GetResponse) {
-                List<KeyValue> keyValues = ((GetResponse) response).getKvs();
+                List<KeyValue> keyValues = ((GetResponse)response).getKvs();
                 if (CollectionUtils.isNotEmpty(keyValues)) {
                     ByteSequence value = keyValues.get(0).getValue();
                     if (value != null) {
@@ -272,7 +262,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
             } else if (response instanceof PutResponse) {
                 configFuture.setResult(Boolean.TRUE);
             } else if (response instanceof TxnResponse) {
-                boolean result = ((TxnResponse) response).isSucceeded();
+                boolean result = ((TxnResponse)response).isSucceeded();
                 //create key if file does not exist)
                 if (result) {
                     configFuture.setResult(Boolean.TRUE);
@@ -283,7 +273,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                 throw new ShouldNeverHappenException("unsupported response type");
             }
         } catch (Exception e) {
-            LOGGER.error("error occurred while completing the future{}", e.getMessage(), e);
+            LOGGER.error("error occurred while completing the future{}", e.getMessage(),e);
         }
     }
 
@@ -333,8 +323,8 @@ public class EtcdConfiguration extends AbstractConfiguration {
         private final ConfigurationChangeListener listener;
         private Watch.Watcher watcher;
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
-                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-                new NamedThreadFactory("etcdListener", MAX_LISTENER_THREAD));
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("etcdListener", MAX_LISTENER_THREAD));
 
         /**
          * Instantiates a new Etcd listener.

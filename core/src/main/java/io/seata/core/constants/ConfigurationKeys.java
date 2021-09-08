@@ -38,14 +38,29 @@ public interface ConfigurationKeys {
     String STORE_PREFIX = "store.";
 
     /**
+     * The constant MODE.
+     */
+    String MODE = "mode";
+
+    /**
      * The constant STORE_MODE.
      */
-    String STORE_MODE = STORE_PREFIX + "mode";
+    String STORE_MODE = STORE_PREFIX + MODE;
+
+    /**
+     * The constant STORE_LOCK_MODE.
+     */
+    String STORE_LOCK_MODE = STORE_PREFIX + "lock." + MODE;
+
+    /**
+     * The constant STORE_SESSION_MODE.
+     */
+    String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
      */
-    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
+    String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
 
     /**
      * The constant STORE_FILE_PREFIX
@@ -117,7 +132,6 @@ public interface ConfigurationKeys {
      */
     String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
 
-
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
      */
@@ -162,6 +176,11 @@ public interface ConfigurationKeys {
      * The constant CLIENT_TABLE_META_CHECKER_INTERVAL.
      */
     String CLIENT_TABLE_META_CHECKER_INTERVAL = CLIENT_RM_PREFIX + "tableMetaCheckerInterval";
+
+    /**
+     * The constant TCC_ACTION_INTERCEPTOR_ORDER.
+     */
+    String TCC_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "tccActionInterceptorOrder";
 
     /**
      * The constant CLIENT_TM_PREFIX.
@@ -213,6 +232,11 @@ public interface ConfigurationKeys {
      * The constant STORE_DB_BRANCH_TABLE.
      */
     String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
+
+    /**
+     * The constant DISTRIBUTED_LOCK_DB_TABLE.
+     */
+    String DISTRIBUTED_LOCK_DB_TABLE = STORE_DB_PREFIX + "distributedLockTable";
 
     /**
      * The constant STORE_DB_DATASOURCE_TYPE.
@@ -270,9 +294,19 @@ public interface ConfigurationKeys {
     String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
     /**
-     * The constant SERVER_PORT.
+     * The constant SERVER_RPC_PORT.
      */
-    String SERVER_PORT = SERVER_PREFIX + "port";
+    String SERVER_SERVICE_PORT_CAMEL = SERVER_PREFIX + "servicePort";
+
+    /**
+     * The constant SERVER_SERVICE_PORT_CONFIG.
+     */
+    String SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "service-port";
+
+    /**
+     * The constant ENV_SEATA_PORT_KEY.
+     */
+    String ENV_SEATA_PORT_KEY = "SEATA_PORT";
 
     /**
      * The constant RECOVERY_PREFIX.
@@ -409,6 +443,11 @@ public interface ConfigurationKeys {
      * the constant RETRY_DEAD_THRESHOLD
      */
     String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
+
+    /**
+     * the constant DISTRIBUTED_LOCK_EXPIRE_TIME
+     */
+    String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.
@@ -618,6 +657,11 @@ public interface ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant GLOBAL_TRANSACTION_INTERCEPTOR_ORDER.
+     */
+    String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
      * The constant SEATA_ACCESS_KEY.
