@@ -64,7 +64,6 @@ public class Server {
         } else {
             XID.setIpAddress(NetUtil.getLocalIp());
         }
-        XID.setPort(parameterParser.getPort());
 
         //initialize the metrics
         MetricsManager.get().init();
@@ -81,7 +80,7 @@ public class Server {
         //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getSessionStoreMode());
         LockerManagerFactory.init(parameterParser.getLockStoreMode());
-        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
+        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
         // register ShutdownHook

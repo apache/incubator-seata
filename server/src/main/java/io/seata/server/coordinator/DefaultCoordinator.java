@@ -22,12 +22,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHelper;
-import io.seata.server.session.SessionHolder;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -67,10 +61,16 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHelper;
+import io.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
+import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
 
@@ -143,20 +143,33 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("UndoLogDelete", 1));
 
-    private final RemotingServer remotingServer;
+    private RemotingServer remotingServer;
 
     private final DefaultCore core;
 
     private final EventBus eventBus = EventBusManager.get();
+
+    private static volatile DefaultCoordinator instance;
 
     /**
      * Instantiates a new Default coordinator.
      *
      * @param remotingServer the remoting server
      */
-    public DefaultCoordinator(RemotingServer remotingServer) {
+    private DefaultCoordinator(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
         this.core = new DefaultCore(remotingServer);
+    }
+
+    public static DefaultCoordinator getInstance(RemotingServer remotingServer) {
+        if (null == instance) {
+            synchronized (DefaultCoordinator.class) {
+                if (null == instance) {
+                    instance = new DefaultCoordinator(remotingServer);
+                }
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -451,5 +464,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();
+    }
+
+    /**
+     * only used for mock test
+     * @param remotingServer
+     */
+    public void setRemotingServer(RemotingServer remotingServer) {
+        this.remotingServer = remotingServer;
     }
 }

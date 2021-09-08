@@ -112,4 +112,11 @@ public class GlobalTransactionEvent implements Event {
         this.endTime = endTime;
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "GlobalTransactionEvent{" + "id=" + id + ", role='" + role + '\'' + ", name='" + name + '\''
+            + ", applicationId='" + applicationId + '\'' + ", group='" + group + '\'' + ", beginTime=" + beginTime
+            + ", endTime=" + endTime + ", status=" + status + '}';
+    }
 }

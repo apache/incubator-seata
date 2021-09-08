@@ -53,7 +53,7 @@ public class TmNettyClientTest {
             @Override
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-                nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
                 UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
@@ -88,7 +88,7 @@ public class TmNettyClientTest {
             @Override
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-                nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
                 UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
@@ -114,7 +114,7 @@ public class TmNettyClientTest {
             @Override
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-                nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
                 UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }

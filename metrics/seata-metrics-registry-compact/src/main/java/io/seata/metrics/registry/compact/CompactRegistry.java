@@ -72,4 +72,9 @@ public class CompactRegistry implements Registry {
                 .forEachRemaining(meter -> meter.measure().forEach(measurements::add));
         return measurements;
     }
+
+    @Override
+    public void clearUp() {
+        METERS.clear();
+    }
 }

@@ -134,6 +134,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT);
             port = SERVICE_DEFAULT_PORT;
         }
+        listenPort = port;
         return port;
     }
 
@@ -165,7 +166,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             });
 
         try {
-            this.serverBootstrap.bind(listenPort).sync();
+            this.serverBootstrap.bind(getListenPort()).sync();
+            XID.setPort(getListenPort());
             LOGGER.info("Server started, service listen port: {}", getListenPort());
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
@@ -191,7 +193,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
+            LOGGER.error("shutdown execute error:{}",exx.getMessage(),exx);
         }
     }
 }
