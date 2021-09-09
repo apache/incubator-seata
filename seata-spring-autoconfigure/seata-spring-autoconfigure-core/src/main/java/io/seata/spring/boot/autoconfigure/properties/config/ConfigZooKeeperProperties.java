@@ -32,7 +32,6 @@ public class ConfigZooKeeperProperties {
     private String username = "";
     private String password = "";
     private String nodePath = "/seata/seata.properties";
-    private String dataType = "";
 
     public String getServerAddr() {
         return serverAddr;
@@ -86,15 +85,5 @@ public class ConfigZooKeeperProperties {
     public ConfigZooKeeperProperties setNodePath(String nodePath) {
         this.nodePath = nodePath;
         return this;
-    }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public ConfigZooKeeperProperties setDataType(String dataType) {
-        this.dataType = dataType;
-        return this;
-
     }
 }
