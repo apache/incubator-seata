@@ -213,10 +213,8 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         for (int i = 0; i < rows.size(); i++) {
             int finalI = i;
             List<String> wherePrimaryList = new ArrayList<>();
-            List<Object> paramAppenderTempList = new ArrayList<>();
             primaryValueMap.forEach((k, v) -> {
                 wherePrimaryList.add(k + " = " +  primaryValueMap.get(k).get(finalI) + " ");
-                paramAppenderTempList.add(primaryValueMap.get(k).get(finalI));
             });
             afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
         }
