@@ -32,10 +32,6 @@ public class ConfigNacosProperties {
     private String username = "";
     private String password = "";
     private String dataId = "seata.properties";
-    /**
-     * properties, yaml
-     */
-    private String dataType = "";
 
     public String getServerAddr() {
         return serverAddr;
