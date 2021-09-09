@@ -17,6 +17,8 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
+import io.seata.config.ConfigurationKeys;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -41,6 +43,7 @@ public interface StarterConstants {
     String TCC_FENCE_CONFIG_PREFIX_KEBAB_STYLE = TCC_FENCE_PREFIX_KEBAB_STYLE + ".config";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
+    String REGISTRY_PREFERED_NETWORKS = ConfigurationKeys.FILE_ROOT_REGISTRY + ".preferredNetworks";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
     String REGISTRY_EUREKA_PREFIX = REGISTRY_PREFIX + ".eureka";
     String REGISTRY_REDIS_PREFIX = REGISTRY_PREFIX + ".redis";
@@ -74,6 +77,8 @@ public interface StarterConstants {
     String STORE_REDIS_PREFIX = STORE_PREFIX + ".redis";
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
+
+    String REGEX_SPLIT_CHAR = ";";
 
 
     int MAP_CAPACITY = 64;

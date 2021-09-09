@@ -261,7 +261,7 @@ public abstract class AbstractUndoExecutor {
                     }
                 }
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("check dirty datas failed, old and new data are not equal," +
+                    LOGGER.debug("check dirty data failed, old and new data are not equal, " +
                             "tableName:[" + sqlUndoLog.getTableName() + "]," +
                             "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
                             "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
