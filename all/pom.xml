@@ -69,7 +69,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-bom</artifactId>
+                <artifactId>seata-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -732,6 +732,7 @@
                                     <include>io.seata:seata-compressor-zip</include>
                                     <include>io.seata:seata-compressor-lz4</include>
                                     <include>io.seata:seata-compressor-deflater</include>
+                                    <include>io.seata:seata-compressor-zstd</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

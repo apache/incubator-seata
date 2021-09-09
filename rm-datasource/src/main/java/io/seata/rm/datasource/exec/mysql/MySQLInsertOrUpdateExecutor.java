@@ -80,11 +80,6 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     private ArrayList<List<Object>> paramAppenderList;
 
-    /**
-     * key is unique index name, value is unique index
-     */
-    private Map<String, List<String>> beforeUniqueIndexMap = new HashMap<>();
-
     public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }

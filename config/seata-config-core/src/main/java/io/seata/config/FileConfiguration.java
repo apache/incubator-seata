@@ -226,7 +226,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
+        String value = getConfigFromSys(dataId);
         if (value != null) {
             return value;
         }
@@ -391,7 +391,8 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            while (true) {
+            Boolean enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
+            while (enabled) {
                 for (String dataId : dataIdMap.keySet()) {
                     try {
                         String currentConfig =
@@ -416,6 +417,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
+                enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
             }
         }
 
