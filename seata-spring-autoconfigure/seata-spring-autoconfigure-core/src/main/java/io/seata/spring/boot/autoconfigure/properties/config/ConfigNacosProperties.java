@@ -90,14 +90,4 @@ public class ConfigNacosProperties {
         this.dataId = dataId;
         return this;
     }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public ConfigNacosProperties setDataType(String dataType) {
-        this.dataType = dataType;
-        return this;
-
-    }
 }
