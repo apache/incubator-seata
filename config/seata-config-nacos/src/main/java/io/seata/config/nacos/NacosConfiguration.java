@@ -54,11 +54,9 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
     private static final String DEFAULT_GROUP = "SEATA_GROUP";
     private static final String DEFAULT_DATA_ID = "seata.properties";
-    private static final String DEFAULT_DATA_TYPE = "properties";
     private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String NACOS_DATA_ID_KEY = "dataId";
-    private static final String NACOS_DATA_TYPE_KEY = "dataType";
     private static final String ENDPOINT_KEY = "endpoint";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
@@ -256,9 +254,6 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static String getNacosDataIdKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, NACOS_DATA_ID_KEY);
     }
-    private static String getNacosDataTypeKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, NACOS_DATA_TYPE_KEY);
-    }
 
     private static String getNacosUserName() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
@@ -279,8 +274,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getNacosDataType() {
-        String dataType = FILE_CONFIG.getConfig(getNacosDataTypeKey());
-        return ConfigProcessor.resolverConfigDataType(dataType, getNacosDataId(), DEFAULT_DATA_TYPE);
+        return ConfigProcessor.resolverConfigDataType(getNacosDataId());
     }
 
     private static String getSeataConfigStr() {

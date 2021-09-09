@@ -97,18 +97,7 @@
       ]
     },
     {
-      "name": "seata.config.nacos.data-type",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "io.seata.config.processor.ConfigDataType"
-          }
-        }
-      ]
-    },
-    {
-      "name": "seata.config.zk.data-type",
+      "name": "seata.config.data-type",
       "providers": [
         {
           "name": "handle-as",

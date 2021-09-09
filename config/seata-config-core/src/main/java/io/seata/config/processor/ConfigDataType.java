@@ -24,11 +24,22 @@ public enum ConfigDataType {
     /**
      * data type yaml
      */
-    yaml,
+    yaml("yaml","yml"),
     /**
      * data type properties
      */
-    properties;
+    properties("properties");
+
+
+    /**
+     * suffix support data type
+     */
+    private String[] suffix;
+
+    ConfigDataType(String... suffix) {
+        this.suffix=suffix;
+    }
+
     /**
      * Gets type.
      *
@@ -42,5 +53,22 @@ public enum ConfigDataType {
             }
         }
         throw new IllegalArgumentException("not support config data type type: " + name);
+    }
+
+    /**
+     * Gets type by suffix.
+     *
+     * @param suffix the suffix
+     * @return the type
+     */
+    public static ConfigDataType getTypeBySuffix(String suffix) {
+        for (ConfigDataType configDataType : values()) {
+            for (String sfx : configDataType.suffix) {
+                if (sfx.equals(suffix)) {
+                    return configDataType;
+                }
+            }
+        }
+        throw new IllegalArgumentException("not support config data type suffix: " + suffix);
     }
 }

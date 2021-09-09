@@ -17,6 +17,9 @@ package io.seata.config.processor;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -28,6 +31,8 @@ import java.util.Properties;
  */
 public class ConfigProcessor {
     private static final String SEPARATOR = ".";
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private static final String DEFAULT_DATA_TYPE = "properties";
     /**
      * processing configuration
      *
@@ -38,6 +43,16 @@ public class ConfigProcessor {
      */
     public static Properties processConfig(String config, String dataType) throws IOException {
         return EnhancedServiceLoader.load(Processor.class, dataType).processor(config);
+    }
+
+    /**
+     * resolver config data type
+     *
+     * @param dataId the configured data id
+     * @return data type
+     */
+    public static String resolverConfigDataType(String dataId){
+        return resolverConfigDataType(FILE_CONFIG.getConfig(getDataTypeKey()),dataId,DEFAULT_DATA_TYPE);
     }
 
     /**
@@ -57,12 +72,16 @@ public class ConfigProcessor {
         }
         String[] splitString = dataId.split("\\"+SEPARATOR);
         try {
-            ConfigDataType configDataType = ConfigDataType.getType(splitString[splitString.length - 1]);
+            ConfigDataType configDataType = ConfigDataType.getTypeBySuffix(splitString[splitString.length - 1]);
             return configDataType.name();
         }catch (IllegalArgumentException e){
             return defaultDataType;
         }
 
+    }
+
+    private static String getDataTypeKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, ConfigurationKeys.DATA_TYPE);
     }
 
 }

@@ -70,12 +70,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final String AUTH_PASSWORD = "password";
     private static final String SERIALIZER_KEY = "serializer";
     private static final String CONFIG_PATH_KEY = "nodePath";
-    private static final String CONFIG_DATA_TYPE_KEY = "dataType";
     private static final int THREAD_POOL_NUM = 1;
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
     private static final String DEFAULT_CONFIG_PATH = ROOT_PATH + "/seata.properties";
-    private static final String DEFAULT_CONFIG_DATA_TYPE = "properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
             + FILE_CONFIG_SPLIT_CHAR;
     private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
@@ -276,8 +274,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
     }
     private static String getZkDataType() {
-        String dataType = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_DATA_TYPE_KEY);
-        return ConfigProcessor.resolverConfigDataType(dataType, getConfigPath(), DEFAULT_CONFIG_DATA_TYPE);
+        return ConfigProcessor.resolverConfigDataType(getConfigPath());
     }
 
     private static String getSeataConfigStr() {
