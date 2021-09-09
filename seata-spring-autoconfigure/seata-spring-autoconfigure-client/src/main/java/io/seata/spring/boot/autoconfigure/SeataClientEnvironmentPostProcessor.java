@@ -20,7 +20,6 @@ import io.seata.spring.boot.autoconfigure.properties.client.LoadBalancePropertie
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TccFenceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
@@ -38,7 +37,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -57,7 +55,6 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(UNDO_PREFIX, UndoProperties.class);
         PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
         PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
-        PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, TccFenceProperties.class);
     }
 
     @Override

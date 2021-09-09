@@ -145,31 +145,15 @@ public interface DefaultValues {
     int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;
 
     /**
-     * the constant DEFAULT_TCC_FENCE_CLEAN_MODE
-     */
-    String DEFAULT_TCC_FENCE_CLEAN_MODE = "Day";
-    /**
      * the constant DEFAULT_TCC_FENCE_CLEAN_PERIOD
      */
-    int DEFAULT_TCC_FENCE_CLEAN_PERIOD = 1;
+    String DEFAULT_TCC_FENCE_CLEAN_PERIOD = "1h";
     /**
      * the constant DEFAULT_TCC_FENCE_LOG_TABLE_NAME
      */
     String DEFAULT_TCC_FENCE_LOG_TABLE_NAME = "tcc_fence_log";
     /**
-     * the constant DEFAULT_DATA_SOURCE_BEAN_NAME
+     * the constant TCC_FENCE_BEAN_NAME
      */
-    String DEFAULT_DATA_SOURCE_BEAN_NAME = "dataSource";
-    /**
-     * the constant DEFAULT_TRANSACTION_MANAGER_BEAN_NAME
-     */
-    String DEFAULT_TRANSACTION_MANAGER_BEAN_NAME = "transactionManager";
-    /**
-     * the constant TCC_FENCE_DATA_SOURCE_BEAN_NAME
-     */
-    String TCC_FENCE_DATA_SOURCE_BEAN_NAME = "seataTCCFenceDataSource";
-    /**
-     * the constant TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME
-     */
-    String TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataTCCFenceTransactionManager";
+    String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
 }

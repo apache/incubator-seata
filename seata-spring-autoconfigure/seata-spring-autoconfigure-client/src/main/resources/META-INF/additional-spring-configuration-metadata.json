@@ -247,18 +247,11 @@
       "defaultValue": "tcc_fence_log"
     },
     {
-      "name": "seata.tcc.fence.clean-mode",
-      "type": "java.lang.String",
-      "description": "TCC fence log clean mode.",
-      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
-      "defaultValue": "hour"
-    },
-    {
       "name": "seata.tcc.fence.clean-period",
-      "type": "java.lang.Integer",
-      "description": "TCC fence log clean period.",
+      "type": "java.lang.String",
+      "description": "TCC fence log clean period. only d(day)/h(hour)/m(minute) endings are supported.",
       "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
-      "defaultValue": 1
+      "defaultValue": "1h"
     }
   ],
   "hints": [
@@ -344,17 +337,6 @@
           "name": "handle-as",
           "parameters": {
             "target": "io.seata.core.compressor.CompressorType"
-          }
-        }
-      ]
-    },
-    {
-      "name": "seata.tcc.fence.clean-mode",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "io.seata.rm.tcc.constant.TCCFenceCleanMode"
           }
         }
       ]

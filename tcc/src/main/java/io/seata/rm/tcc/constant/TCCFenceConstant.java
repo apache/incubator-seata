@@ -43,23 +43,17 @@ public class TCCFenceConstant {
     public static final int STATUS_SUSPENDED = 4;
 
     /**
-     * Clean up the tcc fence log a few days ago by default
+     * Clean up the tcc fence log by days
      */
-    public static final int DEFAULT_CLEAN_DAY = 1;
+    public static final String DAY = "d";
 
     /**
-     * Clean up the tcc fence log a few hours ago by default
+     * Clean up the tcc fence log by hours
      */
-    public static final int DEFAULT_CLEAN_HOUR = 1;
+    public static final String HOUR = "h";
 
     /**
-     * Clean up the tcc fence log a few minutes ago by default
+     * Clean up the tcc fence log by minutes
      */
-    public static final int DEFAULT_CLEAN_MINUTE = 15;
-
-    /**
-     * Default tcc fence log table name
-     */
-    public static final String DEFAULT_LOG_TABLE_NAME = "tcc_fence_log";
-
+    public static final String MINUTE = "m";
 }
