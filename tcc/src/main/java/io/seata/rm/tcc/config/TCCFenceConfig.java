@@ -34,6 +34,7 @@ import javax.sql.DataSource;
 import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * TCC Fence Config
@@ -43,6 +44,8 @@ import java.util.concurrent.TimeUnit;
 public class TCCFenceConfig implements InitializingBean, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceConfig.class);
+
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
      * TCC fence clean period. only d(day)/h(hour)/m(minute) endings are supported
@@ -96,30 +99,32 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
      * init tcc fence clean task
      */
     public void initCleanTask() {
-        try {
-            String mode = cleanPeriod.substring(cleanPeriod.length() - 1);
-            int period = Integer.parseInt(cleanPeriod.substring(0, cleanPeriod.length() - 1));
-            if (period == 0) {
-                LOGGER.error("TCC fence log clean period can not be zero, clean task start failed");
-                return;
+        if (initialized.compareAndSet(false, true)) {
+            try {
+                String mode = cleanPeriod.substring(cleanPeriod.length() - 1);
+                int period = Integer.parseInt(cleanPeriod.substring(0, cleanPeriod.length() - 1));
+                if (period == 0) {
+                    LOGGER.error("TCC fence log clean period can not be zero, clean task start failed");
+                    return;
+                }
+                // set timeUtil value according to clean mode
+                TimeUnit timeUnit;
+                if (TCCFenceConstant.DAY.equals(mode)) {
+                    timeUnit = TimeUnit.DAYS;
+                } else if (TCCFenceConstant.HOUR.equals(mode)) {
+                    timeUnit = TimeUnit.HOURS;
+                } else if (TCCFenceConstant.MINUTE.equals(mode)) {
+                    timeUnit = TimeUnit.MINUTES;
+                } else {
+                    LOGGER.error("TCC fence log clean period only d/h/m endings are supported, clean task start failed");
+                    return;
+                }
+                // start tcc fence clean schedule
+                startTccFenceCleanSchedule(mode, period, timeUnit);
+                LOGGER.info("TCC fence log clean task start success, mode:{}, period:{}", mode, period);
+            } catch (NumberFormatException e) {
+                LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
             }
-            // set timeUtil value according to clean mode
-            TimeUnit timeUnit;
-            if (TCCFenceConstant.DAY.equals(mode)) {
-                timeUnit = TimeUnit.DAYS;
-            } else if (TCCFenceConstant.HOUR.equals(mode)) {
-                timeUnit = TimeUnit.HOURS;
-            } else if (TCCFenceConstant.MINUTE.equals(mode)) {
-                timeUnit = TimeUnit.MINUTES;
-            } else {
-                LOGGER.error("TCC fence log clean period only d/h/m endings are supported, clean task start failed");
-                return;
-            }
-            // start tcc fence clean schedule
-            startTccFenceCleanSchedule(mode, period, timeUnit);
-            LOGGER.info("TCC fence log clean task start success, mode:{}, period:{}", mode, period);
-        } catch (NumberFormatException e) {
-            LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
         }
     }
 
