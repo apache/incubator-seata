@@ -30,6 +30,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.MapUtil;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.processor.ConfigProcessor;
 import org.springframework.util.ResourceUtils;
 import org.yaml.snakeyaml.Yaml;
 
@@ -75,30 +76,20 @@ public class PortHelper {
                 configFile = ymlFile;
             }
         }
-        String fileName = configFile.getName();
-        String portNum = null;
-        if (fileName.endsWith("yml")) {
-            Map<String, Object> yamlMap = new Yaml().load(new FileInputStream(configFile));
-            Map<String, Object> configMap = MapUtil.getFlattenedMap(yamlMap);
-            if (CollectionUtils.isNotEmpty(configMap)) {
-                Object serverPort = configMap.get("server.port");
-                if (null != serverPort) {
-                    portNum = serverPort.toString();
-            InputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(configFile);
-                String fileName = configFile.getName();
-                String portNum = null;
-                if (fileName.endsWith("yml")) {
-                    Map<String, Object> configMap = new HashMap<>();
-                    Map<String, Object> yamlMap = new Yaml().load(inputStream);
-                    bulidFlatMap(yamlMap, null, configMap);
-                    if (CollectionUtils.isNotEmpty(configMap)) {
-                        Object serverPort = configMap.get("server.port");
-                        if (null != serverPort) {
-                            portNum = serverPort.toString();
-                        }
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(configFile);
+            String fileName = configFile.getName();
+            String portNum = null;
+            if (fileName.endsWith("yml")) {
+                Map<String, Object> yamlMap = new Yaml().load(inputStream);
+                Map<String, Object> configMap =  MapUtil.getFlattenedMap(yamlMap);
+                if (CollectionUtils.isNotEmpty(configMap)) {
+                    Object serverPort = configMap.get("server.port");
+                    if (null != serverPort) {
+                        portNum = serverPort.toString();
                     }
+                }
             } else {
                 Properties properties = new Properties();
                 properties.load(inputStream);
@@ -119,7 +110,6 @@ public class PortHelper {
         return port;
 
     }
-
     private static File getConfigFromStartup() {
 
         String configLocation = System.getProperty("spring.config.location");
@@ -145,4 +135,3 @@ public class PortHelper {
 
 }
 
-  
