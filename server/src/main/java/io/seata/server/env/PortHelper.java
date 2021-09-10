@@ -20,9 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -30,7 +27,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.MapUtil;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.processor.ConfigProcessor;
 import org.springframework.util.ResourceUtils;
 import org.yaml.snakeyaml.Yaml;
 
