@@ -19,6 +19,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -80,18 +84,36 @@ public class PortHelper {
                 Object serverPort = configMap.get("server.port");
                 if (null != serverPort) {
                     portNum = serverPort.toString();
+            InputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(configFile);
+                String fileName = configFile.getName();
+                String portNum = null;
+                if (fileName.endsWith("yml")) {
+                    Map<String, Object> configMap = new HashMap<>();
+                    Map<String, Object> yamlMap = new Yaml().load(inputStream);
+                    bulidFlatMap(yamlMap, null, configMap);
+                    if (CollectionUtils.isNotEmpty(configMap)) {
+                        Object serverPort = configMap.get("server.port");
+                        if (null != serverPort) {
+                            portNum = serverPort.toString();
+                        }
+                    }
+            } else {
+                Properties properties = new Properties();
+                properties.load(inputStream);
+                portNum = properties.getProperty("server.port");
+            }
+            if (null != portNum) {
+                try {
+                    port = Integer.parseInt(portNum);
+                } catch (NumberFormatException exx) {
+                    //ignore
                 }
             }
-        } else {
-            Properties properties = new Properties();
-            properties.load(new FileInputStream(configFile));
-            portNum = properties.getProperty("server.port");
-        }
-        if (null != portNum) {
-            try {
-                port = Integer.parseInt(portNum);
-            } catch (NumberFormatException exx) {
-                //ignore
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
             }
         }
         return port;
