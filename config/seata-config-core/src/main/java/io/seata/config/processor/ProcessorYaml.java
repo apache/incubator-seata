@@ -30,6 +30,7 @@ import java.util.Properties;
  */
 @LoadLevel(name = "yaml")
 public class ProcessorYaml implements Processor {
+
     @Override
     public Properties processor(String config) {
         Properties properties = new Properties();

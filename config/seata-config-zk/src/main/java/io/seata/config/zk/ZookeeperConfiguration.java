@@ -261,7 +261,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         String config = zkClient.readData(configPath, true);
         if (StringUtils.isNotBlank(config)) {
             try {
-                seataConfig = ConfigProcessor.processConfig(config,getZkDataType());
+                seataConfig = ConfigProcessor.processConfig(config, getZkDataType());
             } catch (IOException e) {
                 LOGGER.error("init config properties error", e);
             }
@@ -273,6 +273,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static String getConfigPath() {
         return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
     }
+
     private static String getZkDataType() {
         return ConfigProcessor.resolverConfigDataType(getConfigPath());
     }
@@ -315,7 +316,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(o.toString())) {
                     try {
-                        seataConfigNew = ConfigProcessor.processConfig(o.toString(),getZkDataType());
+                        seataConfigNew = ConfigProcessor.processConfig(o.toString(), getZkDataType());
 
                     } catch (IOException e) {
                         LOGGER.error("load config properties error", e);
