@@ -148,12 +148,15 @@ public class TCCBeanParserUtils {
         }
         if (applicationContext != null && applicationContext.containsBean(DefaultValues.TCC_FENCE_BEAN_NAME)) {
             TCCFenceConfig tccFenceConfig = (TCCFenceConfig) applicationContext.getBean(DefaultValues.TCC_FENCE_BEAN_NAME);
-            if (tccFenceConfig != null && tccFenceConfig.getInitialized().compareAndSet(false, true)) {
-                Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-                Method[] methods = tccInterfaceClazz.getMethods();
-                for (Method method : methods) {
-                    TwoPhaseBusinessAction twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-                    if (twoPhaseBusinessAction != null && twoPhaseBusinessAction.useTCCFence()) {
+            if (tccFenceConfig == null) {
+                return;
+            }
+            Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
+            Method[] methods = tccInterfaceClazz.getMethods();
+            for (Method method : methods) {
+                TwoPhaseBusinessAction twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
+                if (twoPhaseBusinessAction != null && twoPhaseBusinessAction.useTCCFence()) {
+                    if (tccFenceConfig.getInitialized().compareAndSet(false, true)) {
                         // init tcc fence clean task if enable useTccFence
                         tccFenceConfig.initCleanTask();
                         break;
