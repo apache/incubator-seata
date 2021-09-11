@@ -31,7 +31,7 @@ public class ConfigProperties {
      */
     private String type = "file";
     /**
-     * properties,yaml(only type in nacos, zk)
+     * properties,yaml(only type in nacos, zk, consul)
      */
     private String dataType ;
 
