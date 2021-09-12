@@ -132,6 +132,7 @@ seata:
       global-table: global_table
       branch-table: branch_table
       lock-table: lock_table
+      distributed-lock-table: distributed_lock
       query-limit: 100
       max-wait: 5000
     redis:
