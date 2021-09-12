@@ -40,7 +40,7 @@
 
         <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <seata.version>1.5.0-SNAPSHOT</seata.version>
@@ -142,7 +142,7 @@
     <repositories>
         <repository>
             <id>ICM</id>
-            <url>http://maven.icm.edu.pl/artifactory/repo/</url>
+            <url>https://maven.icm.edu.pl/artifactory/repo/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
