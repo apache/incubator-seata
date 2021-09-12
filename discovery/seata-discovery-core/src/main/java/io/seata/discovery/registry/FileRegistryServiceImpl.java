@@ -37,6 +37,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final String ENDPOINT_SPLIT_CHAR = ";";
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
+
     private FileRegistryServiceImpl() {
     }
 
@@ -83,7 +84,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
             return null;
         }
         String endpointStr = CONFIG.getConfig(
-            PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
+                PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
         if (StringUtils.isNullOrEmpty(endpointStr)) {
             throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");
         }
