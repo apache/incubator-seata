@@ -1,0 +1,14 @@
+syntax = "proto2";
+package io.seata.integration.brpc.dto;
+
+
+message EchoRequest {
+  required string reqMsg = 1;
+};
+
+message EchoResponse {
+  optional string xid = 1;
+  optional string branchType = 2;
+  required string reqMsg = 3;
+};
+

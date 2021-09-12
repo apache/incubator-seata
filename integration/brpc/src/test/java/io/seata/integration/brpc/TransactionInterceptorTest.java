@@ -1,16 +1,28 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.integration.brpc;
 
 import com.baidu.brpc.client.BrpcProxy;
 import com.baidu.brpc.client.RpcClient;
 import com.baidu.brpc.client.RpcClientOptions;
-import com.baidu.brpc.interceptor.ServerInvokeInterceptor;
 import com.baidu.brpc.server.RpcServer;
 import com.baidu.brpc.server.RpcServerOptions;
-import com.google.common.collect.Lists;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
-import io.seata.integration.brpc.dto.EchoRequest;
-import io.seata.integration.brpc.dto.EchoResponse;
+import io.seata.integration.brpc.dto.Echo;
 import io.seata.integration.brpc.server.EchoService;
 import io.seata.integration.brpc.server.impl.EchoServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,28 +51,12 @@ public class TransactionInterceptorTest {
         RootContext.bindBranchType(BranchType.AT);
         RpcClient rpcClientA = initRpcClient();
         EchoService echoAPI = BrpcProxy.getProxy(rpcClientA, EchoService.class);
-        EchoRequest echoRequest = new EchoRequest();
+        Echo.EchoRequest.Builder echoRequest = Echo.EchoRequest.newBuilder();
         echoRequest.setReqMsg("WITH-TEST");
-        EchoResponse echoResponse = echoAPI.echo(echoRequest);
+        Echo.EchoResponse echoResponse = echoAPI.echo(echoRequest.build());
         assertThat(echoResponse.getXid()).isEqualTo(DEFAULT_XID);
         RootContext.unbind();
         RootContext.unbindBranchType();
-        rpcClientA.stop();
-        rpcServerB.shutdown();
-    }
-
-    @Test
-    public void testWithoutInterceptor() {
-
-        // without transaction interceptor should no exception and no xid
-        RpcClient rpcClientA = initRpcClient();
-        EchoRequest echoRequest = new EchoRequest();
-        echoRequest.setReqMsg("WITHOUT-TEST");
-        rpcServerB.getInterceptors().clear();
-        rpcServerB.getInterceptors().addAll(Lists.newArrayList(new ServerInvokeInterceptor()));
-        EchoService echoAPI = BrpcProxy.getProxy(rpcClientA, EchoService.class);
-        EchoResponse echoResponse = echoAPI.echo(echoRequest);
-        assertThat(echoResponse.getXid()).isNull();
         rpcClientA.stop();
         rpcServerB.shutdown();
     }

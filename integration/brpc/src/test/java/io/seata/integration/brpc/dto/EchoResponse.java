@@ -1,54 +1,80 @@
-package io.seata.integration.brpc.dto;
-
-import com.baidu.bjf.remoting.protobuf.annotation.Protobuf;
-import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
-
-/**
- * @author mxz0828@163.com
- * @date 2021/8/16
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-@ProtobufClass
-public class EchoResponse {
-
-    @Protobuf
-    private String xid;
-
-    @Protobuf
-    private String branchType;
-
-    @Protobuf
-    private String reqMsg;
-
-    public EchoResponse(String xid, String branchType,String reqMsg) {
-        this.xid = xid;
-        this.branchType = branchType;
-        this.reqMsg = reqMsg;
-    }
-
-    public EchoResponse() {
-    }
-
-    public void setXid(String xid) {
-        this.xid = xid;
-    }
-
-    public void setBranchType(String branchType) {
-        this.branchType = branchType;
-    }
-
-    public void setReqMsg(String reqMsg) {
-        this.reqMsg = reqMsg;
-    }
-
-    public String getXid() {
-        return xid;
-    }
-
-    public String getBranchType() {
-        return branchType;
-    }
-
-    public String getReqMsg() {
-        return reqMsg;
-    }
-}
+///*
+// *  Copyright 1999-2019 Seata.io Group.
+// *
+// *  Licensed under the Apache License, Version 2.0 (the "License");
+// *  you may not use this file except in compliance with the License.
+// *  You may obtain a copy of the License at
+// *
+// *       http://www.apache.org/licenses/LICENSE-2.0
+// *
+// *  Unless required by applicable law or agreed to in writing, software
+// *  distributed under the License is distributed on an "AS IS" BASIS,
+// *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// *  See the License for the specific language governing permissions and
+// *  limitations under the License.
+// */
+//package io.seata.integration.brpc.dto;
+//
+//import com.baidu.bjf.remoting.protobuf.annotation.ProtobufClass;
+//
+///**
+// * @author mxz0828@163.com
+// * @date 2021/8/16
+// */
+//@ProtobufClass
+//public class EchoResponse {
+//
+//    private String xid;
+//
+//    private String branchType;
+//
+//    private String reqMsg;
+//
+//    public EchoResponse(String xid, String branchType,String reqMsg) {
+//        this.xid = xid;
+//        this.branchType = branchType;
+//        this.reqMsg = reqMsg;
+//    }
+//
+//    public EchoResponse() {
+//    }
+//
+//    public void setXid(String xid) {
+//        this.xid = xid;
+//    }
+//
+//    public void setBranchType(String branchType) {
+//        this.branchType = branchType;
+//    }
+//
+//    public void setReqMsg(String reqMsg) {
+//        this.reqMsg = reqMsg;
+//    }
+//
+//    public String getXid() {
+//        return xid;
+//    }
+//
+//    public String getBranchType() {
+//        return branchType;
+//    }
+//
+//    public String getReqMsg() {
+//        return reqMsg;
+//    }
+//}
