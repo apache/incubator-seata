@@ -28,6 +28,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -139,7 +140,7 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
             }
             //get the increment
             int increment = 0;
-            final String querySql = "SELECT IDENT_INCR(" + getTableMeta().getTableName() + ") As INCR";
+            final String querySql = "SELECT IDENT_INCR('" + getTableMeta().getTableName() + "') As INCR";
             Connection conn = statementProxy.getConnection();
             try (Statement ps = conn.createStatement();
                  ResultSet incr = ps.executeQuery(querySql)) {
@@ -150,7 +151,17 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
             if (increment < 1) {
                 throw new SQLException("the increment for " + getTableMeta().getTableName() + " is illegal");
             }
-            long beginAt = (long) pkValues.get(0) - (long) (updateCount - 1) * increment;
+
+            //The sqlserver driver uses SCOPE_IDENTITY() to get the primary key value,
+            //and the return type of SCOPE_IDENTITY() is numeric(38,0)
+            long lastPkValue;
+            if (pkValues.get(0) instanceof BigDecimal) {
+                lastPkValue = ((BigDecimal) pkValues.get(0)).longValue();
+            } else {
+                lastPkValue = (long) pkValues.get(0);
+            }
+
+            long beginAt = lastPkValue - (long) (updateCount - 1) * increment;
             pkValues = new ArrayList<>();
             for (int i = 0; i < updateCount; i++) {
                 pkValues.add(beginAt);
