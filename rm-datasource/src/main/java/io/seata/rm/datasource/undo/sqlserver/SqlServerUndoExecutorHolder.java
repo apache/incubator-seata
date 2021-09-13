@@ -38,6 +38,6 @@ public class SqlServerUndoExecutorHolder implements UndoExecutorHolder {
 
     @Override
     public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
-        return null;
+        return new SqlServerUndoDeleteExecutor(sqlUndoLog);
     }
 }
