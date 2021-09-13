@@ -206,7 +206,7 @@ class NettyClientChannelManager {
                 }
                 RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
             } else {
-                RegistryFactory.getInstance().aliveLookup(transactionServiceGroup).clear();
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.EMPTY_LIST);
             }
         }
     }
