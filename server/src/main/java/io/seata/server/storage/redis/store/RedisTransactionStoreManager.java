@@ -314,6 +314,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
             multi.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
             List<Object> exec = multi.exec();
+            if (CollectionUtils.isEmpty(exec)) {
+                //The data has changed by another tc, so we still think the modification is successful.
+                LOGGER.warn("The global transaction xid = {}, maybe changed by another TC. It does not affect the results",globalTransactionDO.getXid());
+                return true;
+            }
             String hmset = exec.get(0).toString();
             long lrem  = (long)exec.get(1);
             long rpush = (long)exec.get(2);

@@ -31,20 +31,27 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * The type Session store test.
  */
+@SpringBootTest
 public class SessionStoreTest {
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context) {
+
+    }
 
     /**
      * The constant RESOURCE_ID.
      */
     public static final String RESOURCE_ID = "mysql:xxx";
-
 
     private static Configuration CONFIG = ConfigurationFactory.getInstance();
 
@@ -57,7 +64,8 @@ public class SessionStoreTest {
     public void clean() throws Exception {
         String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
         File rootDataFile = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
-        File rootDataFileHis = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
+        File rootDataFileHis = new File(
+            sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
 
         if (rootDataFile.exists()) {
             rootDataFile.delete();
@@ -86,7 +94,7 @@ public class SessionStoreTest {
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-                    "ta:1,2;tb:3", "xxx");
+                "ta:1,2;tb:3", "xxx");
             branchSession1.setXid(xid);
             branchSession1.lock();
             globalSession.addBranch(branchSession1);
@@ -169,7 +177,7 @@ public class SessionStoreTest {
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-                    "ta:1", "xxx");
+                "ta:1", "xxx");
             Assertions.assertTrue(branchSession1.lock());
             globalSession.addBranch(branchSession1);
 
@@ -193,7 +201,7 @@ public class SessionStoreTest {
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
 
             GlobalSession sessionInAsyncCommittingQueue = SessionHolder.getAsyncCommittingSessionManager()
-                    .findGlobalSession(globalSession.getXid());
+                .findGlobalSession(globalSession.getXid());
             Assertions.assertTrue(reloadSession == sessionInAsyncCommittingQueue);
 
             // No locking for session in AsyncCommitting status
@@ -225,7 +233,7 @@ public class SessionStoreTest {
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-                    "ta:1", "xxx");
+                "ta:1", "xxx");
             branchSession1.lock();
             globalSession.addBranch(branchSession1);
 
@@ -251,7 +259,7 @@ public class SessionStoreTest {
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.CommitRetrying);
 
             GlobalSession sessionInRetryCommittingQueue = SessionHolder.getRetryCommittingSessionManager()
-                    .findGlobalSession(globalSession.getXid());
+                .findGlobalSession(globalSession.getXid());
             Assertions.assertTrue(reloadSession == sessionInRetryCommittingQueue);
             BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
             Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
@@ -286,7 +294,7 @@ public class SessionStoreTest {
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-                    "ta:1", "xxx");
+                "ta:1", "xxx");
             branchSession1.lock();
             globalSession.addBranch(branchSession1);
 
@@ -312,7 +320,7 @@ public class SessionStoreTest {
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.RollbackRetrying);
 
             GlobalSession sessionInRetryRollbackingQueue = SessionHolder.getRetryRollbackingSessionManager()
-                    .findGlobalSession(globalSession.getXid());
+                .findGlobalSession(globalSession.getXid());
             Assertions.assertTrue(reloadSession == sessionInRetryRollbackingQueue);
             BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
             Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_RollbackFailed_Retryable);
@@ -347,7 +355,7 @@ public class SessionStoreTest {
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-                    "ta:1", "xxx");
+                "ta:1", "xxx");
             branchSession1.lock();
             globalSession.addBranch(branchSession1);
 
