@@ -98,7 +98,7 @@ public class MapUtil {
                             Collections.singletonMap("[" + (count++) + "]", object), key);
                 }
             } else {
-                result.put(key, (value != null ? value : ""));
+                result.put(key, value != null ? value : "");
             }
         }
     }
