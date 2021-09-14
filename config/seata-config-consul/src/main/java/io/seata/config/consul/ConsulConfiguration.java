@@ -15,12 +15,8 @@
  */
 package io.seata.config.consul;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -48,6 +44,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -266,8 +263,8 @@ public class ConsulConfiguration extends AbstractConfiguration {
         String config = kvValue.getValue().getDecodedValue();
 
         if (StringUtils.isNotBlank(config)) {
-            try (Reader reader = new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
-                seataConfig.load(reader);
+            try {
+                seataConfig = ConfigProcessor.processConfig(config, getConsulDataType());
             } catch (IOException e) {
                 LOGGER.error("init config properties error", e);
             }
@@ -275,6 +272,10 @@ public class ConsulConfiguration extends AbstractConfiguration {
         // Start config change listener for the ConsulConfigKey,default value is "seata.properties".
         ConsulListener consulListener = new ConsulListener(getConsulConfigKey(), null);
         consulListener.onProcessEvent(new ConfigurationChangeEvent());
+    }
+
+    private static String getConsulDataType() {
+        return ConfigProcessor.resolverConfigDataType(getConsulConfigKey());
     }
 
     private static String getConsulConfigKey() {
@@ -329,9 +330,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
                     consulIndex = currentIndex;
                     if (dataId.equals(getConsulConfigKey())) {
                         // The new config change listener
-                        Properties seataConfigNew = new Properties();
-                        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(value.getBytes()), StandardCharsets.UTF_8)) {
-                            seataConfigNew.load(reader);
+                        Properties seataConfigNew;
+                        try {
+                            seataConfigNew  = ConfigProcessor.processConfig(value, getConsulDataType());
                         } catch (IOException e) {
                             LOGGER.error("load config properties error", e);
                             continue;

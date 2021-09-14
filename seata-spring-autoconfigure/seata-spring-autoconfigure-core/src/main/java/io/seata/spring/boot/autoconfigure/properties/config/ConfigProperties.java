@@ -30,6 +30,10 @@ public class ConfigProperties {
      * file, nacos, apollo, zk, consul, etcd3, springCloudConfig
      */
     private String type = "file";
+    /**
+     * properties,yaml(only type in nacos, zk, consul, etcd3)
+     */
+    private String dataType ;
 
     public String getType() {
         return type;
@@ -37,6 +41,15 @@ public class ConfigProperties {
 
     public ConfigProperties setType(String type) {
         this.type = type;
+        return this;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public ConfigProperties setDataType(String dataType) {
+        this.dataType = dataType;
         return this;
     }
 }
