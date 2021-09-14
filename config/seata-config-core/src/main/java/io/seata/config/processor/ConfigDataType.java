@@ -37,7 +37,7 @@ public enum ConfigDataType {
     private String[] suffix;
 
     ConfigDataType(String... suffix) {
-        this.suffix=suffix;
+        this.suffix = suffix;
     }
 
     /**
