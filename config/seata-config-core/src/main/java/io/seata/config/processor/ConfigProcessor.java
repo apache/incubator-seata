@@ -51,7 +51,7 @@ public class ConfigProcessor {
      * @param dataId the configured data id
      * @return data type
      */
-    public static String resolverConfigDataType(String dataId){
+    public static String resolverConfigDataType(String dataId) {
         return resolverConfigDataType(FILE_CONFIG.getConfig(getDataTypeKey()),dataId,DEFAULT_DATA_TYPE);
     }
 
@@ -63,18 +63,18 @@ public class ConfigProcessor {
      * @param defaultDataType the default data type
      * @return data type
      */
-    public static String resolverConfigDataType(String dataType,String dataId,String defaultDataType){
-        if(StringUtils.isNotBlank(dataType)){
+    public static String resolverConfigDataType(String dataType,String dataId,String defaultDataType) {
+        if (StringUtils.isNotBlank(dataType)) {
             return dataType;
         }
-        if(!dataId.contains(SEPARATOR)){
+        if (!dataId.contains(SEPARATOR)) {
             return defaultDataType;
         }
-        String[] splitString = dataId.split("\\"+SEPARATOR);
+        String[] splitString = dataId.split("\\" + SEPARATOR);
         try {
             ConfigDataType configDataType = ConfigDataType.getTypeBySuffix(splitString[splitString.length - 1]);
             return configDataType.name();
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return defaultDataType;
         }
 
