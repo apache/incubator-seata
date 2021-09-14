@@ -330,7 +330,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
                     consulIndex = currentIndex;
                     if (dataId.equals(getConsulConfigKey())) {
                         // The new config change listener
-                        Properties seataConfigNew = null;
+                        Properties seataConfigNew;
                         try {
                             seataConfigNew  = ConfigProcessor.processConfig(value, getConsulDataType());
                         } catch (IOException e) {
