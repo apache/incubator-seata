@@ -37,6 +37,7 @@ public class StoreDBProperties {
     private String globalTable = "global_table";
     private String branchTable = "branch_table";
     private String lockTable = "lock_table";
+    private String distributedLockTable = "distributed_lock";
     private Integer queryLimit = 100;
     private Integer maxWait = 5000;
 
@@ -137,6 +138,14 @@ public class StoreDBProperties {
     public StoreDBProperties setLockTable(String lockTable) {
         this.lockTable = lockTable;
         return this;
+    }
+
+    public String getDistributedLockTable() {
+        return distributedLockTable;
+    }
+
+    public void setDistributedLockTable(String distributedLockTable) {
+        this.distributedLockTable = distributedLockTable;
     }
 
     public Integer getQueryLimit() {
