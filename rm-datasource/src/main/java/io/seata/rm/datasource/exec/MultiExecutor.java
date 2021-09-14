@@ -75,10 +75,18 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
                 case UPDATE:
-                    executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
+                    if (JdbcConstants.SQLSERVER.equalsIgnoreCase(getDbType())) {
+                        executor = new SqlServerMultiUpdateExecutor<>(statementProxy, statementCallback, value);
+                    } else {
+                        executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
+                    }
                     break;
                 case DELETE:
-                    executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
+                    if (JdbcConstants.SQLSERVER.equalsIgnoreCase(getDbType())) {
+                        executor = new SqlServerMultiDeleteExecutor<>(statementProxy, statementCallback, value);
+                    } else {
+                        executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
+                    }
                     break;
                 default:
                     throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
