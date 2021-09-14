@@ -11,4 +11,12 @@
 
     <artifactId>seata-spring-autoconfigure-core</artifactId>
     <name>seata-spring-autoconfigure-core ${project.version}</name>
+    <dependencies>
+    <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>seata-discovery-all</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
+    </dependency>
+    </dependencies>
 </project>
