@@ -55,7 +55,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         //start services server first
         Thread thread = new Thread(() -> {
-            nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
             nettyRemotingServer.setListenPort(8091);
             // set registry
             XID.setIpAddress(NetUtil.getLocalIp());
@@ -93,7 +93,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         //start services server first
         Thread thread = new Thread(() -> {
-            nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
             nettyRemotingServer.setListenPort(8091);
             // set registry
             XID.setIpAddress(NetUtil.getLocalIp());
@@ -123,7 +123,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         new Thread(() -> {
-            nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
             nettyRemotingServer.setListenPort(8091);
             // set registry
             XID.setIpAddress(NetUtil.getLocalIp());
