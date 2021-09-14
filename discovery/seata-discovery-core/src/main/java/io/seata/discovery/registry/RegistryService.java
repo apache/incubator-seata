@@ -16,13 +16,12 @@
 package io.seata.discovery.registry;
 
 import java.net.InetSocketAddress;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
@@ -52,7 +51,7 @@ public interface RegistryService<T> {
     /**
      * Service node health check
      */
-    Map<String,List<InetSocketAddress>> CURRENT_ADDRESS_MAP = new HashMap<>();
+    Map<String,List<InetSocketAddress>> CURRENT_ADDRESS_MAP = new ConcurrentHashMap<>();
     /**
      * Register.
      *
@@ -118,6 +117,12 @@ public interface RegistryService<T> {
     }
 
     default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
-        return CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new CopyOnWriteArrayList<>());
+        return CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new ArrayList<>());
     }
+
+    default List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
+        List<InetSocketAddress> aliveAddress) {
+        return CURRENT_ADDRESS_MAP.put(transactionServiceGroup, aliveAddress);
+    }
+
 }
