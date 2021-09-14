@@ -77,7 +77,6 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
     public void buildUndoSQL() {
         String sql = executor.buildUndoSQL().toUpperCase();
         Assertions.assertNotNull(sql);
-        System.out.println(sql);
         Assertions.assertTrue(sql.contains("INSERT"));
         Assertions.assertTrue(sql.contains("TABLE_NAME"));
         Assertions.assertTrue(sql.contains("ID"));
