@@ -458,7 +458,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
 
         storeLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(STORE_LOG_DELETE,
-                this::storeLogDelete), UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+                this::storeLogDelete), 0, STORE_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override

@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -82,6 +85,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private static final String OK = "OK";
 
     /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    /**
      * Get the instance.
      */
     public static RedisTransactionStoreManager getInstance() {
@@ -102,10 +110,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
             return updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            // Marked as removed
             GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(session);
-            globalTransactionDO.setStatus(GlobalStatus.Removed.getCode());
-            return updateGlobalTransactionDO(globalTransactionDO);
+            if(CONFIG.getLong(ConfigurationKeys.STORE_LOG_SAVE_MINS, 0L) > 0) {
+                // Marked as removed
+                globalTransactionDO.setStatus(GlobalStatus.Removed.getCode());
+                return updateGlobalTransactionDO(globalTransactionDO);
+            } else {
+                return deleteGlobalTransactionDO(globalTransactionDO);
+            }
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
             return insertBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
@@ -182,7 +194,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     
     /**
      * Batch delete the branch transaction
-     * @param branchTransactionDO
+     * @param branchTransactionDOs
      * @return
      */
     private boolean deleteBranchTransactionDO(List<BranchTransactionDO> branchTransactionDOs) {

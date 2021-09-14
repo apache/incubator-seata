@@ -124,7 +124,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
     /**
      * Clean globalSession
      * 
-     * @param session the session
+     * @param sessions the list of session
      * @throws TransactionException
      */
     @Override

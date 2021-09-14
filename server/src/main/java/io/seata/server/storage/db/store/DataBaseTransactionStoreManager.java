@@ -104,19 +104,27 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
             return logStore.updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            // Marked as removed in the database
             GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(session);
-            globalTransactionDO.setStatus(GlobalStatus.Removed.getCode());
-            return logStore.updateGlobalTransactionDO(globalTransactionDO);
+            if(CONFIG.getLong(ConfigurationKeys.STORE_LOG_SAVE_MINS, 0L) > 0) {
+                // Marked as removed in the database
+                globalTransactionDO.setStatus(GlobalStatus.Removed.getCode());
+                return logStore.updateGlobalTransactionDO(globalTransactionDO);
+            } else {
+                return logStore.deleteGlobalTransactionDO(globalTransactionDO);
+            }
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
             return logStore.insertBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
             return logStore.updateBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
-            // Marked as removed in the database
             BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(session);
-            branchTransactionDO.setStatus(BranchStatus.Removed.getCode());
-            return logStore.updateBranchTransactionDO(branchTransactionDO);
+            if(CONFIG.getLong(ConfigurationKeys.STORE_LOG_SAVE_MINS, 0L) > 0) {
+                // Marked as removed in the database
+                branchTransactionDO.setStatus(BranchStatus.Removed.getCode());
+                return logStore.updateBranchTransactionDO(branchTransactionDO);
+            } else {
+                return logStore.deleteBranchTransactionDO(branchTransactionDO);
+            }
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
