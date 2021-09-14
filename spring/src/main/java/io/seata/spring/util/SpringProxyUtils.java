@@ -23,6 +23,7 @@ import java.util.Set;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.tcc.remoting.parser.DubboUtil;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
@@ -48,8 +49,12 @@ public class SpringProxyUtils {
             return null;
         }
         if (AopUtils.isAopProxy(proxy) && proxy instanceof Advised) {
-            Object targetObject = ((Advised) proxy).getTargetSource().getTarget();
-            return findTargetClass(targetObject);
+            // #issue 3709
+            final TargetSource targetSource = ((Advised) proxy).getTargetSource();
+            if (!targetSource.isStatic()) {
+                return targetSource.getTargetClass();
+            }
+            return findTargetClass(targetSource.getTarget());
         }
         return proxy.getClass();
     }
@@ -132,9 +137,9 @@ public class SpringProxyUtils {
     /**
      * Get the class type of the proxy target object, if hadn't a target object, return the interface of the proxy
      *
-     * @param proxy
-     * @return
-     * @throws Exception
+     * @param proxy the proxy
+     * @return target interface
+     * @throws Exception the exception
      */
     protected static Class<?> getTargetClass(Object proxy) throws Exception {
         if (proxy == null) {
@@ -162,8 +167,8 @@ public class SpringProxyUtils {
 
     /**
      * get the all interfaces of bean, if the bean is null, then return empty array
-     * @param bean
-     * @return
+     * @param bean the bean
+     * @return target interface
      */
     public static Class<?>[] getAllInterfaces(Object bean) {
         Set<Class<?>> interfaces = new HashSet<>();

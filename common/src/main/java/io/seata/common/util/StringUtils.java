@@ -15,16 +15,18 @@
  */
 package io.seata.common.util;
 
-import io.seata.common.Constants;
-import io.seata.common.exception.ShouldNeverHappenException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+
+import io.seata.common.Constants;
+import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type String utils.
@@ -41,6 +43,11 @@ public class StringUtils {
      * empty string
      */
     public static final String EMPTY = "";
+
+    /**
+     * Space string
+     */
+    public static final String SPACE = " ";
 
     /**
      * Is empty boolean.
@@ -160,66 +167,116 @@ public class StringUtils {
      * @param obj the obj
      * @return string string
      */
-    public static String toString(Object obj) {
+    @SuppressWarnings("deprecation")
+    public static String toString(final Object obj) {
         if (obj == null) {
             return "null";
         }
-        if (obj.getClass().isPrimitive()) {
-            return String.valueOf(obj);
+
+        //region Convert simple types to String directly
+
+        if (obj instanceof CharSequence) {
+            return "\"" + obj + "\"";
         }
-        if (obj instanceof String) {
-            return (String)obj;
-        }
-        if (obj instanceof Number || obj instanceof Character || obj instanceof Boolean) {
-            return String.valueOf(obj);
+        if (obj instanceof Character) {
+            return "'" + obj + "'";
         }
         if (obj instanceof Date) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(obj);
-        }
-        if (obj instanceof Collection) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            if (!((Collection)obj).isEmpty()) {
-                for (Object o : (Collection)obj) {
-                    sb.append(toString(o)).append(",");
-                }
-                sb.deleteCharAt(sb.length() - 1);
+            Date date = (Date)obj;
+            long time = date.getTime();
+            String dateFormat;
+            if (date.getHours() == 0 && date.getMinutes() == 0 && date.getSeconds() == 0 && time % 1000 == 0) {
+                dateFormat = "yyyy-MM-dd";
+            } else if (time % (60 * 1000) == 0) {
+                dateFormat = "yyyy-MM-dd HH:mm";
+            } else if (time % 1000 == 0) {
+                dateFormat = "yyyy-MM-dd HH:mm:ss";
+            } else {
+                dateFormat = "yyyy-MM-dd HH:mm:ss.SSS";
             }
-            sb.append("]");
-            return sb.toString();
+            return new SimpleDateFormat(dateFormat).format(obj);
+        }
+        if (obj instanceof Enum) {
+            return obj.getClass().getSimpleName() + "." + ((Enum)obj).name();
+        }
+        if (obj instanceof Class) {
+            return ReflectionUtil.classToString((Class<?>)obj);
+        }
+        if (obj instanceof Field) {
+            return ReflectionUtil.fieldToString((Field)obj);
+        }
+        if (obj instanceof Method) {
+            return ReflectionUtil.methodToString((Method)obj);
+        }
+        if (obj instanceof Annotation) {
+            return ReflectionUtil.annotationToString((Annotation)obj);
+        }
+
+        //endregion
+
+        //region Convert the Collection and Map
+
+        if (obj instanceof Collection) {
+            return CollectionUtils.toString((Collection<?>)obj);
+        }
+        if (obj.getClass().isArray()) {
+            return ArrayUtils.toString((Object[])obj);
         }
         if (obj instanceof Map) {
-            Map<Object, Object> map = (Map)obj;
-            StringBuilder sb = new StringBuilder();
-            sb.append("{");
-            if (!map.isEmpty()) {
-                map.forEach((key, value) -> {
-                    sb.append(toString(key)).append("->")
-                        .append(toString(value)).append(",");
-                });
-                sb.deleteCharAt(sb.length() - 1);
-            }
-            sb.append("}");
-            return sb.toString();
+            return CollectionUtils.toString((Map<?, ?>)obj);
         }
-        StringBuilder sb = new StringBuilder();
-        Field[] fields = obj.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            sb.append(field.getName());
-            sb.append("=");
-            try {
-                Object f = field.get(obj);
-                if (f.getClass() == obj.getClass()) {
-                    sb.append(f.toString());
+
+        //endregion
+
+        //the jdk classes
+        if (obj.getClass().getClassLoader() == null) {
+            return obj.toString();
+        }
+
+        return CycleDependencyHandler.wrap(obj, o -> {
+            StringBuilder sb = new StringBuilder(32);
+
+            // handle the anonymous class
+            String classSimpleName;
+            if (obj.getClass().isAnonymousClass()) {
+                if (!obj.getClass().getSuperclass().equals(Object.class)) {
+                    classSimpleName = obj.getClass().getSuperclass().getSimpleName();
                 } else {
-                    sb.append(toString(f));
+                    classSimpleName = obj.getClass().getInterfaces()[0].getSimpleName();
                 }
-            } catch (Exception e) {
+                // Connect a '$', different from ordinary class
+                classSimpleName += "$";
+            } else {
+                classSimpleName = obj.getClass().getSimpleName();
             }
-            sb.append(";");
-        }
-        return sb.toString();
+
+            sb.append(classSimpleName).append("(");
+            final int initialLength = sb.length();
+
+            // Gets all fields, excluding static or synthetic fields
+            Field[] fields = ReflectionUtil.getAllFields(obj.getClass());
+            for (Field field : fields) {
+                field.setAccessible(true);
+
+                if (sb.length() > initialLength) {
+                    sb.append(", ");
+                }
+                sb.append(field.getName());
+                sb.append("=");
+                try {
+                    Object f = field.get(obj);
+                    if (f == obj) {
+                        sb.append("(this ").append(f.getClass().getSimpleName()).append(")");
+                    } else {
+                        sb.append(toString(f));
+                    }
+                } catch (Exception ignore) {
+                }
+            }
+
+            sb.append(")");
+            return sb.toString();
+        });
     }
 
     /**
