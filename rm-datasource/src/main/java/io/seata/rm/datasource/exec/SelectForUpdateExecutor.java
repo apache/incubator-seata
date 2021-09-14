@@ -132,7 +132,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         return rs;
     }
 
-    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList) {
+    protected String buildSelectSQL(ArrayList<List<Object>> paramAppenderList) {
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
         StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNamesInSQL(getTableMeta().getEscapePkNameList(getDbType())));
