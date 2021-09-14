@@ -19,16 +19,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.seata.common.util.ConfigTools;
 import io.seata.common.exception.RedisException;
+import io.seata.common.util.ConfigTools;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolAbstract;
@@ -71,8 +69,9 @@ public class JedisPooledFactory {
         if (jedisPool == null) {
             synchronized (JedisPooledFactory.class) {
                 if (jedisPool == null) {
+                    JedisPoolAbstract tempJedisPool = null;
                     if (jedisPools != null && jedisPools.length > 0) {
-                        jedisPool = jedisPools[0];
+                        tempJedisPool = jedisPools[0];
                     } else {
                         String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
                         if (StringUtils.isBlank(password)) {
@@ -83,9 +82,7 @@ public class JedisPooledFactory {
                                 try {
                                     password = ConfigTools.publicDecrypt(password, publicKey);
                                 } catch (Exception e) {
-                                    LOGGER.error(
-                                        "decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: {}",
-                                        e.getMessage());
+                                    LOGGER.error("decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: {}", e.getMessage());
                                 }
                             }
                         }
@@ -102,16 +99,13 @@ public class JedisPooledFactory {
                             Set<String> sentinels = new HashSet<>(SENTINEL_HOST_NUMBER);
                             String[] sentinelHosts = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_HOST).split(",");
                             Arrays.asList(sentinelHosts).forEach(sentinelHost -> sentinels.add(sentinelHost));
-                            jedisPool = new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, password,
-                                    CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
+                            tempJedisPool = new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, password, CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                         } else if (mode.equals(ConfigurationKeys.REDIS_SINGLE_MODE)) {
                             String host = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
                             host = StringUtils.isBlank(host) ? CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST) : host;
                             int port = CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT);
                             port = port == 0 ? CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT) : port;
-                            jedisPool =
-                                    new JedisPool(poolConfig, host, port, 60000, password,
-                                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
+                            tempJedisPool = new JedisPool(poolConfig, host, port, 60000, password, CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                         } else {
                             throw new RedisException("Configuration error of redis cluster mode");
                         }
@@ -119,6 +113,7 @@ public class JedisPooledFactory {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("initialization of the build redis connection pool is complete");
                     }
+                    jedisPool = tempJedisPool;
                 }
             }
         }

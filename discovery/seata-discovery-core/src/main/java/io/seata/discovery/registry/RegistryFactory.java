@@ -57,10 +57,7 @@ public class RegistryFactory {
         } catch (Exception exx) {
             throw new NotSupportYetException("not support registry type: " + registryTypeName);
         }
-        if (RegistryType.File == registryType) {
-            return FileRegistryServiceImpl.getInstance();
-        } else {
-            return EnhancedServiceLoader.load(RegistryProvider.class, Objects.requireNonNull(registryType).name()).provide();
-        }
+        return EnhancedServiceLoader.load(RegistryProvider.class, Objects.requireNonNull(registryType).name()).provide();
+
     }
 }

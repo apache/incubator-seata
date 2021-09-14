@@ -134,7 +134,7 @@ public class DefaultCoreForEventBusTest {
             core.begin("test_app_id", "default_group", "test_tran_name3", 0);
 
             //sleep for check ->  DefaultCoordinator.timeoutCheck
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             //at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
             subscriber.downLatch.await(5000, TimeUnit.MILLISECONDS);

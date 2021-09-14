@@ -99,31 +99,26 @@ public class FileConfiguration extends AbstractConfiguration {
 
     /**
      * Instantiates a new File configuration.
-     *
+     * For seata-server side the conf file should always exists.
+     * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
      * @param name                the name
      * @param allowDynamicRefresh the allow dynamic refresh
      */
     public FileConfiguration(String name, boolean allowDynamicRefresh) {
-        LOGGER.info("The file name of the operation is {}", name);
         File file = getConfigFile(name);
         if (file == null) {
             targetFilePath = null;
-        } else {
-            targetFilePath = file.getPath();
-            fileConfig = FileConfigFactory.load(file, name);
-        }
-        /*
-         * For seata-server side the conf file should always exists.
-         * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
-         */
-        if (targetFilePath == null) {
             fileConfig = FileConfigFactory.load();
             this.allowDynamicRefresh = false;
         } else {
+            targetFilePath = file.getPath();
+            fileConfig = FileConfigFactory.load(file, name);
             targetFileLastModified = new File(targetFilePath).lastModified();
             this.allowDynamicRefresh = allowDynamicRefresh;
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("The file name of the operation is {}", name);
+            }
         }
-
         this.name = name;
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
                 Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
@@ -142,16 +137,13 @@ public class FileConfiguration extends AbstractConfiguration {
 
             File targetFile = getFileFromFileSystem(decodedPath);
             if (targetFile != null) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("The configuration file used is {}", targetFile.getPath());
-                }
                 return targetFile;
             }
 
             if (!filePathCustom) {
-                File classpathFile = getFileFromClasspath(name);
-                if (classpathFile != null) {
-                    return classpathFile;
+                targetFile = getFileFromClasspath(name);
+                if (targetFile != null) {
+                    return targetFile;
                 }
             }
         } catch (UnsupportedEncodingException e) {
@@ -204,18 +196,12 @@ public class FileConfiguration extends AbstractConfiguration {
             for (String s : FileConfigFactory.getSuffixSet()) {
                 resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
                 if (resource != null) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("The configuration file used is {}", resource.getPath());
-                    }
                     String path = resource.getPath();
                     path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
                     return new File(path);
                 }
             }
         } else {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("The configuration file used is {}", name);
-            }
             String path = resource.getPath();
             path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
             return new File(path);
