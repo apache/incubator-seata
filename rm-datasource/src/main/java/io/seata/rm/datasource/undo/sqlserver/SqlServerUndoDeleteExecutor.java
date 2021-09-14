@@ -21,7 +21,6 @@ import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
@@ -32,11 +31,11 @@ import java.util.stream.Collectors;
 /**
  * @author GoodBoyCoder
  */
-public class SqlServerUndoDeleteExecutor extends AbstractUndoExecutor {
+public class SqlServerUndoDeleteExecutor extends BaseSqlServerUndoExecutor {
     /**
      * INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
      */
-    private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
+    private static final String INSERT_SQL_TEMPLATE = "SET IDENTITY_INSERT %s ON; INSERT INTO %s (%s) VALUES (%s); SET IDENTITY_INSERT %s OFF;";
 
     /**
      * Instantiates a new sql server delete undo executor.
@@ -66,7 +65,7 @@ public class SqlServerUndoDeleteExecutor extends AbstractUndoExecutor {
         String insertValues = fields.stream().map(field -> "?")
                 .collect(Collectors.joining(", "));
 
-        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
+        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), sqlUndoLog.getTableName(), insertColumns, insertValues, sqlUndoLog.getTableName());
     }
 
     @Override
