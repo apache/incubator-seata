@@ -56,6 +56,16 @@ public interface ConfigurationKeys {
      * The constant STORE_SESSION_MODE.
      */
     String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
+    
+    /**
+     * The constant STORE_LOG_DELETE_PERIOD.
+     */
+    String STORE_LOG_DELETE_PERIOD = STORE_PREFIX + "logDeletePeriod";
+    
+    /**
+     * The constant STORE_LOG_SAVE_MINS.
+     */
+    String STORE_LOG_SAVE_MINS = STORE_PREFIX + "logSaveMins";
 
     /**
      * The constant STORE_PUBLIC_KEY.

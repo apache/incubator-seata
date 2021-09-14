@@ -16,18 +16,18 @@
 package io.seata.server.coordinator;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import io.seata.server.session.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHelper;
-import io.seata.server.session.SessionHolder;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -73,6 +73,7 @@ import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.Constants.STORE_LOG_DELETE;
 
 /**
  * The type Default coordinator.
@@ -116,6 +117,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * The Transaction undo log delay delete period
      */
     protected static final long UNDO_LOG_DELAY_DELETE_PERIOD = 3 * 60 * 1000;
+    
+    /**
+     * The Store log delete period.
+     */
+    protected static final long STORE_LOG_DELETE_PERIOD = CONFIG.getLong(ConfigurationKeys.STORE_LOG_DELETE_PERIOD, 1000L);
+
+    /**
+     * The Default store log save minutes.
+     */
+    protected static final int DEFAULT_STORE_LOG_SAVE_MINS = 1;
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
@@ -142,6 +153,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("UndoLogDelete", 1));
+    
+    private final ScheduledThreadPoolExecutor storeLogDelete = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("StoreLogDelete", 1));
 
     private final RemotingServer remotingServer;
 
@@ -390,6 +404,39 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }
     }
+    
+    /**
+     * Store log delete.
+     */
+    protected void storeLogDelete() {
+        int saveMins = CONFIG.getInt(ConfigurationKeys.STORE_LOG_SAVE_MINS, DEFAULT_STORE_LOG_SAVE_MINS);
+        long expiredTime = System.currentTimeMillis() - saveMins * 60 * 1000;
+        
+        SessionCondition condition = new SessionCondition();
+        condition.setExpiredTime(expiredTime);
+        condition.setStatus(GlobalStatus.Removed);
+        List<GlobalSession> removedGlobalSessions = SessionHolder.getRootSessionManager().findGlobalSessions(condition);
+        
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Clean expired removed sessions. expiredTime: {}, removeSessions: {}",
+                    expiredTime, removedGlobalSessions);
+        }
+        
+        try {
+            if (CollectionUtils.isNotEmpty(removedGlobalSessions)) {
+                SessionHolder.getRootSessionManager().cleanGlobalSession(removedGlobalSessions);
+                List<BranchSession> branchSessions = new ArrayList<>();
+                for (GlobalSession globalSession : removedGlobalSessions) {
+                    if (CollectionUtils.isNotEmpty(globalSession.getBranchSessions())) {
+                        branchSessions.addAll(globalSession.getBranchSessions());
+                    }
+                }
+                SessionHolder.getRootSessionManager().cleanBranchSession(branchSessions);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to async delete store log, exception: {}", e.getMessage());
+        }
+    }
 
     /**
      * Init.
@@ -409,6 +456,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         undoLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
                 UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+
+        storeLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(STORE_LOG_DELETE,
+                this::storeLogDelete), UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -437,11 +487,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
+        storeLogDelete.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            storeLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 
         }
