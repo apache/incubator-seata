@@ -15,8 +15,10 @@
  */
 package io.seata.config.etcd3;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.List;
@@ -56,7 +58,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -288,7 +289,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
             GetResponse getResponse = future.get();
             List<KeyValue> kvs = getResponse.getKvs();
             if (!kvs.isEmpty()) {
-                seataConfig = ConfigProcessor.processConfig(new String(kvs.get(0).getValue().getBytes(), StandardCharsets.UTF_8), getEtcdDataType());
+                try (Reader reader = new InputStreamReader(new ByteArrayInputStream(kvs.get(0).getValue().getBytes()), StandardCharsets.UTF_8)) {
+                    seataConfig.load(reader);
+                }
 
                 EtcdListener etcdListener = new EtcdListener(etcdConfigKey, null);
                 CONFIG_LISTENERS_MAP.computeIfAbsent(etcdConfigKey, key -> new ConcurrentSet<>())
@@ -303,9 +306,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static String getEtcdConfigKey() {
         return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
     }
-    private static String getEtcdDataType() {
-        return ConfigProcessor.resolverConfigDataType(getEtcdConfigKey());
-    }
+
     private static String getSeataConfigStr() {
         StringBuilder sb = new StringBuilder();
 
@@ -365,12 +366,11 @@ public class EtcdConfiguration extends AbstractConfiguration {
                 public void onNext(WatchResponse watchResponse) {
                     if (dataId.equals(getEtcdConfigKey())) {
                         byte[] bytes = watchResponse.getEvents().get(0).getKeyValue().getValue().getBytes();
-                        Properties seataConfigNew;
-                        try  {
-                            seataConfigNew = ConfigProcessor.processConfig(new String(bytes, StandardCharsets.UTF_8), getEtcdDataType());
+                        Properties seataConfigNew = new Properties();
+                        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8)) {
+                            seataConfigNew.load(reader);
                         } catch (IOException e) {
                             LOGGER.error("load config properties error", e);
-                            return;
                         }
 
                         for (Map.Entry<String, Set<ConfigurationChangeListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
