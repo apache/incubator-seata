@@ -16,8 +16,7 @@
 
 package io.seata.spring.boot.autoconfigure;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -35,19 +34,12 @@ public class BasePropertiesTest {
     protected static final long LONG_TEST_ONE = 1L;
     protected static final long LONG_TEST_TWO = 2L;
 
-    @BeforeAll
-    public static void setUp() {
+    @BeforeEach
+    public void setUp() {
         applicationContex = new AnnotationConfigApplicationContext(
             new String[] {"io.seata.spring.boot.autoconfigure.properties.config.test"});
         SeataCoreEnvironmentPostProcessor processor = new SeataCoreEnvironmentPostProcessor();
         processor.postProcessEnvironment(null, null);
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        if (null != applicationContex) {
-            applicationContex.close();
-        }
     }
 
 }
