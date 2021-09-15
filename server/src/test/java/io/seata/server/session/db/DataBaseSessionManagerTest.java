@@ -33,6 +33,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.context.ApplicationContext;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -56,7 +57,7 @@ public class DataBaseSessionManagerTest {
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start() throws Exception {
+    public static void start(ApplicationContext context) throws Exception {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
         DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 
