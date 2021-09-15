@@ -15,11 +15,10 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import io.seata.spring.boot.autoconfigure.properties.LogProperties;
+import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
@@ -88,12 +87,6 @@ public class CorePropertiesTest {
     @Test
     public void testLogProperties() {
         assertEquals(100, context.getBean(LogProperties.class).getExceptionRate());
-    }
-
-    @Test
-    public void testConfigApolloProperties() {
-        assertEquals("seata-server", context.getBean(ConfigApolloProperties.class).getAppId());
-        assertEquals("http://192.168.1.204:8801", context.getBean(ConfigApolloProperties.class).getApolloMeta());
     }
 
     @Test
