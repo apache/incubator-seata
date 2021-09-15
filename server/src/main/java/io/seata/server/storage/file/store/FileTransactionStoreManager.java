@@ -196,8 +196,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     
     @Override
     public boolean writeSession(LogOperation logOperation, List<SessionStorable> sessions) {
-        writeSessionLock.lock();
         long curFileTrxNum;
+        writeSessionLock.lock();
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             for (SessionStorable session : sessions) {

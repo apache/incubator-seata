@@ -70,9 +70,6 @@ import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.RETRY_COMMITTING;
@@ -163,7 +160,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor storeLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("StoreLogDelete", 1));
 
-    private final RemotingServer remotingServer;
+    private RemotingServer remotingServer;
 
     private final DefaultCore core;
 
