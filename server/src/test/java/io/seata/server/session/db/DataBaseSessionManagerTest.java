@@ -33,6 +33,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import java.sql.Connection;
@@ -48,6 +49,7 @@ import java.util.List;
  *
  * @author zhangsen
  */
+@SpringBootTest
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
