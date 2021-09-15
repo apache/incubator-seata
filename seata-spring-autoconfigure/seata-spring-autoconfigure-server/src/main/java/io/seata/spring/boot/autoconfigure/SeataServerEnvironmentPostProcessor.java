@@ -23,38 +23,37 @@ import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBPropert
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreHBaseProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.ConfigurableEnvironment;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_POOL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_PREFIX;
 
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
+ * @author wang.liang
  */
-@ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-@ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
-@Configuration
-public class SeataServerPropertiesAutoConfiguration {
-    static {
+public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         PROPERTY_BEAN_MAP.put(SERVER_PREFIX, ServerProperties.class);
         PROPERTY_BEAN_MAP.put(SERVER_UNDO_PREFIX, ServerUndoProperties.class);
         PROPERTY_BEAN_MAP.put(SERVER_RECOVERY_PREFIX, ServerRecoveryProperties.class);
@@ -69,5 +68,10 @@ public class SeataServerPropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
         PROPERTY_BEAN_MAP.put(STORE_HBASE_PREFIX, StoreHBaseProperties.class);
         PROPERTY_BEAN_MAP.put(STORE_HBASE_POOL_PREFIX, StoreHBaseProperties.Pool.class);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
