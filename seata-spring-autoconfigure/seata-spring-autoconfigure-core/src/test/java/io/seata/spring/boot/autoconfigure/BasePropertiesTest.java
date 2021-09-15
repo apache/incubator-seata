@@ -23,7 +23,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 /**
  * @author slievrly
  */
-public class BaseConfigPropertiesTest {
+public class BasePropertiesTest {
     protected static AnnotationConfigApplicationContext applicationContex;
     protected static final String STR_TEST_AAA = "aaa";
     protected static final String STR_TEST_BBB = "bbb";
@@ -32,10 +32,13 @@ public class BaseConfigPropertiesTest {
     protected static final String STR_TEST_EEE = "eee";
     protected static final String STR_TEST_FFF = "fff";
 
+    protected static final long LONG_TEST_ONE = 1L;
+    protected static final long LONG_TEST_TWO = 2L;
+
     @BeforeAll
     public static void setUp() {
         applicationContex = new AnnotationConfigApplicationContext(
-            new String[] {"io.seata.spring.boot.autoconfigure.properties.test"});
+            new String[] {"io.seata.spring.boot.autoconfigure.properties.config.test"});
         SeataCoreEnvironmentPostProcessor processor = new SeataCoreEnvironmentPostProcessor();
         processor.postProcessEnvironment(null, null);
     }
