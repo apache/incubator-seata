@@ -105,7 +105,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             return logStore.updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
             GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(session);
-            if(CONFIG.getLong(ConfigurationKeys.STORE_LOG_SAVE_MINS, 0L) > 0) {
+            if (CONFIG.getLong(ConfigurationKeys.STORE_LOG_SAVE_MINS, 0L) > 0) {
                 // Marked as removed in the database
                 globalTransactionDO.setStatus(GlobalStatus.Removed.getCode());
                 return logStore.updateGlobalTransactionDO(globalTransactionDO);
@@ -118,7 +118,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             return logStore.updateBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
             BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(session);
-            if(CONFIG.getLong(ConfigurationKeys.STORE_LOG_SAVE_MINS, 0L) > 0) {
+            if (CONFIG.getLong(ConfigurationKeys.STORE_LOG_SAVE_MINS, 0L) > 0) {
                 // Marked as removed in the database
                 branchTransactionDO.setStatus(BranchStatus.Removed.getCode());
                 return logStore.updateBranchTransactionDO(branchTransactionDO);

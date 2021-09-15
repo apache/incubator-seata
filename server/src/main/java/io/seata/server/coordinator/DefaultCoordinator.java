@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
-import io.seata.server.session.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -67,7 +66,9 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
+import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 

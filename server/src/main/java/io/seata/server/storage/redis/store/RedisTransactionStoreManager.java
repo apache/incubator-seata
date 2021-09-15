@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
