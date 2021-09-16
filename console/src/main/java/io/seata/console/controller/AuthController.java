@@ -15,6 +15,8 @@
  */
 package io.seata.console.controller;
 
+import javax.servlet.http.HttpServletResponse;
+
 import io.seata.console.config.WebSecurityConfig;
 import io.seata.console.constant.Code;
 import io.seata.console.security.User;
@@ -26,9 +28,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * auth user
@@ -46,25 +49,26 @@ public class AuthController {
     /**
      * Whether the Seata is in broken states or not, and cannot recover except by being restarted
      *
+     * @param response the response
+     * @param user     the user
      * @return HTTP code equal to 200 indicates that Seata is in right states. HTTP code equal to 500 indicates that
      * Seata is in broken states.
      */
-
     @PostMapping("/login")
     public Result login(HttpServletResponse response, @RequestBody User user) {
-        // 通过用户名和密码创建一个 Authentication 认证对象，实现类为 UsernamePasswordAuthenticationToken
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+            user.getUsername(), user.getPassword());
 
         try {
-            //通过 AuthenticationManager（默认实现为ProviderManager）的authenticate方法验证 Authentication 对象
+            //AuthenticationManager(default ProviderManager) #authenticate check Authentication
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            //将 Authentication 绑定到 SecurityContext
+            //bind authentication to securityContext
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            //生成Token
+            //create token
             String token = jwtTokenUtils.createToken(authentication);
 
             String authHeader = WebSecurityConfig.TOKEN_PREFIX + token;
-            //将Token写入到Http头部
+            //put token into http header
             response.addHeader(WebSecurityConfig.AUTHORIZATION_HEADER, authHeader);
 
             return Result.ofSuccess(authHeader);

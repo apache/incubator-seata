@@ -15,14 +15,14 @@
  */
 package io.seata.console.security;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Custem user service
@@ -40,6 +40,9 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
     private User user;
 
+    /**
+     * Init.
+     */
     @PostConstruct
     public void init() {
         // TODO: get userInfo by db
@@ -47,7 +50,6 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         user.setUsername(username);
         user.setPassword(new BCryptPasswordEncoder().encode(password));
     }
-
 
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {

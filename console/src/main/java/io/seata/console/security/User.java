@@ -24,6 +24,12 @@ import lombok.Data;
  */
 @Data
 public class User {
+    /**
+     * The Username.
+     */
     String username;
+    /**
+     * The Password.
+     */
     String password;
 }

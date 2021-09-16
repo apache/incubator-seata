@@ -44,12 +44,24 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    /**
+     * The constant AUTHORIZATION_HEADER.
+     */
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
+    /**
+     * The constant AUTHORIZATION_TOKEN.
+     */
     public static final String AUTHORIZATION_TOKEN = "access_token";
 
+    /**
+     * The constant SECURITY_IGNORE_URLS_SPILT_CHAR.
+     */
     public static final String SECURITY_IGNORE_URLS_SPILT_CHAR = ",";
 
+    /**
+     * The constant TOKEN_PREFIX.
+     */
     public static final String TOKEN_PREFIX = "Bearer ";
 
     @Autowired
@@ -85,22 +97,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .anyRequest().authenticated().and()
-                // custom token authorize exception handler
-                .exceptionHandling()
-                .authenticationEntryPoint(unauthorizedHandler).and()
-                // since we use jwt, session is not necessary
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                // since we use jwt, csrf is not necessary
-                .csrf().disable();
-        http.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+        http.authorizeRequests().anyRequest().authenticated().and()
+            // custom token authorize exception handler
+            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+            // since we use jwt, session is not necessary
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+            // since we use jwt, csrf is not necessary
+            .csrf().disable();
+        http.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
+            UsernamePasswordAuthenticationFilter.class);
 
         // disable cache
         http.headers().cacheControl();
     }
 
+    /**
+     * Password encoder password encoder.
+     *
+     * @return the password encoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

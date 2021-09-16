@@ -15,6 +15,13 @@
  */
 package io.seata.console.filter;
 
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import io.seata.console.config.WebSecurityConfig;
 import io.seata.console.utils.JwtTokenUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +29,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * jwt auth token filter
@@ -39,12 +40,18 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private JwtTokenUtils tokenProvider;
 
+    /**
+     * Instantiates a new Jwt authentication token filter.
+     *
+     * @param tokenProvider the token provider
+     */
     public JwtAuthenticationTokenFilter(JwtTokenUtils tokenProvider) {
         this.tokenProvider = tokenProvider;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws IOException, ServletException {
         String jwt = resolveToken(request);
 
         if (jwt != null && !"".equals(jwt.trim()) && SecurityContextHolder.getContext().getAuthentication() == null) {

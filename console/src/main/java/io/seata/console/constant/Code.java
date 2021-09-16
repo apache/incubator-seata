@@ -34,8 +34,14 @@ public enum Code {
      */
     LOGIN_FAILED(401, "Login failed");
 
+    /**
+     * The Code.
+     */
     public int code;
 
+    /**
+     * The Msg.
+     */
     public String msg;
 
     private Code(int code, String msg) {
@@ -43,22 +49,48 @@ public enum Code {
         this.msg = msg;
     }
 
+    /**
+     * Gets code.
+     *
+     * @return the code
+     */
     public int getCode() {
         return this.code;
     }
 
+    /**
+     * Sets code.
+     *
+     * @param code the code
+     */
     public void setCode(int code) {
         this.code = code;
     }
 
+    /**
+     * Gets msg.
+     *
+     * @return the msg
+     */
     public String getMsg() {
         return msg;
     }
 
+    /**
+     * Sets msg.
+     *
+     * @param msg the msg
+     */
     public void setMsg(String msg) {
         this.msg = msg;
     }
 
+    /**
+     * Gets error msg.
+     *
+     * @param code the code
+     * @return the error msg
+     */
     public static String getErrorMsg(int code) {
         Code[] errorCodes = values();
         for (Code errCode : errorCodes) {

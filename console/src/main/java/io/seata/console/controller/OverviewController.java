@@ -15,16 +15,15 @@
  */
 package io.seata.console.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.seata.console.utils.Result;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Overview
@@ -35,6 +34,11 @@ import java.util.Map;
 @RequestMapping("/api/v1/overview")
 public class OverviewController {
 
+    /**
+     * Gets data.
+     *
+     * @return the data
+     */
     @GetMapping(value = "/getData")
     public Result<List> getData() {
         List<Map<String, Object>> result = new ArrayList<>();

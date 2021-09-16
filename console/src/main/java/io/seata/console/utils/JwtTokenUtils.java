@@ -15,7 +15,17 @@
  */
 package io.seata.console.utils;
 
-import io.jsonwebtoken.*;
+import java.util.Date;
+import java.util.List;
+
+import javax.crypto.spec.SecretKeySpec;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +37,6 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.spec.SecretKeySpec;
-import java.util.Date;
-import java.util.List;
-
 /**
  * Jwt token tool
  *
@@ -39,7 +45,6 @@ import java.util.List;
 @Component
 @Slf4j
 public class JwtTokenUtils {
-
 
     private static final String AUTHORITIES_KEY = "auth";
 
@@ -55,12 +60,11 @@ public class JwtTokenUtils {
     @Value("${seata.security.tokenValidityInMilliseconds}")
     private long tokenValidityInMilliseconds;
 
-
     /**
      * Create token
      *
      * @param authentication auth info
-     * @return token
+     * @return token string
      */
     public String createToken(Authentication authentication) {
         /**
@@ -74,16 +78,13 @@ public class JwtTokenUtils {
         /**
          * Key
          */
-        SecretKeySpec secretKeySpec = new SecretKeySpec(Decoders.BASE64.decode(secretKey), SignatureAlgorithm.HS256.getJcaName());
+        SecretKeySpec secretKeySpec = new SecretKeySpec(Decoders.BASE64.decode(secretKey),
+            SignatureAlgorithm.HS256.getJcaName());
         /**
          * create token
          */
-        return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, "")
-                .setExpiration(expirationDate)
-                .signWith(secretKeySpec, SignatureAlgorithm.HS256)
-                .compact();
+        return Jwts.builder().setSubject(authentication.getName()).claim(AUTHORITIES_KEY, "").setExpiration(
+            expirationDate).signWith(secretKeySpec, SignatureAlgorithm.HS256).compact();
     }
 
     /**
@@ -96,13 +97,10 @@ public class JwtTokenUtils {
         /**
          *  parse the payload of token
          */
-        Claims claims = Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
 
-        List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList((String) claims.get(AUTHORITIES_KEY));
-
+        List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(
+            (String)claims.get(AUTHORITIES_KEY));
 
         User principal = new User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);

@@ -15,11 +15,11 @@
  */
 package io.seata.console.security;
 
+import java.util.Collection;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
 
 /**
  * custem user
@@ -29,6 +29,11 @@ import java.util.Collection;
 public class CustomUserDetails implements UserDetails {
     private User user;
 
+    /**
+     * Instantiates a new Custom user details.
+     *
+     * @param user the user
+     */
     public CustomUserDetails(User user) {
         this.user = user;
     }
