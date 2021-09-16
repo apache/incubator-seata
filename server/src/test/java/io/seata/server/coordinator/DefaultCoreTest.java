@@ -22,7 +22,8 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
+import io.seata.server.ServerApplication;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -35,17 +36,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * The type Default core test.
  *
  * @author zhimo.xiao @gmail.com
- * @since 2019 /1/23
  */
+@SpringBootTest(classes = ServerApplication.class)
 public class DefaultCoreTest {
 
     private static DefaultCore core;
-    private static ServerMessageSender serverMessageSender;
+    private static RemotingServer remotingServer;
 
     private static final String applicationId = "demo-child-app";
 
@@ -73,10 +76,10 @@ public class DefaultCoreTest {
      * @throws Exception the exception
      */
     @BeforeAll
-    public static void initSessionManager() throws Exception {
+    public static void initSessionManager(ApplicationContext context) throws Exception {
         SessionHolder.init(null);
-        serverMessageSender = new DefaultCoordinatorTest.MockServerMessageSender();
-        core = new DefaultCore(serverMessageSender);
+        remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
+        core = new DefaultCore(remotingServer);
     }
 
     /**
@@ -94,7 +97,7 @@ public class DefaultCoreTest {
      */
     @AfterEach
     public void clean() throws TransactionException {
-        if (null != globalSession) {
+        if (globalSession != null) {
             globalSession.end();
             globalSession = null;
         }
@@ -166,13 +169,13 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitCommitTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.XA, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.XA,
             new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
-        core.doGlobalCommit(globalSession, false);
+        core.doGlobalCommit(globalSession, true);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
 
@@ -206,11 +209,11 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitExpTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.XA, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.XA,
                 new MockCore(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
@@ -348,7 +351,7 @@ public class DefaultCoreTest {
          * @param rollbackStatus the rollback status
          */
         public MockCore(BranchStatus commitStatus, BranchStatus rollbackStatus) {
-            super(null);
+            super(new DefaultCoordinatorTest.MockServerMessageSender());
             this.commitStatus = commitStatus;
             this.rollbackStatus = rollbackStatus;
         }

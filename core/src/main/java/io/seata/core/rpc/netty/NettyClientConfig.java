@@ -17,11 +17,12 @@ package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.TransportServerType;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 
 /**
  * The type Netty client config.
@@ -39,14 +40,13 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
-    private final boolean useConnPool = false;
     private static String vgroup;
     private static String clientAppName;
     private static int clientType;
     private static int maxInactiveChannelCheck = 10;
     private static final int MAX_NOT_WRITEABLE_RETRY = 2000;
     private static final int MAX_CHECK_ALIVE_RETRY = 300;
-    private static final int CHECK_ALIVE_INTERNAL = 10;
+    private static final int CHECK_ALIVE_INTERVAL = 10;
     private static final String SOCKET_ADDRESS_START_CHAR = "/";
     private static final long MAX_ACQUIRE_CONN_MILLS = 60 * 1000L;
     private static final String RPC_DISPATCH_THREAD_PREFIX = "rpcDispatch";
@@ -224,15 +224,6 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     /**
-     * Is use conn pool boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isUseConnPool() {
-        return useConnPool;
-    }
-
-    /**
      * Gets vgroup.
      *
      * @return the vgroup
@@ -323,12 +314,12 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     /**
-     * Gets check alive internal.
+     * Gets check alive interval.
      *
-     * @return the check alive internal
+     * @return the check alive interval
      */
-    public static int getCheckAliveInternal() {
-        return CHECK_ALIVE_INTERNAL;
+    public static int getCheckAliveInterval() {
+        return CHECK_ALIVE_INTERVAL;
     }
 
     /**

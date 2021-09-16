@@ -20,6 +20,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -28,6 +29,10 @@ import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Table meta cache.
@@ -61,11 +66,9 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
             return resultSetMetaToSchema(connection.getMetaData(), tableName);
-        }
-        catch (SQLException sqlEx) {
+        } catch (SQLException sqlEx) {
             throw sqlEx;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
@@ -112,6 +115,9 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
 
+                if (tm.getAllColumns().containsKey(col.getColumnName())) {
+                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
 
@@ -145,19 +151,47 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
                 }
             }
-
-            while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getString("PK_NAME");
-                if (tm.getAllIndexes().containsKey(pkIndexName)) {
-                    IndexMeta index = tm.getAllIndexes().get(pkIndexName);
-                    index.setIndextype(IndexType.PRIMARY);
-                }
-            }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
             }
+            // when we create a primary key constraint oracle will uses and existing unique index.
+            // if we create a unique index before create a primary constraint in the same column will cause the problem
+            // that primary key constraint name was different from the unique name.
+            List<String> pkcol = new ArrayList<>();
+            while (rsPrimary.next()) {
+                String pkConstraintName = rsPrimary.getString("PK_NAME");
+                if (tm.getAllIndexes().containsKey(pkConstraintName)) {
+                    IndexMeta index = tm.getAllIndexes().get(pkConstraintName);
+                    index.setIndextype(IndexType.PRIMARY);
+                } else {
+                    //save the columns that constraint primary key name was different from unique index name
+                    pkcol.add(rsPrimary.getString("COLUMN_NAME"));
+                }
+            }
+            //find the index that belong to the primary key constraint
+            if (!pkcol.isEmpty()) {
+                int matchCols = 0;
+                for (Map.Entry<String, IndexMeta> entry : tm.getAllIndexes().entrySet()) {
+                    IndexMeta index = entry.getValue();
+                    // only the unique index and all the unique index's columes same as primary key columes,
+                    // it belongs to primary key
+                    if (index.getIndextype().value() == IndexType.UNIQUE.value()) {
+                        for (ColumnMeta col : index.getValues()) {
+                            if (pkcol.contains(col.getColumnName())) {
+                                matchCols++;
+                            }
+                        }
+                        if (matchCols == pkcol.size()) {
+                            index.setIndextype(IndexType.PRIMARY);
+                            // each table only has one primary key
+                            break;
+                        } else {
+                            matchCols = 0;
+                        }
+                    }
+                }
+            }
         }
-
         return tm;
     }
 }

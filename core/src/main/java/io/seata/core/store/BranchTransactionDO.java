@@ -25,13 +25,13 @@ import io.seata.core.model.BranchStatus;
  *
  * @author zhangsen
  */
-public class BranchTransactionDO {
+public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
 
     private String xid;
 
-    private long transactionId;
+    private Long transactionId;
 
-    private long branchId;
+    private Long branchId;
 
     private String resourceGroupId;
 
@@ -39,7 +39,7 @@ public class BranchTransactionDO {
 
     private String branchType;
 
-    private int status = BranchStatus.Unknown.getCode();
+    private Integer status = BranchStatus.Unknown.getCode();
 
     private String clientId;
 
@@ -250,6 +250,11 @@ public class BranchTransactionDO {
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+
+    @Override
+    public int compareTo(BranchTransactionDO branchTransactionDO) {
+        return this.getGmtCreate().compareTo(branchTransactionDO.getGmtCreate());
     }
 
 }

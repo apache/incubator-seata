@@ -16,6 +16,8 @@
 package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.util.StringUtils;
@@ -47,9 +49,9 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
+                    ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
                     if (paramAppenderList.size() == 0) {
-                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
+                        oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
                         Object o = oneParamValues.get(i);
@@ -80,6 +82,51 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
         executeVisit(where, new PGOutputVisitor(sb));
+        return sb.toString();
+    }
+
+    protected String getLimitCondition(SQLLimit sqlLimit) {
+        if (Objects.isNull(sqlLimit)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeLimit(sqlLimit, new PGOutputVisitor(sb));
+
+        return sb.toString();
+    }
+
+    protected String getLimitCondition(SQLLimit sqlLimit, final ParametersHolder parametersHolder,
+                                       final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(sqlLimit)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        executeLimit(sqlLimit, createOutputVisitor(parametersHolder, paramAppenderList, sb));
+        return sb.toString();
+    }
+
+    protected String getOrderByCondition(SQLOrderBy sqlOrderBy) {
+        if (Objects.isNull(sqlOrderBy)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeOrderBy(sqlOrderBy, new PGOutputVisitor(sb));
+
+        return sb.toString();
+    }
+
+    protected String getOrderByCondition(SQLOrderBy sqlOrderBy, final ParametersHolder parametersHolder,
+                                         final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(sqlOrderBy)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeOrderBy(sqlOrderBy, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 }

@@ -15,24 +15,6 @@
  */
 package io.seata.server.session.db;
 
-import io.seata.common.XID;
-import io.seata.common.util.IOUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.db.LogStoreDataBaseDAO;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
-import io.seata.server.session.SessionManager;
-import io.seata.server.store.db.DatabaseTransactionStoreManager;
-import org.apache.commons.dbcp.BasicDataSource;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,11 +22,33 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import io.seata.common.XID;
+import io.seata.common.util.IOUtil;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionManager;
+import io.seata.server.storage.db.session.DataBaseSessionManager;
+import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
 /**
  * The type Data base session manager test.
  *
  * @author zhangsen
  */
+@SpringBootTest
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
@@ -54,9 +58,9 @@ public class DataBaseSessionManagerTest {
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start() throws Exception {
+    public static void start(ApplicationContext context) throws Exception {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
-        DatabaseTransactionStoreManager transactionStoreManager = new DatabaseTransactionStoreManager();
+        DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
@@ -67,7 +71,7 @@ public class DataBaseSessionManagerTest {
         logStoreDataBaseDAO = new LogStoreDataBaseDAO(dataSource);
         logStoreDataBaseDAO.setDbType("h2");
         logStoreDataBaseDAO.setGlobalTable("global_table");
-        logStoreDataBaseDAO.setBrachTable("branch_table");
+        logStoreDataBaseDAO.setBranchTable("branch_table");
 
         transactionStoreManager.setLogQueryLimit(100);
         transactionStoreManager.setLogStore(logStoreDataBaseDAO);
@@ -452,7 +456,7 @@ public class DataBaseSessionManagerTest {
         Assertions.assertNotNull(rets);
         Assertions.assertEquals(1, rets.size());
 
-        GlobalSession globalSession_db = (io.seata.server.session.GlobalSession) new ArrayList(rets).get(0);
+        GlobalSession globalSession_db = (GlobalSession) new ArrayList(rets).get(0);
 
         Assertions.assertNotNull(globalSession_db.getReverseSortedBranches());
         Assertions.assertEquals(2, globalSession_db.getReverseSortedBranches().size());
@@ -534,7 +538,7 @@ public class DataBaseSessionManagerTest {
         Assertions.assertNotNull(rets);
         Assertions.assertEquals(1, rets.size());
 
-        GlobalSession globalSession_db = (io.seata.server.session.GlobalSession) new ArrayList(rets).get(0);
+        GlobalSession globalSession_db = (GlobalSession) new ArrayList(rets).get(0);
 
         Assertions.assertNotNull(globalSession_db.getReverseSortedBranches());
         Assertions.assertEquals(1, globalSession_db.getReverseSortedBranches().size());

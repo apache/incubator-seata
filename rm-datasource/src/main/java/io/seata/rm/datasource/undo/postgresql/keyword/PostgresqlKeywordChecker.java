@@ -15,13 +15,13 @@
  */
 package io.seata.rm.datasource.undo.postgresql.keyword;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.sqlparser.util.JdbcConstants;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type postgresql keyword checker.
@@ -30,11 +30,9 @@ import java.util.stream.Collectors;
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlKeywordChecker implements KeywordChecker {
-    private static Set<String> keywordSet;
 
-    static {
-        keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values()).map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
-    }
+    private Set<String> keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values())
+            .map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
 
     /**
      * postgresql keyword
@@ -363,7 +361,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
-        if (null != fieldOrTableName) {
+        if (fieldOrTableName != null) {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
@@ -373,25 +371,13 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     @Override
     public boolean checkEscape(String fieldOrTableName) {
         boolean check = check(fieldOrTableName);
-        if (!check && containsUppercase(fieldOrTableName)) {
+        if (!check && !containsUppercase(fieldOrTableName)) {
             // postgresql
             // we are recommend table name and column name must lowercase.
             // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
             return false;
         }
         return true;
-    }
-
-    @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? replace(fieldOrTableName) : fieldOrTableName;
-    }
-
-    private String replace(String fieldOrTableName) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\"").append(fieldOrTableName).append("\"");
-        String name = builder.toString();
-        return name;
     }
 
     private static boolean containsUppercase(String colName) {

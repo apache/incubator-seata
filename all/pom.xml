@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -69,7 +69,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-bom</artifactId>
+                <artifactId>seata-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -208,10 +208,21 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-rm-datasource</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-compressor-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-sqlparser-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-sqlparser-antlr</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -223,6 +234,12 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-spring</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-serializer-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
@@ -256,6 +273,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-serializer-fst</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-serializer-hessian</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -277,6 +299,16 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-compressor-zip</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-lz4</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-deflater</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -310,6 +342,12 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-saga-engine-store</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-serializer-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- spring  -->
@@ -337,6 +375,10 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -383,6 +425,11 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.edas</groupId>
+            <artifactId>edas-sdk</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -451,7 +498,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>listenablefuture</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -521,6 +573,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -533,6 +586,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
             <scope>provided</scope>
@@ -540,6 +598,11 @@
         <dependency>
             <groupId>de.javakaffee</groupId>
             <artifactId>kryo-serializers</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -644,6 +707,7 @@
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
                                     <include>io.seata:seata-sqlparser-core</include>
+                                    <include>io.seata:seata-sqlparser-antlr</include>
                                     <include>io.seata:seata-sqlparser-druid</include>
                                     <include>io.seata:seata-sofa-rpc</include>
                                     <include>io.seata:seata-spring</include>
@@ -652,6 +716,7 @@
                                     <include>io.seata:seata-serializer-seata</include>
                                     <include>io.seata:seata-serializer-protobuf</include>
                                     <include>io.seata:seata-serializer-kryo</include>
+                                    <include>io.seata:seata-serializer-fst</include>
                                     <include>io.seata:seata-serializer-hessian</include>
                                     <!-- saga -->
                                     <include>io.seata:seata-saga-processctrl</include>
@@ -660,10 +725,14 @@
                                     <include>io.seata:seata-saga-rm</include>
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
+                                    <!--compressor-->
                                     <include>io.seata:seata-compressor-gzip</include>
                                     <include>io.seata:seata-compressor-7z</include>
                                     <include>io.seata:seata-compressor-bzip2</include>
                                     <include>io.seata:seata-compressor-zip</include>
+                                    <include>io.seata:seata-compressor-lz4</include>
+                                    <include>io.seata:seata-compressor-deflater</include>
+                                    <include>io.seata:seata-compressor-zstd</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -763,7 +832,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
                                 </configuration>
                             </execution>
                         </executions>

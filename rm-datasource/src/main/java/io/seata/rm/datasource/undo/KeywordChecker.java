@@ -32,16 +32,9 @@ public interface KeywordChecker {
 
     /**
      * check whether given field or table name use keywords. the method has database special logic.
-     * @param fieldOrTableName
-     * @return
+     * @param fieldOrTableName the field or table name
+     * @return true: need to escape. false: no need to escape.
      */
     boolean checkEscape(String fieldOrTableName);
 
-    /**
-     * check whether given field name and table name use keywords and,if so,will add "`" to the name.
-     *
-     * @param fieldOrTableName the field or table name
-     * @return string
-     */
-    String checkAndReplace(String fieldOrTableName);
 }

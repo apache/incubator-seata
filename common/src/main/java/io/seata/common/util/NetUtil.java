@@ -15,15 +15,16 @@
  */
 package io.seata.common.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Net util.
@@ -47,7 +48,7 @@ public class NetUtil {
      * @return the string
      */
     public static String toStringAddress(SocketAddress address) {
-        if (null == address) {
+        if (address == null) {
             return StringUtils.EMPTY;
         }
         return toStringAddress((InetSocketAddress) address);
@@ -117,8 +118,8 @@ public class NetUtil {
      *
      * @return the local ip
      */
-    public static String getLocalIp() {
-        InetAddress address = getLocalAddress();
+    public static String getLocalIp(String... preferredNetworks) {
+        InetAddress address = getLocalAddress(preferredNetworks);
         return address == null ? LOCALHOST : address.getHostAddress();
     }
 
@@ -134,41 +135,49 @@ public class NetUtil {
 
     /**
      * Gets local address.
-     *
+     * not support ipv6
+     * if match the preferredNetworks rule return the first
+     * if all not match preferredNetworks rule return the first valid ip
      * @return the local address
      */
-    public static InetAddress getLocalAddress() {
+    public static InetAddress getLocalAddress(String... preferredNetworks) {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
-        InetAddress localAddress = getLocalAddress0();
+        InetAddress localAddress = getLocalAddress0(preferredNetworks);
         LOCAL_ADDRESS = localAddress;
         return localAddress;
     }
 
-    private static InetAddress getLocalAddress0() {
+    private static InetAddress getLocalAddress0(String... preferredNetworks) {
         InetAddress localAddress = null;
-        try {
-            localAddress = InetAddress.getLocalHost();
-            if (isValidAddress(localAddress)) {
-                return localAddress;
-            }
-        } catch (Throwable e) {
-            LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
-        }
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             if (interfaces != null) {
                 while (interfaces.hasMoreElements()) {
                     try {
                         NetworkInterface network = interfaces.nextElement();
-                        Enumeration<InetAddress> addresses = network.getInetAddresses();
-                        if (addresses != null) {
+                        if (network.isUp()) {
+                            Enumeration<InetAddress> addresses = network.getInetAddresses();
                             while (addresses.hasMoreElements()) {
                                 try {
                                     InetAddress address = addresses.nextElement();
                                     if (isValidAddress(address)) {
-                                        return address;
+                                        if (null == localAddress) {
+                                            localAddress = address;
+                                        }
+                                        //check preferredNetworks
+                                        if (preferredNetworks.length > 0) {
+                                            String ip = address.getHostAddress();
+                                            for (String regex : preferredNetworks) {
+                                                if (StringUtils.isBlank(regex)) {
+                                                    continue;
+                                                }
+                                                if (ip.matches(regex) || ip.startsWith(regex)) {
+                                                    return address;
+                                                }
+                                            }
+                                        }
                                     }
                                 } catch (Throwable e) {
                                     LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
@@ -193,7 +202,7 @@ public class NetUtil {
      * @param address the address
      */
     public static void validAddress(InetSocketAddress address) {
-        if (null == address.getHostName() || 0 == address.getPort()) {
+        if (address.getHostName() == null || 0 == address.getPort()) {
             throw new IllegalArgumentException("invalid address:" + address);
         }
     }
@@ -219,11 +228,33 @@ public class NetUtil {
      * @return true if the given IP is valid
      */
     public static boolean isValidIp(String ip, boolean validLocalAndAny) {
+        if (ip == null) {
+            return false;
+        }
+        ip = convertIpIfNecessary(ip);
         if (validLocalAndAny) {
-            return ip != null && IP_PATTERN.matcher(ip).matches();
+            return IP_PATTERN.matcher(ip).matches();
         } else {
-            return ip != null && !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
+            return !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
         }
 
+    }
+
+    /**
+     * convert ip if necessary
+     *
+     * @param ip
+     * @return java.lang.String
+     */
+    private static String convertIpIfNecessary(String ip) {
+        if (IP_PATTERN.matcher(ip).matches()) {
+            return ip;
+        } else {
+            try {
+                return InetAddress.getByName(ip).getHostAddress();
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

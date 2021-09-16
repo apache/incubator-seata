@@ -3,13 +3,22 @@ seata:
   application-id: applicationName
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
+  data-source-proxy-mode: AT
   use-jdk-proxy: false
+  scan-packages: firstPackage,secondPackage
+  excludes-for-scanning: firstBeanNameForExclude,secondBeanNameForExclude
+  excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
-      async-commit-buffer-limit: 1000
+      async-commit-buffer-limit: 10000
       report-retry-count: 5
       table-meta-check-enable: false
       report-success-enable: false
+      saga-branch-register-enable: false
+      saga-json-parser: fastjson
+      saga-retry-persist-mode-update: false
+      saga-compensate-persist-mode-update: false
+      tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
       lock:
         retry-interval: 10
         retry-times: 30
@@ -17,12 +26,23 @@ seata:
     tm:
       commit-retry-count: 5
       rollback-retry-count: 5
+      default-global-transaction-timeout: 60000
+      degrade-check: false
+      degrade-check-period: 2000
+      degrade-check-allow-times: 10
+      interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
     undo:
       data-validation: true
       log-serialization: jackson
       log-table: undo_log
-    log:
-      exceptionRate: 100
+      only-care-update-columns: true
+      compress:
+        enable: true
+        type: zip
+        threshold: 64k
+    load-balance:
+      type: RandomLoadBalance
+      virtual-nodes: 10
   service:
     vgroup-mapping:
       my_test_tx_group: default
@@ -57,44 +77,69 @@ seata:
       apollo-meta: http://192.168.1.204:8801
       app-id: seata-server
       namespace: application
+      apollo-accesskey-secret: ""
     etcd3:
       server-addr: http://localhost:2379
     nacos:
-      namespace:
-      serverAddr: localhost
+      namespace: ""
+      server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
+      username: ""
+      password: ""
+      data-id: seata.properties
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
       username: ""
       password: ""
+      node-path: /seata/seata.properties
+    custom:
+      name: ""
   registry:
     type: file
+    file:
+      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
+      acl-token: ""
     etcd3:
-      serverAddr: http://localhost:2379
+      server-addr: http://localhost:2379
     eureka:
       weight: 1
       service-url: http://localhost:8761/eureka
     nacos:
-      server-addr: localhost
-      namespace:
+      application: seata-server
+      server-addr: 127.0.0.1:8848
+      group : "SEATA_GROUP"
+      namespace: ""
+      username: ""
+      password: ""
     redis:
       server-addr: localhost:6379
       db: 0
-      password:
+      password: ""
       timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
-      addressWaitTime: 3000
+      address-wait-time: 3000
+      application: default
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
       username: ""
       password: ""
+    custom:
+      name: ""
+  log:
+    exception-rate: 100
+  tcc-fence:
+    enable: true
+    config:
+      log-table-name: tcc_fence_log
+      clean-mode: hour
+      clean-period: 1

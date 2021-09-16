@@ -24,7 +24,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
 import io.seata.common.XID;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -32,11 +37,15 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.lock.LockerFactory;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.core.model.GlobalStatus.AsyncCommitting;
+import static io.seata.core.model.GlobalStatus.CommitRetrying;
+import static io.seata.core.model.GlobalStatus.Committing;
 
 /**
  * The type Global session.
@@ -51,6 +60,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
+
+    /**
+     * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
+     *  then the tx will be remand as need to retry rollback
+     */
+    private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+            .getInt(ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
     private String xid;
 
@@ -70,7 +86,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
@@ -106,11 +122,25 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC) {
+            if (!branchSession.canBeCommittedAsync()) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Has AT branch
+     *
+     * @return the boolean
+     */
+    public boolean hasATBranch() {
+        for (BranchSession branchSession : branchSessions) {
+            if (branchSession.getBranchType() == BranchType.AT) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -121,8 +151,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public boolean isSaga() {
         if (branchSessions.size() > 0) {
             return BranchType.SAGA == branchSessions.get(0).getBranchType();
+        } else {
+            return StringUtils.isNotBlank(transactionName)
+                && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX);
         }
-        return false;
     }
 
     /**
@@ -135,11 +167,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * prevent could not handle rollbacking transaction
-     * @return if true force roll back
+     * prevent could not handle committing and rollbacking transaction
+     * @return if true retry commit or roll back
      */
-    public boolean isRollbackingDead() {
-        return (System.currentTimeMillis() - beginTime) > (2 * 6000);
+    public boolean isDeadSession() {
+        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
     }
 
     @Override
@@ -158,7 +190,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
-
     }
 
     @Override
@@ -192,12 +223,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onEnd(this);
         }
-
     }
 
     public void clean() throws TransactionException {
-        LockerFactory.getLockManager().releaseGlobalSessionLock(this);
-
+        if (this.hasATBranch()) {
+            if (!LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this)) {
+                throw new TransactionException("UnLock globalSession error, xid = " + this.xid);
+            }
+        }
     }
 
     /**
@@ -208,7 +241,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void closeAndClean() throws TransactionException {
         close();
         clean();
-
     }
 
     /**
@@ -240,10 +272,16 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
+        // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
+        // because it's already unlocked in 'DefaultCore.commit()'
+        if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
+            if (!branchSession.unlock()) {
+                throw new TransactionException("Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
+            }
+        }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
-        branchSession.unlock();
         remove(branchSession);
     }
 
@@ -263,7 +301,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
             return null;
         }
-
     }
 
     /**
@@ -462,7 +499,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public byte[] encode() {
-
         byte[] byApplicationIdBytes = applicationId != null ? applicationId.getBytes() : null;
 
         byte[] byServiceGroupBytes = transactionServiceGroup != null ? transactionServiceGroup.getBytes() : null;
@@ -486,19 +522,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
-        if (null != byApplicationIdBytes) {
+        if (byApplicationIdBytes != null) {
             byteBuffer.putShort((short)byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byServiceGroupBytes) {
+        if (byServiceGroupBytes != null) {
             byteBuffer.putShort((short)byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byTxNameBytes) {
+        if (byTxNameBytes != null) {
             byteBuffer.putShort((short)byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {
@@ -601,24 +637,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         globalSessionLock.unlock();
     }
 
-    public void lockAndExecute(LockRunnable excuteRunnable) throws TransactionException {
-        this.lock();
-        try {
-            excuteRunnable.run();
-        } finally {
-            this.unlock();
-        }
-    }
-
-    public <T> T lockAndExecute(LockCallable<T> lockCallable) throws TransactionException {
-        this.lock();
-        try {
-            return lockCallable.call();
-        } finally {
-            this.unlock();
-        }
-    }
-
     private static class GlobalSessionLock {
 
         private Lock globalSessionLock = new ReentrantLock();
@@ -639,7 +657,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         public void unlock() {
             globalSessionLock.unlock();
         }
-
     }
 
     @FunctionalInterface
@@ -660,24 +677,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
+        this.setStatus(GlobalStatus.AsyncCommitting);
         SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
-        this.changeStatus(GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
+        this.setStatus(GlobalStatus.CommitRetrying);
         SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
-        this.changeStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
         GlobalStatus currentStatus = this.getStatus();
         if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
-            this.changeStatus(GlobalStatus.TimeoutRollbackRetrying);
+            this.setStatus(GlobalStatus.TimeoutRollbackRetrying);
         } else {
-            this.changeStatus(GlobalStatus.RollbackRetrying);
+            this.setStatus(GlobalStatus.RollbackRetrying);
         }
+        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
     }
 }

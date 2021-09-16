@@ -18,14 +18,15 @@ package io.seata.rm.datasource.sql.struct;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.seata.common.exception.NotSupportYetException;
 
 /**
  * The type Row.
  *
  * @author sharajava
  */
-public class Row {
+public class Row implements java.io.Serializable {
+
+    private static final long serialVersionUID = 6532477221179419451L;
 
     private List<Field> fields = new ArrayList<Field>();
 
@@ -73,9 +74,6 @@ public class Row {
             if (KeyType.PRIMARY_KEY == field.getKeyType()) {
                 pkFields.add(field);
             }
-        }
-        if (pkFields.size() > 1) {
-            throw new NotSupportYetException("Multi-PK");
         }
         return pkFields;
     }

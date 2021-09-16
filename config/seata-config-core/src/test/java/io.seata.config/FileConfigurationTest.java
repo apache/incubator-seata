@@ -16,8 +16,6 @@
 package io.seata.config;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +26,7 @@ import org.junit.jupiter.api.Test;
  */
 class FileConfigurationTest {
 
-    private Configuration fileConfig = ConfigurationFactory.getInstance();
+
 
     @BeforeEach
     void setUp() {
@@ -40,14 +38,50 @@ class FileConfigurationTest {
 
     @Test
     void addConfigListener() throws InterruptedException {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
-        fileConfig.addConfigListener("service.disableGlobalTransaction", (event) -> {
+        ConfigurationCache.addConfigListener("service.disableGlobalTransaction", (event) -> {
             Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
             countDownLatch.countDown();
         });
         System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
-        Assertions.assertTrue(countDownLatch.await(2000, TimeUnit.MILLISECONDS));
+        countDownLatch.await();
+        System.setProperty("file.listener.enabled", "false");
+        System.setProperty("service.disableGlobalTransaction", String.valueOf(value));
+        Thread.sleep(2000);
+        boolean currentValue = fileConfig.getBoolean("service.disableGlobalTransaction");
+        Assertions.assertNotEquals(value, currentValue);
+        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+    }
+
+    @Test
+    void testDiffDefaultValue() {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
+        int intValue1 = fileConfig.getInt("int.not.exist", 100);
+        int intValue2 = fileConfig.getInt("int.not.exist", 200);
+        Assertions.assertNotEquals(intValue1, intValue2);
+        String strValue1 = fileConfig.getConfig("str.not.exist", "en");
+        String strValue2 = fileConfig.getConfig("str.not.exist", "us");
+        Assertions.assertNotEquals(strValue1, strValue2);
+        boolean bolValue1 = fileConfig.getBoolean("boolean.not.exist", true);
+        boolean bolValue2 = fileConfig.getBoolean("boolean.not.exist", false);
+        Assertions.assertNotEquals(bolValue1, bolValue2);
+
+        String value = "QWERT";
+        System.setProperty("mockDataId1", value);
+        String content1 = fileConfig.getConfig("mockDataId1");
+        Assertions.assertEquals(content1, value);
+        String content2 = fileConfig.getConfig("mockDataId1", "hehe");
+        Assertions.assertEquals(content2, value);
+
+        String content3 = fileConfig.getConfig("mockDataId2");
+        Assertions.assertNull(content3);
+        String content4 = fileConfig.getConfig("mockDataId2", value);
+        Assertions.assertEquals(content4, value);
+        String content5 = fileConfig.getConfig("mockDataId2");
+        Assertions.assertEquals(content5, value);
+
     }
 
 }

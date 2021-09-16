@@ -20,12 +20,14 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.parser.JsonParserFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -142,6 +144,45 @@ public class StateMachineTests {
     }
 
     @Test
+    public void testSimpleScriptTaskStateMachine() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "simpleScriptTaskStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
+
+
+        start = System.currentTimeMillis();
+
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+
+        start = System.currentTimeMillis();
+        paramMap.put("scriptThrowException", true);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
     public void testSimpleRetryStateMachine() {
 
         long start  = System.currentTimeMillis();
@@ -240,7 +281,36 @@ public class StateMachineTests {
     }
 
     @Test
-    public void testStateMachineWithComplextParams() {
+    public void testStateComplexParams() {
+
+        People people1 = new People();
+        people1.setName("lilei");
+        people1.setAge(18);
+
+        People people2 = new People();
+        people2.setName("lilei2");
+        people2.setAge(19);
+
+        People people3 = new People();
+        people3.setName("lilei3");
+        people3.setAge(20);
+
+        People people4 = new People();
+        people4.setName("lilei4");
+        people4.setAge(21);
+
+        people1.setChildrenArray(new People[] {people2});
+        people1.setChildrenList(Arrays.asList(people3));
+        Map<String, People> map1 = new HashMap<>(1);
+        map1.put("lilei4", people4);
+        people1.setChildrenMap(map1);
+
+        String json = JsonParserFactory.getJsonParser("jackson").toJsonString(people1, false, true);
+        System.out.println(json);
+    }
+
+    @Test
+    public void testStateMachineWithComplexParams() {
 
         long start = System.currentTimeMillis();
 

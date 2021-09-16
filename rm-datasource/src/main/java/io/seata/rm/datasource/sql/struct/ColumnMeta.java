@@ -37,7 +37,7 @@ public class ColumnMeta {
     private String columnDef;
     private int sqlDataType;
     private int sqlDatetimeSub;
-    private int charOctetLength;
+    private Object charOctetLength;
     private int ordinalPosition;
     private String isNullAble;
     private String isAutoincrement;
@@ -110,7 +110,8 @@ public class ColumnMeta {
 
     /**
      * Gets table schema name
-     * @return
+     *
+     * @return table schema name
      */
     protected String getTableSchemaName() {
         return tableSchemaName;
@@ -125,10 +126,10 @@ public class ColumnMeta {
         this.tableName = tableName;
     }
 
-
     /**
      * Gets table name
-     * @return
+     *
+     * @return table name
      */
     protected String getTableName() {
         return tableName;
@@ -337,7 +338,7 @@ public class ColumnMeta {
      *
      * @return the char octet length
      */
-    public int getCharOctetLength() {
+    public Object getCharOctetLength() {
         return charOctetLength;
     }
 
@@ -346,7 +347,7 @@ public class ColumnMeta {
      *
      * @param charOctetLength the char octet length
      */
-    public void setCharOctetLength(int charOctetLength) {
+    public void setCharOctetLength(Object charOctetLength) {
         this.charOctetLength = charOctetLength;
     }
 

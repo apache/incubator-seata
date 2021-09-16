@@ -16,62 +16,26 @@
 package io.seata.spring.annotation.datasource;
 
 import javax.sql.DataSource;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
 
-import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.SeataDataSourceProxy;
 
 /**
  * the type data source proxy holder
  *
  * @author xingfudeshi@gmail.com
+ * @author selfishlover
  */
 public class DataSourceProxyHolder {
-    private static final int MAP_INITIAL_CAPACITY = 8;
-    private ConcurrentHashMap<DataSource, DataSourceProxy> dataSourceProxyMap;
 
-    private DataSourceProxyHolder() {
-        dataSourceProxyMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+    private static final Map<DataSource, SeataDataSourceProxy> PROXY_MAP = new HashMap<>(4);
+
+    static SeataDataSourceProxy put(DataSource origin, SeataDataSourceProxy proxy) {
+        return PROXY_MAP.put(origin, proxy);
     }
 
-    /**
-     * the type holder
-     */
-    private static class Holder {
-        private static final DataSourceProxyHolder INSTANCE;
-
-        static {
-            INSTANCE = new DataSourceProxyHolder();
-        }
-
+    static SeataDataSourceProxy get(DataSource origin) {
+        return PROXY_MAP.get(origin);
     }
-
-    /**
-     * Get DataSourceProxyHolder instance
-     *
-     * @return the INSTANCE of DataSourceProxyHolder
-     */
-    public static DataSourceProxyHolder get() {
-        return Holder.INSTANCE;
-    }
-
-    /**
-     * Put dataSource
-     *
-     * @param dataSource
-     * @return dataSourceProxy
-     */
-    public DataSourceProxy putDataSource(DataSource dataSource) {
-        return this.dataSourceProxyMap.computeIfAbsent(dataSource, DataSourceProxy::new);
-    }
-
-    /**
-     * Get dataSourceProxy
-     *
-     * @param dataSource
-     * @return dataSourceProxy
-     */
-    public DataSourceProxy getDataSourceProxy(DataSource dataSource) {
-        return this.dataSourceProxyMap.get(dataSource);
-    }
-
 }

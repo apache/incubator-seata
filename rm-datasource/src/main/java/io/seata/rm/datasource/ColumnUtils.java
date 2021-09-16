@@ -26,20 +26,30 @@ import java.util.List;
 
 /**
  * column utils
+ *
  * @author jsbxyyx
  */
 public final class ColumnUtils {
+
+    private static final String DOT = ".";
 
     /**
      * The escape
      */
     public enum Escape {
-        /** standard escape */
+        /**
+         * standard escape
+         */
         STANDARD('"'),
-        /** mysql series escape */
-        MYSQL('`')
-        ;
+        /**
+         * mysql series escape
+         */
+        MYSQL('`');
+        /**
+         * The Value.
+         */
         public final char value;
+
         Escape(char value) {
             this.value = value;
         }
@@ -47,9 +57,10 @@ public final class ColumnUtils {
 
     /**
      * del escape by db type
-     * @param cols the cols
+     *
+     * @param cols   the cols
      * @param dbType the db type
-     * @return
+     * @return list
      */
     public static List<String> delEscape(List<String> cols, String dbType) {
         // sql standard
@@ -65,7 +76,8 @@ public final class ColumnUtils {
 
     /**
      * del escape
-     * @param cols the cols
+     *
+     * @param cols   the cols
      * @param escape the escape
      * @return delete the column list element left and right escape.
      */
@@ -84,9 +96,10 @@ public final class ColumnUtils {
 
     /**
      * del escape by db type
+     *
      * @param colName the column name
-     * @param dbType the db type
-     * @return
+     * @param dbType  the db type
+     * @return string string
      */
     public static String delEscape(String colName, String dbType) {
         String newColName = delEscape(colName, Escape.STANDARD);
@@ -98,25 +111,55 @@ public final class ColumnUtils {
 
     /**
      * del escape by escape
+     *
      * @param colName the column name
-     * @param escape the escape
-     * @return
+     * @param escape  the escape
+     * @return string string
      */
     public static String delEscape(String colName, Escape escape) {
         if (colName == null || colName.isEmpty()) {
             return colName;
         }
+
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
+            // like "scheme"."id" `scheme`.`id`
+            String str = escape.value + DOT + escape.value;
+            int index = colName.indexOf(str);
+            if (index > -1) {
+                return colName.substring(1, index) + DOT + colName.substring(index + str.length(), colName.length() - 1);
+            }
             return colName.substring(1, colName.length() - 1);
+        } else {
+            // like "scheme".id `scheme`.id
+            String str = escape.value + DOT;
+            int index = colName.indexOf(str);
+            if (index > -1 && colName.charAt(0) == escape.value) {
+                return colName.substring(1, index) + DOT + colName.substring(index + str.length());
+            }
+            // like scheme."id" scheme.`id`
+            str = DOT + escape.value;
+            index = colName.indexOf(str);
+            if (index > -1 && colName.charAt(colName.length() - 1) == escape.value) {
+                return colName.substring(0, index) + DOT + colName.substring(index + str.length(), colName.length() - 1);
+            }
         }
         return colName;
     }
 
     /**
-     * add escape by db type
-     * @param cols the column name list
+     * if necessary, add escape by db type
+     * <pre>
+     * mysql:
+     *   only deal with keyword.
+     * postgresql:
+     *   only deal with keyword, contains uppercase character.
+     * oracle:
+     *   only deal with keyword, not full uppercase character.
+     * </pre>
+     *
+     * @param cols   the column name list
      * @param dbType the db type
-     * @return
+     * @return list list
      */
     public static List<String> addEscape(List<String> cols, String dbType) {
         if (CollectionUtils.isEmpty(cols)) {
@@ -132,9 +175,10 @@ public final class ColumnUtils {
     }
 
     /**
-     * add escape by db type
+     * if necessary, add escape by db type
+     *
      * @param colName the column name
-     * @param dbType the db type
+     * @param dbType  the db type
      * @return the colName left and right add escape
      */
     public static String addEscape(String colName, String dbType) {
@@ -145,9 +189,10 @@ public final class ColumnUtils {
     }
 
     /**
-     * add escape
+     * if necessary, add escape
+     *
      * @param colName the column name
-     * @param escape the escape
+     * @param escape  the escape
      * @return
      */
     private static String addEscape(String colName, String dbType, Escape escape) {
@@ -166,14 +211,56 @@ public final class ColumnUtils {
             }
         }
 
-        StringBuilder result = new StringBuilder(2 * (String.valueOf(escape.value).length()) + colName.length());
-        return result.append(escape.value).append(colName).append(escape.value).toString();
+        if (colName.contains(DOT)) {
+            // like "scheme".id `scheme`.id
+            String str = escape.value + DOT;
+            int dotIndex = colName.indexOf(str);
+            if (dotIndex > -1) {
+                return new StringBuilder()
+                        .append(colName.substring(0, dotIndex + str.length()))
+                        .append(escape.value)
+                        .append(colName.substring(dotIndex + str.length()))
+                        .append(escape.value).toString();
+            }
+            // like scheme."id" scheme.`id`
+            str = DOT + escape.value;
+            dotIndex = colName.indexOf(str);
+            if (dotIndex > -1) {
+                return new StringBuilder()
+                        .append(escape.value)
+                        .append(colName.substring(0, dotIndex))
+                        .append(escape.value)
+                        .append(colName.substring(dotIndex))
+                        .toString();
+            }
+
+            str = DOT;
+            dotIndex = colName.indexOf(str);
+            if (dotIndex > -1) {
+                return new StringBuilder()
+                        .append(escape.value)
+                        .append(colName.substring(0, dotIndex))
+                        .append(escape.value)
+                        .append(DOT)
+                        .append(escape.value)
+                        .append(colName.substring(dotIndex + str.length()))
+                        .append(escape.value).toString();
+            }
+        }
+
+        char[] buf = new char[colName.length() + 2];
+        buf[0] = escape.value;
+        buf[buf.length - 1] = escape.value;
+
+        colName.getChars(0, colName.length(), buf, 1);
+
+        return new String(buf).intern();
     }
 
     private static boolean isMysqlSeries(String dbType) {
         return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
-            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
-            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
+                StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
+                StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
     }
 
 }

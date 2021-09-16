@@ -16,11 +16,16 @@
 package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLType;
@@ -55,7 +60,10 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
 
     @Override
     public String getTableAlias() {
-        return ast.getTableSource().getAlias();
+        if (ast.getFrom() == null) {
+            return ast.getTableSource().getAlias();
+        }
+        return ast.getFrom().getAlias();
     }
 
     @Override
@@ -68,8 +76,26 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
                 printTableSourceExpr(x.getExpr());
                 return false;
             }
+
+            @Override
+            public boolean visit(SQLJoinTableSource x) {
+                throw new NotSupportYetException("not support the syntax of delete with join table");
+            }
         };
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
+        SQLTableSource tableSource;
+        if (ast.getFrom() == null) {
+            tableSource = ast.getTableSource();
+        } else {
+            tableSource = ast.getFrom();
+        }
+
+        if (tableSource instanceof SQLExprTableSource) {
+            visitor.visit((SQLExprTableSource) tableSource);
+        } else if (tableSource instanceof SQLJoinTableSource) {
+            visitor.visit((SQLJoinTableSource) tableSource);
+        } else {
+            throw new NotSupportYetException("not support the syntax of delete with unknow");
+        }
         return sb.toString();
     }
 
@@ -84,6 +110,30 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
     public String getWhereCondition() {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where);
+    }
+
+    @Override
+    public String getLimitCondition() {
+        SQLLimit limit = ast.getLimit();
+        return super.getLimitCondition(limit);
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLLimit limit = ast.getLimit();
+        return super.getLimitCondition(limit, parametersHolder, paramAppenderList);
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        SQLOrderBy sqlOrderBy = ast.getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = ast.getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
 }

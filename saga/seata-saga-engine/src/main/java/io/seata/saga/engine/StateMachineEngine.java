@@ -134,7 +134,7 @@ public interface StateMachineEngine {
      * @return
      * @throws EngineExecutionException
      */
-    StateMachineInstance skipAndForward(String stateMachineInstId) throws EngineExecutionException;
+    StateMachineInstance skipAndForward(String stateMachineInstId, Map<String, Object> replaceParams) throws EngineExecutionException;
 
     /**
      * skip current failed state instance and forward restart state machine instance asynchronously

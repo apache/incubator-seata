@@ -18,8 +18,8 @@ package io.seata.rm.datasource.undo.parser;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
-
 import io.seata.common.Constants;
+import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -30,14 +30,15 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  * @author sharajava
  */
 @LoadLevel(name = FastjsonUndoLogParser.NAME)
-public class FastjsonUndoLogParser implements UndoLogParser {
+public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
     public static final String NAME = "fastjson";
 
-    private static final SimplePropertyPreFilter FILTER = new SimplePropertyPreFilter();
+    private final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
 
-    static {
-        FILTER.getExcludes().add("tableMeta");
+    @Override
+    public void init() {
+        filter.getExcludes().add("tableMeta");
     }
 
     @Override
@@ -52,7 +53,7 @@ public class FastjsonUndoLogParser implements UndoLogParser {
 
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
-        String json = JSON.toJSONString(branchUndoLog, FILTER, SerializerFeature.WriteDateUseDateFormat);
+        String json = JSON.toJSONString(branchUndoLog, filter, SerializerFeature.WriteClassName, SerializerFeature.WriteDateUseDateFormat);
         return json.getBytes(Constants.DEFAULT_CHARSET);
     }
 

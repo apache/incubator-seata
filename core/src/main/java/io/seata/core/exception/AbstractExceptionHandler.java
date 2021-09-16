@@ -54,33 +54,39 @@ public abstract class AbstractExceptionHandler {
         void execute(T request, S response) throws TransactionException;
 
         /**
-         * on Success
+         * On success.
          *
-         * @param request
-         * @param response
+         * @param request  the request
+         * @param response the response
          */
         void onSuccess(T request, S response);
 
         /**
          * onTransactionException
          *
-         * @param request
-         * @param response
-         * @param exception
+         * @param request   the request
+         * @param response  the response
+         * @param exception the exception
          */
         void onTransactionException(T request, S response, TransactionException exception);
 
         /**
          * on other exception
          *
-         * @param request
-         * @param response
-         * @param exception
+         * @param request   the request
+         * @param response  the response
+         * @param exception the exception
          */
         void onException(T request, S response, Exception exception);
 
     }
 
+    /**
+     * The type Abstract callback.
+     *
+     * @param <T> the type parameter
+     * @param <S> the type parameter
+     */
     public abstract static class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
         implements Callback<T, S> {
 
@@ -107,12 +113,13 @@ public abstract class AbstractExceptionHandler {
     /**
      * Exception handle template.
      *
+     * @param <T>      the type parameter
+     * @param <S>      the type parameter
      * @param callback the callback
      * @param request  the request
      * @param response the response
      */
-    public void exceptionHandleTemplate(Callback callback, AbstractTransactionRequest request,
-        AbstractTransactionResponse response) {
+    public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
         try {
             callback.execute(request, response);
             callback.onSuccess(request, response);

@@ -34,5 +34,6 @@ Just paste your stack trace here!
 ### Ⅵ. Environment:
 
 - JDK version :
+- Seata version:  
 - OS :
 - Others:

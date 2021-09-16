@@ -15,10 +15,10 @@
  */
 package io.seata.config;
 
+import java.time.Duration;
 
 import io.seata.common.util.DurationUtil;
-
-import java.time.Duration;
+import io.seata.common.util.StringUtils;
 
 /**
  * The type Abstract configuration.
@@ -32,10 +32,20 @@ public abstract class AbstractConfiguration implements Configuration {
      */
     protected static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
 
+    /**
+     * The constant DEFAULT_XXX.
+     */
+    public static final short DEFAULT_SHORT = (short)0;
+    public static final int DEFAULT_INT = 0;
+    public static final long DEFAULT_LONG = 0L;
+    public static final Duration DEFAULT_DURATION = Duration.ZERO;
+    public static final boolean DEFAULT_BOOLEAN = false;
+
+
     @Override
-    public short getShort(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Short.parseShort(result);
+    public short getShort(String dataId, short defaultValue, long timeoutMills) {
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Short.parseShort(result);
     }
 
     @Override
@@ -45,13 +55,13 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId) {
-        return getShort(dataId, (short) 0);
+        return getShort(dataId, DEFAULT_SHORT);
     }
 
     @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Integer.parseInt(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Integer.parseInt(result);
     }
 
     @Override
@@ -61,13 +71,13 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public int getInt(String dataId) {
-        return getInt(dataId, 0);
+        return getInt(dataId, DEFAULT_INT);
     }
 
     @Override
     public long getLong(String dataId, long defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Long.parseLong(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Long.parseLong(result);
     }
 
     @Override
@@ -77,12 +87,12 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public long getLong(String dataId) {
-        return getLong(dataId, 0L);
+        return getLong(dataId, DEFAULT_LONG);
     }
 
     @Override
     public Duration getDuration(String dataId) {
-        return getDuration(dataId, Duration.ZERO);
+        return getDuration(dataId, DEFAULT_DURATION);
     }
 
     @Override
@@ -92,14 +102,14 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills);
-        return DurationUtil.parse(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : DurationUtil.parse(result);
     }
 
     @Override
     public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Boolean.parseBoolean(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Boolean.parseBoolean(result);
     }
 
     @Override
@@ -109,7 +119,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public boolean getBoolean(String dataId) {
-        return getBoolean(dataId, false);
+        return getBoolean(dataId, DEFAULT_BOOLEAN);
     }
 
     @Override
@@ -120,6 +130,15 @@ public abstract class AbstractConfiguration implements Configuration {
     @Override
     public String getConfig(String dataId, long timeoutMills) {
         return getConfig(dataId, null, timeoutMills);
+    }
+
+    @Override
+    public String getConfig(String dataId, String content, long timeoutMills) {
+        String value = getConfigFromSys(dataId);
+        if (value != null) {
+            return value;
+        }
+        return getLatestConfig(dataId, content, timeoutMills);
     }
 
     @Override

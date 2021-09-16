@@ -22,6 +22,7 @@ import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.GlobalStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,9 +63,16 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     }
 
     @Override
-    public void onRollbackFailure(GlobalTransaction tx, Throwable cause) {
-        LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", cause);
+    public void onRollbackFailure(GlobalTransaction tx, Throwable originalException) {
+        LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", originalException);
         timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void onRollbackRetrying(GlobalTransaction tx, Throwable originalException) {
+        StackTraceLogger.warn(LOGGER, originalException, "Retrying to rollback transaction[{}]", new String[] {tx.getXid()});
+        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackRetrying), SCHEDULE_INTERVAL_SECONDS,
+            TimeUnit.SECONDS);
     }
 
     protected class CheckTimerTask implements TimerTask {

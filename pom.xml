@@ -29,6 +29,7 @@
         <module>config</module>
         <module>console</module>
         <module>core</module>
+        <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
         <module>integration/dubbo</module>
@@ -37,9 +38,9 @@
         <module>integration/motan</module>
         <module>integration/grpc</module>
         <module>integration/http</module>
+        <module>integration/hsf</module>
         <module>rm</module>
         <module>rm-datasource</module>
-        <module>server</module>
         <module>spring</module>
         <module>tcc</module>
         <module>test</module>
@@ -47,9 +48,12 @@
         <module>metrics</module>
         <module>serializer</module>
         <module>seata-spring-boot-starter</module>
+        <module>seata-spring-autoconfigure</module>
         <module>compressor</module>
         <module>saga</module>
         <module>sqlparser</module>
+        <module>server</module>
+        <module>ext/apm-seata-skywalking-plugin</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -67,7 +71,8 @@
         <developer>
             <id>Seata</id>
             <name>Seata</name>
-            <url>http://seata.io</url>
+            <url>https://seata.io</url>
+            <email>dev-seata@googlegroups.com</email>
         </developer>
     </developers>
 
@@ -89,7 +94,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.2.0-SNAPSHOT</revision>
+        <revision>1.5.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -100,15 +105,16 @@
         <maven.test.skip>false</maven.test.skip>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+<!--        <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>-->
+        <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
         <p3c-pmd.version>1.3.6</p3c-pmd.version>
         <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
         <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <protobuf-maven-plugin.version>0.5.0</protobuf-maven-plugin.version>
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
-        <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
 
         <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
@@ -119,19 +125,22 @@
         <!-- for docker image-->
         <image.publish.skip>true</image.publish.skip>
         <image.tags>latest</image.tags>
+
+        <checkstyle.skip>true</checkstyle.skip>
+        <license.skip>true</license.skip>
+        <!-- for jdbc driver when package  -->
+        <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+        <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
+
+        <!-- for kotlin  -->
+        <kotlin.version>1.4.0</kotlin.version>
     </properties>
 
     <!--test-->
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
@@ -164,12 +173,11 @@
         <dependencies>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-bom</artifactId>
+                <artifactId>seata-dependencies</artifactId>
                 <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -220,7 +228,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
                                 </configuration>
                             </execution>
                         </executions>
@@ -284,6 +292,69 @@
                 <image.publish.skip>false</image.publish.skip>
                 <image.tags>latest</image.tags>
             </properties>
+        </profile>
+        <profile>
+            <id>checkstyle</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>${license-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>remove</goal>
+                                    <goal>format</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <quiet>true</quiet>
+                            <header>${user.dir}/style/copyright</header>
+                            <includes>
+                                <include>**/src/main/java/**</include>
+                                <include>**/src/test/java/**</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/generated/**</exclude>
+                                <exclude>**/antlr/mysql/parser/*.*</exclude>
+                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
+                            </excludes>
+                            <strictCheck>true</strictCheck>
+                            <mapping>
+                                <java>SLASHSTAR_STYLE</java>
+                            </mapping>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>${maven-checkstyle-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>validate</id>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
+                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
+                                    <encoding>UTF-8</encoding>
+                                    <consoleOutput>true</consoleOutput>
+                                    <failsOnError>true</failsOnError>
+                                </configuration>
+                                <goals>
+                                    <goal>checkstyle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -350,6 +421,9 @@
                     </rulesets>
                     <excludes>
                         <exclude>**/generated/*.java</exclude>
+                        <exclude>**/antlr/mysql/parser/*.*</exclude>
+                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -413,6 +487,7 @@
                     <execution>
                         <id>flatten</id>
                         <phase>process-resources</phase>
+
                         <goals>
                             <goal>flatten</goal>
                         </goals>
@@ -422,60 +497,6 @@
                         <phase>clean</phase>
                         <goals>
                             <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>${license-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>remove</goal>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <quiet>true</quiet>
-                    <header>${user.dir}/style/copyright</header>
-                    <includes>
-                        <include>**/src/main/java/**</include>
-                        <include>**/src/test/java/**</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/generated/**</exclude>
-                    </excludes>
-                    <strictCheck>true</strictCheck>
-                    <mapping>
-                        <java>SLASHSTAR_STYLE</java>
-                    </mapping>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven-checkstyle-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                            <encoding>UTF-8</encoding>
-                            <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
-                            <failOnViolation>false</failOnViolation>
-                            <excludes>**/generated/**/*</excludes>
-                            <excludes>io/seata/integration/grpc/interceptor/</excludes>
-                            <excludes>**/console-fe/**/*</excludes>
-                            <includeResources>false</includeResources>
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>

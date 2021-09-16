@@ -15,6 +15,7 @@
  */
 package io.seata.integration.http;
 
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class XidResource {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("unbind[{}] from RootContext", unbindXid);
             }
-            if (!rpcXid.equalsIgnoreCase(unbindXid)) {
+            if (!StringUtils.equalsIgnoreCase(rpcXid, unbindXid)) {
                 LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
                 if (unbindXid != null) {
                     RootContext.bind(unbindXid);

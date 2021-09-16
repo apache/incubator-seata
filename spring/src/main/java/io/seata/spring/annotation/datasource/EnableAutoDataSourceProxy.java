@@ -38,4 +38,18 @@ public @interface EnableAutoDataSourceProxy {
      * @return useJdkProxy
      */
     boolean useJdkProxy() default false;
+
+    /**
+     * Specifies which datasource bean are not eligible for auto-proxying
+     *
+     * @return excludes
+     */
+    String[] excludes() default {};
+
+    /**
+     * Data source proxy mode, AT or XA
+     *
+     * @return dataSourceProxyMode
+     */
+    String dataSourceProxyMode() default "AT";
 }

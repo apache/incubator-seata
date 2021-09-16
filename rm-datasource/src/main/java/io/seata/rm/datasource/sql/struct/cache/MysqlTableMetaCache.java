@@ -22,14 +22,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +43,6 @@ import org.slf4j.LoggerFactory;
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
-
-    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -79,15 +77,13 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        String sql = "SELECT * FROM " + keywordChecker.checkAndReplace(tableName) + " LIMIT 1";
+        String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MYSQL) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            ResultSet rs = stmt.executeQuery(sql)) {
             return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
-        }
-        catch (SQLException sqlEx) {
+        } catch (SQLException sqlEx) {
             throw sqlEx;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
@@ -141,6 +137,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
 
+                if (tm.getAllColumns().containsKey(col.getColumnName())) {
+                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
 

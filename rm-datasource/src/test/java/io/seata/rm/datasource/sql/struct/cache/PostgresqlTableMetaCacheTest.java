@@ -18,16 +18,17 @@ package io.seata.rm.datasource.sql.struct.cache;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
   * @author will.zjw
@@ -36,12 +37,12 @@ public class PostgresqlTableMetaCacheTest {
 
     private static Object[][] columnMetas =
         new Object[][] {
-            new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
+            new Object[] {"", "", "pt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+            new Object[] {"", "", "pt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
                 "NO"},
-            new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
+            new Object[] {"", "", "pt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
                 "NO"},
-            new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
+            new Object[] {"", "", "pt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
                 "NO"}
         };
 
@@ -68,15 +69,15 @@ public class PostgresqlTableMetaCacheTest {
 
         TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POSTGRESQL);
 
-        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t1", proxy.getResourceId());
+        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "pt1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
 
-        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.t1", proxy.getResourceId());
+        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.pt1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
 
-        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.\"t1\"", proxy.getResourceId());
+        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.\"pt1\"", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
     }

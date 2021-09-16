@@ -18,6 +18,7 @@ package io.seata.serializer.seata.protocol;
 import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
+import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.ResultCode;
 
@@ -41,22 +42,16 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
         out.writeByte(resultCode.ordinal());
         if (resultCode == ResultCode.Failed) {
-            if (resultMsg != null) {
+            if (StringUtils.isNotEmpty(resultMsg)) {
                 String msg;
-                if (resultMsg.length() > 128) {
-                    msg = resultMsg.substring(0, 128);
+                if (resultMsg.length() > Short.MAX_VALUE) {
+                    msg = resultMsg.substring(0, Short.MAX_VALUE);
                 } else {
                     msg = resultMsg;
                 }
                 byte[] bs = msg.getBytes(UTF8);
-                if (bs.length > 400 && resultMsg.length() > 64) {
-                    msg = resultMsg.substring(0, 64);
-                    bs = msg.getBytes(UTF8);
-                }
                 out.writeShort((short)bs.length);
-                if (bs.length > 0) {
-                    out.writeBytes(bs);
-                }
+                out.writeBytes(bs);
             } else {
                 out.writeShort((short)0);
             }

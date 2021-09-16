@@ -24,6 +24,12 @@ import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.registry.Registry;
+import io.seata.server.event.EventBusManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static io.seata.metrics.IdConstants.APP_ID_KEY;
+import static io.seata.metrics.IdConstants.GROUP_KEY;
 
 /**
  * Event subscriber for metrics
@@ -31,6 +37,8 @@ import io.seata.metrics.registry.Registry;
  * @author zhengyangyong
  */
 public class MetricsSubscriber {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricsSubscriber.class);
     private final Registry registry;
 
     private final Map<GlobalStatus, Consumer<GlobalTransactionEvent>> consumers;
@@ -49,39 +57,70 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).increase(1);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("accept new event,xid:{},event:{}", event.getId(), event);
+            for (Object object : EventBusManager.get().getSubscribers()) {
+                LOGGER.debug("subscribe:{},threadName:{}", object.toString(), Thread.currentThread().getName());
+            }
+        }
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
+            .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processGlobalStatusCommitted(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
-        registry.getCounter(MeterIdConstants.COUNTER_COMMITTED).increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_COMMITTED).record(event.getEndTime() - event.getBeginTime(),
-            TimeUnit.MILLISECONDS);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_COMMITTED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(MeterIdConstants.TIMER_COMMITTED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processGlobalStatusRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
-        registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED).increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACKED).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_ROLLBACK).record(event.getEndTime() - event.getBeginTime(),
-            TimeUnit.MILLISECONDS);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACKED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(MeterIdConstants.TIMER_ROLLBACK
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processGlobalStatusCommitFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     private void processGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     private void processGlobalStatusTimeoutRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     private void processGlobalStatusTimeoutRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     @Subscribe
@@ -89,5 +128,20 @@ public class MetricsSubscriber {
         if (registry != null && consumers.containsKey(event.getStatus())) {
             consumers.get(event.getStatus()).accept(event);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.getClass().getName().equals(obj.getClass().getName());
+    }
+
+    /**
+     * PMD check
+     * SuppressWarnings("checkstyle:EqualsHashCode")
+     * @return
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

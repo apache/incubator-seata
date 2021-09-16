@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~  Copyright 1999-2019 Seata.io Group.
   ~
@@ -13,7 +14,6 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-
 <assembly>
     <id>server-${project.version}</id>
     <includeBaseDirectory>true</includeBaseDirectory>
@@ -22,17 +22,11 @@
         <format>tar.gz</format>
         <format>zip</format>
     </formats>
-    <fileSets>
 
+    <fileSets>
         <fileSet>
             <includes>
                 <include>plugins/**</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
-            <includes>
-                <include>conf/**</include>
             </includes>
         </fileSet>
 
@@ -45,14 +39,52 @@
 
         <fileSet>
             <includes>
-                <include>lib/*</include>
+                <include>logs/**</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>../server/src/main/resources/logback/</directory>
+            <outputDirectory>conf/logback/</outputDirectory>
+            <includes>
+                <include>**/*.xml</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>../ext/apm-seata-skywalking-plugin/target/ext/skywalking-agent/</directory>
+            <outputDirectory>ext/apm-skywalking/</outputDirectory>
+        </fileSet>
     </fileSets>
+
     <files>
+        <file>
+            <source>Dockerfile</source>
+            <destName>Dockerfile</destName>
+        </file>
+
         <file>
             <source>LICENSE-BIN</source>
             <destName>LICENSE</destName>
+        </file>
+
+        <file>
+            <source>../server/target/seata-server.jar</source>
+            <outputDirectory>target/</outputDirectory>
+        </file>
+
+        <file>
+            <source>../server/src/main/resources/application.yml</source>
+            <outputDirectory>conf/</outputDirectory>
+        </file>
+        <file>
+            <source>../server/src/main/resources/application.example.yml</source>
+            <outputDirectory>conf/</outputDirectory>
+        </file>
+
+        <file>
+            <source>../server/src/main/resources/logback-spring.xml</source>
+            <outputDirectory>conf/</outputDirectory>
         </file>
     </files>
 

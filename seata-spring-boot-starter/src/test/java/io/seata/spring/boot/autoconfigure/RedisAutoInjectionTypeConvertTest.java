@@ -19,8 +19,8 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.config.FileConfiguration;
+import io.seata.config.springcloud.SpringApplicationContextProvider;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,6 +28,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -37,22 +39,25 @@ import static org.mockito.Mockito.mock;
 @Import(SpringApplicationContextProvider.class)
 @org.springframework.context.annotation.Configuration
 public class RedisAutoInjectionTypeConvertTest {
-    private static AnnotationConfigApplicationContext applicationContex;
+    private static AnnotationConfigApplicationContext applicationContext;
 
     @BeforeAll
     public static void initContext() {
-        applicationContex = new AnnotationConfigApplicationContext(RedisAutoInjectionTypeConvertTest.class);
+        applicationContext = new AnnotationConfigApplicationContext(RedisAutoInjectionTypeConvertTest.class);
     }
 
     @Bean
     RegistryRedisProperties registryRedisProperties() {
-        return new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+        RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+        PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
+        return registryRedisProperties;
     }
 
     @Test
     public void testReadConfigurationItems() {
         FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration =
+            EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
         assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
         assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
         assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
@@ -60,6 +65,6 @@ public class RedisAutoInjectionTypeConvertTest {
 
     @AfterAll
     public static void closeContext() {
-        applicationContex.close();
+        applicationContext.close();
     }
 }
