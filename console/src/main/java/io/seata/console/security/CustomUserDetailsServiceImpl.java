@@ -32,10 +32,10 @@ import javax.annotation.PostConstruct;
 @Service
 public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
-    @Value("${user.username}")
+    @Value("${console.user.username}")
     private String username;
 
-    @Value("${user.password}")
+    @Value("${console.user.password}")
     private String password;
 
     private User user;

@@ -23,7 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * @author spilledyear@outlook.com
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"io.seata"})
 public class ServerApplication {
     public static void main(String[] args) throws IOException {
         // run the spring-boot application

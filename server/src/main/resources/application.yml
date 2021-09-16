@@ -16,6 +16,11 @@ logging:
       bootstrap-servers: 127.0.0.1:9092
       topic: logback_to_logstash
 
+console:
+  user:
+    username: admin
+    password: admin
+
 seata:
   config:
     # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
@@ -28,3 +33,8 @@ seata:
     mode: file
   server:
     service-port: 8091
+  security:
+    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    tokenValidityInMilliseconds: 1800000
+    ignore:
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
