@@ -20,7 +20,12 @@ import io.seata.core.constants.DubboConstants;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.rpc.*;
+import org.apache.dubbo.rpc.Filter;
+import org.apache.dubbo.rpc.Invocation;
+import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.Result;
+import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +99,6 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
 
     /**
      * get rpc xid
-     *
      * @return
      */
     private String getRpcXid() {
