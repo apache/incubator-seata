@@ -151,6 +151,9 @@ public class TCCBeanParserUtils {
             if (tccFenceConfig == null) {
                 return;
             }
+            if (tccFenceConfig.getInitialized().get()) {
+                return;
+            }
             Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
             Method[] methods = tccInterfaceClazz.getMethods();
             for (Method method : methods) {
