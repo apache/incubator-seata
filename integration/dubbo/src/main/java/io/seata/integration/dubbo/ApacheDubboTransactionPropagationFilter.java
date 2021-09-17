@@ -20,12 +20,7 @@ import io.seata.core.constants.DubboConstants;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.rpc.Filter;
-import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.Invoker;
-import org.apache.dubbo.rpc.Result;
-import org.apache.dubbo.rpc.RpcContext;
-import org.apache.dubbo.rpc.RpcException;
+import org.apache.dubbo.rpc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,12 +85,16 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                     }
                 }
             }
-            RpcContext.getServerContext().removeAttachment(rpcXid);
+            RpcContext.getContext().removeAttachment(RootContext.KEY_XID);
+            RpcContext.getContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
+            RpcContext.getServerContext().removeAttachment(RootContext.KEY_XID);
+            RpcContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
         }
     }
 
     /**
      * get rpc xid
+     *
      * @return
      */
     private String getRpcXid() {
