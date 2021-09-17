@@ -3,6 +3,9 @@ package io.seata.server.storage.hbase.lock;
 import io.seata.common.XID;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.*;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
@@ -17,8 +20,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_NAMESPACE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_STATUS_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_TABLE_BRANCHES;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_TABLE_GLOBAL;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_TABLE_LOCK;
 
 /**
  * ClassName: LockStoreHBaseDao
@@ -27,6 +42,11 @@ import java.util.stream.Collectors;
  */
 public class LockStoreHBaseDao implements LockStore {
 
+    /**
+     * The constant CONFIGURATION.
+     */
+    protected static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);
 
     private static Connection connection = HBaseSingleConnectionFactory.getInstance();
@@ -34,14 +54,26 @@ public class LockStoreHBaseDao implements LockStore {
     /**
      *  The HBase Table
      */
-    protected String tableName = "seata:table";
+    protected String tableName;
 
     /**
      * The Column Family
      */
-    protected String lockCF = "lock";
+    protected String lockCF;
 
     private static Table table = null;
+
+    public LockStoreHBaseDao(){
+        String namespace = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_NAMESPACE,
+                DEFAULT_STORE_HBASE_NAMESPACE);
+        String table = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_TABLE_NAME,
+                DEFAULT_STORE_HBASE_TABLE);
+        tableName = namespace + ":" + table;
+        String statusTable = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_STATUS_TABLE_NAME,
+                DEFAULT_STORE_HBASE_STATUS_TABLE);
+        lockCF = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_TABLE_LOCK,
+                DEFAULT_STORE_HBASE_TABLE_LOCK);
+    }
 
     @Override
     public boolean acquireLock(LockDO lockDO) {

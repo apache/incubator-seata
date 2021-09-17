@@ -6,6 +6,9 @@ import io.seata.common.util.BeanUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
@@ -17,60 +20,68 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 
-import javafx.scene.input.DataFormat;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Date;
+import java.util.Map;
+
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_NAMESPACE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_STATUS_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_TABLE_BRANCHES;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_TABLE_GLOBAL;
 
 /**
  * ClassName: HBaseTransactionStoreManager
- * Description:
  *
  * @author haishin
  */
 public class HBaseTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HBaseTransactionStoreManager.class);
+    /**
+     * The constant CONFIGURATION.
+     */
+    protected Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      *  The HBase Table
      */
-    protected String tableName = "seata:table";
+    protected String tableName;
 
     /**
-     * GlobalStatus_GlobalTransactionID
+     * The HBase statusTable
      */
-    protected String statusTableName = "seata:statusTable";
+    protected String statusTableName;
 
     /**
      * The Global Family.
      */
-    protected String globalCF = "global";
+    protected String globalCF;
 
     /**
      * The Branch Family.
      */
-    protected String branchesCF = "branches";
+    protected String branchesCF;
 
     /**
-     * The Status Family
+     * The StatusTable Family
      */
-    protected String transactionIdCF = "transactionId";
+    protected String transactionIdCF;
 
     private static volatile HBaseTransactionStoreManager instance;
 
-
-    private static Connection connection = HBaseSingleConnectionFactory.getInstance();
+    protected Connection connection;
 
     private static Table table = null;
 
@@ -88,6 +99,24 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             }
         }
         return instance;
+    }
+
+    private HBaseTransactionStoreManager() {
+        connection = HBaseSingleConnectionFactory.getInstance();
+        String namespace = CONFIG.getConfig(ConfigurationKeys.STORE_HBASE_NAMESPACE,
+                DEFAULT_STORE_HBASE_NAMESPACE);
+        String table = CONFIG.getConfig(ConfigurationKeys.STORE_HBASE_TABLE_NAME,
+                DEFAULT_STORE_HBASE_TABLE);
+        tableName = namespace + ":" + table;
+        String statusTable = CONFIG.getConfig(ConfigurationKeys.STORE_HBASE_STATUS_TABLE_NAME,
+                DEFAULT_STORE_HBASE_STATUS_TABLE);
+        statusTableName = namespace + ":" + statusTable;
+        globalCF = CONFIG.getConfig(ConfigurationKeys.STORE_HBASE_TABLE_GLOBAL,
+                DEFAULT_STORE_HBASE_TABLE_GLOBAL);
+        branchesCF = CONFIG.getConfig(ConfigurationKeys.STORE_HBASE_TABLE_BRANCHES,
+                DEFAULT_STORE_HBASE_TABLE_BRANCHES);
+        transactionIdCF = CONFIG.getConfig(ConfigurationKeys.STORE_HBASE_STATUS_TABLE_TRANSACTION,
+                DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION);
     }
 
     @Override
@@ -173,9 +202,6 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         Long branchId = branchTransactionDO.getBranchId();
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Date now = new Date();
-            DateFormat df = new SimpleDateFormat("yy-MM-dd hh:mm:ss");
-            String time = df.format(now);
             Put put = new Put(Bytes.toBytes(rowKey.toString()));
             if (StringUtils.isNotBlank(branchTransactionDO.getXid()))
                 put.addColumn(Bytes.toBytes(branchesCF), Bytes.toBytes(branchId + "_xid"), Bytes.toBytes(branchTransactionDO.getXid()));
@@ -262,9 +288,6 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         String  rowKey = String.valueOf(globalTransactionDO.getTransactionId());
         try {
             table = connection.getTable(TableName.valueOf(tableName));
-            Date now = new Date();
-            DateFormat df = new SimpleDateFormat("yy-MM-dd hh:mm:ss");
-            String time = df.format(now);
             Put put = new Put(Bytes.toBytes(rowKey));
             if (StringUtils.isNotBlank(globalTransactionDO.getXid()))
                 put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("xid"), Bytes.toBytes(globalTransactionDO.getXid()));
@@ -445,4 +468,35 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     private String buildStatusRowKey(int status, long transactionId) {
         return status + "_" +transactionId;
     }
+
+    /**
+     * only for test
+     */
+    public void setConnection(Connection connection){ this.connection = connection; }
+
+    /**
+     * only for test
+     */
+    public void setTableName(String tableName) { this.tableName = tableName; }
+
+    /**
+     * only for test
+     */
+    public void setStatusTableName(String statusTableName) { this.statusTableName = statusTableName; }
+
+    /**
+     * only for test
+     */
+    public void setGlobalCF(String globalCF) { this.globalCF = globalCF; }
+
+    /**
+     * only for test
+     */
+    public void setBranchesCF(String branchesCF) { this.branchesCF = branchesCF; }
+
+    /**
+     * only for test
+     */
+    public void setTransactionIdCF(String transactionIdCF){ this.transactionIdCF = transactionIdCF; }
+
 }

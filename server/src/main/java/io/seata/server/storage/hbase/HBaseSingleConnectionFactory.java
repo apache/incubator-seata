@@ -22,8 +22,6 @@ public class HBaseSingleConnectionFactory {
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(HBaseSingleConnectionFactory.class);
 
-    private static Admin admin = null;
-
     private volatile static Connection connection = null;
 
     private static final int PORT = 2181;
@@ -48,7 +46,6 @@ public class HBaseSingleConnectionFactory {
                         LOGGER.info("the connection of HBase is created successfully.");
                     } catch (IOException e) {
                         LOGGER.error("the connection of HBase is created failed.", e.getMessage());
-                        //改成HBase专有异常类
                     }
                 }
             }

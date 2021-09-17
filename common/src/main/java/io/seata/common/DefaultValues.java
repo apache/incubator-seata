@@ -80,6 +80,41 @@ public interface DefaultValues {
      */
     String DEFAULT_DISTRIBUTED_LOCK_DB_TABLE = "distributed_lock";
 
+    /**
+     * the constant DEFAULT_STORE_HBASE_NAMESPACE
+     */
+    String DEFAULT_STORE_HBASE_NAMESPACE = "seata";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_TABLE
+     */
+    String DEFAULT_STORE_HBASE_TABLE = "table";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_TABLE_GLOBAL
+     */
+    String DEFAULT_STORE_HBASE_TABLE_GLOBAL = "global";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_TABLE_BRANCHES
+     */
+    String DEFAULT_STORE_HBASE_TABLE_BRANCHES = "branches";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_TABLE_LOCK
+     */
+    String DEFAULT_STORE_HBASE_TABLE_LOCK = "lock";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_STATUS_TABLE
+     */
+    String DEFAULT_STORE_HBASE_STATUS_TABLE = "statusTable";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION
+     */
+    String DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION = "transactionId";
+
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;

@@ -650,24 +650,69 @@ public interface ConfigurationKeys {
     String STORE_HBASE_ZOOKEEPER_QUORUM = STORE_HBASE_PREFIX + "zookeeperQuorum";
 
     /**
-     * STORE_HBASE_PROPERTY_CLIENTPORT
+     * STORE_HBASE_PROPERTY_CLIENTPORT.
      */
-    String STORE_HBASE_PROPERTY_CLIENTPORT = STORE_HBASE_PREFIX + "propertyClientPort";
+    String STORE_HBASE_PROPERTY_CLIENT_PORT = STORE_HBASE_PREFIX + "propertyClientPort";
 
     /**
-     * STORE_HBASE_POOL_PREFIX
+     * STORE_HBASE_POOL_PREFIX.
      */
     String STORE_HBASE_POOL_PREFIX = STORE_HBASE_PREFIX + "pool.";
 
     /**
-     * STORE_HBASE_POOL_TYPE
+     * STORE_HBASE_POOL_TYPE.
      */
     String STORE_HBASE_POOL_TYPE = STORE_HBASE_POOL_PREFIX + "type";
 
     /**
-     * STORE_HBASE_POOL_SIZE
+     * STORE_HBASE_POOL_SIZE.
      */
     String STORE_HBASE_POOL_SIZE = STORE_HBASE_POOL_PREFIX + "size";
+
+    /**
+     * STORE_HBASE_NAMESPACE.
+     */
+    String STORE_HBASE_NAMESPACE = STORE_HBASE_PREFIX + "namespace";
+
+    /**
+     * STORE_HBASE_TABLE_PREFIX.
+     */
+    String STORE_HBASE_TABLE_PREFIX = STORE_HBASE_PREFIX + "table.";
+
+    /**
+     * STORE_HBASE_TABLE_NAME.
+     */
+    String STORE_HBASE_TABLE_NAME = STORE_HBASE_TABLE_PREFIX + "name";
+
+    /**
+     * STORE_HBASE_TABLE_GLOBAL.
+     */
+    String STORE_HBASE_TABLE_GLOBAL = STORE_HBASE_TABLE_PREFIX + "globalCF";
+
+    /**
+     * STORE_HBASE_TABLE_BRANCHES.
+     */
+    String STORE_HBASE_TABLE_BRANCHES = STORE_HBASE_TABLE_PREFIX + "branchesCF";
+
+    /**
+     * STORE_HBASE_TABLE_LOCK.
+     */
+    String STORE_HBASE_TABLE_LOCK = STORE_HBASE_TABLE_PREFIX + "lockCF";
+
+    /**
+     * STORE_HBASE_STATUS_TABLE_PREFIX.
+     */
+    String STORE_HBASE_STATUS_TABLE_PREFIX = STORE_HBASE_PREFIX + "statusTable.";
+
+    /**
+     * STORE_HBASE_STATUS_TABLE_NAME.
+     */
+    String STORE_HBASE_STATUS_TABLE_NAME = STORE_HBASE_STATUS_TABLE_PREFIX + "name";
+
+    /**
+     * STORE_HBASE_STATUS_TABLE_TRANSACTION.
+     */
+    String STORE_HBASE_STATUS_TABLE_TRANSACTION = STORE_HBASE_STATUS_TABLE_PREFIX + "transactionIdCF";
 
     /**
      * STORE_REDIS_SENTINEL_HOST.
