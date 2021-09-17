@@ -79,6 +79,8 @@ public interface StarterConstants {
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
     String STORE_HBASE_PREFIX = STORE_PREFIX + ".hbase";
     String STORE_HBASE_POOL_PREFIX = STORE_HBASE_PREFIX + ".pool";
+    String STORE_HBASE_TABLE_PREFIX = STORE_HBASE_PREFIX + ".table";
+    String STORE_HBASE_STATUS_TABLE_PREFIX = STORE_HBASE_PREFIX + ".statusTable";
 
     String REGEX_SPLIT_CHAR = ";";
 
