@@ -148,10 +148,7 @@ public class TCCBeanParserUtils {
         }
         if (applicationContext != null && applicationContext.containsBean(DefaultValues.TCC_FENCE_BEAN_NAME)) {
             TCCFenceConfig tccFenceConfig = (TCCFenceConfig) applicationContext.getBean(DefaultValues.TCC_FENCE_BEAN_NAME);
-            if (tccFenceConfig == null) {
-                return;
-            }
-            if (tccFenceConfig.getInitialized().get()) {
+            if (tccFenceConfig == null || tccFenceConfig.getInitialized().get()) {
                 return;
             }
             Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
