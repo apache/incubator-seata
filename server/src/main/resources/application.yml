@@ -51,3 +51,12 @@ seata:
         size: 1
       zookeeper-quorum: hadoop1
       property-clientPort: 2181
+      namespace: seata
+      table:
+        name: table
+        globalCF: global
+        branchesCF: branches
+        lockCF: lock
+      statusTable:
+        name: statusTable
+        transactionIdCF: transactionId
