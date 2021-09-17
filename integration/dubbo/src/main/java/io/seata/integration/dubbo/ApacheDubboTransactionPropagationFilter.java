@@ -90,6 +90,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                     }
                 }
             }
+            RpcContext.getServerContext().removeAttachment(rpcXid);
         }
     }
 
