@@ -141,7 +141,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
                 LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
-                ResultSet rsFirstId =null;
+                ResultSet rsFirstId = null;
                 try {
                     rsFirstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
 
