@@ -239,28 +239,28 @@ public class NacosConfiguration extends AbstractConfiguration {
         return properties;
     }
 
-    private static String getNacosNameSpaceFileKey() {
+    public static String getNacosNameSpaceFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
     }
 
-    private static String getNacosAddrFileKey() {
+    public static String getNacosAddrFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
-    private static String getNacosGroupKey() {
+    public static String getNacosGroupKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
     }
 
-    private static String getNacosDataIdKey() {
+    public static String getNacosDataIdKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, NACOS_DATA_ID_KEY);
     }
 
-    private static String getNacosUserName() {
+    public static String getNacosUserName() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
                 USER_NAME);
     }
 
-    private static String getNacosPassword() {
+    public static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
                 PASSWORD);
     }

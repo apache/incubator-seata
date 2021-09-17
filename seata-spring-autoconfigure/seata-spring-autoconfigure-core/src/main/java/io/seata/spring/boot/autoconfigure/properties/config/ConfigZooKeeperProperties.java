@@ -26,7 +26,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREF
 @Component
 @ConfigurationProperties(prefix = CONFIG_ZK_PREFIX)
 public class ConfigZooKeeperProperties {
-    private String serverAddr = "127.0.0.1:2181";
+    private String serverAddr;
     private long sessionTimeout = 6000L;
     private long connectTimeout = 2000L;
     private String username = "";

@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
-package io.seata.spring.boot.autoconfigure.properties.test;
+package io.seata.spring.boot.autoconfigure.properties.config.test;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.config.FileConfiguration;
 import io.seata.config.apollo.ApolloConfiguration;
-import io.seata.spring.boot.autoconfigure.BaseConfigPropertiesTest;
+import io.seata.spring.boot.autoconfigure.BasePropertiesTest;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
  */
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
-class ConfigApolloPropertiesTest extends BaseConfigPropertiesTest {
+class ApolloPropertiesTest extends BasePropertiesTest {
 
     @Bean
     public ConfigApolloProperties configApolloProperties() {

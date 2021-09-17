@@ -119,7 +119,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init globalMap
      *
-     * @param
      * @return void
      */
     public void initGlobalMap() {
@@ -135,7 +134,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init branchMap
      *
-     * @param
      * @return void
      */
     public void initBranchMap() {
