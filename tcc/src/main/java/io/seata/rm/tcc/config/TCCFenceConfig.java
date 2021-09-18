@@ -20,7 +20,6 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.rpc.Disposable;
 import io.seata.rm.tcc.TCCFenceHandler;
-import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
 import org.apache.commons.lang.time.DateUtils;
@@ -31,6 +30,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
+import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -48,10 +48,14 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
-     * TCC fence clean period. only d(day)/h(hour)/m(minute) endings are supported
-     *
+     * TCC fence clean period max value. maximum interval is 68 years
      */
-    private String cleanPeriod = DefaultValues.DEFAULT_TCC_FENCE_CLEAN_PERIOD;
+    private static final Duration MAX_PERIOD = Duration.ofSeconds(Integer.MAX_VALUE);
+
+    /**
+     * TCC fence clean period. only duration type format are supported
+     */
+    private Duration cleanPeriod = Duration.ofDays(DefaultValues.DEFAULT_TCC_FENCE_CLEAN_PERIOD);
 
     /**
      * TCC fence log table name
@@ -91,7 +95,7 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
         return transactionManager;
     }
 
-    public void setCleanPeriod(String cleanPeriod) {
+    public void setCleanPeriod(Duration cleanPeriod) {
         this.cleanPeriod = cleanPeriod;
     }
 
@@ -104,60 +108,26 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
      */
     public void initCleanTask() {
         try {
-            String mode = cleanPeriod.substring(cleanPeriod.length() - 1);
-            int period = Integer.parseInt(cleanPeriod.substring(0, cleanPeriod.length() - 1));
-            if (period == 0) {
-                LOGGER.error("TCC fence log clean period can not be zero, clean task start failed");
-                return;
-            }
-            // set timeUtil value according to clean mode
-            TimeUnit timeUnit;
-            if (TCCFenceConstant.DAY.equals(mode)) {
-                timeUnit = TimeUnit.DAYS;
-            } else if (TCCFenceConstant.HOUR.equals(mode)) {
-                timeUnit = TimeUnit.HOURS;
-            } else if (TCCFenceConstant.MINUTE.equals(mode)) {
-                timeUnit = TimeUnit.MINUTES;
-            } else {
-                LOGGER.error("TCC fence log clean period only d/h/m endings are supported, clean task start failed");
-                return;
-            }
+            // convert to second level. maximum interval is 68 years
+            long periodSeconds = cleanPeriod.compareTo(MAX_PERIOD) >= 0 ? Integer.MAX_VALUE : cleanPeriod.toMillis() / 1000;
             // start tcc fence clean schedule
-            startTccFenceCleanSchedule(mode, period, timeUnit);
-            LOGGER.info("TCC fence log clean task start success, mode:{}, period:{}", mode, period);
-        } catch (NumberFormatException e) {
-            LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
-        }
-    }
-
-    /**
-     * start tcc fence clean schedule
-     * @param mode clean mode
-     * @param period clean period
-     * @param timeUnit timeunit
-     */
-    private void startTccFenceCleanSchedule(String mode, int period, TimeUnit timeUnit) {
-        tccFenceClean.scheduleWithFixedDelay(() -> {
-            Date timeBefore = null;
-            try {
-                if (TCCFenceConstant.HOUR.equals(mode)) {
-                    timeBefore = DateUtils.addHours(new Date(), -period);
-                } else if (TCCFenceConstant.MINUTE.equals(mode)) {
-                    timeBefore = DateUtils.addMinutes(new Date(), -period);
-                } else if (TCCFenceConstant.DAY.equals(mode)) {
-                    timeBefore = DateUtils.addDays(new Date(), -period);
-                }
-                if (timeBefore != null) {
+            tccFenceClean.scheduleWithFixedDelay(() -> {
+                Date timeBefore = null;
+                try {
+                    timeBefore = DateUtils.addSeconds(new Date(), -(int)periodSeconds);
                     int deletedRowCount = TCCFenceHandler.deleteFenceByDate(timeBefore);
                     if (deletedRowCount > 0) {
                         LOGGER.info("TCC fence clean task executed success, timeBefore: {}, deleted row count: {}",
                                 timeBefore, deletedRowCount);
                     }
+                } catch (RuntimeException e) {
+                    LOGGER.error("Delete tcc fence log failed, timeBefore: {}", timeBefore, e);
                 }
-            } catch (RuntimeException e) {
-                LOGGER.error("Delete tcc fence log failed, timeBefore: {}", timeBefore, e);
-            }
-        }, 0, period, timeUnit);
+            }, 0, periodSeconds, TimeUnit.SECONDS);
+            LOGGER.info("TCC fence log clean task start success, cleanPeriod:{}", cleanPeriod.toString());
+        } catch (NumberFormatException e) {
+            LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
+        }
     }
 
     @Override

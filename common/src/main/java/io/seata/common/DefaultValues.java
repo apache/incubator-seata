@@ -147,7 +147,7 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_TCC_FENCE_CLEAN_PERIOD
      */
-    String DEFAULT_TCC_FENCE_CLEAN_PERIOD = "1h";
+    int DEFAULT_TCC_FENCE_CLEAN_PERIOD = 1;
     /**
      * the constant DEFAULT_TCC_FENCE_LOG_TABLE_NAME
      */

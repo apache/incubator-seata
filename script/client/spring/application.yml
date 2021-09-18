@@ -140,4 +140,4 @@ seata:
   tcc:
     fence:
       log-table-name: tcc_fence_log
-      clean-period: 1h
+      clean-period: PT1H

@@ -41,19 +41,4 @@ public class TCCFenceConstant {
      * Suspended status.
      */
     public static final int STATUS_SUSPENDED = 4;
-
-    /**
-     * Clean up the tcc fence log by days
-     */
-    public static final String DAY = "d";
-
-    /**
-     * Clean up the tcc fence log by hours
-     */
-    public static final String HOUR = "h";
-
-    /**
-     * Clean up the tcc fence log by minutes
-     */
-    public static final String MINUTE = "m";
 }
