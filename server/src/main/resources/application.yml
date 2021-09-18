@@ -57,6 +57,6 @@ seata:
         globalCF: global
         branchesCF: branches
         lockCF: lock
-      statusTable:
+      status:
         name: statusTable
         transactionIdCF: transactionId

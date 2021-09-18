@@ -107,9 +107,10 @@ public class StoreHBaseProperties {
             this.lockCF = lockCF;
         }
     }
+
     @Component
     @ConfigurationProperties(prefix = STORE_HBASE_STATUS_TABLE_PREFIX)
-    public static class StatusTable {
+    public static class Status {
         private String name;
         private String transactionIdCF;
 

@@ -52,7 +52,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * The constant CONFIGURATION.
      */
-    protected Configuration CONFIG = ConfigurationFactory.getInstance();
+    protected Configuration CONFIG;
 
     /**
      *  The HBase Table

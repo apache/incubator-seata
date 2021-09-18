@@ -702,7 +702,7 @@ public interface ConfigurationKeys {
     /**
      * STORE_HBASE_STATUS_TABLE_PREFIX.
      */
-    String STORE_HBASE_STATUS_TABLE_PREFIX = STORE_HBASE_PREFIX + "statusTable.";
+    String STORE_HBASE_STATUS_TABLE_PREFIX = STORE_HBASE_PREFIX + "status.";
 
     /**
      * STORE_HBASE_STATUS_TABLE_NAME.
