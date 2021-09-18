@@ -90,6 +90,10 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                     }
                 }
             }
+            RpcContext.getContext().removeAttachment(RootContext.KEY_XID);
+            RpcContext.getContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
+            RpcContext.getServerContext().removeAttachment(RootContext.KEY_XID);
+            RpcContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
         }
     }
 
