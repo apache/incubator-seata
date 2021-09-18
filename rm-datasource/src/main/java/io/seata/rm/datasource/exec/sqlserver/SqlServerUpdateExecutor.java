@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource.exec.sqlserver;
 
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.StringJoiner;
+
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
@@ -24,10 +28,6 @@ import io.seata.rm.datasource.exec.UpdateExecutor;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.StringJoiner;
 
 /**
  * @author GoodBoyCoder

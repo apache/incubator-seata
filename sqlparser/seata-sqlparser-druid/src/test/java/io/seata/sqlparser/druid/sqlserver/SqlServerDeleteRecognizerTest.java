@@ -15,6 +15,13 @@
  */
 package io.seata.sqlparser.druid.sqlserver;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
@@ -23,8 +30,6 @@ import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.*;
 
 /**
  * The type SqlServer delete recognizer test.

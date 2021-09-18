@@ -15,6 +15,18 @@
  */
 package io.seata.rm.datasource.exec.sqlserver;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -23,17 +35,15 @@ import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.struct.*;
+import io.seata.sqlparser.struct.Defaultable;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.Sequenceable;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
 
 /**
  * The type MS SqlServer insert executor.
@@ -43,6 +53,7 @@ import java.util.*;
 @LoadLevel(name = JdbcConstants.SQLSERVER, scope = Scope.PROTOTYPE)
 public class SqlServerInsertExecutor extends BaseInsertExecutor implements Sequenceable, Defaultable {
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlServerInsertExecutor.class);
+
     /**
      * Instantiates a new Abstract dml base executor.
      *
@@ -108,7 +119,7 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
     @Override
     public List<Object> getPkValuesByDefault() {
         //Get form the tableMetaData
-       throw new NotSupportYetException("Default value is not yet supported");
+        throw new NotSupportYetException("Default value is not yet supported");
     }
 
     @Override

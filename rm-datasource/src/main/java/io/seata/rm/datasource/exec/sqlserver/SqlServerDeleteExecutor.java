@@ -15,6 +15,11 @@
  */
 package io.seata.rm.datasource.exec.sqlserver;
 
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
@@ -23,11 +28,6 @@ import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
-
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * The type SqlServer Delete executor.

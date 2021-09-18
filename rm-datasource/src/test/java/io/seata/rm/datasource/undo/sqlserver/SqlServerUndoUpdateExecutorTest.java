@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource.undo.sqlserver;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -25,10 +29,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author GoodBoyCoder

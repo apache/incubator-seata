@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource.undo.sqlserver;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ColumnUtils;
@@ -24,9 +27,6 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author GoodBoyCoder

@@ -15,6 +15,11 @@
  */
 package io.seata.rm.datasource.undo.sqlserver;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
+
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
@@ -23,11 +28,6 @@ import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
 
 /**
  * @author GoodBoyCoder

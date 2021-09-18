@@ -15,6 +15,9 @@
  */
 package io.seata.sqlparser.druid.sqlserver;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.alibaba.druid.sql.ast.SQLCommentHint;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLHint;
@@ -27,10 +30,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The Type SqlServerOperateRecognizerHolder

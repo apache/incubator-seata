@@ -15,6 +15,9 @@
  */
 package io.seata.sqlparser.druid.sqlserver;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
@@ -26,9 +29,6 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type SqlServer delete recognizer.

@@ -15,18 +15,22 @@
  */
 package io.seata.sqlparser.druid.sqlserver;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.*;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLSelect;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.SQLServerSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerOutputVisitor;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type SqlServer select for update recognizer.

@@ -39,18 +39,21 @@ public class SqlServerOperateRecognizerHolderTest extends AbstractRecognizerTest
         SQLStatement sqlStatement = getSQLStatement(sql);
         Assertions.assertNotNull(new SqlServerOperateRecognizerHolder().getDeleteRecognizer(sql, sqlStatement));
     }
+
     @Test
     public void getInsertRecognizerTest() {
         String sql = "INSERT INTO t (name) VALUES ('name1')";
         SQLStatement sqlStatement = getSQLStatement(sql);
         Assertions.assertNotNull(new SqlServerOperateRecognizerHolder().getInsertRecognizer(sql, sqlStatement));
     }
+
     @Test
     public void getUpdateRecognizerTest() {
         String sql = "UPDATE t1 SET name = 'name1' WHERE id = 'id1'";
         SQLStatement sqlStatement = getSQLStatement(sql);
         Assertions.assertNotNull(new SqlServerOperateRecognizerHolder().getUpdateRecognizer(sql, sqlStatement));
     }
+
     @Test
     public void getSelectForUpdateTest() {
         //test with lock

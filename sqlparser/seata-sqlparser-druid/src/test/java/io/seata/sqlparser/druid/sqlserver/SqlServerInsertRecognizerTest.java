@@ -15,6 +15,10 @@
  */
 package io.seata.sqlparser.druid.sqlserver;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLDateExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
@@ -26,10 +30,6 @@ import io.seata.sqlparser.druid.AbstractRecognizerTest;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * The type SqlServer insert recognizer test.

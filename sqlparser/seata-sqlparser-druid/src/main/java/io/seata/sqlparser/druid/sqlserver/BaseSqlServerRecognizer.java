@@ -15,6 +15,10 @@
  */
 package io.seata.sqlparser.druid.sqlserver;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
@@ -25,10 +29,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author GoodBoyCoder

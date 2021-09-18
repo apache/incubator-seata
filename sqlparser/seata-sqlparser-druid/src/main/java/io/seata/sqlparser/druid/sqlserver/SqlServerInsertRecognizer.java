@@ -15,9 +15,19 @@
  */
 package io.seata.sqlparser.druid.sqlserver;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.*;
+import com.alibaba.druid.sql.ast.expr.SQLDefaultExpr;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
+import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
+import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
+import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
+import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.sqlserver.ast.stmt.SQLServerInsertStatement;
@@ -25,11 +35,11 @@ import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerOutputVisitor;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.struct.*;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import io.seata.sqlparser.struct.NotPlaceholderExpr;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 
 /**
  * The type SqlServer insert recognizer.
