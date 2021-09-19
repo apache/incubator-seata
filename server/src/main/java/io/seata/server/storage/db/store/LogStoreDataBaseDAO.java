@@ -173,6 +173,12 @@ public class LogStoreDataBaseDAO implements LogStore {
                 ps.setInt(i + 1, status);
             }
             ps.setInt(statuses.length + 1, limit);
+
+            //modify for the change of limit position in sqlserver
+            if ("sqlserver".equalsIgnoreCase(dbType)) {
+                ps.setInt(1, limit);
+                ps.setInt(statuses.length + 1, statuses[0]);
+            }
             rs = ps.executeQuery();
             while (rs.next()) {
                 ret.add(convertGlobalTransactionDO(rs));
