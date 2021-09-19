@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import io.seata.common.XID;
 import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
@@ -39,12 +40,15 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * The type Data base session manager test.
  *
  * @author zhangsen
  */
+@SpringBootTest
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
@@ -54,7 +58,7 @@ public class DataBaseSessionManagerTest {
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start() throws Exception {
+    public static void start(ApplicationContext context) throws Exception {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
         DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 

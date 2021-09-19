@@ -140,9 +140,8 @@ public class LockStoreDataBaseDAO implements LockStore {
                     if (LOGGER.isInfoEnabled()) {
                         String dbPk = rs.getString(ServerTableColumnsName.LOCK_TABLE_PK);
                         String dbTableName = rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME);
-                        Long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
-                        LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID,
-                            dbBranchId);
+                        long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
+                        LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID, dbBranchId);
                     }
                     if (!autoCommit) {
                         Integer status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
