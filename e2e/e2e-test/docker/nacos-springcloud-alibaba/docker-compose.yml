@@ -62,8 +62,8 @@ services:
     hostname: provider
     networks:
       - host
-#    ports:
-#      - "8080:8080"
+    ports:
+      - "8080:8080"
     depends_on:
       - nacos
       - db-mysql

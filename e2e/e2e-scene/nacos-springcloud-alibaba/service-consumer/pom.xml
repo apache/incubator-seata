@@ -85,7 +85,7 @@
 
                 <configuration>
                     <includeSystemScope>true</includeSystemScope>
-                    <mainClass>com.demo.ConsumerApplication</mainClass>
+                    <mainClass>seata.demo.ConsumerApplication</mainClass>
                 </configuration>
             </plugin>
 
