@@ -47,7 +47,7 @@ public class SqlServerMultiUpdateExecutor<T, S extends Statement> extends MultiU
     protected String buildSuffixSql(String whereCondition) {
         final StringBuilder suffix = new StringBuilder(" FROM ")
                 .append(getFromTableInSQL())
-                .append(" WITH(UPDLOCK) ");;
+                .append(" WITH(UPDLOCK) ");
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE ").append(whereCondition);
         }
