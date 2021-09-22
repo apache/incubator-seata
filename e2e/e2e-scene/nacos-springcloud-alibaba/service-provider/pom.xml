@@ -12,16 +12,6 @@
     <artifactId>service-provider</artifactId>
 
     <dependencies>
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.velocity</groupId>-->
-        <!--            <artifactId>velocity-engine-core</artifactId>-->
-        <!--            <version>2.1</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.baomidou</groupId>-->
-        <!--            <artifactId>mybatis-plus-generator</artifactId>-->
-        <!--            <version>3.1.0</version>-->
-        <!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -36,12 +26,12 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-        <!--        &lt;!&ndash; nacos 作为服务注册中心 &ndash;&gt;-->
+        <!-- As the service registry -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
-        <!-- nacos 作为配置中心 -->
+        <!-- As the config center -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
@@ -71,21 +61,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
     </dependencies>
 
@@ -110,29 +87,9 @@
 
                 <configuration>
                     <includeSystemScope>true</includeSystemScope>
-                    <mainClass>com.demo.ProviderApplication</mainClass>
+                    <mainClass>seata.demo.ProviderApplication</mainClass>
                 </configuration>
             </plugin>
-
-
-<!--            <plugin>-->
-<!--                <groupId>com.spotify</groupId>-->
-<!--                <artifactId>docker-maven-plugin</artifactId>-->
-<!--                <version>1.0.0</version>-->
-<!--                <configuration>-->
-<!--                    <imageName>provider:0.0.1</imageName>-->
-<!--                    <dockerDirectory>${basedir}</dockerDirectory> &lt;!&ndash; 指定 Dockerfile 路径&ndash;&gt;-->
-<!--                    &lt;!&ndash; 这里是复制 jar 包到 docker 容器指定目录配置，也可以写到 Docokerfile 中 &ndash;&gt;-->
-<!--                    <resources>-->
-<!--                        <resource>-->
-<!--                            <targetPath>/ROOT</targetPath>-->
-<!--                            <directory>${project.build.directory}</directory>-->
-<!--                            <include>${project.build.finalName}.jar</include>-->
-<!--                        </resource>-->
-<!--                    </resources>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-
 
             <plugin>
                 <groupId>com.spotify</groupId>
@@ -140,7 +97,7 @@
                 <version>1.0.0</version>
                 <configuration>
                     <imageName>provider:0.0.1</imageName>
-                    <dockerDirectory>${basedir}</dockerDirectory> <!-- 指定 Dockerfile 路径-->
+                    <dockerDirectory>${basedir}/docker</dockerDirectory> <!-- Specify Dockerfile path -->
                     <resources>
                         <resource>
                             <targetPath>/ROOT</targetPath>

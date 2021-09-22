@@ -21,15 +21,15 @@ import seata.demo.common.R;
 import seata.demo.model.StorageTbl;
 import seata.demo.service.ProviderService;
 import io.seata.spring.annotation.GlobalTransactional;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 @RestController
-@Api
 @RequestMapping("/consumer")
 public class ConsumerController {
 
@@ -40,7 +40,6 @@ public class ConsumerController {
 
 
     @GlobalTransactional
-    @ApiOperation(value = "delCommdity")
     @GetMapping(value = "commodity/{commodityCode}")
     public R delCount(@PathVariable String commodityCode){
         providerService.subCount(commodityCode);
@@ -50,7 +49,6 @@ public class ConsumerController {
     // 有错误的代码
     @GlobalTransactional
     @GetMapping(value = "commodityWrong/{commodityCode}")
-    @ApiOperation(value = "delCountWrong")
     public R delCountWrong(@PathVariable String commodityCode){
         providerService.subCount(commodityCode);
         int i = 1 / 0;
@@ -59,13 +57,11 @@ public class ConsumerController {
 
     @PutMapping("commodity")
     @GlobalTransactional
-    @ApiOperation(value = "addCommodity")
     public R addCommodity(@RequestBody StorageTbl storageTbl){
         providerService.addCommodity(storageTbl);
         return R.ok();
     }
 
-    @ApiOperation(value = "queryCount")
     @GetMapping("{commodityCode}/count")
     public R queryCount(@PathVariable String commodityCode) {
         R r = providerService.queryCount(commodityCode);

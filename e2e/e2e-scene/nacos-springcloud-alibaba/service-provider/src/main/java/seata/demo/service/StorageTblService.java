@@ -20,12 +20,7 @@ import seata.demo.model.StorageTbl;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * <p>
- *  服务类
- * </p>
- *
- * @author ${author}
- * @since 2021-07-03
+ * @author jingliu_xiong@foxmail.com
  */
 public interface StorageTblService extends IService<StorageTbl> {
 

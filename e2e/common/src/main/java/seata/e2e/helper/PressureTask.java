@@ -16,17 +16,21 @@
 
 package seata.e2e.helper;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
- * @author xjl
- * @Description: 压力任务执行 同步 考虑调度器的添加
+ * A synchronous pressure task executor.
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 public class PressureTask {
 
@@ -51,7 +55,8 @@ public class PressureTask {
 
     /**
      * The returned result of the sender is successful by default
-     * @param isRetry When this parameter is set to true, any test failure will throw an RuntimeException.
+     * @param isRetry when this parameter is set to true, any test failure in this pressure task
+     * will throw an RuntimeException.
      */
     public void start(boolean isRetry){
 
@@ -85,7 +90,7 @@ public class PressureTask {
         LOGGER.info("pressure task defeated, total {}", clientTotal - count);
         if (isRetry && (count != clientTotal)) {
             count = 0;
-            throw new RuntimeException("Pressure task defeated !");
+            throw new RuntimeException("Pressure task defeated!");
         }
         count = 0;
     }

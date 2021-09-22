@@ -16,13 +16,6 @@
 
 package seata.e2e.helper;
 
-import com.alibaba.druid.pool.DruidDataSourceFactory;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.jdbc.ScriptRunner;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
@@ -31,8 +24,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.alibaba.druid.pool.DruidDataSourceFactory;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.jdbc.ScriptRunner;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
 /**
  * Used to query the data in the database and run sql script.
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 public class DruidJdbcHelper {
 

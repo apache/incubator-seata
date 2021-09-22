@@ -19,7 +19,10 @@ package seata.demo.config;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 @Configuration
-@MapperScan("com.demo.mapper")
+@MapperScan("seata.demo.mapper")
 public class MybatisPlusConfig {
 }

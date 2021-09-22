@@ -34,14 +34,14 @@
 
 package seata.e2e.docker.file;
 
-import seata.e2e.docker.extension.Envs;
-import org.springframework.core.io.ClassPathResource;
-import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import seata.e2e.docker.extension.Envs;
+import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
 
 /**
  * A class to load YAML content as a type-safe object.

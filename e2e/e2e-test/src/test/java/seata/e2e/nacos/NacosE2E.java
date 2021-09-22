@@ -39,7 +39,9 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.InputStream;
 import java.util.Properties;
 
-
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 @E2E
 public class NacosE2E{
 

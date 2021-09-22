@@ -34,6 +34,20 @@
 
 package seata.e2e.docker.extension;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import seata.e2e.config.E2Econfig;
 import seata.e2e.docker.annotation.ContainerHostAndPort;
 import seata.e2e.docker.annotation.DockerCompose;
@@ -51,18 +65,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import seata.e2e.docker.file.Yamls;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static seata.e2e.docker.file.Yamls.load;
-
 /**
  * This annotation will initialize fields annotated with annotations in {@link seata.e2e.docker.annotation}
  *
@@ -77,7 +79,7 @@ import static seata.e2e.docker.file.Yamls.load;
  *     private HostAndPort someService1HostPort;
  * }
  * }</pre>
- *
+ * <p>
  * If you don't use the ContainerInitAndDestoryExtension for some reasons, here is an example:
  *
  * <pre>{@code
@@ -99,8 +101,9 @@ import static seata.e2e.docker.file.Yamls.load;
  *    }
  * }
  * }</pre>
+ *
+ * @author jingliu_xiong@foxmail.com
  */
-
 public class ContainerInitAndDestory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PressureTask.class);
@@ -119,9 +122,9 @@ public class ContainerInitAndDestory {
         compose.start();
 
         /**
-        * Assign the corresponding value to the fileds annotated with {@link com.demo.docker.annotation}, these fileds
-        * will be used in test.
-        */
+         * Assign the corresponding value to the fileds annotated with {@link com.demo.docker.annotation}, these fileds
+         * will be used in test.
+         */
         initHostAndPort(testClass, compose);
         initDockerContainers(testClass, compose);
     }
@@ -147,7 +150,8 @@ public class ContainerInitAndDestory {
     }
 
     /**
-     * Assign the corresponding value to the fileds annotated with {@link DockerContainer}
+     * Assign the corresponding value to the fields annotated with {@link DockerContainer}
+     *
      * @param testClass
      * @param compose
      * @throws Exception
@@ -192,8 +196,8 @@ public class ContainerInitAndDestory {
     }
 
     /**
-     * Assign the corresponding value to the fileds annotated with
-     * {@link ContainerHostAndPort}
+     * Assign the corresponding value to the fields annotated with {@link ContainerHostAndPort}
+     *
      * @param testClass
      * @param compose
      * @throws Exception
@@ -266,6 +270,7 @@ public class ContainerInitAndDestory {
 
     /**
      * Initialization of containers logs
+     *
      * @param files
      * @param compose
      */

@@ -34,13 +34,12 @@
 
 package seata.e2e.docker.annotation;
 
-
-import seata.e2e.docker.extension.ContainerInitAndDestoryExtension;
-import seata.e2e.model.HostAndPort;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import seata.e2e.docker.extension.ContainerInitAndDestoryExtension;
+import seata.e2e.model.HostAndPort;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -50,6 +49,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * initialized by {@link ContainerInitAndDestoryExtension} with the real host and port of the docker container, whose original {@link
  * #name() service name} and {@link #port() exposed port}  defined in {@code docker-compose.yml} are given, for more
  * details and examples, refer to the JavaDoc of {@link ContainerInitAndDestoryExtension}.
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 @Documented
 @Target(FIELD)

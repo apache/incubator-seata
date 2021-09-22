@@ -16,10 +16,8 @@
 
 package seata.e2e.config;
 
-
 /**
- * @author xjl
- * @Description:
+ * @author jingliu_xiong@foxmail.com
  */
 public class E2Econfig {
 

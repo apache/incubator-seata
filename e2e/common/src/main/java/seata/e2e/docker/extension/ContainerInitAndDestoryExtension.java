@@ -34,14 +34,12 @@
 
 package seata.e2e.docker.extension;
 
-
 import seata.e2e.docker.E2E;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import seata.e2e.docker.annotation.ContainerHostAndPort;
 import seata.e2e.docker.annotation.DockerCompose;
-
 
 /**
  * This annotation supports the {@link DockerCompose @DockerCompose} and {@link ContainerHostAndPort @ContainerHostAndPort} annotations.
@@ -61,6 +59,8 @@ import seata.e2e.docker.annotation.DockerCompose;
  *     private HostAndPort someService2HostPort;
  * }
  * }</pre>
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 public class ContainerInitAndDestoryExtension implements BeforeAllCallback, AfterAllCallback {
     @Override

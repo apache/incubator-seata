@@ -15,27 +15,33 @@
  */
 package seata.e2e.factory;
 
-import seata.e2e.helper.*;
-
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+import seata.e2e.helper.CronTask;
+import seata.e2e.helper.DruidJdbcHelper;
+import seata.e2e.helper.PressureTask;
+import seata.e2e.helper.TimeCountHelper;
+import seata.e2e.helper.TimesTask;
+
 /**
  * Return some tools commonly used in testing
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 public interface SeataTestHelperFactory {
 
     /**
      *
-     * @param map The configuration required to initialize the durid connection pool
+     * @param map The configuration required to initialize the druid connection pool
      * @return
      */
     public DruidJdbcHelper druidJdbcQuery(Map map);
 
     /**
      *
-     * @param pro The configuration required to initialize the durid connection pool
+     * @param pro The configuration required to initialize the druid connection pool
      * @return
      */
     public DruidJdbcHelper druidJdbcQuery(Properties pro);

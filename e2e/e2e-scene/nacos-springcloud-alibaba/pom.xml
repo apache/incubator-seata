@@ -21,7 +21,6 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <alibaba.cloud.version>2.2.5.RELEASE</alibaba.cloud.version>
-        <swagger.version>2.6.1</swagger.version>
     </properties>
 
     <dependencyManagement>
@@ -42,13 +41,13 @@
                 <artifactId>spring-cloud-starter-openfeign</artifactId>
                 <version>${alibaba.cloud.version}</version>
             </dependency>
-            <!-- nacos 作为服务注册中心 -->
+            <!-- As the service registry -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
                 <version>${alibaba.cloud.version}</version>
             </dependency>
-            <!-- nacos 作为配置中心 -->
+            <!-- As the config center -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
@@ -89,11 +88,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.18.12</version>
-            </dependency>
-            <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>3.3.1</version>
@@ -102,16 +96,6 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
                 <version>1.1.20</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${swagger.version}</version>
             </dependency>
 
         </dependencies>

@@ -16,15 +16,14 @@
 
 package seata.e2e.helper;
 
-import seata.e2e.model.HostAndPort;
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import seata.e2e.model.HostAndPort;
+import org.junit.Test;
+
 /**
- * @author xjl
- * @Description:
+ * @author jingliu_xiong@foxmail.com
  */
 public class MapVerifyBeanHelperTest {
 

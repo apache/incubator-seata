@@ -16,23 +16,11 @@
 
 package seata.demo.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
-
 import java.io.Serializable;
 
 /**
- * <p>
- * 
- * </p>
- *
- * @author ${author}
- * @since 2021-07-03
+ * @author jingliu_xiong@foxmail.com
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@Accessors(chain = true)
 public class StorageTbl implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,5 +31,40 @@ public class StorageTbl implements Serializable {
 
     private Integer count;
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getCommodityCode() {
+        return commodityCode;
+    }
+
+    public void setCommodityCode(String commodityCode) {
+        this.commodityCode = commodityCode;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    @Override
+    public String toString() {
+        return "StorageTbl{" +
+                "id=" + id +
+                ", commodityCode='" + commodityCode + '\'' +
+                ", count=" + count +
+                '}';
+    }
 }

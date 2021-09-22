@@ -16,15 +16,14 @@
 
 package seata.e2e.helper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * @author xjl
- * @Description:
+ * @author jingliu_xiong@foxmail.com
  */
 public class MapVerifyBeanHelper {
 

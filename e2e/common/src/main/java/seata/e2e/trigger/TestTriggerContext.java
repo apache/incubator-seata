@@ -34,12 +34,15 @@
 
 package seata.e2e.trigger;
 
-import org.junit.jupiter.api.extension.Extension;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
-
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.extension.Extension;
+import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
+
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public class TestTriggerContext implements TestTemplateInvocationContext {
 
     private final Class<? extends Throwable>[] throwables;

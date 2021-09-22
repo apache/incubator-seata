@@ -16,14 +16,16 @@
 
 package seata.e2e.trigger;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public class TestTriggerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestTriggerTest.class);

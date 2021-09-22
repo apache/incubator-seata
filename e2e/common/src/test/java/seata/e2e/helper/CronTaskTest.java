@@ -3,8 +3,7 @@ package seata.e2e.helper;
 import org.junit.Test;
 
 /**
- * @author xjl
- * @Description:
+ * @author jingliu_xiong@foxmail.com
  */
 public class CronTaskTest {
 

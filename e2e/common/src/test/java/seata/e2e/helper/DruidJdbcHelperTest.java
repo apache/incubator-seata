@@ -26,8 +26,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * @author xjl
- * @Description:
+ * @author jingliu_xiong@foxmail.com
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DruidJdbcHelperTest {

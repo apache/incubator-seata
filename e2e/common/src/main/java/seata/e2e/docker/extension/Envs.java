@@ -34,14 +34,11 @@
 
 package seata.e2e.docker.extension;
 
-import com.google.common.base.Strings;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- */
+import com.google.common.base.Strings;
+
 public final class Envs {
 
     public static String resolve(final String text) {

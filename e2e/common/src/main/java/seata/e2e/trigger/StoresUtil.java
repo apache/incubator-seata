@@ -34,9 +34,11 @@
 
 package seata.e2e.trigger;
 
-
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public final class StoresUtil {
     public static ExtensionContext.Store store(final ExtensionContext context) {
 

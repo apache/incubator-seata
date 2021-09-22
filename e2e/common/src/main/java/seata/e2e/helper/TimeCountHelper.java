@@ -16,10 +16,8 @@
 
 package seata.e2e.helper;
 
-
 /**
- * @author xjl
- * @Description: 一个用来统计一共花费多少时间的工具类
+ * @author jingliu_xiong@foxmail.com
  */
 public class TimeCountHelper {
 

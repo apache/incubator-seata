@@ -18,8 +18,9 @@ package seata.e2e.model;
 
 /**
  * Data model of a host and port.
+ *
+ * @author jingliu_xiong@foxmail.com
  */
-
 public final class HostAndPort {
     private final String host;
     private final int port;

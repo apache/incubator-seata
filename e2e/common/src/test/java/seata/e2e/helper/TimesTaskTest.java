@@ -18,7 +18,9 @@ package seata.e2e.helper;
 
 import org.junit.jupiter.api.Test;
 
-
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public class TimesTaskTest {
 
     @Test

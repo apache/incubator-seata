@@ -19,8 +19,10 @@ package seata.demo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-
-@SpringBootApplication(scanBasePackages = "com.demo")
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
+@SpringBootApplication(scanBasePackages = "seata.demo")
 public class ProviderApplication {
     public static void main(String[] args) {
         SpringApplication.run(ProviderApplication.class, args);

@@ -16,14 +16,20 @@
 
 package seata.e2e.factory;
 
-import seata.e2e.helper.*;
-
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+import seata.e2e.helper.CronTask;
+import seata.e2e.helper.DruidJdbcHelper;
+import seata.e2e.helper.PressureTask;
+import seata.e2e.helper.TimeCountHelper;
+import seata.e2e.helper.TimesTask;
+
 /**
  * Integrate some helpers commonly used in scene test.
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 public class SeataTestHelperFactoryImpl implements SeataTestHelperFactory{
 

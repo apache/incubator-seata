@@ -34,10 +34,6 @@
 
 package seata.e2e.trigger;
 
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
-
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -45,7 +41,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
+import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public class TestTriggerExtension implements TestTemplateInvocationContextProvider {
 
     public static final String TEST_SHOULD_RETRY = "TEST_PASSED";

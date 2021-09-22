@@ -21,6 +21,9 @@ import seata.demo.model.StorageTbl;
 import seata.demo.service.ProviderService;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 @Component
 public class ProviderFailBack implements ProviderService {
 

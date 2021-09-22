@@ -20,12 +20,7 @@ import seata.demo.model.StorageTbl;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
- * <p>
- *  Mapper 接口
- * </p>
- *
- * @author ${author}
- * @since 2021-07-03
+ * @author jingliu_xiong@foxmail.com
  */
 public interface StorageTblMapper extends BaseMapper<StorageTbl> {
 

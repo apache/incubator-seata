@@ -16,13 +16,12 @@
 
 package seata.demo.common;
 
-
-import lombok.Data;
-
 import java.util.HashMap;
 import java.util.Map;
 
-@Data
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public class R {
     private boolean success;
     private Map<String, Object> data = new HashMap<String, Object>();
@@ -50,5 +49,29 @@ public class R {
     public R data(Map<String, Object> map) {
         this.setData(map);
         return this;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public Map<String, Object> getData() {
+        return data;
+    }
+
+    public void setData(Map<String, Object> data) {
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "R{" +
+                "success=" + success +
+                ", data=" + data +
+                '}';
     }
 }

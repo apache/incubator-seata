@@ -13,14 +13,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
         </dependency>
@@ -29,12 +21,12 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
-        <!-- nacos 作为服务注册中心 -->
+        <!-- As the service registry -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
-        <!-- nacos 作为配置中心 -->
+        <!-- As the config center -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
@@ -56,11 +48,6 @@
                     <artifactId>seata-spring-boot-starter</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -95,7 +82,7 @@
                 <version>1.0.0</version>
                 <configuration>
                     <imageName>consumer:0.0.1</imageName>
-                    <dockerDirectory>${basedir}/docker</dockerDirectory> <!-- 指定 Dockerfile 路径-->
+                    <dockerDirectory>${basedir}/docker</dockerDirectory> <!-- Specify Dockerfile path -->
                     <resources>
                         <resource>
                             <targetPath>/ROOT</targetPath>

@@ -16,15 +16,20 @@
 
 package seata.e2e.helper;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.concurrent.*;
-
 /**
- * 定次数任务执行
- * Perform tasks at fixed number of times. 同步
+ * A synchronous fixed number of task executor
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 public class TimesTask {
 
@@ -80,4 +85,5 @@ public class TimesTask {
         LOGGER.info("Task defeated, total {}", times - count);
         count = 0;
     }
+
 }

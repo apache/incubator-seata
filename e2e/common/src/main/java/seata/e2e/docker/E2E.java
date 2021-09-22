@@ -34,14 +34,20 @@
 
 package seata.e2e.docker;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import seata.e2e.docker.extension.ContainerInitAndDestoryExtension;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.lang.annotation.*;
-
 /**
  * Use this annotation to provide {@link ContainerInitAndDestoryExtension} for all test methods under a class.
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 @Documented
 @Target(ElementType.TYPE)

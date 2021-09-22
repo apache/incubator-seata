@@ -36,10 +36,10 @@ package seata.e2e.docker.file;
 
 import java.util.Map;
 
-
-
 /**
  * Data Model for docker-compose file, fields will be assembled when reading the yaml file
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 public final class DockerComposeFile {
 

@@ -34,6 +34,8 @@
 
 package seata.e2e.docker.log;
 
+import java.nio.file.Path;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -42,8 +44,9 @@ import ch.qos.logback.core.FileAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public class ContainerLoggerFactory {
 
     public static Logger containerLogger(final Path logDirectory, final String container) {

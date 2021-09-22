@@ -34,11 +34,18 @@
 
 package seata.e2e.trigger;
 
-import org.junit.jupiter.api.extension.*;
-import org.opentest4j.TestAbortedException;
-
 import java.util.Optional;
 
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExecutionCondition;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.opentest4j.TestAbortedException;
+
+/**
+ * @author jingliu_xiong@foxmail.com
+ */
 public class OneTestExtension implements ExecutionCondition, AfterTestExecutionCallback, TestExecutionExceptionHandler {
 
     /**
