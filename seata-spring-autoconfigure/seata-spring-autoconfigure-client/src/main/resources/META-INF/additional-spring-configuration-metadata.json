@@ -251,7 +251,7 @@
       "type": "java.time.Duration",
       "description": "TCC fence log clean period. only duration type format are supported.",
       "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
-      "defaultValue": "PT1H"
+      "defaultValue": "1h"
     }
   ],
   "hints": [
