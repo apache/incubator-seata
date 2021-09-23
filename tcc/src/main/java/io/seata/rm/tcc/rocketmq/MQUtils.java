@@ -13,7 +13,7 @@ import org.apache.rocketmq.common.message.MessageConst;
 import java.lang.reflect.Field;
 
 public class MQUtils {
-    private static String PRODUCER_IMPL = "defaultMQProducerImpl";
+    private static final String PRODUCER_IMPL = "defaultMQProducerImpl";
 
     public static SendResult halfSend(DefaultMQProducer defaultMQproducer, Message msg) {
         // ignore DelayTimeLevel parameter

@@ -1,5 +1,6 @@
 package io.seata.rm.tcc.rocketmq;
 
+import io.seata.core.context.RootContext;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -10,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import io.seata.core.context.RootContext;
 
 @Aspect
 public class RocketMQAop {
