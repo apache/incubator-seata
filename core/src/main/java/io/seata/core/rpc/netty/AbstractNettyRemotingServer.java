@@ -113,15 +113,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     }
 
     /**
-     * Sets listen port.
-     *
-     * @param listenPort the listen port
-     */
-    public void setListenPort(int listenPort) {
-        serverBootstrap.setListenPort(listenPort);
-    }
-
-    /**
      * Gets listen port.
      *
      * @return the listen port
