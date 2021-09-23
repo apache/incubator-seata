@@ -231,7 +231,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String getSqlServerResourceId() {
         if (jdbcUrl.contains(";")) {
             StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf(';')));
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf(';'));
             StringBuilder paramsBuilder = new StringBuilder();
             String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf(';') + 1);
             String[] urlParams = paramUrl.split(";");
