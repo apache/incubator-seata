@@ -48,6 +48,6 @@ public enum ObjectHolder {
      * @return the previous object with the key, or null
      */
     public Object setObject(String objectKey, Object object) {
-        return OBJECT_MAP.putIfAbsent(objectKey, object);
+        return OBJECT_MAP.put(objectKey, object);
     }
 }
