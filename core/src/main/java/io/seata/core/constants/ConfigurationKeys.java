@@ -687,4 +687,14 @@ public interface ConfigurationKeys {
      * The constant DATA_SOURCE_PROXY_MODE.
      */
     String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
+
+    /**
+     * The constant ENABLE_GRPC
+     */
+    String ENABLE_GRPC = SERVICE_PREFIX + "enableGrpc";
+
+    /**
+     * The constant SERVICE_GRPC_PORT (if enable grpc)
+     */
+    String SERVICE_GRPC_PORT = SERVER_PREFIX + "grpcPort";
 }

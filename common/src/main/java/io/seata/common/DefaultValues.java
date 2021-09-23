@@ -121,9 +121,19 @@ public interface DefaultValues {
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
-  
+
     /**
      * the constant TCC_ACTION_INTERCEPTOR_ORDER
      */
     int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+
+    /**
+     * Default rpc Type is netty
+     */
+    boolean DEFAULT_ENABLE_GRPC = false;
+
+    /**
+     * Default grpc port.
+     */
+    int DEFAULT_GRPC_PORT = 50051;
 }
