@@ -36,7 +36,7 @@ public abstract class AbstractDataSourceProxy implements SeataDataSourceProxy {
     /**
      * Instantiates a new Abstract data source proxy.
      */
-    public AbstractDataSourceProxy(){}
+    public AbstractDataSourceProxy() {}
 
     /**
      * Instantiates a new Abstract data source proxy.

@@ -224,7 +224,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * The general form of the connection URL for SqlServer is
      * jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
-     * required connection properties: [INSTANCENAME]、[databaseName,database]
+     * required connection properties: [INSTANCENAME], [databaseName,database]
      *
      * @return resourceId
      */

@@ -100,7 +100,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
             schemaName = schemaTable[schemaTable.length - 2];
         }
 
-        //If the tableName does not contain the required information，get from connection
+        //If the tableName does not contain the required information, get from connection
         if (StringUtils.isBlank(catalogName)) {
             catalogName = connection.getCatalog();
         }

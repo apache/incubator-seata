@@ -94,10 +94,6 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
      * @param ast the statement
      */
     public void dealTop(SQLStatement ast) {
-        if (ast instanceof SQLSelectStatement) {
-            //TODO do something
-        } else {
-            throw new NotSupportYetException("Top expr is not supported");
-        }
+        throw new NotSupportYetException("Top expr is not supported");
     }
 }
