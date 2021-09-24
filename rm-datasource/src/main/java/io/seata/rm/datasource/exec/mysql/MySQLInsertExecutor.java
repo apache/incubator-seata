@@ -82,7 +82,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
     public Map<String,List<Object>> getPkValues() throws SQLException {
         Map<String,List<Object>> pkValuesMap = null;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        Boolean isContainsPk = containsPK();
+        boolean isContainsPk = containsPK();
         //when there is only one pk in the table
         if (pkColumnNameList.size() == 1) {
             if (isContainsPk) {
