@@ -31,6 +31,8 @@ public class RegistryProperties {
      */
     private String type = "file";
 
+    private String preferredNetworks;
+
     public String getType() {
         return type;
     }
@@ -40,4 +42,12 @@ public class RegistryProperties {
         return this;
     }
 
+    public String getPreferredNetworks() {
+        return preferredNetworks;
+    }
+
+    public RegistryProperties setPreferredNetworks(String preferredNetworks) {
+        this.preferredNetworks = preferredNetworks;
+        return this;
+    }
 }
