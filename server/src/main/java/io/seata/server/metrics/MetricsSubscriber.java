@@ -15,15 +15,18 @@
  */
 package io.seata.server.metrics;
 
-import com.google.common.eventbus.Subscribe;
-import io.seata.core.event.GlobalTransactionEvent;
-import io.seata.core.model.GlobalStatus;
-import io.seata.metrics.registry.Registry;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+
+import com.google.common.eventbus.Subscribe;
+import io.seata.core.event.GlobalTransactionEvent;
+import io.seata.core.model.GlobalStatus;
+import io.seata.metrics.registry.Registry;
+import io.seata.server.event.EventBusManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.metrics.IdConstants.APP_ID_KEY;
 import static io.seata.metrics.IdConstants.GROUP_KEY;
@@ -34,6 +37,8 @@ import static io.seata.metrics.IdConstants.GROUP_KEY;
  * @author zhengyangyong
  */
 public class MetricsSubscriber {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricsSubscriber.class);
     private final Registry registry;
 
     private final Map<GlobalStatus, Consumer<GlobalTransactionEvent>> consumers;
@@ -52,9 +57,14 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("accept new event,xid:{},event:{}", event.getId(), event);
+            for (Object object : EventBusManager.get().getSubscribers()) {
+                LOGGER.debug("subscribe:{},threadName:{}", object.toString(), Thread.currentThread().getName());
+            }
+        }
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
+            .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processGlobalStatusCommitted(GlobalTransactionEvent event) {
@@ -118,5 +128,20 @@ public class MetricsSubscriber {
         if (registry != null && consumers.containsKey(event.getStatus())) {
             consumers.get(event.getStatus()).accept(event);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.getClass().getName().equals(obj.getClass().getName());
+    }
+
+    /**
+     * PMD check
+     * SuppressWarnings("checkstyle:EqualsHashCode")
+     * @return
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }
