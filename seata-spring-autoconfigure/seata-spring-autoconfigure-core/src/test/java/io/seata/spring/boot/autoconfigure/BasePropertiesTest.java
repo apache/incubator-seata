@@ -16,6 +16,7 @@
 
 package io.seata.spring.boot.autoconfigure;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -47,6 +48,13 @@ public class BasePropertiesTest {
 
         // set new applicationContex for test cases in extension test classes
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContex);
+    }
+
+    @AfterEach
+    public void closeContext() {
+        if(applicationContex!=null) {
+            applicationContex.close();
+        }
     }
 
 }
