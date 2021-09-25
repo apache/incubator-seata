@@ -15,8 +15,8 @@
  */
 package io.seata.server;
 
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.server.env.PortHelper;
+import java.io.IOException;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -25,12 +25,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class ServerApplication {
-    public static void main(String[] args) {
-        // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
-        int port = PortHelper.getPort(args);
-        System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(port));
-
+    public static void main(String[] args) throws IOException {
         // run the spring-boot application
         SpringApplication.run(ServerApplication.class, args);
+
     }
 }

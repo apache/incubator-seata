@@ -1,5 +1,5 @@
 server:
-  port: 9091
+  port: 7091
 
 spring:
   application:
@@ -29,11 +29,12 @@ seata:
       weight: 1
   store:
     # support: file 、 db 、 redis
-    mode: elasticsearch
+#<<<<<<< HEAD
+    mode: db
     session:
-      mode: elasticsearch
+      mode: db
     lock:
-      mode: elasticsearch
+      mode: db
     db:
       datasource: druid
       db-type: mysql
@@ -48,3 +49,8 @@ seata:
       lock-table: lock_table
       query-limit: 100
       max-wait: 5000
+#=======
+#    mode: file
+#  server:
+#    service-port: 8091
+#>>>>>>> upstream/develop

@@ -28,6 +28,7 @@ import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,7 +92,11 @@ public class DataCompareUtils {
         int f0Type = f0.getType();
         int f1Type = f1.getType();
         if (f0Type == Types.TIMESTAMP && f0.getValue().getClass().equals(String.class)) {
-            f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
+            if (f1.getValue().getClass().equals(LocalDateTime.class)) {
+                f0.setValue(LocalDateTime.parse(f0.getValue().toString()));
+            } else {
+                f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
+            }
         }
         if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
             f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
