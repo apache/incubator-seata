@@ -51,7 +51,7 @@ public class SessionHolderTest {
         String sessionStorePath = SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
         //delete file previously created
         pathname = sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME;
-        SessionHolder.init(StoreMode.REDIS.getName());
+       // SessionHolder.init(StoreMode.REDIS.getName());
     }
 
     @Test
