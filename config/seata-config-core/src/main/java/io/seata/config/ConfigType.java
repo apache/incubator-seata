@@ -52,12 +52,7 @@ public enum ConfigType {
     /**
      * Custom config type
      */
-    Custom,
-
-    /**
-     * Url config type
-     */
-    Url;
+    Custom;
 
     /**
      * Gets type.

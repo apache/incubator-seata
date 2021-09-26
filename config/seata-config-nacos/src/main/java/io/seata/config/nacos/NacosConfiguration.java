@@ -99,7 +99,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private NacosConfiguration() {
         if (configService == null) {
             try {
-                if (StringUtils.equals(FILE_CONFIG.getConfig(getConfigUrlKey()), ConfigurationKeys.URL)) {
+                if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
                     configService = NacosFactory.createConfigService(getConfigPropertiesWithUrl());
                 } else {
                     configService = NacosFactory.createConfigService(getConfigProperties());
@@ -289,7 +289,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getConfigUrlKey() {
-        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE;
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
     }
 
     private static String getNacosAddrFileKey() {
@@ -315,7 +315,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getNacosGroup() {
-        if (StringUtils.equals(FILE_CONFIG.getConfig(getConfigUrlKey()), ConfigurationKeys.URL)) {
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
             return CONFIG_URL.getParameters().get(GROUP_KEY);
         } else {
             return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
@@ -323,7 +323,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getNacosDataId() {
-        if (StringUtils.equals(FILE_CONFIG.getConfig(getConfigUrlKey()), ConfigurationKeys.URL)) {
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
             return CONFIG_URL.getParameters().get(NACOS_DATA_ID_KEY) != null ? CONFIG_URL.getParameters().get(NACOS_DATA_ID_KEY) : DEFAULT_DATA_ID;
         } else {
             return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);

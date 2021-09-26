@@ -52,8 +52,10 @@ public class RegistryFactory {
         RegistryType registryType;
         String registryTypeName = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
+        String urlType = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.URL);
         try {
-            if (StringUtils.equals(registryTypeName, ConfigurationKeys.URL)) {
+            if (StringUtils.isNotBlank(urlType)) {
                 registryType = RegistryType.getType(REGISTRY_URL.getProtocol());
             } else {
                 registryType = RegistryType.getType(registryTypeName);

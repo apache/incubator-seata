@@ -102,12 +102,14 @@ public final class ConfigurationFactory {
         String configTypeName = CURRENT_FILE_INSTANCE.getConfig(
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                         + ConfigurationKeys.FILE_ROOT_TYPE);
-
+        String urlType =  CURRENT_FILE_INSTANCE.getConfig(
+                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                        + ConfigurationKeys.URL);
         if (StringUtils.isBlank(configTypeName)) {
             throw new NotSupportYetException("config type can not be null");
         }
         ConfigType configType;
-        if (StringUtils.equals(configTypeName, ConfigurationKeys.URL)) {
+        if (StringUtils.isNotBlank(urlType)) {
             configType = ConfigType.getType(CONFIG_URL.getProtocol());
         } else {
             configType = ConfigType.getType(configTypeName);

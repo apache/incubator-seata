@@ -168,7 +168,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public static NamingService getNamingInstance() throws Exception {
         if (naming == null) {
             synchronized (NacosRegistryServiceImpl.class) {
-                if (StringUtils.equals(FILE_CONFIG.getConfig(getRegistryType()),ConfigurationKeys.URL)) {
+                if (StringUtils.isBlank(FILE_CONFIG.getConfig(getRegistryType()))) {
                     naming = NacosFactory.createNamingService(getNamingPropertiesWithUrl());
                 } else {
                     naming = NacosFactory.createNamingService(getNamingProperties());
@@ -298,7 +298,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     }
 
     private static String getRegistryType() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, ConfigurationKeys.FILE_ROOT_TYPE);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, ConfigurationKeys.URL);
     }
 
 
