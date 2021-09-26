@@ -216,6 +216,6 @@ The following components are provided under the Apache License. See project link
 The text of each license is the standard Apache 2.0 license.
 
    ext/apm-seata-skywalking-plugin files from Apache: skywalking 8.4.0: https://github.com/apache/skywalking, Apache 2.0
-   e2e/common/src/main/java/com/demo/docker files from Apache: skywalking 8.4.0: https://github.com/apache/skywalking, Apache 2.0
-   e2e/common/src/main/java/com/demo/trigger files from Apache: skywalking 8.4.0: https://github.com/apache/skywalking, Apache 2.0
+   e2e/common/src/main/java/seata/e2e/docker files from Apache: skywalking 8.4.0: https://github.com/apache/skywalking, Apache 2.0
+   e2e/common/src/main/java/seata/e2e/trigger files from Apache: skywalking 8.4.0: https://github.com/apache/skywalking, Apache 2.0
     
