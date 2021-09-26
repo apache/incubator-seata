@@ -40,7 +40,7 @@ public class TestTriggerTest {
     void shouldRetryOnAnyFailure() {
         while (true) {
             if (TIMES1.getAndIncrement() == 10) {
-                LOGGER.info("Test passed");
+                LOGGER.info("test passed");
                 break;
             }
         }
@@ -58,7 +58,7 @@ public class TestTriggerTest {
     @DisplayName("should retry specific times")
     void shouldRetrySpecificTimes() {
         if (TIMES2.getAndIncrement() < 3) {
-            LOGGER.info("Test passed");
+            LOGGER.info("test passed");
         }
     }
 

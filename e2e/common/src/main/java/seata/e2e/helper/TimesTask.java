@@ -65,7 +65,7 @@ public class TimesTask {
                 } else {
                     List<Runnable> runnables = executorService.shutdownNow();
                     if (runnables.size() != 0) {
-                        LOGGER.error("There are some requests not work, the num is ", runnables.size());
+                        LOGGER.error("there are some requests not work, the num is ", runnables.size());
                     }
                 }
             } catch (final Exception e) {
@@ -80,9 +80,9 @@ public class TimesTask {
             e.printStackTrace();
         }
         long time = timeCountHelper.stopTimeCount();
-        LOGGER.info("Task cost time: {} s", time / 1000);
-        LOGGER.info("Task completed, total {}", count);
-        LOGGER.info("Task defeated, total {}", times - count);
+        LOGGER.info("task cost time: {} s", time / 1000);
+        LOGGER.info("task completed, total {}", count);
+        LOGGER.info("task defeated, total {}", times - count);
         count = 0;
     }
 

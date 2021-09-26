@@ -34,7 +34,7 @@ public class StorageTblServiceImpl extends ServiceImpl<StorageTblMapper, Storage
         QueryWrapper<StorageTbl> storageTblWrapper = new QueryWrapper<>();
         storageTblWrapper.eq("commodity_code", commodityCode);
         StorageTbl one = baseMapper.selectOne(storageTblWrapper);
-        one.setCount(one.getCount()-1);
+        one.setCount(one.getCount() - 1);
         baseMapper.updateById(one);
     }
 

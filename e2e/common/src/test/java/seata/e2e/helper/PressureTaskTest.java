@@ -30,7 +30,7 @@ public class PressureTaskTest {
     @Test
     public void pressureTest(){
         PressureTask pressureTask = new PressureTask(() -> {
-            System.out.println("Hello Lambda!");
+            System.out.println("Task is Running.");
             return "one task is over";
             }, 100, 20);
         pressureTask.start(false);
@@ -40,7 +40,7 @@ public class PressureTaskTest {
     @Test
     public void pressureTestWithJudge(){
         PressureTask pressureTask = new PressureTask(() -> {
-            System.out.println("Hello Lambda!");
+            System.out.println("Task is Running.");
             return "one task is over";
         }, 100, 20);
         pressureTask.start(false, r -> {

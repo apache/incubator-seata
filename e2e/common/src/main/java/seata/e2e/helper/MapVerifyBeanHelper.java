@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Verify whether the value in the map is equal to the corresponding field in an object
+ *
  * @author jingliu_xiong@foxmail.com
  */
 public class MapVerifyBeanHelper {
@@ -63,7 +65,7 @@ public class MapVerifyBeanHelper {
             String key = entry.getKey();
             Object field = getFieldValueByName(key, object);
             if (field == null) {
-                LOGGER.warn("This field {} not exists.", key);
+                LOGGER.warn("this field {} not exists.", key);
                 return false;
             } else {
                 String mapValue = entry.getValue().toString();
@@ -78,14 +80,14 @@ public class MapVerifyBeanHelper {
 
     /**
      * Use the value of toString () to determine whether a value of the map is equal
-     * to the corresponding attribute in the bean.
+     * to the corresponding field in the bean.
      * @return
      */
     public boolean mapOneEqualBeanOne(String key) {
         Object o = map.get(key);
         Object field = getFieldValueByName(key, object);
         if (field == null) {
-            LOGGER.warn("This field {} not exists.", key);
+            LOGGER.warn("this field {} not exists.", key);
             return false;
         } else {
             String mapValue = o.toString();

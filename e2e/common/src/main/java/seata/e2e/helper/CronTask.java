@@ -47,7 +47,7 @@ public class CronTask {
                     LOGGER.info("response: {}", result);
                     count++;
                 } catch (final Exception e) {
-                    LOGGER.error("failed to send request", e);
+                    LOGGER.error("one cron task fail ", e);
                 }
             }, 0, interval, TimeUnit.MILLISECONDS);
         }
@@ -61,8 +61,8 @@ public class CronTask {
             future.cancel(true);
             future = null;
             long time = timeCountHelper.stopTimeCount();
-            LOGGER.info("Task cost time: {} s", time / 1000);
-            LOGGER.info("Task completed, total {}", count);
+            LOGGER.info("task cost time: {} s", time / 1000);
+            LOGGER.info("task completed, total {}", count);
             count = 0;
         }
     }

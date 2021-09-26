@@ -16,13 +16,15 @@
 
 package seata.e2e.nacos;
 
+import java.io.InputStream;
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import seata.e2e.factory.SeataTestHelperFactory;
 import seata.e2e.factory.SeataTestHelperFactoryImpl;
 import seata.e2e.helper.*;
-
 import seata.e2e.docker.annotation.ContainerHostAndPort;
 import seata.e2e.docker.annotation.DockerCompose;
 import seata.e2e.docker.E2E;
@@ -34,10 +36,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.DockerComposeContainer;
-
-
-import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * @author jingliu_xiong@foxmail.com
@@ -75,12 +73,13 @@ public class NacosE2E{
         druidJdbcHelper = seataTestHelperFactory.druidJdbcQuery(properties);
     }
 
-    //
+
     @TestTrigger(value = 10)
-    public void shouldRetryOnSpecficException() throws Exception {
+    public void shouldRetryOnAnyException(){
 
         String sql = "SELECT COUNT FROM storage_tbl WHERE commodity_code = 'apple';";
         int appleCountB = druidJdbcHelper.queryForOneValue(sql, Integer.class);
+        // Apple inventory minus 1
         restTemplate.getForEntity(consumerUrl + "/consumer/commodity/" + "apple", String.class);
         int appleCountA = druidJdbcHelper.queryForOneValue(sql, Integer.class);
         if (appleCountB - 1 != appleCountA) {
@@ -97,17 +96,17 @@ public class NacosE2E{
             // Call a method with the @globaltransactional annotation that will make an exception during execution.
             ResponseEntity<String> forEntity = restTemplate.getForEntity(consumerUrl + "/consumer/commodityWrong/" + "banana", String.class);
         } catch (HttpServerErrorException e) {
-            LOGGER.info("An error occurred within the consumer service");
+            LOGGER.info("an error occurred within the consumer service");
         }
         long l = timeCountHelper.stopTimeCount();
-        LOGGER.info("Rollback cost times: {} s", l / 1000);
+        // Time spent accessing this interface
+        LOGGER.info("request cost times: {} s", l / 1000);
 
-
+        // Query banana inventory
         R r = restTemplate.getForObject(consumerUrl + "/consumer/" + "banana" + "/count", R.class);
         Integer countAfter = (Integer) r.getData().get("count");
 
-
-        // Compare whether the inventory number has changed
+        // Compare whether the inventory has changed
         if (!countBefore.equals(countAfter)) {
             throw new RuntimeException("Unsuccessful rollback! The data before the start is " + countBefore + ", the data after the start is " + countAfter);
         } else {
@@ -120,11 +119,13 @@ public class NacosE2E{
     public void pressureTaskWithJudgerTest() {
 
         PressureTask pressureTask = seataTestHelperFactory.pressureController(() -> {
+            // Query banana inventory
             ResponseEntity<R> r = restTemplate.getForEntity(consumerUrl + "/consumer/" + "banana" + "/count", R.class);
             HttpStatus statusCode = r.getStatusCode();
             return r;
         }, 100, Runtime.getRuntime().availableProcessors());
         pressureTask.start(true, r -> {
+            // Verify the response
             if (r == null) throw new RuntimeException("Presurre Test failed!");
             ResponseEntity<R> responseEntity = (ResponseEntity<R>) r;
             HttpStatus status = responseEntity.getStatusCode();
@@ -143,6 +144,7 @@ public class NacosE2E{
             HttpStatus statusCode = r.getStatusCode();
             return r;
         }, 100, Runtime.getRuntime().availableProcessors());
+        // Not Verify the response
         pressureTask.start(false);
 
     }
@@ -183,7 +185,7 @@ public class NacosE2E{
         if (!countBefore.equals(countAfter)) {
             throw new RuntimeException("Unsuccessful rollback! The data before the start is " + countBefore + ", the data after the start is " + countAfter);
         } else {
-            LOGGER.info("The data is unchanged and successfully rollback");
+            LOGGER.info("The data is unchanged but may test fail");
         }
     }
 

@@ -28,16 +28,11 @@ public class TimesTaskTest {
         int times = 3;
         int interval = 1000;
         TimesTask timesTask = new TimesTask(() -> {
-            System.out.println("Hello Lambda!");
+            System.out.println("Time task is running!");
             return "one task is over";
         }, times, interval);
         timesTask.start();
         System.out.println("The main function is over");
-        try {
-            Thread.sleep(10000000000l);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -50,10 +45,5 @@ public class TimesTaskTest {
         }, times, interval);
         timesTask.start();
         System.out.println("The main function is over");
-        try {
-            Thread.sleep(10000000000l);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -46,7 +46,11 @@ public class ConsumerController {
         return R.ok();
     }
 
-    // 有错误的代码
+    /**
+     * This code will throw an error when running, and then Seata will rollback
+     * @param commodityCode
+     * @return
+     */
     @GlobalTransactional
     @GetMapping(value = "commodityWrong/{commodityCode}")
     public R delCountWrong(@PathVariable String commodityCode){

@@ -1,4 +1,3 @@
-# networks暂时配置为host偷懒
 version: "2.1"
 services:
   seata-server:

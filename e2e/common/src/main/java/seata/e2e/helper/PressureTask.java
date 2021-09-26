@@ -137,7 +137,7 @@ public class PressureTask {
         LOGGER.info("pressure task defeated, total {}", clientTotal - count);
         if (isRetry && (count != clientTotal)) {
             count = 0;
-            throw new RuntimeException("Pressure task defeated !");
+            throw new RuntimeException("pressure task defeated !");
         }
         count = 0;
     }

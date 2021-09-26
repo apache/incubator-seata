@@ -62,6 +62,6 @@ public class TestTriggerContext implements TestTemplateInvocationContext {
 
     @Override
     public String getDisplayName(final int invocationIndex) {
-        return String.format("test attempt #%d", invocationIndex);
+        return String.format("test attempt %d", invocationIndex);
     }
 }

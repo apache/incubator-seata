@@ -49,7 +49,7 @@ import org.opentest4j.TestAbortedException;
 public class OneTestExtension implements ExecutionCondition, AfterTestExecutionCallback, TestExecutionExceptionHandler {
 
     /**
-     * When not specified, the default initialization is Throwable.class
+     * When not specified, the default initialization is {@code null}
       */
     private final Class<? extends Throwable>[] throwables;
     private final int invocation;

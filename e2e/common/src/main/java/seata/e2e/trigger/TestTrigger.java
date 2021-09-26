@@ -41,6 +41,7 @@ import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.Extension;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -48,7 +49,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * {@link TestTemplate} in contrast to @Test , it is not itself a test case but rather a template for test cases.
- * {@link ExtendWith} is used to register {@link org.junit.jupiter.api.extension.Extension}.
+ * {@link ExtendWith} is used to register {@link Extension}.
  *
  * @author jingliu_xiong@foxmail.com
  */
