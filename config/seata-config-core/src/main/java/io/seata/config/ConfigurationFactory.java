@@ -66,8 +66,8 @@ public final class ConfigurationFactory {
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("load Configuration:{}", extConfiguration == null ? configuration.getClass().getSimpleName()
-                        : extConfiguration.getClass().getSimpleName());
+                LOGGER.info("load Configuration from :{}", extConfiguration == null ?
+                    configuration.getClass().getSimpleName() : "Spring Configuration");
             }
         } catch (EnhancedServiceNotFoundException ignore) {
 
@@ -124,8 +124,8 @@ public final class ConfigurationFactory {
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("load Configuration:{}", extConfiguration == null
-                            ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
+                    LOGGER.info("load Configuration from :{}", extConfiguration == null ?
+                        configuration.getClass().getSimpleName() : "Spring Configuration");
                 }
             } catch (EnhancedServiceNotFoundException ignore) {
 

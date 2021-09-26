@@ -43,4 +43,8 @@ public interface ConfigurationKeys {
     String FILE_ROOT_TYPE = "type";
 
     String URL = "url";
+    /**
+     * The constant DATA_TYPE.
+     */
+    String DATA_TYPE = "dataType";
 }
