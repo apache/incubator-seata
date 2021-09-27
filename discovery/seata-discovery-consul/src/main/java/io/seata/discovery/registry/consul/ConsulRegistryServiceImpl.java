@@ -343,7 +343,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             if ((currentIndex != null && currentIndex > consulIndex) || hasError) {
                 hasError = false;
                 List<HealthService> services = response.getValue();
-                consulIndex = currentIndex;
+                consulIndex = currentIndex;/*lgtm[java/dereferenced-value-may-be-null]*/
                 for (ConsulListener listener : listenerMap.get(cluster)) {
                     listener.onEvent(services);
                 }

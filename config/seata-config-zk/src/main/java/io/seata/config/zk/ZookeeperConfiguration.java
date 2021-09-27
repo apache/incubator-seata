@@ -88,6 +88,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     /**
      * Instantiates a new Zookeeper configuration.
      */
+    @SuppressWarnings("lgtm[java/unsafe-double-checked-locking-init-order]")
     public ZookeeperConfiguration() {
         if (zkClient == null) {
             synchronized (ZookeeperConfiguration.class) {

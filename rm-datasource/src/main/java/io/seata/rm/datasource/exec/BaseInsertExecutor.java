@@ -335,6 +335,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @param ps       true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
      */
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     protected boolean checkPkValuesForSinglePk(List<Object> pkValues, boolean ps) {
         /*
         ps = true

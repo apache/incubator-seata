@@ -72,6 +72,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
     private static volatile ApolloConfiguration instance;
 
+    @SuppressWarnings("lgtm[java/unsafe-double-checked-locking-init-order]")
     private ApolloConfiguration() {
         readyApolloConfig();
         if (config == null) {
