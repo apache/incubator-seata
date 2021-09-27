@@ -133,6 +133,9 @@
 
         <!-- for kotlin  -->
         <kotlin.version>1.4.0</kotlin.version>
+
+        <!-- for HBase -->
+        <hbase.client.version>2.4.6</hbase.client.version>
     </properties>
 
     <!--test-->
