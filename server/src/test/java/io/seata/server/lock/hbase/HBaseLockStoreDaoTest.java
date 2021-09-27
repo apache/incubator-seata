@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.lock.hbase;
 
 import io.seata.core.store.LockDO;
@@ -35,7 +50,7 @@ public class HBaseLockStoreDaoTest {
 
 
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum","hadoop1");
+        configuration.set("hbase.zookeeper.quorum", "hadoop1");
 
         connection = ConnectionFactory.createConnection(configuration);
         lockStoreHBaseDao = new LockStoreHBaseDao();
@@ -147,15 +162,15 @@ public class HBaseLockStoreDaoTest {
     }
 
     @Test
-    public void test_isLockable_can(){
+    public void test_isLockable_can() {
         List<LockDO> lockDOs = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-678:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("abc-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -195,13 +210,13 @@ public class HBaseLockStoreDaoTest {
             Assertions.assertTrue(false);
 
         List<LockDO> lockDOs_2 = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-123:333");
             lock.setTransactionId(333L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("abc-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs_2.add(lock);
@@ -213,7 +228,7 @@ public class HBaseLockStoreDaoTest {
 
 
     @Test
-    public void test_unlock(){
+    public void test_unlock() {
         lockStoreHBaseDao.unLock("abc-123:786756", 5657L);
 
     }

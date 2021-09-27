@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.storage.hbase.session;
 
 import io.seata.common.exception.StoreException;
@@ -8,7 +23,12 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.session.*;
+
+import io.seata.server.session.AbstractSessionManager;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.hbase.store.HBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager;
 import org.slf4j.Logger;
@@ -38,7 +58,7 @@ public class HBaseSessionManager extends AbstractSessionManager
     /**
      * Instantiates a new Data base session manager.
      */
-    public HBaseSessionManager(){
+    public HBaseSessionManager() {
         super();
     }
 
@@ -47,7 +67,7 @@ public class HBaseSessionManager extends AbstractSessionManager
      *
      * @param name the name
      */
-    public HBaseSessionManager(String name){
+    public HBaseSessionManager(String name) {
         super();
         this.taskName = name;
     }
@@ -88,6 +108,7 @@ public class HBaseSessionManager extends AbstractSessionManager
      * remove globalSession
      * 1. rootSessionManager remove normal globalSession
      * 2. retryCommitSessionManager and retryRollbackSessionManager remove retry expired globalSession
+     *
      * @param session the session
      * @throws TransactionException
      */
@@ -148,13 +169,13 @@ public class HBaseSessionManager extends AbstractSessionManager
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.RollbackRetrying,
                     GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             // all data
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{
                     GlobalStatus.UnKnown, GlobalStatus.Begin,
                     GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
                     GlobalStatus.RollbackRetrying,

@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.storage.hbase.store;
 
 import io.seata.common.XID;
@@ -23,7 +38,14 @@ import io.seata.server.store.TransactionStoreManager;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -54,10 +76,10 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * The constant CONFIGURATION.
      */
-    protected Configuration CONFIG = ConfigurationFactory.getInstance();
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
-     *  The HBase Table
+     * The HBase Table
      */
     protected String tableName;
 
@@ -253,7 +275,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         } catch (IOException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(table,statusTable);
+            IOUtil.close(table, statusTable);
         }
     }
 
@@ -263,7 +285,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         Table statusTable = null;
         try {
             statusTable = connection.getTable(TableName.valueOf(statusTableName));
-            int previousGlobalStatus = readSession(globalTransactionDO.getXid(),false).getStatus().getCode();
+            int previousGlobalStatus = readSession(globalTransactionDO.getXid(), false).getStatus().getCode();
             String preStatusTransactionId = buildStatusRowKey(previousGlobalStatus, rowKey);
             Delete delete = new Delete(Bytes.toBytes(preStatusTransactionId));
             delete.addFamily(Bytes.toBytes(transactionIdCF));
@@ -284,12 +306,12 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         } catch (IOException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(table,statusTable);
+            IOUtil.close(table, statusTable);
         }
     }
 
     private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String  rowKey = String.valueOf(globalTransactionDO.getTransactionId());
+        String rowKey = String.valueOf(globalTransactionDO.getTransactionId());
         Table table = null;
         Table statusTable = null;
         try {
@@ -326,10 +348,10 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         } catch (IOException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(table,statusTable);
+            IOUtil.close(table, statusTable);
         }
     }
-    
+
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         List<GlobalSession> globalSessions = new ArrayList<>();
@@ -384,7 +406,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             return globalSessions;
         } catch (IOException e) {
             throw new StoreException(e);
-        } finally{
+        } finally {
             IOUtil.close(statusTable);
         }
     }
@@ -396,7 +418,9 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     @Override
-    public GlobalSession readSession(String xid) { return this.readSession(xid, true); }
+    public GlobalSession readSession(String xid) {
+        return this.readSession(xid, true);
+    }
 
 
     public GlobalSession readSessionByTransactionId(Long transactionId, boolean withBranchSessions) {
@@ -418,13 +442,13 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             Map<String, String> branchMap = new HashMap<>();
 
             List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
-            for (Cell cell: result.rawCells()) {
+            for (Cell cell : result.rawCells()) {
                 String key = Bytes.toString(CellUtil.cloneQualifier(cell));
                 String value = Bytes.toString(CellUtil.cloneValue(cell));
-                if (key.contains("_")){
+                if (key.contains("_")) {
                     branchesMap.put(key, value);
-                }else{
-                    map.put(key,value);
+                } else {
+                    map.put(key, value);
                 }
             }
 
@@ -445,14 +469,14 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
                         branchMap.put(key.split("_")[1], branchesMap.get(key));
                     }
                 }
-                if (branchMap.size() != 0){
+                if (branchMap.size() != 0) {
                     BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
                     branchTransactionDOs.add(branchTransactionDO);
                 }
 
             }
 
-            return getGlobalSession(globalTransactionDO,branchTransactionDOs);
+            return getGlobalSession(globalTransactionDO, branchTransactionDOs);
 
         } catch (IOException e) {
             throw new StoreException(e);
@@ -475,37 +499,49 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private String buildStatusRowKey(int status, long transactionId) {
-        return status + "_" +transactionId;
+        return status + "_" + transactionId;
     }
 
     /**
      * only for test
      */
-    public void setHBaseConnection(Connection connection){ this.connection = connection; }
+    public void setHBaseConnection(Connection connection) {
+        this.connection = connection;
+    }
 
     /**
      * only for test
      */
-    public void setTableName(String tableName) { this.tableName = tableName; }
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
     /**
      * only for test
      */
-    public void setStatusTableName(String statusTableName) { this.statusTableName = statusTableName; }
+    public void setStatusTableName(String statusTableName) {
+        this.statusTableName = statusTableName;
+    }
 
     /**
      * only for test
      */
-    public void setGlobalCF(String globalCF) { this.globalCF = globalCF; }
+    public void setGlobalCF(String globalCF) {
+        this.globalCF = globalCF;
+    }
 
     /**
      * only for test
      */
-    public void setBranchesCF(String branchesCF) { this.branchesCF = branchesCF; }
+    public void setBranchesCF(String branchesCF) {
+        this.branchesCF = branchesCF;
+    }
 
     /**
      * only for test
      */
-    public void setTransactionIdCF(String transactionIdCF){ this.transactionIdCF = transactionIdCF; }
+    public void setTransactionIdCF(String transactionIdCF) {
+        this.transactionIdCF = transactionIdCF;
+    }
 
 }

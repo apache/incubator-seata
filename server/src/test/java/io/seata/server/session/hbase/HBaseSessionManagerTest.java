@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.session.hbase;
 
 import io.seata.common.XID;
@@ -43,7 +58,7 @@ public class HBaseSessionManagerTest {
         HBaseTransactionStoreManager transactionStoreManager = HBaseTransactionStoreManager.getInstance();
 
         Configuration configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum","hadoop1");
+        configuration.set("hbase.zookeeper.quorum", "hadoop1");
 
         connection = ConnectionFactory.createConnection(configuration);
 
@@ -120,9 +135,9 @@ public class HBaseSessionManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setClientId("storage-server:192.168.158.80:11934");
-        sessionManager.addBranchSession(globalSession,branchSession);
+        sessionManager.addBranchSession(globalSession, branchSession);
 
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -152,7 +167,7 @@ public class HBaseSessionManagerTest {
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
 
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -180,13 +195,13 @@ public class HBaseSessionManagerTest {
         sessionManager.addBranchSession(session, branchSession);
 
         GlobalSession globalSession = sessionManager.findGlobalSession(xid);
-        Assertions.assertEquals(session.getXid(),globalSession.getXid());
-        Assertions.assertEquals(session.getTransactionId(),globalSession.getTransactionId());
-        Assertions.assertEquals(branchSession.getXid(),globalSession.getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSession.getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSession.getBranchSessions().get(0).getClientId());
+        Assertions.assertEquals(session.getXid(), globalSession.getXid());
+        Assertions.assertEquals(session.getTransactionId(), globalSession.getTransactionId());
+        Assertions.assertEquals(branchSession.getXid(), globalSession.getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSession.getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSession.getBranchSessions().get(0).getClientId());
 
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -217,26 +232,26 @@ public class HBaseSessionManagerTest {
         condition.setXid(xid);
 
         List<GlobalSession> globalSessions = sessionManager.findGlobalSessions(condition);
-        Assertions.assertEquals(session.getXid(),globalSessions.get(0).getXid());
-        Assertions.assertEquals(session.getTransactionId(),globalSessions.get(0).getTransactionId());
-        Assertions.assertEquals(branchSession.getXid(),globalSessions.get(0).getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSessions.get(0).getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
+        Assertions.assertEquals(session.getXid(), globalSessions.get(0).getXid());
+        Assertions.assertEquals(session.getTransactionId(), globalSessions.get(0).getTransactionId());
+        Assertions.assertEquals(branchSession.getXid(), globalSessions.get(0).getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSessions.get(0).getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
         condition.setXid(null);
         condition.setTransactionId(session.getTransactionId());
         globalSessions = sessionManager.findGlobalSessions(condition);
-        Assertions.assertEquals(session.getXid(),globalSessions.get(0).getXid());
-        Assertions.assertEquals(session.getTransactionId(),globalSessions.get(0).getTransactionId());
-        Assertions.assertEquals(branchSession.getXid(),globalSessions.get(0).getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSessions.get(0).getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
+        Assertions.assertEquals(session.getXid(), globalSessions.get(0).getXid());
+        Assertions.assertEquals(session.getTransactionId(), globalSessions.get(0).getTransactionId());
+        Assertions.assertEquals(branchSession.getXid(), globalSessions.get(0).getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSessions.get(0).getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
         condition.setTransactionId(null);
         globalSessions = sessionManager.findGlobalSessions(condition);
         Assertions.assertNull(globalSessions);
 
-        sessionManager.removeBranchSession(session,branchSession);
+        sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
     }
 
@@ -272,7 +287,7 @@ public class HBaseSessionManagerTest {
         condition.setStatuses(statuses);
         sessionManager.findGlobalSessions(condition);
 
-        sessionManager.removeBranchSession(session,branchSession);
+        sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
     }
 
@@ -299,17 +314,17 @@ public class HBaseSessionManagerTest {
         branchSession.setClientId("storage-server:192.168.158.80:11934");
         sessionManager.addBranchSession(session, branchSession);
 
-        GlobalSession globalSession = sessionManager.findGlobalSession(xid,false);
-        Assertions.assertEquals(session.getXid(),globalSession.getXid());
-        Assertions.assertEquals(session.getTransactionId(),globalSession.getTransactionId());
-        Assertions.assertEquals(0,globalSession.getBranchSessions().size());
+        GlobalSession globalSession = sessionManager.findGlobalSession(xid, false);
+        Assertions.assertEquals(session.getXid(), globalSession.getXid());
+        Assertions.assertEquals(session.getTransactionId(), globalSession.getTransactionId());
+        Assertions.assertEquals(0, globalSession.getBranchSessions().size());
 
-        globalSession = sessionManager.findGlobalSession(xid,true);
-        Assertions.assertEquals(branchSession.getXid(),globalSession.getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSession.getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSession.getBranchSessions().get(0).getClientId());
+        globalSession = sessionManager.findGlobalSession(xid, true);
+        Assertions.assertEquals(branchSession.getXid(), globalSession.getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSession.getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSession.getBranchSessions().get(0).getClientId());
 
-        sessionManager.removeBranchSession(session,branchSession);
+        sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
     }
 
