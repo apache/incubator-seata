@@ -289,7 +289,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
     }
 
-    private static String getNacosAddrFileKey() {
+    public static String getNacosAddrFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
