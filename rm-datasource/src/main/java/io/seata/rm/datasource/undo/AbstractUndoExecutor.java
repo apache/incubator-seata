@@ -117,9 +117,10 @@ public abstract class AbstractUndoExecutor {
         if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
             return;
         }
+        PreparedStatement undoPST = null;
         try {
             String undoSQL = buildUndoSQL();
-            PreparedStatement undoPST = conn.prepareStatement(undoSQL);
+            undoPST = conn.prepareStatement(undoSQL);
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
@@ -141,6 +142,10 @@ public abstract class AbstractUndoExecutor {
             } else {
                 throw new SQLException(ex);
             }
+        }
+        finally {
+            //important for oracle
+            IOUtil.close(undoPST);
         }
 
     }
