@@ -16,8 +16,13 @@
 
 package io.seata.spring.boot.autoconfigure;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import io.seata.common.holder.ObjectHolder;
+
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 /**
  * @author slievrly
@@ -40,6 +45,16 @@ public class BasePropertiesTest {
             new String[] {"io.seata.spring.boot.autoconfigure.properties.config.test"});
         SeataCoreEnvironmentPostProcessor processor = new SeataCoreEnvironmentPostProcessor();
         processor.postProcessEnvironment(null, null);
+
+        // set new applicationContex for test cases in extension test classes
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContex);
+    }
+
+    @AfterEach
+    public void closeContext() {
+        if(applicationContex!=null) {
+            applicationContex.close();
+        }
     }
 
 }
