@@ -5,12 +5,12 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.config.Configuration;
 import io.seata.core.constants.ConfigurationKeys;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 
 /**
@@ -39,7 +39,7 @@ public class HBaseSingleConnectionFactory {
                     try {
                         org.apache.hadoop.conf.Configuration configuration = HBaseConfiguration.create();
                         configuration.set("hbase.zookeeper.quorum", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_ZOOKEEPER_QUORUM));
-//                        configuration.set("hbase.zookeeper.property.clientPort", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_PROPERTY_CLIENTPORT));
+                        configuration.set("hbase.zookeeper.property.clientPort", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_PROPERTY_CLIENT_PORT,PORT));
                         configuration.set("hbase.client.ipc.pool.type", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_POOL_TYPE,POOL_TYPE));
                         configuration.set("hbase.client.ipc.pool.size", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_POOL_SIZE,POOL_SIZE));
                         connection = ConnectionFactory.createConnection(configuration);
@@ -51,6 +51,16 @@ public class HBaseSingleConnectionFactory {
             }
         }
         return connection;
+    }
+
+    @PreDestroy
+    private void closeConnection() {
+        try {
+            connection.close();
+        } catch (IOException e) {
+            LOGGER.error("failure to close the connection of HBase!");
+        }
+
     }
 }
 

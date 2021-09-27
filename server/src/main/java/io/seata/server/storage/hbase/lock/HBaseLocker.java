@@ -6,9 +6,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockStore;
-import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
 
-import javax.sql.DataSource;
 import java.util.List;
 
 /**
@@ -102,5 +100,14 @@ public class HBaseLocker extends AbstractLocker {
             LOGGER.error("isLockable error, locks:{}", CollectionUtils.toString(locks), t);
             return false;
         }
+    }
+
+    /**
+     * Sets lock store.
+     *
+     * @param lockStore the lock store
+     */
+    public void setLockStore(LockStore lockStore) {
+        this.lockStore = lockStore;
     }
 }

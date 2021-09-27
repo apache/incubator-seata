@@ -101,11 +101,6 @@ public interface DefaultValues {
     String DEFAULT_STORE_HBASE_TABLE_BRANCHES = "branches";
 
     /**
-     * the constant DEFAULT_STORE_HBASE_TABLE_LOCK
-     */
-    String DEFAULT_STORE_HBASE_TABLE_LOCK = "lock";
-
-    /**
      * the constant DEFAULT_STORE_HBASE_STATUS_TABLE
      */
     String DEFAULT_STORE_HBASE_STATUS_TABLE = "statusTable";
@@ -114,6 +109,30 @@ public interface DefaultValues {
      * the constant DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION
      */
     String DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION = "transactionId";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_LOCK_KEY_TABLE
+     */
+    String DEFAULT_STORE_HBASE_LOCK_TABLE = "lockTable";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_LOCK_TABLE_LOCK
+     */
+    String DEFAULT_STORE_HBASE_LOCK_TABLE_LOCK = "lock";
+
+    /**
+     * DEFAULT_STORE_HBASE_LOCK_KEY_TABLE
+     */
+    String DEFAULT_STORE_HBASE_LOCK_KEY_TABLE = "lockKey";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_LOCK_KEY_TABLE_TRANSACTION
+     */
+    String DEFAULT_STORE_HBASE_LOCK_KEY_TABLE_TRANSACTION = "transactionId";
+
+    /**
+     * the constant DEFAULT_STORE_HBASE_LOCK_KEY_TABLE_TRANSACTION
+     */
 
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;

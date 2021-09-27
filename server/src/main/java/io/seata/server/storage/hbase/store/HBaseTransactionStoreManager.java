@@ -31,9 +31,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Date;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_NAMESPACE;
 import static io.seata.common.DefaultValues.DEFAULT_STORE_HBASE_STATUS_TABLE;
@@ -52,7 +54,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * The constant CONFIGURATION.
      */
-    protected Configuration CONFIG;
+    protected Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      *  The HBase Table
@@ -82,10 +84,6 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     private static volatile HBaseTransactionStoreManager instance;
 
     protected Connection connection;
-
-    private static Table table = null;
-
-    private static Table statusTransactionIdTable = null;
 
     /**
      * Get the instance.
@@ -142,6 +140,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         Long rowKey = branchTransactionDO.getTransactionId();
         Long branchId = branchTransactionDO.getBranchId();
+        Table table = null;
         try {
             table = connection.getTable(TableName.valueOf(tableName));
             Delete delete = new Delete(Bytes.toBytes(rowKey.toString()));
@@ -171,6 +170,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         Long rowKey = branchTransactionDO.getTransactionId();
         Long branchId = branchTransactionDO.getBranchId();
+        Table table = null;
         try {
             table = connection.getTable(TableName.valueOf(tableName));
             Get get = new Get(Bytes.toBytes(rowKey.toString()));
@@ -200,6 +200,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         Long rowKey = branchTransactionDO.getTransactionId();
         Long branchId = branchTransactionDO.getBranchId();
+        Table table = null;
         try {
             table = connection.getTable(TableName.valueOf(tableName));
             Put put = new Put(Bytes.toBytes(rowKey.toString()));
@@ -236,11 +237,12 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         Long rowKey = globalTransactionDO.getTransactionId();
         int status = globalTransactionDO.getStatus();
         String statusTransactionId = buildStatusRowKey(status, rowKey);
-
+        Table table = null;
+        Table statusTable = null;
         try {
-            statusTransactionIdTable = connection.getTable(TableName.valueOf(statusTableName));
+            statusTable = connection.getTable(TableName.valueOf(statusTableName));
             Delete statusDelete = new Delete(Bytes.toBytes(statusTransactionId));
-            statusTransactionIdTable.delete(statusDelete);
+            statusTable.delete(statusDelete);
 
             table = connection.getTable(TableName.valueOf(tableName));
             Delete delete = new Delete(Bytes.toBytes(rowKey.toString()));
@@ -251,19 +253,21 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         } catch (IOException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(table,statusTransactionIdTable);
+            IOUtil.close(table,statusTable);
         }
     }
 
     private boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         Long rowKey = globalTransactionDO.getTransactionId();
+        Table table = null;
+        Table statusTable = null;
         try {
-
-            statusTransactionIdTable = connection.getTable(TableName.valueOf(statusTableName));
+            statusTable = connection.getTable(TableName.valueOf(statusTableName));
             int previousGlobalStatus = readSession(globalTransactionDO.getXid(),false).getStatus().getCode();
             String preStatusTransactionId = buildStatusRowKey(previousGlobalStatus, rowKey);
             Delete delete = new Delete(Bytes.toBytes(preStatusTransactionId));
-            statusTransactionIdTable.delete(delete);
+            delete.addFamily(Bytes.toBytes(transactionIdCF));
+            statusTable.delete(delete);
 
             table = connection.getTable(TableName.valueOf(tableName));
             Put put = new Put(Bytes.toBytes(rowKey.toString()));
@@ -274,18 +278,20 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             String newStatusTransactionId = buildStatusRowKey(globalTransactionDO.getStatus(), rowKey);
             Put statusPut = new Put(Bytes.toBytes(newStatusTransactionId));
             statusPut.addColumn(Bytes.toBytes(transactionIdCF), Bytes.toBytes("transactionId"), Bytes.toBytes(String.valueOf(rowKey)));
-            statusTransactionIdTable.put(statusPut);
+            statusTable.put(statusPut);
 
             return true;
         } catch (IOException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(table,statusTransactionIdTable);
+            IOUtil.close(table,statusTable);
         }
     }
 
     private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String  rowKey = String.valueOf(globalTransactionDO.getTransactionId());
+        Table table = null;
+        Table statusTable = null;
         try {
             table = connection.getTable(TableName.valueOf(tableName));
             Put put = new Put(Bytes.toBytes(rowKey));
@@ -310,17 +316,17 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             put.addColumn(Bytes.toBytes(globalCF), Bytes.toBytes("gmtModified"), Bytes.toBytes(String.valueOf(new Date().getTime())));
             table.put(put);
 
-            statusTransactionIdTable = connection.getTable(TableName.valueOf(statusTableName));
+            statusTable = connection.getTable(TableName.valueOf(statusTableName));
             String statusRowKey = buildStatusRowKey(globalTransactionDO.getStatus(), globalTransactionDO.getTransactionId());
             Put statusPut = new Put(Bytes.toBytes(statusRowKey));
             statusPut.addColumn(Bytes.toBytes(transactionIdCF), Bytes.toBytes("transactionId"), Bytes.toBytes(String.valueOf(globalTransactionDO.getTransactionId())));
-            statusTransactionIdTable.put(statusPut);
+            statusTable.put(statusPut);
 
             return true;
         } catch (IOException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(table,statusTransactionIdTable);
+            IOUtil.close(table,statusTable);
         }
     }
     
@@ -350,19 +356,23 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
 
     private List<GlobalSession> readSession(GlobalStatus[] statuses) {
 
+        Table statusTable = null;
         List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
         List<Integer> statusKeys = new ArrayList<>();
         for (int i = 0; i < statuses.length; i++) {
             statusKeys.add(statuses[i].getCode());
         }
         try {
-            table = connection.getTable(TableName.valueOf(statusTableName));
+            statusTable = connection.getTable(TableName.valueOf(statusTableName));
 
             for (int code : statusKeys) {
                 Scan scan = new Scan();
+                scan.withStartRow(Bytes.toBytes(code));
                 scan.setFilter(new PrefixFilter(Bytes.toBytes(code)));
-                ResultScanner resultScanner = table.getScanner(scan);
-                for (Result result : resultScanner) {
+                ResultScanner resultScanner = statusTable.getScanner(scan);
+                Iterator<Result> results = resultScanner.iterator();
+                while (results.hasNext()) {
+                    Result result = results.next();
                     Long transactionId = Bytes.toLong(CellUtil.cloneValue(result.getColumnLatestCell(Bytes.toBytes(transactionIdCF), Bytes.toBytes("transactionId"))));
                     GlobalSession globalSession = this.readSessionByTransactionId(transactionId, true);
                     if (globalSession != null) {
@@ -375,7 +385,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         } catch (IOException e) {
             throw new StoreException(e);
         } finally{
-            IOUtil.close(table);
+            IOUtil.close(statusTable);
         }
     }
 
@@ -392,8 +402,9 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     public GlobalSession readSessionByTransactionId(Long transactionId, boolean withBranchSessions) {
 
         String rowKey = String.valueOf(transactionId);
+        Table table = null;
         try {
-            Table table = connection.getTable(TableName.valueOf(tableName));
+            table = connection.getTable(TableName.valueOf(tableName));
             Get get = new Get(Bytes.toBytes(rowKey));
             get.addFamily(Bytes.toBytes(globalCF));
             get.addFamily(Bytes.toBytes(branchesCF));
@@ -402,13 +413,11 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
             Map<String, String> map = new HashMap<String, String>();
 
             String branchId = null;
-            boolean newBranch;
-            Map<String, String> branchesMap = new HashMap<>();
+
+            Map<String, String> branchesMap = new TreeMap<>();
             Map<String, String> branchMap = new HashMap<>();
 
             List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
-
-
             for (Cell cell: result.rawCells()) {
                 String key = Bytes.toString(CellUtil.cloneQualifier(cell));
                 String value = Bytes.toString(CellUtil.cloneValue(cell));
@@ -417,7 +426,6 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
                 }else{
                     map.put(key,value);
                 }
-
             }
 
             GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO) BeanUtils.mapToObject(map, GlobalTransactionDO.class);
@@ -432,6 +440,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
                     } else {
                         BranchTransactionDO branchTransactionDO = (BranchTransactionDO) BeanUtils.mapToObject(branchMap, BranchTransactionDO.class);
                         branchTransactionDOs.add(branchTransactionDO);
+                        branchMap.clear();
 
                         branchMap.put(key.split("_")[1], branchesMap.get(key));
                     }
@@ -472,7 +481,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * only for test
      */
-    public void setConnection(Connection connection){ this.connection = connection; }
+    public void setHBaseConnection(Connection connection){ this.connection = connection; }
 
     /**
      * only for test

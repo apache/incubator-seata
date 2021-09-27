@@ -19,7 +19,6 @@ import java.util.List;
 
 /**
  * ClassName: HBaseSessionManager
- * Description:
  *
  * @author haishin
  */

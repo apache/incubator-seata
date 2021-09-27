@@ -161,11 +161,10 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
-        <!--HBase-->
+        <!-- HBase -->
         <dependency>
-            <groupId>com.aliyun.hbase</groupId>
-            <artifactId>alihbase-client</artifactId>
-            <version>2.8.4</version>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-client</artifactId>
         </dependency>
 
         <!-- logback -->

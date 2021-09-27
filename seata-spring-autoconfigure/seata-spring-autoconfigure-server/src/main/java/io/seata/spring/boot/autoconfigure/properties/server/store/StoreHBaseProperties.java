@@ -7,6 +7,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_PR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_POOL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_TABLE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_STATUS_TABLE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_LOCK_KEY_TABLE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_HBASE_LOCK_TABLE_PREFIX;
 
 /**
  * ClassName: StoreHBaseProperties
@@ -73,7 +75,6 @@ public class StoreHBaseProperties {
         private String name;
         private String globalCF;
         private String branchesCF;
-        private String lockCF;
 
         public String getName() {
             return name;
@@ -99,6 +100,45 @@ public class StoreHBaseProperties {
             this.branchesCF = branchesCF;
         }
 
+    }
+
+    @Component
+    @ConfigurationProperties(prefix = STORE_HBASE_STATUS_TABLE_PREFIX)
+    public static class Status {
+        private String name;
+        private String transactionIdCF;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getTransactionIdCF() {
+            return transactionIdCF;
+        }
+
+        public void setTransactionIdCF(String transactionIdCF) {
+            this.transactionIdCF = transactionIdCF;
+        }
+    }
+
+    @Component
+    @ConfigurationProperties(prefix = STORE_HBASE_LOCK_TABLE_PREFIX)
+    public static class Lock {
+        private String name;
+        private String lockCF;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
         public String getLockCF() {
             return lockCF;
         }
@@ -109,8 +149,8 @@ public class StoreHBaseProperties {
     }
 
     @Component
-    @ConfigurationProperties(prefix = STORE_HBASE_STATUS_TABLE_PREFIX)
-    public static class Status {
+    @ConfigurationProperties(prefix = STORE_HBASE_LOCK_KEY_TABLE_PREFIX)
+    public static class LockKey {
         private String name;
         private String transactionIdCF;
 
