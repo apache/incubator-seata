@@ -152,7 +152,7 @@ public class ConfigUrl {
         return this.parameters.get("application");
     }
 
-    public String getCLusterName(){
+    public String getCLusterName() {
         return this.parameters.get("cluster");
     }
 
