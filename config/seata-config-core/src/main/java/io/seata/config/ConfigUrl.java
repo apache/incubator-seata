@@ -144,6 +144,26 @@ public class ConfigUrl {
         return this.parameters.get("password");
     }
 
+    public String getWeight() {
+        return this.parameters.get("weight");
+    }
+
+    public String getApplication() {
+        return this.parameters.get("application");
+    }
+
+    public String getCLusterName(){
+        return this.parameters.get("cluster");
+    }
+
+    public String getAclToken() {
+        return this.parameters.get("aclToken");
+    }
+
+    public String getKey() {
+        return this.parameters.get("key");
+    }
+
     public static String getConfigTypeKey() {
         return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE;
     }

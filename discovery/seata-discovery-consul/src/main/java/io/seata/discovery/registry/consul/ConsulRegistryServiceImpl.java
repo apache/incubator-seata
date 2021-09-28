@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.seata.discovery.registry.RegistryURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,8 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private ConcurrentMap<String, Set<ConsulListener>> listenerMap;
     private ExecutorService notifierExecutor;
     private ConcurrentMap<String, ConsulNotifier> notifiers;
+
+    private static final RegistryURL REGISTRY_URL = RegistryURL.getInstance();
 
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -188,7 +191,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         if (client == null) {
             synchronized (ConsulRegistryServiceImpl.class) {
                 if (client == null) {
-                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    String serverAddr = StringUtils.isNotBlank(getConfigUrlKey()) ? REGISTRY_URL.getHost() : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
                     client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
@@ -203,8 +206,16 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return
      */
     private String getClusterName() {
-        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
+        if (StringUtils.isNotBlank(getConfigUrlKey())) {
+            return REGISTRY_URL.getCLusterName();
+        } else {
+            String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
+            return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
+        }
+    }
+
+    private static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
     }
 
     /**
@@ -224,8 +235,12 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      */
     private static String getAclToken() {
         String fileConfigKey = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, ACL_TOKEN);
-        String aclToken = StringUtils.isNotBlank(System.getProperty(ACL_TOKEN)) ? System.getProperty(ACL_TOKEN)
-                : FILE_CONFIG.getConfig(fileConfigKey);
+        String aclToken;
+        if (StringUtils.isNotBlank(System.getProperty(ACL_TOKEN))) {
+            aclToken = System.getProperty(ACL_TOKEN);
+        } else {
+            aclToken = StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey())) ? REGISTRY_URL.getAclToken() : FILE_CONFIG.getConfig(fileConfigKey);
+        }
         return StringUtils.isNotBlank(aclToken) ? aclToken : null;
     }
 

@@ -38,16 +38,12 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigFuture;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
+import io.seata.config.*;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.config.ConfigUrl.getConfigUrlKey;
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
@@ -72,6 +68,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private ExecutorService consulNotifierExecutor;
+    private static final ConfigUrl CONFIG_URL = ConfigUrl.getInstance();
     private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> CONFIG_LISTENERS_MAP
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile Properties seataConfig = new Properties();
@@ -219,7 +216,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         if (client == null) {
             synchronized (ConsulConfiguration.class) {
                 if (client == null) {
-                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    String serverAddr = StringUtils.isNotBlank(getConfigUrlKey()) ? CONFIG_URL.getHost() : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
                     client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
@@ -234,8 +231,12 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @return acl-token
      */
     private static String getAclToken() {
-        String aclToken = StringUtils.isNotBlank(System.getProperty(ACL_TOKEN)) ? System.getProperty(ACL_TOKEN)
-                : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
+        String aclToken;
+        if (StringUtils.isNotBlank(System.getProperty(ACL_TOKEN))) {
+            aclToken = System.getProperty(ACL_TOKEN);
+        } else {
+            aclToken = StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey())) ? CONFIG_URL.getAclToken() : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
+        }
         return StringUtils.isNotBlank(aclToken) ? aclToken : null;
     }
 
@@ -279,7 +280,8 @@ public class ConsulConfiguration extends AbstractConfiguration {
     }
 
     private static String getConsulConfigKey() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONSUL_CONFIG_KEY, DEFAULT_CONSUL_CONFIG_KEY_VALUE);
+        return StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey())) ?
+                CONFIG_URL.getKey() : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONSUL_CONFIG_KEY, DEFAULT_CONSUL_CONFIG_KEY_VALUE);
     }
 
     private static String getSeataConfigStr() {

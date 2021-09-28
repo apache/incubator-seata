@@ -132,6 +132,18 @@ public class RegistryURL {
         return this.parameters.get("application");
     }
 
+    public String getCLusterName() {
+        return this.parameters.get("cluster");
+    }
+
+    public String getAclToken() {
+        return this.parameters.get("aclToken");
+    }
+
+    public String getKey() {
+        return this.parameters.get("key");
+    }
+
     public Map<String, String> getParameters() {
         return parameters;
     }
