@@ -33,9 +33,11 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
 
+import io.seata.discovery.registry.RegistryURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +97,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private static long leaseId = 0;
     private EtcdLifeKeeper lifeKeeper = null;
     private Future<Boolean> lifeKeeperFuture = null;
+    private static final RegistryURL REGISTRY_URL = RegistryURL.getInstance();
+
     /**
      * a endpoint for unit testing
      */
@@ -264,6 +268,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
                     String testEndpoint = System.getProperty(TEST_ENDPONT);
                     if (StringUtils.isNotBlank(testEndpoint)) {
                         client = Client.builder().endpoints(testEndpoint).build();
+                    } else if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+                        client = Client.builder().endpoints(REGISTRY_URL.getHost()).build();
                     } else {
                         client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
                     }
@@ -279,8 +285,16 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @return
      */
     private String getClusterName() {
-        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+            return REGISTRY_URL.getParameters().get("cluster");
+        } else {
+            String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
+            return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
+        }
+    }
+
+    private static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
     }
 
     /**

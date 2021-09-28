@@ -50,12 +50,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigFuture;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
+import io.seata.config.*;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +74,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static final String ETCD_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "etcd3";
     private static final String DEFAULT_ETCD_CONFIG_KEY_VALUE = "seata.properties";
+    private static final ConfigUrl CONFIG_URL = ConfigUrl.getInstance();
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
@@ -236,9 +232,14 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static Client getClient() {
         if (client == null) {
             synchronized (EtcdConfiguration.class) {
+                String serverAddr;
                 if (client == null) {
-                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
-                        .build();
+                    if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+                        serverAddr = CONFIG_URL.getProtocol();
+                    } else {
+                        serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    }
+                    client = Client.builder().endpoints(serverAddr).build();
                 }
             }
         }
@@ -301,8 +302,17 @@ public class EtcdConfiguration extends AbstractConfiguration {
     }
 
     private static String getEtcdConfigKey() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+            return CONFIG_URL.getParameters().get("key");
+        } else {
+            return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
+        }
     }
+
+    private static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
+    }
+
     private static String getEtcdDataType() {
         return ConfigProcessor.resolverConfigDataType(getEtcdConfigKey());
     }
