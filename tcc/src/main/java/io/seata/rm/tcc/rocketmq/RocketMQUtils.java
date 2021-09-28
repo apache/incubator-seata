@@ -15,7 +15,6 @@
  */
 package io.seata.rm.tcc.rocketmq;
 
-import io.seata.common.util.ReflectionUtil;
 import java.net.UnknownHostException;
 import org.apache.rocketmq.client.Validators;
 import org.apache.rocketmq.client.exception.MQBrokerException;
@@ -30,10 +29,9 @@ import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 
 public class RocketMQUtils {
-    private static final String PRODUCER_IMPL = "defaultMQProducerImpl";
 
     public static SendResult halfSend(DefaultMQProducer defaultMQProducer,
-        Message msg) throws NoSuchFieldException, MQClientException {
+        Message msg) throws MQClientException {
         // ignore DelayTimeLevel parameter
         if (msg.getDelayTimeLevel() != 0) {
             MessageAccessor.clearProperty(msg, MessageConst.PROPERTY_DELAY_TIME_LEVEL);
@@ -43,7 +41,7 @@ public class RocketMQUtils {
 
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_TRANSACTION_PREPARED, "true");
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP, defaultMQProducer.getProducerGroup());
-        DefaultMQProducerImpl defaultMQProducerImpl = ReflectionUtil.getFieldValue(defaultMQProducer, PRODUCER_IMPL);
+        DefaultMQProducerImpl defaultMQProducerImpl = defaultMQProducer.getDefaultMQProducerImpl();
         SendResult sendResult = null;
         try {
             sendResult = defaultMQProducerImpl.send(msg);
@@ -63,14 +61,14 @@ public class RocketMQUtils {
     }
 
     public static void confirm(DefaultMQProducer defaultMQProducer, Message msg,
-        SendResult sendResult) throws NoSuchFieldException, UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
-        DefaultMQProducerImpl defaultMQProducerImpl = ReflectionUtil.getFieldValue(defaultMQProducer, PRODUCER_IMPL);
+        SendResult sendResult) throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
+        DefaultMQProducerImpl defaultMQProducerImpl = defaultMQProducer.getDefaultMQProducerImpl();
         defaultMQProducerImpl.endTransaction(msg, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
     }
 
     public static void cancel(DefaultMQProducer defaultMQProducer, Message msg,
-        SendResult sendResult) throws NoSuchFieldException, UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
-        DefaultMQProducerImpl defaultMQProducerImpl = ReflectionUtil.getFieldValue(defaultMQProducer, PRODUCER_IMPL);
+        SendResult sendResult) throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
+        DefaultMQProducerImpl defaultMQProducerImpl = defaultMQProducer.getDefaultMQProducerImpl();
         defaultMQProducerImpl.endTransaction(msg, sendResult, LocalTransactionState.ROLLBACK_MESSAGE, null);
     }
 }

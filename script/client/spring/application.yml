@@ -1,5 +1,6 @@
 seata:
   enabled: true
+  rocketmq-enabled: false
   application-id: applicationName
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
