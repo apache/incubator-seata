@@ -124,6 +124,14 @@ public class RegistryURL {
         return this.parameters.get("password");
     }
 
+    public String getWeight() {
+        return this.parameters.get("weight");
+    }
+
+    public String getApplication() {
+        return this.parameters.get("application");
+    }
+
     public Map<String, String> getParameters() {
         return parameters;
     }

@@ -30,7 +30,9 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryService;
+import io.seata.discovery.registry.RegistryURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +69,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final String DEFAULT_WEIGHT = "1";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private static final RegistryURL REGISTRY_URL = RegistryURL.getInstance();
     private static ConcurrentMap<String, Set<InetSocketAddress>> clusterAddressMap;
 
     private static volatile boolean subscribeListener = false;
@@ -205,8 +208,33 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         return eurekaProperties;
     }
 
+    private Properties getEurekaPropertiesWithUrl(boolean needRegister) {
+        Properties eurekaProperties = new Properties();
+        eurekaProperties.setProperty(EUREKA_CONFIG_REFRESH_KEY, String.valueOf(EUREKA_REFRESH_INTERVAL));
+
+        String url = REGISTRY_URL.getUrl();
+        if (StringUtils.isBlank(url)) {
+            throw new EurekaRegistryException("eureka server url can not be null!");
+        }
+        eurekaProperties.setProperty(EUREKA_CONFIG_SERVER_URL_KEY, url);
+
+        String weight = REGISTRY_URL.getWeight();
+        if (StringUtils.isNotBlank(weight)) {
+            eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, weight);
+        } else {
+            eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, DEFAULT_WEIGHT);
+        }
+
+        if (!needRegister) {
+            eurekaProperties.setProperty(EUREKA_CONFIG_SHOULD_REGISTER, "false");
+        }
+
+        return eurekaProperties;
+    }
+
     private String getApplicationName() {
-        String application = FILE_CONFIG.getConfig(getEurekaApplicationFileKey());
+        String application = StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey())) ?
+                REGISTRY_URL.getApplication() : FILE_CONFIG.getConfig(getEurekaApplicationFileKey());
         if (application == null) {
             application = DEFAULT_APPLICATION;
         }
@@ -221,7 +249,11 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
                         if (!needRegister) {
                             instanceConfig = new CustomEurekaInstanceConfig();
                         }
-                        ConfigurationManager.loadProperties(getEurekaProperties(needRegister));
+                        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+                            ConfigurationManager.loadProperties(getEurekaPropertiesWithUrl(needRegister));
+                        } else {
+                            ConfigurationManager.loadProperties(getEurekaProperties(needRegister));
+                        }
                         InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
                         applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
                         eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
@@ -244,6 +276,11 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private String getInstanceId() {
         return String.format("%s:%s:%d", instanceConfig.getIpAddress(), instanceConfig.getAppname(),
             instanceConfig.getNonSecurePort());
+    }
+
+
+    private static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
     }
 
     private String getEurekaServerUrlFileKey() {
