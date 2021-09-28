@@ -20,7 +20,7 @@ public class TmGrpcRemotingClient {
         stub = TransactionManagerServiceGrpc.newBlockingStub(channel);
     }
 
-    public TransactionManagerServiceBlockingStub getInstance() {
+    public static TransactionManagerServiceBlockingStub getInstance() {
         if (stub != null) {
             return stub;
         }

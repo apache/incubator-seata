@@ -20,7 +20,7 @@ public class RmGrpcRemotingClient {
         stub = ResourceManagerServiceGrpc.newBlockingStub(channel);
     }
 
-    public ResourceManagerServiceBlockingStub getInstance() {
+    public static ResourceManagerServiceBlockingStub getInstance() {
         if (stub != null) {
             return stub;
         }
