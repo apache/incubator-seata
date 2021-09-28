@@ -13,29 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.constant;
+package io.seata.config.processor;
+
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.MapUtil;
+import org.yaml.snakeyaml.Yaml;
+
+import java.util.Map;
+import java.util.Properties;
 
 /**
- * TCC Fence clean mode
+ * The Yaml Processor.
  *
- * @author kaka2code
+ * @author zhixing
  */
-public enum TCCFenceCleanMode {
+@LoadLevel(name = "yaml")
+public class ProcessorYaml implements Processor {
 
-    /**
-     * Close auto clean task
-     */
-    Close,
-    /**
-     * Clean by days
-     */
-    Day,
-    /**
-     * Clean by hours
-     */
-    Hour,
-    /**
-     * Clean by minutes
-     */
-    Minute;
+    @Override
+    public Properties processor(String config) {
+        Properties properties = new Properties();
+        Map<String, Object> configMap = MapUtil.asMap(new Yaml().load(config));
+        properties.putAll(MapUtil.getFlattenedMap(configMap));
+        return properties;
+    }
+
 }

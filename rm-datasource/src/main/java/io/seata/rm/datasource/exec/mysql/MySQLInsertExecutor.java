@@ -19,6 +19,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
@@ -82,7 +83,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
     public Map<String,List<Object>> getPkValues() throws SQLException {
         Map<String,List<Object>> pkValuesMap = null;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        Boolean isContainsPk = containsPK();
+        boolean isContainsPk = containsPK();
         //when there is only one pk in the table
         if (pkColumnNameList.size() == 1) {
             if (isContainsPk) {
@@ -138,16 +139,21 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, " +
-                        "statement could be polluted. Recommend you set the statement to return generated keys.");
+                LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
-                ResultSet firstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+                ResultSet rsFirstId = null;
+                try {
+                    rsFirstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
 
-                // If there is batch insert
-                // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
-                if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
-                    firstId.next();
-                    return autoGeneratePks(new BigDecimal(firstId.getString(1)), autoColumnName, updateCount);
+                    // If there is batch insert
+                    // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
+                    if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
+                        rsFirstId.next();
+                        BigDecimal firstId = new BigDecimal(rsFirstId.getString(1));
+                        return autoGeneratePks(firstId, autoColumnName, updateCount);
+                    }
+                } finally {
+                    IOUtil.close(rsFirstId);
                 }
             } else {
                 throw e;
@@ -186,6 +192,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         return pkValuesMap;
     }
 
+    @SuppressWarnings("lgtm[java/database-resource-leak]")
     @Override
     public List<Object> getPkValuesByDefault() throws SQLException {
         // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
@@ -198,11 +205,16 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         if (RESOURCE_ID_STEP_CACHE.containsKey(resourceId)) {
             step = RESOURCE_ID_STEP_CACHE.get(resourceId);
         } else {
-            ResultSet increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
+            ResultSet increment = null;
+            try {
+                increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
 
-            increment.next();
-            step = new BigDecimal(increment.getString(2));
-            RESOURCE_ID_STEP_CACHE.put(resourceId, step);
+                increment.next();
+                step = new BigDecimal(increment.getString(2));
+                RESOURCE_ID_STEP_CACHE.put(resourceId, step);
+            } finally {
+                IOUtil.close(increment);
+            }
         }
 
         List<Object> pkValues = new ArrayList<>();

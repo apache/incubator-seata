@@ -17,19 +17,21 @@ package io.seata.server.session;
 
 import java.io.File;
 import java.io.IOException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
+
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.StoreMode;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.boot.test.context.SpringBootTest;
 
+import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
@@ -40,6 +42,7 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
  * @author Wu
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SpringBootTest
 public class SessionHolderTest {
     private String pathname;
 
@@ -48,7 +51,7 @@ public class SessionHolderTest {
         String sessionStorePath = SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
         //delete file previously created
         pathname = sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME;
-        SessionHolder.init(StoreMode.REDIS.getName());
+       // SessionHolder.init(StoreMode.REDIS.getName());
     }
 
     @Test
