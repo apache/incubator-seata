@@ -34,11 +34,13 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
+import io.seata.config.ConfigUrl;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationKeys;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeType;
 import io.seata.config.processor.ConfigProcessor;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
@@ -73,6 +75,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final int THREAD_POOL_NUM = 1;
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
+    private static final ConfigUrl CONFIG_URL = ConfigUrl.getInstance();
     private static final String DEFAULT_CONFIG_PATH = ROOT_PATH + "/seata.properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
             + FILE_CONFIG_SPLIT_CHAR;
@@ -94,12 +97,25 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             synchronized (ZookeeperConfiguration.class) {
                 if (zkClient == null) {
                     ZkSerializer zkSerializer = getZkSerializer();
-                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
-                    int sessionTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT);
-                    int connectTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIMEOUT_KEY, DEFAULT_CONNECT_TIMEOUT);
+                    String serverAddr;
+                    int sessionTimeout;
+                    int connectTimeout;
+                    String username;
+                    String password;
+                    if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+                        serverAddr = CONFIG_URL.getHost();
+                        sessionTimeout = CONFIG_URL.getParameters().get("sessionTimeout") == null ? DEFAULT_SESSION_TIMEOUT : Integer.parseInt(CONFIG_URL.getParameters().get("sessionTimeout"));
+                        connectTimeout = CONFIG_URL.getParameters().get("connectTimeout") == null ? DEFAULT_CONNECT_TIMEOUT : Integer.parseInt(CONFIG_URL.getParameters().get("connectTimeout"));
+                        username = CONFIG_URL.getUsername();
+                        password = CONFIG_URL.getPassword();
+                    } else {
+                        serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                        sessionTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT);
+                        connectTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIMEOUT_KEY, DEFAULT_CONNECT_TIMEOUT);
+                        username = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME);
+                        password = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD);
+                    }
                     zkClient = new ZkClient(serverAddr, sessionTimeout, connectTimeout, zkSerializer);
-                    String username = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME);
-                    String password = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD);
                     if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
                         StringBuilder auth = new StringBuilder(username).append(":").append(password);
                         zkClient.addAuthInfo("digest", auth.toString().getBytes());
@@ -272,7 +288,15 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     }
 
     private static String getConfigPath() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(ConfigurationKeys.URL))) {
+            return CONFIG_URL.getPath() == null ? DEFAULT_CONFIG_PATH : CONFIG_URL.getPath();
+        } else {
+            return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
+        }
+    }
+
+    private static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
     }
 
     private static String getZkDataType() {
@@ -362,7 +386,12 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     private ZkSerializer getZkSerializer() {
         ZkSerializer zkSerializer = null;
-        String serializer = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERIALIZER_KEY);
+        String serializer;
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+            serializer = CONFIG_URL.getParameters().get("serializer");
+        } else {
+            serializer = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERIALIZER_KEY);
+        }
         if (StringUtils.isNotBlank(serializer)) {
             try {
                 Class<?> clazz = Class.forName(serializer);

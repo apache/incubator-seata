@@ -33,7 +33,9 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryService;
+import io.seata.discovery.registry.RegistryURL;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
@@ -66,6 +68,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final String CONNECT_TIME_OUT_KEY = "connectTimeout";
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
+    private static final RegistryURL REGISTRY_URL = RegistryURL.getInstance();
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE
@@ -218,11 +221,20 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         if (zkClient == null) {
             synchronized (ZookeeperRegisterServiceImpl.class) {
                 if (zkClient == null) {
-                    zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
-                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
-                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
+                    if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+                        String serverAddr = REGISTRY_URL.getHost();
+                        int sessionTimeout = REGISTRY_URL.getParameters().get("sessionTimeout") == null ? DEFAULT_SESSION_TIMEOUT : Integer.parseInt(REGISTRY_URL.getParameters().get("sessionTimeout"));
+                        int connectTimeout = REGISTRY_URL.getParameters().get("connectTimeout") == null ? DEFAULT_CONNECT_TIMEOUT : Integer.parseInt(REGISTRY_URL.getParameters().get("connectTimeout"));
+                        String username = REGISTRY_URL.getUsername();
+                        String password = REGISTRY_URL.getPassword();
+                        zkClient = buildZkClient(serverAddr, sessionTimeout, connectTimeout, username, password);
+                    } else {
+                        zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
+                                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
+                                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
+                                FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
+                                FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
+                    }
                 }
             }
         }
@@ -311,11 +323,19 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     private String getClusterName() {
-        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return FILE_CONFIG.getConfig(clusterConfigName);
+        if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
+            return REGISTRY_URL.getParameters().get("cluster");
+        } else {
+            String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
+            return FILE_CONFIG.getConfig(clusterConfigName);
+        }
     }
 
     private String getRegisterPathByPath(InetSocketAddress address) {
         return ROOT_PATH + getClusterName() + ZK_PATH_SPLIT_CHAR + NetUtil.toStringAddress(address);
+    }
+
+    private static String getConfigUrlKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.URL;
     }
 }
