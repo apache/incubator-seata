@@ -15,21 +15,33 @@
  */
 package io.seata.server;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import io.seata.core.rpc.Disposable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
 
 /**
  * @author spilledyear@outlook.com
  */
 @Component
-public class ServerRunner implements CommandLineRunner {
+public class ServerRunner implements CommandLineRunner, DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerRunner.class);
 
     private boolean started = Boolean.FALSE;
 
+    private static final List<Disposable> DISPOSABLE_LIST = new CopyOnWriteArrayList<>();
+
+    public static void addDisposable(Disposable disposable) {
+        DISPOSABLE_LIST.add(disposable);
+    }
 
     @Override
     public void run(String... args) {
@@ -50,5 +62,21 @@ public class ServerRunner implements CommandLineRunner {
 
     public boolean started() {
         return started;
+    }
+
+    @Override
+    public void destroy() throws Exception {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("destoryAll starting");
+        }
+
+        for (Disposable disposable : DISPOSABLE_LIST) {
+            disposable.destroy();
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("destoryAll finish");
+        }
     }
 }

@@ -75,7 +75,7 @@ public class EnhancedServiceNotFoundException extends NestableRuntimeException {
     }
 
     @Override
-    public Throwable fillInStackTrace() {
+    public synchronized Throwable fillInStackTrace() {
         return this;
     }
 }
