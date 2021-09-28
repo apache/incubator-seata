@@ -69,10 +69,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static io.seata.common.Constants.ASYNC_COMMITTING;
+import static io.seata.common.Constants.ASYNC_ROLLBACKING;
 import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.ASYNC_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
 
