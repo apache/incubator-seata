@@ -5,7 +5,7 @@ CREATE TABLE [undo_log]
     [branch_id]     bigint                NOT NULL,
     [xid]           varchar(128)          NOT NULL,
     [context]       varchar(128)          NOT NULL,
-    [rollback_info] varbinary(255)        NOT NULL,
+    [rollback_info] varbinary(max)        NOT NULL,
     [log_status]    int                   NOT NULL,
     [log_created]   datetime              NOT NULL,
     [log_modified]  datetime              NOT NULL,
