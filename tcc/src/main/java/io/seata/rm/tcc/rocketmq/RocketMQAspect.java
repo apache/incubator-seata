@@ -16,7 +16,6 @@
 package io.seata.rm.tcc.rocketmq;
 
 import io.seata.core.context.RootContext;
-import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -39,12 +38,10 @@ public class RocketMQAspect {
     public SendResult send(ProceedingJoinPoint point) throws Throwable {
         if (RootContext.inGlobalTransaction()) {
             LOGGER.info("DefaultMQProducer send is in Global Transaction, send() will be proxy");
-            DefaultMQProducer defaultMQProducer = (DefaultMQProducer) point.getTarget();
             Message message = (Message) point.getArgs()[0];
-            SendResult sendResult = tccRocketMQ.prepare(null, defaultMQProducer, message);
-            return sendResult;
+            return tccRocketMQ.prepare(null, message);
         } else {
-            return (SendResult) point.proceed(point.getArgs());
+            return (SendResult) point.proceed();
         }
     }
 }

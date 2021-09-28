@@ -13,8 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure;
+package io.seata.spring.annotation;
 
+import io.seata.rm.tcc.rocketmq.RocketMQAspect;
+import io.seata.rm.tcc.rocketmq.TCCRocketMQImpl;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -25,6 +27,6 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(RocketMQAutoConfiguration.class)
+@Import({RocketMQAspect.class,TCCRocketMQImpl.class})
 public @interface EnableRocketMQAspect {
 }

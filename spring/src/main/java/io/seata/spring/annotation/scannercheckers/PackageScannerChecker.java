@@ -58,7 +58,7 @@ public class PackageScannerChecker implements ScannerChecker {
 
     @Override
     public boolean check(Object bean, String beanName, @Nullable ConfigurableListableBeanFactory beanFactory) throws Exception {
-        if (SCANNABLE_PACKAGE_SET.isEmpty()) {
+        if (SCANNABLE_PACKAGE_SET.isEmpty() || bean.getClass().getName().startsWith("io.seata")) {
             // if empty, pass this checker
             return true;
         }

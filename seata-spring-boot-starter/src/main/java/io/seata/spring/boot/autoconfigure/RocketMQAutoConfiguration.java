@@ -16,21 +16,28 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.rm.tcc.rocketmq.RocketMQAspect;
+import io.seata.rm.tcc.rocketmq.TCCRocketMQ;
 import io.seata.rm.tcc.rocketmq.TCCRocketMQImpl;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@ConditionalOnClass(DefaultMQProducer.class)
+@ConditionalOnBean(DefaultMQProducer.class)
+@ConditionalOnExpression("${seata.enabled:true} && ${seata.rocketmq-enabled:true")
 public class RocketMQAutoConfiguration {
 
     @Bean
-    TCCRocketMQImpl tccRocketMQ() {
-        return new TCCRocketMQImpl();
+    @ConditionalOnMissingBean
+    public TCCRocketMQImpl tccRocketMQ(DefaultMQProducer defaultMQProducer) {
+        return new TCCRocketMQImpl(defaultMQProducer);
     }
 
     @Bean
-    public RocketMQAspect rocketMQAspect() {
-        RocketMQAspect rocketMQAspect = new RocketMQAspect(tccRocketMQ());
-        return rocketMQAspect;
+    public RocketMQAspect rocketMQAspect(TCCRocketMQ tccRocketMQ) {
+        return new RocketMQAspect(tccRocketMQ);
     }
 }

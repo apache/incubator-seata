@@ -16,10 +16,10 @@
 package io.seata.rm.tcc.rocketmq;
 
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
@@ -32,32 +32,30 @@ import org.slf4j.LoggerFactory;
 public class TCCRocketMQImpl implements TCCRocketMQ {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCRocketMQImpl.class);
 
-    private final ConcurrentHashMap<String, Map<String, Object>> map = new ConcurrentHashMap<>();
+    private final DefaultMQProducer defaultMQProducer;
+
+    public TCCRocketMQImpl(DefaultMQProducer defaultMQProducer) {
+        this.defaultMQProducer = defaultMQProducer;
+    }
 
     @Override
-    public SendResult prepare(BusinessActionContext context, DefaultMQProducer defaultMQProducer, Message message)
+    public SendResult prepare(BusinessActionContext context, Message message)
         throws MQBrokerException, RemotingException, NoSuchFieldException, InterruptedException, MQClientException {
-        String key = context.getXid() + context.getBranchId();
         SendResult sendResult = RocketMQUtils.halfSend(defaultMQProducer, message);
         LOGGER.info("RocketMQ message send prepare, xid = {}, bid = {}", context.getXid(), context.getBranchId());
-        Map<String, Object> params = new HashMap<>(3);
-        params.put("defaultMQProducer", defaultMQProducer);
+        Map<String, Object> params = new HashMap<>(2);
         params.put("message", message);
         params.put("sendResult", sendResult);
-        map.put(key, params);
+        BusinessActionContextUtil.addContext(params);
         return sendResult;
     }
 
     @Override
     public boolean commit(BusinessActionContext context)
         throws UnknownHostException, MQBrokerException, RemotingException, NoSuchFieldException, InterruptedException {
-        String key = context.getXid() + context.getBranchId();
-        Map<String, Object> params = map.get(key);
-        DefaultMQProducer producer = (DefaultMQProducer) params.get("defaultMQProducer");
-        Message message = (Message) params.get("message");
-        SendResult sendResult = (SendResult) params.get("sendResult");
-        RocketMQUtils.confirm(producer, message, sendResult);
-        map.remove(key);
+        Message message = context.getActionContext("message", Message.class);
+        SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
+        RocketMQUtils.confirm(defaultMQProducer, message, sendResult);
         LOGGER.info("RocketMQ message send commit, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
     }
@@ -65,12 +63,9 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
     @Override
     public boolean rollback(BusinessActionContext context)
         throws UnknownHostException, MQBrokerException, RemotingException, NoSuchFieldException, InterruptedException {
-        String key = context.getXid() + context.getBranchId();
-        Map<String, Object> params = map.get(key);
-        DefaultMQProducer producer = (DefaultMQProducer) params.get("defaultMQProducer");
-        Message message = (Message) params.get("message");
-        SendResult sendResult = (SendResult) params.get("sendResult");
-        RocketMQUtils.cancel(producer, message, sendResult);
+        Message message = context.getActionContext("message", Message.class);
+        SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
+        RocketMQUtils.cancel(defaultMQProducer, message, sendResult);
         LOGGER.info("RocketMQ message send rollback, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
     }

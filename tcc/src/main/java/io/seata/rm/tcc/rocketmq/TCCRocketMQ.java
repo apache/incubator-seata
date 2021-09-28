@@ -21,7 +21,6 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import java.net.UnknownHostException;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
-import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
@@ -31,9 +30,8 @@ public interface TCCRocketMQ {
     /**
      * RocketMQ half send
      *
-     * @param context           thre context
-     * @param defaultMQProducer the defaultMQProducer
-     * @param message           the message
+     * @param context thre context
+     * @param message the message
      * @return SendResult
      * @throws MQBrokerException
      * @throws RemotingException
@@ -42,14 +40,14 @@ public interface TCCRocketMQ {
      * @throws MQClientException
      */
     @TwoPhaseBusinessAction(name = "tccRocketMQ", commitMethod = "commit", rollbackMethod = "rollback")
-    SendResult prepare(BusinessActionContext context, DefaultMQProducer defaultMQProducer, Message message)
+    SendResult prepare(BusinessActionContext context, Message message)
         throws MQBrokerException, RemotingException, NoSuchFieldException, InterruptedException, MQClientException;
 
     /**
      * RocketMQ half send commit
      *
      * @param context the BusinessActionContext
-     * @return
+     * @return SendResult
      * @throws UnknownHostException
      * @throws MQBrokerException
      * @throws RemotingException

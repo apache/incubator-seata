@@ -64,6 +64,10 @@ public class SeataProperties {
      * Specifies which datasource bean are not eligible for auto-proxying
      */
     private String[] excludesForAutoProxying = {};
+    /**
+     * whether enable rocketmq integrate
+     */
+    private Boolean rocketmqEnabled = false;
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;

@@ -14,6 +14,12 @@
       "defaultValue": "AT"
     },
     {
+      "name": "seata.rocketmq-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
+      "description": "Enable seata integrate rocketmq"
+    },
+    {
       "name": "spring.cloud.alibaba.seata.application-id",
       "type": "java.lang.String",
       "description": "The application id, default value if '${spring.application.name}'.",

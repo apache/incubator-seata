@@ -33,7 +33,7 @@ public class RocketMQUtils {
     private static final String PRODUCER_IMPL = "defaultMQProducerImpl";
 
     public static SendResult halfSend(DefaultMQProducer defaultMQProducer,
-        Message msg) throws NoSuchFieldException, MQBrokerException, RemotingException, InterruptedException, MQClientException {
+        Message msg) throws NoSuchFieldException, MQClientException {
         // ignore DelayTimeLevel parameter
         if (msg.getDelayTimeLevel() != 0) {
             MessageAccessor.clearProperty(msg, MessageConst.PROPERTY_DELAY_TIME_LEVEL);
@@ -44,7 +44,12 @@ public class RocketMQUtils {
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_TRANSACTION_PREPARED, "true");
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP, defaultMQProducer.getProducerGroup());
         DefaultMQProducerImpl defaultMQProducerImpl = ReflectionUtil.getFieldValue(defaultMQProducer, PRODUCER_IMPL);
-        SendResult sendResult = defaultMQProducerImpl.send(msg);
+        SendResult sendResult = null;
+        try {
+            sendResult = defaultMQProducerImpl.send(msg);
+        } catch (Exception e) {
+            throw new MQClientException("send message Exception", e);
+        }
 
         switch (sendResult.getSendStatus()) {
             case FLUSH_DISK_TIMEOUT:
