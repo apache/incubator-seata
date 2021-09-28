@@ -21,9 +21,9 @@ public class GrpcClientBootstrap implements RemotingBootstrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcClientBootstrap.class);
     private GrpcClientConfig clientConfig;
     private Server server;
-    private ConcurrentHashMap<InetSocketAddress, Channel> channelMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<InetSocketAddress, Channel> channelMap = new ConcurrentHashMap<>();
 
-    public Channel getNewChannel(InetSocketAddress address) {
+    public static Channel getNewChannel(InetSocketAddress address) {
         if (channelMap.contains(address)) {
             return channelMap.get(address);
         }
