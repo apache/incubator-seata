@@ -1,8 +1,8 @@
 package io.seata.core.rpc.grpc;
 
 import io.grpc.Channel;
-import io.seata.core.model.grpc.TransactionManagerServiceGrpc;
-import io.seata.core.model.grpc.TransactionManagerServiceGrpc.TransactionManagerServiceBlockingStub;
+import io.seata.core.model.grpc.BranchTransactionServiceGrpc;
+import io.seata.core.model.grpc.BranchTransactionServiceGrpc.BranchTransactionServiceBlockingStub;
 
 import java.net.InetSocketAddress;
 
@@ -10,19 +10,19 @@ import java.net.InetSocketAddress;
  * @author xilou31
  **/
 public class GrpcRemotingServer {
-    private static TransactionManagerServiceBlockingStub stub;
+    private static BranchTransactionServiceBlockingStub stub;
     private static Channel channel;
 
     public static void init(String serverAddress, Integer port) {
         channel = GrpcServerBootstrap.getNewChannel(new InetSocketAddress(serverAddress, port));
-        stub = TransactionManagerServiceGrpc.newBlockingStub(channel);
+        stub = BranchTransactionServiceGrpc.newBlockingStub(channel);
     }
 
-    public static TransactionManagerServiceBlockingStub getInstance() {
+    public static BranchTransactionServiceBlockingStub getInstance() {
         if (stub != null) {
             return stub;
         }
-        stub = TransactionManagerServiceGrpc.newBlockingStub(channel);
+        stub = BranchTransactionServiceGrpc.newBlockingStub(channel);
         return stub;
     }
 }
