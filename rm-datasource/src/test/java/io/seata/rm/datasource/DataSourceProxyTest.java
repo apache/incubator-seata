@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -69,5 +70,17 @@ public class DataSourceProxyTest {
 
         dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.MYSQL);
         Assertions.assertEquals(proxy.getResourceId(), "jdbc:mock:xxx");
+
+        //test for sqlserver
+        DruidDataSource dataSourceForSqlServer = new DruidDataSource();
+        dataSourceForSqlServer.setDriver(mockDriver);
+        dataSourceForSqlServer.setUsername(username);
+        dataSourceForSqlServer.setPassword("password");
+        dataSourceForSqlServer.setUrl("jdbc:mock:xxx;database=test;other=other");
+        DataSourceProxy proxyForSqlServer = new DataSourceProxy(dataSourceForSqlServer);
+        Field dbTypeFieldForSqlServer = proxyForSqlServer.getClass().getDeclaredField("dbType");
+        dbTypeFieldForSqlServer.setAccessible(true);
+        dbTypeFieldForSqlServer.set(proxyForSqlServer, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("jdbc:mock:xxx;database=test", proxyForSqlServer.getResourceId());
     }
 }
