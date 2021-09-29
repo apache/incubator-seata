@@ -15,6 +15,7 @@
  */
 package io.seata.rm;
 
+import io.seata.core.rpc.grpc.RmGrpcRemotingClient;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 
 /**
@@ -35,6 +36,10 @@ public class RMClient {
         rmNettyRemotingClient.setResourceManager(DefaultResourceManager.get());
         rmNettyRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
         rmNettyRemotingClient.init();
+
+        RmGrpcRemotingClient rmGrpcRemotingClient = new RmGrpcRemotingClient();
+        rmGrpcRemotingClient.setResourceManager(new GrpcResourceManager());
+        RmGrpcRemotingClient.init("localhost", 50051);
     }
 
 }

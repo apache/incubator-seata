@@ -15,6 +15,7 @@
  */
 package io.seata.tm;
 
+import io.seata.core.rpc.grpc.TmGrpcRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
 /**
@@ -45,6 +46,10 @@ public class TMClient {
     public static void init(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup, accessKey, secretKey);
         tmNettyRemotingClient.init();
+
+        TmGrpcRemotingClient tmGrpcRemotingClient = new TmGrpcRemotingClient();
+        tmGrpcRemotingClient.setTransactionManager(new GrpcTransactionManager());
+        TmGrpcRemotingClient.init("localhost", 50051);
     }
 
 }
