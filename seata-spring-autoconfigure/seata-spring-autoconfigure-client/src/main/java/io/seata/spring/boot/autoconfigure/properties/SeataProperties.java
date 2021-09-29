@@ -33,6 +33,10 @@ public class SeataProperties {
      */
     private boolean enabled = true;
     /**
+     * whether enable rocketmq integrate
+     */
+    private boolean rocketmqEnabled = false;
+    /**
      * application id
      */
     private String applicationId;
@@ -64,10 +68,6 @@ public class SeataProperties {
      * Specifies which datasource bean are not eligible for auto-proxying
      */
     private String[] excludesForAutoProxying = {};
-    /**
-     * whether enable rocketmq integrate
-     */
-    private Boolean rocketmqEnabled = false;
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
@@ -79,6 +79,14 @@ public class SeataProperties {
     public SeataProperties setEnabled(boolean enabled) {
         this.enabled = enabled;
         return this;
+    }
+
+    public boolean isRocketmqEnabled() {
+        return rocketmqEnabled;
+    }
+
+    public void setRocketmqEnabled(boolean rocketmqEnabled) {
+        this.rocketmqEnabled = rocketmqEnabled;
     }
 
     public String getApplicationId() {
