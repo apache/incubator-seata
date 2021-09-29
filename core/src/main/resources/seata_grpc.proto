@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package grpc;
 
-option java_package = "io.seata.core.protocol.grpc";
+option java_package = "io.seata.core.model.grpc";
 
 enum ResultCode {
   ResultCodeFailed = 0;
