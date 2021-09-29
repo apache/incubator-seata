@@ -28,24 +28,26 @@ public class Blacklist {
 
     private static final long DEFAULT_CONFIG_TIMEOUT = 5000;
 
+    private static final String IP_CONFIG_SPLIT_CHAR = ";";
+
     private List<String> ipList = new CopyOnWriteArrayList<>();
 
-    Blacklist() {
-        String ips = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_BLACKLIST);
-        if(ips != null) {
-            String[] ipArray = ips.split(";");
+    public Blacklist(String blacklistConfig) {
+        String ips = ConfigurationFactory.getInstance().getConfig(blacklistConfig);
+        if (ips != null) {
+            String[] ipArray = ips.split(IP_CONFIG_SPLIT_CHAR);
             Collections.addAll(ipList, ipArray);
         }
 
-        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.SERVER_BLACKLIST, new ConfigurationChangeListener() {
+        ConfigurationFactory.getInstance().addConfigListener(blacklistConfig, new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
-                String currentIps = ConfigurationFactory.getInstance().getLatestConfig(ConfigurationKeys.SERVER_BLACKLIST,null, DEFAULT_CONFIG_TIMEOUT);
+                String currentIps = ConfigurationFactory.getInstance().getLatestConfig(blacklistConfig, null, DEFAULT_CONFIG_TIMEOUT);
                 clear();
-                if(currentIps == null) {
+                if (currentIps == null) {
                     return;
                 }
-                String[] currentIpArray = currentIps.split(";");
+                String[] currentIpArray = currentIps.split(IP_CONFIG_SPLIT_CHAR);
                 Collections.addAll(ipList, currentIpArray);
             }
         });

@@ -18,6 +18,7 @@ package io.seata.server.auth;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.NetUtil;
+import io.seata.core.constants.ConfigurationKeys;
 
 /**
  * @author slievrly
@@ -25,12 +26,14 @@ import io.seata.common.util.NetUtil;
 @LoadLevel(name = "defaultCheckAuthHandler", order = 100)
 public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 
-    Blacklist blacklist = new Blacklist();
+    Blacklist tmBlacklist = new Blacklist(ConfigurationKeys.TM_BLACKLIST);
+
+    Blacklist rmBlacklist = new Blacklist(ConfigurationKeys.RM_BLACKLIST);
 
     @Override
     public boolean doRegTransactionManagerCheck(ChannelHandlerContext ctx) {
         String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
-        if(blacklist.contains(ip)) {
+        if (tmBlacklist.contains(ip)) {
             return false;
         }
         return true;
@@ -39,7 +42,7 @@ public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
     @Override
     public boolean doRegResourceManagerCheck(ChannelHandlerContext ctx) {
         String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
-        if(blacklist.contains(ip)) {
+        if (rmBlacklist.contains(ip)) {
             return false;
         }
         return true;

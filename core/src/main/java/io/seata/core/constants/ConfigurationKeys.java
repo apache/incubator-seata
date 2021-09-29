@@ -450,9 +450,14 @@ public interface ConfigurationKeys {
     String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
 
     /**
-     * The constant SERVER_BLACKLIST
+     * The constant TM_BLACKLIST
      */
-    String SERVER_BLACKLIST = SERVER_PREFIX + "blacklist";
+    String TM_BLACKLIST = SERVER_PREFIX + "tmBlacklist";
+
+    /**
+     * The constant RM_BLACKLIST
+     */
+    String RM_BLACKLIST = SERVER_PREFIX + "rmBlacklist";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.
