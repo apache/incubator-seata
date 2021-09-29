@@ -43,7 +43,7 @@ dependency-reduced-pom.xml
 /distribution/sessionStore/
 /distribution/*/sessionStore/
 /file_store/
-/core/src/main/java/io/seata/core/protocol/grpc/
+/core/src/main/java/io/seata/core/model/grpc/
 
 # system ignore
 .DS_Store
