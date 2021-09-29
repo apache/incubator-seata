@@ -63,7 +63,7 @@ public class RegRmProcessor implements RemotingProcessor {
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
-            if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
+            if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(ctx)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;

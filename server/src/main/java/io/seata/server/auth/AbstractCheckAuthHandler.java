@@ -15,10 +15,9 @@
  */
 package io.seata.server.auth;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
 
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
@@ -32,22 +31,22 @@ public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandl
         ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
 
     @Override
-    public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {
+    public boolean regTransactionManagerCheckAuth(ChannelHandlerContext ctx) {
         if (!ENABLE_CHECK_AUTH) {
             return true;
         }
-        return doRegTransactionManagerCheck(request);
+        return doRegTransactionManagerCheck(ctx);
     }
 
-    public abstract boolean doRegTransactionManagerCheck(RegisterTMRequest request);
+    public abstract boolean doRegTransactionManagerCheck(ChannelHandlerContext ctx);
 
     @Override
-    public boolean regResourceManagerCheckAuth(RegisterRMRequest request) {
+    public boolean regResourceManagerCheckAuth(ChannelHandlerContext ctx) {
         if (!ENABLE_CHECK_AUTH) {
             return true;
         }
-        return doRegResourceManagerCheck(request);
+        return doRegResourceManagerCheck(ctx);
     }
 
-    public abstract boolean doRegResourceManagerCheck(RegisterRMRequest request);
+    public abstract boolean doRegResourceManagerCheck(ChannelHandlerContext ctx);
 }

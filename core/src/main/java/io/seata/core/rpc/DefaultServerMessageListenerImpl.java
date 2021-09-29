@@ -112,7 +112,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
-            if (checkAuthHandler == null || checkAuthHandler.regResourceManagerCheckAuth(message)) {
+            if (checkAuthHandler == null || checkAuthHandler.regResourceManagerCheckAuth(ctx)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
@@ -144,7 +144,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
-            if (checkAuthHandler == null || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
+            if (checkAuthHandler == null || checkAuthHandler.regTransactionManagerCheckAuth(ctx)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;

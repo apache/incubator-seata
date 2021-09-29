@@ -64,7 +64,7 @@ public class RegTmProcessor implements RemotingProcessor {
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
-            if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
+            if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(ctx)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;

@@ -34,6 +34,7 @@ public class ServerProperties {
     private Boolean enableCheckAuth = true;
     private Integer retryDeadThreshold = 130000;
     private Integer servicePort;
+    private String blacklist = null;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -86,6 +87,15 @@ public class ServerProperties {
 
     public ServerProperties setServicePort(Integer servicePort) {
         this.servicePort = servicePort;
+        return this;
+    }
+
+    public String getBlacklist() {
+        return blacklist;
+    }
+
+    public ServerProperties setBlacklist(String blacklist) {
+        this.blacklist = blacklist;
         return this;
     }
 }

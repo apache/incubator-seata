@@ -1,0 +1,70 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package io.seata.server.auth;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+
+public class Blacklist {
+
+    private static final long DEFAULT_CONFIG_TIMEOUT = 5000;
+
+    private List<String> ipList = new CopyOnWriteArrayList<>();
+
+    Blacklist() {
+        String ips = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_BLACKLIST);
+        if(ips != null) {
+            String[] ipArray = ips.split(";");
+            Collections.addAll(ipList, ipArray);
+        }
+
+        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.SERVER_BLACKLIST, new ConfigurationChangeListener() {
+            @Override
+            public void onChangeEvent(ConfigurationChangeEvent event) {
+                String currentIps = ConfigurationFactory.getInstance().getLatestConfig(ConfigurationKeys.SERVER_BLACKLIST,null, DEFAULT_CONFIG_TIMEOUT);
+                clear();
+                if(currentIps == null) {
+                    return;
+                }
+                String[] currentIpArray = currentIps.split(";");
+                Collections.addAll(ipList, currentIpArray);
+            }
+        });
+    }
+
+    public void setIpList(List<String> ipList) {
+        this.ipList = ipList;
+    }
+
+    public List<String> getIpList() {
+        return ipList;
+    }
+
+    public void clear() {
+        ipList.clear();
+    }
+
+    public boolean contains(String address) {
+        return ipList.contains(address);
+    }
+}
+
