@@ -1,15 +1,15 @@
 package io.seata.core.rpc.grpc;
 
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalBeginRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalBeginResponse;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalCommitRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalCommitResponse;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalReportRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalReportResponse;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalRollbackRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalRollbackResponse;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalStatusRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalStatusResponse;
+import io.seata.core.model.grpc.SeataGrpc.GlobalBeginRequest;
+import io.seata.core.model.grpc.SeataGrpc.GlobalBeginResponse;
+import io.seata.core.model.grpc.SeataGrpc.GlobalCommitRequest;
+import io.seata.core.model.grpc.SeataGrpc.GlobalCommitResponse;
+import io.seata.core.model.grpc.SeataGrpc.GlobalReportRequest;
+import io.seata.core.model.grpc.SeataGrpc.GlobalReportResponse;
+import io.seata.core.model.grpc.SeataGrpc.GlobalRollbackRequest;
+import io.seata.core.model.grpc.SeataGrpc.GlobalRollbackResponse;
+import io.seata.core.model.grpc.SeataGrpc.GlobalStatusRequest;
+import io.seata.core.model.grpc.SeataGrpc.GlobalStatusResponse;
 
 /**
  * @author xilou31

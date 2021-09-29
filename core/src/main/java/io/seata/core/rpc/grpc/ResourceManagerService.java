@@ -1,14 +1,14 @@
 package io.seata.core.rpc.grpc;
 
 import io.grpc.stub.StreamObserver;
-import io.seata.core.protocol.grpc.ResourceManagerServiceGrpc;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchRegisterRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchRegisterResponse;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchReportRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchReportResponse;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchSession.BranchType;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalLockQueryRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.GlobalLockQueryResponse;
+import io.seata.core.model.grpc.ResourceManagerServiceGrpc;
+import io.seata.core.model.grpc.SeataGrpc.BranchRegisterRequest;
+import io.seata.core.model.grpc.SeataGrpc.BranchRegisterResponse;
+import io.seata.core.model.grpc.SeataGrpc.BranchReportRequest;
+import io.seata.core.model.grpc.SeataGrpc.BranchReportResponse;
+import io.seata.core.model.grpc.SeataGrpc.BranchSession.BranchType;
+import io.seata.core.model.grpc.SeataGrpc.GlobalLockQueryRequest;
+import io.seata.core.model.grpc.SeataGrpc.GlobalLockQueryResponse;
 
 import java.util.concurrent.ConcurrentHashMap;
 

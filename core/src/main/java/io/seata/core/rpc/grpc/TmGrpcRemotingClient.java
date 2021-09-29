@@ -1,8 +1,8 @@
 package io.seata.core.rpc.grpc;
 
 import io.grpc.Channel;
-import io.seata.core.protocol.grpc.TransactionManagerServiceGrpc;
-import io.seata.core.protocol.grpc.TransactionManagerServiceGrpc.TransactionManagerServiceBlockingStub;
+import io.seata.core.model.grpc.TransactionManagerServiceGrpc;
+import io.seata.core.model.grpc.TransactionManagerServiceGrpc.TransactionManagerServiceBlockingStub;
 
 import java.net.InetSocketAddress;
 

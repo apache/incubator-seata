@@ -1,8 +1,8 @@
 package io.seata.core.rpc.grpc;
 
 import io.grpc.Channel;
-import io.seata.core.protocol.grpc.ResourceManagerServiceGrpc;
-import io.seata.core.protocol.grpc.ResourceManagerServiceGrpc.ResourceManagerServiceBlockingStub;
+import io.seata.core.model.grpc.ResourceManagerServiceGrpc;
+import io.seata.core.model.grpc.ResourceManagerServiceGrpc.ResourceManagerServiceBlockingStub;
 
 import java.net.InetSocketAddress;
 

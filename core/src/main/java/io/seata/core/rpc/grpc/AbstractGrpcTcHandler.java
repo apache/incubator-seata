@@ -1,9 +1,9 @@
 package io.seata.core.rpc.grpc;
 
-import io.seata.core.protocol.grpc.SeataGrpc.BranchCommitRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchCommitResponse;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchRollbackRequest;
-import io.seata.core.protocol.grpc.SeataGrpc.BranchRollbackResponse;
+import io.seata.core.model.grpc.SeataGrpc.BranchCommitRequest;
+import io.seata.core.model.grpc.SeataGrpc.BranchCommitResponse;
+import io.seata.core.model.grpc.SeataGrpc.BranchRollbackRequest;
+import io.seata.core.model.grpc.SeataGrpc.BranchRollbackResponse;
 
 /**
  * @author xilou31
