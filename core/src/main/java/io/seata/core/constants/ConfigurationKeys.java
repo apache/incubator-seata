@@ -309,6 +309,31 @@ public interface ConfigurationKeys {
     String ENV_SEATA_PORT_KEY = "SEATA_PORT";
 
     /**
+     * The constant RATELIMIT_PREFIX.
+     */
+    String RATELIMIT_PREFIX = SERVER_PREFIX + "ratelimit.";
+
+    /**
+     * The constant ENABLE_SERVER_RATELIMIT.
+     */
+    String ENABLE_SERVER_RATELIMIT = RATELIMIT_PREFIX + "enableServerRatelimit";
+
+    /**
+     * The constant REQUESTS_PER_SECOND.
+     */
+    String REQUESTS_PER_SECOND = RATELIMIT_PREFIX + "requestsPerSecond";
+
+    /**
+     * The constant BURST.
+     */
+    String BURST = RATELIMIT_PREFIX + "burst";
+
+    /**
+     * The constant DELAY.
+     */
+    String DELAY = RATELIMIT_PREFIX + "delay";
+
+    /**
      * The constant RECOVERY_PREFIX.
      */
     String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";

@@ -18,10 +18,12 @@ package io.seata.server.coordinator;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -60,6 +62,7 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.ratelimit.RateLimiter;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -128,6 +131,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
+    private static final boolean ENABLE_SERVER_RATELIMIT = ConfigurationFactory.getInstance().getBoolean(
+            ConfigurationKeys.ENABLE_SERVER_RATELIMIT, false);
+
     private final ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("RetryRollbacking", 1));
 
@@ -150,6 +156,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final EventBus eventBus = EventBusManager.get();
 
     private static volatile DefaultCoordinator instance;
+
+    private Map<Class, RateLimiter> ratelimiterMap = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new Default coordinator.
@@ -431,6 +439,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
+        if (ENABLE_SERVER_RATELIMIT) {
+            if (ratelimiterMap.get(transactionRequest.getClass()) == null) {
+                RateLimiter ratelimiter = EnhancedServiceLoader.load(RateLimiter.class);
+                ratelimiterMap.put(transactionRequest.getClass(), ratelimiter);
+            }
+            if (!ratelimiterMap.get(transactionRequest.getClass()).canPass()) {
+                return null;
+            }
+        }
 
         return transactionRequest.handle(context);
     }
