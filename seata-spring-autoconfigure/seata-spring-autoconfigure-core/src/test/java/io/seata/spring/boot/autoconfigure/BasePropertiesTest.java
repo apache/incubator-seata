@@ -16,14 +16,18 @@
 
 package io.seata.spring.boot.autoconfigure;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import io.seata.common.holder.ObjectHolder;
+
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 /**
  * @author slievrly
  */
-public class BaseConfigPropertiesTest {
+public class BasePropertiesTest {
     protected static AnnotationConfigApplicationContext applicationContex;
     protected static final String STR_TEST_AAA = "aaa";
     protected static final String STR_TEST_BBB = "bbb";
@@ -32,17 +36,23 @@ public class BaseConfigPropertiesTest {
     protected static final String STR_TEST_EEE = "eee";
     protected static final String STR_TEST_FFF = "fff";
 
-    @BeforeAll
-    public static void setUp() {
+    protected static final long LONG_TEST_ONE = 1L;
+    protected static final long LONG_TEST_TWO = 2L;
+
+    @BeforeEach
+    public void setUp() {
         applicationContex = new AnnotationConfigApplicationContext(
-            new String[] {"io.seata.spring.boot.autoconfigure.properties.test"});
+            new String[] {"io.seata.spring.boot.autoconfigure.properties.config.test"});
         SeataCoreEnvironmentPostProcessor processor = new SeataCoreEnvironmentPostProcessor();
         processor.postProcessEnvironment(null, null);
+
+        // set new applicationContex for test cases in extension test classes
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContex);
     }
 
-    @AfterAll
-    public static void tearDown() {
-        if (null != applicationContex) {
+    @AfterEach
+    public void closeContext() {
+        if(applicationContex!=null) {
             applicationContex.close();
         }
     }
