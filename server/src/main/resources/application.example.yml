@@ -1,5 +1,5 @@
 server:
-  port: 9091
+  port: 7091
 
 spring:
   application:
@@ -30,6 +30,7 @@ seata:
     consul:
       server-addr: 127.0.0.1:8500
       acl-token:
+      key: seata.properties
     apollo:
       appId: seata-server
       apollo-meta: http://192.168.1.204:8801
@@ -46,9 +47,11 @@ seata:
       node-path: /seata/seata.properties
     etcd3:
       server-addr: http://localhost:2379
+      key: seata.properties
   registry:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
+    preferred-networks: 30.240.*
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -91,6 +94,7 @@ seata:
       address-wait-time: 3000
 
   server:
+    service-port: 8091
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
@@ -130,6 +134,7 @@ seata:
       global-table: global_table
       branch-table: branch_table
       lock-table: lock_table
+      distributed-lock-table: distributed_lock
       query-limit: 100
       max-wait: 5000
     redis:

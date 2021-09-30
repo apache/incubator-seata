@@ -15,12 +15,8 @@
  */
 package io.seata.config.zk;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.lang.reflect.Constructor;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -43,6 +39,7 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.processor.ConfigProcessor;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
@@ -91,6 +88,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     /**
      * Instantiates a new Zookeeper configuration.
      */
+    @SuppressWarnings("lgtm[java/unsafe-double-checked-locking-init-order]")
     public ZookeeperConfiguration() {
         if (zkClient == null) {
             synchronized (ZookeeperConfiguration.class) {
@@ -122,16 +120,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
+        String value = seataConfig.getProperty(dataId);
         if (value != null) {
             return value;
         }
-
-        value = seataConfig.getProperty(dataId);
-        if (value != null) {
-            return value;
-        }
-
         FutureTask<String> future = new FutureTask<>(() -> {
             String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
             if (!zkClient.exists(path)) {
@@ -269,8 +261,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         String configPath = getConfigPath();
         String config = zkClient.readData(configPath, true);
         if (StringUtils.isNotBlank(config)) {
-            try (Reader reader = new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
-                seataConfig.load(reader);
+            try {
+                seataConfig = ConfigProcessor.processConfig(config, getZkDataType());
             } catch (IOException e) {
                 LOGGER.error("init config properties error", e);
             }
@@ -281,6 +273,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     private static String getConfigPath() {
         return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
+    }
+
+    private static String getZkDataType() {
+        return ConfigProcessor.resolverConfigDataType(getConfigPath());
     }
 
     private static String getSeataConfigStr() {
@@ -320,8 +316,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             if (s.equals(getConfigPath())) {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(o.toString())) {
-                    try (Reader reader = new InputStreamReader(new ByteArrayInputStream(o.toString().getBytes()), StandardCharsets.UTF_8)) {
-                        seataConfigNew.load(reader);
+                    try {
+                        seataConfigNew = ConfigProcessor.processConfig(o.toString(), getZkDataType());
+
                     } catch (IOException e) {
                         LOGGER.error("load config properties error", e);
                         return;

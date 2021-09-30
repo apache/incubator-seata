@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.session.redis;
 
 import java.io.IOException;
@@ -37,18 +36,21 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author funkye
  */
+@SpringBootTest
 public class RedisSessionManagerTest {
     private static RedisServer server = null;
     private static SessionManager sessionManager = null;
 
     @BeforeAll
-    public static void start() throws IOException {
+    public static void start(ApplicationContext context) throws IOException {
         server = RedisServer.newRedisServer(6789);
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();

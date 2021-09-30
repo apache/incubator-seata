@@ -15,18 +15,10 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import io.seata.spring.boot.autoconfigure.properties.LogProperties;
+import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
@@ -90,49 +82,6 @@ public class CorePropertiesTest {
         assertEquals(100, context.getBean(LogProperties.class).getExceptionRate());
     }
 
-    @Test
-    public void testConfigApolloProperties() {
-        assertEquals("seata-server", context.getBean(ConfigApolloProperties.class).getAppId());
-        assertEquals("http://192.168.1.204:8801", context.getBean(ConfigApolloProperties.class).getApolloMeta());
-    }
-
-    @Test
-    public void testConfigConsulProperties() {
-        assertEquals("127.0.0.1:8500", context.getBean(ConfigConsulProperties.class).getServerAddr());
-    }
-
-    @Test
-    public void testConfigEtcd3Properties() {
-        assertEquals("http://localhost:2379", context.getBean(ConfigEtcd3Properties.class).getServerAddr());
-    }
-
-    @Test
-    public void testConfigFileProperties() {
-        assertEquals("file.conf", context.getBean(ConfigFileProperties.class).getName());
-    }
-
-    @Test
-    public void testConfigNacosProperties() {
-        assertEquals("localhost:8848", context.getBean(ConfigNacosProperties.class).getServerAddr());
-        assertEquals("", context.getBean(ConfigNacosProperties.class).getNamespace());
-    }
-
-    @Test
-    public void testConfigProperties() {
-        assertEquals("file", context.getBean(ConfigProperties.class).getType());
-    }
-
-    @Test
-    public void testConfigZooKeeperProperties() {
-        assertEquals("127.0.0.1:2181", context.getBean(ConfigZooKeeperProperties.class).getServerAddr());
-        assertEquals(6000L, context.getBean(ConfigZooKeeperProperties.class).getSessionTimeout());
-        assertEquals(2000L, context.getBean(ConfigZooKeeperProperties.class).getConnectTimeout());
-    }
-
-    @Test
-    public void testConfigCustomProperties() {
-        assertEquals("", context.getBean(ConfigCustomProperties.class).getName());
-    }
 
     @Test
     public void testRegistryConsulProperties() {
