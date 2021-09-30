@@ -89,12 +89,12 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
 
     @Override
     public void init() {
+        this.numOfToken = 1;
         double requestsPerSecond = Double.parseDouble(CONFIG.getConfig(ConfigurationKeys.REQUESTS_PER_SECOND));
         this.microSecondsPerToken = TimeUnit.SECONDS.toMicros(1L) / requestsPerSecond;
         this.burst = CONFIG.getInt(ConfigurationKeys.BURST, (int)microSecondsPerToken);
-        this.delay = CONFIG.getBoolean(ConfigurationKeys.DELAY, DEFAULT_SERVER_RATELIMIT_DELAY);
-        this.numOfToken = 1;
         this.lastUpdateTimeInMicros = microTime();
+        this.delay = CONFIG.getBoolean(ConfigurationKeys.DELAY, DEFAULT_SERVER_RATELIMIT_DELAY);
     }
 
     @Override

@@ -113,7 +113,7 @@ public class TokenBucketRateLimiterTest {
     }
 
     public static void testPerformanceOfTokenBucketLimiterWithDelay() {
-        RateLimiter rateLimiter = new TokenBucketLimiter(1000,true);
+        RateLimiter rateLimiter = new TokenBucketLimiter(1000, true);
         int threads = 50;
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<Runnable>(), new NamedThreadFactory("test3", false));
