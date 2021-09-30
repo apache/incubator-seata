@@ -100,10 +100,8 @@ public class DruidJdbcHelper {
             ScriptRunner runner = new ScriptRunner(connection);
             runner.setErrorLogWriter(null);
             runner.setLogWriter(null);
-            // 执行SQL脚本
             runner.runScript(Resources.getResourceAsReader(file));
         } finally {
-            // 关闭连接
             connection.close();
         }
     }
