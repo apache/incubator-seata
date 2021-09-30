@@ -21,6 +21,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockStore;
+import org.apache.hadoop.hbase.client.Connection;
 
 import java.util.List;
 
@@ -124,5 +125,12 @@ public class HBaseLocker extends AbstractLocker {
      */
     public void setLockStore(LockStore lockStore) {
         this.lockStore = lockStore;
+    }
+
+    /**
+     * only for test.
+     */
+    public HBaseLocker(Connection connection, String lockTable, String lockKeyTable, String lockCF, String transactionIdCF) {
+        lockStore = new LockStoreHBaseDao(connection, lockTable, lockKeyTable, lockCF, transactionIdCF);
     }
 }

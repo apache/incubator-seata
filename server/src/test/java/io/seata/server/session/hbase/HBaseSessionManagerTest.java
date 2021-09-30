@@ -55,19 +55,13 @@ public class HBaseSessionManagerTest {
     @BeforeAll
     public static void start(ApplicationContext context) throws Exception {
         HBaseSessionManager tempSessionManager = new HBaseSessionManager();
-        HBaseTransactionStoreManager transactionStoreManager = HBaseTransactionStoreManager.getInstance();
 
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", "hadoop1");
 
         connection = ConnectionFactory.createConnection(configuration);
-
-        transactionStoreManager.setHBaseConnection(connection);
-        transactionStoreManager.setTableName("seata:table");
-        transactionStoreManager.setStatusTableName("seata:statusTable");
-        transactionStoreManager.setGlobalCF("global");
-        transactionStoreManager.setBranchesCF("branches");
-        transactionStoreManager.setTransactionIdCF("transactionId");
+        HBaseTransactionStoreManager transactionStoreManager = new HBaseTransactionStoreManager(connection,
+                "seata:statusTable", "seata:table", "global", "branches", "transactionId");
 
         tempSessionManager.setTransactionStoreManager(transactionStoreManager);
         sessionManager = tempSessionManager;

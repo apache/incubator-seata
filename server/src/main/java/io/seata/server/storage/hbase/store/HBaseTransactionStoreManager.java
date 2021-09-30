@@ -139,6 +139,7 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
                 DEFAULT_STORE_HBASE_STATUS_TABLE_TRANSACTION);
     }
 
+
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
 
@@ -502,46 +503,17 @@ public class HBaseTransactionStoreManager extends AbstractTransactionStoreManage
         return status + "_" + transactionId;
     }
 
+
     /**
      * only for test
      */
-    public void setHBaseConnection(Connection connection) {
+    public HBaseTransactionStoreManager(Connection connection, String statusTableName, String tableName, String globalCF, String branchesCF, String transactionIdCF) {
+
         this.connection = connection;
-    }
-
-    /**
-     * only for test
-     */
-    public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
-
-    /**
-     * only for test
-     */
-    public void setStatusTableName(String statusTableName) {
         this.statusTableName = statusTableName;
-    }
-
-    /**
-     * only for test
-     */
-    public void setGlobalCF(String globalCF) {
         this.globalCF = globalCF;
-    }
-
-    /**
-     * only for test
-     */
-    public void setBranchesCF(String branchesCF) {
         this.branchesCF = branchesCF;
-    }
-
-    /**
-     * only for test
-     */
-    public void setTransactionIdCF(String transactionIdCF) {
         this.transactionIdCF = transactionIdCF;
     }
-
 }

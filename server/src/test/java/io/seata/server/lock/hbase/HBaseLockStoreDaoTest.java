@@ -53,12 +53,7 @@ public class HBaseLockStoreDaoTest {
         configuration.set("hbase.zookeeper.quorum", "hadoop1");
 
         connection = ConnectionFactory.createConnection(configuration);
-        lockStoreHBaseDao = new LockStoreHBaseDao();
-        lockStoreHBaseDao.setHBaseConnection(connection);
-        lockStoreHBaseDao.setLockTableName("seata:lockTable");
-        lockStoreHBaseDao.setLockKeyTableName("seata:lockKey");
-        lockStoreHBaseDao.setLockCF("lock");
-        lockStoreHBaseDao.setTransactionIdCF("transactionId");
+        lockStoreHBaseDao = new LockStoreHBaseDao(connection, "seata:lockTable", "seata:lockKey", "lock", "transactionId");
     }
 
     @Test

@@ -78,7 +78,7 @@ public class LockStoreHBaseDao implements LockStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);
 
-    protected Connection connection;
+    protected Connection connection = null;
 
     /**
      * The Column Family
@@ -95,19 +95,24 @@ public class LockStoreHBaseDao implements LockStore {
     protected String lockKeyTableName;
 
     public LockStoreHBaseDao() {
-        connection = HBaseSingleConnectionFactory.getInstance();
+        if (connection == null)
+            connection = HBaseSingleConnectionFactory.getInstance();
         String namespace = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_NAMESPACE,
                 DEFAULT_STORE_HBASE_NAMESPACE);
         String lockTable = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_LOCK_TABLE_NAME,
                 DEFAULT_STORE_HBASE_LOCK_TABLE);
-        lockTableName = namespace + ":" + lockTable;
-        lockCF = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_LOCK_TABLE_LOCK,
-                DEFAULT_STORE_HBASE_LOCK_TABLE_LOCK);
+        if (StringUtils.isBlank(lockTableName))
+            lockTableName = namespace + ":" + lockTable;
+        if (StringUtils.isBlank(lockCF))
+            lockCF = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_LOCK_TABLE_LOCK,
+                    DEFAULT_STORE_HBASE_LOCK_TABLE_LOCK);
         String lockKeyTable = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_LOCK_KEY_TABLE_NAME,
                 DEFAULT_STORE_HBASE_LOCK_KEY_TABLE);
-        lockKeyTableName = namespace + ":" + lockKeyTable;
-        transactionIdCF = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_LOCK_KEY_TABLE_TRANSACTION,
-                DEFAULT_STORE_HBASE_LOCK_KEY_TABLE_TRANSACTION);
+        if (StringUtils.isBlank(lockKeyTableName))
+            lockKeyTableName = namespace + ":" + lockKeyTable;
+        if (StringUtils.isBlank(transactionIdCF))
+            transactionIdCF = CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_LOCK_KEY_TABLE_TRANSACTION,
+                    DEFAULT_STORE_HBASE_LOCK_KEY_TABLE_TRANSACTION);
 
     }
 
@@ -419,23 +424,11 @@ public class LockStoreHBaseDao implements LockStore {
     /**
      * only for test
      */
-    public void setHBaseConnection(Connection connection) {
+    public LockStoreHBaseDao(Connection connection, String lockTableName, String lockKeyTableName, String lockCF, String transactionIdCF) {
         this.connection = connection;
-    }
-
-    public void setLockCF(String lockCF) {
-        this.lockCF = lockCF;
-    }
-
-    public void setLockTableName(String lockTableName) {
         this.lockTableName = lockTableName;
-    }
-
-    public void setLockKeyTableName(String lockKeyTableName) {
+        this.lockCF = lockCF;
         this.lockKeyTableName = lockKeyTableName;
-    }
-
-    public void setTransactionIdCF(String transactionIdCF) {
         this.transactionIdCF = transactionIdCF;
     }
 }

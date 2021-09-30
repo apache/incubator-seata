@@ -52,13 +52,8 @@ public class HBaseLockManagerImplTest {
         configuration.set("hbase.zookeeper.quorum", "hadoop1");
 
         connection = ConnectionFactory.createConnection(configuration);
-        lockStoreHBaseDao = new LockStoreHBaseDao();
-        lockStoreHBaseDao.setHBaseConnection(connection);
-        lockStoreHBaseDao.setLockTableName("seata:lockTable");
-        lockStoreHBaseDao.setLockCF("lock");
-        lockStoreHBaseDao.setLockKeyTableName("seata:lockKey");
-        lockStoreHBaseDao.setTransactionIdCF("transactionId");
-        lockManager = new HBaseLockManagerForTest(lockStoreHBaseDao);
+
+        lockManager = new HBaseLockManagerForTest();
     }
 
     @Test
@@ -147,16 +142,12 @@ public class HBaseLockManagerImplTest {
 
     public static class HBaseLockManagerForTest extends HBaseLockManager {
 
-        protected LockStoreHBaseDao lockStore;
-
-        public HBaseLockManagerForTest(LockStoreHBaseDao db) {
-            lockStore = db;
+        public HBaseLockManagerForTest() {
         }
 
         @Override
         public Locker getLocker(BranchSession branchSession) {
-            HBaseLocker locker = new HBaseLocker();
-            locker.setLockStore(lockStore);
+            HBaseLocker locker = new HBaseLocker(connection, "seata:lockTable", "seata:lockKey", "lock", "transactionId");
             return locker;
         }
     }

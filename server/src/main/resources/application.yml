@@ -1,5 +1,5 @@
 server:
-  port: 9091
+  port: 7091
 
 spring:
   application:
@@ -19,49 +19,12 @@ logging:
 seata:
   config:
     # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
-    type: nacos
-    nacos:
-      server-addr: 127.0.0.1:8848
-      namespace: Public
-      group: SEATA_GROUP
-      username: "nacos"
-      password: "nacos"
-      data-id: seataServer.properties
+    type: file
   registry:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
-    type: nacos
-    nacos:
-      application: seata-server
-      server-addr: 127.0.0.1:8848
-      group: SEATA_GROUP
-      namespace:
-      cluster: default
-      username: "nacos"
-      password: "nacos"
+    type: file
   store:
-    # support: file 、 db 、 redis、 hbase
-    mode: hbase
-    session:
-      mode: hbase
-    lock:
-      mode: hbase
-    hbase:
-      pool:
-        type: Reusable
-        size: 1
-      zookeeper-quorum: hadoop1
-      property-clientPort: 2181
-      namespace: seata
-      table:
-        name: table
-        globalCF: global
-        branchesCF: branches
-      status:
-        name: statusTable
-        transactionIdCF: transactionId
-      lock:
-        name: lockTable
-        lockCF: lock
-      lock-key:
-        name: lockKeyTable
-        transactionIdCF: transactionId
+    # support: file 、 db 、 redis
+    mode: file
+  server:
+    service-port: 8091

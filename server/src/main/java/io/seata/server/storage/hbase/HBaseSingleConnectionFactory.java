@@ -38,6 +38,8 @@ public class HBaseSingleConnectionFactory {
 
     private volatile static Connection connection = null;
 
+    private static final String QUORUM = "hadoop1";
+
     private static final int PORT = 2181;
 
     private static final int POOL_SIZE = 1;
@@ -52,7 +54,7 @@ public class HBaseSingleConnectionFactory {
                 if (connection == null) {
                     try {
                         org.apache.hadoop.conf.Configuration configuration = HBaseConfiguration.create();
-                        configuration.set("hbase.zookeeper.quorum", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_ZOOKEEPER_QUORUM));
+                        configuration.set("hbase.zookeeper.quorum", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_ZOOKEEPER_QUORUM, QUORUM));
                         configuration.set("hbase.zookeeper.property.clientPort", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_PROPERTY_CLIENT_PORT, PORT));
                         configuration.set("hbase.client.ipc.pool.type", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_POOL_TYPE, POOL_TYPE));
                         configuration.set("hbase.client.ipc.pool.size", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_POOL_SIZE, POOL_SIZE));
