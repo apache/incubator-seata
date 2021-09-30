@@ -22,9 +22,35 @@ seata:
     type: file
   registry:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
-    type: file
+    type: eureka
+    eureka:
+      service-url: http://localhost:8761/eureka
+      application: my_test_tx_group
+      weight: 1
   store:
     # support: file 、 db 、 redis
-    mode: file
-  server:
-    service-port: 8091
+#<<<<<<< HEAD
+    mode: elasticsearch
+    session:
+      mode: elasticsearch
+    lock:
+      mode: elasticsearch
+    db:
+      datasource: druid
+      db-type: mysql
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1:3306/seata?serverTimezone=UTC&useSSL=false&rewriteBatchedStatements=true
+      user: root
+      password: root
+      min-conn: 5
+      max-conn: 100
+      global-table: global_table
+      branch-table: branch_table
+      lock-table: lock_table
+      query-limit: 100
+      max-wait: 5000
+#=======
+#    mode: file
+#  server:
+#    service-port: 8091
+#>>>>>>> upstream/develop
