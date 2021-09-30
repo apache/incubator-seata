@@ -34,6 +34,7 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
@@ -79,7 +80,7 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
                 String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
                 pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
             } else {
-                pkValuesMap = getPkValuesByColumn();
+                pkValuesMap = getPkValuesWithNoColumn();
             }
         } else {
             //when there is a composite primary key
@@ -180,5 +181,24 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
             }
         }
         return pkValues;
+    }
+
+    private Map<String, List<Object>> getPkValuesWithNoColumn() throws SQLException {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        List<String> insertParamsValue = recognizer.getInsertParamsValue();
+        boolean insertWithNoPkValue = insertParamsValue.isEmpty();
+        if (!insertWithNoPkValue) {
+            String paramsValue = insertParamsValue.get(0);
+            String[] split = paramsValue.split(",");
+            insertWithNoPkValue = getTableMeta().getAllColumns().size() > split.length;
+        }
+
+        if (insertWithNoPkValue) {
+            //like 'insert into table_name values (args1, args2)' with no column_list and pkValue
+            String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
+            return Collections.singletonMap(columnName, getGeneratedKeys());
+        } else {
+            return getPkValuesByColumn();
+        }
     }
 }

@@ -109,7 +109,7 @@ public class SqlServerInsertExecutorTest {
         mockParametersPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
-        ;
+
         doReturn(Arrays.asList(new Object[]{PK_VALUE})).when(insertExecutor).getGeneratedKeys();
         Map<String, List<Object>> pkValuesByAuto = insertExecutor.getPkValues();
 

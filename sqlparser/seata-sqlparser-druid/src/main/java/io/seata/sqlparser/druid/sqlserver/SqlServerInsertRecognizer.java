@@ -126,7 +126,17 @@ public class SqlServerInsertRecognizer extends BaseSqlServerRecognizer implement
 
     @Override
     public List<String> getInsertParamsValue() {
-        return null;
+        List<SQLInsertStatement.ValuesClause> valuesList = ast.getValuesList();
+        List<String> list = new ArrayList<>();
+        for (SQLInsertStatement.ValuesClause m : valuesList) {
+            String values = m.toString().replace("VALUES", "").trim();
+            // when all params is constant or have default value, the length of values less than 1
+            if (values.length() > 1) {
+                values = values.substring(1, values.length() - 1);
+            }
+            list.add(values);
+        }
+        return list;
     }
 
     @Override
