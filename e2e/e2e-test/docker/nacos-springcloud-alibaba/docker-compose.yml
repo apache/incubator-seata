@@ -15,8 +15,6 @@ services:
       - SEATA_PORT=8091
 #      - STORE_MODE=db
     restart: on-failure
-#    entrypoint: ['sh','/seata-server/resources/nacos-config2.sh','-h nacos-server -p 8848 -g SEATA_GROUP -t 5a3c7d6c-f497-4d68-a71a-2e5e3340b3ca -u nacos -w nacos']
-  # 此mysql专门用于nacos的数据存储
   mysql:
     hostname: mysql
     image: nacos/nacos-mysql:5.7
@@ -40,8 +38,8 @@ services:
       MYSQL_DATABASE: storage
       MYSQL_USER: user
       MYSQL_PASSWORD: user
-    ports:
-      - "3307:3306"
+#    ports:
+#      - "3307:3306"
     networks:
       - host
   consumer:
@@ -49,8 +47,8 @@ services:
     hostname: consumer
     networks:
       - host
-    ports:
-      - "8081:8081"
+#    ports:
+#      - "8081:8081"
     depends_on:
       - nacos
       - seata-server
@@ -61,8 +59,8 @@ services:
     hostname: provider
     networks:
       - host
-    ports:
-      - "8080:8080"
+#    ports:
+#      - "8080:8080"
     depends_on:
       - nacos
       - db-mysql
@@ -75,23 +73,14 @@ services:
     image: nacos/nacos-server:2.0.2
     env_file:
       - ./nacos-standlone-mysql.env
-#    volumes:
-#      - ./volume/seata/config:/seata/config
-#      - ./standalone-logs/:/home/nacos/logs
-#      - ./init.d/custom.properties:/home/nacos/init.d/custom.properties
-    ports:
-      - "8848:8848"
+#    ports:
+#      - "8848:8848"
 #      - "9848:9848"
 #      - "9555:9555"
     depends_on:
       - mysql
     restart: on-failure
-#    entrypoint: ['bin/docker-startup.sh','&&','sh /seata/config/nacos-config.sh -h nacos-server -p 8848 -g SEATA_GROUP -u nacos -w nacos']
-#    ,'&&','/seata/config/nacos-config.sh -h nacos-server -p 8848 -g SEATA_GROUP -u nacos -w nacos'
-#  shrun:
-#    networks:
-#      - host
-#    image: shrun:0.0.1
+
 
 
 networks:
