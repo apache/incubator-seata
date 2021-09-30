@@ -51,6 +51,7 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean acquireLock(List<RowLock> locks) {
+        LOGGER.info("acquireLock(List<RowLock> locks)");
         if (CollectionUtils.isEmpty(locks)) {
             // no lock
             return true;
@@ -67,6 +68,7 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean releaseLock(List<RowLock> locks) {
+        LOGGER.info("releaseLock(List<RowLock> locks)");
         if (CollectionUtils.isEmpty(locks)) {
             // no lock
             return true;
@@ -83,6 +85,7 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean releaseLock(String xid, Long branchId) {
+        LOGGER.info("releaseLock(String xid, Long branchId)");
         try {
             return lockStore.unLock(xid, branchId);
         } catch (StoreException e) {
@@ -95,6 +98,7 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean releaseLock(String xid, List<Long> branchIds) {
+        LOGGER.info("releaseLock(String xid, List<Long> branchIds)");
         if (CollectionUtils.isEmpty(branchIds)) {
             // no lock
             return true;
@@ -111,6 +115,7 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> locks) {
+        LOGGER.info("isLockable(List<RowLock> locks)");
         if (CollectionUtils.isEmpty(locks)) {
             // no lock
             return true;

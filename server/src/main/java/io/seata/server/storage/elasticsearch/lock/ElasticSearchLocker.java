@@ -12,6 +12,7 @@ import io.seata.server.storage.elasticsearch.ClientConnectDAO;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.TotalHits;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -121,13 +122,13 @@ public class ElasticSearchLocker extends AbstractLocker {
     }
 
     private boolean acquireLockDO(List<LockDO> lockDOs){
-
+        //需要refresh一下
+//        LOGGER.info("acquireLockDO(List<LockDO> lockDOs)");
         RestHighLevelClient client = clientConnect.ClientConnect();
         if (lockDOs.size() > 1) {
             lockDOs = lockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
         }
         try{
-
             boolean canlock = true;
             Set<String> esExistLockRowKeys = new HashSet<>();
             String currentXid = lockDOs.get(0).getXid();
@@ -135,11 +136,13 @@ public class ElasticSearchLocker extends AbstractLocker {
             for(int i = 0; i<lockDOs.size(); i++){
                 rowKeys.add(lockDOs.get(i).getRowKey());
             }
+            RefreshRequest refreshRequest = new RefreshRequest(DEFAULT_LOCK_INDEX);
             SearchRequest request = new SearchRequest();
             SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
             sourceBuilder.query(QueryBuilders.termsQuery(ES_INDEX_LOCK_ROWKEY, rowKeys));
             request.indices(DEFAULT_LOCK_INDEX);
             request.source(sourceBuilder);
+            client.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);
             SearchHits searchHits = response.getHits();
             TotalHits totalHits = searchHits.getTotalHits();
@@ -203,6 +206,7 @@ public class ElasticSearchLocker extends AbstractLocker {
     }
 
     private boolean insertLockDO(RestHighLevelClient client, LockDO lockDO){
+//        LOGGER.info("insertLockDO(RestHighLevelClient client, LockDO lockDO)");
         IndexRequest request = new IndexRequest();
         request.index(DEFAULT_LOCK_INDEX);
         request.id(lockDO.getRowKey());
@@ -223,6 +227,7 @@ public class ElasticSearchLocker extends AbstractLocker {
 
     private boolean insertLockDO(RestHighLevelClient client, List<LockDO> lockDOS){
         //批量插入操作
+//        LOGGER.info("insertLockDO(RestHighLevelClient client, List<LockDO> lockDOS)");
         BulkRequest request = new BulkRequest();
         for(LockDO lockDO : lockDOS){
             Map<String, Object> jsonMap = ElasticSearchUtils.toESjsonMap(lockDO, ES_INDEX_LOCK_ROWKEY);
@@ -241,7 +246,7 @@ public class ElasticSearchLocker extends AbstractLocker {
     }
 
     private boolean unLock(List<LockDO> lockDOS){
-        LOGGER.info("Lock is releasing List<LockDO> lockDOS");
+//        LOGGER.info("unLock(List<LockDO> lockDOS)");
         BulkRequest request = new BulkRequest();
         RestHighLevelClient client = clientConnect.ClientConnect();
         for(LockDO lockDO : lockDOS){
@@ -260,7 +265,7 @@ public class ElasticSearchLocker extends AbstractLocker {
     }
 
     private boolean unLock(String xid, Long branchId){
-        LOGGER.info("Lock is releasing List<LockDO> lockDOS");
+//        LOGGER.info("unLock(String xid, Long branchId)");
         DeleteByQueryRequest request = new DeleteByQueryRequest();
         RestHighLevelClient client = clientConnect.ClientConnect();
         request.indices(DEFAULT_LOCK_INDEX);
@@ -281,7 +286,8 @@ public class ElasticSearchLocker extends AbstractLocker {
     }
 
     private boolean unLock(String xid, List<Long> branchIds){
-        LOGGER.info("Lock is releasing List<LockDO> lockDOS");
+        //Delete 好像都有点问题
+//        LOGGER.info("unLock(String xid, List<Long> branchIds");
         DeleteByQueryRequest request = new DeleteByQueryRequest();
         RestHighLevelClient client = clientConnect.ClientConnect();
         request.indices(DEFAULT_LOCK_INDEX);
@@ -305,6 +311,9 @@ public class ElasticSearchLocker extends AbstractLocker {
     }
 
     private boolean isLockableDO(List<LockDO> lockDOs){
+        //query refresh
+//        LOGGER.info("isLockableDO(List<LockDO> lockDOs)");
+        RefreshRequest refreshRequest = new RefreshRequest(DEFAULT_LOCK_INDEX);
         String currentXid = lockDOs.get(0).getXid();
         MultiGetRequest request = new MultiGetRequest();
         RestHighLevelClient client = clientConnect.ClientConnect();
@@ -313,6 +322,7 @@ public class ElasticSearchLocker extends AbstractLocker {
             request.add(new MultiGetRequest.Item(DEFAULT_LOCK_INDEX,rowKey));
         }
         try{
+            client.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             MultiGetResponse response = client.mget(request, RequestOptions.DEFAULT);
             for(MultiGetItemResponse Item : response.getResponses()){
                 if(!Item.isFailed()){

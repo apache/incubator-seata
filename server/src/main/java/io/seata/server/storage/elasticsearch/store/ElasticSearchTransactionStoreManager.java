@@ -1,5 +1,6 @@
 package io.seata.server.storage.elasticsearch.store;
 
+import com.sun.webkit.graphics.Ref;
 import io.seata.common.exception.ElasticSearchException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.BeanUtils;
@@ -21,6 +22,8 @@ import jdk.nashorn.internal.ir.JumpToInlinedFinally;
 import org.apache.http.HttpHost;
 import org.apache.lucene.search.TotalHits;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -49,6 +52,7 @@ import java.util.Map;
 import java.util.function.ToLongBiFunction;
 import java.util.stream.Collectors;
 
+import static io.seata.common.util.ElasticSearchUtils.toESjsonMap;
 import static io.seata.core.constants.ElasticSearchConstants.*;
 //常量这一块应该再增加一点... 增加各个表名的...统一一下 需要修改的代码位置 "xid" "transactionId" toEsjonMap可能需要？
 
@@ -113,6 +117,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
         //reduce rpc with ?
         if(withBranchSessions){
             branchTransactionDOS = queryBranchTransactionDO(globalTransactionDO.getXid());
+            LOGGER.info("branchTransaction_xid "+branchTransactionDOS.get(0).getXid());
         }
         return getGlobalSession(globalTransactionDO, branchTransactionDOS);
     }
@@ -171,12 +176,15 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private GlobalTransactionDO queryGlobalTransactionDO(String xid) {
+//        LOGGER.info("queryGlobalTransactionDO(String xid)");
         GlobalTransactionDO res;
+        RefreshRequest refreshRequest = new RefreshRequest(DEFAULT_GLOBAL_INDEX);
         RestHighLevelClient client = clientConnect.ClientConnect();
         GetRequest request = new GetRequest();
         request.index(DEFAULT_GLOBAL_INDEX);
         request.id(xid);
         try {
+            client.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             GetResponse response = client.get(request, RequestOptions.DEFAULT);
             String index = response.getIndex();
             String id = response.getId();
@@ -196,6 +204,10 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private GlobalTransactionDO queryGlobalTransactionDO(long transactionId){
+        //transactionId 存在插入的精度丢失 所有的transactionId好像都有这个问题
+        //未修改 进行修改 增加refresh
+//        LOGGER.info("queryGlobalTransactionDO(long transactionId)");
+        RefreshRequest refreshRequest = new RefreshRequest(DEFAULT_GLOBAL_INDEX);
         GlobalTransactionDO res;
         RestHighLevelClient client = clientConnect.ClientConnect();
         SearchRequest request = new SearchRequest();
@@ -205,6 +217,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
         request.source(sourceBuilder);
         try{
             Map<String, Object> source;
+            client.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);
             SearchHits hits = response.getHits();
             TotalHits totalHits = hits.getTotalHits();
@@ -218,7 +231,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
                 String index = searchHit.getIndex();
                 String xid = searchHit.getId();
                 source = searchHit.getSourceAsMap();
-                if(index == DEFAULT_GLOBAL_INDEX) {
+                if(index.equals(DEFAULT_GLOBAL_INDEX)) {
                     res = convertToGlobalTransactionDO(xid, source);
                     return res;
                 }
@@ -237,7 +250,10 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private List<GlobalTransactionDO> queryGlobalTransaction(int[] statues){
-        List<GlobalTransactionDO> res = null;
+        //已修改 增加refresh
+//        LOGGER.info("queryGlobalTransaction(int[] statues)");
+        RefreshRequest refreshRequest = new RefreshRequest(DEFAULT_GLOBAL_INDEX);
+        List<GlobalTransactionDO> res = new ArrayList<>();
         GlobalTransactionDO globalTransactionDO;
         RestHighLevelClient client = clientConnect.ClientConnect();
         SearchRequest request = new SearchRequest();
@@ -247,6 +263,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
         request.source(sourceBuilder);
         try{
             Map<String, Object> source;
+            client.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);
             SearchHits hits = response.getHits();
             TotalHits totalHits = hits.getTotalHits();
@@ -259,7 +276,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
                 String index =searchHit.getIndex();
                 String xid = searchHit.getId();
                 source = searchHit.getSourceAsMap();
-                if(index == DEFAULT_BRANCH_INDEX){
+                if(index.equals(DEFAULT_BRANCH_INDEX)) {
                     globalTransactionDO = convertToGlobalTransactionDO(xid, source);
                     res.add(globalTransactionDO);
                 }
@@ -275,7 +292,13 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private List<BranchTransactionDO> queryBranchTransactionDO(String xid){
-        List<BranchTransactionDO> res = null;
+        //已修改
+        //好像有错
+        //res 空指针异常
+        //刷新API调用
+//        LOGGER.info("queryBranchTransactionDO(String xid)");
+        RefreshRequest refreshRequest = new RefreshRequest(DEFAULT_BRANCH_INDEX);
+        List<BranchTransactionDO> res = new ArrayList<>() ;
         BranchTransactionDO branchTransactionDO;
         RestHighLevelClient client = clientConnect.ClientConnect();
         SearchRequest request = new SearchRequest();
@@ -285,6 +308,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
         request.source(sourceBuilder);
         try{
             Map<String, Object> source;
+            client.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);
             SearchHits hits = response.getHits();
             TotalHits totalHits = hits.getTotalHits();
@@ -297,7 +321,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
                 String index = searchHit.getIndex();
                 String branchId = searchHit.getId();
                 source = searchHit.getSourceAsMap();
-                if(index == DEFAULT_BRANCH_INDEX) {
+                if(index.equals(DEFAULT_BRANCH_INDEX)) {
                     branchTransactionDO = convertToBranchTransactionDO(Long.valueOf(branchId), source);
                     res.add(branchTransactionDO);
                 }
@@ -313,6 +337,8 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids){
+//        LOGGER.info("queryBranchTransactionDO(List<String> xids)");
+        RefreshRequest refreshRequest = new RefreshRequest(DEFAULT_BRANCH_INDEX);
         List<BranchTransactionDO> res = null;
         BranchTransactionDO branchTransactionDO;
         RestHighLevelClient client = clientConnect.ClientConnect();
@@ -322,6 +348,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
         request.indices(DEFAULT_BRANCH_INDEX);
         request.source(sourceBuilder);
         try{
+            client.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             Map<String, Object> source;
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);
             SearchHits hits = response.getHits();
@@ -351,12 +378,13 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO){
+//        LOGGER.info("insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO)");
         RestHighLevelClient client = clientConnect.ClientConnect();
         IndexRequest request = new IndexRequest();
         request.index(DEFAULT_GLOBAL_INDEX);
         request.id(globalTransactionDO.getXid());
         Map<String, Object> jsonMap;
-        jsonMap = ElasticSearchUtils.toESjsonMap(globalTransactionDO,ES_INDEX_GLOBAL_XID);
+        jsonMap = toESjsonMap(globalTransactionDO,ES_INDEX_GLOBAL_XID);
         request.source(jsonMap);
         try{
             IndexResponse response = client.index(request, RequestOptions.DEFAULT);
@@ -371,7 +399,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO){
-        LOGGER.info("deleting GlobalTransaction");
+//        LOGGER.info("deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO)");
         RestHighLevelClient client = clientConnect.ClientConnect();
         DeleteRequest request = new DeleteRequest();
         request.index(DEFAULT_GLOBAL_INDEX);
@@ -389,14 +417,14 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        LOGGER.info("updating GlobalTransaction");
+//        LOGGER.info("updating GlobalTransaction");
         RestHighLevelClient client = clientConnect.ClientConnect();
         UpdateRequest request = new UpdateRequest();
         request.index(DEFAULT_GLOBAL_INDEX);
         request.id(globalTransactionDO.getXid());
         Map<String, Object> jsonMap;
-        jsonMap = ElasticSearchUtils.toESjsonMap(globalTransactionDO,ES_INDEX_GLOBAL_XID);
-        request.doc(jsonMap);
+        jsonMap = toESjsonMap(globalTransactionDO,ES_INDEX_GLOBAL_XID);
+        request.doc(jsonMap).docAsUpsert(true);
         try{
             UpdateResponse response = client.update(request, RequestOptions.DEFAULT);
         }
@@ -415,7 +443,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
         request.index(DEFAULT_BRANCH_INDEX);
         request.id(String.valueOf(branchTransactionDO.getBranchId()));
         Map<String, Object> jsonMap;
-        jsonMap = ElasticSearchUtils.toESjsonMap(branchTransactionDO,ES_INDEX_BRANCH_BRANCH_ID);
+        jsonMap = toESjsonMap(branchTransactionDO,ES_INDEX_BRANCH_BRANCH_ID);
         request.source(jsonMap);
         try{
             IndexResponse response = client.index(request, RequestOptions.DEFAULT);
@@ -430,7 +458,7 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        LOGGER.info("deleting BranchTransaction");
+//        LOGGER.info("deleting BranchTransaction");
         RestHighLevelClient client = clientConnect.ClientConnect();
         DeleteRequest request = new DeleteRequest();
         request.index(DEFAULT_BRANCH_INDEX);
@@ -449,9 +477,11 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
 
     private boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         RestHighLevelClient client = clientConnect.ClientConnect();
+        Map<String, Object> jsonMap = toESjsonMap(branchTransactionDO,ES_INDEX_BRANCH_BRANCH_ID);
         UpdateRequest request = new UpdateRequest();
         request.index(DEFAULT_BRANCH_INDEX);
         request.id(String.valueOf(branchTransactionDO.getTransactionId()));
+        request.doc(jsonMap).docAsUpsert(true);
         try{
             UpdateResponse response =client.update(request, RequestOptions.DEFAULT);
         }
@@ -465,20 +495,15 @@ public class ElasticSearchTransactionStoreManager extends AbstractTransactionSto
     }
 
     private GlobalTransactionDO convertToGlobalTransactionDO(String xid, Map<String, Object> source){
-//        Map to Object  Note: 大小写？如何处理
-        // 将Object to String!
         Map<String, String> map;
         map = ElasticSearchUtils.toStringMap(source);
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO = (GlobalTransactionDO) BeanUtils.mapToObject(map, GlobalTransactionDO.class);
         globalTransactionDO.setXid(xid);
-        //云清兄有封装好的MapToObject!属实牛皮 跪了 QAQ 只要<String, String> to object
         return globalTransactionDO;
     }
 
     private BranchTransactionDO convertToBranchTransactionDO(long branchId, Map<String, Object> source){
-        //Map <String, Object> to object;
-        //还没写 晚点写
         Map<String, String> map;
         map = ElasticSearchUtils.toStringMap(source);
         BranchTransactionDO branchTransactionDO;

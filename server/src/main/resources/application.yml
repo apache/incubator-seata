@@ -30,11 +30,11 @@ seata:
   store:
     # support: file 、 db 、 redis
 #<<<<<<< HEAD
-    mode: db
+    mode: elasticsearch
     session:
-      mode: db
+      mode: elasticsearch
     lock:
-      mode: db
+      mode: elasticsearch
     db:
       datasource: druid
       db-type: mysql
