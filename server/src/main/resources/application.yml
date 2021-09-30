@@ -24,7 +24,7 @@ seata:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
   store:
-    # support: file 、 db 、 redis
+    # support: file 、 db 、 redis、redis
     mode: file
   server:
     service-port: 8091
