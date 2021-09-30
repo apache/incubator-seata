@@ -359,6 +359,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.statusDecisionStrategy = statusDecisionStrategy;
     }
 
+    @SuppressWarnings("lgtm[java/unsafe-double-checked-locking]")
     @Override
     public SeqGenerator getSeqGenerator() {
         if (seqGenerator == null) {
