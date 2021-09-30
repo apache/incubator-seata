@@ -107,3 +107,5 @@ metrics.enabled=false
 metrics.registryType=compact
 metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898
+tcc.fence.logTableName=tcc_fence_log
+tcc.fence.cleanPeriod=1h
