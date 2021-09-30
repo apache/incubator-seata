@@ -305,13 +305,7 @@ public class ElasticSearchManagerTest {
         Assertions.assertEquals(session.getXid(),globalSession.getXid());
         Assertions.assertEquals(session.getTransactionId(),globalSession.getTransactionId());
         Assertions.assertEquals(0,globalSession.getBranchSessions().size());
-        //上面这一段单元测试通过了 下面的没有通过
-
-        //问题根源 插入后立马查询不到 所以会自动匹配最相似的一个（elasticsearch的模糊搜索导致）
         globalSession = sessionManager.findGlobalSession(xid,true);
-        //应该是有分支事务 但是最后为空 导致索引越界 纠错 已解决
-        //修改为 .equals
-        //index 索引越界异常
         Assertions.assertEquals(branchSession.getXid(),globalSession.getBranchSessions().get(0).getXid());
         Assertions.assertEquals(branchSession.getBranchId(),globalSession.getBranchSessions().get(0).getBranchId());
         Assertions.assertEquals(branchSession.getClientId(),globalSession.getBranchSessions().get(0).getClientId());
