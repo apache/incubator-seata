@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * load SEATA xid for brpc request
@@ -55,8 +54,8 @@ public class TransactionPropagationClientInterceptor extends AbstractInterceptor
             LOGGER.info("SEATA-BRPC[{}]: xid in RootContext[{}] xid in RpcContext[{}]", RootContext.getBranchType(), xid, rpcXid);
         }
 
-        if (Objects.nonNull(xid)) {
-            if (Objects.isNull(kvAttachment)) {
+        if (null != xid) {
+            if (null == kvAttachment) {
                 kvAttachment = new HashMap<>();
             }
             kvAttachment.put(RootContext.KEY_XID, xid);
@@ -80,13 +79,9 @@ public class TransactionPropagationClientInterceptor extends AbstractInterceptor
     private String getRpcXid() {
         RpcContext context = RpcContext.getContext();
         Map<String, Object> requestKvAttachmentMap = context.getRequestKvAttachment();
-        if (Objects.isNull(requestKvAttachmentMap)) {
+        if (null == requestKvAttachmentMap) {
             return null;
         }
-        String rpcXid = (String) requestKvAttachmentMap.get(RootContext.KEY_XID);
-        if (Objects.isNull(rpcXid)) {
-            rpcXid = (String) requestKvAttachmentMap.get(RootContext.KEY_XID);
-        }
-        return rpcXid;
+        return (String) requestKvAttachmentMap.get(RootContext.KEY_XID);
     }
 }
