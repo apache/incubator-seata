@@ -145,4 +145,17 @@ public interface DefaultValues {
      * the constant DEFAULT_DISTRIBUTED_LOCK_EXPIRE
      */
     int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;
+
+    /**
+     * the constant DEFAULT_TCC_FENCE_CLEAN_PERIOD
+     */
+    int DEFAULT_TCC_FENCE_CLEAN_PERIOD = 1;
+    /**
+     * the constant DEFAULT_TCC_FENCE_LOG_TABLE_NAME
+     */
+    String DEFAULT_TCC_FENCE_LOG_TABLE_NAME = "tcc_fence_log";
+    /**
+     * the constant TCC_FENCE_BEAN_NAME
+     */
+    String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
 }

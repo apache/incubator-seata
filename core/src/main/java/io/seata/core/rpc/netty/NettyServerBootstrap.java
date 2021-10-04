@@ -33,7 +33,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
@@ -41,8 +41,8 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.SERVER_PORT;
-import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
+import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 
 /**
  * Rpc server bootstrap.
@@ -124,18 +124,18 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         if (listenPort != 0) {
             return listenPort;
         }
+        String strPort = ConfigurationFactory.getInstance().getConfig(SERVER_SERVICE_PORT_CAMEL);
         int port = 0;
         try {
-            port = Integer.parseInt(System.getProperty(ConfigurationKeys.SERVER_RPC_PORT));
+            port = Integer.parseInt(strPort);
         } catch (NumberFormatException exx) {
-            LOGGER.error("server port set error:{}", exx.getMessage());
+            LOGGER.error("server service port set error:{}", exx.getMessage());
         }
         if (port <= 0) {
-            String serverPort = System.getProperty(SERVER_PORT);
-            int defaultPort = Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT;
-            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, defaultPort);
-            port = defaultPort;
+            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT);
+            port = SERVICE_DEFAULT_PORT;
         }
+        listenPort = port;
         return port;
     }
 
@@ -172,8 +172,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             });
 
         try {
-            this.serverBootstrap.bind(listenPort).sync();
-            LOGGER.info("Server started, listen port: {}", getListenPort());
+            this.serverBootstrap.bind(getListenPort()).sync();
+            XID.setPort(getListenPort());
+            LOGGER.info("Server started, service listen port: {}", getListenPort());
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
         } catch (Exception exx) {
@@ -198,7 +199,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
+            LOGGER.error("shutdown execute error:{}",exx.getMessage(),exx);
         }
     }
 }

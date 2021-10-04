@@ -26,3 +26,5 @@ seata:
   store:
     # support: file 、 db 、 redis
     mode: file
+  server:
+    service-port: 8091

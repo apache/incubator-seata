@@ -19,13 +19,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.MapUtil;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import org.springframework.util.ResourceUtils;
@@ -73,34 +72,40 @@ public class PortHelper {
                 configFile = ymlFile;
             }
         }
-        String fileName = configFile.getName();
-        String portNum = null;
-        if (fileName.endsWith("yml")) {
-            Map<String, Object> configMap = new HashMap<>();
-            Map<String, Object> yamlMap = new Yaml().load(new FileInputStream(configFile));
-            bulidFlatMap(yamlMap, null, configMap);
-            if (CollectionUtils.isNotEmpty(configMap)) {
-                Object serverPort = configMap.get("server.port");
-                if (null != serverPort) {
-                    portNum = serverPort.toString();
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(configFile);
+            String fileName = configFile.getName();
+            String portNum = null;
+            if (fileName.endsWith("yml")) {
+                Map<String, Object> yamlMap = new Yaml().load(inputStream);
+                Map<String, Object> configMap =  MapUtil.getFlattenedMap(yamlMap);
+                if (CollectionUtils.isNotEmpty(configMap)) {
+                    Object serverPort = configMap.get("server.port");
+                    if (null != serverPort) {
+                        portNum = serverPort.toString();
+                    }
+                }
+            } else {
+                Properties properties = new Properties();
+                properties.load(inputStream);
+                portNum = properties.getProperty("server.port");
+            }
+            if (null != portNum) {
+                try {
+                    port = Integer.parseInt(portNum);
+                } catch (NumberFormatException exx) {
+                    //ignore
                 }
             }
-        } else {
-            Properties properties = new Properties();
-            properties.load(new FileInputStream(configFile));
-            portNum = properties.getProperty("server.port");
-        }
-        if (null != portNum) {
-            try {
-                port = Integer.parseInt(portNum);
-            } catch (NumberFormatException exx) {
-                //ignore
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
             }
         }
         return port;
 
     }
-
     private static File getConfigFromStartup() {
 
         String configLocation = System.getProperty("spring.config.location");
@@ -123,34 +128,6 @@ public class PortHelper {
 
     }
 
-    public static void bulidFlatMap(Map<String, Object> sourceMap, String prefix, Map<String, Object> resultMap) {
-        if (CollectionUtils.isNotEmpty(sourceMap)) {
-            for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
-                Object value = entry.getValue();
-                String key = entry.getKey();
-                if (StringUtils.isNotBlank(prefix)) {
-                    key = prefix + "." + key;
-                }
-                if (value instanceof String) {
-                    resultMap.put(key, value);
-                } else if (value instanceof Map) {
-                    bulidFlatMap((Map<String, Object>)value, key, resultMap);
-                } else if (value instanceof Collection) {
-                    if (((Collection)value).isEmpty()) {
-                        sourceMap.put(key, "");
-                    } else {
-                        int index = 0;
-                        Collection collection = (Collection)value;
-                        for (Object obj : collection) {
-                            bulidFlatMap(Collections.singletonMap("[" + (index++) + "]", obj), key, resultMap);
-                        }
-                    }
-                } else {
-                    resultMap.put(key, value == null ? "null" : value);
-                }
-            }
-        }
-    }
+
 }
 
-  

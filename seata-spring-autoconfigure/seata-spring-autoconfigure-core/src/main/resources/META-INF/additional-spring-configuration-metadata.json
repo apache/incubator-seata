@@ -109,6 +109,17 @@
       ]
     },
     {
+      "name": "seata.config.data-type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.config.processor.ConfigDataType"
+          }
+        }
+      ]
+    },
+    {
       "name": "seata.registry.type",
       "providers": [
         {

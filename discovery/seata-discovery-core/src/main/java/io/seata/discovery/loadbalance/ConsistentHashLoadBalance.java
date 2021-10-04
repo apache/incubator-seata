@@ -70,6 +70,7 @@ public class ConsistentHashLoadBalance implements LoadBalance {
         }
     }
 
+    @SuppressWarnings("lgtm[java/weak-cryptographic-algorithm]")
     private static class MD5Hash implements HashFunction {
         MessageDigest instance;
         public MD5Hash() {
