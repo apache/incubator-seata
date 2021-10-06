@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import io.seata.sqlparser.util.JdbcConstants;
+
 /**
  * The type Abstract statement proxy.
  *
@@ -46,6 +48,16 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * The Target sql.
      */
     protected String targetSQL;
+
+    /**
+     * The Cache for ResultSet
+     */
+    protected CachedRowSet generatedKeysRowSet;
+
+    /**
+     * The last executed resultSet cache
+     */
+    protected ResultSet resultSet;
 
     /**
      * Instantiates a new Abstract statement proxy.
@@ -103,7 +115,8 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void close() throws SQLException {
         targetStatement.close();
-
+        //clean cache
+        clearCache();
     }
 
     @Override
@@ -245,8 +258,16 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
-        CachedRowSet generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
-        generatedKeysRowSet.populate(rs);
+        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(connectionProxy.getDbType())) {
+            if (null == generatedKeysRowSet || !resultSet.equals(rs)) {
+                generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
+                generatedKeysRowSet.populate(rs);
+                resultSet = rs;
+            }
+        } else {
+            generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
+            generatedKeysRowSet.populate(rs);
+        }
         return generatedKeysRowSet;
     }
 
@@ -274,7 +295,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void closeOnCompletion() throws SQLException {
         targetStatement.closeOnCompletion();
-
+        clearCache();
     }
 
     @Override
@@ -290,5 +311,13 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return targetStatement.isWrapperFor(iface);
+    }
+
+    /**
+     * clean the resultSet cache
+     */
+    private void clearCache() {
+        resultSet = null;
+        generatedKeysRowSet = null;
     }
 }
