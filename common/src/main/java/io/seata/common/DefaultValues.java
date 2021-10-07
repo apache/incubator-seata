@@ -145,12 +145,15 @@ public interface DefaultValues {
     int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;
 
     /**
-     * Default rpc Type is netty
+     * the constant DEFAULT_TCC_FENCE_CLEAN_PERIOD
      */
-    boolean DEFAULT_ENABLE_GRPC = false;
-
+    int DEFAULT_TCC_FENCE_CLEAN_PERIOD = 1;
     /**
-     * Default grpc port.
+     * the constant DEFAULT_TCC_FENCE_LOG_TABLE_NAME
      */
-    int DEFAULT_GRPC_PORT = 50051;
+    String DEFAULT_TCC_FENCE_LOG_TABLE_NAME = "tcc_fence_log";
+    /**
+     * the constant TCC_FENCE_BEAN_NAME
+     */
+    String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
 }

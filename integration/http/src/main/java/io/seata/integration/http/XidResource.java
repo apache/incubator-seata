@@ -32,14 +32,14 @@ public class XidResource {
 
     public static void cleanXid(String rpcXid) {
         String xid = RootContext.getXID();
-        if (xid != null) {
+        if (StringUtils.isNotBlank(xid)) {
             String unbindXid = RootContext.unbind();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("unbind[{}] from RootContext", unbindXid);
             }
             if (!StringUtils.equalsIgnoreCase(rpcXid, unbindXid)) {
                 LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
-                if (unbindXid != null) {
+                if (StringUtils.isNotBlank(unbindXid)) {
                     RootContext.bind(unbindXid);
                     LOGGER.warn("bind [{}] back to RootContext", unbindXid);
                 }

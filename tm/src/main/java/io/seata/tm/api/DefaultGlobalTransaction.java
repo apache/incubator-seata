@@ -110,6 +110,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
     }
 
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     @Override
     public void commit() throws TransactionException {
         if (role == GlobalTransactionRole.Participant) {
@@ -144,6 +145,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
     }
 
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     @Override
     public void rollback() throws TransactionException {
         if (role == GlobalTransactionRole.Participant) {

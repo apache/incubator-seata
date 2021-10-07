@@ -703,12 +703,22 @@ public interface ConfigurationKeys {
     String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 
     /**
-     * The constant ENABLE_GRPC
+     * The constant TCC_PREFIX
      */
-    String ENABLE_GRPC = SERVICE_PREFIX + "enableGrpc";
+    String TCC_PREFIX = "tcc.";
 
     /**
-     * The constant SERVICE_GRPC_PORT (if enable grpc)
+     * The constant TCC_FENCE_PREFIX
      */
-    String SERVICE_GRPC_PORT = SERVER_PREFIX + "grpcPort";
+    String TCC_FENCE_PREFIX = TCC_PREFIX + "fence.";
+
+    /**
+     * The constant TCC_FENCE_CLEAN_PERIOD
+     */
+    String TCC_FENCE_CLEAN_PERIOD = TCC_FENCE_PREFIX + "cleanPeriod";
+
+    /**
+     * The constant TCC_FENCE_LOG_TABLE_NAME
+     */
+    String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 }
