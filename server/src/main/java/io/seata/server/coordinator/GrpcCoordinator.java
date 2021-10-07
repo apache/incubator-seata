@@ -19,8 +19,7 @@ import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.RpcContext;
 
 /**
- * @author xilou
- * @date 2021/9/29
+ * @author xilou31
  **/
 public class GrpcCoordinator extends TransactionManagerServiceImplBase {
     @Override
@@ -36,35 +35,5 @@ public class GrpcCoordinator extends TransactionManagerServiceImplBase {
     @Override
     public void rollback(SeataGrpc.GlobalRollbackRequest request, StreamObserver<SeataGrpc.GlobalRollbackResponse> responseObserver) {
         super.rollback(request, responseObserver);
-    }
-
-    @Override
-    protected void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response, RpcContext rpcContext) throws TransactionException {
-
-    }
-
-    @Override
-    protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response, RpcContext rpcContext) throws TransactionException {
-
-    }
-
-    @Override
-    protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext) throws TransactionException {
-
-    }
-
-    @Override
-    protected void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext) throws TransactionException {
-
-    }
-
-    @Override
-    protected void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext) throws TransactionException {
-
-    }
-
-    @Override
-    protected void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext) throws TransactionException {
-
     }
 }
