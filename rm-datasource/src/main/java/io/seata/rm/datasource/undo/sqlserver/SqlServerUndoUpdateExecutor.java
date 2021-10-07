@@ -33,11 +33,6 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 public class SqlServerUndoUpdateExecutor extends BaseSqlServerUndoExecutor {
     /**
-     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk1 = ? and pk2 = ?
-     */
-    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s ";
-
-    /**
      * Instantiates a new SqlServer update undo executor.
      *
      * @param sqlUndoLog the sql undo log
@@ -63,11 +58,11 @@ public class SqlServerUndoUpdateExecutor extends BaseSqlServerUndoExecutor {
             field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.SQLSERVER) + " = ?").collect(
             Collectors.joining(", "));
 
-        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.SQLSERVER).stream().map(e -> e.getName())
+        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.SQLSERVER).stream().map(Field::getName)
             .collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.SQLSERVER);
 
-        return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, whereSql);
+        return "UPDATE " + sqlUndoLog.getTableName() + " SET " + updateColumns + " WHERE " + whereSql;
     }
 
     @Override

@@ -35,11 +35,6 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 public class SqlServerUndoInsertExecutor extends BaseSqlServerUndoExecutor {
     /**
-     * DELETE FROM a WHERE pk = ?
-     */
-    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s ";
-
-    /**
      * Instantiates a new sqlserver undo insert executor.
      *
      * @param sqlUndoLog the sql undo log
@@ -64,7 +59,7 @@ public class SqlServerUndoInsertExecutor extends BaseSqlServerUndoExecutor {
                 .map(Field::getName)
                 .collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.SQLSERVER);
-        return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(), whereSql);
+        return "DELETE FROM " + sqlUndoLog.getTableName() + " WHERE " + whereSql;
     }
 
     @Override

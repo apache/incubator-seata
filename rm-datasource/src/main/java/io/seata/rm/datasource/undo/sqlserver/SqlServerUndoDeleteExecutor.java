@@ -33,11 +33,6 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 public class SqlServerUndoDeleteExecutor extends BaseSqlServerUndoExecutor {
     /**
-     * INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
-     */
-    private static final String INSERT_SQL_TEMPLATE = "SET IDENTITY_INSERT %s ON; INSERT INTO %s (%s) VALUES (%s); SET IDENTITY_INSERT %s OFF;";
-
-    /**
      * Instantiates a new sql server delete undo executor.
      *
      * @param sqlUndoLog the sql undo log
@@ -65,7 +60,17 @@ public class SqlServerUndoDeleteExecutor extends BaseSqlServerUndoExecutor {
         String insertValues = fields.stream().map(field -> "?")
                 .collect(Collectors.joining(", "));
 
-        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), sqlUndoLog.getTableName(), insertColumns, insertValues, sqlUndoLog.getTableName());
+        return "SET IDENTITY_INSERT " +
+                sqlUndoLog.getTableName() +
+                " ON; INSERT INTO " +
+                sqlUndoLog.getTableName() +
+                " (" +
+                insertColumns +
+                ") VALUES (" +
+                insertValues +
+                "); SET IDENTITY_INSERT " +
+                sqlUndoLog.getTableName() +
+                " OFF;";
     }
 
     @Override
