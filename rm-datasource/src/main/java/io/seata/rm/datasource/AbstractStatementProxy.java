@@ -55,11 +55,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected CachedRowSet generatedKeysRowSet;
 
     /**
-     * The last executed resultSet cache
-     */
-    protected ResultSet resultSet;
-
-    /**
      * Instantiates a new Abstract statement proxy.
      *
      * @param connectionProxy the connection proxy
@@ -259,10 +254,9 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
         if (JdbcConstants.SQLSERVER.equalsIgnoreCase(connectionProxy.getDbType())) {
-            if (null == generatedKeysRowSet || !resultSet.equals(rs)) {
+            if (null == generatedKeysRowSet || !rs.isAfterLast()) {
                 generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
                 generatedKeysRowSet.populate(rs);
-                resultSet = rs;
             }
         } else {
             generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
@@ -295,7 +289,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void closeOnCompletion() throws SQLException {
         targetStatement.closeOnCompletion();
-        clearCache();
     }
 
     @Override
@@ -317,7 +310,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * clean the resultSet cache
      */
     private void clearCache() {
-        resultSet = null;
         generatedKeysRowSet = null;
     }
 }
