@@ -22,6 +22,7 @@ public class GrpcTransactionManager implements TransactionManager {
                 .setTransactionName(name)
                 .setTimeout(timeout)
                 .build();
+        return "";
     }
 
     @Override
