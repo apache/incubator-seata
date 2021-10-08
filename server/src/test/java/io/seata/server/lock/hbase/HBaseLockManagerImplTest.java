@@ -50,8 +50,13 @@ public class HBaseLockManagerImplTest {
 
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", "hadoop1");
+        configuration.set("hbase.client.retries.number", "3");
 
-        connection = ConnectionFactory.createConnection(configuration);
+        try {
+            connection = ConnectionFactory.createConnection(configuration);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         lockManager = new HBaseLockManagerForTest();
     }

@@ -53,13 +53,19 @@ public class HBaseSessionManagerTest {
 
 
     @BeforeAll
-    public static void start(ApplicationContext context) throws Exception {
+    public static void start(ApplicationContext context) {
         HBaseSessionManager tempSessionManager = new HBaseSessionManager();
 
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", "hadoop1");
+        configuration.set("hbase.client.retries.number", "3");
 
-        connection = ConnectionFactory.createConnection(configuration);
+        try {
+            connection = ConnectionFactory.createConnection(configuration);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         HBaseTransactionStoreManager transactionStoreManager = new HBaseTransactionStoreManager(connection,
                 "seata:statusTable", "seata:table", "global", "branches", "transactionId");
 
