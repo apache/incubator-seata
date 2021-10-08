@@ -42,7 +42,7 @@ public class Blacklist {
         ConfigurationFactory.getInstance().addConfigListener(blacklistConfig, new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
-                String currentIps = ConfigurationFactory.getInstance().getLatestConfig(blacklistConfig, null, DEFAULT_CONFIG_TIMEOUT);
+                String currentIps = event.getNewValue();
                 clear();
                 if (currentIps == null) {
                     return;
