@@ -12,8 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *//*
-
+ */
 package io.seata.server.lock.hbase;
 
 import io.seata.core.exception.TransactionException;
@@ -33,22 +32,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-*/
 /**
  * ClassName: HBaseLockManagerImplTest
  * Description:
  *
  * @author haishin
- *//*
-
+ */
 @SpringBootTest
 public class HBaseLockManagerImplTest {
 
     static LockManager lockManager = null;
     static Connection connection = null;
-    static LockStoreHBaseDao lockStoreHBaseDao = null;
 
-    @BeforeAll
+   /* @BeforeAll
     public static void start(ApplicationContext context) throws Exception {
 
         Configuration configuration = HBaseConfiguration.create();
@@ -158,7 +154,6 @@ public class HBaseLockManagerImplTest {
             HBaseLocker locker = new HBaseLocker(connection, "seata:lockTable", "seata:lockKey", "lock", "transactionId");
             return locker;
         }
-    }
+    }*/
 
 }
-*/

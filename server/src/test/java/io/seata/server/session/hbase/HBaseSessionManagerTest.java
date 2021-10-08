@@ -12,8 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *//*
-
+ */
 package io.seata.server.session.hbase;
 
 import io.seata.common.XID;
@@ -40,14 +39,12 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 
-*/
 /**
  * ClassName: HBaseSessionManagerTest
  * Description: The hbase session manager test.
  *
  * @author haishin
- *//*
-
+ */
 @SpringBootTest
 public class HBaseSessionManagerTest {
     static SessionManager sessionManager = null;
@@ -55,7 +52,7 @@ public class HBaseSessionManagerTest {
     static Connection connection = null;
 
 
-    @BeforeAll
+    /*@BeforeAll
     public static void start(ApplicationContext context) {
         HBaseSessionManager tempSessionManager = new HBaseSessionManager();
 
@@ -328,7 +325,6 @@ public class HBaseSessionManagerTest {
 
         sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
-    }
+    }*/
 
 }
-*/
