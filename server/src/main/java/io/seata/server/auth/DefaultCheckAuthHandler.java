@@ -26,14 +26,12 @@ import io.seata.core.constants.ConfigurationKeys;
 @LoadLevel(name = "defaultCheckAuthHandler", order = 100)
 public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 
-    Blacklist tmBlacklist = new Blacklist(ConfigurationKeys.TM_BLACKLIST);
-
-    Blacklist rmBlacklist = new Blacklist(ConfigurationKeys.RM_BLACKLIST);
+    Blacklist blacklist = new Blacklist(ConfigurationKeys.BLACKLIST);
 
     @Override
     public boolean doRegTransactionManagerCheck(ChannelHandlerContext ctx) {
         String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
-        if (tmBlacklist.contains(ip)) {
+        if (blacklist.contains(ip)) {
             return false;
         }
         return true;
@@ -42,7 +40,7 @@ public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
     @Override
     public boolean doRegResourceManagerCheck(ChannelHandlerContext ctx) {
         String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
-        if (rmBlacklist.contains(ip)) {
+        if (blacklist.contains(ip)) {
             return false;
         }
         return true;
