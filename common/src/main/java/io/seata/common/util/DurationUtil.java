@@ -16,6 +16,7 @@
 package io.seata.common.util;
 
 import java.time.Duration;
+import java.util.regex.Pattern;
 
 /**
  * @author XCXCXCXCX
@@ -30,27 +31,37 @@ public class DurationUtil {
     public static final String SECOND_UNIT = "s";
     public static final String MILLIS_SECOND_UNIT = "ms";
 
+    private static final Pattern SIMPLE = Pattern.compile("^([\\+\\-]?\\d+)([a-zA-Z]{0,2})$");
+    private static final Pattern ISO8601 = Pattern.compile("^[\\+\\-]?P.*$");
+
     public static Duration parse(String str) {
         if (StringUtils.isBlank(str)) {
             return DEFAULT_DURATION;
         }
 
-        if (str.contains(MILLIS_SECOND_UNIT)) {
-            Long value = doParse(MILLIS_SECOND_UNIT, str);
-            return value == null ? null : Duration.ofMillis(value);
-        } else if (str.contains(DAY_UNIT)) {
-            Long value = doParse(DAY_UNIT, str);
-            return value == null ? null : Duration.ofDays(value);
-        } else if (str.contains(HOUR_UNIT)) {
-            Long value = doParse(HOUR_UNIT, str);
-            return value == null ? null : Duration.ofHours(value);
-        } else if (str.contains(MINUTE_UNIT)) {
-            Long value = doParse(MINUTE_UNIT, str);
-            return value == null ? null : Duration.ofMinutes(value);
-        } else if (str.contains(SECOND_UNIT)) {
-            Long value = doParse(SECOND_UNIT, str);
-            return value == null ? null : Duration.ofSeconds(value);
+        if (SIMPLE.matcher(str).matches()) {
+            if (str.contains(MILLIS_SECOND_UNIT)) {
+                long value = doParse(MILLIS_SECOND_UNIT, str);
+                return Duration.ofMillis(value);
+            } else if (str.contains(DAY_UNIT)) {
+                long value = doParse(DAY_UNIT, str);
+                return Duration.ofDays(value);
+            } else if (str.contains(HOUR_UNIT)) {
+                long value = doParse(HOUR_UNIT, str);
+                return Duration.ofHours(value);
+            } else if (str.contains(MINUTE_UNIT)) {
+                long value = doParse(MINUTE_UNIT, str);
+                return Duration.ofMinutes(value);
+            } else if (str.contains(SECOND_UNIT)) {
+                long value = doParse(SECOND_UNIT, str);
+                return Duration.ofSeconds(value);
+            }
         }
+
+        if (ISO8601.matcher(str).matches()) {
+            return Duration.parse(str);
+        }
+
         try {
             int millis = Integer.parseInt(str);
             return Duration.ofMillis(millis);
@@ -59,11 +70,8 @@ public class DurationUtil {
         }
     }
 
-    private static Long doParse(String unit, String str) {
+    private static long doParse(String unit, String str) {
         str = str.replace(unit, "");
-        if ("".equals(str)) {
-            return null;
-        }
         try {
             return Long.parseLong(str);
         } catch (NumberFormatException e) {
