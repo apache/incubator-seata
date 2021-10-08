@@ -108,6 +108,7 @@ seata:
     undo:
       log-save-days: 7
       log-delete-period: 86400000
+    blacklist: 1.1.1.1;2.2.2.2
   store:
     # support: file 、 db 、 redis
     mode: file
