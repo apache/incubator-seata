@@ -46,6 +46,8 @@ public class HBaseSingleConnectionFactory {
 
     private static final String POOL_TYPE = "Reusable";
 
+    private static final String RETRIES = "3";
+
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
     public static Connection getInstance() {
@@ -58,6 +60,7 @@ public class HBaseSingleConnectionFactory {
                         configuration.set("hbase.zookeeper.property.clientPort", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_PROPERTY_CLIENT_PORT, PORT));
                         configuration.set("hbase.client.ipc.pool.type", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_POOL_TYPE, POOL_TYPE));
                         configuration.set("hbase.client.ipc.pool.size", CONFIGURATION.getConfig(ConfigurationKeys.STORE_HBASE_POOL_SIZE, POOL_SIZE));
+                        configuration.set("hbase.client.retries.number", RETRIES);
                         connection = ConnectionFactory.createConnection(configuration);
                         LOGGER.info("the connection of HBase is created successfully.");
                     } catch (IOException e) {
