@@ -12,7 +12,8 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- */
+ *//*
+
 package io.seata.server.lock.hbase;
 
 import io.seata.core.exception.TransactionException;
@@ -32,12 +33,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+*/
 /**
  * ClassName: HBaseLockManagerImplTest
  * Description:
  *
  * @author haishin
- */
+ *//*
+
 @SpringBootTest
 public class HBaseLockManagerImplTest {
 
@@ -158,3 +161,4 @@ public class HBaseLockManagerImplTest {
     }
 
 }
+*/
