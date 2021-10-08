@@ -13,29 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.constant;
+package io.seata.saga.statelang.parser.utils;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.core.io.Resource;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * TCC Fence clean mode
+ * ResourceUtil tests
  *
- * @author kaka2code
+ * @author wang.liang
  */
-public enum TCCFenceCleanMode {
+public class ResourceUtilTests {
 
-    /**
-     * Close auto clean task
-     */
-    Close,
-    /**
-     * Clean by days
-     */
-    Day,
-    /**
-     * Clean by hours
-     */
-    Hour,
-    /**
-     * Clean by minutes
-     */
-    Minute;
+    @Test
+    public void getResources_test() {
+        Resource[] resources = ResourceUtil.getResources("classpath*:statelang/*.json");
+        assertThat(resources.length).isEqualTo(2);
+
+        Resource[] resources2 = ResourceUtil.getResources(new String[]{"classpath*:statelang/*.json"});
+        assertThat(resources2.length).isEqualTo(2);
+    }
 }
