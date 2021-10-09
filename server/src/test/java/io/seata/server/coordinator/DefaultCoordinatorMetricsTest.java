@@ -33,6 +33,7 @@ import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -45,6 +46,7 @@ import static io.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessa
  * @author zhengyangyong
  */
 @SpringBootTest
+@Disabled
 public class DefaultCoordinatorMetricsTest {
 
     @BeforeAll
