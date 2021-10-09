@@ -286,23 +286,27 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         }
     }
 
-    protected Object toJavaObject(Object value, Class paramType) {
+    protected Object toJavaObject(Object value, Class<?> paramType) {
         if (value == null) {
             return value;
         }
 
-        if (paramType.isAssignableFrom(value.getClass())) {
-            return value;
-        } else if (isPrimitive(paramType)) {
+        if (value instanceof Map || value instanceof List) {
+            return jsonParseToJavaObject(value, paramType);
+        } else if (paramType.isAssignableFrom(value.getClass()) || isPrimitive(paramType)) {
             return value;
         } else {
-            JsonParser jsonParser = JsonParserFactory.getJsonParser(getSagaJsonParser());
-            if (jsonParser == null) {
-                throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
-            }
-            String jsonValue = jsonParser.toJsonString(value, true, false);
-            return jsonParser.parse(jsonValue, paramType, false);
+            return jsonParseToJavaObject(value, paramType);
         }
+    }
+
+    protected Object jsonParseToJavaObject(Object value, Class<?> paramType) {
+        JsonParser jsonParser = JsonParserFactory.getJsonParser(getSagaJsonParser());
+        if (jsonParser == null) {
+            throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
+        }
+        String jsonValue = jsonParser.toJsonString(value, true, false);
+        return jsonParser.parse(jsonValue, paramType, false);
     }
 
     protected boolean isPrimitive(Class<?> clazz) {
