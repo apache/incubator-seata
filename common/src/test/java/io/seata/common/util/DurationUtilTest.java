@@ -66,9 +66,6 @@ public class DurationUtilTest {
                 () -> DurationUtil.parse("s"));
 
         Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("as"));
-
-        Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> DurationUtil.parse("ms"));
     }
 }
