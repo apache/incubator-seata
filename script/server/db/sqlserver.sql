@@ -11,8 +11,8 @@ CREATE TABLE [global_table]
     [timeout]                   int           NULL,
     [begin_time]                bigint        NULL,
     [application_data]          nvarchar(2000) NULL,
-    [gmt_create]                datetime      NULL,
-    [gmt_modified]              datetime      NULL,
+    [gmt_create]                datetime2      NULL,
+    [gmt_modified]              datetime2      NULL,
     PRIMARY KEY CLUSTERED ([xid])
         WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 )
@@ -43,8 +43,8 @@ CREATE TABLE [branch_table]
     [status]            tinyint       NULL,
     [client_id]         nvarchar(64)   NULL,
     [application_data]  nvarchar(2000) NULL,
-    [gmt_create]        datetime      NULL,
-    [gmt_modified]      datetime      NULL,
+    [gmt_create]        datetime2      NULL,
+    [gmt_modified]      datetime2      NULL,
     PRIMARY KEY CLUSTERED ([branch_id])
         WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 )
@@ -66,8 +66,8 @@ CREATE TABLE [lock_table]
     [resource_id]    nvarchar(256) NULL,
     [table_name]     nvarchar(32)  NULL,
     [pk]             nvarchar(36)  NULL,
-    [gmt_create]     datetime     NULL,
-    [gmt_modified]   datetime     NULL,
+    [gmt_create]     datetime2     NULL,
+    [gmt_modified]   datetime2     NULL,
     PRIMARY KEY CLUSTERED ([row_key])
         WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 )

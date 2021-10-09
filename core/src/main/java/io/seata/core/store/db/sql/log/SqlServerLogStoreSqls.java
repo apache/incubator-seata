@@ -31,14 +31,14 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String INSERT_GLOBAL_TRANSACTION_SQLSERVER = "insert into " + GLOBAL_TABLE_PLACEHOLD
             + "(" + ALL_GLOBAL_COLUMNS + ")"
-            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
+            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())";
 
     /**
      * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_SQLSERVER.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_SQLSERVER = "update " + GLOBAL_TABLE_PLACEHOLD
             + "   set " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?,"
-            + "       " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = GETDATE()"
+            + "       " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = SYSDATETIME()"
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
@@ -62,21 +62,21 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String INSERT_BRANCH_TRANSACTION_SQLSERVER = "insert into " + BRANCH_TABLE_PLACEHOLD
             + "(" + ALL_BRANCH_COLUMNS + ")"
-            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), GETDATE())";
+            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_SQLSERVER.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_SQLSERVER = "update " + BRANCH_TABLE_PLACEHOLD
             + "   set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?,"
-            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = GETDATE()"
+            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = SYSDATETIME()"
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
             + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     public static final String UPDATE_BRANCH_STATUS_APPLICATION_DATA_SQLSERVER = "update " + BRANCH_TABLE_PLACEHOLD
             + "   set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?,"
             + "       " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?,"
-            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = GETDATE()"
+            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = SYSDATETIME()"
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
             + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
