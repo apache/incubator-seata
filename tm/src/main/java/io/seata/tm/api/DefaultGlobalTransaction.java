@@ -110,6 +110,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
     }
 
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     @Override
     public void commit() throws TransactionException {
         if (role == GlobalTransactionRole.Participant) {
@@ -124,11 +125,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             while (retry > 0) {
                 try {
+                    retry--;
                     status = transactionManager.commit(xid);
                     break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                    retry--;
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global commit", ex);
                     }
@@ -144,6 +145,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
     }
 
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     @Override
     public void rollback() throws TransactionException {
         if (role == GlobalTransactionRole.Participant) {
@@ -159,11 +161,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             while (retry > 0) {
                 try {
+                    retry--;
                     status = transactionManager.rollback(xid);
                     break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                    retry--;
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global rollback", ex);
                     }

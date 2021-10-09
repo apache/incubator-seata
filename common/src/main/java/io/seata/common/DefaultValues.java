@@ -92,7 +92,14 @@ public interface DefaultValues {
 
     boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
-    int SERVER_DEFAULT_PORT = 8091;
+    //currently not use and will be delete in the next version
+    @Deprecated
+    int SERVICE_DEFAULT_PORT = 8091;
+
+    int SERVICE_OFFSET_SPRING_BOOT = 1000;
+
+    String SERVER_PORT = "seata.server.port";
+
     String SERVER_DEFAULT_STORE_MODE = "file";
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
@@ -136,4 +143,17 @@ public interface DefaultValues {
      * the constant DEFAULT_DISTRIBUTED_LOCK_EXPIRE
      */
     int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;
+
+    /**
+     * the constant DEFAULT_TCC_FENCE_CLEAN_PERIOD
+     */
+    int DEFAULT_TCC_FENCE_CLEAN_PERIOD = 1;
+    /**
+     * the constant DEFAULT_TCC_FENCE_LOG_TABLE_NAME
+     */
+    String DEFAULT_TCC_FENCE_LOG_TABLE_NAME = "tcc_fence_log";
+    /**
+     * the constant TCC_FENCE_BEAN_NAME
+     */
+    String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
 }

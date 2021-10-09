@@ -18,8 +18,11 @@ package io.seata.server.event;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
@@ -28,20 +31,33 @@ import io.seata.core.rpc.RemotingServer;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
+import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Test events come from Default Core.
  *
  * @author zhengyangyong
  */
+@SpringBootTest
 public class DefaultCoreForEventBusTest {
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context) throws InterruptedException {
+        Thread.sleep(5000);
+        MetricsManager.get().getRegistry().clearUp();
+    }
+
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         class GlobalTransactionEventSubscriber {
             private final Map<GlobalStatus, AtomicInteger> eventCounters;
+            private CountDownLatch downLatch;
 
             public Map<GlobalStatus, AtomicInteger> getEventCounters() {
                 return eventCounters;
@@ -52,61 +68,82 @@ public class DefaultCoreForEventBusTest {
             }
 
             @Subscribe
+            @AllowConcurrentEvents
             public void processGlobalTransactionEvent(GlobalTransactionEvent event) {
                 AtomicInteger counter = eventCounters.computeIfAbsent(event.getStatus(),
                     status -> new AtomicInteger(0));
                 counter.addAndGet(1);
+                //System.out.println("current status:" + event.getName() + "," + event.getStatus() + "," + eventCounters.size());
+                if (null != downLatch) {
+                    downLatch.countDown();
+                }
+            }
+
+            public void setDownLatch(CountDownLatch countDownLatch) {
+                this.downLatch = countDownLatch;
+            }
+
+            public CountDownLatch getDownLatch() {
+                return downLatch;
+            }
+
+            public void resetDownLatch() {
+                if (null != downLatch) {
+                    downLatch = null;
+                }
             }
         }
-        SessionHolder.init(null);
         RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
-        DefaultCoordinator coordinator = new DefaultCoordinator(remotingServer);
-        coordinator.init();
+        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(null);
+        coordinator.setRemotingServer(remotingServer);
+        SessionHolder.init(null);
+        GlobalTransactionEventSubscriber subscriber = null;
         try {
             DefaultCore core = new DefaultCore(remotingServer);
 
-            GlobalTransactionEventSubscriber subscriber = new GlobalTransactionEventSubscriber();
-            // avoid transactional interference from other unit tests
-            Thread.sleep(1500);
+            subscriber = new GlobalTransactionEventSubscriber();
+            EventBusManager.get().unregisterAll();
             EventBusManager.get().register(subscriber);
 
-            //start a transaction
+            //start and commit a transaction
+            subscriber.setDownLatch(new CountDownLatch(3));
             String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
-
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
-
-            //commit this transaction
             core.commit(xid);
 
-            //we need sleep for a short while because default canBeCommittedAsync() is true
-            Thread.sleep(1000);
 
-            //check
+            //we need sleep for a short while because default canBeCommittedAsync() is true
+            subscriber.getDownLatch().await(5000, TimeUnit.MILLISECONDS);
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed).get());
 
-            //start another new transaction
+            //start and rollback transaction
+            subscriber.setDownLatch(new CountDownLatch(3));
             xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
-
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
-
             core.rollback(xid);
 
             //check
+            subscriber.getDownLatch().await(1000, TimeUnit.MILLISECONDS);
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacked).get());
 
+
             //start more one new transaction for test timeout and let this transaction immediately timeout
-            xid = core.begin("test_app_id", "default_group", "test_tran_name3", 0);
+            subscriber.setDownLatch(new CountDownLatch(1));
+            core.begin("test_app_id", "default_group", "test_tran_name3", 0);
 
             //sleep for check ->  DefaultCoordinator.timeoutCheck
-            Thread.sleep(1000);
+            Thread.sleep(2000);
 
             //at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
+            subscriber.downLatch.await(5000, TimeUnit.MILLISECONDS);
             Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking).get() >= 1);
         } finally {
-            coordinator.destroy();
-            SessionHolder.destroy();
+            // call SpringContextShutdownHook
+            if (null != subscriber) {
+                EventBusManager.get().unregister(subscriber);
+            }
         }
     }
 }

@@ -15,11 +15,7 @@
  */
 package io.seata.config.nacos;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +38,7 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
+import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,28 +239,28 @@ public class NacosConfiguration extends AbstractConfiguration {
         return properties;
     }
 
-    private static String getNacosNameSpaceFileKey() {
+    public static String getNacosNameSpaceFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
     }
 
-    private static String getNacosAddrFileKey() {
+    public static String getNacosAddrFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
-    private static String getNacosGroupKey() {
+    public static String getNacosGroupKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
     }
 
-    private static String getNacosDataIdKey() {
+    public static String getNacosDataIdKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, NACOS_DATA_ID_KEY);
     }
 
-    private static String getNacosUserName() {
+    public static String getNacosUserName() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
                 USER_NAME);
     }
 
-    private static String getNacosPassword() {
+    public static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
                 PASSWORD);
     }
@@ -274,6 +271,10 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static String getNacosDataId() {
         return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
+    }
+
+    private static String getNacosDataType() {
+        return ConfigProcessor.resolverConfigDataType(getNacosDataId());
     }
 
     private static String getSeataConfigStr() {
@@ -294,9 +295,8 @@ public class NacosConfiguration extends AbstractConfiguration {
             String nacosDataId = getNacosDataId();
             String config = configService.getConfig(nacosDataId, getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
             if (StringUtils.isNotBlank(config)) {
-                try (Reader reader = new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
-                    seataConfig.load(reader);
-                }
+                seataConfig = ConfigProcessor.processConfig(config, getNacosDataType());
+
                 NacosListener nacosListener = new NacosListener(nacosDataId, null);
                 configService.addListener(nacosDataId, getNacosGroup(), nacosListener);
             }
@@ -304,6 +304,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             LOGGER.error("init config properties error", e);
         }
     }
+
 
     @Override
     public String getTypeName() {
@@ -343,8 +344,8 @@ public class NacosConfiguration extends AbstractConfiguration {
             if (getNacosDataId().equals(dataId)) {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(configInfo)) {
-                    try (Reader reader = new InputStreamReader(new ByteArrayInputStream(configInfo.getBytes()), StandardCharsets.UTF_8)) {
-                        seataConfigNew.load(reader);
+                    try {
+                        seataConfigNew = ConfigProcessor.processConfig(configInfo, getNacosDataType());
                     } catch (IOException e) {
                         LOGGER.error("load config properties error", e);
                         return;
@@ -379,4 +380,5 @@ public class NacosConfiguration extends AbstractConfiguration {
             listener.onProcessEvent(event);
         }
     }
+
 }
