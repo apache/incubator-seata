@@ -37,23 +37,60 @@ public class DB2UndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DB2UndoLogManager.class);
 
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
+            " (" + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", " + ClientTableColumnsName.UNDO_LOG_XID + ", "
+            + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", " + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", "
+            + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", "
+            + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
+            + " VALUES (?, ?, ?, ?, ?, now(6), now(6))";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? and ROWNUM <= ?";
 
-    @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser undoLogParser, Connection conn) throws SQLException {
 
+    @Override
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
+        insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(), State.GlobalFinished, conn);
     }
 
     @Override
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException {
-
+        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
-        return 0;
+        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
+            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
+            deletePST.setInt(2, limitRows);
+            int deleteRows = deletePST.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete undo log size {}", deleteRows);
+            }
+            return deleteRows;
+        } catch (Exception e) {
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        }
+    }
+
+    private void insertUndoLog(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
+                               State state, Connection conn) throws SQLException {
+        try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
+            pst.setLong(1, branchId);
+            pst.setString(2, xid);
+            pst.setString(3, rollbackCtx);
+            pst.setBytes(4, undoLogContent);
+            pst.setInt(5, state.getValue());
+            pst.executeUpdate();
+        } catch (Exception e) {
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        }
     }
 }
 
