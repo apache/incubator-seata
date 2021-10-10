@@ -45,4 +45,5 @@ public interface ConfigurationKeys {
      * The constant DATA_TYPE.
      */
     String DATA_TYPE = "dataType";
+    String URL = "url";
 }

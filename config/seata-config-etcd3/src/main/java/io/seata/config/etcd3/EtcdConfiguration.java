@@ -50,12 +50,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigFuture;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
+import io.seata.config.*;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +69,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static volatile EtcdConfiguration instance;
     private static volatile Client client;
 
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    public static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String ETCD_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "etcd3";

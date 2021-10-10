@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
@@ -33,6 +35,7 @@ import io.seata.config.ConfigurationFactory;
  */
 public interface RegistryService<T> {
 
+    Configuration FILE_CONFIG = RegistryURL.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
     /**
      * The constant PREFIX_SERVICE_MAPPING.
      */

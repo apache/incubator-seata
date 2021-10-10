@@ -32,13 +32,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigFuture;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationChangeType;
-import io.seata.config.ConfigurationFactory;
+import io.seata.config.*;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
@@ -63,7 +57,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final String PROP_APOLLO_CLUSTER = "apollo.cluster";
     private static final String NAMESPACE = "namespace";
     private static final String DEFAULT_NAMESPACE = "application";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    public static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
     private static volatile Config config;
     private ExecutorService configOperateExecutor;
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;

@@ -32,12 +32,7 @@ import com.alibaba.nacos.api.exception.NacosException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
+import io.seata.config.*;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +60,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    public static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
