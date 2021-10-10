@@ -18,7 +18,6 @@ package io.seata.server.coordinator;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -158,7 +157,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private static volatile DefaultCoordinator instance;
 
-    private Map<Class, RateLimiter> ratelimiterMap = new ConcurrentHashMap<>();
+    private RateLimiter rateLimiter;
 
     private LimitedRequestToResponse limitedRequestToResponse = new LimitedRequestToResponse();
 
@@ -170,6 +169,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private DefaultCoordinator(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
         this.core = new DefaultCore(remotingServer);
+        if (ENABLE_SERVER_RATELIMIT) {
+            rateLimiter = EnhancedServiceLoader.load(RateLimiter.class);
+        }
     }
 
     public static DefaultCoordinator getInstance(RemotingServer remotingServer) {
@@ -443,15 +445,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
         if (ENABLE_SERVER_RATELIMIT) {
-            if (ratelimiterMap.get(transactionRequest.getClass()) == null) {
-                RateLimiter ratelimiter = EnhancedServiceLoader.load(RateLimiter.class);
-                ratelimiterMap.put(transactionRequest.getClass(), ratelimiter);
-            }
-            if (!ratelimiterMap.get(transactionRequest.getClass()).canPass()) {
-                AbstractResultMessage resultMessage = limitedRequestToResponse.get(request.getClass());
-                if (resultMessage != null) {
-                    return resultMessage;
-                }
+            AbstractResultMessage resultMessage = limitedRequestToResponse.get(request.getClass());
+            if (resultMessage != null && !rateLimiter.canPass()) {
+                return resultMessage;
             }
         }
 
