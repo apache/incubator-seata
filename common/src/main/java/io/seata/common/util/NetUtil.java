@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
 
@@ -118,8 +119,8 @@ public class NetUtil {
      *
      * @return the local ip
      */
-    public static String getLocalIp() {
-        InetAddress address = getLocalAddress();
+    public static String getLocalIp(String... preferredNetworks) {
+        InetAddress address = getLocalAddress(preferredNetworks);
         return address == null ? LOCALHOST : address.getHostAddress();
     }
 
@@ -135,43 +136,55 @@ public class NetUtil {
 
     /**
      * Gets local address.
-     *
+     * not support ipv6
+     * if match the preferredNetworks rule return the first
+     * if all not match preferredNetworks rule return the first valid ip
      * @return the local address
      */
-    public static InetAddress getLocalAddress() {
+    public static InetAddress getLocalAddress(String... preferredNetworks) {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
-        InetAddress localAddress = getLocalAddress0();
+        InetAddress localAddress = getLocalAddress0(preferredNetworks);
         LOCAL_ADDRESS = localAddress;
         return localAddress;
     }
 
-    private static InetAddress getLocalAddress0() {
+    private static InetAddress getLocalAddress0(String... preferredNetworks) {
         InetAddress localAddress = null;
-        try {
-            localAddress = InetAddress.getLocalHost();
-            if (isValidAddress(localAddress)) {
-                return localAddress;
-            }
-        } catch (Throwable e) {
-            LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
-        }
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             if (interfaces != null) {
                 while (interfaces.hasMoreElements()) {
                     try {
                         NetworkInterface network = interfaces.nextElement();
-                        Enumeration<InetAddress> addresses = network.getInetAddresses();
-                        while (addresses.hasMoreElements()) {
-                            try {
-                                InetAddress address = addresses.nextElement();
-                                if (isValidAddress(address)) {
-                                    return address;
+                        if (network.isUp()) {
+                            Enumeration<InetAddress> addresses = network.getInetAddresses();
+                            while (addresses.hasMoreElements()) {
+                                try {
+                                    InetAddress address = addresses.nextElement();
+                                    if (isValidAddress(address)) {
+                                        if (null == localAddress) {
+                                            localAddress = address;
+                                        }
+                                        //check preferredNetworks
+                                        if (preferredNetworks.length > 0) {
+                                            String ip = address.getHostAddress();
+                                            for (String regex : preferredNetworks) {
+                                                if (StringUtils.isBlank(regex)) {
+                                                    continue;
+                                                }
+                                                if (ip.matches(regex) || ip.startsWith(regex)) {
+                                                    return address;
+                                                }
+                                            }
+                                        } else {
+                                            return address;
+                                        }
+                                    }
+                                } catch (Throwable e) {
+                                    LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
                                 }
-                            } catch (Throwable e) {
-                                LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
                             }
                         }
                     } catch (Throwable e) {
@@ -182,7 +195,11 @@ public class NetUtil {
         } catch (Throwable e) {
             LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
         }
-        LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
+        if (localAddress == null) {
+            LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
+        } else {
+            LOGGER.error("Could not match ip by preferredNetworks:{}, will use default first ip {} instead.", Arrays.toString(preferredNetworks), localAddress.getHostAddress());
+        }
         return localAddress;
     }
 
