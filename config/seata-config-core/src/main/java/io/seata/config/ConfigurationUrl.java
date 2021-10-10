@@ -105,7 +105,7 @@ public class ConfigurationUrl {
                     throw new IllegalStateException("url missing protocol: \"" + url + "\"");
                 }
                 this.protocol = url.substring(0, index);
-                parameters.put("type",protocol);
+                parameters.put("type", protocol);
                 url = url.substring(index + 3);
             }
             index = url.indexOf(47);
