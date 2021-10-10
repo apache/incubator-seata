@@ -104,17 +104,17 @@ public class RegistryURL {
                     throw new IllegalStateException("url missing protocol: \"" + url + "\"");
                 }
                 this.protocol = url.substring(0, index);
-                parameters.put("type",protocol);
+                parameters.put("type", protocol);
                 url = url.substring(index + 3);
             }
             index = url.indexOf(47);
             if (index >= 0) {
                 this.path = url.substring(index + 1);
-                parameters.put("path",path);
+                parameters.put("path", path);
                 url = url.substring(0, index);
             }
             this.serverAddr = url;
-            parameters.put("serverAddr",serverAddr);
+            parameters.put("serverAddr", serverAddr);
         } else {
             throw new IllegalArgumentException("url == null");
         }
