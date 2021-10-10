@@ -62,6 +62,7 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.ratelimit.LimitedRequestToResponse;
 import io.seata.server.ratelimit.RateLimiter;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
@@ -158,6 +159,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static volatile DefaultCoordinator instance;
 
     private Map<Class, RateLimiter> ratelimiterMap = new ConcurrentHashMap<>();
+
+    private LimitedRequestToResponse limitedRequestToResponse = new LimitedRequestToResponse();
 
     /**
      * Instantiates a new Default coordinator.
@@ -445,7 +448,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 ratelimiterMap.put(transactionRequest.getClass(), ratelimiter);
             }
             if (!ratelimiterMap.get(transactionRequest.getClass()).canPass()) {
-                return null;
+                AbstractResultMessage resultMessage = limitedRequestToResponse.get(request.getClass());
+                if (resultMessage != null) {
+                    return resultMessage;
+                }
             }
         }
 

@@ -15,10 +15,6 @@
  */
 package io.seata.core.rpc.processor.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
@@ -114,28 +110,19 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             return;
         }
         if (message instanceof MergedWarpMessage) {
-            List<AbstractResultMessage> resultList = new ArrayList<>();
-            for (int i = 0; i < ((MergedWarpMessage) message).msgs.size(); i++) {
+            AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
+            for (int i = 0; i < results.length; i++) {
                 final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
-                AbstractResultMessage tmpResult = transactionMessageHandler.onRequest(subMessage, rpcContext);
-                if (tmpResult != null) {
-                    resultList.add(tmpResult);
-                }
+                results[i] = transactionMessageHandler.onRequest(subMessage, rpcContext);
             }
-            if (resultList.size() != 0) {
-                AbstractResultMessage[] results = new AbstractResultMessage[resultList.size()];
-                Collections.addAll(resultList, results);
-                MergeResultMessage resultMessage = new MergeResultMessage();
-                resultMessage.setMsgs(results);
-                remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
-            }
+            MergeResultMessage resultMessage = new MergeResultMessage();
+            resultMessage.setMsgs(results);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            if (result != null) {
-                remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
-            }
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
         }
     }
 
