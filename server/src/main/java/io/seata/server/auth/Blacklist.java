@@ -22,7 +22,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 
 public class Blacklist {
 
