@@ -15,6 +15,9 @@
  */
 package io.seata.tm;
 
+import io.seata.common.DefaultValues;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -43,10 +46,17 @@ import java.util.concurrent.TimeoutException;
  * @author sharajava
  */
 public class DefaultTransactionManager implements TransactionManager {
+    /**
+     * enable grpc
+     */
+    private boolean enableGrpc = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_GRPC, DefaultValues.DEFAULT_ENABLE_GRPC);
 
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-        throws TransactionException {
+            throws TransactionException {
+        if (enableGrpc) {
+            return GrpcTransactionManager.getInstance().begin(applicationId, transactionServiceGroup, name, timeout);
+        }
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
@@ -59,6 +69,9 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
+        if (enableGrpc) {
+            return GrpcTransactionManager.getInstance().commit(xid);
+        }
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
         globalCommit.setXid(xid);
         GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
@@ -67,6 +80,9 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus rollback(String xid) throws TransactionException {
+        if (enableGrpc) {
+            return GrpcTransactionManager.getInstance().rollback(xid);
+        }
         GlobalRollbackRequest globalRollback = new GlobalRollbackRequest();
         globalRollback.setXid(xid);
         GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
@@ -75,6 +91,9 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
+        if (enableGrpc) {
+            return GrpcTransactionManager.getInstance().getStatus(xid);
+        }
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
         GlobalStatusResponse response = (GlobalStatusResponse) syncCall(queryGlobalStatus);
@@ -83,6 +102,9 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
+        if (enableGrpc) {
+            return GrpcTransactionManager.getInstance().globalReport(xid, globalStatus);
+        }
         GlobalReportRequest globalReport = new GlobalReportRequest();
         globalReport.setXid(xid);
         globalReport.setGlobalStatus(globalStatus);
