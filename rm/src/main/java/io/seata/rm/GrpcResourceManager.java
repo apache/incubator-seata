@@ -1,18 +1,19 @@
 package io.seata.rm;
 
 import com.google.protobuf.ByteString;
+import io.grpc.stub.StreamObserver;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.model.grpc.SeataGrpc.BranchCommitRequest;
+import io.seata.core.model.grpc.SeataGrpc.BranchCommitResponse;
 import io.seata.core.model.grpc.SeataGrpc.BranchRegisterRequest;
 import io.seata.core.model.grpc.SeataGrpc.BranchReportRequest;
 import io.seata.core.model.grpc.SeataGrpc.BranchRollbackRequest;
 import io.seata.core.model.grpc.SeataGrpc.BranchSession;
 import io.seata.core.model.grpc.SeataGrpc.GlobalLockQueryRequest;
-import io.seata.core.rpc.grpc.GrpcRemotingServer;
 import io.seata.core.rpc.grpc.RmGrpcRemotingClient;
 
 import java.nio.charset.StandardCharsets;
@@ -22,6 +23,8 @@ import java.util.Map;
  * @author xilou31
  **/
 public class GrpcResourceManager implements ResourceManager {
+    private static volatile GrpcResourceManager instance;
+
     @Override
     public void registerResource(Resource resource) {
 
@@ -51,9 +54,24 @@ public class GrpcResourceManager implements ResourceManager {
                 .setResourceID(resourceId)
                 .setApplicationData(ByteString.copyFrom(applicationData, StandardCharsets.UTF_8))
                 .build();
-        return BranchStatus.valueOf(GrpcRemotingServer.getInstance()
-                .branchCommit(request)
-                .getBranchStatus().name());
+        StreamObserver<BranchCommitResponse> observer = new StreamObserver<BranchCommitResponse>() {
+            @Override
+            public void onNext(BranchCommitResponse branchCommitResponse) {
+                System.out.println("received Message" + branchCommitResponse.getMessage());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                System.out.println("error " + throwable.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("completed");
+            }
+        };
+        RmGrpcRemotingClient.getAsyncStub().branchCommit(request, observer);
+        return null;
     }
 
     @Override
@@ -65,9 +83,10 @@ public class GrpcResourceManager implements ResourceManager {
                 .setResourceID(resourceId)
                 .setApplicationData(ByteString.copyFrom(applicationData, StandardCharsets.UTF_8))
                 .build();
-        return BranchStatus.valueOf(GrpcRemotingServer.getInstance()
-                .branchRollback(request)
-                .getBranchStatus().name());
+//        return BranchStatus.valueOf(RmGrpcRemotingClient.getInstance().
+//                .branchRollback(request)
+//                .getBranchStatus().name());
+        return null;
     }
 
     @Override
@@ -80,7 +99,7 @@ public class GrpcResourceManager implements ResourceManager {
                 .setApplicationData(ByteString.copyFrom(applicationData, StandardCharsets.UTF_8))
                 .setLockKey(lockKeys)
                 .build();
-        return RmGrpcRemotingClient.getInstance()
+        return RmGrpcRemotingClient.getSyncStub()
                 .branchRegister(request)
                 .getBranchID();
     }
@@ -94,7 +113,7 @@ public class GrpcResourceManager implements ResourceManager {
                 .setBranchStatus(BranchSession.BranchStatus.valueOf(status.name()))
                 .setApplicationData(ByteString.copyFrom(applicationData, StandardCharsets.UTF_8))
                 .build();
-        RmGrpcRemotingClient.getInstance()
+        RmGrpcRemotingClient.getSyncStub()
                 .branchReport(request);
     }
 
@@ -106,8 +125,15 @@ public class GrpcResourceManager implements ResourceManager {
                 .setXID(xid)
                 .setLockKey(lockKeys)
                 .build();
-        return RmGrpcRemotingClient.getInstance()
+        return RmGrpcRemotingClient.getSyncStub()
                 .lockQuery(request)
                 .getLockable();
+    }
+
+    public static GrpcResourceManager getInstance() {
+        if (instance == null) {
+            instance = new GrpcResourceManager();
+        }
+        return instance;
     }
 }
