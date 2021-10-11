@@ -14,7 +14,7 @@ public class RmRemotingClient {
             return RmNettyRemotingClient.getInstance();
         }
         if (framework == RpcType.GRPC) {
-            return RmGrpcRemotingClient.getInstance();
+            return RmGrpcRemotingClient.getAsyncStub();
         }
         return null;
     }

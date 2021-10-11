@@ -14,7 +14,7 @@ public class TmRemotingClient {
             return TmNettyRemotingClient.getInstance();
         }
         if (framework == RpcType.GRPC) {
-            return TmGrpcRemotingClient.getInstance();
+            return TmGrpcRemotingClient.getSyncStub();
         }
         return null;
     }
