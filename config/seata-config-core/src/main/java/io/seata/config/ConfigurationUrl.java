@@ -65,7 +65,7 @@ public class ConfigurationUrl {
         return (Configuration) Enhancer.create(Configuration.class,
                 (MethodInterceptor) (proxy, method, args, methodProxy) -> {
                     if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX)
-                            && !method.getName().equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
+                        && !method.getName().equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
                         String rawDataId = (String) args[0];
                         if (StringUtils.isNotBlank(url)) {
                             getInstance();
