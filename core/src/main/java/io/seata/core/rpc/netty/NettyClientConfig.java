@@ -21,6 +21,8 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
@@ -37,6 +39,8 @@ import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TLS;
  * @author slievrly
  */
 public class NettyClientConfig extends NettyBaseConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientConfig.class);
 
     private int connectTimeoutMillis = 10000;
     private int clientSocketSndBufSize = 153600;
@@ -480,7 +484,7 @@ public class NettyClientConfig extends NettyBaseConfig {
             }
             sslContext = sslContextBuilder.build();
         } catch (SSLException e) {
-            e.printStackTrace();
+            LOGGER.error("init client ssl context error:{}", e.getMessage(), e);
         }
         return sslContext;
     }

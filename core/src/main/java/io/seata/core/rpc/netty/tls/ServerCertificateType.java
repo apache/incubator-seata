@@ -30,6 +30,8 @@ import javax.net.ssl.SSLException;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The enum server certificate type
@@ -75,7 +77,7 @@ public enum ServerCertificateType {
                 }
                 sslContext = sslContextBuilder.build();
             } catch (SSLException e) {
-                e.printStackTrace();
+                LOGGER.error("init server ssl context error:{}", e.getMessage(), e);
             }
             return sslContext;
         }
@@ -85,6 +87,8 @@ public enum ServerCertificateType {
      * The certificate type.
      */
     private String type;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerCertificateType.class);
 
     ServerCertificateType(String type) {
         this.type = type;
@@ -128,13 +132,13 @@ public enum ServerCertificateType {
             sslContext = sslContextBuilder.build();
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException |
                 UnrecoverableKeyException | CertificateException e) {
-            e.printStackTrace();
+            LOGGER.error("init server ssl context error:{}", e.getMessage(), e);
         } finally {
             if (certificateFile != null) {
                 try {
                     certificateFile.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.error("close certificate inputStream error:{}", e.getMessage(), e);
                 }
             }
         }
