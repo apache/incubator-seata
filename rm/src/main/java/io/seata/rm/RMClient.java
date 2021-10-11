@@ -37,8 +37,6 @@ public class RMClient {
         rmNettyRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
         rmNettyRemotingClient.init();
 
-        RmGrpcRemotingClient rmGrpcRemotingClient = new RmGrpcRemotingClient();
-        rmGrpcRemotingClient.setResourceManager(new GrpcResourceManager());
         RmGrpcRemotingClient.init("localhost", 50051);
     }
 

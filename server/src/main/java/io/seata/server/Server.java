@@ -15,16 +15,14 @@
  */
 package io.seata.server;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.grpc.GrpcRemotingServer;
+import io.seata.core.rpc.grpc.GrpcServerConfig;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -34,6 +32,10 @@ import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
@@ -79,6 +81,10 @@ public class Server {
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
+
+        GrpcServerConfig grpcServerConfig = new GrpcServerConfig();
+        GrpcRemotingServer grpcRemotingServer = new GrpcRemotingServer(grpcServerConfig.getPort());
+        grpcRemotingServer.start();
 
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);

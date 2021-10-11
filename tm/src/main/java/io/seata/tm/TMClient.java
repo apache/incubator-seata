@@ -47,8 +47,6 @@ public class TMClient {
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup, accessKey, secretKey);
         tmNettyRemotingClient.init();
 
-        TmGrpcRemotingClient tmGrpcRemotingClient = new TmGrpcRemotingClient();
-        tmGrpcRemotingClient.setTransactionManager(new GrpcTransactionManager());
         TmGrpcRemotingClient.init("localhost", 50051);
     }
 
