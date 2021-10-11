@@ -26,15 +26,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_TLS_PRE
 @ConfigurationProperties(prefix = SERVER_TLS_PREFIX)
 public class ServerTlsProperties {
     private String certificateType = DEFAULT_SERVER_CERTIFICATE_TYPE;
-
     private String certificatePath;
-
     private String certificatePassword;
-
     private boolean enableTls = DEFAULT_SERVER_ENABLE_TLS;
-
     private String keyFilePath;
-
     private String tlsVersion = null;
 
     public String getCertificateType() {

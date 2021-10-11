@@ -24,20 +24,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TLS_PRE
 @Component
 @ConfigurationProperties(prefix = CLIENT_TLS_PREFIX)
 public class ClientTlsProperties {
-    /**
-     * enable TLS
-     */
     private boolean enableTls = DEFAULT_CLIENT_ENABLE_TLS;
-
-
-    /**
-     * version of TLS
-     */
     private String tlsVersion = null;
-
-    /**
-     * path of trust certificate
-     */
     private String trustCertificatePath = null;
 
     public boolean isEnableTls() {
