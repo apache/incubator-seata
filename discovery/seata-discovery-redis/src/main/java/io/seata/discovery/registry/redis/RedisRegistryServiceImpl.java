@@ -34,7 +34,6 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;

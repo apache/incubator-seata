@@ -24,8 +24,6 @@ import com.alibaba.nacos.api.naming.pojo.Instance;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryService;
 
