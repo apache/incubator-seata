@@ -149,7 +149,7 @@ public class LockStoreDataBaseDAO implements LockStore {
                             failFast = true;
                         }
                     }
-                    canLock &= false;
+                    canLock = false;
                     break;
                 }
 

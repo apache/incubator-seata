@@ -272,15 +272,6 @@ public class ConnectionContext {
     }
 
     /**
-     * set seata application data
-     *
-     * @param applicationData the map
-     */
-    public void setApplicationData(Map<String, Object> applicationData) {
-        this.applicationData = applicationData;
-    }
-
-    /**
      * Reset.
      */
     public void reset() {

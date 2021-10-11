@@ -159,7 +159,6 @@ public class FileLocker extends AbstractLocker {
             return true;
         }
         for (RowLock rowLock : rowLocks) {
-            String xid = rowLock.getXid();
             String tableName = rowLock.getTableName();
             String pk = rowLock.getPk();
 

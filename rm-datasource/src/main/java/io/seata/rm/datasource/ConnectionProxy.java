@@ -254,8 +254,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private void processGlobalTransactionCommit() throws SQLException {
         try {
             register();
-        } catch (JsonProcessingException e) {
-            throw new SQLException(e);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, context.buildLockKeys());
         }
@@ -273,7 +271,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         context.reset();
     }
 
-    private void register() throws TransactionException, JsonProcessingException {
+    private void register() throws TransactionException {
         if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
@@ -281,7 +279,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (!context.isAutoCommitChanged()) {
             Map<String, Object> map = context.getApplicationData();
             map.computeIfAbsent(AUTO_COMMIT, k -> context.isAutoCommitChanged());
-            applicationData = MAPPER.writeValueAsString(map);
+            try {
+                applicationData = MAPPER.writeValueAsString(map);
+            } catch (JsonProcessingException e) {
+                throw new TransactionException(e.getMessage(), e);
+            }
         }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), applicationData, context.buildLockKeys());
