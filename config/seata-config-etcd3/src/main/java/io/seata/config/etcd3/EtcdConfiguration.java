@@ -76,7 +76,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static volatile EtcdConfiguration instance;
     private static volatile Client client;
 
-    public static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
+    private static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String ETCD_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "etcd3";

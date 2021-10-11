@@ -45,5 +45,16 @@ public interface ConfigurationKeys {
      * The constant DATA_TYPE.
      */
     String DATA_TYPE = "dataType";
+    /**
+     * The constant URL.
+     */
     String URL = "url";
+    /**
+     * The constant METHOD_PREFIX.
+     */
+    String METHOD_PREFIX = "get";
+    /**
+     * The constant METHOD_PREFIX.
+     */
+    String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
 }

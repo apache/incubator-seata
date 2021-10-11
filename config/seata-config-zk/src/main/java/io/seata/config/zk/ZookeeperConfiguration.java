@@ -63,7 +63,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final String CONFIG_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + SEATA_FILE_ROOT_CONFIG;
-    public static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
+    private static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String SESSION_TIMEOUT_KEY = "sessionTimeout";
     private static final String CONNECT_TIMEOUT_KEY = "connectTimeout";

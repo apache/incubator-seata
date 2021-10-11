@@ -41,8 +41,6 @@ public class RegistryURL {
      * register center paramters
      */
     private Map<String, String> parameters = new HashMap<>();
-    private static final String METHOD_PREFIX = "get";
-    private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
 
     private static RegistryURL instance;
 
@@ -66,8 +64,8 @@ public class RegistryURL {
         String url = originalConfiguration.getConfig(getRegistryUrlKey());
         return (Configuration) Enhancer.create(Configuration.class,
                 (MethodInterceptor) (proxy, method, args, methodProxy) -> {
-                    if (method.getName().startsWith(METHOD_PREFIX)
-                            && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                    if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX)
+                            && !method.getName().equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
                         String rawDataId = (String) args[0];
                         if (StringUtils.isNotBlank(url)) {
                             getInstance(originalConfiguration);

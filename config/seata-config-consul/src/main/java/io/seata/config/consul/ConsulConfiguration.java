@@ -62,7 +62,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private volatile static ConsulClient client;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulConfiguration.class);
-    public static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
+    private static final Configuration FILE_CONFIG = ConfigurationUrl.proxy(ConfigurationFactory.CURRENT_FILE_INSTANCE);
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONSUL_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "consul";

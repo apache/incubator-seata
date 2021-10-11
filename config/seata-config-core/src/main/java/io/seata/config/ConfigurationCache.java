@@ -32,9 +32,6 @@ import net.sf.cglib.proxy.MethodInterceptor;
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
 
-    private static final String METHOD_PREFIX = "get";
-
-    private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
 
     private static final ConcurrentHashMap<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
@@ -103,11 +100,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     public Configuration proxy(Configuration originalConfiguration) {
         return (Configuration)Enhancer.create(Configuration.class,
             (MethodInterceptor)(proxy, method, args, methodProxy) -> {
-                if (method.getName().startsWith(METHOD_PREFIX)
-                        && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX)
+                        && !method.getName().equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
-                    ObjectWrapper.ConfigType type = ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
+                    ObjectWrapper.ConfigType type = ObjectWrapper.getTypeByName(method.getName().substring(ConfigurationKeys.METHOD_PREFIX.length()));
                     Object defaultValue = null;
                     if (args.length > 1 && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
                         defaultValue = args[1];
