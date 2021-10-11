@@ -55,6 +55,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String PRO_GROUP_KEY = "group";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
+    private static final String IP = "ip";
+    private static final String PORT = "port";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
@@ -84,7 +86,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     @Override
     public void register(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
-        getNamingInstance().registerInstance(getServiceName(), getServiceGroup(), address.getAddress().getHostAddress(), address.getPort(), getClusterName());
+        getNamingInstance().registerInstance(getServiceName(), getServiceGroup(), getServiceIp() != null ? getServiceIp() : address.getAddress().getHostAddress(), getServicePort() != -1 ? (getServicePort()) : address.getPort(), getClusterName());
     }
 
     @Override
@@ -219,6 +221,14 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return FILE_CONFIG.getConfig(getNacosApplicationGroupKey(), DEFAULT_GROUP);
     }
 
+    private static String getServiceIp() {
+        return  FILE_CONFIG.getConfig(getIpFileKey());
+    }
+
+    private static int getServicePort() {
+        return FILE_CONFIG.getInt(getPortFileKey(),-1);
+    }
+
     private static String getNacosAddrFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
     }
@@ -245,5 +255,13 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     private static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PASSWORD);
+    }
+
+    private static String getIpFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, IP);
+    }
+
+    private static String getPortFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PORT);
     }
 }
