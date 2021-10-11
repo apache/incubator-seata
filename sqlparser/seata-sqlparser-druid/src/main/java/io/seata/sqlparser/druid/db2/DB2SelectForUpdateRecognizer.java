@@ -1,4 +1,22 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.sqlparser.druid.db2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -8,19 +26,15 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.db2.visitor.DB2OutputVisitor;
-
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author qingjiusanliangsan
  */
-public class DB2SelectForUpdateRecognizer extends BaseDB2Recognizer implements SQLSelectRecognizer{
+public class DB2SelectForUpdateRecognizer extends BaseDB2Recognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;
 
@@ -28,7 +42,7 @@ public class DB2SelectForUpdateRecognizer extends BaseDB2Recognizer implements S
      * Instantiates a new db2 select for update recognizer
      *
      * @param originalSql the original sql
-     * @param ast the ast
+     * @param ast         the ast
      */
     public DB2SelectForUpdateRecognizer(String originalSql, SQLStatement ast) {
         super(originalSql);
@@ -87,7 +101,7 @@ public class DB2SelectForUpdateRecognizer extends BaseDB2Recognizer implements S
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 }

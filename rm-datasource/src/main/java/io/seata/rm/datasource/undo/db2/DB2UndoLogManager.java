@@ -15,9 +15,7 @@
  */
 package io.seata.rm.datasource.undo.db2;
 
-/**
- * @author qingjiusanliangsan
- */
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -32,6 +30,9 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author qingjiusanliangsan
+ */
 @LoadLevel(name = JdbcConstants.DB2)
 public class DB2UndoLogManager extends AbstractUndoLogManager {
 

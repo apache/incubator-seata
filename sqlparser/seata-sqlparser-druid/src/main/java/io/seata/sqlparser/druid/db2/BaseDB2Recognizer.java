@@ -1,9 +1,24 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.sqlparser.druid.db2;
 
-/**
- * @author qingjiusanliangsan
- */
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
@@ -12,11 +27,11 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
-public abstract class BaseDB2Recognizer extends BaseRecognizer{
+/**
+ * @author qingjiusanliangsan
+ */
+public abstract class BaseDB2Recognizer extends BaseRecognizer {
 
     /**
      * Instantiates a new db2 base recognizer
@@ -28,7 +43,7 @@ public abstract class BaseDB2Recognizer extends BaseRecognizer{
     }
 
     public DB2OutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
-                                               final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
+                                                final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
         DB2OutputVisitor visitor = new DB2OutputVisitor(sb) {
 
             @Override

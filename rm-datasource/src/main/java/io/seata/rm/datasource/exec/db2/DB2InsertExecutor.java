@@ -15,6 +15,17 @@
  */
 package io.seata.rm.datasource.exec.db2;
 
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
@@ -23,15 +34,11 @@ import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.struct.*;
+import io.seata.sqlparser.struct.Defaultable;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlMethodExpr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author qingjiusanliangsan
@@ -57,13 +64,13 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
      * @param sqlRecognizer     the sql recognizer
      */
     public DB2InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                                SQLRecognizer sqlRecognizer) {
+                             SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
     public Map<String, List<Object>> getPkValues() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = null;
+        Map<String, List<Object>> pkValuesMap = null;
         Boolean isContainsPk = containsPK();
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         //when there is only one pk in the table
@@ -75,7 +82,7 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
             } else {
                 pkValuesMap = getPkValuesByColumn();
             }
-        } else{
+        } else {
             throw new NotSupportYetException("composite primary key is not supported in db2");
         }
         return pkValuesMap;
@@ -129,16 +136,16 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
         } catch (SQLException e) {
             LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
         }
-        pkValuesMap.put(autoColumnName,pkValues);
+        pkValuesMap.put(autoColumnName, pkValues);
         return pkValuesMap;
     }
 
     @Override
-    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
-        Map<String,List<Object>> pkValuesMap  = parsePkValuesFromStatement();
+    public Map<String, List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = parsePkValuesFromStatement();
         Set<String> keySet = new HashSet<>(pkValuesMap.keySet());
         //auto increment
-        for (String pkKey:keySet) {
+        for (String pkKey : keySet) {
             List<Object> pkValues = pkValuesMap.get(pkKey);
             // pk auto generated while single insert primary key is expression
             if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
@@ -178,7 +185,7 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
         }
 
         Map<String, List<Object>> pkValuesMap = new HashMap<>(1, 1.001f);
-        pkValuesMap.put(autoColumnName,pkValues);
+        pkValuesMap.put(autoColumnName, pkValues);
         return pkValuesMap;
     }
 

@@ -14,9 +14,7 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource.sql.struct.cache;
-/**
- * @author qingjiusanliangsan
- */
+
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -28,18 +26,17 @@ import java.sql.Statement;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * @author qingjiusanliangsan
+ */
 @LoadLevel(name = JdbcConstants.DB2)
 public class DB2TableMetaCache extends AbstractTableMetaCache {
 
@@ -88,7 +85,8 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
             throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
-//    SELECT CURRENT SCHEMA FROM SYSIBM.SYSDUMMY1
+
+    //    SELECT CURRENT SCHEMA FROM SYSIBM.SYSDUMMY1
     private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
             throws SQLException {
         //always "" for mysql

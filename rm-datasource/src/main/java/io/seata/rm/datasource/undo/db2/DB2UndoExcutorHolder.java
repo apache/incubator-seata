@@ -14,20 +14,17 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource.undo.db2;
-/**
- * @author qingjiusanliangsan
- */
 
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoExecutorHolder;
-import io.seata.rm.datasource.undo.db2.DB2UndoDeleteExecutor;
-import io.seata.rm.datasource.undo.db2.DB2UndoInsertExecutor;
-import io.seata.rm.datasource.undo.db2.DB2UndoUpdateExecutor;
 import io.seata.sqlparser.util.JdbcConstants;
 
+/**
+ * @author qingjiusanliangsan
+ */
 @LoadLevel(name = JdbcConstants.DB2)
 public class DB2UndoExcutorHolder implements UndoExecutorHolder {
     @Override

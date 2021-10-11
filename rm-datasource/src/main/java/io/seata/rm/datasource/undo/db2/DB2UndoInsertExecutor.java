@@ -14,10 +14,6 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource.undo.db2;
-/**
- * @author qingjiusanliangsan
- */
-
 
 
 import java.sql.PreparedStatement;
@@ -36,6 +32,9 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
+/**
+ * @author qingjiusanliangsan
+ */
 public class DB2UndoInsertExecutor extends AbstractUndoExecutor {
     /**
      * Instantiates a new DB2 undo insert executor.
@@ -63,14 +62,14 @@ public class DB2UndoInsertExecutor extends AbstractUndoExecutor {
         if (CollectionUtils.isEmpty(afterImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
-        return generateDeleteSql(afterImageRows,afterImage);
+        return generateDeleteSql(afterImageRows, afterImage);
     }
 
     @Override
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
             throws SQLException {
         int undoIndex = 0;
-        for (Field pkField:pkValueList) {
+        for (Field pkField : pkValueList) {
             undoIndex++;
             undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
         }

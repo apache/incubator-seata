@@ -15,9 +15,6 @@
  */
 package io.seata.rm.datasource.undo.db2;
 
-/**
- * @author qingjiusanliangsan
- */
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +30,9 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
+/**
+ * @author qingjiusanliangsan
+ */
 public class DB2UndoUpdateExecutor extends AbstractUndoExecutor {
 
     /**

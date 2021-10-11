@@ -1,4 +1,4 @@
-package io.seata.rm.datasource.undo.db2.keyword;/*
+/*
  *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,9 @@ package io.seata.rm.datasource.undo.db2.keyword;/*
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package io.seata.rm.datasource.undo.db2.keyword;
 
-/**
- * @author qingjiusanliangsan
- */
+
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +24,9 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.sqlparser.util.JdbcConstants;
 
+/**
+ * @author qingjiusanliangsan
+ */
 @LoadLevel(name = JdbcConstants.DB2)
 public class DB2KeywordChecker implements KeywordChecker {
 
@@ -1046,7 +1048,7 @@ public class DB2KeywordChecker implements KeywordChecker {
         /**
          * SYSTEM  is db2 keyword
          */
-        SYSTEM ("SYSTEM "),
+        SYSTEM("SYSTEM "),
         /**
          * TABLE is db2 keyword
          */
@@ -1177,6 +1179,7 @@ public class DB2KeywordChecker implements KeywordChecker {
          * The Name.
          */
         public final String name;
+
         DB2Keyword(String name) {
             this.name = name;
         }

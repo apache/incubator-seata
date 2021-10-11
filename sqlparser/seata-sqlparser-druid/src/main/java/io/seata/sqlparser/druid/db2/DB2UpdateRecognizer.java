@@ -1,14 +1,34 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.sqlparser.druid.db2;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.statement.*;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.db2.visitor.DB2OutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
@@ -26,11 +46,11 @@ public class DB2UpdateRecognizer extends BaseDB2Recognizer implements SQLUpdateR
      * Instantiates a new db2 update recognizer
      *
      * @param originalSQL the original sql
-     * @param ast the ast
+     * @param ast         the ast
      */
     public DB2UpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLUpdateStatement)ast;
+        this.ast = (SQLUpdateStatement) ast;
     }
 
     @Override
@@ -45,15 +65,15 @@ public class DB2UpdateRecognizer extends BaseDB2Recognizer implements SQLUpdateR
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
-                SQLExpr owner = ((SQLPropertyExpr)expr).getOwner();
+                SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    list.add(((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName());
+                    list.add(((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName());
                     //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
                 } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
-                    list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
+                    list.add(((SQLPropertyExpr) expr).getOwnernName() + "." + ((SQLPropertyExpr) expr).getName());
                 }
             } else {
                 wrapSQLParsingException(expr);
@@ -69,7 +89,7 @@ public class DB2UpdateRecognizer extends BaseDB2Recognizer implements SQLUpdateR
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getValue();
             if (expr instanceof SQLValuableExpr) {
-                list.add(((SQLValuableExpr)expr).getValue());
+                list.add(((SQLValuableExpr) expr).getValue());
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {

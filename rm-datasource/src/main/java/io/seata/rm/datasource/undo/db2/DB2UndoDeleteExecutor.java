@@ -15,9 +15,10 @@
  */
 package io.seata.rm.datasource.undo.db2;
 
-/**
- * @author qingjiusanliangsan
- */
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -29,10 +30,10 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * @author qingjiusanliangsan
+ */
 public class DB2UndoDeleteExecutor extends AbstractUndoExecutor {
     /**
      * Instantiates a new DB2 undo delete executor.
@@ -57,7 +58,7 @@ public class DB2UndoDeleteExecutor extends AbstractUndoExecutor {
         }
         Row row = beforeImageRows.get(0);
         List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        fields.addAll(getOrderedPkList(beforeImage,row,JdbcConstants.MYSQL));
+        fields.addAll(getOrderedPkList(beforeImage, row, JdbcConstants.MYSQL));
 
         // delete sql undo log before image all field come from table meta, need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
