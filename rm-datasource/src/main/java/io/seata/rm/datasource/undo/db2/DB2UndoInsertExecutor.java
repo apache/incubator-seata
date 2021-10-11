@@ -82,7 +82,7 @@ public class DB2UndoInsertExecutor extends AbstractUndoExecutor {
 
     private String generateDeleteSql(List<Row> rows, TableRecords afterImage) {
         List<String> pkNameList = getOrderedPkList(afterImage, rows.get(0), JdbcConstants.MYSQL).stream().map(
-                e -> e.getName()).collect(Collectors.toList());
+            e -> e.getName()).collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.MYSQL);
         return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(), whereSql);
     }
