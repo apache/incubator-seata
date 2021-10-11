@@ -105,6 +105,11 @@ seata:
       asyn-committing-retry-period: 1000
       rollbacking-retry-period: 1000
       timeout-retry-period: 1000
+    tls:
+      enable-tls: true
+      certificate-type: JKS
+      certificate-path: server\\src\\test\\resources\\tls\\cert.jks
+      certificate-password: tJ7Hb2WK
     undo:
       log-save-days: 7
       log-delete-period: 86400000
