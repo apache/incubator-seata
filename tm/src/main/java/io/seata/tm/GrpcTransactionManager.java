@@ -15,6 +15,8 @@ import io.seata.core.rpc.grpc.TmGrpcRemotingClient;
  * @author xilou31
  **/
 public class GrpcTransactionManager implements TransactionManager {
+    private static volatile GrpcTransactionManager instance;
+
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
         GlobalBeginRequest request = GlobalBeginRequest.newBuilder()
@@ -22,7 +24,7 @@ public class GrpcTransactionManager implements TransactionManager {
                 .setTransactionName(name)
                 .setTimeout(timeout)
                 .build();
-        return "";
+        return TmGrpcRemotingClient.getSyncStub().begin(request).getXID();
     }
 
     @Override
@@ -30,7 +32,7 @@ public class GrpcTransactionManager implements TransactionManager {
         GlobalCommitRequest request = GlobalCommitRequest.newBuilder()
                 .setXID(xid)
                 .build();
-        return GlobalStatus.valueOf(TmGrpcRemotingClient.getInstance()
+        return GlobalStatus.valueOf(TmGrpcRemotingClient.getSyncStub()
                 .commit(request)
                 .getGlobalStatus()
                 .name());
@@ -41,7 +43,7 @@ public class GrpcTransactionManager implements TransactionManager {
         GlobalRollbackRequest request = GlobalRollbackRequest.newBuilder()
                 .setXID(xid)
                 .build();
-        return GlobalStatus.valueOf(TmGrpcRemotingClient.getInstance()
+        return GlobalStatus.valueOf(TmGrpcRemotingClient.getSyncStub()
                 .rollback(request)
                 .getGlobalStatus()
                 .name());
@@ -52,7 +54,7 @@ public class GrpcTransactionManager implements TransactionManager {
         GlobalStatusRequest request = GlobalStatusRequest.newBuilder()
                 .setXID(xid)
                 .build();
-        return GlobalStatus.valueOf(TmGrpcRemotingClient.getInstance()
+        return GlobalStatus.valueOf(TmGrpcRemotingClient.getSyncStub()
                 .getStatus(request)
                 .getGlobalStatus()
                 .name());
@@ -64,9 +66,16 @@ public class GrpcTransactionManager implements TransactionManager {
                 .setXID(xid)
                 .setGlobalStatus(GlobalSession.GlobalStatus.valueOf(globalStatus.name()))
                 .build();
-        return GlobalStatus.valueOf(TmGrpcRemotingClient.getInstance()
+        return GlobalStatus.valueOf(TmGrpcRemotingClient.getSyncStub()
                 .globalReport(request)
                 .getGlobalStatus()
                 .name());
+    }
+
+    public static GrpcTransactionManager getInstance() {
+        if (instance == null) {
+            instance = new GrpcTransactionManager();
+        }
+        return instance;
     }
 }
