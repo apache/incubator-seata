@@ -721,4 +721,14 @@ public interface ConfigurationKeys {
      * The constant TCC_FENCE_LOG_TABLE_NAME
      */
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant ENABLE_GRPC
+     */
+    String ENABLE_GRPC = SEATA_PREFIX + "enableGrpc";
+
+    /**
+     * The constant SERVICE_GRPC_PORT (if enable grpc)
+     */
+    String SERVER_GRPC_PORT = SEATA_PREFIX + SERVER_PREFIX + "grpcPort";
 }

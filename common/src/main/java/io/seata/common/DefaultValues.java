@@ -156,4 +156,14 @@ public interface DefaultValues {
      * the constant TCC_FENCE_BEAN_NAME
      */
     String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+
+    /**
+     * Default rpc Type is netty
+     */
+    boolean DEFAULT_ENABLE_GRPC = false;
+
+    /**
+     * Default grpc port.
+     */
+    int DEFAULT_GRPC_PORT = 50051;
 }
