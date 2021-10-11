@@ -115,9 +115,21 @@
       "defaultValue": true
     },
     {
+      "name": "seata.client.tls.enable-tls",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ClientTlsProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.client.tls.tls-version",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ClientTlsProperties",
+      "defaultValue": null
+    },
+    {
       "name": "seata.client.tls.trust-certificate-path",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TlsProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ClientTlsProperties",
       "defaultValue": null
     },
     {
@@ -320,6 +332,23 @@
     }
   ],
   "hints": [
+    {
+      "name": "seata.client.tls.tls-version",
+      "values": [
+        {
+          "value": "TLSv1"
+        },
+        {
+          "value": "TLSv1.1"
+        },
+        {
+          "value": "TLSv1.2"
+        },
+        {
+          "value": "TLSv1.3"
+        }
+      ]
+    },
     {
       "name": "seata.data-source-proxy-mode",
       "values": [

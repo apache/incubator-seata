@@ -28,7 +28,7 @@ import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
-import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TLS;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_TLS;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_CERTIFICATE_TYPE;
 
 /**
@@ -314,8 +314,8 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the boolean
      */
     public boolean isEnableTls() {
-        return CONFIG.getBoolean(ConfigurationKeys.ENABLE_TLS,
-                DEFAULT_ENABLE_TLS);
+        return CONFIG.getBoolean(ConfigurationKeys.SERVER_ENABLE_TLS,
+                DEFAULT_SERVER_ENABLE_TLS);
     }
 
     /**
@@ -374,6 +374,6 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the String
      */
     private String getTlsVersion() {
-        return CONFIG.getConfig(ConfigurationKeys.TLS_VERSION);
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_TLS_VERSION);
     }
 }

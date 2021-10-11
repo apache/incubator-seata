@@ -23,7 +23,7 @@ import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TlsProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ClientTlsProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 
 import org.junit.jupiter.api.AfterAll;
@@ -94,9 +94,8 @@ public class ClientPropertiesTest {
     }
 
     @Test
-    public void testTlsProperties() {
-        TlsProperties tlsProperties = context.getBean(TlsProperties.class);
-        assertNull(tlsProperties.getTrustCertificatePath());
+    public void testClientTlsProperties() {
+        assertFalse(context.getBean(ClientTlsProperties.class).isEnableTls());
     }
 
     @Test

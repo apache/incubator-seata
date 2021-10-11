@@ -19,6 +19,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_CERTIFICATE_TYPE;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_TLS;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_TLS_PREFIX;
 
 @Component
@@ -30,7 +31,11 @@ public class ServerTlsProperties {
 
     private String certificatePassword;
 
+    private boolean enableTls = DEFAULT_SERVER_ENABLE_TLS;
+
     private String keyFilePath;
+
+    private String tlsVersion = null;
 
     public String getCertificateType() {
         return this.certificateType;
@@ -55,10 +60,28 @@ public class ServerTlsProperties {
         return this;
     }
 
+    public boolean isEnableTls() {
+        return enableTls;
+    }
+
+    public ServerTlsProperties setEnableTls(boolean enableTls) {
+        this.enableTls = enableTls;
+        return this;
+    }
+
     public String getKeyFilePath() { return this.keyFilePath; }
 
     public ServerTlsProperties setKeyFilePath(String keyFilePath) {
         this.keyFilePath = keyFilePath;
+        return this;
+    }
+
+    public String getTlsVersion() {
+        return tlsVersion;
+    }
+
+    public ServerTlsProperties setTlsVersion(String tlsVersion) {
+        this.tlsVersion = tlsVersion;
         return this;
     }
 }

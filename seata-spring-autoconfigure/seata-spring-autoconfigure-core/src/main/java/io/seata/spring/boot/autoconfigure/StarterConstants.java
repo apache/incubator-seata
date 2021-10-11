@@ -35,7 +35,7 @@ public interface StarterConstants {
     String CLIENT_RM_PREFIX = CLIENT_PREFIX + ".rm";
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
-    String TLS_PREFIX = CLIENT_PREFIX + ".tls";
+    String CLIENT_TLS_PREFIX = CLIENT_PREFIX + ".tls";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     String LOAD_BALANCE_PREFIX_KEBAB_STYLE = CLIENT_PREFIX + ".load-balance";
     String LOAD_BALANCE_PREFIX = CLIENT_PREFIX + ".loadBalance";

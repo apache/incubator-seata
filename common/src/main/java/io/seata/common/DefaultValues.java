@@ -46,7 +46,8 @@ public interface DefaultValues {
     String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
     String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
-    boolean DEFAULT_ENABLE_TLS = false;
+    boolean DEFAULT_CLIENT_ENABLE_TLS = false;
+    boolean DEFAULT_SERVER_ENABLE_TLS = false;
     String DEFAULT_SERVER_CERTIFICATE_TYPE = "JKS";
 
 

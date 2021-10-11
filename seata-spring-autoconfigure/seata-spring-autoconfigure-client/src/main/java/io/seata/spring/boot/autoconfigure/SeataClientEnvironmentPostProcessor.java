@@ -19,11 +19,11 @@ import io.seata.rm.tcc.config.TCCFenceConfig;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ClientTlsProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TlsProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
@@ -33,6 +33,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TLS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
@@ -43,7 +44,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MAC
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.TLS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**
@@ -57,6 +57,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
 
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, RmProperties.class);
+        PROPERTY_BEAN_MAP.put(CLIENT_TLS_PREFIX, ClientTlsProperties.class);
         PROPERTY_BEAN_MAP.put(CLIENT_TM_PREFIX, TmProperties.class);
         PROPERTY_BEAN_MAP.put(LOCK_PREFIX, LockProperties.class);
         PROPERTY_BEAN_MAP.put(SERVICE_PREFIX, ServiceProperties.class);
@@ -64,7 +65,6 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
         PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
         PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, TCCFenceConfig.class);
-        PROPERTY_BEAN_MAP.put(TLS_PREFIX, TlsProperties.class);
         PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
     }

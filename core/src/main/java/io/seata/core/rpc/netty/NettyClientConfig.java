@@ -15,6 +15,9 @@
  */
 package io.seata.core.rpc.netty;
 
+import javax.net.ssl.SSLException;
+import java.io.File;
+
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
@@ -24,14 +27,11 @@ import io.seata.core.rpc.TransportServerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
-import java.io.File;
-
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
-import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TLS;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ENABLE_TLS;
 
 /**
  * The type Netty client config.
@@ -460,7 +460,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the boolean
      */
     public boolean isEnableTls() {
-        return CONFIG.getBoolean(ConfigurationKeys.ENABLE_TLS, DEFAULT_ENABLE_TLS);
+        return CONFIG.getBoolean(ConfigurationKeys.CLIENT_ENABLE_TLS, DEFAULT_CLIENT_ENABLE_TLS);
     }
 
     /**
@@ -496,7 +496,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the String
      */
     private String getTrustCertificatePath() {
-        return CONFIG.getConfig(ConfigurationKeys.CLIENT_TLS_TRUST_CERTIFICATE_PATH);
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_TRUST_CERTIFICATE_PATH);
     }
 
     /**
@@ -506,6 +506,6 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the String
      */
     private String getTlsVersion() {
-        return CONFIG.getConfig(ConfigurationKeys.TLS_VERSION);
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_TLS_VERSION);
     }
 }

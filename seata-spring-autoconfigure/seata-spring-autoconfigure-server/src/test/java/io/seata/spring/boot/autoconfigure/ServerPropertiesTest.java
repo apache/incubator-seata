@@ -61,6 +61,7 @@ public class ServerPropertiesTest {
     public void testServerTlsProperties() {
         assertEquals(context.getBean(ServerTlsProperties.class).getCertificateType(),
                 DEFAULT_SERVER_CERTIFICATE_TYPE);
+        assertFalse(context.getBean(ServerTlsProperties.class).isEnableTls());
     }
 
     @Test

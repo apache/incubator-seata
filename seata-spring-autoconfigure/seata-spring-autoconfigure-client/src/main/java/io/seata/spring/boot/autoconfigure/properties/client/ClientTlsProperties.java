@@ -15,23 +15,52 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.TLS_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ENABLE_TLS;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TLS_PREFIX;
 
 @Component
-@ConfigurationProperties(prefix = TLS_PREFIX)
-public class TlsProperties {
+@ConfigurationProperties(prefix = CLIENT_TLS_PREFIX)
+public class ClientTlsProperties {
+    /**
+     * enable TLS
+     */
+    private boolean enableTls = DEFAULT_CLIENT_ENABLE_TLS;
+
+
+    /**
+     * version of TLS
+     */
+    private String tlsVersion = null;
+
     /**
      * path of trust certificate
      */
     private String trustCertificatePath = null;
 
+    public boolean isEnableTls() {
+        return enableTls;
+    }
+
+    public ClientTlsProperties setEnableTls(boolean enableTls) {
+        this.enableTls = enableTls;
+        return this;
+    }
+
+    public String getTlsVersion() {
+        return tlsVersion;
+    }
+
+    public ClientTlsProperties setTlsVersion(String tlsVersion) {
+        this.tlsVersion = tlsVersion;
+        return this;
+    }
+
     public String getTrustCertificatePath() { return this.trustCertificatePath; }
 
-    public TlsProperties setTrustCertificatePath(String trustCertificatePath) {
+    public ClientTlsProperties setTrustCertificatePath(String trustCertificatePath) {
         this.trustCertificatePath = trustCertificatePath;
         return this;
     }
