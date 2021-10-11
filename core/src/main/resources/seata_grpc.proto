@@ -477,8 +477,8 @@ service TransactionManagerService {
 }
 
 service ResourceManagerService {
-  rpc BranchCommit(stream BranchCommitRequest) returns (stream BranchCommitResponse);
-  rpc BranchRollback(stream BranchRollbackRequest) returns (stream BranchRollbackResponse);
+  rpc BranchCommit(BranchCommitRequest) returns (stream BranchCommitResponse);
+  rpc BranchRollback(BranchRollbackRequest) returns (stream BranchRollbackResponse);
   rpc BranchRegister(BranchRegisterRequest) returns (BranchRegisterResponse);
   rpc BranchReport(BranchReportRequest) returns (BranchReportResponse);
   rpc LockQuery(GlobalLockQueryRequest) returns (GlobalLockQueryResponse);
