@@ -71,6 +71,7 @@ seata:
     enable-client-batch-send-request: true
   config:
     type: file
+    url: nacos://127.0.0.1:8848?namespace=&group=SEATA_GROUP&username=&password=&data-id=
     consul:
       server-addr: 127.0.0.1:8500
     apollo:
@@ -98,6 +99,7 @@ seata:
       name: ""
   registry:
     type: file
+    url: nacos://127.0.0.1:8848?namespace=&group=SEATA_GROUP&username=&password=&cluster=default
     file:
       name: file.conf
     consul:
