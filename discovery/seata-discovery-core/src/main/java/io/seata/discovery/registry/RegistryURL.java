@@ -62,19 +62,19 @@ public class RegistryURL {
 
     public static Configuration proxy(Configuration originalConfiguration) {
         String url = originalConfiguration.getConfig(getRegistryUrlKey());
-        return (Configuration) Enhancer.create(Configuration.class,
-                (MethodInterceptor) (proxy, method, args, methodProxy) -> {
-                    if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX)
-                        && !method.getName().equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
-                        String rawDataId = (String) args[0];
-                        if (StringUtils.isNotBlank(url)) {
-                            getInstance(originalConfiguration);
-                            String[] subDataId = rawDataId.split("\\.");
-                            return instance.getConfig(subDataId[subDataId.length - 1]);
-                        }
+        return (Configuration)Enhancer
+            .create(Configuration.class, (MethodInterceptor)(proxy, method, args, methodProxy) -> {
+                if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX) && !method.getName()
+                    .equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
+                    String rawDataId = (String)args[0];
+                    if (StringUtils.isNotBlank(url)) {
+                        getInstance(originalConfiguration);
+                        String[] subDataId = rawDataId.split("\\.");
+                        return instance.getConfig(subDataId[subDataId.length - 1]);
                     }
-                    return method.invoke(originalConfiguration, args);
-                });
+                }
+                return method.invoke(originalConfiguration, args);
+            });
     }
 
     public void valueOf(String url) {
