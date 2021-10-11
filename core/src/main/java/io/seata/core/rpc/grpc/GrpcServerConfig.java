@@ -4,11 +4,9 @@ package io.seata.core.rpc.grpc;
  * @author xilou31
  **/
 public class GrpcServerConfig {
-    public String getHost() {
-        return "";
-    }
+    private Integer port = 50051;
 
     public Integer getPort() {
-        return 50051;
+        return port;
     }
 }
