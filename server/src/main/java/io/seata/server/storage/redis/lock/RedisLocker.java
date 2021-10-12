@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -167,10 +168,10 @@ public class RedisLocker extends AbstractLocker {
         List<List<String>> existedLockInfos =
             Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
         if (!autoCommit) {
-            Collections.sort(existedLockInfos, (status1, status2) -> {
-                Long a = status1.size() == 2 ? Long.valueOf(status1.get(1)) : 0L;
-                Long b = status2.size() == 2 ? Long.valueOf(status2.get(1)) : 0L;
-                return b.compareTo(a);
+            Collections.sort(existedLockInfos, (list1, list2) -> {
+                String status1 = Optional.ofNullable(list1.get(1)).orElse("0");
+                String status2 = Optional.ofNullable(list2.get(1)).orElse("0");
+                return Long.valueOf(status2).compareTo(Long.valueOf(status1));
             });
         }
         Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
