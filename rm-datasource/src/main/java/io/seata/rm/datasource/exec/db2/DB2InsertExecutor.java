@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
@@ -37,12 +39,14 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author qingjiusanliangsan
  */
+@LoadLevel(name = JdbcConstants.DB2, scope = Scope.PROTOTYPE)
 public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DB2InsertExecutor.class);
