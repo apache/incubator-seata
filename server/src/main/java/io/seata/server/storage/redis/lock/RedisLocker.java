@@ -166,11 +166,13 @@ public class RedisLocker extends AbstractLocker {
         });
         List<List<String>> existedLockInfos =
             Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
-        Collections.sort(existedLockInfos, (status1, status2) -> {
-            Long a = status1.size() == 2 ? Long.valueOf(status1.get(1)) : 0L;
-            Long b = status2.size() == 2 ? Long.valueOf(status2.get(1)) : 0L;
-            return b.compareTo(a);
-        });
+        if (!autoCommit) {
+            Collections.sort(existedLockInfos, (status1, status2) -> {
+                Long a = status1.size() == 2 ? Long.valueOf(status1.get(1)) : 0L;
+                Long b = status2.size() == 2 ? Long.valueOf(status2.get(1)) : 0L;
+                return b.compareTo(a);
+            });
+        }
         Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
         boolean failFast = false;
         boolean canLock = true;
@@ -190,10 +192,8 @@ public class RedisLocker extends AbstractLocker {
                         }
                     }
                     // If not equals,means the rowkey is holding by another global transaction
-                    if (canLock) {
-                        canLock = false;
-                        break;
-                    }
+                    canLock = false;
+                    break;
                 }
             }
         }
