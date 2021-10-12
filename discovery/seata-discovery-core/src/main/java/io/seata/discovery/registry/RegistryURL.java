@@ -42,14 +42,16 @@ public class RegistryURL {
      */
     private Map<String, String> parameters = new HashMap<>();
 
-    private static RegistryURL instance;
+    private static volatile RegistryURL instance;
 
     public static RegistryURL getInstance(Configuration configuration) {
         if (instance == null) {
             synchronized (RegistryURL.class) {
                 if (StringUtils.isNotBlank(configuration.getConfig(getRegistryUrlKey()))) {
-                    String url = configuration.getConfig(getRegistryUrlKey());
-                    instance = new RegistryURL(url);
+                    if (instance == null) {
+                        String url = configuration.getConfig(getRegistryUrlKey());
+                        instance = new RegistryURL(url);
+                    }
                 }
             }
         }
@@ -61,16 +63,18 @@ public class RegistryURL {
     }
 
     public static Configuration proxy(Configuration originalConfiguration) {
-        String url = originalConfiguration.getConfig(getRegistryUrlKey());
         return (Configuration)Enhancer
             .create(Configuration.class, (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX) && !method.getName()
                     .equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
+                    String url = originalConfiguration.getConfig(getRegistryUrlKey());
                     if (StringUtils.isNotBlank(url)) {
                         getInstance(originalConfiguration);
                         String[] subDataId = rawDataId.split("\\.");
-                        return instance.getConfig(subDataId[subDataId.length - 1]);
+                        int len = subDataId.length;
+                        return instance.getConfig(subDataId[len - 1]) == null ?
+                            method.invoke(originalConfiguration, args) : instance.getConfig(subDataId[len - 1]);
                     }
                 }
                 return method.invoke(originalConfiguration, args);

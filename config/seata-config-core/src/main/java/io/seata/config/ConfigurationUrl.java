@@ -40,16 +40,16 @@ public class ConfigurationUrl {
      */
     private Map<String, String> parameters = new HashMap<>();
 
-    public static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private static volatile ConfigurationUrl instance;
 
-    private static ConfigurationUrl instance;
-
-    public static ConfigurationUrl getInstance() {
+    public static ConfigurationUrl getInstance(Configuration configuration) {
         if (instance == null) {
             synchronized (ConfigurationUrl.class) {
-                if (StringUtils.isNotBlank(FILE_CONFIG.getConfig(getConfigUrlKey()))) {
-                    String url = FILE_CONFIG.getConfig(getConfigUrlKey());
-                    instance = new ConfigurationUrl(url);
+                if (StringUtils.isNotBlank(configuration.getConfig(getConfigUrlKey()))) {
+                    if (instance == null) {
+                        String url = configuration.getConfig(getConfigUrlKey());
+                        instance = new ConfigurationUrl(url);
+                    }
                 }
             }
         }
@@ -61,17 +61,18 @@ public class ConfigurationUrl {
     }
 
     public static Configuration proxy(Configuration originalConfiguration) {
-        String url = originalConfiguration.getConfig(getConfigUrlKey());
         return (Configuration)Enhancer
             .create(Configuration.class, (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX) && !method.getName()
                     .equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
+                    String url = originalConfiguration.getConfig(getConfigUrlKey());
                     if (StringUtils.isNotBlank(url)) {
-                        getInstance();
+                        getInstance(originalConfiguration);
                         String[] subDataId = rawDataId.split("\\.");
                         int len = subDataId.length;
-                        return instance.getConfig(subDataId[len - 1]);
+                        return instance.getConfig(subDataId[len - 1]) == null ?
+                            method.invoke(originalConfiguration, args) : instance.getConfig(subDataId[len - 1]);
                     }
                 }
                 return method.invoke(originalConfiguration, args);
