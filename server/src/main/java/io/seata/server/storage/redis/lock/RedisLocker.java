@@ -175,7 +175,6 @@ public class RedisLocker extends AbstractLocker {
         }
         Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
         boolean failFast = false;
-        boolean canLock = true;
         for (int i = 0; i < needLockKeys.size(); i++) {
             List<String> results = existedLockInfos.get(i);
             String existedLockXid = CollectionUtils.isEmpty(results) ? null : existedLockInfos.get(i).get(0);
@@ -192,16 +191,12 @@ public class RedisLocker extends AbstractLocker {
                         }
                     }
                     // If not equals,means the rowkey is holding by another global transaction
-                    canLock = false;
-                    break;
+                    return false;
                 }
             }
         }
         if (failFast) {
             throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
-        }
-        if (!canLock) {
-            return canLock;
         }
         if (needAddLock.isEmpty()) {
             return true;
