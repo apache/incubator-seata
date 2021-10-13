@@ -148,10 +148,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             }
             // 2. build XA-Xid with xid and branchId
             this.xaBranchXid = XAXidBuilder.build(xid, branchId);
+            // Keep the Connection if necessary
+            keepIfNecessary();
             try {
                 // 3. XA Start
                 xaResource.start(this.xaBranchXid, XAResource.TMNOFLAGS);
             } catch (XAException e) {
+                releaseIfNecessary();
                 cleanXABranchContext();
                 throw new SQLException("failed to start xa branch " + xid + " since " + e.getMessage(), e);
             }
@@ -182,9 +185,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             xaResource.end(xaBranchXid, XAResource.TMSUCCESS);
             // XA Prepare
             xaResource.prepare(xaBranchXid);
-            // Keep the Connection if necessary
-            keepIfNecessary();
         } catch (XAException xe) {
+            releaseIfNecessary();
             try {
                 // Branch Report to TC: Failed
                 DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
