@@ -18,6 +18,7 @@ package io.seata.rm;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -208,7 +209,9 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     }
 
     public static void remove(String xaBranchXid) {
-        BRANCH_STATUS_CACHE.invalidate(xaBranchXid);
+        if (StringUtils.isNotBlank(xaBranchXid)) {
+            BRANCH_STATUS_CACHE.invalidate(xaBranchXid);
+        }
     }
 
 }

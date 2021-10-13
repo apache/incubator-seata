@@ -79,10 +79,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void releaseIfNecessary() {
-        if (isHeld()) {
-            resource.release(xaBranchXid.toString(), this);
+        if (this.xaBranchXid != null) {
+            String xaBranchXid = this.xaBranchXid.toString();
+            if (isHeld()) {
+                resource.release(xaBranchXid, this);
+            }
+            BaseDataSourceResource.remove(xaBranchXid);
         }
-        BaseDataSourceResource.remove(xaBranchXid.toString());
     }
 
     /**
