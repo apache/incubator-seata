@@ -35,6 +35,7 @@ public class ConfigurationUrl {
     private String serverAddr;
     private String protocol;
     private String path;
+    private String url;
     /**
      * config center paramters
      */
@@ -45,8 +46,8 @@ public class ConfigurationUrl {
     public static ConfigurationUrl getInstance(Configuration configuration) {
         if (instance == null) {
             synchronized (ConfigurationUrl.class) {
-                if (StringUtils.isNotBlank(configuration.getConfig(getConfigUrlKey()))) {
-                    if (instance == null) {
+                if (instance == null) {
+                    if (StringUtils.isNotBlank(configuration.getConfig(getConfigUrlKey()))) {
                         String url = configuration.getConfig(getConfigUrlKey());
                         instance = new ConfigurationUrl(url);
                     }
@@ -66,13 +67,11 @@ public class ConfigurationUrl {
                 if (method.getName().startsWith(ConfigurationKeys.METHOD_PREFIX) && !method.getName()
                     .equalsIgnoreCase(ConfigurationKeys.METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
-                    String url = originalConfiguration.getConfig(getConfigUrlKey());
-                    if (StringUtils.isNotBlank(url)) {
-                        getInstance(originalConfiguration);
-                        String[] subDataId = rawDataId.split("\\.");
-                        int len = subDataId.length;
-                        return instance.getConfig(subDataId[len - 1]) == null ?
-                            method.invoke(originalConfiguration, args) : instance.getConfig(subDataId[len - 1]);
+                    getInstance(originalConfiguration);
+                    String[] subDataId = rawDataId.split("\\.");
+                    int len = subDataId.length;
+                    if (instance != null) {
+                        return instance.getConfig(subDataId[len - 1]);
                     }
                 }
                 return method.invoke(originalConfiguration, args);
