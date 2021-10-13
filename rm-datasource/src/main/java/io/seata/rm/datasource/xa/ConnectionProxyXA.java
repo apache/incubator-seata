@@ -92,7 +92,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param applicationData application data
      * @throws SQLException SQLException
      */
-    public void xaCommit(String xid, long branchId, String applicationData) throws XAException {
+    public synchronized void xaCommit(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
         xaResource.commit(xaXid, false);
         releaseIfNecessary();
@@ -105,7 +105,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param applicationData application data
      * @throws SQLException  SQLException
      */
-    public void xaRollback(String xid, long branchId, String applicationData) throws XAException {
+    public synchronized void xaRollback(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
         xaRollback(xaXid);
     }
@@ -243,7 +243,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private synchronized void prepare() throws XAException, SQLException {
-        termination();
+        try {
+            termination();
+        } catch (SQLException e) {
+            xaResource.rollback(xaBranchXid);
+            throw e;
+        }
         // XA Prepare
         xaResource.prepare(xaBranchXid);
     }
