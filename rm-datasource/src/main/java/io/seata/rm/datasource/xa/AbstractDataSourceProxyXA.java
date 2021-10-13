@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.xa;
 
+import io.seata.core.model.BranchStatus;
 import io.seata.rm.BaseDataSourceResource;
 
 import javax.sql.PooledConnection;
@@ -35,10 +36,17 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
      * @return ConnectionProxyXA instance
      * @throws SQLException exception
      */
-    public ConnectionProxyXA getConnectionForXAFinish(XAXid xaXid) throws SQLException {
-        ConnectionProxyXA connectionProxyXA = lookup(xaXid.toString());
+    public ConnectionProxyXA getConnectionForXAFinish(XAXid xaXid, boolean committed) throws SQLException {
+        String xaBranchXid = xaXid.toString();
+        BaseDataSourceResource.setBranchStatus(xaBranchXid,
+            committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
+        ConnectionProxyXA connectionProxyXA = lookup(xaBranchXid);
         if (connectionProxyXA != null) {
-            return connectionProxyXA;
+            try {
+                return connectionProxyXA;
+            } finally {
+                BaseDataSourceResource.remove(xaBranchXid);
+            }
         }
         return (ConnectionProxyXA)getConnectionProxyXA();
     }
