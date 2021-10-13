@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.xa;
 
-import io.seata.core.model.BranchStatus;
 import io.seata.rm.BaseDataSourceResource;
 
 import javax.sql.PooledConnection;
