@@ -38,15 +38,9 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
      */
     public ConnectionProxyXA getConnectionForXAFinish(XAXid xaXid, boolean committed) throws SQLException {
         String xaBranchXid = xaXid.toString();
-        BaseDataSourceResource.setBranchStatus(xaBranchXid,
-            committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
         ConnectionProxyXA connectionProxyXA = lookup(xaBranchXid);
         if (connectionProxyXA != null) {
-            try {
-                return connectionProxyXA;
-            } finally {
-                BaseDataSourceResource.remove(xaBranchXid);
-            }
+            return connectionProxyXA;
         }
         return (ConnectionProxyXA)getConnectionProxyXA();
     }

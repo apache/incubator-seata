@@ -82,6 +82,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         if (isHeld()) {
             resource.release(xaBranchXid.toString(), this);
         }
+        BaseDataSourceResource.remove(xaBranchXid.toString());
     }
 
     /**
@@ -211,7 +212,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         try {
             // XA End: Fail
-            end(XAResource.TMFAIL);
+            xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
             xaRollback(xaBranchXid);
             // Branch Report to TC
             DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
