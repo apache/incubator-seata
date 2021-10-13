@@ -14,12 +14,13 @@
  *  limitations under the License.
  */
 
-package seata.e2e.factory;
+package seata.e2e.factory.impl;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+import seata.e2e.factory.SeataTestHelperFactory;
 import seata.e2e.helper.CronTask;
 import seata.e2e.helper.DruidJdbcHelper;
 import seata.e2e.helper.PressureTask;
@@ -31,7 +32,7 @@ import seata.e2e.helper.TimesTask;
  *
  * @author jingliu_xiong@foxmail.com
  */
-public class SeataTestHelperFactoryImpl implements SeataTestHelperFactory{
+public class SeataTestHelperFactoryImpl implements SeataTestHelperFactory {
 
     @Override
     public DruidJdbcHelper druidJdbcQuery(Map map) {
@@ -46,10 +47,10 @@ public class SeataTestHelperFactoryImpl implements SeataTestHelperFactory{
     }
 
     @Override
-    public DruidJdbcHelper druidJdbcQuery(Properties pro) {
+    public DruidJdbcHelper druidJdbcQuery(Properties prop) {
         DruidJdbcHelper druidJdbcHelper = null;
         try {
-            druidJdbcHelper = new DruidJdbcHelper(pro);
+            druidJdbcHelper = new DruidJdbcHelper(prop);
             return druidJdbcHelper;
         } catch (Exception e) {
             e.printStackTrace();

@@ -34,10 +34,10 @@
 
 package seata.e2e.docker.extension;
 
-import seata.e2e.docker.E2E;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import seata.e2e.docker.E2E;
 import seata.e2e.docker.annotation.ContainerHostAndPort;
 import seata.e2e.docker.annotation.DockerCompose;
 
@@ -46,7 +46,7 @@ import seata.e2e.docker.annotation.DockerCompose;
  * You can use {@link E2E} to instead of this annotation, too.
  *
  * <pre>{@code
- * @ExtendWith(ContainerInitAndDestoryExtension.class)
+ * @ExtendWith(ContainerInitAndDestroyExtension.class)
  * @TestInstance(TestInstance.Lifecycle.PER_CLASS)
  * public class SomeTest {
  *     @DockerCompose("docker-compose.yml")
@@ -62,15 +62,15 @@ import seata.e2e.docker.annotation.DockerCompose;
  *
  * @author jingliu_xiong@foxmail.com
  */
-public class ContainerInitAndDestoryExtension implements BeforeAllCallback, AfterAllCallback {
+public class ContainerInitAndDestroyExtension implements BeforeAllCallback, AfterAllCallback {
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
         // context.getRequiredTestInstance() get the actual running object
-        ContainerInitAndDestory.init(context.getRequiredTestInstance());
+        ContainerInitAndDestroy.init(context.getRequiredTestInstance());
     }
 
     @Override
     public void afterAll(ExtensionContext context) throws Exception {
-        ContainerInitAndDestory.destroy(context.getRequiredTestInstance());
+        ContainerInitAndDestroy.destroy(context.getRequiredTestInstance());
     }
 }

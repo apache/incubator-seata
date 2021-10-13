@@ -61,12 +61,13 @@ public class OneTestExtension implements ExecutionCondition, AfterTestExecutionC
         this.times = times;
     }
 
-    @Override
+
 
     /**
      * Get the exception occurred in the test method, decide whether to retry next time
      * based on the exception.
      */
+    @Override
     public void afterTestExecution(ExtensionContext context) throws Exception {
 
         final Optional<Throwable> throwable = context.getExecutionException();
@@ -76,10 +77,11 @@ public class OneTestExtension implements ExecutionCondition, AfterTestExecutionC
         );
     }
 
-    @Override
+
     /**
      * Assess whether the test method needs to be started
      */
+    @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
         final boolean shouldRetry = StoresUtil.get(context, TestTriggerExtension.TEST_SHOULD_RETRY, Boolean.class) != Boolean.FALSE;
 

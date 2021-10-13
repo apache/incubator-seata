@@ -48,14 +48,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import seata.e2e.config.E2Econfig;
-import seata.e2e.docker.annotation.ContainerHostAndPort;
-import seata.e2e.docker.annotation.DockerCompose;
-import seata.e2e.docker.annotation.DockerContainer;
-import seata.e2e.docker.file.DockerComposeFile;
-import seata.e2e.docker.log.ContainerLoggerFactory;
-import seata.e2e.helper.PressureTask;
-import seata.e2e.model.HostAndPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.ContainerState;
@@ -63,13 +55,20 @@ import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
+import seata.e2e.config.E2EConfig;
+import seata.e2e.docker.annotation.ContainerHostAndPort;
+import seata.e2e.docker.annotation.DockerCompose;
+import seata.e2e.docker.annotation.DockerContainer;
+import seata.e2e.docker.file.DockerComposeFile;
 import seata.e2e.docker.file.Yamls;
+import seata.e2e.docker.log.ContainerLoggerFactory;
+import seata.e2e.model.HostAndPort;
 
 /**
  * This annotation will initialize fields annotated with annotations in {@link seata.e2e.docker.annotation}
  *
  * <pre>{@code
- * @ExtendWith(ContainerInitAndDestoryExtension.class)
+ * @ExtendWith(ContainerInitAndDestroyExtension.class)
  * @TestInstance(TestInstance.Lifecycle.PER_CLASS)
  * public class SomeTest {
  *     @DockerCompose("docker-compose.yml")
@@ -80,7 +79,7 @@ import seata.e2e.docker.file.Yamls;
  * }
  * }</pre>
  * <p>
- * If you don't use the ContainerInitAndDestoryExtension for some reasons, here is an example:
+ * If you don't use the ContainerInitAndDestroyExtension for some reasons, here is an example:
  *
  * <pre>{@code
  * public class SomeTest {
@@ -92,26 +91,26 @@ import seata.e2e.docker.file.Yamls;
  *
  *     @BeforeAll
  *     public void setUp() throws Exception {
- *         ContainerInitAndDestory.init(this);
+ *         ContainerInitAndDestroy.init(this);
  *     }
  *
  *     @AfterAll
  *     public void stop() throws Exception {
- *         ContainerInitAndDestory.destroy(this);
+ *         ContainerInitAndDestroy.destroy(this);
  *    }
  * }
  * }</pre>
  *
  * @author jingliu_xiong@foxmail.com
  */
-public class ContainerInitAndDestory {
+public class ContainerInitAndDestroy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PressureTask.class);
-    private static final Path LOG_DIR = Paths.get(E2Econfig.LOG_DIR_ENV);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContainerInitAndDestroy.class);
+    private static final Path LOG_DIR = Paths.get(E2EConfig.LOG_DIR_ENV);
 
     static {
-        LOGGER.info("IDENTIFIER={}", E2Econfig.IDENTIFIER);
-        LOGGER.info("LOG_DIR={}", E2Econfig.LOG_DIR_ENV);
+        LOGGER.info("IDENTIFIER={}", E2EConfig.IDENTIFIER);
+        LOGGER.info("LOG_DIR={}", E2EConfig.LOG_DIR_ENV);
     }
 
     public static void init(final Object testClass) throws Exception {
@@ -137,7 +136,7 @@ public class ContainerInitAndDestory {
      */
     public static void destroy(final Object testClass) {
         Stream.of(testClass.getClass().getDeclaredFields())
-                .filter(ContainerInitAndDestory::isAnnotatedWithDockerCompose)
+                .filter(ContainerInitAndDestroy::isAnnotatedWithDockerCompose)
                 .findFirst()
                 .ifPresent(field -> {
                     try {
@@ -160,7 +159,7 @@ public class ContainerInitAndDestory {
     private static void initDockerContainers(final Object testClass,
                                              final DockerComposeContainer<?> compose) throws Exception {
         final List<Field> containerFields = Stream.of(testClass.getClass().getDeclaredFields())
-                .filter(ContainerInitAndDestory::isAnnotatedWithDockerContainer)
+                .filter(ContainerInitAndDestroy::isAnnotatedWithDockerContainer)
                 .collect(Collectors.toList());
         if (containerFields.isEmpty()) {
             return;
@@ -224,7 +223,7 @@ public class ContainerInitAndDestory {
     private static Optional<DockerComposeContainer<?>> initDockerComposeField(final Object testClass) throws Exception {
         final Field[] fields = testClass.getClass().getDeclaredFields();
         final List<Field> dockerComposeFields = Stream.of(fields)
-                .filter(ContainerInitAndDestory::isAnnotatedWithDockerCompose)
+                .filter(ContainerInitAndDestroy::isAnnotatedWithDockerCompose)
                 .collect(Collectors.toList());
 
         if (dockerComposeFields.isEmpty()) {
@@ -242,7 +241,7 @@ public class ContainerInitAndDestory {
         final List<File> files = Stream.of(dockerCompose.value()).map(Envs::resolve)
                 .map(File::new).collect(Collectors.toList());
 
-        final DockerComposeContainer<?> compose = new DockerComposeContainer<>(E2Econfig.IDENTIFIER, files);
+        final DockerComposeContainer<?> compose = new DockerComposeContainer<>(E2EConfig.IDENTIFIER, files);
 
         for (final Field field : fields) {
             final WaitStrategy waitStrategy = Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(5));

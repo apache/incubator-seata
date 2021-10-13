@@ -40,19 +40,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import seata.e2e.docker.extension.ContainerInitAndDestoryExtension;
+import seata.e2e.docker.extension.ContainerInitAndDestroyExtension;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * Use this annotation to provide {@link ContainerInitAndDestoryExtension} for all test methods under a class.
+ * Use this annotation to provide {@link ContainerInitAndDestroyExtension} for all test methods under a class.
  *
  * @author jingliu_xiong@foxmail.com
  */
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(ContainerInitAndDestoryExtension.class)
+@ExtendWith(ContainerInitAndDestroyExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public @interface E2E {
 

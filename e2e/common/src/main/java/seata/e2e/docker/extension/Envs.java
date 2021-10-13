@@ -41,13 +41,13 @@ import com.google.common.base.Strings;
 
 public final class Envs {
 
+    static final Pattern PATTERN = Pattern.compile("\\$\\{(?<name>\\w+)}");
+
     public static String resolve(final String text) {
         if (Strings.isNullOrEmpty(text)) {
             return "";
         }
-
-        final Pattern pattern = Pattern.compile("\\$\\{(?<name>\\w+)}");
-        final Matcher matcher = pattern.matcher(text);
+        final Matcher matcher = PATTERN.matcher(text);
         final StringBuffer buffer = new StringBuffer();
 
         while (matcher.find()) {

@@ -19,8 +19,10 @@ package seata.e2e.helper;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -41,16 +43,20 @@ public class PressureTask {
         this.sender = sender;
         this.clientTotal = clientTotal;
         this.threadTotal = threadTotal;
+        this.executorService =  new ThreadPoolExecutor(0, threadTotal,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(),
+                r -> {
+                    final Thread thread = new Thread(r, "PressureTask");
+                    thread.setDaemon(true);
+                    return thread;
+                });
     }
 
     private Callable<?> sender;
     private int clientTotal;
     private int threadTotal ;
-    private final ExecutorService executorService =  Executors.newCachedThreadPool(r -> {
-        final Thread thread = new Thread(r, "PressureTask");
-        thread.setDaemon(true);
-        return thread;
-    });
+    private final ExecutorService executorService;
     private int count = 0;
 
     /**

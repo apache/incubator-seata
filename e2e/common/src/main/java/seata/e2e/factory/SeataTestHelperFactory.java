@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+
+import com.alibaba.druid.pool.DruidDataSource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import seata.e2e.helper.CronTask;
 import seata.e2e.helper.DruidJdbcHelper;
 import seata.e2e.helper.PressureTask;
@@ -33,21 +36,27 @@ import seata.e2e.helper.TimesTask;
 public interface SeataTestHelperFactory {
 
     /**
-     *
+     * DruidJdbcHelper encapsulates {@link DruidDataSource} connection pool and {@link JdbcTemplate}. Allow developers
+     * to directly use the orm method to query data during testing. It also allows simple update statement execution and
+     * sql script execution. If you need to perform comprehensive database operations, it is recommended to directly
+     * use frameworks such as JPA.
      * @param map The configuration required to initialize the druid connection pool
      * @return
      */
     public DruidJdbcHelper druidJdbcQuery(Map map);
 
     /**
-     *
-     * @param pro The configuration required to initialize the druid connection pool
+     * DruidJdbcHelper encapsulates {@link DruidDataSource} connection pool and {@link JdbcTemplate}. Allow developers
+     * to directly use the orm method to query data during testing. It also allows simple update statement execution and
+     * sql script execution. If you need to perform comprehensive database operations, it is recommended to directly
+     * use frameworks such as JPA.
+     * @param prop The configuration required to initialize the druid connection pool
      * @return
      */
-    public DruidJdbcHelper druidJdbcQuery(Properties pro);
+    public DruidJdbcHelper druidJdbcQuery(Properties prop);
 
     /**
-     *
+     * TimesTask executes tasks according to the execution times and execution time interval set by the developer.
      * @param sender Tasks to be performed
      * @param times Number of times to execute
      * @param interval Interval between each execution
@@ -56,7 +65,8 @@ public interface SeataTestHelperFactory {
     public TimesTask timseTask(Callable<?> sender, int times, int interval);
 
     /**
-     *
+     *  PressureTask executes pressure tasks according to the number of threads and total execution times set
+     *  by the developer, and the developer can pass in related functions for the callback processing of each test.
      * @param sender Tasks to be performed
      * @param clientTotal Number of times to execute
      * @param threadTotal Maximum number of execution threads
@@ -65,13 +75,14 @@ public interface SeataTestHelperFactory {
     public PressureTask pressureController(Callable<?> sender, int clientTotal, int threadTotal);
 
     /**
-     *
+     * TimeCountHelper is a time count tool that supports time pausing and settling the total time spent.
      * @return
      */
     public TimeCountHelper timeCountHelper();
 
     /**
-     *
+     * CronTask executes tasks according to the time interval set by the developer, it will not stop until it is
+     * manually stopped by code.
      * @param interval Interval between each execution
      * @param sender Tasks to be performed
      * @return

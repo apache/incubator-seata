@@ -38,7 +38,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import seata.e2e.docker.extension.ContainerInitAndDestoryExtension;
+import seata.e2e.docker.extension.ContainerInitAndDestroyExtension;
 import org.testcontainers.containers.ContainerState;
 
 import static java.lang.annotation.ElementType.FIELD;
@@ -46,8 +46,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Fields of type {@link ContainerState} annotated with {@link DockerContainer @DockerContainer} can be initialized by
- * {@link ContainerInitAndDestoryExtension} with the docker container, whose {@link #value() service name} defined in {@code
- * docker-compose.yml} are given, for more details and examples, refer to the JavaDoc of {@link ContainerInitAndDestoryExtension}.
+ * {@link ContainerInitAndDestroyExtension} with the docker container, whose {@link #value() service name} defined in {@code
+ * docker-compose.yml} are given, for more details and examples, refer to the JavaDoc of {@link ContainerInitAndDestroyExtension}.
+ *
+ * @author jingliu_xiong@foxmail.com
  */
 @Documented
 @Target(FIELD)

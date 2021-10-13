@@ -19,7 +19,7 @@ package seata.e2e.config;
 /**
  * @author jingliu_xiong@foxmail.com
  */
-public class E2Econfig {
+public class E2EConfig {
 
 
     /**

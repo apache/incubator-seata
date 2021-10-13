@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import seata.e2e.factory.SeataTestHelperFactory;
-import seata.e2e.factory.SeataTestHelperFactoryImpl;
+import seata.e2e.factory.impl.SeataTestHelperFactoryImpl;
 import seata.e2e.helper.*;
 import seata.e2e.docker.annotation.ContainerHostAndPort;
 import seata.e2e.docker.annotation.DockerCompose;

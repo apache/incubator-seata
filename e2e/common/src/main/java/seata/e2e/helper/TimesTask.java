@@ -19,8 +19,8 @@ package seata.e2e.helper;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -46,11 +46,13 @@ public class TimesTask {
     private int interval;
     private int count = 0;
 
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
+    private final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(Runtime.getRuntime().
+            availableProcessors(), r -> {
         final Thread thread = new Thread(r, "TimesTask");
         thread.setDaemon(true);
         return thread;
     });
+
 
     public void start() {
         TimeCountHelper timeCountHelper = new TimeCountHelper();

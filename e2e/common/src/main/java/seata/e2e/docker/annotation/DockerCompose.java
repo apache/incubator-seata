@@ -38,7 +38,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import seata.e2e.docker.extension.ContainerInitAndDestoryExtension;
+import seata.e2e.docker.extension.ContainerInitAndDestroyExtension;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import static java.lang.annotation.ElementType.FIELD;
@@ -46,8 +46,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Fields of type {@link DockerComposeContainer} annotated with {@link DockerCompose @DockerCompose} can be initialized
- * by {@link ContainerInitAndDestoryExtension} with the given {@link #value() docker-compose.yml} files, for more details and
- * examples, refer to the JavaDoc of {@link ContainerInitAndDestoryExtension}.
+ * by {@link ContainerInitAndDestroyExtension} with the given {@link #value() docker-compose.yml} files, for more details and
+ * examples, refer to the JavaDoc of {@link ContainerInitAndDestroyExtension}.
  *
  * @author jingliu_xiong@foxmail.com
  */
