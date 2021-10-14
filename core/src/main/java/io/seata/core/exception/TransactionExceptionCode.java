@@ -43,9 +43,9 @@ public enum TransactionExceptionCode {
     RollbackFailed,
 
     /**
-     * LockQueryFailed
+     * GlobalLockQueryFailed
      */
-    LockQueryFailed,
+    GlobalLockQueryFailed,
 
     /**
      * GlobalReportFailed

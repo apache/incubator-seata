@@ -38,20 +38,20 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 
 /**
- * The ratelimited request and corresponding response.
+ * The ratelimited request type and corresponding response.
  */
-public class LimitedRequestToResponse {
+public class RateLimitedResponseMap {
 
-    private Map<Class, AbstractResultMessage> requestToResponseMap = new HashMap<>();
+    private Map<Class, AbstractResultMessage> responseMap = new HashMap<>();
 
-    private static volatile LimitedRequestToResponse instance;
+    private static volatile RateLimitedResponseMap instance;
 
-    private LimitedRequestToResponse() {
+    private RateLimitedResponseMap() {
         BranchReportResponse branchReportResponse = new BranchReportResponse();
         branchReportResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchReportFailed);
 
         GlobalLockQueryResponse globalLockQueryResponse = new GlobalLockQueryResponse();
-        globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.LockQueryFailed);
+        globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalLockQueryFailed);
 
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setTransactionExceptionCode(TransactionExceptionCode.BeginFailed);
@@ -62,6 +62,7 @@ public class LimitedRequestToResponse {
 
         GlobalReportResponse globalReportResponse = new GlobalReportResponse();
         globalReportResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalReportFailed);
+        globalReportResponse.setGlobalStatus(GlobalStatus.UnKnown);
 
         GlobalRollbackResponse globalRollbackResponse = new GlobalRollbackResponse();
         globalRollbackResponse.setTransactionExceptionCode(TransactionExceptionCode.RollbackFailed);
@@ -71,24 +72,24 @@ public class LimitedRequestToResponse {
         globalStatusResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalStatusFailed);
         globalStatusResponse.setGlobalStatus(GlobalStatus.UnKnown);
 
-        requestToResponseMap.put(BranchReportRequest.class, branchReportResponse);
-        requestToResponseMap.put(GlobalBeginRequest.class, globalBeginResponse);
-        requestToResponseMap.put(GlobalCommitRequest.class, globalCommitResponse);
-        requestToResponseMap.put(GlobalLockQueryRequest.class, globalLockQueryResponse);
-        requestToResponseMap.put(GlobalReportRequest.class, globalReportResponse);
-        requestToResponseMap.put(GlobalRollbackRequest.class, globalRollbackResponse);
-        requestToResponseMap.put(GlobalStatusRequest.class, globalStatusResponse);
-        for (Map.Entry<Class, AbstractResultMessage> entry : requestToResponseMap.entrySet()) {
+        responseMap.put(BranchReportRequest.class, branchReportResponse);
+        responseMap.put(GlobalBeginRequest.class, globalBeginResponse);
+        responseMap.put(GlobalCommitRequest.class, globalCommitResponse);
+        responseMap.put(GlobalLockQueryRequest.class, globalLockQueryResponse);
+        responseMap.put(GlobalReportRequest.class, globalReportResponse);
+        responseMap.put(GlobalRollbackRequest.class, globalRollbackResponse);
+        responseMap.put(GlobalStatusRequest.class, globalStatusResponse);
+        for (Map.Entry<Class, AbstractResultMessage> entry : responseMap.entrySet()) {
             entry.getValue().setResultCode(ResultCode.Failed);
             entry.getValue().setMsg(entry.getKey().getSimpleName() + " rate limited.");
         }
     }
 
-    public static LimitedRequestToResponse getInstance() {
+    public static RateLimitedResponseMap getInstance() {
         if (instance == null) {
-            synchronized (LimitedRequestToResponse.class) {
+            synchronized (RateLimitedResponseMap.class) {
                 if (instance == null) {
-                    instance = new LimitedRequestToResponse();
+                    instance = new RateLimitedResponseMap();
                 }
             }
         }
@@ -96,6 +97,6 @@ public class LimitedRequestToResponse {
     }
 
     public AbstractResultMessage get(Class clazz) {
-        return requestToResponseMap.get(clazz);
+        return responseMap.get(clazz);
     }
 }

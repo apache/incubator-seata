@@ -61,7 +61,7 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
-import io.seata.server.ratelimit.LimitedRequestToResponse;
+import io.seata.server.ratelimit.RateLimitedResponseMap;
 import io.seata.server.ratelimit.RateLimiter;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
@@ -159,7 +159,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private RateLimiter rateLimiter;
 
-    private LimitedRequestToResponse limitedRequestToResponse = LimitedRequestToResponse.getInstance();
+    private RateLimitedResponseMap rateLimitedResponseMap;
 
     /**
      * Instantiates a new Default coordinator.
@@ -171,6 +171,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         this.core = new DefaultCore(remotingServer);
         if (ENABLE_SERVER_RATELIMIT) {
             rateLimiter = EnhancedServiceLoader.load(RateLimiter.class);
+            rateLimitedResponseMap = RateLimitedResponseMap.getInstance();
         }
     }
 
@@ -445,7 +446,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
         if (ENABLE_SERVER_RATELIMIT) {
-            AbstractResultMessage resultMessage = limitedRequestToResponse.get(request.getClass());
+            AbstractResultMessage resultMessage = rateLimitedResponseMap.get(request.getClass());
             if (resultMessage != null && !rateLimiter.canPass()) {
                 return resultMessage;
             }
