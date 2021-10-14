@@ -17,7 +17,6 @@ package io.seata.rm.datasource.xa;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
