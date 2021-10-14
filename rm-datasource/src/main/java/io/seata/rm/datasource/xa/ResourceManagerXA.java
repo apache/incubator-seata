@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource.xa;
 
+import java.sql.SQLException;
+import javax.transaction.xa.XAException;
+
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -23,9 +26,6 @@ import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.datasource.AbstractDataSourceCacheResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.transaction.xa.XAException;
-import java.sql.SQLException;
 
 /**
  * RM for XA mode.
@@ -39,7 +39,6 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
     @Override
     public void init() {
         LOGGER.info("ResourceManagerXA init ...");
-
     }
 
     @Override
