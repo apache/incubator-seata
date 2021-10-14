@@ -50,7 +50,7 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
     /**
      * The maximum number of tokens.
      */
-    private int burst;
+    private double burst;
 
     /**
      * The last time to update tokens in microseconds.
@@ -68,18 +68,18 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
     }
 
     public TokenBucketLimiter(double requestsPerSecond) {
-        this(requestsPerSecond, (int) requestsPerSecond);
+        this(requestsPerSecond, requestsPerSecond);
     }
 
-    public TokenBucketLimiter(double requestsPerSecond, int burst) {
-        this(requestsPerSecond, burst, false);
+    public TokenBucketLimiter(double requestsPerSecond, double burst) {
+        this(requestsPerSecond, burst, DEFAULT_SERVER_RATELIMIT_DELAY);
     }
 
     public TokenBucketLimiter(double requestsPerSecond, boolean delay) {
-        this(requestsPerSecond, (int)requestsPerSecond, delay);
+        this(requestsPerSecond, requestsPerSecond, delay);
     }
 
-    public TokenBucketLimiter(double requestsPerSecond, int burst, boolean delay) {
+    public TokenBucketLimiter(double requestsPerSecond, double burst, boolean delay) {
         this.numOfToken = 1;
         this.microSecondsPerToken = TimeUnit.SECONDS.toMicros(1L) / requestsPerSecond;
         this.burst = burst;
@@ -90,9 +90,13 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
     @Override
     public void init() {
         this.numOfToken = 1;
-        double requestsPerSecond = Double.parseDouble(CONFIG.getConfig(ConfigurationKeys.REQUESTS_PER_SECOND));
+        String requestsPerSecondConfig = CONFIG.getConfig(ConfigurationKeys.REQUESTS_PER_SECOND);
+        if (requestsPerSecondConfig == null) {
+            throw new IllegalArgumentException("ratelimiter requestsPerSecond is null");
+        }
+        double requestsPerSecond = Double.parseDouble(requestsPerSecondConfig);
         this.microSecondsPerToken = TimeUnit.SECONDS.toMicros(1L) / requestsPerSecond;
-        this.burst = CONFIG.getInt(ConfigurationKeys.BURST, (int)microSecondsPerToken);
+        this.burst = Double.parseDouble(CONFIG.getConfig(ConfigurationKeys.BURST, String.valueOf(requestsPerSecond)));
         this.lastUpdateTimeInMicros = microTime();
         this.delay = CONFIG.getBoolean(ConfigurationKeys.DELAY, DEFAULT_SERVER_RATELIMIT_DELAY);
     }

@@ -23,13 +23,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RATELIM
 @Component
 @ConfigurationProperties(prefix = SERVER_RATELIMIT_PREFIX)
 public class ServerRatelimitProperties {
-    private boolean enableServerRatelimit;
-
-    private int requestsPerSecond;
-
-    private int burst;
-
-    private boolean delay;
+    private boolean enableServerRatelimit = false;
+    private String requestsPerSecond;
+    private String burst;
+    private boolean delay = false;
 
     public boolean getEnableServerRatelimit() {
         return enableServerRatelimit;
@@ -40,20 +37,20 @@ public class ServerRatelimitProperties {
         return this;
     }
 
-    public int getRequestsPerSecond() {
+    public String getRequestsPerSecond() {
         return requestsPerSecond;
     }
 
-    public ServerRatelimitProperties setRequestsPerSecond(int requestsPerSecond) {
+    public ServerRatelimitProperties setRequestsPerSecond(String requestsPerSecond) {
         this.requestsPerSecond = requestsPerSecond;
         return this;
     }
 
-    public int getBurst() {
+    public String getBurst() {
         return burst;
     }
 
-    public ServerRatelimitProperties setBurst(int burst) {
+    public ServerRatelimitProperties setBurst(String burst) {
         this.burst = burst;
         return this;
     }
