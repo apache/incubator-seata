@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec.db2;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
@@ -38,20 +40,21 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.Sequenceable;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author qingjiusanliangsan
+ * @author qingjiusanliangsan, GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.DB2, scope = Scope.PROTOTYPE)
-public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable {
+public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable, Sequenceable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DB2InsertExecutor.class);
-
-    public static final String ERR_SQL_STATE = "S1009";
 
     /**
      * The cache of auto increment step of database
@@ -107,34 +110,32 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
             throw new ShouldNeverHappenException();
         }
 
-        ResultSet genKeys;
-        try {
-            genKeys = statementProxy.getGeneratedKeys();
-        } catch (SQLException e) {
-            // java.sql.SQLException: Generated keys not requested. You need to
-            // specify Statement.RETURN_GENERATED_KEYS to
-            // Statement.executeUpdate() or Connection.prepareStatement().
-            if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.error("Fail to get auto-generated keys, use 'IDENTITY_VAL_LOCAL()' instead. Be cautious, " +
-                        "statement could be polluted. Recommend you set the statement to return generated keys.");
-                int updateCount = statementProxy.getUpdateCount();
-                ResultSet firstId = genKeys = statementProxy.getTargetStatement().executeQuery("IDENTITY_VAL_LOCAL()");
-
-                // If there is batch insert
-                // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
-                if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
-                    firstId.next();
-                    return autoGeneratePks(new BigDecimal(firstId.getString(1)), autoColumnName, updateCount);
-                }
-            } else {
-                throw e;
-            }
-        }
+        ResultSet genKeys = statementProxy.getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
         }
+
+        if (pkValues.isEmpty()) {
+            LOGGER.error("Fail to get auto-generated keys, use 'IDENTITY_VAL_LOCAL()' instead. Be cautious, " +
+                    "statement could be polluted. Recommend you set the statement to return generated keys.");
+            int updateCount = statementProxy.getUpdateCount();
+            ResultSet firstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT identity_val_local() FROM SYSIBM.SYSDUMMY1");
+
+            if (!firstId.next()) {
+                throw new ShouldNeverHappenException("Could not get insert primary key value");
+            }
+
+            // If there is batch insert
+            // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
+            if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
+                return autoGeneratePks(new BigDecimal(firstId.getString(1)), autoColumnName, updateCount);
+            } else {
+                pkValues.add(firstId.getObject(1));
+            }
+        }
+
         try {
             genKeys.beforeFirst();
         } catch (SQLException e) {
@@ -159,6 +160,14 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
             else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
                 pkValuesMap.putAll(getPkValuesByAuto());
             }
+            // pk auto generated while column exists and value is default
+            else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
+                pkValuesMap.putAll(getPkValuesByAuto());
+            }
+            // pk auto generated while column exists and value gets from sequence
+            else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
+                pkValuesMap.put(pkKey, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
+            }
         }
         return pkValuesMap;
     }
@@ -170,22 +179,19 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
     }
 
     protected Map<String, List<Object>> autoGeneratePks(BigDecimal cursor, String autoColumnName, Integer updateCount) throws SQLException {
-        BigDecimal step = BigDecimal.ONE;
+        BigDecimal step;
         String resourceId = statementProxy.getConnectionProxy().getDataSourceProxy().getResourceId();
         if (RESOURCE_ID_STEP_CACHE.containsKey(resourceId)) {
             step = RESOURCE_ID_STEP_CACHE.get(resourceId);
         } else {
-            ResultSet increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
-
-            increment.next();
-            step = new BigDecimal(increment.getString(2));
+            step = getIncrementStep();
             RESOURCE_ID_STEP_CACHE.put(resourceId, step);
         }
 
         List<Object> pkValues = new ArrayList<>();
         for (int i = 0; i < updateCount; i++) {
-            pkValues.add(cursor);
             cursor = cursor.add(step);
+            pkValues.add(cursor);
         }
 
         Map<String, List<Object>> pkValuesMap = new HashMap<>(1, 1.001f);
@@ -204,5 +210,26 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
         return false;
     }
 
+    public BigDecimal getIncrementStep() throws SQLException {
+        //Each row represents an identity column that is defined for a table.
+        String sqlQuery = "select INCREMENT AS INCR from SYSCAT.COLIDENTATTRIBUTES WHERE TABSCHEMA = ? AND TABNAME = ?";
+        ResultSet increment = null;
+        try (PreparedStatement pst = statementProxy.getConnectionProxy().prepareStatement(sqlQuery)) {
+            pst.setString(1, statementProxy.getConnectionProxy().getSchema());
+            pst.setString(2, getTableMeta().getTableName());
+            increment = pst.executeQuery();
+            if (increment.next()) {
+                return new BigDecimal(increment.getString("INCR"));
+            }
+        } finally {
+            IOUtil.close(increment);
+        }
 
+        throw new ShouldNeverHappenException("could not get auto_increment step");
+    }
+
+    @Override
+    public String getSequenceSql(SqlSequenceExpr expr) {
+        return "VALUES PREVIOUS VALUE FOR " + expr.getSequence();
+    }
 }
