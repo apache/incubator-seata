@@ -263,7 +263,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     
     private void cleanXABranchContext() {
         xaActive = false;
-        rollBacked = false;
         if (!isHeld()) {
             xaBranchXid = null;
         }
@@ -271,6 +270,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void close() throws SQLException {
+        rollBacked = false;
         if (isHeld()) {
             // if kept by a keeper, just hold the connection.
             return;
