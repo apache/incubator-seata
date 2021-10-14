@@ -77,7 +77,8 @@ public class LoadBalanceTest {
     public void testConsistentHashLoadBalance_select(List<InetSocketAddress> addresses) {
         int runs = 10000;
         int selected = 0;
-        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new ConsistentHashLoadBalance());
+        ConsistentHashLoadBalance loadBalance = new ConsistentHashLoadBalance();
+        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, loadBalance);
         for (InetSocketAddress address : counter.keySet()) {
             if (counter.get(address).get() > 0) {
                 selected++;

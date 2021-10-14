@@ -21,6 +21,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -31,16 +35,12 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.DistributedLockDO;
+import io.seata.core.store.DistributedLocker;
+import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.core.store.StoreMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-
-import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.RETRY_COMMITTING;
-import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
-import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
  * The type Session holder.
@@ -77,20 +77,28 @@ public class SessionHolder {
      */
     public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
 
+    /**
+     * The redis distributed lock expire time
+     */
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME,10000);
+
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
 
+    private static DistributedLocker DISTRIBUTED_LOCKER;
+
     /**
      * Init.
      *
-     * @param mode the store mode: file, db
+     * @param mode the store mode: file, db, redis
      * @throws IOException the io exception
      */
     public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+            mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+                CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
@@ -101,6 +109,8 @@ public class SessionHolder {
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.DB.getName());
         } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
@@ -115,6 +125,8 @@ public class SessionHolder {
                 new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -123,6 +135,8 @@ public class SessionHolder {
                 StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
@@ -332,93 +346,48 @@ public class SessionHolder {
     }
 
     /**
-     * retry rollbacking lock
+     * acquire lock
      *
+     * @param lockKey the lock key, should be distinct for each lock
      * @return the boolean
      */
-    public static boolean retryRollbackingLock() {
-        return getRootSessionManager().scheduledLock(RETRY_ROLLBACKING);
+    public static boolean acquireDistributedLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.acquireLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     /**
-     * retry committing lock
+     * release lock
      *
      * @return the boolean
      */
-    public static boolean retryCommittingLock() {
-        return getRootSessionManager().scheduledLock(RETRY_COMMITTING);
+    public static boolean releaseDistributedLock(String lockKey) {
+        return DISTRIBUTED_LOCKER.releaseLock(new DistributedLockDO(lockKey, XID.getIpAddressAndPort(), DISTRIBUTED_LOCK_EXPIRE_TIME));
     }
 
     /**
-     * async committing lock
-     *
-     * @return the boolean
+     * Execute the function after get the distribute lock
+     * @param key   the distribute lock key
+     * @param func  the function to be call
+     * @return whether the func be call
      */
-    public static boolean asyncCommittingLock() {
-        return getRootSessionManager().scheduledLock(ASYNC_COMMITTING);
-    }
-
-    /**
-     * tx timeout check lOck
-     *
-     * @return the boolean
-     */
-    public static boolean txTimeoutCheckLock() {
-        return getRootSessionManager().scheduledLock(TX_TIMEOUT_CHECK);
-    }
-
-    /**
-     * undolog delete lock
-     *
-     * @return the boolean
-     */
-    public static boolean undoLogDeleteLock() {
-        return getRootSessionManager().scheduledLock(UNDOLOG_DELETE);
-    }
-
-    /**
-     * un retry rollbacking lock
-     *
-     * @return the boolean
-     */
-    public static boolean unRetryRollbackingLock() {
-        return getRootSessionManager().unScheduledLock(RETRY_ROLLBACKING);
-    }
-
-    /**
-     * un retry committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean unRetryCommittingLock() {
-        return getRootSessionManager().unScheduledLock(RETRY_COMMITTING);
-    }
-
-    /**
-     * un async committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean unAsyncCommittingLock() {
-        return getRootSessionManager().unScheduledLock(ASYNC_COMMITTING);
-    }
-
-    /**
-     * un tx timeout check lOck
-     *
-     * @return the boolean
-     */
-    public static boolean unTxTimeoutCheckLock() {
-        return getRootSessionManager().unScheduledLock(TX_TIMEOUT_CHECK);
-    }
-
-    /**
-     * un undolog delete lock
-     *
-     * @return the boolean
-     */
-    public static boolean unUndoLogDeleteLock() {
-        return getRootSessionManager().unScheduledLock(UNDOLOG_DELETE);
+    public static boolean distributedLockAndExecute(String key, NoArgsFunc func) {
+        boolean lock = false;
+        try {
+            if (lock = acquireDistributedLock(key)) {
+                func.call();
+            }
+        } catch (Exception e) {
+            LOGGER.info("Exception running function with key = {}", key, e);
+        } finally {
+            if (lock) {
+                try {
+                    SessionHolder.releaseDistributedLock(key);
+                } catch (Exception ex) {
+                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                }
+            }
+        }
+        return lock;
     }
 
     public static void destroy() {
@@ -434,5 +403,10 @@ public class SessionHolder {
         if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
             RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
         }
+    }
+
+    @FunctionalInterface
+    public static interface NoArgsFunc {
+        public void call();
     }
 }

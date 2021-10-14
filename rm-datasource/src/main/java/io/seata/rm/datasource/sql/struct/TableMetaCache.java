@@ -24,13 +24,12 @@ import java.sql.Connection;
  */
 public interface TableMetaCache {
 
-
     /**
      * Gets table meta.
      *
-     * @param connection
-     * @param tableName       the table name
-     * @param resourceId
+     * @param connection the connection
+     * @param tableName  the table name
+     * @param resourceId the resource id
      * @return the table meta
      */
     TableMeta getTableMeta(Connection connection, String tableName, String resourceId);
@@ -38,8 +37,8 @@ public interface TableMetaCache {
     /**
      * Clear the table meta cache
      *
-     * @param connection
-     * @param resourceId
+     * @param connection the connection
+     * @param resourceId the resource id
      */
     void refresh(Connection connection, String resourceId);
 

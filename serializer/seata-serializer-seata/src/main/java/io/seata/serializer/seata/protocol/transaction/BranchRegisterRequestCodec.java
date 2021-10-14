@@ -43,15 +43,6 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         String lockKey = branchRegisterRequest.getLockKey();
         String applicationData = branchRegisterRequest.getApplicationData();
 
-        byte[] lockKeyBytes = null;
-        if (lockKey != null) {
-            lockKeyBytes = lockKey.getBytes(UTF8);
-        }
-        byte[] applicationDataBytes = null;
-        if (applicationData != null) {
-            applicationDataBytes = applicationData.getBytes(UTF8);
-        }
-
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
@@ -78,6 +69,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
 
         // 4. Lock Key
         if (lockKey != null) {
+            byte[] lockKeyBytes = lockKey.getBytes(UTF8);
             out.writeInt(lockKeyBytes.length);
             if (lockKeyBytes.length > 0) {
                 out.writeBytes(lockKeyBytes);
@@ -88,6 +80,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
 
         //5. applicationData
         if (applicationData != null) {
+            byte[] applicationDataBytes = applicationData.getBytes(UTF8);
             out.writeInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
                 out.writeBytes(applicationDataBytes);

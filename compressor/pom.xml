@@ -35,6 +35,7 @@
         <module>seata-compressor-bzip2</module>
         <module>seata-compressor-lz4</module>
         <module>seata-compressor-deflater</module>
+        <module>seata-compressor-zstd</module>
     </modules>
 
 

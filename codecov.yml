@@ -17,6 +17,8 @@ ignore:
  - ".style/.*"
  - "*.md"
  - "rm-datasource/src/test/java/io/seata/rm/datasource/mock"
+ - "sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/antlr/.*"
+ - "sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/parser/.*"
 comment:
   layout: "reach,diff,flags,tree"
   behavior: default

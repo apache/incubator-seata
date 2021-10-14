@@ -69,7 +69,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-bom</artifactId>
+                <artifactId>seata-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -208,10 +208,21 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-rm-datasource</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-compressor-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-sqlparser-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-sqlparser-antlr</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -223,6 +234,12 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-spring</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-serializer-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
@@ -325,6 +342,12 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-saga-engine-store</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-serializer-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- spring  -->
@@ -352,6 +375,10 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -398,6 +425,11 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.edas</groupId>
+            <artifactId>edas-sdk</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -466,6 +498,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>listenablefuture</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -669,6 +707,7 @@
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
                                     <include>io.seata:seata-sqlparser-core</include>
+                                    <include>io.seata:seata-sqlparser-antlr</include>
                                     <include>io.seata:seata-sqlparser-druid</include>
                                     <include>io.seata:seata-sofa-rpc</include>
                                     <include>io.seata:seata-spring</include>
@@ -693,6 +732,7 @@
                                     <include>io.seata:seata-compressor-zip</include>
                                     <include>io.seata:seata-compressor-lz4</include>
                                     <include>io.seata:seata-compressor-deflater</include>
+                                    <include>io.seata:seata-compressor-zstd</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -792,7 +832,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
                                 </configuration>
                             </execution>
                         </executions>

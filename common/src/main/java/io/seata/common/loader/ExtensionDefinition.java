@@ -82,5 +82,7 @@ final class ExtensionDefinition {
         return !scope.equals(other.scope);
     }
 
-
+    public String getName() {
+        return name;
+    }
 }

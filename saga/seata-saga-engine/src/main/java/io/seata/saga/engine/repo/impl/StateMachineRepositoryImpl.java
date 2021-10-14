@@ -16,6 +16,7 @@
 package io.seata.saga.engine.repo.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
@@ -58,7 +59,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
             synchronized (item) {
-                if (item.getValue() == null && stateLangStore != null) {
+                if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineId);
                     if (stateMachine != null) {
                         StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName).parse(
@@ -86,7 +87,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
             synchronized (item) {
-                if (item.getValue() == null && stateLangStore != null) {
+                if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if (stateMachine != null) {
                         StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName).parse(
@@ -166,7 +167,10 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     public void registryByResources(Resource[] resources, String tenantId) throws IOException {
         if (resources != null) {
             for (Resource resource : resources) {
-                String json = IOUtils.toString(resource.getInputStream(), charset);
+                String json;
+                try (InputStream is = resource.getInputStream()) {
+                    json = IOUtils.toString(is, charset);
+                }
                 StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName).parse(json);
                 if (stateMachine != null) {
                     stateMachine.setContent(json);

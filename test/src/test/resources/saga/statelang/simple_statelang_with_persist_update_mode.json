@@ -38,7 +38,7 @@
         "SecondState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
-            "ServiceMethod": "randomExceptionMethod",
+            "ServiceMethod": "bar",
             "Input": [
                 {
                     "barInput": "$.[fooResult]",

@@ -219,7 +219,7 @@ public class StateMachineAsyncTests {
     }
 
     @Test
-    public void testStateMachineWithComplextParams() {
+    public void testStateMachineWithComplexParams() {
 
         long start = System.currentTimeMillis();
 

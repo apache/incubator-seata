@@ -20,12 +20,14 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.parser.JsonParserFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -279,7 +281,36 @@ public class StateMachineTests {
     }
 
     @Test
-    public void testStateMachineWithComplextParams() {
+    public void testStateComplexParams() {
+
+        People people1 = new People();
+        people1.setName("lilei");
+        people1.setAge(18);
+
+        People people2 = new People();
+        people2.setName("lilei2");
+        people2.setAge(19);
+
+        People people3 = new People();
+        people3.setName("lilei3");
+        people3.setAge(20);
+
+        People people4 = new People();
+        people4.setName("lilei4");
+        people4.setAge(21);
+
+        people1.setChildrenArray(new People[] {people2});
+        people1.setChildrenList(Arrays.asList(people3));
+        Map<String, People> map1 = new HashMap<>(1);
+        map1.put("lilei4", people4);
+        people1.setChildrenMap(map1);
+
+        String json = JsonParserFactory.getJsonParser("jackson").toJsonString(people1, false, true);
+        System.out.println(json);
+    }
+
+    @Test
+    public void testStateMachineWithComplexParams() {
 
         long start = System.currentTimeMillis();
 

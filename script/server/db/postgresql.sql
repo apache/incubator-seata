@@ -42,7 +42,7 @@ CREATE INDEX idx_xid ON public.branch_table (xid);
 CREATE TABLE IF NOT EXISTS public.lock_table
 (
     row_key        VARCHAR(128) NOT NULL,
-    xid            VARCHAR(96),
+    xid            VARCHAR(128),
     transaction_id BIGINT,
     branch_id      BIGINT       NOT NULL,
     resource_id    VARCHAR(256),
@@ -54,3 +54,15 @@ CREATE TABLE IF NOT EXISTS public.lock_table
 );
 
 CREATE INDEX idx_branch_id ON public.lock_table (branch_id);
+
+CREATE TABLE distributed_lock (
+    lock_key     VARCHAR(20)  NOT NULL,
+    lock_value        VARCHAR(20)  NOT NULL,
+    expire       BIGINT       NOT NULL,
+    CONSTRAINT pk_distributed_lock_table PRIMARY KEY (lock_key)
+);
+
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('AsyncCommitting', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
