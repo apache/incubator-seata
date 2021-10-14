@@ -38,7 +38,7 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 
 /**
- * The ratelimited request type and corresponding response.
+ * The rate limited request type and corresponding response.
  */
 public class RateLimitedResponseMap {
 
@@ -50,15 +50,15 @@ public class RateLimitedResponseMap {
         BranchReportResponse branchReportResponse = new BranchReportResponse();
         branchReportResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchReportFailed);
 
-        GlobalLockQueryResponse globalLockQueryResponse = new GlobalLockQueryResponse();
-        globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalLockQueryFailed);
-
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setTransactionExceptionCode(TransactionExceptionCode.BeginFailed);
 
         GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
         globalCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.CommitFailed);
         globalCommitResponse.setGlobalStatus(GlobalStatus.CommitFailed);
+
+        GlobalLockQueryResponse globalLockQueryResponse = new GlobalLockQueryResponse();
+        globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalLockQueryFailed);
 
         GlobalReportResponse globalReportResponse = new GlobalReportResponse();
         globalReportResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalReportFailed);
