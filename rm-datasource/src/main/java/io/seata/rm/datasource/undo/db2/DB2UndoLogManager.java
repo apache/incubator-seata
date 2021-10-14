@@ -43,10 +43,10 @@ public class DB2UndoLogManager extends AbstractUndoLogManager {
             + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", " + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
-            + " VALUES (?, ?, ?, ?, ?, now(6), now(6))";
+            + " VALUES (?, ?, ?, ?, ?, current timestamp, current timestamp)";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? and ROWNUM <= ?";
+            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? FETCH FIRST ? ROWS ONLY";
 
 
     @Override

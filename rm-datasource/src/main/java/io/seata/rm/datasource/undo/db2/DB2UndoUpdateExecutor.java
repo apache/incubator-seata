@@ -62,12 +62,12 @@ public class DB2UndoUpdateExecutor extends AbstractUndoExecutor {
         // update sql undo log before image all field come from table meta. need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
         String updateColumns = nonPkFields.stream().map(
-            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.POSTGRESQL) + " = ?").collect(
+            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.DB2) + " = ?").collect(
             Collectors.joining(", "));
 
-        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.POSTGRESQL).stream().map(
+        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.DB2).stream().map(
             e -> e.getName()).collect(Collectors.toList());
-        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.POSTGRESQL);
+        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.DB2);
 
         return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, whereSql);
     }

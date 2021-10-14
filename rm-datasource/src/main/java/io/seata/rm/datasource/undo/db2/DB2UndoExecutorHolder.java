@@ -26,7 +26,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author qingjiusanliangsan
  */
 @LoadLevel(name = JdbcConstants.DB2)
-public class DB2UndoExcutorHolder implements UndoExecutorHolder {
+public class DB2UndoExecutorHolder implements UndoExecutorHolder {
     @Override
     public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
         return new DB2UndoInsertExecutor(sqlUndoLog);
