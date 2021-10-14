@@ -47,6 +47,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private boolean kept = false;
 
+    private boolean rollBacked = false;
+    
     /**
      * Constructor of Connection Proxy for XA mode.
      *
@@ -214,9 +216,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT rollback on an inactive session");
         }
         try {
-            // XA End: Fail
-            xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
-            xaRollback(xaBranchXid);
+            if (!rollBacked) {
+                // XA End: Fail
+                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
+                xaRollback(xaBranchXid);
+            }
             // Branch Report to TC
             DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
                 BranchStatus.PhaseOne_Failed, null);
@@ -250,6 +254,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             termination();
         } catch (SQLException e) {
             xaResource.rollback(xaBranchXid);
+            rollBacked = true;
             throw e;
         }
         // XA Prepare
@@ -258,6 +263,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     
     private void cleanXABranchContext() {
         xaActive = false;
+        rollBacked = false;
         if (!isHeld()) {
             xaBranchXid = null;
         }
