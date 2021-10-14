@@ -15,14 +15,13 @@
  */
 package io.seata.server.ratelimit;
 
-
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.transaction.BranchRegisterRequest;
-import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.BranchReportResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
@@ -42,21 +41,58 @@ import io.seata.core.protocol.transaction.GlobalStatusResponse;
  * The ratelimited request and corresponding response.
  */
 public class LimitedRequestToResponse {
-    private Map<Class, AbstractResultMessage> requestToResponseMap = new ConcurrentHashMap<>();
 
-    public LimitedRequestToResponse() {
-        requestToResponseMap.put(BranchRegisterRequest.class, new BranchRegisterResponse());
-        requestToResponseMap.put(BranchReportRequest.class, new BranchReportResponse());
-        requestToResponseMap.put(GlobalBeginRequest.class, new GlobalBeginResponse());
-        requestToResponseMap.put(GlobalCommitRequest.class, new GlobalCommitResponse());
-        requestToResponseMap.put(GlobalLockQueryRequest.class, new GlobalLockQueryResponse());
-        requestToResponseMap.put(GlobalReportRequest.class, new GlobalReportResponse());
-        requestToResponseMap.put(GlobalRollbackRequest.class, new GlobalRollbackResponse());
-        requestToResponseMap.put(GlobalStatusRequest.class, new GlobalStatusResponse());
+    private Map<Class, AbstractResultMessage> requestToResponseMap = new HashMap<>();
+
+    private static volatile LimitedRequestToResponse instance;
+
+    private LimitedRequestToResponse() {
+        BranchReportResponse branchReportResponse = new BranchReportResponse();
+        branchReportResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchReportFailed);
+
+        GlobalLockQueryResponse globalLockQueryResponse = new GlobalLockQueryResponse();
+        globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.LockQueryFailed);
+
+        GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
+        globalBeginResponse.setTransactionExceptionCode(TransactionExceptionCode.BeginFailed);
+
+        GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
+        globalCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.CommitFailed);
+        globalCommitResponse.setGlobalStatus(GlobalStatus.CommitFailed);
+
+        GlobalReportResponse globalReportResponse = new GlobalReportResponse();
+        globalReportResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalReportFailed);
+
+        GlobalRollbackResponse globalRollbackResponse = new GlobalRollbackResponse();
+        globalRollbackResponse.setTransactionExceptionCode(TransactionExceptionCode.RollbackFailed);
+        globalRollbackResponse.setGlobalStatus(GlobalStatus.RollbackFailed);
+
+        GlobalStatusResponse globalStatusResponse = new GlobalStatusResponse();
+        globalStatusResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalStatusFailed);
+        globalStatusResponse.setGlobalStatus(GlobalStatus.UnKnown);
+
+        requestToResponseMap.put(BranchReportRequest.class, branchReportResponse);
+        requestToResponseMap.put(GlobalBeginRequest.class, globalBeginResponse);
+        requestToResponseMap.put(GlobalCommitRequest.class, globalCommitResponse);
+        requestToResponseMap.put(GlobalLockQueryRequest.class, globalLockQueryResponse);
+        requestToResponseMap.put(GlobalReportRequest.class, globalReportResponse);
+        requestToResponseMap.put(GlobalRollbackRequest.class, globalRollbackResponse);
+        requestToResponseMap.put(GlobalStatusRequest.class, globalStatusResponse);
         for (Map.Entry<Class, AbstractResultMessage> entry : requestToResponseMap.entrySet()) {
             entry.getValue().setResultCode(ResultCode.Failed);
-            entry.getValue().setMsg(entry.getKey().getSimpleName() + " refused: rate limit.");
+            entry.getValue().setMsg(entry.getKey().getSimpleName() + " rate limited.");
         }
+    }
+
+    public static LimitedRequestToResponse getInstance() {
+        if (instance == null) {
+            synchronized (LimitedRequestToResponse.class) {
+                if (instance == null) {
+                    instance = new LimitedRequestToResponse();
+                }
+            }
+        }
+        return instance;
     }
 
     public AbstractResultMessage get(Class clazz) {

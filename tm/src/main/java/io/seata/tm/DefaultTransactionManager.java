@@ -62,6 +62,9 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
         globalCommit.setXid(xid);
         GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
+        if (response.getResultCode() == ResultCode.Failed) {
+            throw new TmTransactionException(TransactionExceptionCode.CommitFailed, response.getMsg());
+        }
         return response.getGlobalStatus();
     }
 
@@ -70,6 +73,9 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalRollbackRequest globalRollback = new GlobalRollbackRequest();
         globalRollback.setXid(xid);
         GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
+        if (response.getResultCode() == ResultCode.Failed) {
+            throw new TmTransactionException(TransactionExceptionCode.RollbackFailed, response.getMsg());
+        }
         return response.getGlobalStatus();
     }
 
@@ -78,6 +84,9 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
         GlobalStatusResponse response = (GlobalStatusResponse) syncCall(queryGlobalStatus);
+        if (response.getResultCode() == ResultCode.Failed) {
+            throw new TmTransactionException(TransactionExceptionCode.GlobalStatusFailed, response.getMsg());
+        }
         return response.getGlobalStatus();
     }
 
@@ -87,6 +96,9 @@ public class DefaultTransactionManager implements TransactionManager {
         globalReport.setXid(xid);
         globalReport.setGlobalStatus(globalStatus);
         GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
+        if (response.getResultCode() == ResultCode.Failed) {
+            throw new TmTransactionException(TransactionExceptionCode.GlobalReportFailed, response.getMsg());
+        }
         return response.getGlobalStatus();
     }
 

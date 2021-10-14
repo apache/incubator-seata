@@ -159,7 +159,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private RateLimiter rateLimiter;
 
-    private LimitedRequestToResponse limitedRequestToResponse = new LimitedRequestToResponse();
+    private LimitedRequestToResponse limitedRequestToResponse = LimitedRequestToResponse.getInstance();
 
     /**
      * Instantiates a new Default coordinator.

@@ -33,6 +33,31 @@ public enum TransactionExceptionCode {
     BeginFailed,
 
     /**
+     * CommitFailed
+     */
+    CommitFailed,
+
+    /**
+     * RollbackFailed
+     */
+    RollbackFailed,
+
+    /**
+     * LockQueryFailed
+     */
+    LockQueryFailed,
+
+    /**
+     * GlobalReportFailed
+     */
+    GlobalReportFailed,
+
+    /**
+     * GlobalStatusFailed
+     */
+    GlobalStatusFailed,
+
+    /**
      * Lock key conflict transaction exception code.
      */
     LockKeyConflict,
