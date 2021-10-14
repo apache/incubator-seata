@@ -75,9 +75,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void keepIfNecessary() {
-        if (shouldBeHeld()) {
-            resource.hold(xaBranchXid.toString(), this);
-        }
+        resource.hold(xaBranchXid.toString(), this);
     }
 
     private void releaseIfNecessary() {
@@ -271,7 +269,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     @Override
     public void close() throws SQLException {
         rollBacked = false;
-        if (isHeld()) {
+        if (isHeld() && shouldBeHeld()) {
             // if kept by a keeper, just hold the connection.
             return;
         }
