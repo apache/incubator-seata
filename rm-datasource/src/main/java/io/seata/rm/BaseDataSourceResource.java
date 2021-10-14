@@ -15,6 +15,15 @@
  */
 package io.seata.rm;
 
+import java.io.PrintWriter;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import javax.sql.DataSource;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -25,16 +34,6 @@ import io.seata.core.model.Resource;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.xa.Holdable;
 import io.seata.rm.datasource.xa.Holder;
-
-import javax.sql.DataSource;
-import java.io.PrintWriter;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * Base class of those DataSources working as Seata Resource.
@@ -58,7 +57,7 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     private Map<String, T> keeper = new ConcurrentHashMap<>();
 
     private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
-        CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(60, TimeUnit.SECONDS).build();
+        CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
     /**
      * Gets target data source.
