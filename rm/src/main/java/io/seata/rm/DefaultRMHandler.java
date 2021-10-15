@@ -54,6 +54,11 @@ public class DefaultRMHandler extends AbstractRMHandler {
         }
     }
 
+    /**
+     * TODO 分支事务接收TC发送的事务提交请求
+     * @param request
+     * @return
+     */
     @Override
     public BranchCommitResponse handle(BranchCommitRequest request) {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
@@ -61,6 +66,11 @@ public class DefaultRMHandler extends AbstractRMHandler {
         return getRMHandler(request.getBranchType()).handle(request);
     }
 
+    /**
+     * TODO 分支事务接收TC发送的事务回滚请求
+     * @param request
+     * @return
+     */
     @Override
     public BranchRollbackResponse handle(BranchRollbackRequest request) {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());

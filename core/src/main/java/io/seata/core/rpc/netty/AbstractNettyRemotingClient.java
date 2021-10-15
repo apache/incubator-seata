@@ -108,6 +108,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
+        //启动ScheduledExecutorService定时执行器，每10秒尝试进行一次重连TC
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -115,6 +116,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+            //用于多数据合并，减少通信次数
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
                 KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
@@ -138,6 +140,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
+        // TODO 负载均衡
         String serverAddress = loadBalance(getTransactionServiceGroup(), msg);
         int timeoutMillis = NettyClientConfig.getRpcRequestTimeout();
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
@@ -153,11 +156,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
-                key -> new LinkedBlockingQueue<>());
+            BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress, key -> new LinkedBlockingQueue<>());
             if (!basket.offer(rpcMessage)) {
-                LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
-                        serverAddress, rpcMessage);
+                LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}", serverAddress, rpcMessage);
                 return null;
             }
             if (LOGGER.isDebugEnabled()) {
@@ -172,8 +173,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             try {
                 return messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
             } catch (Exception exx) {
-                LOGGER.error("wait response error:{},ip:{},request:{}",
-                    exx.getMessage(), serverAddress, rpcMessage.getBody());
+                LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), serverAddress, rpcMessage.getBody());
                 if (exx instanceof TimeoutException) {
                     throw (TimeoutException) exx;
                 } else {

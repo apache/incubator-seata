@@ -62,10 +62,8 @@ public class ExecuteTemplate {
      * @return the t
      * @throws SQLException the sql exception
      */
-    public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers,
-                                                     StatementProxy<S> statementProxy,
-                                                     StatementCallback<T, S> statementCallback,
-                                                     Object... args) throws SQLException {
+    public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers, StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, Object... args) throws SQLException {
+        // 不存在全局事务，不存在全局锁
         if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
@@ -73,14 +71,14 @@ public class ExecuteTemplate {
 
         String dbType = statementProxy.getConnectionProxy().getDbType();
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
-            sqlRecognizers = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    dbType);
+            // sql解析
+            sqlRecognizers = SQLVisitorFactory.get(statementProxy.getTargetSQL(), dbType);
         }
         Executor<T> executor;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
             executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
+            // 根据解析出来的类型选择Executor
             if (sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
@@ -108,6 +106,7 @@ public class ExecuteTemplate {
         }
         T rs;
         try {
+            // executor执行
             rs = executor.execute(args);
         } catch (Throwable ex) {
             if (!(ex instanceof SQLException)) {

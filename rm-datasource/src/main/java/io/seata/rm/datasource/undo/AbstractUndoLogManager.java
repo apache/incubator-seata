@@ -257,6 +257,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         PreparedStatement selectPST = null;
         boolean originalAutoCommit = true;
 
+        // 自旋
         for (; ; ) {
             try {
                 conn = dataSourceProxy.getPlainConnection();
@@ -267,6 +268,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 }
 
                 // Find UNDO LOG
+                // 根据 xid、branchId 查找 undo_log 记录
                 selectPST = conn.prepareStatement(SELECT_UNDO_LOG_SQL);
                 selectPST.setLong(1, branchId);
                 selectPST.setString(2, xid);
@@ -291,24 +293,24 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                     Map<String, String> context = parseContext(contextString);
                     byte[] rollbackInfo = getRollbackInfo(rs);
 
+                    // 反序列化
                     String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
-                    UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance()
-                        : UndoLogParserFactory.getInstance(serializer);
+                    UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance() : UndoLogParserFactory.getInstance(serializer);
                     BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);
 
                     try {
                         // put serializer name to local
                         setCurrentSerializer(parser.getName());
+                        // 反转顺序
                         List<SQLUndoLog> sqlUndoLogs = branchUndoLog.getSqlUndoLogs();
                         if (sqlUndoLogs.size() > 1) {
                             Collections.reverse(sqlUndoLogs);
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(
-                                conn, sqlUndoLog.getTableName(), dataSourceProxy.getResourceId());
+                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(conn, sqlUndoLog.getTableName(), dataSourceProxy.getResourceId());
                             sqlUndoLog.setTableMeta(tableMeta);
-                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
-                                dataSourceProxy.getDbType(), sqlUndoLog);
+                            // 执行器处理undo
+                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(), sqlUndoLog);
                             undoExecutor.executeOn(conn);
                         }
                     } finally {
@@ -327,6 +329,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 // See https://github.com/seata/seata/issues/489
 
                 if (exists) {
+                    // 删除 undo_log
                     deleteUndoLog(xid, branchId, conn);
                     conn.commit();
                     if (LOGGER.isInfoEnabled()) {
@@ -403,8 +406,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @param conn           sql connection
      * @throws SQLException SQLException
      */
-    protected abstract void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-                                                    Connection conn) throws SQLException;
+    protected abstract void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException;
 
     /**
      * RollbackInfo to bytes

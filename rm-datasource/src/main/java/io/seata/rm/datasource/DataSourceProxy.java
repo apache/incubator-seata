@@ -98,8 +98,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private void init(DataSource dataSource, String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
+        // 获取原始dataSource的Connection
         try (Connection connection = dataSource.getConnection()) {
+            // 从Connection中获取URL地址
             jdbcUrl = connection.getMetaData().getURL();
+            // 从Connection中获取数据库类型
             dbType = JdbcUtils.getDbType(jdbcUrl);
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
@@ -107,8 +110,12 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
+
+        // 注册当前对象到ResourceManager
         DefaultResourceManager.get().registerResource(this);
+
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
+            // 定时任务校验表的元数据
             tableMetaExcutor.scheduleAtFixedRate(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())

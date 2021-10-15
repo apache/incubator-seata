@@ -54,6 +54,7 @@ public class TransactionalTemplate {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
         // 1.1 Get current transaction, if not null, the tx role is 'GlobalTransactionRole.Participant'.
+        // TODO 获取 xid ，如果不为空，说明上面的线程set过，所以这里的 角色 参与者
         GlobalTransaction tx = GlobalTransactionContext.getCurrent();
 
         // 1.2 Handle the transaction propagation.
@@ -109,6 +110,7 @@ public class TransactionalTemplate {
             }
 
             // 1.3 If null, create new transaction with role 'GlobalTransactionRole.Launcher'.
+            // TODO tid is null，角色为发起者
             if (tx == null) {
                 tx = GlobalTransactionContext.createNew();
             }
@@ -119,6 +121,9 @@ public class TransactionalTemplate {
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
                 //    else do nothing. Of course, the hooks will still be triggered.
+                /**
+                 * TODO：发起者角色 向 TC 发送，创建全局事务请求，TC 返回 xid
+                 */
                 beginTransaction(txInfo, tx);
 
                 Object rs;
@@ -127,11 +132,19 @@ public class TransactionalTemplate {
                     rs = business.execute();
                 } catch (Throwable ex) {
                     // 3. The needed business exception to rollback.
+                    /**
+                     * TODO：发起者角色 向 TC 发送，回滚创建全局事务请求，TC 返回执行状态
+                     *  默认重试 5次
+                     */
                     completeTransactionAfterThrowing(txInfo, tx, ex);
                     throw ex;
                 }
 
                 // 4. everything is fine, commit.
+                /**
+                 * TODO：发起者角色 向 TC 发送，提交创建全局事务请求，TC 返回执行状态
+                 *  默认重试 5次
+                 */
                 commitTransaction(tx);
 
                 return rs;

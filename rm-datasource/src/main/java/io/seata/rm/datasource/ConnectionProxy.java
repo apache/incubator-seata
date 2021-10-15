@@ -227,10 +227,13 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void doCommit() throws SQLException {
         if (context.inGlobalTransaction()) {
+            // 全局事务
             processGlobalTransactionCommit();
         } else if (context.isGlobalLockRequire()) {
+            // 全局锁
             processLocalCommitWithGlobalLocks();
         } else {
+            // 本地数据库原始的 commit
             targetConnection.commit();
         }
     }
@@ -247,21 +250,29 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void processGlobalTransactionCommit() throws SQLException {
         try {
+            // TODO ：向 TC 注册分支事务，TC 返回 branchId
             register();
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, context.buildLockKeys());
         }
         try {
+            // TODO ：插入 undo_log 表数据
             UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
+            // 提交本地事务
             targetConnection.commit();
         } catch (Throwable ex) {
             LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
+            // TODO ：向 TC 报告 第一阶段失败（本地事务失败）, 重试 5 次
             report(false);
             throw new SQLException(ex);
         }
+
+        // TODO ：如果分支事务注册成功、本地事务 commit 成功，向 TC 报告 第一阶段成功（本地事务成功）, 重试 5 次
         if (IS_REPORT_SUCCESS_ENABLE) {
             report(true);
         }
+
+        // 清除当前ConnectionProxy中的xid、branchId、undoLog buffer之类的，本次提交结束
         context.reset();
     }
 

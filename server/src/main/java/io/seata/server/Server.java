@@ -79,6 +79,7 @@ public class Server {
         //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getStoreMode());
 
+        // 构造并初始化一个分布式事务Coordinator
         DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);

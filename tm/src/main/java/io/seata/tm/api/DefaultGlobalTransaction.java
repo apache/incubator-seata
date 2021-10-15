@@ -99,8 +99,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         assertXIDNull();
         String currentXid = RootContext.getXID();
         if (currentXid != null) {
-            throw new IllegalStateException("Global transaction already exists," +
-                " can't begin a new global transaction, currentXid = " + currentXid);
+            throw new IllegalStateException("Global transaction already exists," + " can't begin a new global transaction, currentXid = " + currentXid);
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;

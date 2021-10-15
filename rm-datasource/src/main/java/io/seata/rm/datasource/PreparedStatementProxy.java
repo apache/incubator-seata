@@ -52,6 +52,7 @@ public class PreparedStatementProxy extends AbstractPreparedStatementProxy
 
     @Override
     public boolean execute() throws SQLException {
+        // 回调，执行原始的Statement的execute方法
         return ExecuteTemplate.execute(this, (statement, args) -> statement.execute());
     }
 

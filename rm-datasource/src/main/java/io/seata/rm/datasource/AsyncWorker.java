@@ -78,6 +78,7 @@ public class AsyncWorker {
 
     public BranchStatus branchCommit(String xid, long branchId, String resourceId) {
         Phase2Context context = new Phase2Context(xid, branchId, resourceId);
+        // 添加到 BlockQueue ，定时任务异步删除 undo_log
         addToCommitQueue(context);
         return BranchStatus.PhaseTwo_Committed;
     }
@@ -90,8 +91,7 @@ public class AsyncWorker {
         if (commitQueue.offer(context)) {
             return;
         }
-        CompletableFuture.runAsync(this::doBranchCommitSafely, scheduledExecutor)
-                .thenRun(() -> addToCommitQueue(context));
+        CompletableFuture.runAsync(this::doBranchCommitSafely, scheduledExecutor).thenRun(() -> addToCommitQueue(context));
     }
 
     void doBranchCommitSafely() {

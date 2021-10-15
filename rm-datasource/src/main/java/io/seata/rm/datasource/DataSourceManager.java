@@ -86,6 +86,7 @@ public class DataSourceManager extends AbstractResourceManager {
     @Override
     public void registerResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
+        // 先加入本地缓存
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
         super.registerResource(dataSourceProxy);
     }

@@ -95,8 +95,12 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Branch committing: " + xid + " " + branchId + " " + resourceId + " " + applicationData);
         }
-        BranchStatus status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId,
-            applicationData);
+
+        /**
+         * TODO : 分支事务提交：AT 对应的是 DataSourceManager
+         *  添加 xid,branchId 到 BlockQueue ，定时任务异步删除 undo_log 提交事务
+         */
+        BranchStatus status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId, applicationData);
         response.setXid(xid);
         response.setBranchId(branchId);
         response.setBranchStatus(status);
@@ -122,8 +126,11 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Branch Rollbacking: " + xid + " " + branchId + " " + resourceId);
         }
-        BranchStatus status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId,
-            applicationData);
+        /**
+         * TODO ： 分支事务回滚，AT 对应的是 DataSourceManager
+         */
+        BranchStatus status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId, applicationData);
+
         response.setXid(xid);
         response.setBranchId(branchId);
         response.setBranchStatus(status);

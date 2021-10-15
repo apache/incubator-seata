@@ -104,12 +104,16 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public T execute(Object... args) throws Throwable {
+        // 如果在全局事务当中
         String xid = RootContext.getXID();
         if (xid != null) {
+            // 将ConnectionProxy绑定XID
             statementProxy.getConnectionProxy().bind(xid);
         }
 
+        // 设置全局锁标识
         statementProxy.getConnectionProxy().setGlobalLockRequire(RootContext.requireGlobalLock());
+
         return doExecute(args);
     }
 
