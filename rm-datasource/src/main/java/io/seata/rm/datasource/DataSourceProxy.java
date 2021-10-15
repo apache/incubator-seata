@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -165,6 +166,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             return getPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
             return getDefaultResourceId() + "/" + userName;
+        } else if (JdbcConstants.DB2.equalsIgnoreCase(dbType)){
+            return getDB2ResourceId();
         } else {
             return getDefaultResourceId();
         }
@@ -217,6 +220,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } else {
             return jdbcUrl;
         }
+    }
+
+    private String getDB2ResourceId() {
+        String schema = "";
+        try {
+            schema = targetDataSource.getConnection().getSchema();
+        } catch (SQLException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return StringUtils.isBlank(schema) ? jdbcUrl : jdbcUrl + ":" + schema;
     }
 
     @Override

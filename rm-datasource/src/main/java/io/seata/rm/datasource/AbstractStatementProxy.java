@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import io.seata.sqlparser.util.JdbcConstants;
+
 /**
  * The type Abstract statement proxy.
  *
@@ -46,6 +48,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * The Target sql.
      */
     protected String targetSQL;
+
+    /**
+     * The Cache for ResultSet
+     */
+    protected CachedRowSet generatedKeysRowSet;
 
     /**
      * Instantiates a new Abstract statement proxy.
@@ -245,8 +252,15 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
-        CachedRowSet generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
-        generatedKeysRowSet.populate(rs);
+        if (JdbcConstants.DB2.equalsIgnoreCase(connectionProxy.getDbType())) {
+            if (null == generatedKeysRowSet || !rs.isClosed()) {
+                generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
+                generatedKeysRowSet.populate(rs);
+            }
+        } else {
+            generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
+            generatedKeysRowSet.populate(rs);
+        }
         return generatedKeysRowSet;
     }
 
