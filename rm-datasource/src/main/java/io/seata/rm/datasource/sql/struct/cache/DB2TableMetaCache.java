@@ -26,6 +26,8 @@ import java.sql.Statement;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -35,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author qingjiusanliangsan
+ * @author qingjiusanliangsan, GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.DB2)
 public class DB2TableMetaCache extends AbstractTableMetaCache {
@@ -47,10 +49,13 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
         //remove single quote and separate it to catalogName and tableName
-        String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
-        String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
+        String[] tableNameWithSchema = tableName.split("\\.");
+        String defaultTableName = tableNameWithSchema[tableNameWithSchema.length - 1];
 
-        DatabaseMetaData databaseMetaData = null;
+        if (defaultTableName.contains("\"")) {
+            defaultTableName = defaultTableName.replace("\"", "");
+        }
+        DatabaseMetaData databaseMetaData;
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
@@ -63,7 +68,7 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
             if (databaseMetaData.supportsMixedCaseIdentifiers()) {
                 cacheKey.append(defaultTableName);
             } else {
-                cacheKey.append(defaultTableName.toLowerCase());
+                cacheKey.append(defaultTableName.toUpperCase());
             }
         } catch (SQLException e) {
             LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
@@ -75,10 +80,8 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        String sql = "SELECT CURRENT SCHEMA FROM SYSIBM.SYSDUMMY1";
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+        try {
+            return resultSetMetaToSchema(connection, tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {
@@ -86,35 +89,36 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    //    SELECT CURRENT SCHEMA FROM SYSIBM.SYSDUMMY1
-    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
+    private TableMeta resultSetMetaToSchema(Connection connection, String tableName)
             throws SQLException {
-        //always "" for mysql
-        String schemaName = rsmd.getSchemaName(1);
-        String catalogName = rsmd.getCatalogName(1);
-        /*
-         * use ResultSetMetaData to get the pure table name
-         * can avoid the problem below
-         *
-         * select * from account_tbl
-         * select * from account_TBL
-         * select * from `account_tbl`
-         * select * from account.account_tbl
-         */
-        String tableName = rsmd.getTableName(1);
-
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
 
-        /*
-         * here has two different type to get the data
-         * make sure the table name was right
-         * 1. show full columns from xxx from xxx(normal)
-         * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
-         */
+        tableName = ColumnUtils.delEscape(tableName, JdbcConstants.DB2);
+        String[] schemaTable = tableName.split("\\.");
+        //get catalog and schema from tableName
+        String catalogName = "";
+        String schemaName = "";
+        if (schemaTable.length > 2) {
+            catalogName = schemaTable[schemaTable.length - 3];
+        } else if (schemaTable.length > 1) {
+            schemaName = schemaTable[schemaTable.length - 2];
+        }
 
-        try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
-             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
+        //If the tableName does not contain the required information, get from connection
+        if (StringUtils.isBlank(catalogName)) {
+            catalogName = connection.getCatalog();
+        }
+        if (StringUtils.isBlank(schemaName)) {
+            schemaName = connection.getSchema();
+        }
+
+        String pureTableName = schemaTable[schemaTable.length - 1];
+
+        DatabaseMetaData metaData  = connection.getMetaData();
+        try (ResultSet rsColumns = metaData.getColumns(catalogName, schemaName, pureTableName, "%");
+             ResultSet rsIndex = metaData.getIndexInfo(catalogName, schemaName, pureTableName, false, true);
+             ResultSet rsPrimary = metaData.getPrimaryKeys(catalogName, schemaName, pureTableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -144,9 +148,12 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
 
             while (rsIndex.next()) {
                 String indexName = rsIndex.getString("INDEX_NAME");
+                if (StringUtils.isNullOrEmpty(indexName)) {
+                    continue;
+                }
+
                 String colName = rsIndex.getString("COLUMN_NAME");
                 ColumnMeta col = tm.getAllColumns().get(colName);
-
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
                     index.getValues().add(col);
@@ -167,7 +174,13 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
                         index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
+                }
+            }
 
+            while (rsPrimary.next()) {
+                String pkIndexName = rsPrimary.getString("PK_NAME");
+                if (tm.getAllIndexes().containsKey(pkIndexName)) {
+                    tm.getAllIndexes().get(pkIndexName).setIndextype(IndexType.PRIMARY);
                 }
             }
             if (tm.getAllIndexes().isEmpty()) {
