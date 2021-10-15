@@ -46,9 +46,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private boolean xaActive = false;
 
-    private boolean kept = false;
+    private volatile boolean kept = false;
 
-    private boolean rollBacked = false;
+    private volatile boolean rollBacked = false;
     
     /**
      * Constructor of Connection Proxy for XA mode.

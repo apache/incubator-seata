@@ -64,7 +64,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
         Resource resource = dataSourceCache.get(resourceId);
         if (resource instanceof AbstractDataSourceProxyXA) {
             try (ConnectionProxyXA connectionProxyXA =
-                ((AbstractDataSourceProxyXA)resource).getConnectionForXAFinish(xaBranchXid, committed)) {
+                ((AbstractDataSourceProxyXA)resource).getConnectionForXAFinish(xaBranchXid)) {
                 if (committed) {
                     connectionProxyXA.xaCommit(xid, branchId, applicationData);
                     LOGGER.info(xaBranchXid + " was committed.");
