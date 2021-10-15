@@ -24,6 +24,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
+import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
@@ -35,6 +36,7 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 
 /**
  * @author qingjiusanliangsan
@@ -95,6 +97,11 @@ public class DB2InsertRecognizer extends BaseDB2Recognizer implements SQLInsertR
                     row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(SqlMethodExpr.get());
+                } else if (expr instanceof SQLSequenceExpr) {
+                    SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
+                    String sequence = sequenceExpr.getSequence().getSimpleName();
+                    String function = sequenceExpr.getFunction().name;
+                    row.add(new SqlSequenceExpr(sequence, function));
                 } else {
                     if (primaryKeyIndex.contains(i)) {
                         wrapSQLParsingException(expr);
