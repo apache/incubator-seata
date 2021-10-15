@@ -157,7 +157,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             try {
                 start();
             } catch (XAException e) {
-                releaseIfNecessary();
                 cleanXABranchContext();
                 throw new SQLException("failed to start xa branch " + xid + " since " + e.getMessage(), e);
             }
@@ -187,7 +186,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             end(XAResource.TMSUCCESS);
             prepare();
         } catch (XAException xe) {
-            releaseIfNecessary();
             try {
                 // Branch Report to TC: Failed
                 DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
@@ -268,7 +266,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     @Override
-    public void close() throws SQLException {
+    public synchronized void close() throws SQLException {
         rollBacked = false;
         if (isHeld() && shouldBeHeld()) {
             // if kept by a keeper, just hold the connection.
@@ -302,6 +300,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         // if it is not empty, the resource will hang and need to be terminated early
         BranchStatus branchStatus = BaseDataSourceResource.getBranchStatus(xaBranchXid);
         if (branchStatus != null) {
+            releaseIfNecessary();
             throw new SQLException("failed xa branch " + xid
                 + " the global transaction has finish, branch status: " + branchStatus.getCode());
         }
