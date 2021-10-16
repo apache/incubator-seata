@@ -13,25 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common.loader;
-
-import io.seata.common.loader.condition.DependsOnClass;
-import io.seata.common.loader.condition.DependsOnJarVersion;
-import io.seata.common.loader.condition.DependsOnJavaVersion;
+package io.seata.common.util;
 
 /**
- * The type Chinese hello.
+ * The type Incompatible version exception.
  *
- * @author Otis.z
+ * @author sharajava
  */
-@LoadLevel(name = "ChineseHello", order = Integer.MIN_VALUE)
-@DependsOnJavaVersion(min = 1, max = 999)
-@DependsOnClass(value = Hello.class, name = "io.seata.common.loader.Hello")
-@DependsOnJarVersion(name = "slf4j-api", minVersion = "0", maxVersion = "99")
-public class ChineseHello implements Hello {
+public class IncompatibleVersionException extends RuntimeException {
 
-    @Override
-    public String say() {
-        return "ni hao!";
+    /**
+     * Instantiates a new Incompatible version exception.
+     *
+     * @param message the message
+     */
+    public IncompatibleVersionException(String message) {
+        super(message);
     }
 }

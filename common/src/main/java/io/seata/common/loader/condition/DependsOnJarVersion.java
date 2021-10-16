@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common.loader;
+package io.seata.common.loader.condition;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,39 +22,35 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The interface Load level.
+ * 服务依赖的Jar及其版本
  *
- * @author slievrly
+ * @author wang.liang
+ * @see DependsOnJarVersionValidator
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-public @interface LoadLevel {
-    /**
-     * Name string.
-     *
-     * @return the string
-     */
-    String name();
+public @interface DependsOnJarVersion {
 
     /**
-     * Order int.
+     * 依赖的Jar包名称数组<br>
+     * 由于部分jar变更过名字，所以可设置多个
      *
-     * @return the int
+     * @return the jar names
      */
-    int order() default 0;
+    String[] name();
 
     /**
-     * Scope enum.
+     * 依赖的Jar包最小版本号
      *
-     * @return the scope
+     * @return the min version
      */
-    Scope scope() default Scope.SINGLETON;
+    String minVersion() default "";
 
     /**
-     * Validator array
+     * 依赖的Jar包最大版本号
      *
-     * @return the validator array
+     * @return the min version
      */
-    Class<? extends IServiceLoaderValidator>[] validators() default {};
+    String maxVersion() default "";
 }

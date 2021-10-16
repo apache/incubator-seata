@@ -13,25 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common.loader;
+package io.seata.common.loader.condition;
 
-import io.seata.common.loader.condition.DependsOnClass;
-import io.seata.common.loader.condition.DependsOnJarVersion;
-import io.seata.common.loader.condition.DependsOnJavaVersion;
+import io.seata.common.loader.IServiceLoaderValidator;
 
 /**
- * The type Chinese hello.
+ * 依赖校验器接口
  *
- * @author Otis.z
+ * @author wang.liang
  */
-@LoadLevel(name = "ChineseHello", order = Integer.MIN_VALUE)
-@DependsOnJavaVersion(min = 1, max = 999)
-@DependsOnClass(value = Hello.class, name = "io.seata.common.loader.Hello")
-@DependsOnJarVersion(name = "slf4j-api", minVersion = "0", maxVersion = "99")
-public class ChineseHello implements Hello {
+public interface IDependsOnValidator extends IServiceLoaderValidator {
 
+    /**
+     * 校验注解信息
+     *
+     * @param serviceClass 服务类型
+     * @param classLoader  类加载器
+     * @throws ServiceDependencyException 依赖无效或不匹配时，请抛出该异常
+     */
     @Override
-    public String say() {
-        return "ni hao!";
-    }
+    void validate(Class<?> serviceClass, ClassLoader classLoader) throws ServiceDependencyException;
 }

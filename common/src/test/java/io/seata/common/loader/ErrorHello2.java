@@ -15,23 +15,19 @@
  */
 package io.seata.common.loader;
 
-import io.seata.common.loader.condition.DependsOnClass;
 import io.seata.common.loader.condition.DependsOnJarVersion;
-import io.seata.common.loader.condition.DependsOnJavaVersion;
 
 /**
- * The type Chinese hello.
+ * The type Error hello 2.
  *
- * @author Otis.z
+ * @author wang.liang
  */
-@LoadLevel(name = "ChineseHello", order = Integer.MIN_VALUE)
-@DependsOnJavaVersion(min = 1, max = 999)
-@DependsOnClass(value = Hello.class, name = "io.seata.common.loader.Hello")
-@DependsOnJarVersion(name = "slf4j-api", minVersion = "0", maxVersion = "99")
-public class ChineseHello implements Hello {
+@LoadLevel(name = "ErrorHello2", order = Integer.MAX_VALUE)
+@DependsOnJarVersion(name = "slf4j-api", maxVersion = "0.0.1")
+public class ErrorHello2 implements Hello {
 
     @Override
     public String say() {
-        return "ni hao!";
+        return "error hello2!";
     }
 }

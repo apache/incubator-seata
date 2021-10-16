@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common.loader;
+package io.seata.common.loader.condition;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,39 +22,27 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The interface Load level.
+ * 服务依赖的类
  *
- * @author slievrly
+ * @author wang.liang
+ * @see DependsOnClassValidator
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-public @interface LoadLevel {
-    /**
-     * Name string.
-     *
-     * @return the string
-     */
-    String name();
+public @interface DependsOnClass {
 
     /**
-     * Order int.
+     * 依赖的类数组
      *
-     * @return the int
+     * @return the classes
      */
-    int order() default 0;
+    Class<?>[] value() default {};
 
     /**
-     * Scope enum.
+     * 依赖的类名数组（无法引用到类时使用）
      *
-     * @return the scope
+     * @return the class names
      */
-    Scope scope() default Scope.SINGLETON;
-
-    /**
-     * Validator array
-     *
-     * @return the validator array
-     */
-    Class<? extends IServiceLoaderValidator>[] validators() default {};
+    String[] name() default {};
 }

@@ -23,10 +23,10 @@ import io.seata.common.util.StringUtils;
  * @author haozhibei
  */
 final class ExtensionDefinition {
-    private String name;
-    private Class serviceClass;
-    private Integer order;
-    private Scope scope;
+    private final String name;
+    private final Class serviceClass;
+    private final Integer order;
+    private final Scope scope;
 
     public Integer getOrder() {
         return this.order;

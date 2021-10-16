@@ -82,6 +82,7 @@ public class EnhancedServiceLoaderTest {
     @Test
     public void getAllExtensionClass() {
         List<Class> allExtensionClass = EnhancedServiceLoader.getAllExtensionClass(Hello.class);
+        assertThat(allExtensionClass.size()).isEqualTo(4);
         assertThat(allExtensionClass.get(3).getSimpleName()).isEqualTo((LatinHello.class.getSimpleName()));
         assertThat(allExtensionClass.get(2).getSimpleName()).isEqualTo((FrenchHello.class.getSimpleName()));
         assertThat(allExtensionClass.get(1).getSimpleName()).isEqualTo((EnglishHello.class.getSimpleName()));

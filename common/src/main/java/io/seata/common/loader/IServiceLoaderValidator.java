@@ -15,23 +15,19 @@
  */
 package io.seata.common.loader;
 
-import io.seata.common.loader.condition.DependsOnClass;
-import io.seata.common.loader.condition.DependsOnJarVersion;
-import io.seata.common.loader.condition.DependsOnJavaVersion;
-
 /**
- * The type Chinese hello.
+ * 服务加载校验器
  *
- * @author Otis.z
+ * @author wang.liang
  */
-@LoadLevel(name = "ChineseHello", order = Integer.MIN_VALUE)
-@DependsOnJavaVersion(min = 1, max = 999)
-@DependsOnClass(value = Hello.class, name = "io.seata.common.loader.Hello")
-@DependsOnJarVersion(name = "slf4j-api", minVersion = "0", maxVersion = "99")
-public class ChineseHello implements Hello {
+public interface IServiceLoaderValidator {
 
-    @Override
-    public String say() {
-        return "ni hao!";
-    }
+    /**
+     * 校验当前服务类是否可以加载
+     *
+     * @param serviceClass 服务类型
+     * @param classLoader  类加载器
+     * @throws InvalidServiceException 服务加载异常
+     */
+    void validate(Class<?> serviceClass, ClassLoader classLoader) throws InvalidServiceException;
 }

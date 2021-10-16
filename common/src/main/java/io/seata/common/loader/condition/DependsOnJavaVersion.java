@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common.loader;
+package io.seata.common.loader.condition;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,39 +22,31 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The interface Load level.
+ * 服务依赖的Java版本
  *
- * @author slievrly
+ * @author wang.liang
+ * @see DependsOnJavaVersionValidator
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-public @interface LoadLevel {
-    /**
-     * Name string.
-     *
-     * @return the string
-     */
-    String name();
+public @interface DependsOnJavaVersion {
 
     /**
-     * Order int.
+     * 依赖的最低版本的Java，小于等于0时，表示不限制最低版本<br>
+     * java1~8时，值域为：1.10 ~ 1.89
+     * java9及以上时，值域为：9.00 ~ xx.99
      *
-     * @return the int
+     * @return the min java version
      */
-    int order() default 0;
+    float min() default 0;
 
     /**
-     * Scope enum.
+     * 依赖的最高版本的Java，小于等于0时，表示不限制最高版本。<br>
+     * 注意：设置该值时，要注意小版本的设置。举例：设置为 17F 时，也许你想设置的是 17.99F，以包含所有Java17的小版本<br>
+     * 值域如：1.1* ~ 1.8*、9.** ~ 1*.**
      *
-     * @return the scope
+     * @return the max java version
      */
-    Scope scope() default Scope.SINGLETON;
-
-    /**
-     * Validator array
-     *
-     * @return the validator array
-     */
-    Class<? extends IServiceLoaderValidator>[] validators() default {};
+    float max() default 0;
 }

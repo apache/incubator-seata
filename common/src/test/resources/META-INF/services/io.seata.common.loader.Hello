@@ -17,3 +17,8 @@
 #
 
 io.seata.common.loader.ChineseHello
+
+io.seata.common.loader.ErrorHello1
+io.seata.common.loader.ErrorHello2
+io.seata.common.loader.ErrorHello3
+io.seata.common.loader.ErrorHello4

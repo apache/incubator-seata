@@ -32,7 +32,12 @@ import java.util.stream.Collectors;
 
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
+import io.seata.common.loader.condition.DependsOnClassValidator;
+import io.seata.common.loader.condition.DependsOnJarVersionValidator;
+import io.seata.common.loader.condition.DependsOnJavaVersionValidator;
+import io.seata.common.loader.condition.IDependsOnValidator;
 import io.seata.common.util.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +48,26 @@ import org.slf4j.LoggerFactory;
  * @author slievrly
  */
 public class EnhancedServiceLoader {
+
+    //region depends on validators
+
+    private static final List<IDependsOnValidator> DEPENDS_ON_VALIDATORS;
+
+    static {
+        List<IDependsOnValidator> dependsOnValidators = new ArrayList<>(2);
+
+        // depends on class
+        dependsOnValidators.add(new DependsOnClassValidator());
+        // depends on java-version
+        dependsOnValidators.add(new DependsOnJavaVersionValidator());
+        // depends on jar and jar-version
+        dependsOnValidators.add(new DependsOnJarVersionValidator());
+
+        DEPENDS_ON_VALIDATORS = dependsOnValidators;
+    }
+
+    //endregion
+
 
     /**
      * Specify classLoader to load the service provider
@@ -373,8 +398,10 @@ public class EnhancedServiceLoader {
                     ExtensionDefinition definition = classToDefinitionMap.get(clazz);
                     allInstances.add(getExtensionInstance(definition, loader, argsType, args));
                 }
+            } catch (EnhancedServiceNotFoundException e) {
+                throw e;
             } catch (Throwable t) {
-                throw new EnhancedServiceNotFoundException(t);
+                throw new EnhancedServiceNotFoundException("get extension instance failed", t);
             }
             return allInstances;
         }
@@ -397,14 +424,12 @@ public class EnhancedServiceLoader {
                 loadAllExtensionClass(loader);
                 ExtensionDefinition defaultExtensionDefinition = getDefaultExtensionDefinition();
                 return getExtensionInstance(defaultExtensionDefinition, loader, argTypes, args);
+            } catch (EnhancedServiceNotFoundException e) {
+                throw e;
             } catch (Throwable e) {
-                if (e instanceof EnhancedServiceNotFoundException) {
-                    throw (EnhancedServiceNotFoundException)e;
-                } else {
-                    throw new EnhancedServiceNotFoundException(
-                        "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
-                            .getFullStackTrace(e));
-                }
+                throw new EnhancedServiceNotFoundException(
+                    "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
+                        .getFullStackTrace(e));
             }
         }
 
@@ -418,14 +443,12 @@ public class EnhancedServiceLoader {
                 loadAllExtensionClass(loader);
                 ExtensionDefinition cachedExtensionDefinition = getCachedExtensionDefinition(activateName);
                 return getExtensionInstance(cachedExtensionDefinition, loader, argTypes, args);
+            } catch (EnhancedServiceNotFoundException e) {
+                throw e;
             } catch (Throwable e) {
-                if (e instanceof EnhancedServiceNotFoundException) {
-                    throw (EnhancedServiceNotFoundException)e;
-                } else {
-                    throw new EnhancedServiceNotFoundException(
-                            "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
-                                    .getFullStackTrace(e));
-                }
+                throw new EnhancedServiceNotFoundException(
+                    "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
+                        .getFullStackTrace(e));
             }
         }
 
@@ -524,7 +547,8 @@ public class EnhancedServiceLoader {
             if (urls != null) {
                 while (urls.hasMoreElements()) {
                     java.net.URL url = urls.nextElement();
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET))) {
+                    try (InputStreamReader isr = new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET);
+                         BufferedReader reader = new BufferedReader(isr)) {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             final int ci = line.indexOf('#');
@@ -542,32 +566,51 @@ public class EnhancedServiceLoader {
                                         continue;
                                     }
                                     extensions.add(extensionDefinition);
-                                } catch (LinkageError | ClassNotFoundException e) {
-                                    LOGGER.warn("Load [{}] class fail. {}", line, e.getMessage());
+                                } catch (LinkageError | ClassNotFoundException | InvalidServiceException e) {
+                                    LOGGER.warn("Load [{}] class failed: {}", line, e.getMessage());
                                 }
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn("load clazz instance error: {}", e.getMessage());
+                        LOGGER.error("Load [{}] extension definition error", url.toString(), e);
                     }
                 }
             }
         }
 
         private ExtensionDefinition getUnloadedExtensionDefinition(String className, ClassLoader loader)
-            throws ClassNotFoundException {
+            throws ClassNotFoundException, InvalidServiceException {
             //Check whether the definition has been loaded
             if (!isDefinitionContainsClazz(className, loader)) {
                 Class<?> clazz = Class.forName(className, true, loader);
+
+                // 执行依赖校验器
+                for (IDependsOnValidator dependsOnValidator : DEPENDS_ON_VALIDATORS) {
+                    dependsOnValidator.validate(clazz, loader);
+                }
+
+                // 获取注解`@LoadLevel`的信息
                 String serviceName = null;
-                Integer priority = 0;
+                int priority = 0;
                 Scope scope = Scope.SINGLETON;
                 LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
                 if (loadLevel != null) {
                     serviceName = loadLevel.name();
                     priority = loadLevel.order();
                     scope = loadLevel.scope();
+
+                    Class<? extends IServiceLoaderValidator>[] validatorClasses = loadLevel.validators();
+                    for (Class<? extends IServiceLoaderValidator> validatorClass : validatorClasses) {
+                        IServiceLoaderValidator validator;
+                        try {
+                            validator = validatorClass.newInstance();
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            throw new ServiceLoadFailedException("Create instance of the validator failed: " + validatorClass.getName(), e);
+                        }
+                        validator.validate(clazz, loader);
+                    }
                 }
+
                 ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
@@ -615,15 +658,12 @@ public class EnhancedServiceLoader {
          */
         private S initInstance(Class implClazz, Class[] argTypes, Object[] args)
                 throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-            S s = null;
-            if (argTypes != null && args != null) {
-                // Constructor with arguments
-                Constructor<S> constructor = implClazz.getDeclaredConstructor(argTypes);
-                s = type.cast(constructor.newInstance(args));
-            } else {
-                // default Constructor
-                s = type.cast(implClazz.newInstance());
+            Constructor<S> constructor = implClazz.getDeclaredConstructor(argTypes != null ? argTypes : ArrayUtils.EMPTY_CLASS_ARRAY);
+            if (!constructor.isAccessible()) {
+                constructor.setAccessible(true);
             }
+
+            S s = type.cast(constructor.newInstance(args != null ? args : ArrayUtils.EMPTY_OBJECT_ARRAY));
             if (s instanceof Initialize) {
                 ((Initialize)s).init();
             }
