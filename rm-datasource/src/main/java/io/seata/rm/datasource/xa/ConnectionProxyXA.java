@@ -187,9 +187,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             end(XAResource.TMSUCCESS);
             xaResource.prepare(xaBranchXid);
         } catch (XAException xe) {
-            if (xaBranchXid == null) {
-                throw new SQLException("resource suspension has occurred and the transaction has been interrupted");
-            }
             try {
                 // Branch Report to TC: Failed
                 DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
