@@ -21,6 +21,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
@@ -111,10 +112,10 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
-                        nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
-                        KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                        new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
-                            nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
+                            nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
+                            KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
+                            new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
+                                    nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
                     instance = new RmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
                 }
             }
@@ -158,13 +159,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             LOGGER.info("register RM success. client version:{}, server version:{},channel:{}", registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
-        String dbKey = getMergedResourceKeys();
-        if (registerRMRequest.getResourceIds() != null) {
-            if (!registerRMRequest.getResourceIds().equals(dbKey)) {
-                sendRegisterMessage(serverAddress, channel, dbKey);
-            }
-        }
-
     }
 
     @Override
@@ -173,42 +167,49 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
         RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
         String errMsg = String.format(
-            "register RM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerRMRequest.getVersion(), registerRMResponse.getVersion(), registerRMResponse.getMsg(), channel);
+                "register RM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerRMRequest.getVersion(), registerRMResponse.getVersion(), registerRMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
     }
 
     /**
      * Register new db key.
      *
-     * @param resourceGroupId the resource group id
-     * @param resourceId      the db key
+     * @param resourceId db key
      */
-    public void registerResource(String resourceGroupId, String resourceId) {
-
+    public void registerResource(String resourceId, BranchType type) {
         // Resource registration cannot be performed until the RM client is initialized
         if (StringUtils.isBlank(transactionServiceGroup)) {
             return;
         }
 
-        if (getClientChannelManager().getChannels().isEmpty()) {
-            getClientChannelManager().reconnect(transactionServiceGroup);
-            return;
+        NettyClientChannelManager channelManager = getClientChannelManager();
+        if (channelManager.getChannels().isEmpty()) {
+            channelManager.reconnect(transactionServiceGroup);
         }
-        synchronized (getClientChannelManager().getChannels()) {
-            for (Map.Entry<String, Channel> entry : getClientChannelManager().getChannels().entrySet()) {
-                String serverAddress = entry.getKey();
-                Channel rmChannel = entry.getValue();
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("will register resourceId:{}", resourceId);
-                }
-                sendRegisterMessage(serverAddress, rmChannel, resourceId);
-            }
-        }
+
+        RegisterRMRequest message = buildRegisterRMRequest(resourceId, type);
+        Map<String, Channel> channels = channelManager.getChannels();
+        channels.forEach((serverAddress, rmChannel) -> {
+            LOGGER.info("will register resource: {}", resourceId);
+            sendRegisterMessage(serverAddress, rmChannel, message);
+        });
     }
 
-    public void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
+    /**
+     * build RegisterRMRequest
+     * note: BranchType store in message.extraData
+     */
+    private RegisterRMRequest buildRegisterRMRequest(String resourceId, BranchType type) {
         RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
         message.setResourceIds(resourceId);
+        if (type != null) {
+            String typeName = type.name();
+            message.setExtraData(typeName);
+        }
+        return message;
+    }
+
+    private void sendRegisterMessage(String serverAddress, Channel channel, RegisterRMRequest message) {
         try {
             super.sendAsyncRequest(channel, message);
         } catch (FrameworkException e) {
@@ -218,7 +219,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                     LOGGER.info("remove not writable channel:{}", channel);
                 }
             } else {
-                LOGGER.error("register resource failed, channel:{},resourceId:{}", channel, resourceId, e);
+                LOGGER.error("register resource failed, resourceId: {}", message.getResourceIds(), e);
             }
         }
     }
@@ -279,7 +280,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.registerProcessor(MessageType.TYPE_RM_DELETE_UNDOLOG, rmUndoLogProcessor, messageExecutor);
         // 4.registry TC response processor
         ClientOnResponseProcessor onResponseProcessor =
-            new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
+                new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor, null);
