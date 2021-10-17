@@ -249,6 +249,6 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private void init() {
         this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        demotion = true;
     }
+
 }
