@@ -25,6 +25,7 @@ seata:
         retry-policy-branch-rollback-on-conflict: true
     tls:
       enable-tls: true
+      tls-version: TLSv1
     tm:
       commit-retry-count: 5
       rollback-retry-count: 5

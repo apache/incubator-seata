@@ -107,9 +107,13 @@ seata:
       timeout-retry-period: 1000
     tls:
       enable-tls: true
+      tls-version: TLSv1
       certificate-type: JKS
       certificate-path: server\\src\\test\\resources\\tls\\cert.jks
+      # only support when certificate-type = JKS or PKCS12
       certificate-password: tJ7Hb2WK
+      # only support when certificate-type = PEM
+      key-file-path: server\\src\\test\\resources\\tls\\key-pkcs8.pem
     undo:
       log-save-days: 7
       log-delete-period: 86400000
