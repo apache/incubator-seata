@@ -21,13 +21,12 @@ import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 
-import io.seata.common.util.StringUtils;
+import com.alibaba.druid.util.JdbcUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,16 +39,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxyXA.class);
 
-    private volatile boolean currentAutoCommitStatus = true;
+    private boolean currentAutoCommitStatus = true;
 
-    private volatile XAXid xaBranchXid;
+    private XAXid xaBranchXid;
 
-    private volatile boolean xaActive = false;
+    private boolean xaActive = false;
 
-    private volatile boolean kept = false;
+    private boolean kept = false;
 
-    private volatile boolean rollBacked = false;
-    
     /**
      * Constructor of Connection Proxy for XA mode.
      *
@@ -76,16 +73,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void keepIfNecessary() {
-        resource.hold(xaBranchXid.toString(), this);
+        if (shouldBeHeld()) {
+            resource.hold(xaBranchXid.toString(), this);
+        }
     }
 
     private void releaseIfNecessary() {
-        if (this.xaBranchXid != null) {
-            String xaBranchXid = this.xaBranchXid.toString();
-            if (isHeld()) {
-                resource.release(xaBranchXid, this);
-            }
-            BaseDataSourceResource.remove(xaBranchXid);
+        if (isHeld()) {
+            resource.release(xaBranchXid.toString(), this);
         }
     }
 
@@ -96,10 +91,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param applicationData application data
      * @throws SQLException SQLException
      */
-    public synchronized void xaCommit(String xid, long branchId, String applicationData) throws XAException {
+    public void xaCommit(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
         xaResource.commit(xaXid, false);
         releaseIfNecessary();
+
     }
 
     /**
@@ -109,7 +105,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param applicationData application data
      * @throws SQLException  SQLException
      */
-    public synchronized void xaRollback(String xid, long branchId, String applicationData) throws XAException {
+    public void xaRollback(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
         xaRollback(xaXid);
     }
@@ -141,7 +137,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 throw new SQLException("should NEVER happen: setAutoCommit from true to false while xa branch is active");
             }
             // Start a XA branch
-            long branchId;
+            long branchId = 0L;
             try {
                 // 1. register branch to TC then get the branchId
                 branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
@@ -152,10 +148,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             }
             // 2. build XA-Xid with xid and branchId
             this.xaBranchXid = XAXidBuilder.build(xid, branchId);
-            // Keep the Connection if necessary
-            keepIfNecessary();
             try {
-                start();
+                // 3. XA Start
+                xaResource.start(this.xaBranchXid, XAResource.TMNOFLAGS);
             } catch (XAException e) {
                 cleanXABranchContext();
                 throw new SQLException("failed to start xa branch " + xid + " since " + e.getMessage(), e);
@@ -174,7 +169,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     @Override
-    public synchronized void commit() throws SQLException {
+    public void commit() throws SQLException {
         if (currentAutoCommitStatus) {
             // Ignore the committing on an autocommit session.
             return;
@@ -183,8 +178,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT commit on an inactive session", SQLSTATE_XA_NOT_END);
         }
         try {
-            end(XAResource.TMSUCCESS);
+            // XA End: Success
+            xaResource.end(xaBranchXid, XAResource.TMSUCCESS);
+            // XA Prepare
             xaResource.prepare(xaBranchXid);
+            // Keep the Connection if necessary
+            keepIfNecessary();
         } catch (XAException xe) {
             try {
                 // Branch Report to TC: Failed
@@ -213,11 +212,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT rollback on an inactive session");
         }
         try {
-            if (!rollBacked) {
-                // XA End: Fail
-                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
-                xaRollback(xaBranchXid);
-            }
+            // XA End: Fail
+            xaResource.end(xaBranchXid, XAResource.TMFAIL);
+            xaRollback(xaBranchXid);
             // Branch Report to TC
             DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
                 BranchStatus.PhaseOne_Failed, null);
@@ -234,25 +231,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
     }
 
-    private synchronized void start() throws XAException, SQLException {
-        // 3. XA Start
-        xaResource.start(this.xaBranchXid, XAResource.TMNOFLAGS);
-        try {
-            termination();
-        } catch (SQLException e) {
-            // the framework layer does not actively call ROLLBACK when setAutoCommit throws an SQL exception
-            xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
-            xaRollback(xaBranchXid);
-            throw  e;
-        }
-    }
-
-    private synchronized void end(int flags) throws XAException, SQLException {
-        termination();
-        // XA End: Success
-        xaResource.end(xaBranchXid, flags);
-    }
-
     private void cleanXABranchContext() {
         xaActive = false;
         if (!isHeld()) {
@@ -261,9 +239,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     @Override
-    public synchronized void close() throws SQLException {
-        rollBacked = false;
-        if (isHeld() && shouldBeHeld()) {
+    public void close() throws SQLException {
+        if (isHeld()) {
             // if kept by a keeper, just hold the connection.
             return;
         }
@@ -283,22 +260,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public boolean shouldBeHeld() {
-        return JdbcConstants.MYSQL.equals(resource.getDbType()) || JdbcConstants.MARIADB.equals(resource.getDbType())
-               || StringUtils.isBlank(resource.getDbType());
-    }
-
-    private void termination() throws SQLException {
-        termination(this.xaBranchXid.toString());
-    }
-
-    private void termination(String xaBranchXid) throws SQLException {
-        // if it is not empty, the resource will hang and need to be terminated early
-        BranchStatus branchStatus = BaseDataSourceResource.getBranchStatus(xaBranchXid);
-        if (branchStatus != null) {
-            releaseIfNecessary();
-            throw new SQLException("failed xa branch " + xid
-                + " the global transaction has finish, branch status: " + branchStatus.getCode());
-        }
+        return JdbcUtils.MYSQL.equals(resource.getDbType()) || JdbcUtils.MARIADB.equals(resource.getDbType());
     }
 
 }
