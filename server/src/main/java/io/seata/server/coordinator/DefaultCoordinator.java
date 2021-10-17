@@ -62,6 +62,7 @@ import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
@@ -241,7 +242,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Timeout check.
      */
     protected void timeoutCheck() {
-        Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
+        SessionCondition sessionCondition = new SessionCondition(new GlobalStatus[] {GlobalStatus.Begin});
+        sessionCondition.setLazyLoadBranch(true);
+        Collection<GlobalSession> allSessions =
+            SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(allSessions)) {
             return;
         }

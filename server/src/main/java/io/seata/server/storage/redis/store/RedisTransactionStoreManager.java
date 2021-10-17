@@ -369,9 +369,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
             List<BranchTransactionDO> branchTransactionDOs = null;
             if (withBranchSessions) {
-                branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
+                branchTransactionDOs = this.readBranchSessionByXid(jedis, xid);
             }
-            return getGlobalSession(globalTransactionDO,branchTransactionDOs);
+            return getGlobalSession(globalTransactionDO, branchTransactionDOs);
         }
     }
 
@@ -393,7 +393,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param statuses the statuses
      * @return the list
      */
-    public List<GlobalSession> readSession(GlobalStatus[] statuses) {
+    @Override
+    public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
         List<String> statusKeys = new ArrayList<>();
         for (int i = 0; i < statuses.length; i++) {
             statusKeys.add(buildGlobalStatus(statuses[i].getCode()));
@@ -406,8 +407,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
                 xids.parallelStream().forEach(xid -> {
-                    GlobalSession globalSession = this.readSession(xid, true);
+                    GlobalSession globalSession = this.readSession(xid, withBranchSessions);
                     if (globalSession != null) {
+                        globalSession.setLazyLoadBranch(withBranchSessions);
                         globalSessions.add(globalSession);
                     }
                 });
@@ -438,9 +440,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             return globalSessions;
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            return readSession(sessionCondition.getStatuses());
+            return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
         } else if (sessionCondition.getStatus() != null) {
-            return readSession(new GlobalStatus[]{sessionCondition.getStatus()});
+            return readSession(new GlobalStatus[] {sessionCondition.getStatus()}, !sessionCondition.isLazyLoadBranch());
         }
         return null;
     }
@@ -482,9 +484,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
             if (withBranchSessions) {
-                branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
+                try(Pipeline pipeline = jedis.pipelined()) {
+                    branchTransactionDOs = this.readBranchSessionByXid(pipeline, xid);
+                }
             }
-            return getGlobalSession(globalTransactionDO,branchTransactionDOs);
+            return getGlobalSession(globalTransactionDO, branchTransactionDOs);
         }
     }
 
@@ -495,10 +499,21 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return the branch transactionDo list
      */
     private List<BranchTransactionDO> readBranchSessionByXid(Jedis jedis,String xid) {
+        try (Pipeline pipeline = jedis.pipelined()) {
+            return readBranchSessionByXid(pipeline, xid);
+        }
+    }
+
+    /**
+     * Read the branch session list by xid
+     * @param pipeline
+     * @param xid the xid
+     * @return the branch transactionDo list
+     */
+    private List<BranchTransactionDO> readBranchSessionByXid(Pipeline pipeline,String xid) {
         List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
         String branchListKey = buildBranchListKeyByXid(xid);
-        List<String> branchKeys = lRange(jedis, branchListKey);
-        Pipeline pipeline = jedis.pipelined();
+        List<String> branchKeys = lRange(branchListKey);
         if (CollectionUtils.isNotEmpty(branchKeys)) {
             branchKeys.stream().forEach(branchKey -> pipeline.hgetAll(branchKey));
             List<Object> branchInfos = pipeline.syncAndReturnAll();
@@ -517,20 +532,22 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return branchTransactionDOs;
     }
 
-    private List<String> lRange(Jedis jedis, String key) {
+    private List<String> lRange(String key) {
         List<String> keys = new ArrayList<>();
         List<String> values;
         int limit = 20;
         int start = 0;
         int stop = limit;
-        for (;;) {
-            values = jedis.lrange(key, start, stop);
-            keys.addAll(values);
-            if (CollectionUtils.isEmpty(values) || values.size() < limit) {
-                break;
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            for (;;) {
+                values = jedis.lrange(key, start, stop);
+                keys.addAll(values);
+                if (CollectionUtils.isEmpty(values) || values.size() < limit) {
+                    break;
+                }
+                start = keys.size();
+                stop = start + limit;
             }
-            start = keys.size();
-            stop = start + limit;
         }
         return keys;
     }

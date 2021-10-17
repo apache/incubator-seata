@@ -86,9 +86,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
+    private boolean lazyLoadBranch;
+
     private volatile boolean active = true;
 
-    private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
+    private ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
@@ -473,6 +475,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.applicationData = applicationData;
     }
 
+    public boolean isLazyLoadBranch() {
+        return lazyLoadBranch;
+    }
+
+    public void setLazyLoadBranch(boolean lazyLoadBranch) {
+        this.lazyLoadBranch = lazyLoadBranch;
+    }
+
     /**
      * Create global session global session.
      *
@@ -626,7 +636,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean hasBranch() {
-        return branchSessions.size() > 0;
+        return getBranchSessions().size() > 0;
     }
 
     public void lock() throws TransactionException {
@@ -672,6 +682,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public ArrayList<BranchSession> getBranchSessions() {
+        if (lazyLoadBranch) {
+            loadBranch();
+        }
         return branchSessions;
     }
 
@@ -697,4 +710,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
     }
+
+    public void loadBranch() {
+        this.branchSessions = SessionHolder.getRootSessionManager().findGlobalSession(xid, true).getBranchSessions();
+    }
+
 }
