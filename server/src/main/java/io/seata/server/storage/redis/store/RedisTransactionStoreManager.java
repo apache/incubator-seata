@@ -484,9 +484,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
             if (withBranchSessions) {
-                try(Pipeline pipeline = jedis.pipelined()) {
-                    branchTransactionDOs = this.readBranchSessionByXid(pipeline, xid);
-                }
+                branchTransactionDOs = this.readBranchSessionByXid(jedis, xid);
             }
             return getGlobalSession(globalTransactionDO, branchTransactionDOs);
         }
