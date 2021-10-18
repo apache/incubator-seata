@@ -17,6 +17,7 @@ package io.seata.common.util;
 
 import java.net.URL;
 import java.util.Objects;
+import java.util.jar.Attributes;
 
 /**
  * Jar Info
@@ -33,8 +34,12 @@ public class JarInfo {
 
     private final long versionLong;
 
+    /**
+     * the attributes of the file 'META-INF/MANIFEST.MF'
+     */
+    private final Attributes manifestAttributes;
 
-    public JarInfo(URL url, String name, String version) {
+    public JarInfo(URL url, String name, Attributes manifestAttributes, String version) {
         if (url == null) {
             throw new IllegalArgumentException("'url' must not be null");
         }
@@ -44,6 +49,7 @@ public class JarInfo {
 
         this.url = url;
         this.name = name.toLowerCase();
+        this.manifestAttributes = manifestAttributes;
         if (StringUtils.isBlank(version)) {
             this.version = VersionUtils.UNKNOWN_VERSION;
             this.versionLong = 0L;
@@ -93,6 +99,18 @@ public class JarInfo {
 
     public long getVersionLong() {
         return versionLong;
+    }
+
+    public Attributes getAttributes() {
+        return manifestAttributes;
+    }
+
+    public String getAttribute(Attributes.Name name) {
+        return manifestAttributes.getValue(name);
+    }
+
+    public String getAttribute(String name) {
+        return manifestAttributes.getValue(name);
     }
 
     //endregion

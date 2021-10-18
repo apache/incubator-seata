@@ -43,6 +43,18 @@ public class JarUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JarUtils.class);
 
+
+    //region The Constants Attributes.Name
+
+    public static final Attributes.Name IMPLEMENTATION_VERSION = Attributes.Name.IMPLEMENTATION_VERSION;
+
+    public static final Attributes.Name BUNDLE_VERSION = new Attributes.Name("Bundle-Version");
+
+    //endregion
+
+
+    //region The Caches
+
     /**
      * cl -> jarList
      */
@@ -52,6 +64,8 @@ public class JarUtils {
      * cl -> jarName -> jarInfo
      */
     private static final Map<ClassLoader, Map<String, JarInfo>> CL_JAR_MAP_CACHE = new ConcurrentHashMap<>();
+
+    //endregion
 
 
     //region getJarList
@@ -164,32 +178,37 @@ public class JarUtils {
         }
 
         URL url;
+        String jarFilePath;
         while (urls.hasMoreElements()) {
             url = urls.nextElement();
+            jarFilePath = url.toString();
             try {
+                if (!jarFilePath.endsWith(".jar!/META-INF/MANIFEST.MF")) {
+                    continue;
+                }
+
                 Manifest manifest = new Manifest(url.openStream());
                 Attributes attributes = manifest.getMainAttributes();
 
-                String version = attributes.getValue("Implementation-Version");
+                // get version
+                String version = attributes.getValue(IMPLEMENTATION_VERSION);
                 if (StringUtils.isBlank(version)) {
-                    version = attributes.getValue("Bundle-Version");
+                    version = attributes.getValue(BUNDLE_VERSION);
                 }
 
-                String name;
-                String jarFilePath = url.toString();
-                jarFilePath = jarFilePath.substring(0, jarFilePath.lastIndexOf("!/META-INF/MANIFEST.MF"));
+                // get jar name
+                jarFilePath = jarFilePath.substring(0, jarFilePath.lastIndexOf(".jar!/META-INF/MANIFEST.MF"));
                 String jarFileName = jarFilePath.substring(jarFilePath.lastIndexOf("/") + 1);
-                name = jarFileName.replaceAll("(-\\d.*)?\\.jar$", "");
-                if (StringUtils.isBlank(version)) {
-                    version = jarFileName.substring(0, jarFileName.lastIndexOf(".jar")).substring(name.length());
-                    if (version.startsWith("-")) {
-                        version = version.substring(1);
-                    }
+                String name = jarFileName.replaceAll("-\\d.*$", "");
+
+                // if version is blank, try to get from the jar file name
+                if (StringUtils.isBlank(version) && name.length() != jarFileName.length()) {
+                    version = jarFileName.substring(name.length() + 1);
                 }
 
-                result.add(new JarInfo(url, name, version));
+                result.add(new JarInfo(url, name, attributes, version));
             } catch (IOException | RuntimeException e) {
-                LOGGER.warn("加载jar信息失败：{}", url, e);
+                LOGGER.warn("Load jar info failed：{}", jarFilePath, e);
             }
         }
 
