@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -712,7 +713,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void loadBranch() {
-        this.branchSessions = SessionHolder.getRootSessionManager().findGlobalSession(xid, true).getBranchSessions();
+        if (lazyLoadBranch && CollectionUtils.isEmpty(branchSessions)) {
+            synchronized (branchSessions) {
+                if (lazyLoadBranch && CollectionUtils.isEmpty(branchSessions)) {
+                    branchSessions
+                        .addAll(SessionHolder.getRootSessionManager().findGlobalSession(xid, true).getBranchSessions());
+                }
+            }
+        }
     }
 
 }
