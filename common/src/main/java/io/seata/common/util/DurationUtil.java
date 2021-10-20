@@ -32,7 +32,7 @@ public class DurationUtil {
     public static final String SECOND_UNIT = "s";
     public static final String MILLIS_SECOND_UNIT = "ms";
 
-    private static final Pattern SIMPLE = Pattern.compile("^([\\+\\-]?\\d+)([a-zA-Z]{0,2})$");
+    private static final Pattern SIMPLE = Pattern.compile("^([\\+\\-]?\\d+)([a-zA-Z]{1,2})$");
     private static final Pattern ISO8601 = Pattern.compile("^[\\+\\-]?P.*$");
 
     public static Duration parse(String str) {
@@ -56,6 +56,8 @@ public class DurationUtil {
             } else if (str.contains(SECOND_UNIT)) {
                 long value = doParse(SECOND_UNIT, str);
                 return Duration.ofSeconds(value);
+            } else {
+                throw new UnsupportedOperationException(str + " can't parse to duration");
             }
         }
 
