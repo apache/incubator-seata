@@ -16,6 +16,8 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.saga.engine.StateMachineConfig;
+import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
@@ -35,10 +37,12 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MACHINE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -58,6 +62,8 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
         PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
         PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, TCCFenceConfig.class);
+        PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
+        PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
     }
 
     @Override
