@@ -49,13 +49,23 @@ public class RocketMQUtils {
             throw new MQClientException("send message Exception", e);
         }
 
+        LocalTransactionState localTransactionState = LocalTransactionState.UNKNOW;
         switch (sendResult.getSendStatus()) {
+            case SEND_OK: {
+                if (sendResult.getTransactionId() != null) {
+                    msg.putUserProperty("__transactionId__", sendResult.getTransactionId());
+                }
+                String transactionId = msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
+                if (null != transactionId && !"".equals(transactionId)) {
+                    msg.setTransactionId(transactionId);
+                }
+            }
+            break;
             case FLUSH_DISK_TIMEOUT:
             case FLUSH_SLAVE_TIMEOUT:
             case SLAVE_NOT_AVAILABLE:
-                throw new RuntimeException("Message send fail.");
             default:
-                break;
+                throw new RuntimeException("Message send fail.");
         }
         return sendResult;
     }

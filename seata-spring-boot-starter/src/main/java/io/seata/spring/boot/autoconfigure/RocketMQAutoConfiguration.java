@@ -27,13 +27,13 @@ import org.springframework.context.annotation.Bean;
 
 @ConditionalOnClass(DefaultMQProducer.class)
 @ConditionalOnBean(DefaultMQProducer.class)
-@ConditionalOnExpression("${seata.enabled:true} && ${seata.rocketmq-enabled:false")
+@ConditionalOnExpression("${seata.enabled:true} && ${seata.rocketmq-enabled:false}")
 public class RocketMQAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TCCRocketMQImpl tccRocketMQ(DefaultMQProducer defaultMQProducer) {
-        return new TCCRocketMQImpl(defaultMQProducer);
+    public TCCRocketMQ tccRocketMQ() {
+        return new TCCRocketMQImpl();
     }
 
     @Bean

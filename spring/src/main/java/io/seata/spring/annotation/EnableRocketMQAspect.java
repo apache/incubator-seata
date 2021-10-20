@@ -27,6 +27,6 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({RocketMQAspect.class,TCCRocketMQImpl.class})
+@Import({RocketMQAspect.class, TCCRocketMQImpl.class})
 public @interface EnableRocketMQAspect {
 }

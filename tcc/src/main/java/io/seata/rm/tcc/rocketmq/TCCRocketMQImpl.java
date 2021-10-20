@@ -32,15 +32,16 @@ import org.slf4j.LoggerFactory;
 public class TCCRocketMQImpl implements TCCRocketMQ {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCRocketMQImpl.class);
 
-    private final DefaultMQProducer defaultMQProducer;
+    private DefaultMQProducer defaultMQProducer;
 
-    public TCCRocketMQImpl(DefaultMQProducer defaultMQProducer) {
+    @Override
+    public void setDefaultMQProducer(DefaultMQProducer defaultMQProducer) {
         this.defaultMQProducer = defaultMQProducer;
     }
 
     @Override
     public SendResult prepare(BusinessActionContext context, Message message)
-        throws MQBrokerException, RemotingException, NoSuchFieldException, InterruptedException, MQClientException {
+        throws MQBrokerException, RemotingException, InterruptedException, MQClientException {
         SendResult sendResult = RocketMQUtils.halfSend(defaultMQProducer, message);
         LOGGER.info("RocketMQ message send prepare, xid = {}, bid = {}", context.getXid(), context.getBranchId());
         Map<String, Object> params = new HashMap<>(2);
@@ -52,7 +53,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
 
     @Override
     public boolean commit(BusinessActionContext context)
-        throws UnknownHostException, MQBrokerException, RemotingException, NoSuchFieldException, InterruptedException {
+        throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
         Message message = context.getActionContext("message", Message.class);
         SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
         RocketMQUtils.confirm(defaultMQProducer, message, sendResult);
@@ -62,7 +63,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
 
     @Override
     public boolean rollback(BusinessActionContext context)
-        throws UnknownHostException, MQBrokerException, RemotingException, NoSuchFieldException, InterruptedException {
+        throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
         Message message = context.getActionContext("message", Message.class);
         SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
         RocketMQUtils.cancel(defaultMQProducer, message, sendResult);
