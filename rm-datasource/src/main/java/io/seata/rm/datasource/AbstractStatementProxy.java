@@ -55,6 +55,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected CachedRowSet generatedKeysRowSet;
 
     /**
+     * error code when result set has been closed
+     */
+    private final int ERR_CODE_CLOSED = -4470;
+
+    /**
      * Instantiates a new Abstract statement proxy.
      *
      * @param connectionProxy the connection proxy
@@ -253,7 +258,19 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
         if (JdbcConstants.DB2.equalsIgnoreCase(connectionProxy.getDbType())) {
-            if (null == generatedKeysRowSet || !rs.isClosed()) {
+            boolean refreshCacheIfNeed;
+            try {
+                refreshCacheIfNeed = null == generatedKeysRowSet || !rs.isAfterLast();
+            } catch (SQLException e) {
+                if (e.getErrorCode() == ERR_CODE_CLOSED) {
+                    //ResultSet has been automatically closed
+                    refreshCacheIfNeed = false;
+                } else {
+                    throw e;
+                }
+            }
+
+            if (refreshCacheIfNeed) {
                 generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
                 generatedKeysRowSet.populate(rs);
             }
