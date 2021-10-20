@@ -46,7 +46,7 @@ public class DB2UndoLogManager extends AbstractUndoLogManager {
             + " VALUES (?, ?, ?, ?, ?, current timestamp, current timestamp)";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? FETCH FIRST ? ROWS ONLY";
+            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? FETCH FIRST (?) ROWS ONLY";
 
 
     @Override
