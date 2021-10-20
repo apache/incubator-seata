@@ -230,7 +230,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
         List<BranchTransactionDO> branchTransactionDOs, boolean withBranchSessions) {
         GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
-        globalSession.setLazyLoadBranch(withBranchSessions);
+        globalSession.setLazyLoadBranch(!withBranchSessions);
         // branch transactions
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
             for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
