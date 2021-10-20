@@ -30,6 +30,9 @@ import java.lang.annotation.Target;
  * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation, which added on the TCC interface. It can't be left out.
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
+ * @see BusinessActionContext
+ * @see BusinessActionContextUtil
+ * @see BusinessActionContextParameter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
@@ -44,7 +47,7 @@ public @interface TwoPhaseBusinessAction {
     String name();
 
     /**
-     * commit methed name
+     * commit method name
      *
      * @return the string
      */
@@ -56,4 +59,32 @@ public @interface TwoPhaseBusinessAction {
      * @return the string
      */
     String rollbackMethod() default "rollback";
+
+    /**
+     * delay branch report while sharing params to tcc phase 2 to enhance performance
+     *
+     * @return isDelayReport
+     */
+    boolean isDelayReport() default false;
+
+    /**
+     * whether use TCC fence (idempotent,non_rollback,suspend)
+     *
+     * @return the boolean
+     */
+    boolean useTCCFence() default false;
+
+    /**
+     * commit method's args
+     *
+     * @return the Class[]
+     */
+    Class<?>[] commitArgsClasses() default {BusinessActionContext.class};
+
+    /**
+     * rollback method's args
+     *
+     * @return the Class[]
+     */
+    Class<?>[] rollbackArgsClasses() default {BusinessActionContext.class};
 }

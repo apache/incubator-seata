@@ -15,31 +15,33 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
+
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doReturn;
 
 
 /**
@@ -60,14 +62,6 @@ public class MySQLInsertOrUpdateExecutorTest {
     private TableMeta tableMeta;
 
     private MySQLInsertOrUpdateExecutor insertOrUpdateExecutor;
-
-    private boolean isUpdateFlag = false;
-
-    private String selectSQL;
-
-    private ArrayList<List<Object>> paramAppenderList;
-
-    private Map<String, List<String>> beforeUniqueIndexMap = new HashMap<>();
 
     private final int pkIndex = 0;
     private HashMap<String,Integer> pkIndexMap;

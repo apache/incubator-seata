@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * declare the transaction only execute in single local RM
@@ -31,7 +32,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
  *
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
- * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // the interceptor of GlobalLock
+ * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // the interceptor of GlobalLock
  * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // the interceptor of GlobalLockLogic and AT/XA mode
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -39,11 +40,21 @@ import org.aopalliance.intercept.MethodInvocation;
 @Inherited
 public @interface GlobalLock {
     /**
-     * customized global lock retry internal(unit: ms)
+     * customized global lock retry interval(unit: ms)
      * you may use this to override global config of "client.rm.lock.retryInterval"
      * note: 0 or negative number will take no effect(which mean fall back to global config)
-     * @return lock retry internal
+     * @return lock retry interval
      */
+    int lockRetryInterval() default 0;
+
+    /**
+     * customized global lock retry interval(unit: ms)
+     * you may use this to override global config of "client.rm.lock.retryInterval"
+     * note: 0 or negative number will take no effect(which mean fall back to global config)
+     * @return lock retry interval
+     */
+    @Deprecated
+    @AliasFor("lockRetryInterval")
     int lockRetryInternal() default 0;
 
     /**

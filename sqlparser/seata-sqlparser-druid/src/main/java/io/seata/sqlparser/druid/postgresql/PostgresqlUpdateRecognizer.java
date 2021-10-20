@@ -15,6 +15,8 @@
  */
 package io.seata.sqlparser.druid.postgresql;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -29,11 +31,8 @@ import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGUpdateStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
-import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author japsercloud
@@ -72,11 +71,11 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName());
                     //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
-                } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
-                    list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
+                } else if (((SQLPropertyExpr) expr).getOwnerName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr)expr).getOwnerName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -93,7 +92,7 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -142,6 +141,30 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
             throw new NotSupportYetException("not support the syntax of update with unknow");
         }
         return sb.toString();
+    }
+
+    @Override
+    public String getLimitCondition() {
+        //postgre does not have limit condition in update statement
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //postgre does not have limit condition in update statement
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        //postgre does not have order by condition in update statement
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //postgre does not have order by condition in update statement
+        return null;
     }
 
 }

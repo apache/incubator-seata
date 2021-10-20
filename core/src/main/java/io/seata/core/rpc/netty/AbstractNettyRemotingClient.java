@@ -252,12 +252,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return clientChannelManager;
     }
 
-    private String loadBalance(String transactionServiceGroup, Object msg) {
+    protected String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
             @SuppressWarnings("unchecked")
-            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
+            address = this.doSelect(inetSocketAddressList, msg);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -267,7 +267,18 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return NetUtil.toStringAddress(address);
     }
 
-    private String getXid(Object msg) {
+    protected InetSocketAddress doSelect(List<InetSocketAddress> list, Object msg) throws Exception {
+        if (CollectionUtils.isNotEmpty(list)) {
+            if (list.size() > 1) {
+                return LoadBalanceFactory.getInstance().select(list, getXid(msg));
+            } else {
+                return list.get(0);
+            }
+        }
+        return null;
+    }
+
+    protected String getXid(Object msg) {
         String xid = "";
         if (msg instanceof AbstractGlobalEndRequest) {
             xid = ((AbstractGlobalEndRequest) msg).getXid();

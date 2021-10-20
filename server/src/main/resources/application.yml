@@ -1,0 +1,30 @@
+server:
+  port: 7091
+
+spring:
+  application:
+    name: seata-server
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ${user.home}/logs
+  extend:
+    logstash-appender:
+      destination: 127.0.0.1:4560
+    kafka-appender:
+      bootstrap-servers: 127.0.0.1:9092
+      topic: logback_to_logstash
+
+seata:
+  config:
+    # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
+    type: file
+  registry:
+    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
+    type: file
+  store:
+    # support: file 、 db 、 redis
+    mode: file
+  server:
+    service-port: 8091
