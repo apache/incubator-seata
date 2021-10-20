@@ -16,7 +16,7 @@ CREATE TABLE global_table
     PRIMARY KEY (xid)
 );
 
-CREATE INDEX idx_gmt_modified_status ON global_table (gmt_modified, status);
+CREATE INDEX idx_status_gmt_modified ON global_table (status, gmt_modified);
 CREATE INDEX idx_transaction_id ON global_table (transaction_id);
 
 -- the table to store BranchSession data

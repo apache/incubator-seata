@@ -293,9 +293,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle retry rollbacking.
      */
     protected void handleRetryRollbacking() {
-        SessionCondition sessionCondition = new SessionCondition(
-            new GlobalStatus[] {GlobalStatus.RollbackFailed, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking});
-        Collection< GlobalSession> rollbackingSessions =
+        SessionCondition sessionCondition =
+            new SessionCondition(new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
+                GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking});
+        Collection<GlobalSession> rollbackingSessions =
             SessionHolder.getRetryRollbackingSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
             return;

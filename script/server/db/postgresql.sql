@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.global_table
     CONSTRAINT pk_global_table PRIMARY KEY (xid)
 );
 
-CREATE INDEX idx_gmt_modified_status ON public.global_table (gmt_modified, status);
+CREATE INDEX idx_status_gmt_modified ON public.global_table (status, gmt_modified);
 CREATE INDEX idx_transaction_id ON public.global_table (transaction_id);
 
 -- the table to store BranchSession data

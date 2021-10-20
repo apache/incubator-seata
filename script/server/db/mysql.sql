@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `global_table`
     `gmt_create`                DATETIME,
     `gmt_modified`              DATETIME,
     PRIMARY KEY (`xid`),
-    KEY `idx_gmt_modified_status` (`gmt_modified`, `status`),
+    KEY `idx_status_gmt_modified` (`status` , `gmt_modified`),
     KEY `idx_transaction_id` (`transaction_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
