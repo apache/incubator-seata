@@ -66,7 +66,7 @@ public class DB2UndoUpdateExecutor extends AbstractUndoExecutor {
             Collectors.joining(", "));
 
         List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.DB2).stream().map(
-            e -> e.getName()).collect(Collectors.toList());
+            Field::getName).collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.DB2);
 
         return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, whereSql);
