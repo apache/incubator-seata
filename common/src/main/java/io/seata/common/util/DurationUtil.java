@@ -57,7 +57,7 @@ public class DurationUtil {
                 long value = doParse(SECOND_UNIT, str);
                 return Duration.ofSeconds(value);
             } else {
-                throw new UnsupportedOperationException(str + " can't parse to duration");
+                throw new UnsupportedOperationException("\"" + str + "\" can't parse to Duration");
             }
         }
 
@@ -66,14 +66,14 @@ public class DurationUtil {
                 return Duration.parse(str);
             }
         } catch (DateTimeParseException e) {
-            throw new UnsupportedOperationException(str + " can't parse to duration", e);
+            throw new UnsupportedOperationException("\"" + str + "\" can't parse to Duration", e);
         }
 
         try {
             int millis = Integer.parseInt(str);
             return Duration.ofMillis(millis);
         } catch (Exception e) {
-            throw new UnsupportedOperationException(str + " can't parse to duration", e);
+            throw new UnsupportedOperationException("\"" + str + "\" can't parse to Duration", e);
         }
     }
 
