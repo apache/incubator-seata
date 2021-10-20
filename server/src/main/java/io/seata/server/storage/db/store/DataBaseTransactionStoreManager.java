@@ -224,7 +224,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
         List<BranchTransactionDO> branchTransactionDOs) {
-        return getGlobalSession(globalTransactionDO, branchTransactionDOs, false);
+        return getGlobalSession(globalTransactionDO, branchTransactionDOs, true);
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
