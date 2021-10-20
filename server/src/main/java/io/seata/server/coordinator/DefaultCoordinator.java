@@ -293,7 +293,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle retry rollbacking.
      */
     protected void handleRetryRollbacking() {
-        Collection<GlobalSession> rollbackingSessions = SessionHolder.getRetryRollbackingSessionManager().allSessions();
+        SessionCondition sessionCondition = new SessionCondition(
+            new GlobalStatus[] {GlobalStatus.RollbackFailed, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking});
+        Collection< GlobalSession> rollbackingSessions =
+            SessionHolder.getRetryRollbackingSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
             return;
         }
@@ -327,7 +330,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle retry committing.
      */
     protected void handleRetryCommitting() {
-        Collection<GlobalSession> committingSessions = SessionHolder.getRetryCommittingSessionManager().allSessions();
+        SessionCondition sessionCondition = new SessionCondition(
+            new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.CommitFailed});
+        Collection<GlobalSession> committingSessions =
+            SessionHolder.getRetryCommittingSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(committingSessions)) {
             return;
         }
@@ -362,18 +368,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle async committing.
      */
     protected void handleAsyncCommitting() {
-        Collection<GlobalSession> asyncCommittingSessions = SessionHolder.getAsyncCommittingSessionManager()
-                .allSessions();
+        SessionCondition sessionCondition = new SessionCondition(new GlobalStatus[] {GlobalStatus.AsyncCommitting});
+        Collection<GlobalSession> asyncCommittingSessions =
+            SessionHolder.getAsyncCommittingSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
         SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
-                // Instruction reordering in DefaultCore#asyncCommit may cause this situation
-                if (GlobalStatus.AsyncCommitting != asyncCommittingSession.getStatus()) {
-                    //The function of this 'return' is 'continue'.
-                    return;
-                }
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
