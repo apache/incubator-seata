@@ -16,6 +16,7 @@
 package io.seata.common.util;
 
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
 /**
@@ -58,8 +59,12 @@ public class DurationUtil {
             }
         }
 
-        if (ISO8601.matcher(str).matches()) {
-            return Duration.parse(str);
+        try {
+            if (ISO8601.matcher(str).matches()) {
+                return Duration.parse(str);
+            }
+        } catch (DateTimeParseException e) {
+            throw new UnsupportedOperationException(str + " can't parse to duration", e);
         }
 
         try {
