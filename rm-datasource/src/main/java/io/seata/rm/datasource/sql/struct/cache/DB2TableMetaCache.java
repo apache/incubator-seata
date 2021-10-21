@@ -113,9 +113,15 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
             schemaName = connection.getSchema();
         }
 
-        String pureTableName = schemaTable[schemaTable.length - 1];
-
         DatabaseMetaData metaData  = connection.getMetaData();
+        String pureTableName = schemaTable[schemaTable.length - 1];
+        if (metaData.storesLowerCaseIdentifiers()) {
+            pureTableName = pureTableName.toLowerCase();
+        } else if (metaData.storesUpperCaseIdentifiers()) {
+            pureTableName = pureTableName.toUpperCase();
+        }
+
+
         try (ResultSet rsColumns = metaData.getColumns(catalogName, schemaName, pureTableName, "%");
              ResultSet rsIndex = metaData.getIndexInfo(catalogName, schemaName, pureTableName, false, true);
              ResultSet rsPrimary = metaData.getPrimaryKeys(catalogName, schemaName, pureTableName)) {
