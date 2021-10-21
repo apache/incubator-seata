@@ -166,11 +166,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             Date now = new Date();
             branchTransactionDO.setGmtCreate(now);
             branchTransactionDO.setGmtModified(now);
-            Pipeline pipelined = jedis.pipelined();
             pipelined.hmset(branchKey, BeanUtils.objectToMap(branchTransactionDO));
             pipelined.rpush(branchListKey, branchKey);
             pipelined.sync();
@@ -193,10 +192,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 return true;
             }
             String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
-            Pipeline pipelined = jedis.pipelined();
-            pipelined.lrem(branchListKey, 0, branchKey);
-            pipelined.del(branchKey);
-            pipelined.sync();
+            try (Pipeline pipelined = jedis.pipelined()) {
+                pipelined.lrem(branchListKey, 0, branchKey);
+                pipelined.del(branchKey);
+                pipelined.sync();
+            }
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -235,11 +235,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             Date now = new Date();
             globalTransactionDO.setGmtCreate(now);
             globalTransactionDO.setGmtModified(now);
-            Pipeline pipelined = jedis.pipelined();
             pipelined.hmset(globalKey, BeanUtils.objectToMap(globalTransactionDO));
             pipelined.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), globalTransactionDO.getXid());
             pipelined.sync();
@@ -267,10 +266,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     globalTransactionDO.getXid());
                 return true;
             }
-            Pipeline pipelined = jedis.pipelined();
-            pipelined.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, globalTransactionDO.getXid());
-            pipelined.del(globalKey);
-            pipelined.sync();
+            try (Pipeline pipelined = jedis.pipelined()) {
+                pipelined.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, globalTransactionDO.getXid());
+                pipelined.del(globalKey);
+                pipelined.sync();
+            }
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -403,6 +403,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, -1));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
+            pipelined.close();
             List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
