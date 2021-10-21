@@ -171,7 +171,8 @@ public class DefaultCore implements Core {
                 globalSession.asyncCommit();
                 return GlobalStatus.Committed;
             } else {
-                return globalSession.getStatus();
+                return globalSession.getStatus() == GlobalStatus.Committing ? GlobalStatus.Committed
+                    : globalSession.getStatus();
             }
         } else {
             return globalSession.getStatus() == GlobalStatus.AsyncCommitting ? GlobalStatus.Committed : globalSession.getStatus();
@@ -253,19 +254,18 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        if (success && globalSession.getBranchSessions().isEmpty()) {
-            globalSession.setStatus(GlobalStatus.Committed);
-            // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is executed to improve concurrency performance, and the global transaction ends..
-            if (retrying) {
-                SessionHelper.endCommitted(globalSession);
+        // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
+        // executed to improve concurrency performance, and the global transaction ends..
+        if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
+            SessionHelper.endCommitted(globalSession);
 
-                // committed event
-                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                        globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
-                        globalSession.getBeginTime(), System.currentTimeMillis(), globalSession.getStatus()));
+            // committed event
+            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                globalSession.getTransactionName(), globalSession.getApplicationId(),
+                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                globalSession.getStatus()));
 
-                LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
-            }
+            LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
         return success;
     }
