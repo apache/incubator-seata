@@ -15,6 +15,14 @@
  */
 package io.seata.rm.tcc.config;
 
+import java.time.Duration;
+import java.util.Date;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.sql.DataSource;
+
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.thread.NamedThreadFactory;
@@ -28,13 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import javax.sql.DataSource;
-import java.time.Duration;
-import java.util.Date;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * TCC Fence Config
@@ -124,7 +125,7 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
                     LOGGER.error("Delete tcc fence log failed, timeBefore: {}", timeBefore, e);
                 }
             }, 0, periodSeconds, TimeUnit.SECONDS);
-            LOGGER.info("TCC fence log clean task start success, cleanPeriod:{}", cleanPeriod.toString());
+            LOGGER.info("TCC fence log clean task start success, cleanPeriod:{}", cleanPeriod);
         } catch (NumberFormatException e) {
             LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
         }
