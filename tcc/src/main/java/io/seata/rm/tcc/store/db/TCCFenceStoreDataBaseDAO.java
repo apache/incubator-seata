@@ -15,11 +15,11 @@
  */
 package io.seata.rm.tcc.store.db;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
-import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
 import io.seata.rm.tcc.store.TCCFenceStore;
@@ -43,7 +43,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     /**
      * TCC fence log table name
      */
-    private String logTableName = TCCFenceConstant.DEFAULT_LOG_TABLE_NAME;
+    private String logTableName = DefaultValues.DEFAULT_TCC_FENCE_LOG_TABLE_NAME;
 
     private static volatile TCCFenceStoreDataBaseDAO instance = null;
 

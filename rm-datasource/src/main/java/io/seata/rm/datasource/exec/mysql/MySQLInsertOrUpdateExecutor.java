@@ -324,6 +324,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @param recognizer
      * @return map, key is column, value is paramperter
      */
+    @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
     public Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
         List<String> duplicateKeyUpdateCloms = recognizer.getDuplicateKeyUpdate();
         if (CollectionUtils.isNotEmpty(duplicateKeyUpdateCloms)) {
@@ -349,11 +350,11 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 String m = insertColumns.get(i);
                 String params = insertParamsArray[i];
                 ArrayList<Object> imageListTemp = imageParamperterMap.computeIfAbsent(m, k -> new ArrayList<>());
-                if ("?".equals(params.toString().trim())) {
+                if ("?".equals(params.trim())) {
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
                     paramsindex++;
-                } else if (params != null && params instanceof String) {
+                } else if (params instanceof String) {
                     // params is characterstring constant
                     if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
                         params = params.trim();
