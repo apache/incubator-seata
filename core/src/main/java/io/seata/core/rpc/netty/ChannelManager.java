@@ -193,7 +193,8 @@ public class ChannelManager {
 
     private static BranchType getBranchType(String typeName) {
         if (StringUtils.isNullOrEmpty(typeName)) {
-            return null;
+            LOGGER.warn("BranchType is empty, consider as AT");
+            return BranchType.AT;
         }
         try {
             return BranchType.get(typeName);
