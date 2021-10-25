@@ -44,11 +44,6 @@ public class DB2UndoUpdateExecutor extends AbstractUndoExecutor {
         super(sqlUndoLog);
     }
 
-    /**
-     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk1 = ? and pk2 = ?
-     */
-    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s ";
-
     @Override
     protected String buildUndoSQL() {
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
