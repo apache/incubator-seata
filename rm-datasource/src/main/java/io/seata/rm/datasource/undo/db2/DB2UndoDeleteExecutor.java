@@ -63,10 +63,10 @@ public class DB2UndoDeleteExecutor extends AbstractUndoExecutor {
         // delete sql undo log before image all field come from table meta, need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
         String insertColumns = fields.stream()
-                .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.DB2))
-                .collect(Collectors.joining(", "));
+            .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.DB2))
+            .collect(Collectors.joining(", "));
         String insertValues = fields.stream().map(field -> "?")
-                .collect(Collectors.joining(", "));
+            .collect(Collectors.joining(", "));
 
         return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }
