@@ -19,9 +19,7 @@ package io.seata.rm.datasource.sql.struct.cache;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -113,7 +111,7 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
             schemaName = connection.getSchema();
         }
 
-        DatabaseMetaData metaData  = connection.getMetaData();
+        DatabaseMetaData metaData = connection.getMetaData();
         String pureTableName = schemaTable[schemaTable.length - 1];
         if (metaData.storesLowerCaseIdentifiers()) {
             pureTableName = pureTableName.toLowerCase();

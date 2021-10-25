@@ -166,7 +166,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             return getPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
             return getDefaultResourceId() + "/" + userName;
-        } else if (JdbcConstants.DB2.equalsIgnoreCase(dbType)){
+        } else if (JdbcConstants.DB2.equalsIgnoreCase(dbType)) {
             return getDB2ResourceId();
         } else {
             return getDefaultResourceId();

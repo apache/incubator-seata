@@ -55,11 +55,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected CachedRowSet generatedKeysRowSet;
 
     /**
-     * error code when result set has been closed
-     */
-    private final int ERR_CODE_CLOSED = -4470;
-
-    /**
      * Instantiates a new Abstract statement proxy.
      *
      * @param connectionProxy the connection proxy
@@ -262,7 +257,10 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
             try {
                 refreshCacheIfNeed = null == generatedKeysRowSet || !rs.isAfterLast();
             } catch (SQLException e) {
-                if (e.getErrorCode() == ERR_CODE_CLOSED) {
+                /**
+                 * error code when result set has been closed
+                 */
+                if (e.getErrorCode() == -4470) {
                     //ResultSet has been automatically closed
                     refreshCacheIfNeed = false;
                 } else {
