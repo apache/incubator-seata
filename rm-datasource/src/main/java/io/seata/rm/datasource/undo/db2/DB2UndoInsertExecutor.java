@@ -46,11 +46,6 @@ public class DB2UndoInsertExecutor extends AbstractUndoExecutor {
     }
 
     /**
-     * DELETE FROM a WHERE pk = ?
-     */
-    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s ";
-
-    /**
      * Undo Inset.
      *
      * @return sql
@@ -84,7 +79,7 @@ public class DB2UndoInsertExecutor extends AbstractUndoExecutor {
         List<String> pkNameList = getOrderedPkList(afterImage, rows.get(0), JdbcConstants.DB2).stream().map(
             Field::getName).collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.DB2);
-        return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(), whereSql);
+        return "DELETE FROM " + sqlUndoLog.getTableName() + " WHERE " + whereSql;
     }
 }
 

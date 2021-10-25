@@ -44,11 +44,6 @@ public class DB2UndoDeleteExecutor extends AbstractUndoExecutor {
         super(sqlUndoLog);
     }
 
-    /**
-     * INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
-     */
-    private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
-
     @Override
     protected String buildUndoSQL() {
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
@@ -68,7 +63,7 @@ public class DB2UndoDeleteExecutor extends AbstractUndoExecutor {
         String insertValues = fields.stream().map(field -> "?")
             .collect(Collectors.joining(", "));
 
-        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
+        return "INSERT INTO " + sqlUndoLog.getTableName() + " (" + insertColumns + ") VALUES (" + insertValues + ")";
     }
 
     @Override

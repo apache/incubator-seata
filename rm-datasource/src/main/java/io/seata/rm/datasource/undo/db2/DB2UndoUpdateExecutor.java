@@ -69,7 +69,7 @@ public class DB2UndoUpdateExecutor extends AbstractUndoExecutor {
             Field::getName).collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.DB2);
 
-        return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, whereSql);
+        return "UPDATE " + sqlUndoLog.getTableName() + " SET " + updateColumns + " WHERE " + whereSql;
     }
 
     @Override
