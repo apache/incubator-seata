@@ -118,9 +118,8 @@ public abstract class AbstractLockManager implements LockManager {
      * @return the list
      */
     protected List<RowLock> collectRowLocks(BranchSession branchSession) {
-        List<RowLock> locks = new ArrayList<>();
         if (branchSession == null || StringUtils.isBlank(branchSession.getLockKey())) {
-            return locks;
+            return new ArrayList<>();
         }
 
         String lockKey = branchSession.getLockKey();
