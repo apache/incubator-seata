@@ -491,37 +491,28 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    /**
-     * Read the branch session list by xid
-     * @param jedis
-     * @param xid the xid
-     * @return the branch transactionDo list
-     */
-    private List<BranchTransactionDO> readBranchSessionByXid(Jedis jedis,String xid) {
-        try (Pipeline pipeline = jedis.pipelined()) {
-            return readBranchSessionByXid(pipeline, xid);
-        }
-    }
 
     /**
      * Read the branch session list by xid
-     * @param pipeline
+     * @param jedis the jedis
      * @param xid the xid
      * @return the branch transactionDo list
      */
-    private List<BranchTransactionDO> readBranchSessionByXid(Pipeline pipeline,String xid) {
+    private List<BranchTransactionDO> readBranchSessionByXid(Jedis jedis, String xid) {
         List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
         String branchListKey = buildBranchListKeyByXid(xid);
-        List<String> branchKeys = lRange(branchListKey);
+        List<String> branchKeys = lRange(jedis, branchListKey);
         if (CollectionUtils.isNotEmpty(branchKeys)) {
-            branchKeys.stream().forEach(branchKey -> pipeline.hgetAll(branchKey));
-            List<Object> branchInfos = pipeline.syncAndReturnAll();
-            for (Object branchInfo : branchInfos) {
-                if (branchInfo != null) {
-                    Map<String, String> branchInfoMap = (Map<String, String>) branchInfo;
-                    Optional<BranchTransactionDO> branchTransactionDO =
-                            Optional.ofNullable((BranchTransactionDO) BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
-                    branchTransactionDO.ifPresent(branchTransactionDOs::add);
+            try (Pipeline pipeline = jedis.pipelined()) {
+                branchKeys.stream().forEach(branchKey -> pipeline.hgetAll(branchKey));
+                List<Object> branchInfos = pipeline.syncAndReturnAll();
+                for (Object branchInfo : branchInfos) {
+                    if (branchInfo != null) {
+                        Map<String, String> branchInfoMap = (Map<String, String>)branchInfo;
+                        Optional<BranchTransactionDO> branchTransactionDO = Optional.ofNullable(
+                            (BranchTransactionDO)BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
+                        branchTransactionDO.ifPresent(branchTransactionDOs::add);
+                    }
                 }
             }
         }
@@ -531,22 +522,20 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return branchTransactionDOs;
     }
 
-    private List<String> lRange(String key) {
+    private List<String> lRange(Jedis jedis, String key) {
         List<String> keys = new ArrayList<>();
         List<String> values;
         int limit = 20;
         int start = 0;
         int stop = limit;
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            for (;;) {
-                values = jedis.lrange(key, start, stop);
-                keys.addAll(values);
-                if (CollectionUtils.isEmpty(values) || values.size() < limit) {
-                    break;
-                }
-                start = keys.size();
-                stop = start + limit;
+        for (;;) {
+            values = jedis.lrange(key, start, stop);
+            keys.addAll(values);
+            if (CollectionUtils.isEmpty(values) || values.size() < limit) {
+                break;
             }
+            start = keys.size();
+            stop = start + limit;
         }
         return keys;
     }
