@@ -64,6 +64,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Global transaction scanner.

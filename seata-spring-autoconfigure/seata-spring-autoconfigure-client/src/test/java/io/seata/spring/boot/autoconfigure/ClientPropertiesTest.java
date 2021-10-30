@@ -35,6 +35,7 @@ import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -86,7 +87,7 @@ public class ClientPropertiesTest {
         ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
         Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
         Map<String, String> grouplist = serviceProperties.getGrouplist();
-        assertEquals("default", vgroupMapping.get("my_test_tx_group"));
+        assertEquals("default", vgroupMapping.get(DEFAULT_TX_GROUP));
         assertEquals("127.0.0.1:8091", grouplist.get("default"));
         assertFalse(serviceProperties.isEnableDegrade());
         assertFalse(serviceProperties.isDisableGlobalTransaction());
