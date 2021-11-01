@@ -35,7 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author qingjiusanliangsan, GoodBoyCoder
+ * @author qingjiusanliangsan
+ * @author GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.DB2)
 public class DB2TableMetaCache extends AbstractTableMetaCache {
