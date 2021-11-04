@@ -25,7 +25,6 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -80,9 +79,10 @@ public class Server {
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
-        // register ShutdownHook
-        ShutdownHook.getInstance().addDisposable(coordinator);
-        ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
+
+        // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
+        ServerRunner.addDisposable(coordinator);
+        ServerRunner.addDisposable(nettyRemotingServer);
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {

@@ -701,4 +701,24 @@ public interface ConfigurationKeys {
      * The constant DATA_SOURCE_PROXY_MODE.
      */
     String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
+
+    /**
+     * The constant TCC_PREFIX
+     */
+    String TCC_PREFIX = "tcc.";
+
+    /**
+     * The constant TCC_FENCE_PREFIX
+     */
+    String TCC_FENCE_PREFIX = TCC_PREFIX + "fence.";
+
+    /**
+     * The constant TCC_FENCE_CLEAN_PERIOD
+     */
+    String TCC_FENCE_CLEAN_PERIOD = TCC_FENCE_PREFIX + "cleanPeriod";
+
+    /**
+     * The constant TCC_FENCE_LOG_TABLE_NAME
+     */
+    String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 }
