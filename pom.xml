@@ -27,7 +27,6 @@
         <module>bom</module>
         <module>common</module>
         <module>config</module>
-        <module>console</module>
         <module>core</module>
         <module>dependencies</module>
         <module>discovery</module>
@@ -487,7 +486,6 @@
                     <execution>
                         <id>flatten</id>
                         <phase>process-resources</phase>
-
                         <goals>
                             <goal>flatten</goal>
                         </goals>
