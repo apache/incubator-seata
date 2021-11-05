@@ -84,8 +84,8 @@ public interface LockStore {
      *
      * @param xid the xid
      * @param lockStatus the lock status
-     * @return the lock owners
+     *
      */
-    boolean updateLockStatus(String xid, LockStatus lockStatus);
+    void updateLockStatus(String xid, LockStatus lockStatus);
 
 }

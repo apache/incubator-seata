@@ -131,8 +131,8 @@ public class DataBaseLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
-        return lockStore.updateLockStatus(xid, lockStatus);
+    public void updateLockStatus(String xid, LockStatus lockStatus) {
+        lockStore.updateLockStatus(xid, lockStatus);
     }
 
     /**

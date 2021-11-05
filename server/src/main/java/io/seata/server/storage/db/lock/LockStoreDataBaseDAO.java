@@ -308,7 +308,7 @@ public class LockStoreDataBaseDAO implements LockStore {
     }
 
     @Override
-    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
+    public void updateLockStatus(String xid, LockStatus lockStatus) {
         String updateStatusLockByGlobalSql =
             LockStoreSqlFactory.getLogStoreSql(dbType).getBatchUpdateStatusLockByGlobalSql(lockTable);
         try (Connection conn = lockStoreDataSource.getConnection();
@@ -316,7 +316,7 @@ public class LockStoreDataBaseDAO implements LockStore {
             conn.setAutoCommit(true);
             ps.setInt(1, lockStatus.getCode());
             ps.setString(2, xid);
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }

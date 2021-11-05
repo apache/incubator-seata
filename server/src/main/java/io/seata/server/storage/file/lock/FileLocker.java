@@ -186,8 +186,7 @@ public class FileLocker extends AbstractLocker {
 
 
     @Override
-    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
-        return true;
+    public void updateLockStatus(String xid, LockStatus lockStatus) {
     }
 
     @Override

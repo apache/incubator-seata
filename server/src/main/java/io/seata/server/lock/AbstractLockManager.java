@@ -195,8 +195,8 @@ public abstract class AbstractLockManager implements LockManager {
     }
     
     @Override
-    public boolean updateLockStatus(String xid, LockStatus lockStatus) throws TransactionException {
-        return this.getLocker().updateLockStatus(xid, lockStatus);
+    public void updateLockStatus(String xid, LockStatus lockStatus) {
+        this.getLocker().updateLockStatus(xid, lockStatus);
     }
 
 }

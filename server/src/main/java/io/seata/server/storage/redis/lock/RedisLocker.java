@@ -358,7 +358,7 @@ public class RedisLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean updateLockStatus(String xid, LockStatus lockStatus) {
+    public void updateLockStatus(String xid, LockStatus lockStatus) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String xidLockKey = buildXidLockKey(xid);
             Map<String, String> branchAndLockKeys = jedis.hgetAll(xidLockKey);
@@ -369,7 +369,6 @@ public class RedisLocker extends AbstractLocker {
                     pipeline.sync();
                 }
             }
-            return true;
         }
     }
 

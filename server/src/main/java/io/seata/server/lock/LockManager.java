@@ -87,8 +87,8 @@ public interface LockManager {
      * @param xid the xid
      * @param lockStatus the lock status
      * @throws TransactionException the transaction exception
-     * @return the boolean
+     *
      */
-    boolean updateLockStatus(String xid, LockStatus lockStatus) throws TransactionException;
+    void updateLockStatus(String xid, LockStatus lockStatus) throws TransactionException;
 
 }
