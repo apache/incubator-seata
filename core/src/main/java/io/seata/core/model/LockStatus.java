@@ -37,7 +37,7 @@ public enum LockStatus {
      */
     Rollbacking(1);
 
-    private int code;
+    private final int code;
 
     LockStatus(int code) {
         this.code = code;

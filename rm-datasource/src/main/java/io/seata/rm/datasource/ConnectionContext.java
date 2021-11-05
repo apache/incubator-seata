@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
@@ -366,10 +367,7 @@ public class ConnectionContext {
 
     @Override
     public String toString() {
-        return "ConnectionContext{" + "xid='" + xid + '\'' + ", branchId=" + branchId + ", isGlobalLockRequire="
-            + isGlobalLockRequire + ", currentSavepoint=" + currentSavepoint + ", autoCommitChanged="
-            + autoCommitChanged + ", applicationData=" + applicationData + ", lockKeysBuffer=" + lockKeysBuffer
-            + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + ", savepoints=" + savepoints + '}';
+        return StringUtils.toString(this);
     }
 
 }
