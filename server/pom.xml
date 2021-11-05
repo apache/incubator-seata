@@ -108,6 +108,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-console</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- for database -->
         <dependency>
             <groupId>com.alibaba</groupId>
