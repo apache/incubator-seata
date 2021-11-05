@@ -60,7 +60,6 @@
         <developerConnection>scm:git@github.com:seata/seata.git</developerConnection>
     </scm>
 
-
     <dependencyManagement>
         <dependencies>
             <dependency>
