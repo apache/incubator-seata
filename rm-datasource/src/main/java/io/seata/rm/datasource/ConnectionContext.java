@@ -26,8 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 
@@ -39,7 +42,7 @@ import static io.seata.common.Constants.AUTO_COMMIT;
  * @author sharajava
  */
 public class ConnectionContext {
-    private static final Savepoint DEFAULT_SAVEPOINT = new Savepoint() {
+    private static final Savepoint    DEFAULT_SAVEPOINT = new Savepoint() {
         @Override
         public int getSavepointId() throws SQLException {
             return 0;
@@ -50,6 +53,8 @@ public class ConnectionContext {
             return "DEFAULT_SEATA_SAVEPOINT";
         }
     };
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private String xid;
     private Long branchId;
@@ -258,7 +263,6 @@ public class ConnectionContext {
      * @param autoCommitChanged the boolean
      */
     public void setAutoCommitChanged(boolean autoCommitChanged) {
-        this.applicationData.put(AUTO_COMMIT, autoCommitChanged);
         this.autoCommitChanged = autoCommitChanged;
     }
 
@@ -267,8 +271,18 @@ public class ConnectionContext {
      *
      * @return the application data
      */
-    public Map<String, Object> getApplicationData() {
-        return applicationData;
+    public String getApplicationData() throws TransactionException {
+        boolean autoCommit = this.isAutoCommitChanged();
+        // when transaction are enabled, it must be false
+        if (!autoCommit) {
+            this.applicationData.put(AUTO_COMMIT, autoCommit);
+            try {
+                return MAPPER.writeValueAsString(this.applicationData);
+            } catch (JsonProcessingException e) {
+                throw new TransactionException(e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     /**

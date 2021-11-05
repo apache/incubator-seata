@@ -55,8 +55,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private final LockRetryPolicy lockRetryPolicy = new LockRetryPolicy(this);
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
 
@@ -275,18 +273,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
-        String applicationData = null;
-        if (!context.isAutoCommitChanged()) {
-            Map<String, Object> map = context.getApplicationData();
-            map.computeIfAbsent(AUTO_COMMIT, k -> context.isAutoCommitChanged());
-            try {
-                applicationData = MAPPER.writeValueAsString(map);
-            } catch (JsonProcessingException e) {
-                throw new TransactionException(e.getMessage(), e);
-            }
-        }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), applicationData, context.buildLockKeys());
+            null, context.getXid(), context.getApplicationData(), context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
