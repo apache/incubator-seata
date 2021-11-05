@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
 
@@ -177,6 +178,8 @@ public class NetUtil {
                                                     return address;
                                                 }
                                             }
+                                        } else {
+                                            return address;
                                         }
                                     }
                                 } catch (Throwable e) {
@@ -192,7 +195,11 @@ public class NetUtil {
         } catch (Throwable e) {
             LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
         }
-        LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
+        if (localAddress == null) {
+            LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
+        } else {
+            LOGGER.error("Could not match ip by preferredNetworks:{}, will use default first ip {} instead.", Arrays.toString(preferredNetworks), localAddress.getHostAddress());
+        }
         return localAddress;
     }
 
