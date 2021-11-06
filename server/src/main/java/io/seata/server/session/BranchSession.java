@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import io.seata.compressor.gzip.GzipCompressor;
 import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
@@ -45,6 +46,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_BRANCH_SESSION_SIZE));
+
+    private static final String SESSION_ENCODE_FLAG = "SESSION_ENCODE";
 
     private String xid;
 
@@ -310,16 +313,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
                 throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : "
                     + MAX_BRANCH_SESSION_SIZE);
             }
-            // try compress lockkey
-            try {
-                size -= lockKeyBytes.length;
-                lockKeyBytes = CompressUtil.compress(lockKeyBytes);
-            } catch (IOException e) {
-                LOGGER.error("compress lockKey error", e);
-            } finally {
-                size += lockKeyBytes.length;
-            }
-
+            size -= lockKeyBytes.length;
+            lockKeyBytes = new GzipCompressor().compress(lockKeyBytes);
+            size += lockKeyBytes.length;
             if (size > MAX_BRANCH_SESSION_SIZE) {
                 throw new RuntimeException(
                     "compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : "
