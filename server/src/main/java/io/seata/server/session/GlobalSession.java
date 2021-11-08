@@ -718,6 +718,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 if (lazyLoadBranch && CollectionUtils.isEmpty(branchSessions)) {
                     branchSessions
                         .addAll(SessionHolder.getRootSessionManager().findGlobalSession(xid, true).getBranchSessions());
+                    lazyLoadBranch = false;
                 }
             }
         }
