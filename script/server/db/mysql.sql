@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `lock_table`
     `gmt_create`     DATETIME,
     `gmt_modified`   DATETIME,
     PRIMARY KEY (`row_key`),
+    KEY `idx_status` (`status`),
     KEY `idx_branch_id` (`branch_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;

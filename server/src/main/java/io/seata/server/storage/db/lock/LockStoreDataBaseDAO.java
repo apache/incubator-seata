@@ -144,7 +144,7 @@ public class LockStoreDataBaseDAO implements LockStore {
                         LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID, dbBranchId);
                     }
                     if (!autoCommit) {
-                        Integer status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
+                        int status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
                         if (status == LockStatus.Rollbacking.getCode()) {
                             failFast = true;
                         }

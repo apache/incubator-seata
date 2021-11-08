@@ -56,6 +56,7 @@ CREATE TABLE lock_table
 
 comment on column lock_table.status is '0:locked ,1:rollbacking';
 CREATE INDEX idx_branch_id ON lock_table (branch_id);
+CREATE INDEX idx_status ON lock_table (status);
 
 CREATE TABLE distributed_lock (
     lock_key     VARCHAR2(20)  NOT NULL,
