@@ -17,6 +17,7 @@ package io.seata.spring.boot.autoconfigure.properties.server;
 
 import java.time.Duration;
 
+import io.seata.common.util.DurationUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +29,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 @Component
 @ConfigurationProperties(prefix = SERVER_PREFIX)
 public class ServerProperties {
-    private Duration maxCommitRetryTimeout = Duration.ofMillis(-1);
-    private Duration maxRollbackRetryTimeout = Duration.ofMillis(-1);
+    private Duration maxCommitRetryTimeout = DurationUtil.DEFAULT_DURATION;
+    private Duration maxRollbackRetryTimeout = DurationUtil.DEFAULT_DURATION;
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
     private Boolean enableCheckAuth = true;
     private Integer retryDeadThreshold = 130000;

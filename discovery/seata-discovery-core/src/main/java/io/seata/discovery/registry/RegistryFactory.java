@@ -29,22 +29,13 @@ import io.seata.config.ConfigurationKeys;
  */
 public class RegistryFactory {
 
-    private static volatile RegistryService instance = null;
-
     /**
      * Gets instance.
      *
      * @return the instance
      */
     public static RegistryService getInstance() {
-        if (instance == null) {
-            synchronized (RegistryFactory.class) {
-                if (instance == null) {
-                    instance = buildRegistryService();
-                }
-            }
-        }
-        return instance;
+        return RegistryFactoryHolder.INSTANCE;
     }
 
     private static RegistryService buildRegistryService() {
@@ -59,5 +50,9 @@ public class RegistryFactory {
         }
         return EnhancedServiceLoader.load(RegistryProvider.class, Objects.requireNonNull(registryType).name()).provide();
 
+    }
+
+    private static class RegistryFactoryHolder {
+        private static final RegistryService INSTANCE = buildRegistryService();
     }
 }
