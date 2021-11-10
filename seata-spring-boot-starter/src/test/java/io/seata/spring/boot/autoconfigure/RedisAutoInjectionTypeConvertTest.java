@@ -39,11 +39,11 @@ import static org.mockito.Mockito.mock;
 @Import(SpringApplicationContextProvider.class)
 @org.springframework.context.annotation.Configuration
 public class RedisAutoInjectionTypeConvertTest {
-    private static AnnotationConfigApplicationContext applicationContex;
+    private static AnnotationConfigApplicationContext applicationContext;
 
     @BeforeAll
     public static void initContext() {
-        applicationContex = new AnnotationConfigApplicationContext(RedisAutoInjectionTypeConvertTest.class);
+        applicationContext = new AnnotationConfigApplicationContext(RedisAutoInjectionTypeConvertTest.class);
     }
 
     @Bean
@@ -65,6 +65,6 @@ public class RedisAutoInjectionTypeConvertTest {
 
     @AfterAll
     public static void closeContext() {
-        applicationContex.close();
+        applicationContext.close();
     }
 }

@@ -15,16 +15,25 @@
  */
 package io.seata.server.session;
 
+import java.io.File;
+import java.io.IOException;
+
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.StoreMode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
-import java.io.IOException;
-
+import static io.seata.common.Constants.ASYNC_COMMITTING;
+import static io.seata.common.Constants.RETRY_COMMITTING;
+import static io.seata.common.Constants.RETRY_ROLLBACKING;
+import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
+import static io.seata.common.Constants.UNDOLOG_DELETE;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 
 /**
@@ -32,6 +41,8 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
  *
  * @author Wu
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SpringBootTest
 public class SessionHolderTest {
     private String pathname;
 
@@ -40,9 +51,11 @@ public class SessionHolderTest {
         String sessionStorePath = SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
         //delete file previously created
         pathname = sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME;
+       // SessionHolder.init(StoreMode.REDIS.getName());
     }
 
     @Test
+    @Order(1)
     public void testInit() throws IOException {
         File rootSessionFile = new File(pathname);
         if (rootSessionFile.exists()) {
@@ -65,5 +78,65 @@ public class SessionHolderTest {
         if (actual.exists()) {
             actual.delete();
         }
+    }
+
+//    @Test
+    @Order(2)
+    public void test_retryRollbackingLock() {
+        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(RETRY_ROLLBACKING));
+    }
+
+//    @Test
+    @Order(3)
+    public void test_unRetryRollbackingLock() {
+        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING));
+    }
+
+//    @Test
+    @Order(4)
+    public void test_retryCommittingLock() {
+        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(RETRY_COMMITTING));
+    }
+
+//    @Test
+    @Order(5)
+    public void test_unRetryCommittingLock() {
+        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(RETRY_COMMITTING));
+    }
+
+//    @Test
+    @Order(6)
+    public void test_asyncCommittingLock() {
+        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(ASYNC_COMMITTING));
+    }
+
+//    @Test
+    @Order(7)
+    public void test_unAsyncCommittingLock() {
+        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(ASYNC_COMMITTING));
+    }
+
+//    @Test
+    @Order(8)
+    public void test_txTimeoutCheckLock() {
+        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK));
+    }
+
+//    @Test
+    @Order(9)
+    public void test_unTxTimeoutCheckLock() {
+        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK));
+    }
+
+//    @Test
+    @Order(10)
+    public void test_undoLogDeleteLock() {
+        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(UNDOLOG_DELETE));
+    }
+
+//    @Test
+    @Order(11)
+    public void test_unUndoLogDeleteLock() {
+        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(UNDOLOG_DELETE));
     }
 }

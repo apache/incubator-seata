@@ -74,6 +74,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         + REGISTRY_TYPE;
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Object> CLUSTER_LOCK = new ConcurrentHashMap<>();
 
     private static final int REGISTERED_PATH_SET_SIZE = 1;
     private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
@@ -186,15 +187,23 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     // visible for test.
     List<InetSocketAddress> doLookup(String clusterName) throws Exception {
-        boolean exist = getClientInstance().exists(ROOT_PATH + clusterName);
-        if (!exist) {
-            return null;
-        }
-
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
-            List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH + clusterName);
-            refreshClusterAddressMap(clusterName, childClusterPath);
-            subscribeCluster(clusterName);
+            Object lock = CLUSTER_LOCK.putIfAbsent(clusterName, new Object());
+            if (null == lock) {
+                lock = CLUSTER_LOCK.get(clusterName);
+            }
+            synchronized (lock) {
+                if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+                    boolean exist = getClientInstance().exists(ROOT_PATH + clusterName);
+                    if (!exist) {
+                        return null;
+                    }
+
+                    List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH + clusterName);
+                    refreshClusterAddressMap(clusterName, childClusterPath);
+                    subscribeCluster(clusterName);
+                }
+            }
         }
 
         return CLUSTER_ADDRESS_MAP.get(clusterName);

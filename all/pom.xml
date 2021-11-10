@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>1.4.2</version>
+    <version>1.5.0-SNAPSHOT</version>
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
     <description>Seata is an easy-to-use, high-performance, java based, open source distributed transaction solution.
@@ -68,7 +68,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-bom</artifactId>
+                <artifactId>seata-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -207,6 +207,12 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-rm-datasource</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-compressor-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
@@ -227,6 +233,12 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-spring</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-serializer-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
@@ -329,6 +341,12 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-saga-engine-store</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-serializer-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- spring  -->
@@ -409,6 +427,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.alibaba.edas</groupId>
+            <artifactId>edas-sdk</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
         </dependency>
@@ -474,6 +497,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>listenablefuture</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -702,6 +731,7 @@
                                     <include>io.seata:seata-compressor-zip</include>
                                     <include>io.seata:seata-compressor-lz4</include>
                                     <include>io.seata:seata-compressor-deflater</include>
+                                    <include>io.seata:seata-compressor-zstd</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

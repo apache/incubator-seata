@@ -94,24 +94,73 @@ public class CollectionUtils {
     }
 
     /**
-     * To string.
+     * Collection To string.
      *
      * @param col the col
      * @return the string
      */
-    public static String toString(Collection<?> col) {
-        if (isEmpty(col)) {
-            return "";
+    public static String toString(final Collection<?> col) {
+        if (col == null) {
+            return "null";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (Object obj : col) {
-            sb.append(StringUtils.toString(obj));
-            sb.append(",");
+        if (col.isEmpty()) {
+            return "[]";
         }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append("]");
-        return sb.toString();
+
+        return CycleDependencyHandler.wrap(col, o -> {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append("[");
+            for (Object obj : col) {
+                if (sb.length() > 1) {
+                    sb.append(", ");
+                }
+                if (obj == col) {
+                    sb.append("(this ").append(obj.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(obj));
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        });
+    }
+
+    /**
+     * Map to string.
+     *
+     * @param map the map
+     * @return the string
+     */
+    public static String toString(final Map<?, ?> map) {
+        if (map == null) {
+            return "null";
+        }
+        if (map.isEmpty()) {
+            return "{}";
+        }
+
+        return CycleDependencyHandler.wrap(map, o -> {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append("{");
+            map.forEach((key, value) -> {
+                if (sb.length() > 1) {
+                    sb.append(", ");
+                }
+                if (key == map) {
+                    sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(key));
+                }
+                sb.append("->");
+                if (value == map) {
+                    sb.append("(this ").append(map.getClass().getSimpleName()).append(")");
+                } else {
+                    sb.append(StringUtils.toString(value));
+                }
+            });
+            sb.append("}");
+            return sb.toString();
+        });
     }
 
     /**
@@ -125,7 +174,11 @@ public class CollectionUtils {
         if (CollectionUtils.isNotEmpty(param)) {
             param.forEach((key, value) -> {
                 if (value != null) {
-                    covertMap.put(key, StringUtils.toString(value));
+                    if (value instanceof CharSequence || value instanceof Character) {
+                        covertMap.put(key, value.toString());
+                    } else {
+                        covertMap.put(key, StringUtils.toString(value));
+                    }
                 }
             });
         }

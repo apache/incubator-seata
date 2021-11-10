@@ -18,15 +18,14 @@ package io.seata.spring.boot.autoconfigure;
 import javax.sql.DataSource;
 
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
-import io.seata.spring.annotation.datasource.SeataDataSourceBeanPostProcessor;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
 import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR;
-import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR;
 
 /**
  * The type Seata data source auto configuration.
@@ -34,17 +33,9 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
  * @author xingfudeshi@gmail.com
  */
 @ConditionalOnBean(DataSource.class)
-@ConditionalOnExpression("${seata.enable:true} && ${seata.enableAutoDataSourceProxy:true} && ${seata.enable-auto-data-source-proxy:true}")
+@ConditionalOnExpression("${seata.enabled:true} && ${seata.enableAutoDataSourceProxy:true} && ${seata.enable-auto-data-source-proxy:true}")
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class})
 public class SeataDataSourceAutoConfiguration {
-
-    /**
-     * The bean seataDataSourceBeanPostProcessor.
-     */
-    @Bean(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)
-    @ConditionalOnMissingBean(SeataDataSourceBeanPostProcessor.class)
-    public SeataDataSourceBeanPostProcessor seataDataSourceBeanPostProcessor(SeataProperties seataProperties) {
-        return new SeataDataSourceBeanPostProcessor(seataProperties.getExcludesForAutoProxying(), seataProperties.getDataSourceProxyMode());
-    }
 
     /**
      * The bean seataAutoDataSourceProxyCreator.
