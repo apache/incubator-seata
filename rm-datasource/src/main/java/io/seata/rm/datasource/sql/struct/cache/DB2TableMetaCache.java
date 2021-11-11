@@ -18,8 +18,10 @@ package io.seata.rm.datasource.sql.struct.cache;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -120,6 +122,19 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
             pureTableName = pureTableName.toUpperCase();
         }
 
+        String querySql = "SELECT IDENTITY, GENERATED FROM SYSCAT.COLUMNS where TABSCHEMA = ? AND TABNAME = ?";
+        try (PreparedStatement statement = connection.prepareStatement(querySql)) {
+            statement.setString(1, schemaName);
+            statement.setString(2, pureTableName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                if ("Y".equals(resultSet.getString("IDENTITY")) &&
+                        "A".equals(resultSet.getString("GENERATED"))) {
+                    throw new NotSupportYetException("Identity column of type generated always as identity is not supported." +
+                            " If necessary, it is recommended to use BY DEFAULT");
+                }
+            }
+        }
 
         try (ResultSet rsColumns = metaData.getColumns(catalogName, schemaName, pureTableName, "%");
              ResultSet rsIndex = metaData.getIndexInfo(catalogName, schemaName, pureTableName, false, true);
