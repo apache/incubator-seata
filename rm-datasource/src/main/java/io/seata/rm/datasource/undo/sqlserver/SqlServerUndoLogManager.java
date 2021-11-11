@@ -47,11 +47,11 @@ public class SqlServerUndoLogManager extends AbstractUndoLogManager {
             + " VALUES (?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE " + ClientTableColumnsName.UNDO_LOG_ID +
-            " IN ( SELECT TOP(?) " + ClientTableColumnsName.UNDO_LOG_ID +
-            " FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? " +
-            "ORDER BY " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " ASC )";
+        " WHERE " + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + "+" + ClientTableColumnsName.UNDO_LOG_XID +
+        " IN ( SELECT TOP(?) " + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + "+" + ClientTableColumnsName.UNDO_LOG_XID +
+        " FROM " + UNDO_LOG_TABLE_NAME +
+        " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? " +
+        " ORDER BY " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " ASC )";
 
     @Override
     protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser undoLogParser, Connection conn) throws SQLException {
