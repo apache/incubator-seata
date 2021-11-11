@@ -130,7 +130,7 @@ public class DB2TableMetaCache extends AbstractTableMetaCache {
             while (resultSet.next()) {
                 if ("Y".equals(resultSet.getString("IDENTITY")) &&
                         "A".equals(resultSet.getString("GENERATED"))) {
-                    throw new NotSupportYetException("Identity column of type generated always as identity is not supported." +
+                    throw new SQLException("Identity column of type generated always as identity is not supported." +
                             " If necessary, it is recommended to use BY DEFAULT");
                 }
             }

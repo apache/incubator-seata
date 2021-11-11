@@ -50,7 +50,7 @@ public class DB2UndoLogManager extends AbstractUndoLogManager {
             " IN ( SELECT " + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", " + ClientTableColumnsName.UNDO_LOG_XID +
             " FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? ORDER BY " +
-            ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " ASC LIMIT ? ";
+            ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " ASC LIMIT ? )";
 
 
     @Override
