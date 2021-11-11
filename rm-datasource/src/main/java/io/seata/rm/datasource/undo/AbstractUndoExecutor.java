@@ -44,7 +44,6 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.util.JdbcUtils;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,13 +138,7 @@ public abstract class AbstractUndoExecutor {
 
         } catch (Exception ex) {
             if (ex instanceof SQLException) {
-                SQLException sqlException = (SQLException) ex;
-                if (JdbcConstants.DB2.equalsIgnoreCase(getDbType(conn))) {
-                    if (sqlException.getErrorCode() == -798 && sqlException.getSQLState().equals("428C9")) {
-                        throw new SQLException("Identity column of type generated always as identity is not supported, please use BY DEFAULT", sqlException);
-                    }
-                }
-                throw sqlException;
+                throw (SQLException) ex;
             } else {
                 throw new SQLException(ex);
             }
