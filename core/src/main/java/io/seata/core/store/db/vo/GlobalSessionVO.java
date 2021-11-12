@@ -18,7 +18,7 @@ package io.seata.core.store.db.vo;
 import java.util.Date;
 
 /**
- *  GlobalSessionVO
+ * GlobalSessionVO
  * @author: zhongxiang.wang
  */
 public class GlobalSessionVO {

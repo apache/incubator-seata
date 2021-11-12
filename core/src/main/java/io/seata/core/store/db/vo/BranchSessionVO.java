@@ -15,12 +15,10 @@
  */
 package io.seata.core.store.db.vo;
 
-import io.seata.core.model.BranchType;
-
 import java.util.Date;
 
 /**
- *  BranchSessionVO
+ * BranchSessionVO
  * @author: zhongxiang.wang
  */
 public class BranchSessionVO {
