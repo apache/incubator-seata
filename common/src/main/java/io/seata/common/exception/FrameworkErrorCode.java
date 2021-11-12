@@ -238,6 +238,18 @@ public enum FrameworkErrorCode {
      */
     TransactionManagerNeedInjected("0505","TCC fence transactionManager need injected","TCC fence transactionManager need injected"),
 
+    /** 0600~0699  The admin console related error **/
+
+    /**
+     * The parameter error
+     */
+    ParameterError("0601","The parameter error","Please check the parameter"),
+
+    /**
+     * The system error
+     */
+    SystemError("0602","The system error","Please check the log of seata server"),
+
     /**
      * Undefined error
      */

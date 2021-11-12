@@ -27,6 +27,9 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
+import io.seata.server.console.manager.BranchSessionServiceManager;
+import io.seata.server.console.manager.GlobalLockServiceManager;
+import io.seata.server.console.manager.GlobalSessionServiceManager;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.env.ContainerHelper;
 import io.seata.server.lock.LockerManagerFactory;
@@ -76,6 +79,9 @@ public class Server {
         //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getSessionStoreMode());
         LockerManagerFactory.init(parameterParser.getLockStoreMode());
+        GlobalLockServiceManager.init(parameterParser.getLockStoreMode());
+        BranchSessionServiceManager.init(parameterParser.getSessionStoreMode());
+        GlobalSessionServiceManager.init(parameterParser.getSessionStoreMode());
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);

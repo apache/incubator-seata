@@ -51,7 +51,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT + ", " + ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME + ", "
             + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", "
             + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
-
     /**
      * The constant ALL_BRANCH_COLUMNS.
      * xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key, branch_type, status, client_id, application_data, gmt_create, gmt_modified
@@ -63,6 +62,16 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE + ", " + ServerTableColumnsName.BRANCH_TABLE_STATUS + ", "
             + ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + ", "
             + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + ", " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED;
+
+    /**
+     * The constant QUERY_ALL_GLOBAL.
+     */
+    protected static final String QUERY_ALL_GLOBAL = "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD;
+
+    /**
+     * The constant QUERY_ALL_BRANCH.
+     */
+    protected static final String QUERY_ALL_BRANCH = "select " + ALL_BRANCH_COLUMNS + " from " + BRANCH_TABLE_PLACEHOLD;
 
     /**
      * The constant DELETE_GLOBAL_TRANSACTION.
@@ -131,6 +140,16 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
     @Override
+    public String getAllGlobalSessionSQL(String globalTable) {
+        return QUERY_ALL_GLOBAL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
+    }
+
+    @Override
+    public String getAllBranchSessionSQL(String branchTable) {
+        return QUERY_ALL_BRANCH.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    }
+
+    @Override
     public abstract String getInsertGlobalTransactionSQL(String globalTable);
 
     @Override
@@ -156,7 +175,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 
     @Override
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
-
 
     @Override
     public abstract String getInsertBranchTransactionSQL(String branchTable);

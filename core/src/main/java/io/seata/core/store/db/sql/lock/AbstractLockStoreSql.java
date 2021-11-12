@@ -55,6 +55,13 @@ public class AbstractLockStoreSql implements LockStoreSql {
         + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + ", " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + ", "
         + ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED;
 
+    protected static final String ALL_COLUMNS_TO_VO
+            = ServerTableColumnsName.LOCK_TABLE_XID + " as xid, " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + " as transactionId, "
+            + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + " as branchId, " + ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID + " as resourceId, "
+            + ServerTableColumnsName.LOCK_TABLE_TABLE_NAME + " as tableName, " + ServerTableColumnsName.LOCK_TABLE_PK + " as pk, "
+            + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " as rowKey, " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + " as gmtCreate, "
+            + ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED + " as gmtModified";
+
     /**
      * The constant DELETE_LOCK_SQL.
      */
@@ -93,6 +100,15 @@ public class AbstractLockStoreSql implements LockStoreSql {
     private static final String CHECK_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
         + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACE_HOLD + ")";
 
+    /**
+     * The constant QUERY_ALL_LOCK.
+     */
+    private static final String QUERY_ALL_LOCK = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD;
+
+    @Override
+    public String getAllLockSQL(String lockTable) {
+        return QUERY_ALL_LOCK.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
+    }
 
     @Override
     public String getInsertLockSQL(String lockTable) {

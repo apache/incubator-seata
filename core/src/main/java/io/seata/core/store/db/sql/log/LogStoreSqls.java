@@ -150,4 +150,25 @@ public interface LogStoreSqls {
      * @return the query branch max
      */
     String getQueryBranchMax(String branchTable);
+
+
+    /* -------------console---------*/
+
+    /**
+     * Get all branch session sql string.
+     *
+     * @param branchTable the branch table
+     * @return the string
+     */
+    String getAllBranchSessionSQL(String branchTable);
+
+    /**
+     * Get all global session sql string.
+     *
+     * @param globalTable the global table
+     * @return the string
+     */
+    String getAllGlobalSessionSQL(String globalTable);
+
+
 }

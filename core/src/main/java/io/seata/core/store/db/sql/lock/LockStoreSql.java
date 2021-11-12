@@ -24,6 +24,14 @@ package io.seata.core.store.db.sql.lock;
 public interface LockStoreSql {
 
     /**
+     * Get all lock sql string.
+     *
+     * @param lockTable the lock table
+     * @return the string
+     */
+    String getAllLockSQL(String lockTable);
+
+    /**
      * Get insert lock sql string.
      *
      * @param lockTable the lock table
