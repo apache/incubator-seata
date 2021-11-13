@@ -34,7 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  *
  * @author kaka2code
  */
-@ConditionalOnExpression("${seata.enabled:true} && ${seata.tccFence.enabled:true} && ${seata.tcc-fence.enabled:true}")
+@ConditionalOnExpression("${seata.enabled:true}")
 @AutoConfigureAfter({SeataCoreAutoConfiguration.class, DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 public class SeataTCCFenceAutoConfiguration {
 
@@ -44,7 +44,7 @@ public class SeataTCCFenceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(TCCFenceConfig.class)
     @ConditionalOnBean({DataSource.class, PlatformTransactionManager.class})
-    @ConfigurationProperties(StarterConstants.TCC_FENCE_CONFIG_PREFIX_KEBAB_STYLE)
+    @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
     public TCCFenceConfig tccFenceConfig(
             DataSource dataSource,
             PlatformTransactionManager transactionManager,

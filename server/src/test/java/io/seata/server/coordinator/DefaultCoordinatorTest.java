@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import io.netty.channel.Channel;
 import io.seata.common.XID;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
@@ -45,6 +46,7 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
+import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
@@ -57,6 +59,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
@@ -67,6 +71,7 @@ import static java.io.File.separator;
  *
  * @author leizhiyuan
  */
+@SpringBootTest
 public class DefaultCoordinatorTest {
     private static DefaultCoordinator defaultCoordinator;
 
@@ -95,12 +100,14 @@ public class DefaultCoordinatorTest {
     private static String sessionStorePath;
 
     @BeforeAll
-    public static void beforeClass() throws Exception {
+    public static void beforeClass(ApplicationContext context) throws Exception {
+        EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + XID.getPort();
         RemotingServer remotingServer = new MockServerMessageSender();
-        defaultCoordinator = new DefaultCoordinator(remotingServer);
+        defaultCoordinator =DefaultCoordinator.getInstance(null);
+        defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
     }
 
@@ -228,7 +235,7 @@ public class DefaultCoordinatorTest {
 
     @AfterEach
     public void tearDown() throws IOException {
-        SessionHolder.destroy();
+        MetricsManager.get().getRegistry().clearUp();
         deleteDataFile();
     }
 
@@ -243,7 +250,6 @@ public class DefaultCoordinatorTest {
     }
 
     private static void deleteAndCreateDataFile() throws IOException {
-        SessionHolder.destroy();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }

@@ -27,7 +27,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.RETRY_COMMITTING;
@@ -44,6 +44,7 @@ import static java.io.File.separator;
  * @author Wu
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SpringBootTest
 public class SessionHolderTest {
     private String pathname;
 
@@ -54,7 +55,7 @@ public class SessionHolderTest {
                 + XID.getPort();
         //delete file previously created
         pathname = sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME;
-        SessionHolder.init(StoreMode.REDIS.getName());
+       // SessionHolder.init(StoreMode.REDIS.getName());
     }
 
     @Test

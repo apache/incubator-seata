@@ -15,6 +15,13 @@
  */
 package io.seata.server.lock.db;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
@@ -24,17 +31,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author zhangsen
  */
+@SpringBootTest
 public class DataBaseLockStoreDAOTest {
 
     static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;
@@ -42,7 +45,7 @@ public class DataBaseLockStoreDAOTest {
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start(){
+    public static void start(ApplicationContext context){
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/lock");
