@@ -44,12 +44,12 @@ public class H2UndoInsertExecutor extends AbstractUndoExecutor {
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
+    protected void undoPrepare(PreparedStatement undoPst, ArrayList<Field> undoValues, List<Field> pkValueList)
             throws SQLException {
         int undoIndex = 0;
         for (Field pkField:pkValueList) {
             undoIndex++;
-            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+            undoPst.setObject(undoIndex, pkField.getValue(), pkField.getType());
         }
     }
 

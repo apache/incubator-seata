@@ -36,7 +36,7 @@ public class H2UndoUpdateExecutor extends AbstractUndoExecutor {
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (CollectionUtils.isEmpty(beforeImageRows)) {
-            throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
+            throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = beforeImageRows.get(0);
 

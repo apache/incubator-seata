@@ -36,10 +36,10 @@ public class H2UndoLogManager extends AbstractUndoLogManager {
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
-        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
-            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
-            deletePST.setInt(2, limitRows);
-            int deleteRows = deletePST.executeUpdate();
+        try (PreparedStatement deletePst = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
+            deletePst.setDate(1, new java.sql.Date(logCreated.getTime()));
+            deletePst.setInt(2, limitRows);
+            int deleteRows = deletePst.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size {}", deleteRows);
             }

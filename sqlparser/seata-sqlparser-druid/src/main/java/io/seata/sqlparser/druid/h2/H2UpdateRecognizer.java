@@ -29,8 +29,8 @@ import java.util.List;
 public class H2UpdateRecognizer extends BaseH2Recognizer implements SQLUpdateRecognizer {
     private SQLUpdateStatement ast;
 
-    public H2UpdateRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+    public H2UpdateRecognizer(String originalSql, SQLStatement ast) {
+        super(originalSql);
         this.ast = (SQLUpdateStatement)ast;
     }
 

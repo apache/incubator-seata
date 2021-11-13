@@ -20,8 +20,8 @@ import java.util.List;
 public class H2SelectForUpdateRecognizer extends BaseH2Recognizer implements SQLSelectRecognizer {
     private final SQLSelectStatement ast;
 
-    public H2SelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+    public H2SelectForUpdateRecognizer(String originalSql, SQLStatement ast) {
+        super(originalSql);
         this.ast = (SQLSelectStatement)ast;
     }
 

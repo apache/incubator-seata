@@ -49,7 +49,7 @@ public class H2InsertExecutor extends BaseInsertExecutor  implements Sequenceabl
     public Map<String,List<Object>> getPkValues() throws SQLException {
         Map<String,List<Object>> pkValuesMap = null;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        Boolean isContainsPk = containsPK();
+        boolean isContainsPk = containsPK();
         if (isContainsPk) {
             pkValuesMap = getPkValuesByColumn();
         } else if (containsColumns()) {

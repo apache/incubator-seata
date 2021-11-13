@@ -43,11 +43,11 @@ public class H2InsertRecognizer extends BaseH2Recognizer implements SQLInsertRec
     /**
      * Instantiates a new h2 sql insert recognizer.
      *
-     * @param originalSQL the original sql
+     * @param originalSql the original sql
      * @param ast         the ast
      */
-    public H2InsertRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+    public H2InsertRecognizer(String originalSql, SQLStatement ast) {
+        super(originalSql);
         this.ast = (SQLInsertStatement)ast;
     }
 
@@ -83,13 +83,13 @@ public class H2InsertRecognizer extends BaseH2Recognizer implements SQLInsertRec
 
     @Override
     public List<String> getInsertColumns() {
-        List<SQLExpr> columnSQLExprs = ast.getColumns();
-        if (columnSQLExprs.isEmpty()) {
+        List<SQLExpr> columnSqlExprs = ast.getColumns();
+        if (columnSqlExprs.isEmpty()) {
             // INSERT INTO ta VALUES (...), without fields clarified
             return null;
         }
-        List<String> list = new ArrayList<>(columnSQLExprs.size());
-        for (SQLExpr expr : columnSQLExprs) {
+        List<String> list = new ArrayList<>(columnSqlExprs.size());
+        for (SQLExpr expr : columnSqlExprs) {
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
             } else {

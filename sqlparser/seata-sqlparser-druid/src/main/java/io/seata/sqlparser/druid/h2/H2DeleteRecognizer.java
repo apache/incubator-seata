@@ -43,11 +43,11 @@ public class H2DeleteRecognizer extends BaseH2Recognizer implements SQLDeleteRec
     /**
      * Instantiates a new h2 sql delete recognizer.
      *
-     * @param originalSQL the original sql
+     * @param originalSql the original sql
      * @param ast         the ast
      */
-    public H2DeleteRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+    public H2DeleteRecognizer(String originalSql, SQLStatement ast) {
+        super(originalSql);
         this.ast = (SQLDeleteStatement)ast;
     }
 

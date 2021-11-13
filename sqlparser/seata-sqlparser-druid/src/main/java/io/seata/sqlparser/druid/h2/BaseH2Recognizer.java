@@ -17,6 +17,8 @@ import java.util.Objects;
  */
 public abstract class BaseH2Recognizer extends BaseRecognizer {
 
+    private static final String REFEXPR = "?";
+
     /**
      * Instantiates a new h2 base recognizer
      *
@@ -33,7 +35,7 @@ public abstract class BaseH2Recognizer extends BaseRecognizer {
 
             @Override
             public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
+                if (REFEXPR.equals(x.getName())) {
                     ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
                     if (paramAppenderList.isEmpty()) {
                         oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
