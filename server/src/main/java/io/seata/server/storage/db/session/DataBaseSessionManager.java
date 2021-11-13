@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 @LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class DataBaseSessionManager extends AbstractSessionManager
-        implements Initialize {
+    implements Initialize {
 
     /**
      * The constant LOGGER.
@@ -168,17 +168,17 @@ public class DataBaseSessionManager extends AbstractSessionManager
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(
-                new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
                 GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             // all data
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.UnKnown, GlobalStatus.Begin,
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {
+                GlobalStatus.UnKnown, GlobalStatus.Begin,
                 GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
-                GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
-                GlobalStatus.AsyncCommitting}));
+                GlobalStatus.RollbackRetrying,
+                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting}));
         }
     }
 

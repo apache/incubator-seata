@@ -210,7 +210,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
             }
 
             WritableTypeId typeId = typeSerializer.writeTypePrefix(gen,
-                    typeSerializer.typeId(timestamp, valueShape));
+                typeSerializer.typeId(timestamp, valueShape));
             serialize(timestamp, gen, serializers);
             gen.writeTypeSuffix(typeId);
         }
@@ -263,7 +263,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public void serializeWithType(SerialBlob blob, JsonGenerator gen, SerializerProvider serializers,
                                       TypeSerializer typeSer) throws IOException {
             WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen,
-                    typeSer.typeId(blob, JsonToken.VALUE_EMBEDDED_OBJECT));
+                typeSer.typeId(blob, JsonToken.VALUE_EMBEDDED_OBJECT));
             serialize(blob, gen, serializers);
             typeSer.writeTypeSuffix(gen, typeIdDef);
         }
@@ -303,7 +303,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public void serializeWithType(SerialClob clob, JsonGenerator gen, SerializerProvider serializers,
                                       TypeSerializer typeSer) throws IOException {
             WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen,
-                    typeSer.typeId(clob, JsonToken.VALUE_EMBEDDED_OBJECT));
+                typeSer.typeId(clob, JsonToken.VALUE_EMBEDDED_OBJECT));
             serialize(clob, gen, serializers);
             typeSer.writeTypeSuffix(gen, typeIdDef);
         }
