@@ -17,7 +17,11 @@ package io.seata.sqlparser.druid.h2;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.*;
+import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
+import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
+import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
+import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.h2.visitor.H2OutputVisitor;
@@ -145,6 +149,6 @@ public class H2InsertRecognizer extends BaseH2Recognizer implements SQLInsertRec
 
     @Override
     public List<String> getDuplicateKeyUpdate() {
-       return null;
+       return new ArrayList<>();
     }
 }
