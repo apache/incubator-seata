@@ -105,7 +105,7 @@ public class H2DeleteRecognizer extends BaseH2Recognizer implements SQLDeleteRec
     }
 
     @Override
-    public String getWhereCondition(){
+    public String getWhereCondition() {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where);
     }

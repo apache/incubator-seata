@@ -149,6 +149,6 @@ public class H2InsertRecognizer extends BaseH2Recognizer implements SQLInsertRec
 
     @Override
     public List<String> getDuplicateKeyUpdate() {
-       return new ArrayList<>();
+        return new ArrayList<>();
     }
 }
