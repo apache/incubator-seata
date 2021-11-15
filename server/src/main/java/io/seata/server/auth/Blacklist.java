@@ -27,7 +27,7 @@ public class Blacklist {
 
     private static final long DEFAULT_CONFIG_TIMEOUT = 5000;
 
-    private static final String IP_CONFIG_SPLIT_CHAR = ";";
+    private static final String IP_CONFIG_SPLIT_CHAR = ",";
 
     private List<String> ipList = new CopyOnWriteArrayList<>();
 
