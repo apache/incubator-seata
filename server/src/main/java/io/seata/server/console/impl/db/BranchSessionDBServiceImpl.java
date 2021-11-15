@@ -24,13 +24,9 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
-import io.seata.core.model.BranchType;
-import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.core.store.db.vo.BranchSessionVO;
-import io.seata.core.store.db.vo.GlobalLockVO;
 import io.seata.server.console.manager.BranchSessionServiceManager;
-import io.seata.server.console.manager.GlobalLockServiceManager;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.service.BranchSessionService;
 
@@ -40,11 +36,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
-import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 
 /**
  * Branch Session DataBase ServiceImpl
