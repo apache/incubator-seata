@@ -90,7 +90,7 @@ public class SofaRegistryServiceImplTest {
         }
 
         try {
-            result = instance.lookup("default_tx_group");
+            result = instance.lookup(DEFAULT_TX_GROUP);
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
