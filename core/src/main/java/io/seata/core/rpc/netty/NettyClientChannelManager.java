@@ -250,17 +250,11 @@ class NettyClientChannelManager {
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                 .lookup(transactionServiceGroup);
-
+        if (DEFAULT_TX_GROUP_OLD.equals(transactionServiceGroup)) {
+            LOGGER.warn("the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5," +
+                    " please change your default configuration as soon as possible", DEFAULT_TX_GROUP_OLD, DEFAULT_TX_GROUP);
+        }
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
-            //compatible with old value, will remove next version
-            List<String> availServerListWithOldValue = RegistryFactory.getInstance().lookup(DEFAULT_TX_GROUP_OLD);
-            if (CollectionUtils.isNotEmpty(availInetSocketAddressList)) {
-                LOGGER.warn("the default value of txServiceGroup: {} has already changed to {} since Seata 1.5, please change your default configuration",
-                        DEFAULT_TX_GROUP_OLD, DEFAULT_TX_GROUP);
-                return availInetSocketAddressList.stream()
-                        .map(NetUtil::toStringAddress)
-                        .collect(Collectors.toList());
-            }
             return Collections.emptyList();
         }
 
