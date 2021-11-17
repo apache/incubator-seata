@@ -23,7 +23,7 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 
-public class Blacklist {
+public class BlackList {
 
     private static final long DEFAULT_CONFIG_TIMEOUT = 5000;
 
@@ -31,14 +31,14 @@ public class Blacklist {
 
     private List<String> ipList = new CopyOnWriteArrayList<>();
 
-    public Blacklist(String blacklistConfig) {
-        String ips = ConfigurationFactory.getInstance().getConfig(blacklistConfig);
+    public BlackList(String blackListConfig) {
+        String ips = ConfigurationFactory.getInstance().getConfig(blackListConfig);
         if (ips != null) {
             String[] ipArray = ips.split(IP_CONFIG_SPLIT_CHAR);
             Collections.addAll(ipList, ipArray);
         }
 
-        ConfigurationFactory.getInstance().addConfigListener(blacklistConfig, new ConfigurationChangeListener() {
+        ConfigurationFactory.getInstance().addConfigListener(blackListConfig, new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
                 String currentIps = event.getNewValue();

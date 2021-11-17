@@ -28,12 +28,12 @@ import io.seata.core.protocol.RegisterTMRequest;
 @LoadLevel(name = "defaultCheckAuthHandler", order = 100)
 public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 
-    Blacklist blacklist = new Blacklist(ConfigurationKeys.BLACKLIST);
+    BlackList blackList = new BlackList(ConfigurationKeys.BLACKLIST);
 
     @Override
     public boolean doRegTransactionManagerCheck(RegisterTMRequest request, ChannelHandlerContext ctx) {
         String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
-        if (blacklist.contains(ip)) {
+        if (blackList.contains(ip)) {
             return false;
         }
         return true;
@@ -42,7 +42,7 @@ public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
     @Override
     public boolean doRegResourceManagerCheck(RegisterRMRequest request, ChannelHandlerContext ctx) {
         String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
-        if (blacklist.contains(ip)) {
+        if (blackList.contains(ip)) {
             return false;
         }
         return true;
