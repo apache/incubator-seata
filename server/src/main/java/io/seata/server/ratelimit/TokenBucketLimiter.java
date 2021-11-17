@@ -94,9 +94,19 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
         if (requestsPerSecondConfig == null) {
             throw new IllegalArgumentException("ratelimiter requestsPerSecond is null");
         }
-        double requestsPerSecond = Double.parseDouble(requestsPerSecondConfig);
+        double requestsPerSecond;
+        try {
+            requestsPerSecond = Double.parseDouble(requestsPerSecondConfig);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("could not convert '" + requestsPerSecondConfig + "' to requestsPerSecond");
+        }
         this.microSecondsPerToken = TimeUnit.SECONDS.toMicros(1L) / requestsPerSecond;
-        this.burst = Double.parseDouble(CONFIG.getConfig(ConfigurationKeys.BURST, String.valueOf(requestsPerSecond)));
+        String burstConfig = CONFIG.getConfig(ConfigurationKeys.BURST, String.valueOf(requestsPerSecond));
+        try {
+            this.burst = Double.parseDouble(burstConfig);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("could not convert '" + burstConfig + "' to burst");
+        }
         this.lastUpdateTimeInMicros = microTime();
         this.delay = CONFIG.getBoolean(ConfigurationKeys.DELAY, DEFAULT_SERVER_RATELIMIT_DELAY);
     }
