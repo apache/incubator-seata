@@ -16,6 +16,7 @@
 package io.seata.server.lock;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.seata.common.XID;
@@ -118,17 +119,17 @@ public abstract class AbstractLockManager implements LockManager {
      * @return the list
      */
     protected List<RowLock> collectRowLocks(BranchSession branchSession) {
-        List<RowLock> locks = new ArrayList<>();
         if (branchSession == null || StringUtils.isBlank(branchSession.getLockKey())) {
-            return locks;
+            return Collections.emptyList();
         }
-        String xid = branchSession.getXid();
-        String resourceId = branchSession.getResourceId();
-        long transactionId = branchSession.getTransactionId();
 
         String lockKey = branchSession.getLockKey();
+        String resourceId = branchSession.getResourceId();
+        String xid = branchSession.getXid();
+        long transactionId = branchSession.getTransactionId();
+        long branchId = branchSession.getBranchId();
 
-        return collectRowLocks(lockKey, resourceId, xid, transactionId, branchSession.getBranchId());
+        return collectRowLocks(lockKey, resourceId, xid, transactionId, branchId);
     }
 
     /**

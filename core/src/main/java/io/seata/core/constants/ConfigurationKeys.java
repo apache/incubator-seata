@@ -132,7 +132,6 @@ public interface ConfigurationKeys {
      */
     String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
 
-
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
      */
@@ -235,6 +234,11 @@ public interface ConfigurationKeys {
     String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
 
     /**
+     * The constant DISTRIBUTED_LOCK_DB_TABLE.
+     */
+    String DISTRIBUTED_LOCK_DB_TABLE = STORE_DB_PREFIX + "distributedLockTable";
+
+    /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
     String STORE_DB_DATASOURCE_TYPE = STORE_DB_PREFIX + "datasource";
@@ -292,7 +296,17 @@ public interface ConfigurationKeys {
     /**
      * The constant SERVER_RPC_PORT.
      */
-    String SERVER_RPC_PORT = SERVER_PREFIX + "rpcPort";
+    String SERVER_SERVICE_PORT_CAMEL = SERVER_PREFIX + "servicePort";
+
+    /**
+     * The constant SERVER_SERVICE_PORT_CONFIG.
+     */
+    String SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "service-port";
+
+    /**
+     * The constant ENV_SEATA_PORT_KEY.
+     */
+    String ENV_SEATA_PORT_KEY = "SEATA_PORT";
 
     /**
      * The constant RECOVERY_PREFIX.
@@ -687,4 +701,24 @@ public interface ConfigurationKeys {
      * The constant DATA_SOURCE_PROXY_MODE.
      */
     String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
+
+    /**
+     * The constant TCC_PREFIX
+     */
+    String TCC_PREFIX = "tcc.";
+
+    /**
+     * The constant TCC_FENCE_PREFIX
+     */
+    String TCC_FENCE_PREFIX = TCC_PREFIX + "fence.";
+
+    /**
+     * The constant TCC_FENCE_CLEAN_PERIOD
+     */
+    String TCC_FENCE_CLEAN_PERIOD = TCC_FENCE_PREFIX + "cleanPeriod";
+
+    /**
+     * The constant TCC_FENCE_LOG_TABLE_NAME
+     */
+    String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 }

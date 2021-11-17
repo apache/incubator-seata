@@ -13,12 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.session.redis;
 
 import java.io.IOException;
 import java.util.List;
 
+import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -36,27 +36,27 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.embedded.RedisServer;
 
 /**
  * @author funkye
  */
+@SpringBootTest
 public class RedisSessionManagerTest {
     private static RedisServer server = null;
     private static SessionManager sessionManager = null;
 
     @BeforeAll
-    public static void start() throws IOException {
-        int port = 6789;
-        server = RedisServer.builder().setting("maxheap 8M").setting("maxmemory 8M").port(port)
-            .setting("bind localhost").build();
+    public static void start(ApplicationContext context) throws IOException {
+        server = RedisServer.newRedisServer(6789);
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", port, 60000));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
         RedisTransactionStoreManager transactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(transactionStoreManager);

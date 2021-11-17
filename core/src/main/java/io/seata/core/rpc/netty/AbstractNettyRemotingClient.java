@@ -256,7 +256,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         InetSocketAddress address = null;
         try {
             @SuppressWarnings("unchecked")
-            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
             address = this.doSelect(inetSocketAddressList, msg);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());

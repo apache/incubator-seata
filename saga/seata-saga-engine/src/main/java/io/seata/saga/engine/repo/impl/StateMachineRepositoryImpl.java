@@ -59,7 +59,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
             synchronized (item) {
-                if (item.getValue() == null && stateLangStore != null) {
+                if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineId);
                     if (stateMachine != null) {
                         StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName).parse(
@@ -87,7 +87,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
             synchronized (item) {
-                if (item.getValue() == null && stateLangStore != null) {
+                if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if (stateMachine != null) {
                         StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName).parse(
