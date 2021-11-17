@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.ssl.ClientAuth;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
 import org.slf4j.Logger;
@@ -473,7 +474,7 @@ public class NettyClientConfig extends NettyBaseConfig {
         String tlsVersion = getTlsVersion();
         String trustCertificatePath = getTrustCertificatePath();
         File trustCertificate = null;
-        if (trustCertificatePath != null) {
+        if (StringUtils.isNotBlank(trustCertificatePath)) {
             trustCertificate = new File(trustCertificatePath);
         }
         try {

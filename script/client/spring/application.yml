@@ -26,6 +26,7 @@ seata:
     tls:
       enable-tls: true
       tls-version: TLSv1
+      trust-certificate-path: ""
     tm:
       commit-retry-count: 5
       rollback-retry-count: 5
