@@ -15,6 +15,20 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.channel.Channel;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
@@ -26,22 +40,6 @@ import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 
 /**
  * Netty client pool manager.
@@ -250,10 +248,6 @@ class NettyClientChannelManager {
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                 .lookup(transactionServiceGroup);
-        if (DEFAULT_TX_GROUP_OLD.equals(transactionServiceGroup)) {
-            LOGGER.warn("the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5," +
-                    " please change your default configuration as soon as possible", DEFAULT_TX_GROUP_OLD, DEFAULT_TX_GROUP);
-        }
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             return Collections.emptyList();
         }

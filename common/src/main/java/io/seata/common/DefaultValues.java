@@ -85,6 +85,7 @@ public interface DefaultValues {
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
     String DEFAULT_TX_GROUP = "default_tx_group";
+    @Deprecated
     String DEFAULT_TX_GROUP_OLD = "my_test_tx_group";
     String DEFAULT_TC_CLUSTER = "default";
     String DEFAULT_GROUPLIST = "127.0.0.1:8091";
