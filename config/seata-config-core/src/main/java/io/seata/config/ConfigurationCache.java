@@ -38,6 +38,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final ConcurrentHashMap<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+
     private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
 
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
@@ -106,21 +108,32 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 if (method.getName().startsWith(METHOD_PREFIX)
                         && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
-                    ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
                     ObjectWrapper.ConfigType type = ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
                     Object defaultValue = null;
                     if (args.length > 1 && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
                         defaultValue = args[1];
                     }
-                    if (null == wrapper || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
-                        Object result = method.invoke(originalConfiguration, args);
-                        // The wrapper.data only exists in the cache when it is not null.
-                        if (result != null) {
-                            wrapper = new ObjectWrapper(result, type, defaultValue);
-                            CONFIG_CACHE.put(rawDataId, wrapper);
+                    Object finalDefaultValue = defaultValue;
+                    ObjectWrapper wrapper = CollectionUtils.computeIfAbsent(CONFIG_CACHE, rawDataId,
+                        k -> new ObjectWrapper(null, type, finalDefaultValue));
+                    if (wrapper.getData() == null
+                        || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                        synchronized (wrapper) {
+                            if (wrapper.getData() == null) {
+                                Object result = method.invoke(originalConfiguration, args);
+                                // The wrapper.data only exists in the cache when it is not null.
+                                if (result != null) {
+                                    wrapper.setData(result);
+                                    CONFIG_CACHE.put(rawDataId, wrapper);
+                                } else {
+                                    // When the remote configuration item does not exist, try to read the local configuration item
+                                    result = FILE_CONFIG.getConfig(rawDataId);
+                                    wrapper.setData(result != null ? result : ObjectWrapper.NIL);
+                                }
+                            }
                         }
                     }
-                    return wrapper == null ? null : wrapper.convertData(type);
+                    return ObjectWrapper.NIL.equals(wrapper.getData()) ? null : wrapper.convertData(type);
                 }
                 return method.invoke(originalConfiguration, args);
             });
@@ -135,7 +148,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     private static class ObjectWrapper {
-        private final Object data;
+        private static final String NIL = "nil";
+        private Object data;
         private final ConfigType type;
         private final Object lastDefaultValue;
 
@@ -151,6 +165,10 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
         public Object getData() {
             return data;
+        }
+
+        public void setData(Object data) {
+            this.data = data;
         }
 
         public ConfigType getType() {
