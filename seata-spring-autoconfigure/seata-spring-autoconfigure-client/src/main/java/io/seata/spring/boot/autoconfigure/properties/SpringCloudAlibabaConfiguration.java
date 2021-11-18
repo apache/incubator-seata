@@ -61,7 +61,7 @@ public class SpringCloudAlibabaConfiguration implements ApplicationContextAware 
      */
     public String getTxServiceGroup() {
         if (txServiceGroup == null) {
-           txServiceGroup = DEFAULT_TX_GROUP;
+            txServiceGroup = DEFAULT_TX_GROUP;
         }
         return txServiceGroup;
     }
