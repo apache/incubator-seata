@@ -116,24 +116,28 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     Object finalDefaultValue = defaultValue;
                     ObjectWrapper wrapper = CollectionUtils.computeIfAbsent(CONFIG_CACHE, rawDataId,
                         k -> new ObjectWrapper(null, type, finalDefaultValue));
-                    if (wrapper.getData() == null
-                        || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                    boolean notEquals = null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue);
+                    if (wrapper.getData() == null || notEquals) {
                         synchronized (wrapper) {
-                            if (wrapper.getData() == null) {
+                            if (wrapper.getData() == null || notEquals) {
                                 Object result = method.invoke(originalConfiguration, args);
                                 // The wrapper.data only exists in the cache when it is not null.
                                 if (result != null) {
-                                    wrapper.setData(result);
+                                    if (defaultValue != null && Objects.equals(result, defaultValue)) {
+                                        // When the remote configuration item does not exist, try to read the local configuration item
+                                        Object localResult = FILE_CONFIG.getConfig(rawDataId);
+                                        wrapper.setData(localResult != null ? localResult : result);
+                                    } else {
+                                        wrapper.setData(result);
+                                    }
                                     CONFIG_CACHE.put(rawDataId, wrapper);
                                 } else {
-                                    // When the remote configuration item does not exist, try to read the local configuration item
-                                    result = FILE_CONFIG.getConfig(rawDataId);
-                                    wrapper.setData(result != null ? result : ObjectWrapper.NIL);
+                                    wrapper.setData(ObjectWrapper.NIL);
                                 }
                             }
                         }
                     }
-                    return ObjectWrapper.NIL.equals(wrapper.getData()) ? null : wrapper.convertData(type);
+                    return wrapper.convertData(type);
                 }
                 return method.invoke(originalConfiguration, args);
             });
@@ -180,10 +184,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
 
         public Object convertData(ConfigType aType) {
-            if (data != null && Objects.equals(type, aType)) {
+            boolean none = NIL.equals(data);
+            if (data != null && !none && Objects.equals(type, aType)) {
                 return data;
             }
-            if (data != null) {
+            if (data != null && !none) {
                 if (ConfigType.INT.equals(aType)) {
                     return Integer.parseInt(data.toString());
                 } else if (ConfigType.BOOLEAN.equals(aType)) {
