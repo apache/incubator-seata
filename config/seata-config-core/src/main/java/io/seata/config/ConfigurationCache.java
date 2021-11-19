@@ -130,7 +130,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                                     } else {
                                         wrapper.setData(result);
                                     }
-                                    CONFIG_CACHE.put(rawDataId, wrapper);
                                 } else {
                                     wrapper.setData(ObjectWrapper.NIL);
                                 }
