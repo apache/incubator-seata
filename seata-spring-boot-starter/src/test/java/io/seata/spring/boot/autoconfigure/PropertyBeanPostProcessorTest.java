@@ -16,7 +16,6 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -41,11 +40,6 @@ public class PropertyBeanPostProcessorTest {
         SeataProperties seataProperties = new SeataProperties();
         seataProperties.setApplicationId("test-id");
         return seataProperties;
-    }
-
-    @Bean
-    public SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration() {
-        return new SpringCloudAlibabaConfiguration();
     }
 
     @AfterAll

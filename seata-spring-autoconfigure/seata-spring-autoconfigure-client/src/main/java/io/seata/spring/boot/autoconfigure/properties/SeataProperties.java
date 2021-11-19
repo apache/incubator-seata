@@ -16,7 +16,6 @@
 package io.seata.spring.boot.autoconfigure.properties;
 
 import io.seata.common.DefaultValues;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -65,8 +64,6 @@ public class SeataProperties {
      */
     private String[] excludesForAutoProxying = {};
 
-    @Autowired
-    private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
 
     public boolean isEnabled() {
         return enabled;
@@ -78,9 +75,6 @@ public class SeataProperties {
     }
 
     public String getApplicationId() {
-        if (applicationId == null) {
-            applicationId = springCloudAlibabaConfiguration.getApplicationId();
-        }
         return applicationId;
     }
 
