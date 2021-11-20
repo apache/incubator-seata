@@ -45,7 +45,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     private static JdbcTemplate jdbcTemplate;
     private static JdbcTemplate directJdbcTemplate;
     private static final String APPLICATION_ID = "my_test_app";
-    private static final String TX_SERVICE_GROUP = "my_test_tx_group";
+    private static final String TX_SERVICE_GROUP = "default_tx_group";
 
     /**
      * Before.

@@ -34,6 +34,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type Lock manager test.
  *
@@ -203,7 +205,7 @@ public class LockManagerTest {
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(0L);
         branchSession.setClientId("c1");
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t:0");
         branchSession.setBranchType(BranchType.AT);
@@ -223,7 +225,7 @@ public class LockManagerTest {
         branchSession1.setTransactionId(UUIDGenerator.generateUUID());
         branchSession1.setBranchId(1L);
         branchSession1.setClientId("c1");
-        branchSession1.setResourceGroupId("my_test_tx_group");
+        branchSession1.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession1.setResourceId(resource);
         branchSession1.setLockKey(lockKey1);
         branchSession1.setBranchType(BranchType.AT);
@@ -234,7 +236,7 @@ public class LockManagerTest {
         branchSession2.setTransactionId(UUIDGenerator.generateUUID());
         branchSession2.setBranchId(2L);
         branchSession2.setClientId("c1");
-        branchSession2.setResourceGroupId("my_test_tx_group");
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession2.setResourceId(resource);
         branchSession2.setLockKey(lockKey2);
         branchSession2.setBranchType(BranchType.AT);

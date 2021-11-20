@@ -50,7 +50,7 @@
 		<property name="enableAsync" value="true"></property>
 		<property name="threadPoolExecutor" ref="threadExecutor"></property>
 		<property name="applicationId" value="test_saga"></property>
-		<property name="txServiceGroup" value="my_test_tx_group"></property>
+		<property name="txServiceGroup" value="default_tx_group"></property>
 		<property name="sagaTransactionalTemplate" ref="mockSagaTransactionTemplate"/>
 	</bean>
 	<bean id="threadExecutor"

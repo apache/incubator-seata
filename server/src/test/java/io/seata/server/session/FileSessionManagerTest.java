@@ -34,6 +34,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 
 /**
  * The type File based session manager test.
@@ -355,7 +357,7 @@ public class FileSessionManagerTest {
      * @return the object [ ] [ ]
      */
     static Stream<Arguments> globalSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
@@ -371,8 +373,8 @@ public class FileSessionManagerTest {
      * @return the object [ ] [ ]
      */
     static Stream<Arguments> globalSessionsProvider() {
-        GlobalSession globalSession1 = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
-        GlobalSession globalSession2 = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
         return Stream.of(
                 Arguments.of(Arrays.asList(globalSession1, globalSession2))
         );
@@ -384,12 +386,12 @@ public class FileSessionManagerTest {
      * @return the object [ ] [ ]
      */
     static Stream<Arguments> branchSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
         globalSession.setXid(XID.generateXID(globalSession.getTransactionId()));
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
