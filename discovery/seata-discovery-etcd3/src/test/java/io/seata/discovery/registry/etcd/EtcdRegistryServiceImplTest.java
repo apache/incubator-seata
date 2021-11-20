@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static io.netty.util.CharsetUtil.UTF_8;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -148,7 +149,7 @@ public class EtcdRegistryServiceImplTest {
         //1.register
         registryService.register(inetSocketAddress);
         //2.lookup
-        List<InetSocketAddress> inetSocketAddresses = registryService.lookup("my_test_tx_group");
+        List<InetSocketAddress> inetSocketAddresses = registryService.lookup(DEFAULT_TX_GROUP);
         assertThat(inetSocketAddresses).size().isEqualTo(1);
     }
 

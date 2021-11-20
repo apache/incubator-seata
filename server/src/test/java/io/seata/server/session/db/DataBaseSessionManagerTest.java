@@ -43,6 +43,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type Data base session manager test.
  *
@@ -282,7 +284,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -327,7 +329,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -376,7 +378,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -426,7 +428,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -442,7 +444,7 @@ public class DataBaseSessionManagerTest {
         branchSession2.setXid(xid);
         branchSession2.setTransactionId(globalSession.getTransactionId());
         branchSession2.setBranchId(2L);
-        branchSession2.setResourceGroupId("my_test_tx_group");
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession2.setResourceId("tb_1");
         branchSession2.setLockKey("t_1");
         branchSession2.setBranchType(BranchType.TCC);
@@ -496,7 +498,7 @@ public class DataBaseSessionManagerTest {
             branchSession.setXid(xid);
             branchSession.setTransactionId(globalSession.getTransactionId());
             branchSession.setBranchId(1L);
-            branchSession.setResourceGroupId("my_test_tx_group");
+            branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
             branchSession.setBranchType(BranchType.AT);
@@ -523,7 +525,7 @@ public class DataBaseSessionManagerTest {
             branchSession.setXid(xid2);
             branchSession.setTransactionId(globalSession.getTransactionId());
             branchSession.setBranchId(1L);
-            branchSession.setResourceGroupId("my_test_tx_group");
+            branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
             branchSession.setBranchType(BranchType.AT);
