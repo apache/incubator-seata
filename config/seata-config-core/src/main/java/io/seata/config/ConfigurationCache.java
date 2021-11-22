@@ -125,7 +125,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                                 Object localResult = null;
                                 // When the remote configuration item does not exist, try to read the local configuration item
                                 if (result == null || (defaultValue != null && Objects.equals(result, defaultValue))) {
-                                   Class<? extends Configuration> clz = FILE_CONFIG.getClass();
+                                    Class<? extends Configuration> clz = FILE_CONFIG.getClass();
                                     Method fileMethod = clz.getMethod(method.getName(), method.getParameterTypes());
                                     localResult = fileMethod.invoke(FILE_CONFIG, args);
                                 }
