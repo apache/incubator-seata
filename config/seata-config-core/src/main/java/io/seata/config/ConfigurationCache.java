@@ -15,6 +15,7 @@
  */
 package io.seata.config;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -125,7 +126,9 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                                 if (result != null) {
                                     if (defaultValue != null && Objects.equals(result, defaultValue)) {
                                         // When the remote configuration item does not exist, try to read the local configuration item
-                                        Object localResult = FILE_CONFIG.getConfig(rawDataId);
+                                        Class<? extends Configuration> clz = FILE_CONFIG.getClass();
+                                        Method fileMethod = clz.getMethod(method.getName(), method.getParameterTypes());
+                                        Object localResult = fileMethod.invoke(FILE_CONFIG, args);
                                         wrapper.setData(localResult != null ? localResult : result);
                                     } else {
                                         wrapper.setData(result);
@@ -183,18 +186,20 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
 
         public Object convertData(ConfigType aType) {
-            boolean none = NIL.equals(data);
-            if (data != null && !none) {
+            if (data != null && Objects.equals(type, aType)) {
+                return data;
+            }
+            if (data != null) {
                 if (ConfigType.INT.equals(aType)) {
-                    return data instanceof Integer ? data : Integer.parseInt(data.toString());
+                    return Integer.parseInt(data.toString());
                 } else if (ConfigType.BOOLEAN.equals(aType)) {
-                    return data instanceof Boolean ? data : Boolean.parseBoolean(data.toString());
+                    return Boolean.parseBoolean(data.toString());
                 } else if (ConfigType.DURATION.equals(aType)) {
-                    return data instanceof DurationUtil ? data : DurationUtil.parse(data.toString());
+                    return DurationUtil.parse(data.toString());
                 } else if (ConfigType.LONG.equals(aType)) {
-                    return data instanceof Long ? data : Long.parseLong(data.toString());
+                    return Long.parseLong(data.toString());
                 } else if (ConfigType.SHORT.equals(aType)) {
-                    return data instanceof Short ? data : Short.parseShort(data.toString());
+                    return Short.parseShort(data.toString());
                 }
                 return String.valueOf(data);
             }
