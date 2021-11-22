@@ -80,7 +80,7 @@ public class RateLimitedResponseMap {
         responseMap.put(GlobalRollbackRequest.class, globalRollbackResponse);
         responseMap.put(GlobalStatusRequest.class, globalStatusResponse);
         for (Map.Entry<Class, AbstractResultMessage> entry : responseMap.entrySet()) {
-            entry.getValue().setResultCode(ResultCode.Failed);
+            entry.getValue().setResultCode(ResultCode.RateLimited);
             entry.getValue().setMsg(entry.getKey().getSimpleName() + " rate limited.");
         }
     }

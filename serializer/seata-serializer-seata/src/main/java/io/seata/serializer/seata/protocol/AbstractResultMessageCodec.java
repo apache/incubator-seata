@@ -41,7 +41,7 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
         String resultMsg = abstractResultMessage.getMsg();
 
         out.writeByte(resultCode.ordinal());
-        if (resultCode == ResultCode.Failed) {
+        if (resultCode == ResultCode.Failed || resultCode == ResultCode.RateLimited) {
             if (StringUtils.isNotEmpty(resultMsg)) {
                 String msg;
                 if (resultMsg.length() > Short.MAX_VALUE) {
@@ -64,7 +64,7 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
         ResultCode resultCode = ResultCode.get(in.get());
         abstractResultMessage.setResultCode(resultCode);
-        if (resultCode == ResultCode.Failed) {
+        if (resultCode == ResultCode.Failed || resultCode == ResultCode.RateLimited) {
             short len = in.getShort();
             if (len > 0) {
                 byte[] msg = new byte[len];
