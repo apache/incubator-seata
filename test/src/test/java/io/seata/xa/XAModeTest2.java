@@ -610,7 +610,7 @@ public class XAModeTest2 {
     }
 
     private GlobalTransaction createGlobalTransaction() {
-        String vgroup = "my_test_tx_group";
+        String vgroup = "default_tx_group";
         GlobalTransactionScanner scanner = new GlobalTransactionScanner(vgroup);
         scanner.afterPropertiesSet();
 
