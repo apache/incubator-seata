@@ -122,20 +122,16 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                         synchronized (wrapper) {
                             if (wrapper.getData() == null || notEquals) {
                                 Object result = method.invoke(originalConfiguration, args);
+                                Object localResult = null;
                                 // The wrapper.data only exists in the cache when it is not null.
-                                if (result != null) {
-                                    if (defaultValue != null && Objects.equals(result, defaultValue)) {
-                                        // When the remote configuration item does not exist, try to read the local configuration item
-                                        Class<? extends Configuration> clz = FILE_CONFIG.getClass();
-                                        Method fileMethod = clz.getMethod(method.getName(), method.getParameterTypes());
-                                        Object localResult = fileMethod.invoke(FILE_CONFIG, args);
-                                        wrapper.setData(localResult != null ? localResult : result);
-                                    } else {
-                                        wrapper.setData(result);
-                                    }
-                                } else {
-                                    wrapper.setData(ObjectWrapper.NIL);
+                                if (result == null || (defaultValue != null && Objects.equals(result, defaultValue))) {
+                                    // When the remote configuration item does not exist, try to read the local configuration item
+                                    Class<? extends Configuration> clz = FILE_CONFIG.getClass();
+                                    Method fileMethod = clz.getMethod(method.getName(), method.getParameterTypes());
+                                    localResult = fileMethod.invoke(FILE_CONFIG, args);
                                 }
+                                wrapper.setData(
+                                    localResult != null ? localResult : result == null ? ObjectWrapper.NIL : result);
                             }
                         }
                     }
