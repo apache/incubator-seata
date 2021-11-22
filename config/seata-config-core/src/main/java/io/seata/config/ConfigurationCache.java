@@ -186,10 +186,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
 
         public Object convertData(ConfigType aType) {
-            if (data != null && Objects.equals(type, aType)) {
+            boolean none = NIL.equals(data);
+            if (data != null && !none && Objects.equals(type, aType)) {
                 return data;
             }
-            if (data != null) {
+            if (data != null && !none) {
                 if (ConfigType.INT.equals(aType)) {
                     return Integer.parseInt(data.toString());
                 } else if (ConfigType.BOOLEAN.equals(aType)) {
