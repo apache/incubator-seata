@@ -38,20 +38,13 @@ public class TransactionPropagationClientInterceptor extends AbstractInterceptor
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationServerInterceptor.class);
 
     @Override
-    public boolean handleRequest(Request brpcRequest) {
-
-        if (!RootContext.inGlobalTransaction()) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("SEATA-BRPC[{}] is not in globalTransaction, handle other interceptor request", RootContext.getBranchType());
-            }
-            return Boolean.TRUE;
-        }
+    public void aroundProcess(Request brpcRequest, Response brpcResponse, InterceptorChain chain) throws Exception {
 
         String xid = RootContext.getXID();
         String rpcXid = getRpcXid();
         Map<String, Object> kvAttachment = brpcRequest.getKvAttachment();
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("SEATA-BRPC[{}]: xid in RootContext[{}] xid in RpcContext[{}]", RootContext.getBranchType(), xid, rpcXid);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SEATA-BRPC[{}]: xid in RootContext[{}] xid in RpcContext[{}]", RootContext.getBranchType(), xid, rpcXid);
         }
 
         if (null != xid) {
@@ -59,21 +52,21 @@ public class TransactionPropagationClientInterceptor extends AbstractInterceptor
                 kvAttachment = new HashMap<>();
             }
             kvAttachment.put(RootContext.KEY_XID, xid);
-            kvAttachment.put(RootContext.KEY_BRANCH_TYPE, RootContext.getBranchType().name());
+            if (null != RootContext.getBranchType()) {
+                kvAttachment.put(RootContext.KEY_BRANCH_TYPE, RootContext.getBranchType().name());
+            }
             brpcRequest.setKvAttachment(kvAttachment);
         }
 
-        return super.handleRequest(brpcRequest);
-    }
-
-    @Override
-    public void handleResponse(Response response) {
-        super.handleResponse(response);
-    }
-
-    @Override
-    public void aroundProcess(Request brpcRequest, Response brpcResponse, InterceptorChain chain) throws Exception {
-        chain.intercept(brpcRequest, brpcResponse);
+        try {
+            chain.intercept(brpcRequest, brpcResponse);
+        } finally {
+            Map<String, Object> requestAttachment = brpcRequest.getKvAttachment();
+            if (null != requestAttachment) {
+                requestAttachment.remove(RootContext.KEY_XID);
+                requestAttachment.remove(RootContext.KEY_BRANCH_TYPE);
+            }
+        }
     }
 
     private String getRpcXid() {
