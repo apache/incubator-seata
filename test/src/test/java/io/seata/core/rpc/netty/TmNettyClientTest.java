@@ -106,7 +106,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         Thread.sleep(3000);
 
         String applicationId = "app 1";
-        String transactionServiceGroup = "my_test_tx_group";
+        String transactionServiceGroup = "default_tx_group";
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
         tmNettyRemotingClient.init();
@@ -132,7 +132,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         Thread.sleep(3000);
 
         String applicationId = "app 1";
-        String transactionServiceGroup = "my_test_tx_group";
+        String transactionServiceGroup = "default_tx_group";
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
         tmNettyRemotingClient.init();
 
