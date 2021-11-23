@@ -27,6 +27,7 @@ public class ServerRatelimitProperties {
     private String requestsPerSecond;
     private String burst;
     private boolean delay = false;
+    private long delayTimeout = 1000;
 
     public boolean getEnableServerRatelimit() {
         return enableServerRatelimit;
@@ -61,6 +62,15 @@ public class ServerRatelimitProperties {
 
     public ServerRatelimitProperties setDelay(boolean delay) {
         this.delay = delay;
+        return this;
+    }
+
+    public long getDelayTimeout() {
+        return delayTimeout;
+    }
+
+    public ServerRatelimitProperties setDelayTimeout(long delayTimeout) {
+        this.delayTimeout = delayTimeout;
         return this;
     }
 }

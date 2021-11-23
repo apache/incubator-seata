@@ -47,6 +47,7 @@ public interface DefaultValues {
     String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
     boolean DEFAULT_SERVER_RATELIMIT_DELAY = false;
+    long DEFAULT_DELAY_TIMEOUT = 1000;
 
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";

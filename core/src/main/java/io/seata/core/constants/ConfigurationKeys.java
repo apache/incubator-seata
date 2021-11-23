@@ -334,6 +334,11 @@ public interface ConfigurationKeys {
     String DELAY = RATELIMIT_PREFIX + "delay";
 
     /**
+     * The constant DELAY_TIMEOUT.
+     */
+    String DELAY_TIMEOUT = RATELIMIT_PREFIX + "delayTimeout";
+
+    /**
      * The constant RECOVERY_PREFIX.
      */
     String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";

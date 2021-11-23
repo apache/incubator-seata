@@ -24,6 +24,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
+import static io.seata.common.DefaultValues.DEFAULT_DELAY_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RATELIMIT_DELAY;
 
 /**
@@ -62,6 +63,11 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
      */
     private boolean delay;
 
+    /**
+     * Timeout in milliseconds.
+     */
+    private long timeout;
+
     private Object lock = new Object();
 
     public TokenBucketLimiter() {
@@ -72,19 +78,20 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
     }
 
     public TokenBucketLimiter(double requestsPerSecond, double burst) {
-        this(requestsPerSecond, burst, DEFAULT_SERVER_RATELIMIT_DELAY);
+        this(requestsPerSecond, burst, DEFAULT_SERVER_RATELIMIT_DELAY, DEFAULT_DELAY_TIMEOUT);
     }
 
-    public TokenBucketLimiter(double requestsPerSecond, boolean delay) {
-        this(requestsPerSecond, requestsPerSecond, delay);
+    public TokenBucketLimiter(double requestsPerSecond, boolean delay, long timeout) {
+        this(requestsPerSecond, requestsPerSecond, delay, timeout);
     }
 
-    public TokenBucketLimiter(double requestsPerSecond, double burst, boolean delay) {
+    public TokenBucketLimiter(double requestsPerSecond, double burst, boolean delay, long timeout) {
         this.numOfToken = 1;
         this.microSecondsPerToken = TimeUnit.SECONDS.toMicros(1L) / requestsPerSecond;
         this.burst = burst;
         this.lastUpdateTimeInMicros = microTime();
         this.delay = delay;
+        this.timeout = timeout;
     }
 
     @Override
@@ -109,6 +116,9 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
         }
         this.lastUpdateTimeInMicros = microTime();
         this.delay = CONFIG.getBoolean(ConfigurationKeys.DELAY, DEFAULT_SERVER_RATELIMIT_DELAY);
+        if (delay) {
+            this.timeout = CONFIG.getLong(ConfigurationKeys.DELAY_TIMEOUT, DEFAULT_DELAY_TIMEOUT);
+        }
     }
 
     @Override
@@ -121,6 +131,9 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
 
     public boolean acquire() {
         long waitTimeInMicros = tryGetTokenWithDelay();
+        if (TimeUnit.MICROSECONDS.toMillis(waitTimeInMicros) > timeout) {
+            return false;
+        }
         try {
             TimeUnit.MICROSECONDS.sleep(waitTimeInMicros);
         } catch (InterruptedException e) {
