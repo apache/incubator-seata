@@ -31,11 +31,10 @@ import java.util.Map;
  * load SEATA xid for brpc request
  *
  * @author mxz0828@163.com
- * @date 2021/8/12
  */
 public class TransactionPropagationClientInterceptor extends AbstractInterceptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationServerInterceptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationClientInterceptor.class);
 
     @Override
     public void aroundProcess(Request brpcRequest, Response brpcResponse, InterceptorChain chain) throws Exception {

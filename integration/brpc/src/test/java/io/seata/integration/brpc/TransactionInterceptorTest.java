@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author mxz0828@163.com
- * @date 2021/8/16
  */
 public class TransactionInterceptorTest {
 

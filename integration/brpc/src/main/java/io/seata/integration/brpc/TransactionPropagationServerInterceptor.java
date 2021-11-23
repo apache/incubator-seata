@@ -31,7 +31,6 @@ import java.util.Map;
  * <p>2. clear SEATA xid when brpc request done in aroundProcess</p>
  *
  * @author mxz0828@163.com
- * @date 2021/8/12
  */
 public class TransactionPropagationServerInterceptor extends AbstractInterceptor {
 

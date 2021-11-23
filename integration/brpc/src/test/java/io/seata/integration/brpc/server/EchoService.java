@@ -20,7 +20,6 @@ import io.seata.integration.brpc.dto.Echo;
 
 /**
  * @author mxz0828@163.com
- * @date 2021/8/16
  */
 public interface EchoService {
 

@@ -24,7 +24,6 @@ import java.util.Objects;
 
 /**
  * @author mxz0828@163.com
- * @date 2021/8/16
  */
 public class EchoServiceImpl implements EchoService {
     @Override
