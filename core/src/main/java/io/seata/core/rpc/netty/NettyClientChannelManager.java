@@ -103,7 +103,7 @@ class NettyClientChannelManager {
             }
         }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("will connect to " + serverAddress);
+            LOGGER.info("will connect to {}", serverAddress);
         }
         Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, serverAddress, key -> new Object());
         synchronized (lockObj) {
@@ -206,7 +206,7 @@ class NettyClientChannelManager {
                 }
                 RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
             } else {
-                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.EMPTY_LIST);
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
             }
         }
     }
