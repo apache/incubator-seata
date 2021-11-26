@@ -39,6 +39,8 @@ import org.springframework.context.ApplicationContext;
 
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static java.io.File.separator;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 
 /**
  * The type Session store test.
@@ -89,7 +91,7 @@ public class SessionStoreTest {
     public void testRestoredFromFile() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
 
@@ -150,7 +152,7 @@ public class SessionStoreTest {
     public void testRestoredFromFile2() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
@@ -171,7 +173,7 @@ public class SessionStoreTest {
     public void testRestoredFromFileAsyncCommitting() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
@@ -227,7 +229,7 @@ public class SessionStoreTest {
     public void testRestoredFromFileCommitRetry() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
@@ -288,7 +290,7 @@ public class SessionStoreTest {
         try {
             SessionHolder.init("file");
 
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
@@ -349,7 +351,7 @@ public class SessionStoreTest {
         try {
             SessionHolder.init("file");
 
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
