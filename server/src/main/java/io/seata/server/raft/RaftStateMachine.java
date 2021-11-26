@@ -96,12 +96,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 try {
                     ByteBuffer byteBuffer = iterator.getData();
                     if (byteBuffer != null && byteBuffer.hasRemaining()) {
-                        KryoInnerSerializer kryo = FACTORY.get();
-                        try {
+                        try (KryoInnerSerializer kryo = FACTORY.get()) {
                             RaftSessionSyncMsg msg = kryo.deserialize(byteBuffer.array());
                             onExecuteRaft(msg);
-                        } finally {
-                            FACTORY.returnKryo(kryo);
                         }
                     }
                 } catch (Throwable e) {

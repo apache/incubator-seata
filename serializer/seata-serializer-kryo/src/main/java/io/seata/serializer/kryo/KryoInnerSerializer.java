@@ -15,18 +15,18 @@
  */
 package io.seata.serializer.kryo;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 /**
  * @author jsbxyyx
  */
-public class KryoInnerSerializer {
+public class KryoInnerSerializer implements AutoCloseable {
 
     private final Kryo kryo;
 
@@ -51,6 +51,11 @@ public class KryoInnerSerializer {
         Input input = new Input(bais);
         input.close();
         return (T) kryo.readClassAndObject(input);
+    }
+
+    @Override
+    public void close() {
+        KryoSerializerFactory.getInstance().returnKryo(this);
     }
 
 }

@@ -37,11 +37,8 @@ public class RaftTaskUtil {
 
     public static void createTask(Closure done, Object data) {
         final Task task = new Task();
-        KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get();
-        try {
+        try (KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get()) {
             task.setData(ByteBuffer.wrap(kryo.serialize(data)));
-        } finally {
-            KryoSerializerFactory.getInstance().returnKryo(kryo);
         }
         task.setDone(done == null ? status -> {
         } : done);
