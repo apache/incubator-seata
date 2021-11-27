@@ -317,7 +317,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected abstract String getTransactionServiceGroup();
 
     /**
-     * Whether to enable batch sending of requests，hand over to subclass implementation.
+     * Whether to enable batch sending of requests, hand over to subclass implementation.
      *
      * @return true:enable, false:disable
      */
