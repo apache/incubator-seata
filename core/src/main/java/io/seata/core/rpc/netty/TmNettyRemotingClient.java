@@ -192,7 +192,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     public boolean isEnableClientBatchSendRequest() {
         return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
-                DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
+            DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
     }
 
     @Override

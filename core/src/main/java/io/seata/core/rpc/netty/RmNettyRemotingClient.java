@@ -281,7 +281,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         // If the old configuration exists, use the old configuration
         // RM client Turns on batch sending by default
         return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST,
-                DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
+            DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
     }
 
     private void registerProcessor() {
