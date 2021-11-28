@@ -583,7 +583,7 @@ public final class ReflectionUtil {
         Method staticMethod = getMethod(targetClass, staticMethodName, parameterTypes);
         if (!Modifier.isStatic(staticMethod.getModifiers())) {
             throw new NoSuchMethodException("static method not found: "
-                                            + methodToString(targetClass, staticMethodName, parameterTypes));
+                    + methodToString(targetClass, staticMethodName, parameterTypes));
         }
 
         return invokeStaticMethod(staticMethod, args);
@@ -679,7 +679,7 @@ public final class ReflectionUtil {
      */
     public static String methodToString(Method method) {
         String methodStr = method.getDeclaringClass().getSimpleName() + "." + method.getName()
-                           + parameterTypesToString(method.getParameterTypes());
+                + parameterTypesToString(method.getParameterTypes());
         if (Modifier.isStatic(method.getModifiers())) {
             methodStr = "static " + methodStr;
         }
