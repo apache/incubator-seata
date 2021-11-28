@@ -28,6 +28,7 @@ import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.client.LeaderInfoRequest;
 import io.seata.core.protocol.client.LeaderInfoResponse;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
@@ -345,6 +346,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         if (StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(), mode)) {
             response.setAddress(getLeaderAddress());
         }
+        response.setResultCode(ResultCode.Success);
         return response;
     }
 

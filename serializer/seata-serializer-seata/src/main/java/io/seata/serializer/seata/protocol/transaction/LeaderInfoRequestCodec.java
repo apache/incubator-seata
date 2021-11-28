@@ -13,26 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.protocol.client;
+package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.core.protocol.MessageType;
-import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
-import io.seata.core.protocol.transaction.AbstractTransactionResponse;
-import io.seata.core.rpc.RpcContext;
+import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.client.LeaderInfoRequest;
 
 /**
- * @author funkye
+ * The type Global begin request codec.
+ *
+ * @author zhangsen
  */
-public class LeaderInfoRequest extends AbstractTransactionRequestToTC {
+public class LeaderInfoRequestCodec extends AbstractTransactionRequestToTCCodec {
 
     @Override
-    public short getTypeCode() {
-        return MessageType.TYPE_LEADER_INFO;
+    public Class<?> getMessageClassType() {
+        return LeaderInfoRequest.class;
     }
 
     @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
+    public <T> void encode(T t, ByteBuf out) {
+    }
+
+    @Override
+    public <T> void decode(T t, ByteBuffer in) {
     }
 
 }
