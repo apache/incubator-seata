@@ -16,7 +16,6 @@
 package io.seata.server.storage.raft.lock;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
@@ -28,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * @description raft distributed lock
  * @author  funkye
  */
-@LoadLevel(name = "raft", scope = Scope.SINGLETON)
+@LoadLevel(name = "raft")
 public class RaftDistributedLocker implements DistributedLocker {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(

@@ -161,6 +161,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         this.core = new DefaultCore(remotingServer);
     }
 
+    public static DefaultCoordinator getInstance() {
+        return getInstance(null);
+    }
+
     public static DefaultCoordinator getInstance(RemotingServer remotingServer) {
         if (null == instance) {
             synchronized (DefaultCoordinator.class) {
@@ -473,4 +477,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     public void setRemotingServer(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
     }
+
+    public RemotingServer getRemotingServer() {
+        return remotingServer;
+    }
+
 }

@@ -15,13 +15,25 @@
  */
 package io.seata.server;
 
+import com.alipay.sofa.jraft.RouteTable;
+import com.alipay.sofa.jraft.conf.Configuration;
+import com.alipay.sofa.jraft.entity.PeerId;
+import com.alipay.sofa.jraft.option.CliOptions;
+import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.seata.common.exception.StoreException;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.client.LeaderInfoRequest;
+import io.seata.core.protocol.client.LeaderInfoResponse;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractGlobalEndResponse;
+import io.seata.core.protocol.transaction.AbstractTransactionRequest;
+import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportRequest;
@@ -39,11 +51,17 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.TCInboundHandler;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.RpcContext;
+import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
+import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 
 /**
  * The type Abstract tc inbound handler.
@@ -319,6 +337,41 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    @Override
+    public LeaderInfoResponse handle(LeaderInfoRequest request, final RpcContext rpcContext) {
+        LeaderInfoResponse response = new LeaderInfoResponse();
+        String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        response.setMode(mode);
+        if (StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(), mode)) {
+            response.setAddress(getLeaderAddress());
+        }
+        return response;
+    }
+
+    protected String getLeaderAddress() {
+        String initConfStr = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        if (!StringUtils.isBlank(initConfStr)) {
+            final Configuration initConf = new Configuration();
+            if (!initConf.parse(initConfStr)) {
+                throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
+            }
+            RouteTable routeTable = RouteTable.getInstance();
+            routeTable.updateConfiguration(SEATA_RAFT_GROUP, initConf);
+            CliClientServiceImpl cliClientService = new CliClientServiceImpl();
+            cliClientService.init(new CliOptions());
+            try {
+                routeTable.refreshLeader(cliClientService, SEATA_RAFT_GROUP, 1000);
+                PeerId leader = routeTable.selectLeader(SEATA_RAFT_GROUP);
+                if (leader != null) {
+                    return leader.getIp() + ":" + (leader.getPort() - DEFAULT_RAFT_PORT_INTERVAL);
+                }
+            } catch (Exception e) {
+                LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
+            }
+        }
+        return null;
+    }
+
     /**
      * Do global report.
      *
@@ -342,4 +395,28 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
             LOGGER.error("check transaction status error,{}]", exx.getMessage());
         }
     }
+
+    /**
+     * Exception handle template.
+     *
+     * @param <T>      the type parameter
+     * @param <S>      the type parameter
+     * @param callback the callback
+     * @param request  the request
+     * @param response the response
+     */
+    @Override
+    public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
+        try {
+            if (RaftServerFactory.getInstance().isNotRaftModeLeader()) {
+                throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        " The current TC is not a leader node, interrupt processing !");
+            }
+            super.exceptionHandleTemplate(callback,request,response);
+        } catch (TransactionException tex) {
+            LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
+            callback.onTransactionException(request, response, tex);
+        }
+    }
+
 }

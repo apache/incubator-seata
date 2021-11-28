@@ -22,6 +22,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionRequestToRM;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
@@ -77,6 +78,14 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     @Override
     public void handle(UndoLogDeleteRequest request) {
         // https://github.com/seata/seata/issues/2226
+    }
+
+    /**
+     * modify leader info
+     * @param request the request
+     */
+    @Override
+    public void handle(LeaderNotifyRequest request) {
     }
 
     /**

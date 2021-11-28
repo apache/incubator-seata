@@ -75,6 +75,7 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         nodeOptions.setRaftMetaUri(dataPath + File.separator + "raft_meta");
         // Snapshot, optional, is generally recommended
         nodeOptions.setSnapshotUri(dataPath + File.separator + "snapshot");
+        nodeOptions.setElectionTimeoutMs(60000);
         boolean reporterEnabled = ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
         nodeOptions.setEnableMetrics(reporterEnabled);
         // Initialize the raft Group service framework

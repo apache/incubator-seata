@@ -183,6 +183,10 @@
             <artifactId>logback-kafka-appender</artifactId>
             <version>${kafka-appender.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>jraft-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

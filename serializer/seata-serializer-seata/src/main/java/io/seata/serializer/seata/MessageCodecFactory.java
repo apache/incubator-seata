@@ -18,6 +18,8 @@ package io.seata.serializer.seata;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import io.seata.core.protocol.client.LeaderInfoRequest;
+import io.seata.core.protocol.client.LeaderInfoResponse;
 import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
 import io.seata.serializer.seata.protocol.RegisterRMRequestCodec;
@@ -44,6 +46,7 @@ import io.seata.serializer.seata.protocol.transaction.GlobalRollbackRequestCodec
 import io.seata.serializer.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.LeaderInfoResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergeResultMessage;
@@ -130,6 +133,9 @@ public class MessageCodecFactory {
             case MessageType.TYPE_BRANCH_ROLLBACK:
                 msgCodec = new BranchRollbackRequestCodec();
                 break;
+            case MessageType.TYPE_NOTIFY_LEADER:
+                msgCodec = new BranchRollbackRequestCodec();
+                break;
             case MessageType.TYPE_GLOBAL_REPORT:
                 msgCodec = new GlobalReportRequestCodec();
                 break;
@@ -179,6 +185,8 @@ public class MessageCodecFactory {
                 return new BranchReportRequestCodec();
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequestCodec();
+            case MessageType.TYPE_LEADER_INFO:
+                return new LeaderInfoResponseCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -204,6 +212,8 @@ public class MessageCodecFactory {
                 return new GlobalLockQueryResponseCodec();
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponseCodec();
+            case MessageType.TYPE_LEADER_INFO_RESULT:
+                return new LeaderInfoResponseCodec();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponseCodec();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:
@@ -305,6 +315,8 @@ public class MessageCodecFactory {
                 return new BranchReportRequest();
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequest();
+            case MessageType.TYPE_LEADER_INFO:
+                return new LeaderInfoRequest();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -330,6 +342,8 @@ public class MessageCodecFactory {
                 return new GlobalLockQueryResponse();
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponse();
+            case MessageType.TYPE_LEADER_INFO_RESULT:
+                return new LeaderInfoResponse();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponse();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:

@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static java.io.File.separator;
 
 /**
@@ -114,9 +116,7 @@ public class SessionHolder {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
         } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                + separator + XID.getPort();
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                + separator + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.FILE.getName(), new Class[] {String.class, String.class},
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
@@ -129,9 +129,11 @@ public class SessionHolder {
             if (StoreMode.RAFT.equals(storeMode) || StoreMode.RAFT.getName()
                 .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
-                    new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
+                        new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.RAFT.getName());
             } else {
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+                        new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
             }
         } else if (StoreMode.REDIS.equals(storeMode)) {
@@ -148,7 +150,8 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
-        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
+        RaftServerFactory.getInstance().init(XID.getIpAddress(),
+            Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL)));
         if (RaftServerFactory.getInstance().isRaftMode()) {
             return;
         }

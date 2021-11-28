@@ -20,7 +20,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * @author jianbin.chen
@@ -42,7 +41,7 @@ public class AcquireLockExecute extends AbstractRaftMsgExecute {
         } else {
             branchSession = SessionConverter.convertBranchSession(sessionSyncMsg.getBranchSession());
         }
-        Boolean owner = RaftLockManager.getFileLockManager().acquireLock(branchSession);
+        Boolean owner = raftLockManager.localAcquireLock(branchSession);
         if (logger.isDebugEnabled()) {
             logger.debug("acquireLock xid: {}, branch id: {} , owner: {}", branchSession.getXid(),
                 branchSession.getBranchId(), owner);

@@ -23,7 +23,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * @author jianbin.chen
@@ -42,7 +41,7 @@ public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
         if (branchSession == null) {
             branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
             if (branchSession.getBranchType() == BranchType.AT && StringUtils.isNotBlank(branchSession.getLockKey())) {
-                RaftLockManager.getFileLockManager().acquireLock(branchSession);
+                raftLockManager.acquireLock(branchSession);
             }
             globalSession.add(branchSession);
             if (logger.isDebugEnabled()) {

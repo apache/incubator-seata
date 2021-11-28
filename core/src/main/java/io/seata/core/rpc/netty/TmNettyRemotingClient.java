@@ -177,6 +177,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
             super.init();
             if (io.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
                 getClientChannelManager().reconnect(transactionServiceGroup);
+                super.initLeaderAddress();
             }
         }
     }
@@ -227,6 +228,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         ClientOnResponseProcessor onResponseProcessor =
                 new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_LEADER_INFO_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor, null);

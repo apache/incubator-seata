@@ -15,6 +15,8 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.LeaderNotifyRequest;
+
 /**
  * The interface Rm inbound handler.
  *
@@ -44,4 +46,12 @@ public interface RMInboundHandler {
      * @param request the request
      */
     void handle(UndoLogDeleteRequest request);
+
+    /**
+     * Handle modify leader address .
+     *
+     * @param request the request
+     */
+    void handle(LeaderNotifyRequest request);
+
 }

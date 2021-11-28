@@ -72,6 +72,16 @@ public interface MessageType {
     short TYPE_GLOBAL_LOCK_QUERY_RESULT = 22;
 
     /**
+     * the constant TYPE_LEADER_INFO
+     */
+    short TYPE_LEADER_INFO = 24;
+
+    /**
+     * the constant TYPE_LEADER_INFO_RESULT
+     */
+    short TYPE_LEADER_INFO_RESULT = 25;
+
+    /**
      * The constant TYPE_BRANCH_COMMIT.
      */
     short TYPE_BRANCH_COMMIT = 3;
@@ -138,4 +148,10 @@ public interface MessageType {
      * the constant TYPE_HEARTBEAT_MSG
      */
     short TYPE_HEARTBEAT_MSG = 120;
+
+    /**
+     * the constant TYPE_NOTIFY_LEADER
+     */
+    short TYPE_NOTIFY_LEADER = 23;
+
 }

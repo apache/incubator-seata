@@ -15,6 +15,8 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.client.LeaderInfoRequest;
+import io.seata.core.protocol.client.LeaderInfoResponse;
 import io.seata.core.rpc.RpcContext;
 
 /**
@@ -95,5 +97,14 @@ public interface TCInboundHandler {
      * @return the global report response
      */
     GlobalReportResponse handle(GlobalReportRequest globalReport, RpcContext rpcContext);
+
+    /**
+     * Handle branch register response.
+     *
+     * @param leaderInfoRequest the leader info
+     * @param rpcContext     the rpc context
+     * @return the leader info response
+     */
+    LeaderInfoResponse handle(LeaderInfoRequest leaderInfoRequest, RpcContext rpcContext);
 
 }

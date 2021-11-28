@@ -13,18 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registry;
+package io.seata.core.protocol.client;
 
-import io.seata.common.loader.LoadLevel;
+import io.seata.core.protocol.MessageType;
+import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
+import io.seata.core.protocol.transaction.AbstractTransactionResponse;
+import io.seata.core.rpc.RpcContext;
 
 /**
- * @author slievrly
+ * @author funkye
  */
-@LoadLevel(name = "File", order = 1)
-public class FileRegistryProvider implements RegistryProvider {
+public class LeaderInfoRequest extends AbstractTransactionRequestToTC {
 
     @Override
-    public RegistryService provide() {
-        return FileRegistryServiceImpl.getInstance();
+    public short getTypeCode() {
+        return MessageType.TYPE_LEADER_INFO;
+    }
+
+    @Override
+    public AbstractTransactionResponse handle(RpcContext rpcContext) {
+        return handler.handle(this, rpcContext);
     }
 }

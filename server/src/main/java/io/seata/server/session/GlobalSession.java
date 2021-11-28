@@ -308,34 +308,41 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void addBranch(BranchSession branchSession) throws TransactionException {
         if (RaftServerFactory.getInstance().isRaftMode()) {
+            CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
             Closure closure = status -> {
                 if (status.isOk()) {
                     try {
-                        this.localAddBranch(branchSession);
+                        completableFuture.complete(this.localAddBranch(branchSession));
                     } catch (TransactionException e) {
-                        e.printStackTrace();
+                        LOGGER.error("raft mode add branch error: {}", e.getMessage(), e);
                     }
                 }
             };
             BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
             RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_BRANCH_SESSION, branchTransactionDO);
             RaftTaskUtil.createTask(closure, raftSyncMsg);
+            try {
+                completableFuture.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new TransactionException(
+                        "add branch failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
+            }
         } else {
             this.localAddBranch(branchSession);
         }
     }
 
-    public void localAddBranch(BranchSession branchSession) throws TransactionException {
+    public boolean localAddBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onAddBranch(this, branchSession);
         }
         branchSession.setStatus(BranchStatus.Registered);
-        add(branchSession);
+        return add(branchSession);
     }
 
     @Override
     public void removeBranch(Long branchId) throws TransactionException {
-        removeBranch(getBranch(branchId));
+        this.removeBranch(getBranch(branchId));
     }
 
     @Override
@@ -347,7 +354,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                     try {
                         completableFuture.complete(this.localRemoveBranch(branchSession));
                     } catch (TransactionException e) {
-                        e.printStackTrace();
+                        LOGGER.error("raft mode remove branch error: {}", e.getMessage(), e);
                     }
                 }
             };

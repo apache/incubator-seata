@@ -70,6 +70,7 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>jraft-core</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

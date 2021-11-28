@@ -27,16 +27,20 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import io.seata.common.XID;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServerFactory;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.store.StoreMode;
 import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
+import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.raft.execute.RaftMsgExecute;
@@ -52,7 +56,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.lock.RaftLockManager;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +105,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                         }
                     }
                 } catch (Throwable e) {
-                    LOGGER.error("Message synchronization failure", e);
+                    LOGGER.error("Message synchronization failure: {}", e.getMessage(), e);
                 }
             }
             Optional.ofNullable(closure).ifPresent(processor -> processor.run(Status.OK()));
@@ -184,7 +187,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 });
                 rootSessionMap.putAll(sessionMap);
                 if (CollectionUtils.isNotEmpty(branchSessionByteMap)) {
-                    LockManager fileLockManager = RaftLockManager.getFileLockManager();
+                    LockManager fileLockManager = LockerManagerFactory.getLockManager();
                     branchSessionByteMap.forEach((k, v) -> {
                         BranchSession branchSession = new BranchSession();
                         branchSession.decode(v);
@@ -214,6 +217,11 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
             SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreMode.FILE, false);
         }
+        NettyRemotingServer nettyRemotingServer =
+            (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
+        LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();
+        leaderNotifyRequest.setAddress(XID.getIpAddressAndPort());
+        nettyRemotingServer.sendSyncRequestAll(leaderNotifyRequest);
         this.leaderTerm.set(term);
         super.onLeaderStart(term);
     }

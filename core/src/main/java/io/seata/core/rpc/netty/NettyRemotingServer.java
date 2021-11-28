@@ -15,6 +15,9 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.netty.channel.Channel;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.TransactionMessageHandler;
@@ -25,9 +28,6 @@ import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The netty remoting server.
@@ -97,6 +97,7 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         super.registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_LEADER_INFO, onRequestProcessor, messageExecutor);
         // 2. registry on response message processor
         ServerOnResponseProcessor onResponseProcessor =
             new ServerOnResponseProcessor(getHandler(), getFutures());

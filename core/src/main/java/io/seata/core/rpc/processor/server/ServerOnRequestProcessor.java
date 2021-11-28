@@ -15,7 +15,6 @@
  */
 package io.seata.core.rpc.processor.server;
 
-import io.seata.core.exception.TransactionExceptionCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +23,13 @@ import com.alipay.sofa.jraft.entity.Task;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.client.LeaderInfoRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
@@ -163,7 +164,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage)message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            if (!raftMode) {
+            if (!raftMode || msg instanceof LeaderInfoRequest) {
                 remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
             } else {
                 RaftClosure closure = new RaftClosure() {

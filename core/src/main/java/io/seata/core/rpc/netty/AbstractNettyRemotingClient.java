@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -29,12 +28,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
-import com.alipay.sofa.jraft.RouteTable;
-import com.alipay.sofa.jraft.conf.Configuration;
-import com.alipay.sofa.jraft.entity.PeerId;
-import com.alipay.sofa.jraft.option.CliOptions;
-import com.alipay.sofa.jraft.rpc.CliClientService;
-import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -43,7 +36,6 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.EventExecutorGroup;
-import io.seata.common.XID;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
@@ -51,7 +43,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
@@ -59,6 +50,8 @@ import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.client.LeaderInfoRequest;
+import io.seata.core.protocol.client.LeaderInfoResponse;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -77,13 +70,9 @@ import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
-import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
-import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static io.seata.core.constants.ConfigurationKeys.GROUPLIST_POSTFIX;
 import static io.seata.core.exception.TransactionExceptionCode.NotRaftLeader;
 import static io.seata.core.protocol.ResultCode.Failed;
-import static io.seata.discovery.registry.RegistryService.PREFIX_SERVICE_ROOT;
 
 /**
  * The netty remoting client.
@@ -127,9 +116,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
+
     private static volatile RaftLeader LEADER_ADDRESS;
-    private static volatile CliClientService CLI_CLIENT_SERVICE;
-    private static volatile List<InetSocketAddress> ADDRESS_LIST;
 
     @Override
     public void init() {
@@ -141,30 +129,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 new LinkedBlockingQueue<>(),
                 new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
-        }
-        if (LEADER_ADDRESS == null) {
-            synchronized (FIND_LEADER_EXECUTOR) {
-                if (LEADER_ADDRESS == null) {
-                    if (StringUtils.isNotBlank(getInitAddress())) {
-                        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-                        if (Objects.equals(storeMode, StoreMode.RAFT.getName())) {
-                            CLI_CLIENT_SERVICE = new CliClientServiceImpl();
-                            CLI_CLIENT_SERVICE.init(new CliOptions());
-                            LEADER_ADDRESS = new RaftLeader();
-                            findLeader();
-                            // The leader election takes 5 second
-                            FIND_LEADER_EXECUTOR.scheduleAtFixedRate(() -> {
-                                try {
-                                    findLeader();
-                                } catch (Exception e) {
-                                    // prevents an exception from being thrown that causes the thread to break
-                                    LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
-                                }
-                            }, DEFAULT_RAFT_PORT_INTERVAL * 5, DEFAULT_RAFT_PORT_INTERVAL * 5, TimeUnit.MILLISECONDS);
-                        }
-                    }
-                }
-            }
         }
         super.init();
         clientBootstrap.start();
@@ -315,7 +279,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
-            if (LEADER_ADDRESS != null && LEADER_ADDRESS.getInetSocketAddress() != null) {
+            if (!(msg instanceof LeaderInfoRequest) && LEADER_ADDRESS != null
+                && LEADER_ADDRESS.getInetSocketAddress() != null) {
                 address = LEADER_ADDRESS.getInetSocketAddress();
             } else {
                 @SuppressWarnings("unchecked")
@@ -540,122 +505,70 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         }
     }
 
-    private void findLeader() {
-        if (LEADER_ADDRESS.isExpired()) {
-            synchronized (LEADER_ADDRESS) {
-                if (LEADER_ADDRESS.isExpired()) {
-                    List<InetSocketAddress> inetSocketAddressList = null;
-                    try {
-                        inetSocketAddressList = RegistryFactory.getInstance().lookup(getTransactionServiceGroup());
-                    } catch (Exception e) {
-                        if (LOGGER.isErrorEnabled()) {
-                            LOGGER.error(e.getMessage());
-                        }
-                    }
-                    if (CollectionUtils.isEmpty(inetSocketAddressList) || inetSocketAddressList.size() < 3) {
-                        if (ADDRESS_LIST != null) {
-                            inetSocketAddressList = ADDRESS_LIST;
-                        } else {
-                            if (LOGGER.isWarnEnabled()) {
-                                LOGGER.warn(" Could not be found the raft cluster list ");
+    protected void initLeaderAddress() {
+        if (LEADER_ADDRESS == null) {
+            synchronized (FIND_LEADER_EXECUTOR) {
+                if (LEADER_ADDRESS == null) {
+                    LEADER_ADDRESS = new RaftLeader();
+                    boolean raft = findLeader();
+                    if (raft) {
+                        // The leader election takes 5 second
+                        FIND_LEADER_EXECUTOR.scheduleAtFixedRate(() -> {
+                            try {
+                                findLeader();
+                            } catch (Exception e) {
+                                // prevents an exception from being thrown that causes the thread to break
+                                LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
                             }
-                            return;
-                        }
-                    }
-                    String initConfStr = getInitAddress();
-                    RouteTable routeTable = RouteTable.getInstance();
-                    if (StringUtils.isNotBlank(initConfStr)) {
-                        if (!Objects.equals(ADDRESS_LIST, inetSocketAddressList)) {
-                            ADDRESS_LIST = inetSocketAddressList;
-                            Configuration conf = new Configuration();
-                            String addresses = convert2RaftNode(inetSocketAddressList);
-                            if (!conf.parse(addresses)) {
-                                throw new IllegalArgumentException("Fail to parse conf:" + addresses);
-                            }
-                            if (!Objects.equals(routeTable.getConfiguration(SEATA_RAFT_GROUP), conf)) {
-                                routeTable.updateConfiguration(SEATA_RAFT_GROUP, conf);
-                            }
-                        }
-                        try {
-
-                            if (!routeTable
-                                .refreshLeader(CLI_CLIENT_SERVICE, SEATA_RAFT_GROUP, DEFAULT_RAFT_PORT_INTERVAL)
-                                .isOk()) {
-                                if (LOGGER.isWarnEnabled()) {
-                                    LOGGER.warn("refresh leader failed");
-                                }
-                                return;
-                            }
-                        } catch (Exception e) {
-                            LOGGER.error("refresh leader failed,error msg: {}", e.getMessage());
-                        }
-                        PeerId leader = routeTable.selectLeader(SEATA_RAFT_GROUP);
-                        int port = leader.getPort() + DEFAULT_RAFT_PORT_INTERVAL;
-                        for (InetSocketAddress inetSocketAddress : inetSocketAddressList) {
-                            if (inetSocketAddress.getPort() == port
-                                && inetSocketAddress.getAddress().getHostAddress().contains(leader.getIp())) {
-                                if (!Objects.equals(LEADER_ADDRESS.getInetSocketAddress(), inetSocketAddress)) {
-                                    LEADER_ADDRESS.setInetSocketAddress(inetSocketAddress);
-                                    XID.setIpAddress(leader.getIp());
-                                    XID.setPort(leader.getPort());
-                                    if (LOGGER.isDebugEnabled()) {
-                                        LOGGER.debug("switch the leader node to:{}:{}", XID.getIpAddress(),
-                                            XID.getPort());
-                                    }
-                                }
-                                break;
-                            }
-                        }
+                        }, DEFAULT_RAFT_PORT_INTERVAL * 5, DEFAULT_RAFT_PORT_INTERVAL * 5, TimeUnit.MILLISECONDS);
                     }
                 }
             }
         }
     }
 
-    private String getInitAddress() {
-        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
-        if (StringUtils.isBlank(initConfStr)) {
-            String cluster = RegistryFactory.getInstance().getServiceGroup(getTransactionServiceGroup());
-            if (StringUtils.isNotBlank(cluster)) {
-                initConfStr = CONFIG.getConfig(new StringBuilder(PREFIX_SERVICE_ROOT)
-                    .append(FILE_CONFIG_SPLIT_CHAR).append(cluster).append(GROUPLIST_POSTFIX).toString());
+    private boolean findLeader() {
+        if (LEADER_ADDRESS.isExpired()) {
+            synchronized (LEADER_ADDRESS) {
+                if (LEADER_ADDRESS.isExpired()) {
+                    for (int i = 0; i < 2; i++) {
+                        LeaderInfoRequest leaderInfoRequest = new LeaderInfoRequest();
+                        try {
+                            String tcAddress = loadBalance(getTransactionServiceGroup(), leaderInfoRequest);
+                            if (StringUtils.isNotBlank(tcAddress)) {
+                                Channel channel = clientChannelManager.acquireChannel(tcAddress);
+                                RpcMessage rpcMessage =
+                                    buildRequestMessage(leaderInfoRequest, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                                LeaderInfoResponse leaderInfoResponse =
+                                    (LeaderInfoResponse)super.sendSync(channel, rpcMessage, 2000);
+                                if (leaderInfoResponse != null && StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(),
+                                    leaderInfoResponse.getMode())) {
+                                    if (StringUtils.isNotBlank(leaderInfoResponse.getAddress())) {
+                                        String[] address = leaderInfoResponse.getAddress().split(":");
+                                        LEADER_ADDRESS.setInetSocketAddress(
+                                            new InetSocketAddress(address[0], Integer.parseInt(address[1])));
+                                        return true;
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                        } catch (TimeoutException e) {
+                            LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
+                        } catch (FrameworkException e) {
+                            LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
+                        }
+                    }
+                }
             }
         }
-        return initConfStr;
+        return false;
     }
 
-    private String convert2RaftNode(String addresses) {
-        return convert2RaftNode(addresses.split(ADDRESS_SPLIT_CHAR));
-    }
-
-    private String convert2RaftNode(String... addresses) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < addresses.length;) {
-            String[] address = addresses[i].split(ADDRESS_LINK_CHAR);
-            String ip = address[0];
-            Integer port = Integer.valueOf(address[1]) - DEFAULT_RAFT_PORT_INTERVAL;
-            stringBuilder.append(ip).append(ADDRESS_LINK_CHAR).append(port);
-            i++;
-            if (i < addresses.length) {
-                stringBuilder.append(ADDRESS_SPLIT_CHAR);
-            }
+    public void modifyLeader(String ip, int port) {
+        synchronized (LEADER_ADDRESS) {
+            LEADER_ADDRESS.setInetSocketAddress(new InetSocketAddress(ip, port));
         }
-        return stringBuilder.toString();
-    }
-
-    private String convert2RaftNode(List<InetSocketAddress> addresses) {
-        StringBuilder stringBuilder = new StringBuilder();
-        int i = 0;
-        while (i < addresses.size()) {
-            InetSocketAddress inetSocketAddress = addresses.get(i);
-            stringBuilder.append(inetSocketAddress.getHostName()).append(ADDRESS_LINK_CHAR)
-                .append(inetSocketAddress.getPort());
-            i++;
-            if (i < addresses.size()) {
-                stringBuilder.append(ADDRESS_SPLIT_CHAR);
-            }
-        }
-        return convert2RaftNode(stringBuilder.toString());
     }
 
 }

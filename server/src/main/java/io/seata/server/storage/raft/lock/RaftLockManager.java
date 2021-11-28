@@ -19,15 +19,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import com.alipay.sofa.jraft.Closure;
 import io.seata.common.exception.StoreException;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.core.store.StoreMode;
-import io.seata.server.lock.AbstractLockManager;
-import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
@@ -43,14 +39,7 @@ import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_
  * @author funkye
  */
 @LoadLevel(name = "raft")
-public class RaftLockManager extends AbstractLockManager {
-
-    private static final FileLockManager FILE_LOCK_MANAGER =
-        (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
-
-    public static LockManager getFileLockManager() {
-        return FILE_LOCK_MANAGER;
-    }
+public class RaftLockManager extends FileLockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
@@ -73,12 +62,20 @@ public class RaftLockManager extends AbstractLockManager {
             throw new StoreException(e);
         }
     }
+    
+    public boolean localAcquireLock(BranchSession branchSession) throws TransactionException {
+        return super.acquireLock(branchSession);
+    }
 
     @Override
     public Locker getLocker(BranchSession branchSession) {
-        return FILE_LOCK_MANAGER.getLocker(branchSession);
+        return super.getLocker(branchSession);
     }
 
+    public boolean localReleaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
+        return super.releaseGlobalSessionLock(globalSession);
+    }
+    
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
@@ -87,7 +84,7 @@ public class RaftLockManager extends AbstractLockManager {
         Closure closure = status -> {
             if (status.isOk()) {
                 try {
-                    completableFuture.complete(FILE_LOCK_MANAGER.releaseGlobalSessionLock(globalSession));
+                    completableFuture.complete(super.releaseGlobalSessionLock(globalSession));
                 } catch (TransactionException e) {
                     completableFuture.completeExceptionally(e);
                 }

@@ -15,11 +15,14 @@
  */
 package io.seata.server.raft.execute;
 
+import io.seata.server.storage.raft.lock.RaftLockManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jianbin.chen
@@ -29,6 +32,8 @@ public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected RaftSessionSyncMsg sessionSyncMsg;
+    
+    protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
 
     protected RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
 

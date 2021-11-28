@@ -19,7 +19,6 @@ import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * @author jianbin.chen
@@ -38,7 +37,7 @@ public class ReleaseLockExecute extends AbstractRaftMsgExecute {
             if (logger.isDebugEnabled()) {
                 logger.debug("releaseGlobalSessionLock xid: {}", globalSession.getXid());
             }
-            return RaftLockManager.getFileLockManager().releaseGlobalSessionLock(globalSession);
+            return raftLockManager.localReleaseGlobalSessionLock(globalSession);
         }
         return false;
     }

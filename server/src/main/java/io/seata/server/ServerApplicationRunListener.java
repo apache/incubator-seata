@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server;
 
 import java.util.Properties;
@@ -26,8 +25,11 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
@@ -93,7 +95,7 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
         this.targetPort = port;
         // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
         System.setProperty(SERVER_SERVICE_PORT_CAMEL, port);
-
+        System.setProperty(SERVER_RAFT_PORT_CAMEL, String.valueOf(Integer.parseInt(port) + DEFAULT_RAFT_PORT_INTERVAL));
     }
 
     @Override

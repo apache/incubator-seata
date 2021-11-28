@@ -15,6 +15,8 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
@@ -70,6 +72,14 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    public void sendSyncRequestAll(Object msg) {
+        Optional<Collection<Channel>> optional = Optional.ofNullable(ChannelManager.getRmChannels().values());
+        optional.ifPresent(channels -> channels.parallelStream().forEach(channel -> {
+            RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+            super.sendAsync(channel, rpcMessage);
+        }));
     }
 
     @Override

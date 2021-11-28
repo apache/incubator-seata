@@ -84,8 +84,7 @@ public class RaftServerFactory {
         }
         // analytic parameter
         final PeerId serverId = new PeerId();
-        String colon = ":";
-        String serverIdStr = new StringBuilder(host).append(":").append(port - DEFAULT_RAFT_PORT_INTERVAL).toString();
+        String serverIdStr = host + ":" + port;
         if (!serverId.parse(serverIdStr)) {
             throw new IllegalArgumentException("fail to parse serverId:" + serverIdStr);
         }
@@ -95,7 +94,7 @@ public class RaftServerFactory {
             raftMode = true;
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                                + separator + serverIdStr.split(colon)[1];
+                                + separator + serverIdStr.split(":")[1];
         final NodeOptions nodeOptions = new NodeOptions();
         // set the election timeout to 1 second
         nodeOptions.setElectionTimeoutMs(DEFAULT_RAFT_PORT_INTERVAL);
@@ -168,7 +167,7 @@ public class RaftServerFactory {
     }
 
     public Boolean isNotRaftModeLeader() {
-        return !isLeader() && isRaftMode();
+        return !isLeader() || !isRaftMode();
     }
 
     private static class SingletonHandler {

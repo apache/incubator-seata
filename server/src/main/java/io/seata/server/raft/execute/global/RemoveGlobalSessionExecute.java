@@ -18,13 +18,11 @@ package io.seata.server.raft.execute.global;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * @author jianbin.chen
@@ -46,7 +44,7 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
                 raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
             if (globalSession != null) {
                 try {
-                    RaftLockManager.getFileLockManager().releaseGlobalSessionLock(globalSession);
+                    raftLockManager.localReleaseGlobalSessionLock(globalSession);
                     raftSessionManager.removeGlobalSession(globalSession);
                     if (logger.isDebugEnabled()) {
                         logger.debug("end xid: {}", globalSession.getXid());
