@@ -14,15 +14,14 @@
  *  limitations under the License.
  */
 package io.seata.core.exception;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract exception handler.
@@ -132,6 +131,5 @@ public abstract class AbstractExceptionHandler {
             callback.onException(request, response, rex);
         }
     }
-
 
 }

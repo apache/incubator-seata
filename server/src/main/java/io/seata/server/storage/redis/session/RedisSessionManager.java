@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
 public class RedisSessionManager extends AbstractSessionManager
-        implements Initialize {
+    implements Initialize {
     /**
      * The constant LOGGER.
      */
@@ -105,7 +105,7 @@ public class RedisSessionManager extends AbstractSessionManager
     /**
      * remove globalSession 1. rootSessionManager remove normal globalSession 2. retryCommitSessionManager and
      * retryRollbackSessionManager remove retry expired globalSession
-     *
+     * 
      * @param session
      *            the session
      * @throws TransactionException
@@ -167,8 +167,7 @@ public class RedisSessionManager extends AbstractSessionManager
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(
-                new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
                 GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));

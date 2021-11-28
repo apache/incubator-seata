@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
