@@ -114,7 +114,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     if (args.length > 1 && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
                         defaultValue = args[1];
                     }
-                    Object finalDefaultValue = defaultValue;
+                    final Object finalDefaultValue = defaultValue;
                     ObjectWrapper wrapper = CollectionUtils.computeIfAbsent(CONFIG_CACHE, rawDataId,
                         k -> new ObjectWrapper(null, type, finalDefaultValue));
                     boolean notEquals = null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue);
