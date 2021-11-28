@@ -112,8 +112,6 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
-            String lockerType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(lockerType);
         } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
@@ -130,11 +128,9 @@ public class SessionHolder {
                 .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-                DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.RAFT.getName());
             } else {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-                DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
             }
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
@@ -144,14 +140,17 @@ public class SessionHolder {
                 StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
         RaftServerFactory.getInstance().init(XID.getIpAddress(),
             Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL)));
+        if (RaftServerFactory.getInstance().getRaftServer() != null) {
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.RAFT.getName());
+        } else {
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(storeMode.getName());
+        }
         if (RaftServerFactory.getInstance().isRaftMode()) {
             return;
         }

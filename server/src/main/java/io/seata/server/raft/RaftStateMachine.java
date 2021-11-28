@@ -153,7 +153,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     @Override
     public boolean onSnapshotLoad(final SnapshotReader reader) {
         if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
-            return false;
+            return true;
         }
         if (isLeader()) {
             if (LOGGER.isWarnEnabled()) {
@@ -216,12 +216,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         // become the leader again,reloading global session
         if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
             SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreMode.FILE, false);
+            NettyRemotingServer nettyRemotingServer =
+                    (NettyRemotingServer) DefaultCoordinator.getInstance().getRemotingServer();
+            LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();
+            leaderNotifyRequest.setAddress(XID.getIpAddressAndPort());
+            nettyRemotingServer.sendSyncRequestAll(leaderNotifyRequest);
         }
-        NettyRemotingServer nettyRemotingServer =
-            (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
-        LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();
-        leaderNotifyRequest.setAddress(XID.getIpAddressAndPort());
-        nettyRemotingServer.sendSyncRequestAll(leaderNotifyRequest);
         this.leaderTerm.set(term);
         super.onLeaderStart(term);
     }
