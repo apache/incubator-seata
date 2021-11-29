@@ -50,13 +50,13 @@ public class ServerApplicationListener implements GenericApplicationListener {
         }
 
         ApplicationEnvironmentPreparedEvent environmentPreparedEvent = (ApplicationEnvironmentPreparedEvent)event;
-
         ConfigurableEnvironment environment = environmentPreparedEvent.getEnvironment();
+        String[] args = environmentPreparedEvent.getArgs();
+
 
         // port: -h > -D > env > yml > default
 
         //-p 8091
-        String[] args = environmentPreparedEvent.getArgs();
         if (args != null && args.length >= 2) {
             for (int i = 0; i < args.length; ++i) {
                 if ("-p".equalsIgnoreCase(args[i]) && i < args.length - 1) {
