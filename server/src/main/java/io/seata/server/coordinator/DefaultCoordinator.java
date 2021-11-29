@@ -75,6 +75,7 @@ import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.Constants.FINISHED_TO_DELETE;
 
 /**
  * The type Default coordinator.
@@ -437,18 +438,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         asyncCommitting.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting),
                 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        finishedToDelete.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.finishedToDeleteLock();
-            if (lock) {
-                try {
-                    handleFinishedToDeleteStates();
-                } catch (Exception e) {
-                    LOGGER.info("Exception deal error statuses ...", e);
-                } finally {
-                    SessionHolder.unFinishedToDeleteLock();
-                }
-            }
-        }, 0, ERROR_STATUS_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        finishedToDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(FINISHED_TO_DELETE, this::handleFinishedToDeleteStates),
+                0, ERROR_STATUS_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck),
                 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);

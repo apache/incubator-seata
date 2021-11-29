@@ -366,42 +366,6 @@ public class SessionHolder {
     }
 
     /**
-     * async committing lock
-     *
-     * @return the boolean
-     */
-    public static boolean asyncCommittingLock() {
-        return getRootSessionManager().scheduledLock(ASYNC_COMMITTING);
-    }
-
-    /**
-     * tx timeout check lock
-     *
-     * @return the boolean
-     */
-    public static boolean txTimeoutCheckLock() {
-        return getRootSessionManager().scheduledLock(TX_TIMEOUT_CHECK);
-    }
-
-    /**
-     * error states lock
-     *
-     * @return the boolean
-     */
-    public static boolean finishedToDeleteLock() {
-        return getRootSessionManager().scheduledLock(FINISHED_TO_DELETE);
-    }
-
-    /**
-     * undolog delete lock
-     *
-     * @return the boolean
-     */
-    public static boolean undoLogDeleteLock() {
-        return getRootSessionManager().scheduledLock(UNDOLOG_DELETE);
-    }
-
-    /**
      * Execute the function after get the distribute lock
      * @param key   the distribute lock key
      * @param func  the function to be call
@@ -425,15 +389,6 @@ public class SessionHolder {
             }
         }
         return lock;
-    }
-
-    /**
-     * un error states lock
-     *
-     * @return the boolean
-     */
-    public static boolean unFinishedToDeleteLock() {
-        return getRootSessionManager().unScheduledLock(FINISHED_TO_DELETE);
     }
 
     public static void destroy() {
