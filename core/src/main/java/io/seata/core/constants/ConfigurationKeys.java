@@ -547,7 +547,18 @@ public interface ConfigurationKeys {
     /**
      * The constant ENABLE_CLIENT_BATCH_SEND_REQUEST
      */
+    @Deprecated
     String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableClientBatchSendRequest";
+
+    /**
+     * The constant ENABLE_TM_CLIENT_BATCH_SEND_REQUEST
+     */
+    String ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableTmClientBatchSendRequest";
+
+    /**
+     * The constant ENABLE_RM_CLIENT_BATCH_SEND_REQUEST
+     */
+    String ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableRmClientBatchSendRequest";
 
     /**
      * The constant DISABLE_GLOBAL_TRANSACTION.

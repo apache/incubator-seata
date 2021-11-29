@@ -96,7 +96,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
      * Send via asynchronous thread {@link MergedSendRunnable}
-     * {@link NettyClientConfig#isEnableClientBatchSendRequest}
+     * {@link this#isEnableClientBatchSendRequest()}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
 
@@ -114,7 +114,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 clientChannelManager.reconnect(getTransactionServiceGroup());
             }
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
-        if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+        if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
                 KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
@@ -144,7 +144,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
         // send batch message
         // put message into basketMap, @see MergedSendRunnable
-        if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+        if (this.isEnableClientBatchSendRequest()) {
 
             // send batch message is sync request, needs to create messageFuture and put it in futures.
             MessageFuture messageFuture = new MessageFuture();
@@ -315,6 +315,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * @return transaction service group
      */
     protected abstract String getTransactionServiceGroup();
+
+    /**
+     * Whether to enable batch sending of requests, hand over to subclass implementation.
+     *
+     * @return true:enable, false:disable
+     */
+    protected abstract boolean isEnableClientBatchSendRequest();
 
     /**
      * The type Merged send runnable.

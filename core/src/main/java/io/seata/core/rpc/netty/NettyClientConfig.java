@@ -439,6 +439,7 @@ public class NettyClientConfig extends NettyBaseConfig {
         return RPC_DISPATCH_THREAD_PREFIX + "_" + NettyPoolKey.TransactionRole.RMROLE.name();
     }
 
+    @Deprecated
     public static boolean isEnableClientBatchSendRequest() {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
     }
