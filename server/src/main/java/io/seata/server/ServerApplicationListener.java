@@ -19,8 +19,6 @@ package io.seata.server;
 import java.util.Properties;
 
 import io.seata.common.util.StringUtils;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
