@@ -41,7 +41,7 @@ public interface Resource {
     /**
      * get resource type, AT, TCC, SAGA and XA
      *
-     * @return
+     * @return branch type
      */
     BranchType getBranchType();
 

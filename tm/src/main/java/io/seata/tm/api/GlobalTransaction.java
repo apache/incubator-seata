@@ -72,7 +72,6 @@ public interface GlobalTransaction {
     /**
      * Suspend the global transaction.
      *
-     * @param unbindXid if true,suspend the global transaction.
      * @return the SuspendedResourcesHolder which holds the suspend resources
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * @see SuspendedResourcesHolder

@@ -2,6 +2,8 @@
 
 It is warmly welcomed if you have interest to hack on Seata. First, we encourage this kind of willing very much. And here is a list of contributing guide for you.
 
+[[中文贡献文档](./CONTRIBUTING_CN.md)]
+
 ## Topics
 
 * [Reporting security issues](#reporting-security-issues)

@@ -28,6 +28,7 @@ import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,11 +48,11 @@ public class DataCompareUtils {
     }
 
     /**
-     * Is field equals.
+     * Is field equals result.
      *
-     * @param f0 the f0
-     * @param f1 the f1
-     * @return the Result<Boolean>
+     * @param f0 the f 0
+     * @param f1 the f 1
+     * @return the result
      */
     public static Result<Boolean> isFieldEquals(Field f0, Field f1) {
         if (f0 == null) {
@@ -91,7 +92,11 @@ public class DataCompareUtils {
         int f0Type = f0.getType();
         int f1Type = f1.getType();
         if (f0Type == Types.TIMESTAMP && f0.getValue().getClass().equals(String.class)) {
-            f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
+            if (f1.getValue().getClass().equals(LocalDateTime.class)) {
+                f0.setValue(LocalDateTime.parse(f0.getValue().toString()));
+            } else {
+                f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
+            }
         }
         if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
             f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
@@ -111,11 +116,11 @@ public class DataCompareUtils {
     }
 
     /**
-     * Is image equals.
+     * Is records equals result.
      *
      * @param beforeImage the before image
      * @param afterImage  the after image
-     * @return Result<Boolean>
+     * @return the result
      */
     public static Result<Boolean> isRecordsEquals(TableRecords beforeImage, TableRecords afterImage) {
         if (beforeImage == null) {
@@ -137,14 +142,13 @@ public class DataCompareUtils {
         }
     }
 
-
     /**
-     * Is rows equals.
+     * Is rows equals result.
      *
      * @param tableMetaData the table meta data
      * @param oldRows       the old rows
      * @param newRows       the new rows
-     * @return the Result<Boolean>
+     * @return the result
      */
     public static Result<Boolean> isRowsEquals(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
         if (!CollectionUtils.isSizeEquals(oldRows, newRows)) {
@@ -182,6 +186,13 @@ public class DataCompareUtils {
         return Result.ok();
     }
 
+    /**
+     * Row list to map map.
+     *
+     * @param rowList        the row list
+     * @param primaryKeyList the primary key list
+     * @return the map
+     */
     public static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeyList) {
         // {value of primaryKey, value of all columns}
         Map<String, Map<String, Field>> rowMap = new HashMap<>();

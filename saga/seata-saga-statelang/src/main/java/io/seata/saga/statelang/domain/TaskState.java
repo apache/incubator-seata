@@ -68,6 +68,13 @@ public interface TaskState extends State {
     Map<String, String> getStatus();
 
     /**
+     * loop strategy
+     *
+     * @return
+     */
+    Loop getLoop();
+
+    /**
      * retry strategy
      */
     interface Retry {
@@ -172,5 +179,46 @@ public interface TaskState extends State {
          * @return
          */
         String getExpressionType();
+    }
+
+    /**
+     * loop strategy
+     */
+    interface Loop {
+
+        /**
+         * parallel size, default 1
+         *
+         * @return
+         */
+        int getParallel();
+
+        /**
+         * collection object name
+         *
+         * @return
+         */
+        String getCollection();
+
+        /**
+         * element variable name
+         *
+         * @return
+         */
+        String getElementVariableName();
+
+        /**
+         * element variable index name, default loopCounter
+         *
+         * @return
+         */
+        String getElementIndexName();
+
+        /**
+         * completion condition, default nrOfInstances == nrOfCompletedInstances
+         *
+         * @return
+         */
+        String getCompletionCondition();
     }
 }

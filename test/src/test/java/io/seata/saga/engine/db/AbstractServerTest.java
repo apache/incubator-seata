@@ -15,6 +15,11 @@
  */
 package io.seata.saga.engine.db;
 
+import java.io.File;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
@@ -25,12 +30,6 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract Server Test
@@ -61,13 +60,11 @@ public abstract class AbstractServerTest {
                 System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
                 nettyServer = new NettyRemotingServer(workingThreads);
-                //server port
-                nettyServer.setListenPort(parameterParser.getPort());
                 UUIDGenerator.init(parameterParser.getServerNode());
                 //log store mode : file、db
                 SessionHolder.init(parameterParser.getStoreMode());
 
-                DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
+                DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyServer);
                 coordinator.init();
                 nettyServer.setHandler(coordinator);
                 // register ShutdownHook

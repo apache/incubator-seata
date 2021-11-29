@@ -25,6 +25,8 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -36,10 +38,10 @@ public class YamlFileConfig implements FileConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(YamlFileConfig.class);
     private Map configMap;
 
-    public YamlFileConfig(File file, String name) {
+    public YamlFileConfig(File file, String name) throws IOException {
         Yaml yaml = new Yaml();
-        try {
-            configMap = (Map) yaml.load(new FileInputStream(file));
+        try (InputStream is = new FileInputStream(file)) {
+            configMap = yaml.load(is);
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException("file not found");
         }

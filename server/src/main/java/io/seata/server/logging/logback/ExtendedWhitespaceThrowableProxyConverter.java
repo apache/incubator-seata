@@ -24,7 +24,7 @@ import ch.qos.logback.core.CoreConstants;
  * stack trace.
  *
  * @author Phillip Webb
- * @origin Copied from spring-boot.jar by wang.liang
+ * @origin Copied from spring-boot-xxx.jar by wang.liang
  */
 public class ExtendedWhitespaceThrowableProxyConverter extends ExtendedThrowableProxyConverter {
 

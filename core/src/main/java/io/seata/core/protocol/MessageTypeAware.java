@@ -16,13 +16,14 @@
 package io.seata.core.protocol;
 
 /**
- * @author zhangsen
+ * The interface Message type aware.
  */
 public interface MessageTypeAware {
 
     /**
-     * return the message type
-     * @return
+     * Gets type code.
+     *
+     * @return the type code
      */
     short getTypeCode();
 

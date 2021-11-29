@@ -8,7 +8,7 @@ A visual graph Seata Saga StateMachine Designer based on [GGEditor](https://gith
 
 ```sh
 $ git clone https://github.com/seata/seata.git
-$ cd saga/saga-statemachine-designer
+$ cd saga/seata-saga-statemachine-designer
 $ npm install
 $ npm start
 ```
