@@ -24,6 +24,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type Spring cloud alibaba configuration.
  *
@@ -59,11 +61,7 @@ public class SpringCloudAlibabaConfiguration implements ApplicationContextAware 
      */
     public String getTxServiceGroup() {
         if (txServiceGroup == null) {
-            String applicationId = getApplicationId();
-            if (applicationId == null) {
-                LOGGER.warn("{} is null, please set its value", SPRING_APPLICATION_NAME_KEY);
-            }
-            txServiceGroup = applicationId + DEFAULT_SPRING_CLOUD_SERVICE_GROUP_POSTFIX;
+            txServiceGroup = DEFAULT_TX_GROUP;
         }
         return txServiceGroup;
     }
