@@ -101,7 +101,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant QUERY_ALL_LOCK.
      */
     private static final String QUERY_ALL_LOCK = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
-            + " where table_name = '" + TABLE_NAME_PLACE_HOLD +"' order by gmt_create desc" ;
+            + " where table_name = '" + TABLE_NAME_PLACE_HOLD + "' order by gmt_create desc";
 
     @Override
     public String getAllLockSQL(String lockTable, String tableName) {
