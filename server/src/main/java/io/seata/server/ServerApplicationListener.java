@@ -19,10 +19,11 @@ package io.seata.server;
 import java.util.Properties;
 
 import io.seata.common.util.StringUtils;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.SpringApplicationRunListener;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.Ordered;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.logging.LoggingApplicationListener;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.event.GenericApplicationListener;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
@@ -34,26 +35,32 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONF
 /**
  * @author slievrly
  */
-public class ServerApplicationRunListener implements SpringApplicationRunListener, Ordered {
+public class ServerApplicationListener implements GenericApplicationListener {
 
-    private final SpringApplication application;
-    private final String[] args;
-    private String targetPort;
-
-    public ServerApplicationRunListener(SpringApplication sa, String[] args) {
-        this.application = sa;
-        this.args = args;
+    @Override
+    public boolean supportsEventType(ResolvableType eventType) {
+        return eventType.getRawClass() != null
+                && ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(eventType.getRawClass());
     }
 
     @Override
-    public void environmentPrepared(ConfigurableEnvironment environment) {
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (!(event instanceof ApplicationEnvironmentPreparedEvent)) {
+            return;
+        }
+
+        ApplicationEnvironmentPreparedEvent environmentPreparedEvent = (ApplicationEnvironmentPreparedEvent)event;
+        ConfigurableEnvironment environment = environmentPreparedEvent.getEnvironment();
+        String[] args = environmentPreparedEvent.getArgs();
+
+
         // port: -h > -D > env > yml > default
 
         //-p 8091
         if (args != null && args.length >= 2) {
             for (int i = 0; i < args.length; ++i) {
                 if ("-p".equalsIgnoreCase(args[i]) && i < args.length - 1) {
-                    setTargetPort(args[i + 1]);
+                    setTargetPort(environment, args[i + 1], true);
                     return;
                 }
             }
@@ -62,21 +69,21 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
         // -Dserver.servicePort=8091
         String dPort = environment.getProperty(SERVER_SERVICE_PORT_CAMEL);
         if (StringUtils.isNotBlank(dPort)) {
-            setTargetPort(dPort);
+            setTargetPort(environment, dPort, true);
             return;
         }
 
         //docker -e SEATA_PORT=8091
         String envPort = environment.getProperty(ENV_SEATA_PORT_KEY);
         if (StringUtils.isNotBlank(envPort)) {
-            setTargetPort(envPort);
+            setTargetPort(environment, envPort, true);
             return;
         }
 
         //yml properties seata.server.service-port=8091
         String configPort = environment.getProperty(SERVER_SERVICE_PORT_CONFIG);
         if (StringUtils.isNotBlank(configPort)) {
-            setTargetPort(configPort);
+            setTargetPort(environment, configPort, false);
             return;
         }
 
@@ -85,32 +92,29 @@ public class ServerApplicationRunListener implements SpringApplicationRunListene
         if (StringUtils.isBlank(serverPort)) {
             serverPort = "8080";
         }
-        targetPort = String.valueOf(Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT);
-        setTargetPort(targetPort);
+        String servicePort = String.valueOf(Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT);
+        setTargetPort(environment, servicePort, true);
     }
 
-    private void setTargetPort(String port) {
-        this.targetPort = port;
+    private void setTargetPort(ConfigurableEnvironment environment, String port, boolean needAddPropertySource) {
         // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
         System.setProperty(SERVER_SERVICE_PORT_CAMEL, port);
 
-    }
-
-    @Override
-    public void contextPrepared(ConfigurableApplicationContext context) {
-        Properties pro = new Properties();
-        pro.setProperty(SERVER_SERVICE_PORT_CONFIG, targetPort);
-        context.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", pro));
+        if (needAddPropertySource) {
+            // add property source to the first position
+            Properties pro = new Properties();
+            pro.setProperty(SERVER_SERVICE_PORT_CONFIG, port);
+            environment.getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", pro));
+        }
     }
 
     /**
-     * lower than EventPublishingRunListener
+     * higher than LoggingApplicationListener
      *
-     * @return
+     * @return the order
      */
     @Override
     public int getOrder() {
-        return 1;
+        return LoggingApplicationListener.DEFAULT_ORDER - 1;
     }
-
 }

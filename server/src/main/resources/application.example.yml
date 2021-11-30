@@ -8,7 +8,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${user.home}/logs
+    path: ${user.home}/logs/seata
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
@@ -94,7 +94,7 @@ seata:
       address-wait-time: 3000
 
   server:
-    service-port: 8091
+    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
