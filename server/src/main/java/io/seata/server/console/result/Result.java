@@ -15,10 +15,8 @@
  */
 package io.seata.server.console.result;
 
-import java.util.List;
-
 /**
- * @description: The result
+ * @description: The basic result
  * @author: zhongxiang.wang
  */
 public class Result<T> {
@@ -27,15 +25,13 @@ public class Result<T> {
 
     private String code = SUCCESS_CODE;
     private String message = SUCCESS_MSG;
-    private List<T> data;
 
     public Result() {
     }
 
-    public Result(String code, String message, List<T> data) {
+    public Result(String code, String message) {
         this.code = code;
         this.message = message;
-        this.data = data;
     }
 
     public boolean isSuccess() {
@@ -58,11 +54,4 @@ public class Result<T> {
         this.message = message;
     }
 
-    public List<T> getData() {
-        return data;
-    }
-
-    public void setData(List<T> data) {
-        this.data = data;
-    }
 }

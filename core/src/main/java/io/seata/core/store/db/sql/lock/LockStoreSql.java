@@ -27,9 +27,10 @@ public interface LockStoreSql {
      * Get all lock sql string.
      *
      * @param lockTable the lock table
+     * @param tableName the table name of the lock
      * @return the string
      */
-    String getAllLockSQL(String lockTable);
+    String getAllLockSQL(String lockTable, String tableName);
 
     /**
      * Get insert lock sql string.

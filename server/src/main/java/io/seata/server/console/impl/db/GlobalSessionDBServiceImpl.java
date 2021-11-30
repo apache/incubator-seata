@@ -15,28 +15,22 @@
  */
 package io.seata.server.console.impl.db;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
-import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
-import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.core.store.db.vo.GlobalSessionVO;
-import io.seata.server.console.manager.GlobalSessionServiceManager;
 import io.seata.server.console.result.PageResult;
+import io.seata.server.console.result.SingleResult;
 import io.seata.server.console.service.GlobalSessionService;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 
@@ -44,7 +38,7 @@ import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
  * Global Session DataBase ServiceImpl
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "db", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "db", scope = Scope.SINGLETON)
 public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
@@ -67,27 +61,18 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
     }
 
     @Override
-    public PageResult<GlobalSessionVO> queryAll() {
-        List<GlobalSessionVO> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet resultSet = null;
-        DataSource dataSource = GlobalSessionServiceManager.getDataSource();
-        String queryAllGlobalSessionSQL = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllGlobalSessionSQL(globalTable);
-        try {
-            conn = dataSource.getConnection();
-            ps = conn.prepareStatement(queryAllGlobalSessionSQL);
+    public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
+        throw new NotSupportYetException();
+    }
 
-            resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                list.add(this.convertGlobalSessionVO(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, conn, resultSet);
-        }
-        return PageResult.success(list, list.size(), 0, 0, 0);
+    @Override
+    public PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch) {
+        throw new NotSupportYetException();
+    }
+
+    @Override
+    public SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch) {
+        throw new NotSupportYetException();
     }
 
     private GlobalSessionVO convertGlobalSessionVO(ResultSet rs) throws SQLException {
@@ -104,15 +89,5 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
         globalSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
         globalSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
         return globalSessionVO;
-    }
-
-    @Override
-    public PageResult<GlobalSessionVO> queryByStatus(Integer status) {
-        return null;
-    }
-
-    @Override
-    public GlobalSessionVO queryByXid(String xid) {
-        return null;
     }
 }

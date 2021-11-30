@@ -41,6 +41,11 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
 
     /**
+     * The constant XID_PLACEHOLD
+     */
+    public static final String XID_PLACEHOLD = " #xid# ";
+
+    /**
      * The constant ALL_GLOBAL_COLUMNS.
      * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
@@ -62,16 +67,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE + ", " + ServerTableColumnsName.BRANCH_TABLE_STATUS + ", "
             + ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + ", "
             + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + ", " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED;
-
-    /**
-     * The constant QUERY_ALL_GLOBAL.
-     */
-    protected static final String QUERY_ALL_GLOBAL = "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD;
-
-    /**
-     * The constant QUERY_ALL_BRANCH.
-     */
-    protected static final String QUERY_ALL_BRANCH = "select " + ALL_BRANCH_COLUMNS + " from " + BRANCH_TABLE_PLACEHOLD;
 
     /**
      * The constant DELETE_GLOBAL_TRANSACTION.
@@ -139,14 +134,14 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " < ?"
             + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
-    @Override
-    public String getAllGlobalSessionSQL(String globalTable) {
-        return QUERY_ALL_GLOBAL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
-    }
+    /**
+     * The constant QUERY_ALL_BRANCH.
+     */
+    public static final String QUERY_ALL_BRANCH_WITH_XID = "select " + ALL_BRANCH_COLUMNS + " from " + BRANCH_TABLE_PLACEHOLD + " where xid = '" + XID_PLACEHOLD + "' order by gmt_create desc";
 
     @Override
-    public String getAllBranchSessionSQL(String branchTable) {
-        return QUERY_ALL_BRANCH.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    public String getAllBranchSessionSQL(String branchTable, String xid) {
+        return QUERY_ALL_BRANCH_WITH_XID.replace(BRANCH_TABLE_PLACEHOLD, branchTable).replace(XID_PLACEHOLD, xid);
     }
 
     @Override

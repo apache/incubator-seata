@@ -33,9 +33,9 @@ public class BranchSessionController {
      * Query all branchSession
      * @return
      */
-    @GetMapping("queryAll")
-    public PageResult<BranchSessionVO> queryAll() {
-        return BranchSessionServiceManager.getInstance().queryAll();
+    @GetMapping("queryByXid")
+    public PageResult<BranchSessionVO> queryByXid(String xid) {
+        return BranchSessionServiceManager.getInstance().queryByXid(xid);
     }
 
 }

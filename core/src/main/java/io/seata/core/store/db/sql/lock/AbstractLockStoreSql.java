@@ -38,6 +38,10 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant LOCK_TABLE_PLACE_HOLD.
      */
     protected static final String LOCK_TABLE_PLACE_HOLD = " #lock_table# ";
+    /**
+     * The constant TABLE_NAME_PLACE_HOLD
+     */
+    protected static final String TABLE_NAME_PLACE_HOLD = " #table_name# ";
 
     /**
      * The constant IN_PARAMS_PLACE_HOLD.
@@ -96,11 +100,12 @@ public class AbstractLockStoreSql implements LockStoreSql {
     /**
      * The constant QUERY_ALL_LOCK.
      */
-    private static final String QUERY_ALL_LOCK = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD;
+    private static final String QUERY_ALL_LOCK = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
+            + " where table_name = '" + TABLE_NAME_PLACE_HOLD +"' order by gmt_create desc" ;
 
     @Override
-    public String getAllLockSQL(String lockTable) {
-        return QUERY_ALL_LOCK.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
+    public String getAllLockSQL(String lockTable, String tableName) {
+        return QUERY_ALL_LOCK.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(TABLE_NAME_PLACE_HOLD, tableName);
     }
 
     @Override

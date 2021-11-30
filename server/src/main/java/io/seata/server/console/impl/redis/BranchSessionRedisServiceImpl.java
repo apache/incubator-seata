@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.impl.redis;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.core.store.db.vo.BranchSessionVO;
@@ -25,15 +26,11 @@ import io.seata.server.console.service.BranchSessionService;
  * Branch Session Redis ServiceImpl
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "redis", scope = Scope.SINGLETON)
 public class BranchSessionRedisServiceImpl implements BranchSessionService {
-    @Override
-    public PageResult<BranchSessionVO> queryAll() {
-        return null;
-    }
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
-        return null;
+        throw new NotSupportYetException();
     }
 }

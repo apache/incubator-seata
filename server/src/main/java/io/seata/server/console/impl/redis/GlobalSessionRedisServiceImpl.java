@@ -15,30 +15,33 @@
  */
 package io.seata.server.console.impl.redis;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.core.store.db.vo.GlobalSessionVO;
 import io.seata.server.console.result.PageResult;
+import io.seata.server.console.result.SingleResult;
 import io.seata.server.console.service.GlobalSessionService;
 
 /**
  * Global Session Redis ServiceImpl
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "redis", scope = Scope.SINGLETON)
 public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
+
     @Override
-    public PageResult<GlobalSessionVO> queryAll() {
-        return null;
+    public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
+        throw new NotSupportYetException();
     }
 
     @Override
-    public PageResult<GlobalSessionVO> queryByStatus(Integer status) {
-        return null;
+    public PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch) {
+        throw new NotSupportYetException();
     }
 
     @Override
-    public GlobalSessionVO queryByXid(String xid) {
-        return null;
+    public SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch) {
+        throw new NotSupportYetException();
     }
 }

@@ -44,7 +44,7 @@ import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
  * Branch Session DataBase ServiceImpl
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "db", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "db", scope = Scope.SINGLETON)
 public class BranchSessionDBServiceImpl implements BranchSessionService {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
@@ -67,13 +67,13 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
     }
 
     @Override
-    public PageResult<BranchSessionVO> queryAll() {
+    public PageResult<BranchSessionVO> queryByXid(String xid) {
         List<BranchSessionVO> list = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
         DataSource dataSource = BranchSessionServiceManager.getDataSource();
-        String queryAllBranchSessionSQL = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllBranchSessionSQL(branchTable);
+        String queryAllBranchSessionSQL = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllBranchSessionSQL(branchTable, xid);
         try {
             conn = dataSource.getConnection();
             ps = conn.prepareStatement(queryAllBranchSessionSQL);
@@ -87,11 +87,7 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
         } finally {
             IOUtil.close(ps, conn, resultSet);
         }
-        return PageResult.success(list, list.size(), 0, 0, 0);    }
-
-    @Override
-    public PageResult<BranchSessionVO> queryByXid(String xid) {
-        return null;
+        return PageResult.success(list, list.size(), 0, 0, 0);
     }
 
     private BranchSessionVO convertBranchSessionVO(ResultSet rs) throws SQLException {

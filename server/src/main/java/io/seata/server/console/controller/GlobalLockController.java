@@ -32,12 +32,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class GlobalLockController {
 
     /**
-     * Query all lock
+     * Query all lock by table
+     * @param tableName the table name of the lock
      * @return
      */
-    @GetMapping("queryAll")
-    public PageResult<GlobalLockVO> queryAll() {
-        return GlobalLockServiceManager.getInstance().queryAll();
+    @GetMapping("queryByTable")
+    public PageResult<GlobalLockVO> queryByTable(String tableName) {
+        return GlobalLockServiceManager.getInstance().queryByTable(tableName);
     }
 
 }

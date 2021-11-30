@@ -18,7 +18,6 @@ package io.seata.server.console.service;
 import io.seata.core.store.db.vo.GlobalLockVO;
 import io.seata.server.console.result.PageResult;
 
-import java.util.List;
 
 /**
  * Global lock service
@@ -27,15 +26,17 @@ import java.util.List;
 public interface GlobalLockService {
 
     /**
-     * Query locks by xids
-     * @return
+     * Query locks by table
+     * @param tableName the table name of the lock
+     * @return the GlobalLockVO list
      */
-    PageResult<GlobalLockVO> queryAll();
+    PageResult<GlobalLockVO> queryByTable(String tableName);
 
     /**
      * Query by xid
      * @param xid the xid
-     * @return
+     * @return the GlobalLockVO list
      */
-    PageResult<List<GlobalLockVO>> queryByXid(String xid);
+    PageResult<GlobalLockVO> queryByXid(String xid);
+
 }

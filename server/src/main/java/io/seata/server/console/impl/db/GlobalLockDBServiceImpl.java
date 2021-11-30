@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.impl.db;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -45,7 +46,7 @@ import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
  *
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "db", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "db", scope = Scope.SINGLETON)
 public class GlobalLockDBServiceImpl implements GlobalLockService {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
@@ -68,17 +69,16 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
     }
 
     @Override
-    public PageResult<GlobalLockVO> queryAll() {
+    public PageResult<GlobalLockVO> queryByTable(String tableName) {
         List<GlobalLockVO> list = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
         DataSource dataSource = GlobalLockServiceManager.getDataSource();
-        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable);
+        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable,tableName);
         try {
             conn = dataSource.getConnection();
             ps = conn.prepareStatement(queryAllLockSQL);
-
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 list.add(this.convertGlobalLockVO(resultSet));
@@ -93,8 +93,8 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
 
 
     @Override
-    public PageResult<List<GlobalLockVO>> queryByXid(String xid) {
-        return null;
+    public PageResult<GlobalLockVO> queryByXid(String xid) {
+        throw new NotSupportYetException();
     }
 
 

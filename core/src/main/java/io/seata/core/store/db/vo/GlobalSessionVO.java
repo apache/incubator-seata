@@ -16,6 +16,7 @@
 package io.seata.core.store.db.vo;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * GlobalSessionVO
@@ -44,6 +45,8 @@ public class GlobalSessionVO {
     private Date gmtCreate;
 
     private Date gmtModified;
+
+    private Set<BranchSessionVO> branchSessionVOs;
 
     public String getXid() {
         return xid;
@@ -131,5 +134,13 @@ public class GlobalSessionVO {
 
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    public Set<BranchSessionVO> getBranchSessionVOs() {
+        return branchSessionVOs;
+    }
+
+    public void setBranchSessionVOs(Set<BranchSessionVO> branchSessionVOs) {
+        this.branchSessionVOs = branchSessionVOs;
     }
 }

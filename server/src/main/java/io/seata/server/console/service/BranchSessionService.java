@@ -25,15 +25,9 @@ import io.seata.server.console.result.PageResult;
 public interface BranchSessionService {
 
     /**
-     * Query all branch Session
-     * @return
-     */
-    PageResult<BranchSessionVO> queryAll();
-
-    /**
      * Query branch session by xid
      * @param xid the xid
-     * @return
+     * @return the BranchSessionVO list
      */
     PageResult<BranchSessionVO> queryByXid(String xid);
 

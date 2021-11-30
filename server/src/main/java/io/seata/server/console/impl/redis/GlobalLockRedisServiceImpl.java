@@ -15,27 +15,27 @@
  */
 package io.seata.server.console.impl.redis;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.core.store.db.vo.GlobalLockVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.service.GlobalLockService;
 
-import java.util.List;
-
 /**
  * Global Lock Redis Service Impl
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "redis", scope = Scope.SINGLETON)
 public class GlobalLockRedisServiceImpl implements GlobalLockService {
+
     @Override
-    public PageResult<GlobalLockVO> queryAll() {
-        return null;
+    public PageResult<GlobalLockVO> queryByTable(String tableName) {
+        throw new NotSupportYetException();
     }
 
     @Override
-    public PageResult<List<GlobalLockVO>> queryByXid(String xid) {
-        return null;
+    public PageResult<GlobalLockVO> queryByXid(String xid) {
+        throw new NotSupportYetException();
     }
 }

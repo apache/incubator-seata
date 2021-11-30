@@ -18,6 +18,7 @@ package io.seata.server.console.controller;
 import io.seata.core.store.db.vo.GlobalSessionVO;
 import io.seata.server.console.manager.GlobalSessionServiceManager;
 import io.seata.server.console.result.PageResult;
+import io.seata.server.console.result.SingleResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +36,24 @@ public class GlobalSessionController {
      * @return
      */
     @GetMapping("queryAll")
-    public PageResult<GlobalSessionVO> queryAll() {
-        return GlobalSessionServiceManager.getInstance().queryAll();
+    public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
+        return GlobalSessionServiceManager.getInstance().queryAll(applicationId, withBranch);
+    }
+
+    /**
+     * Query all globalSession by status
+     * @param applicationId
+     * @param status
+     * @param withBranch
+     * @return
+     */
+    @GetMapping("queryByStatus")
+    public PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch) {
+        return null;
+    }
+
+    @GetMapping("queryByXid")
+    SingleResult<GlobalSessionVO> queryByXid(String xid) {
+        return null;
     }
 }

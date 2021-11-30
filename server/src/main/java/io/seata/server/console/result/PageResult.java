@@ -42,16 +42,21 @@ public class PageResult<T> extends Result<T> {
      * total page number
      */
     private Integer pages = 0;
+    /**
+     * the data
+     */
+    private List<T> data;
 
     public PageResult(String errCode, String code) {
     }
 
     public PageResult(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
-        super(SUCCESS_CODE, SUCCESS_MSG, data);
+        super(SUCCESS_CODE, SUCCESS_MSG);
         this.total = total;
         this.pages = pages;
         this.pageNum = pageNum;
         this.pageSize = pageSize;
+        this.data = data;
     }
 
     public static <T> PageResult<T> failure(String code, String msg) {
@@ -59,7 +64,7 @@ public class PageResult<T> extends Result<T> {
     }
 
     public static <T> PageResult<T> failure(FrameworkErrorCode errorCode) {
-        return new PageResult(errorCode.getErrCode(), errorCode.getErrCode());
+        return new PageResult(errorCode.getErrCode(), errorCode.getErrMessage());
     }
 
     public static <T> PageResult<T> success() {
@@ -108,5 +113,13 @@ public class PageResult<T> extends Result<T> {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public List<T> getData() {
+        return data;
+    }
+
+    public void setData(List<T> data) {
+        this.data = data;
     }
 }
