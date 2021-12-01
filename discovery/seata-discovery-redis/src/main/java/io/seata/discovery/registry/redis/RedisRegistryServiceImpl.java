@@ -80,41 +80,41 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         int port = Integer.parseInt(serverArr[1]);
         int db = seataConfig.getInt(getRedisDbFileKey());
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
-        redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
-        redisConfig.setTestOnReturn(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
-        redisConfig.setTestWhileIdle(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.while.idle", false));
-        int maxIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0);
+        redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test-on-borrow", true));
+        redisConfig.setTestOnReturn(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test-on-return", false));
+        redisConfig.setTestWhileIdle(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test-while-idle", false));
+        int maxIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-idle", 0);
         if (maxIdle > 0) {
             redisConfig.setMaxIdle(maxIdle);
         }
-        int minIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0);
+        int minIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min-idle", 0);
         if (minIdle > 0) {
             redisConfig.setMinIdle(minIdle);
         }
-        int maxActive = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0);
+        int maxActive = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-active", 0);
         if (maxActive > 0) {
             redisConfig.setMaxTotal(maxActive);
         }
-        int maxTotal = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0);
+        int maxTotal = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-total", 0);
         if (maxTotal > 0) {
             redisConfig.setMaxTotal(maxTotal);
         }
-        int maxWait = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
-            seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
+        int maxWait = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-wait",
+                seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
         if (maxWait > 0) {
             redisConfig.setMaxWaitMillis(maxWait);
         }
-        int numTestsPerEvictionRun = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0);
+        int numTestsPerEvictionRun = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "num-tests-per-eviction-run", 0);
         if (numTestsPerEvictionRun > 0) {
             redisConfig.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
         }
         int timeBetweenEvictionRunsMillis = seataConfig.getInt(
-            REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0);
+                REDIS_FILEKEY_PREFIX + "time-between-eviction-runs-millis", 0);
         if (timeBetweenEvictionRunsMillis > 0) {
             redisConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
         }
-        int minEvictableIdleTimeMillis = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis",
-            0);
+        int minEvictableIdleTimeMillis = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min-evictable-idle-time-millis",
+                0);
         if (minEvictableIdleTimeMillis > 0) {
             redisConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
         }
@@ -247,7 +247,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 try {
                     listener.onEvent(msg);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }
