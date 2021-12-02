@@ -73,7 +73,7 @@ public class RaftServerFactory {
     }
 
     public static CliClientService getCliClientServiceInstance() {
-        return SingletonHandler.cliClientService;
+        return SingletonHandler.CLI_CLIENT_SERVICE;
     }
 
     public void init(String host, int port) {
@@ -179,9 +179,9 @@ public class RaftServerFactory {
     private static class SingletonHandler {
         private static final RaftServerFactory INSTANCE = new RaftServerFactory();
         private static final CliService CLI_SERVICE = RaftServiceFactory.createAndInitCliService(new CliOptions());
-        private static final CliClientServiceImpl cliClientService = new CliClientServiceImpl();
+        private static final CliClientServiceImpl CLI_CLIENT_SERVICE = new CliClientServiceImpl();
         static {
-            cliClientService.init(new CliOptions());
+            CLI_CLIENT_SERVICE.init(new CliOptions());
         }
     }
 
