@@ -15,10 +15,12 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import io.netty.channel.Channel;
+import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.server.RegRmProcessor;
@@ -43,6 +45,11 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
     private TransactionMessageHandler transactionMessageHandler;
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
+
+    private ThreadPoolExecutor branchResultMessageExecutor = new ThreadPoolExecutor(NettyServerConfig.getMinBranchResultPoolSize(),
+            NettyServerConfig.getMaxBranchResultPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
+            new NamedThreadFactory("BranchResultHandlerThread", NettyServerConfig.getMaxBranchResultPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
     @Override
     public void init() {
@@ -101,8 +108,8 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         // 2. registry on response message processor
         ServerOnResponseProcessor onResponseProcessor =
             new ServerOnResponseProcessor(getHandler(), getFutures());
-        super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, branchResultMessageExecutor);
+        super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, branchResultMessageExecutor);
         // 3. registry rm message processor
         RegRmProcessor regRmProcessor = new RegRmProcessor(this);
         super.registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
@@ -114,4 +121,9 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        branchResultMessageExecutor.shutdown();
+    }
 }

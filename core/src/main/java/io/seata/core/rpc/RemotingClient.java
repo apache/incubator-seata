@@ -20,7 +20,8 @@ import java.util.concurrent.TimeoutException;
 import io.netty.channel.Channel;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.NettyClientConfig;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.core.rpc.processor.RemotingProcessor;
 
 /**
@@ -34,8 +35,10 @@ public interface RemotingClient {
 
     /**
      * client send sync request.
-     * In this request, if {@link NettyClientConfig#isEnableClientBatchSendRequest} is enabled,
-     * the message will be sent in batches.
+     * In this request, if
+     * {@link RmNettyRemotingClient#isEnableClientBatchSendRequest()}
+     * {@link TmNettyRemotingClient#isEnableClientBatchSendRequest()}
+     * is enabled, the message will be sent in batches.
      *
      * @param msg transaction message {@link io.seata.core.protocol}
      * @return server result message

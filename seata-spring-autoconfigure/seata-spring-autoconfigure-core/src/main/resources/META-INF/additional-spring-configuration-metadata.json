@@ -14,6 +14,18 @@
       "defaultValue": true
     },
     {
+      "name": "seata.transport.enable-tm-client-batch-send-request",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.transport.enable-rm-client-batch-send-request",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": true
+    },
+    {
       "name": "seata.transport.shutdown.wait",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.ShutdownProperties",

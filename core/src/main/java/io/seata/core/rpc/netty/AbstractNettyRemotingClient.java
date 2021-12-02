@@ -108,7 +108,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
      * Send via asynchronous thread {@link MergedSendRunnable}
-     * {@link NettyClientConfig#isEnableClientBatchSendRequest}
+     * {@link this#isEnableClientBatchSendRequest()}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
     private static final io.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
@@ -123,7 +123,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     @Override
     public void init() {
         timerExecutor.scheduleAtFixedRate(() -> clientChannelManager.reconnect(getTransactionServiceGroup()), SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
-        if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+        if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
                 KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
@@ -158,7 +158,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
         // send batch message
         // put message into basketMap, @see MergedSendRunnable
-        if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+        if (this.isEnableClientBatchSendRequest()) {
 
             // send batch message is sync request, needs to create messageFuture and put it in futures.
             MessageFuture messageFuture = new MessageFuture();
@@ -346,6 +346,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * @return transaction service group
      */
     protected abstract String getTransactionServiceGroup();
+
+    /**
+     * Whether to enable batch sending of requests, hand over to subclass implementation.
+     *
+     * @return true:enable, false:disable
+     */
+    protected abstract boolean isEnableClientBatchSendRequest();
 
     /**
      * The type Merged send runnable.
@@ -549,20 +556,20 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                                         RAFT_META_DATA.setLeaderAddress(
                                             new InetSocketAddress(address[0], Integer.parseInt(address[1])));
                                         if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getFollowers())) {
-                                            String[] followers = raftClusterMetaDataResponse.getFollowers().split(",");
+                                            String[] followers = raftClusterMetaDataResponse.getFollowers().split(ADDRESS_SPLIT_CHAR);
                                             List<InetSocketAddress> list = new ArrayList<>();
                                             for (String follower : followers) {
-                                                address = follower.split(":");
+                                                address = follower.split(ADDRESS_LINK_CHAR);
                                                 list.add(
                                                     new InetSocketAddress(address[0], Integer.parseInt(address[1])));
                                             }
                                             RAFT_META_DATA.setFollowers(list);
                                         }
                                         if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getLearners())) {
-                                            String[] learners = raftClusterMetaDataResponse.getLearners().split(",");
+                                            String[] learners = raftClusterMetaDataResponse.getLearners().split(ADDRESS_SPLIT_CHAR);
                                             List<InetSocketAddress> list = new ArrayList<>();
                                             for (String learner : learners) {
-                                                address = learner.split(":");
+                                                address = learner.split(ADDRESS_LINK_CHAR);
                                                 list.add(
                                                     new InetSocketAddress(address[0], Integer.parseInt(address[1])));
                                             }
