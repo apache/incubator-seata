@@ -11,7 +11,7 @@ you only need to follow the instructions below and keep the corresponding config
 | #only db:                | #only file:                                                  |
 | store.db.driverClassName | service.default.grouplist                                    |
 | store.db.url             | #All:                                                        |
-| store.db.user            | service.vgroupMapping.my_test_tx_group                       |
+| store.db.user            | service.vgroupMapping.default_tx_group                       |
 | store.db.password        | service.disableGlobalTransaction                             |
 
 ## Nacos

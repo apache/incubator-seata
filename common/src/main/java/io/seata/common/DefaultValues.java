@@ -45,7 +45,10 @@ public interface DefaultValues {
 
     String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
     String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
+    @Deprecated
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
+    boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
+    boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
 
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
@@ -84,7 +87,9 @@ public interface DefaultValues {
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
-    String DEFAULT_TX_GROUP = "my_test_tx_group";
+    String DEFAULT_TX_GROUP = "default_tx_group";
+    @Deprecated
+    String DEFAULT_TX_GROUP_OLD = "my_test_tx_group";
     String DEFAULT_TC_CLUSTER = "default";
     String DEFAULT_GROUPLIST = "127.0.0.1:8091";
 
