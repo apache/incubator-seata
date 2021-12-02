@@ -16,24 +16,29 @@
 package io.seata.core.raft;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 
 /**
  * @author funkye
  */
-public class RaftLeader {
+public class RaftMetadata {
 
-    private InetSocketAddress inetSocketAddress;
+    private InetSocketAddress leaderAddress;
+
+    private List<InetSocketAddress> learners;
+
+    private List<InetSocketAddress> followers;
 
     private Long timestamp;
 
-    public InetSocketAddress getInetSocketAddress() {
-        return inetSocketAddress;
+    public InetSocketAddress getLeaderAddress() {
+        return leaderAddress;
     }
 
-    public void setInetSocketAddress(InetSocketAddress inetSocketAddress) {
-        this.inetSocketAddress = inetSocketAddress;
+    public void setLeaderAddress(InetSocketAddress leaderAddress) {
+        this.leaderAddress = leaderAddress;
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -53,9 +58,26 @@ public class RaftLeader {
         return !isExpired();
     }
 
+    public List<InetSocketAddress> getLearners() {
+        return learners;
+    }
+
+    public void setLearners(List<InetSocketAddress> learners) {
+        this.learners = learners;
+    }
+
+    public List<InetSocketAddress> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(List<InetSocketAddress> followers) {
+        this.followers = followers;
+    }
+
     @Override
     public String toString() {
-        return "RaftLeader{" + "LEADER_ADDRESS=" + inetSocketAddress + ", timestamp=" + timestamp + '}';
+        return "RaftMetadata{" + "leaderAddress=" + leaderAddress + ", learners=" + learners + ", followers="
+            + followers + ", timestamp=" + timestamp + '}';
     }
 
 }

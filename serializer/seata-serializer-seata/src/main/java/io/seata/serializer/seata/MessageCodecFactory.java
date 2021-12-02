@@ -18,8 +18,8 @@ package io.seata.serializer.seata;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import io.seata.core.protocol.client.LeaderInfoRequest;
-import io.seata.core.protocol.client.LeaderInfoResponse;
+import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
+import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
 import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
 import io.seata.serializer.seata.protocol.RegisterRMRequestCodec;
@@ -46,8 +46,8 @@ import io.seata.serializer.seata.protocol.transaction.GlobalRollbackRequestCodec
 import io.seata.serializer.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.LeaderInfoRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.LeaderInfoResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.RaftClusterMetaDataRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.RaftClusterMetaDataResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.LeaderNotifyRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractMessage;
@@ -184,8 +184,8 @@ public class MessageCodecFactory {
                 return new BranchReportRequestCodec();
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequestCodec();
-            case MessageType.TYPE_LEADER_INFO:
-                return new LeaderInfoRequestCodec();
+            case MessageType.TYPE_RAFT_METADATA:
+                return new RaftClusterMetaDataRequestCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -211,8 +211,8 @@ public class MessageCodecFactory {
                 return new GlobalLockQueryResponseCodec();
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponseCodec();
-            case MessageType.TYPE_LEADER_INFO_RESULT:
-                return new LeaderInfoResponseCodec();
+            case MessageType.TYPE_RAFT_METADATA_RESULT:
+                return new RaftClusterMetaDataResponseCodec();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponseCodec();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:
@@ -319,8 +319,8 @@ public class MessageCodecFactory {
                 return new BranchReportRequest();
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequest();
-            case MessageType.TYPE_LEADER_INFO:
-                return new LeaderInfoRequest();
+            case MessageType.TYPE_RAFT_METADATA:
+                return new RaftClusterMetaDataRequest();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -346,8 +346,8 @@ public class MessageCodecFactory {
                 return new GlobalLockQueryResponse();
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponse();
-            case MessageType.TYPE_LEADER_INFO_RESULT:
-                return new LeaderInfoResponse();
+            case MessageType.TYPE_RAFT_METADATA_RESULT:
+                return new RaftClusterMetaDataResponse();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponse();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:

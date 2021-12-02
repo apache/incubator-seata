@@ -284,7 +284,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         ClientOnResponseProcessor onResponseProcessor =
             new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
-        super.registerProcessor(MessageType.TYPE_LEADER_INFO_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_RAFT_METADATA_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor, null);

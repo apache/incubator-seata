@@ -23,11 +23,11 @@ import io.seata.core.rpc.RpcContext;
 /**
  * @author funkye
  */
-public class LeaderInfoRequest extends AbstractTransactionRequestToTC {
+public class RaftClusterMetaDataRequest extends AbstractTransactionRequestToTC {
 
     @Override
     public short getTypeCode() {
-        return MessageType.TYPE_LEADER_INFO;
+        return MessageType.TYPE_RAFT_METADATA;
     }
 
     @Override

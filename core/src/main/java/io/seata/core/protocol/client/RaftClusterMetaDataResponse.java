@@ -23,18 +23,22 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 /**
  * @author funkye
  */
-public class LeaderInfoResponse extends AbstractTransactionResponse implements Serializable {
+public class RaftClusterMetaDataResponse extends AbstractTransactionResponse implements Serializable {
 
-    private String address;
+    private String leaderAddress;
+
+    private String followers;
+
+    private String learners;
 
     private String mode;
 
-    public String getAddress() {
-        return address;
+    public String getLeaderAddress() {
+        return leaderAddress;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setLeaderAddress(String leaderAddress) {
+        this.leaderAddress = leaderAddress;
     }
 
     public String getMode() {
@@ -45,14 +49,30 @@ public class LeaderInfoResponse extends AbstractTransactionResponse implements S
         this.mode = mode;
     }
 
+    public String getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(String followers) {
+        this.followers = followers;
+    }
+
+    public String getLearners() {
+        return learners;
+    }
+
+    public void setLearners(String learners) {
+        this.learners = learners;
+    }
+
     @Override
     public short getTypeCode() {
-        return MessageType.TYPE_LEADER_INFO_RESULT;
+        return MessageType.TYPE_RAFT_METADATA_RESULT;
     }
 
     @Override
     public String toString() {
-        return "LeaderInfoResponse{" + "address='" + address + '\'' + ", mode='" + mode + '\'' + '}';
+        return "LeaderInfoResponse{" + "leaderAddress='" + leaderAddress + '\'' + ", followers='" + followers + '\''
+            + ", learners='" + learners + '\'' + ", mode='" + mode + '\'' + '}';
     }
-    
 }

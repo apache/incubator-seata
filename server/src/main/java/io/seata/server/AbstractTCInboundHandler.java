@@ -15,11 +15,11 @@
  */
 package io.seata.server;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
-import com.alipay.sofa.jraft.option.CliOptions;
-import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -29,8 +29,8 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.client.LeaderInfoRequest;
-import io.seata.core.protocol.client.LeaderInfoResponse;
+import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
+import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractGlobalEndResponse;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
@@ -339,39 +339,44 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
     }
 
     @Override
-    public LeaderInfoResponse handle(LeaderInfoRequest request, final RpcContext rpcContext) {
-        LeaderInfoResponse response = new LeaderInfoResponse();
+    public RaftClusterMetaDataResponse handle(RaftClusterMetaDataRequest request, final RpcContext rpcContext) {
+        RaftClusterMetaDataResponse response = new RaftClusterMetaDataResponse();
         String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
         response.setMode(mode);
         if (StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(), mode)) {
-            response.setAddress(getLeaderAddress());
+            getRaftCluster(response);
         }
         response.setResultCode(ResultCode.Success);
         return response;
     }
 
-    protected String getLeaderAddress() {
-        String initConfStr = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
-        if (!StringUtils.isBlank(initConfStr)) {
-            final Configuration initConf = new Configuration();
-            if (!initConf.parse(initConfStr)) {
-                throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
+    protected RaftClusterMetaDataResponse getRaftCluster(RaftClusterMetaDataResponse response) {
+        String currentConf = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        if (!StringUtils.isBlank(currentConf)) {
+            final Configuration currentClusters = new Configuration();
+            if (!currentClusters.parse(currentConf)) {
+                throw new IllegalArgumentException("fail to parse initConf:" + currentConf);
             }
             RouteTable routeTable = RouteTable.getInstance();
-            routeTable.updateConfiguration(SEATA_RAFT_GROUP, initConf);
-            CliClientServiceImpl cliClientService = new CliClientServiceImpl();
-            cliClientService.init(new CliOptions());
+            if (!Objects.equals(routeTable.getConfiguration(SEATA_RAFT_GROUP), currentClusters)) {
+                routeTable.updateConfiguration(SEATA_RAFT_GROUP, currentClusters);
+            }
             try {
-                routeTable.refreshLeader(cliClientService, SEATA_RAFT_GROUP, 1000);
+                routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), SEATA_RAFT_GROUP, 1000);
                 PeerId leader = routeTable.selectLeader(SEATA_RAFT_GROUP);
                 if (leader != null) {
-                    return leader.getIp() + ":" + (leader.getPort() - DEFAULT_RAFT_PORT_INTERVAL);
+                    response.setLeaderAddress(leader.getIp() + ":" + (leader.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
+                    Configuration configuration = routeTable.getConfiguration(SEATA_RAFT_GROUP);
+                    response.setLearners(String.join(",", configuration.getLearners().parallelStream()
+                        .map(i -> i.getIp() + ":" + i.getPort()).collect(Collectors.toList())));
+                    response.setFollowers(String.join(",", configuration.getPeers().parallelStream()
+                        .map(i -> i.getIp() + ":" + i.getPort()).collect(Collectors.toList())));
                 }
             } catch (Exception e) {
                 LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
             }
         }
-        return null;
+        return response;
     }
 
     /**

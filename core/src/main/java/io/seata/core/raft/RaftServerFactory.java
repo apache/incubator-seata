@@ -24,6 +24,8 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.CliOptions;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.option.RaftOptions;
+import com.alipay.sofa.jraft.rpc.CliClientService;
+import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -68,6 +70,10 @@ public class RaftServerFactory {
 
     public static CliService getCliServiceInstance() {
         return SingletonHandler.CLI_SERVICE;
+    }
+
+    public static CliClientService getCliClientServiceInstance() {
+        return SingletonHandler.cliClientService;
     }
 
     public void init(String host, int port) {
@@ -173,6 +179,10 @@ public class RaftServerFactory {
     private static class SingletonHandler {
         private static final RaftServerFactory INSTANCE = new RaftServerFactory();
         private static final CliService CLI_SERVICE = RaftServiceFactory.createAndInitCliService(new CliOptions());
+        private static final CliClientServiceImpl cliClientService = new CliClientServiceImpl();
+        static {
+            cliClientService.init(new CliOptions());
+        }
     }
 
 }

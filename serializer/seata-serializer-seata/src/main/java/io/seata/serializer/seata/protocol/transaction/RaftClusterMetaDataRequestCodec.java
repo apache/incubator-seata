@@ -17,18 +17,18 @@ package io.seata.serializer.seata.protocol.transaction;
 
 import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
-import io.seata.core.protocol.client.LeaderInfoRequest;
+import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
 
 /**
  * The type Global begin request codec.
  *
  * @author zhangsen
  */
-public class LeaderInfoRequestCodec extends AbstractTransactionRequestToTCCodec {
+public class RaftClusterMetaDataRequestCodec extends AbstractTransactionRequestToTCCodec {
 
     @Override
     public Class<?> getMessageClassType() {
-        return LeaderInfoRequest.class;
+        return RaftClusterMetaDataRequest.class;
     }
 
     @Override

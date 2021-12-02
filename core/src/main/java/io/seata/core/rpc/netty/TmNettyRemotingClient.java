@@ -228,7 +228,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         ClientOnResponseProcessor onResponseProcessor =
                 new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
-        super.registerProcessor(MessageType.TYPE_LEADER_INFO_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_RAFT_METADATA_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor, null);

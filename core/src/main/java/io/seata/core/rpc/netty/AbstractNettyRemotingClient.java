@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -50,14 +51,14 @@ import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.client.LeaderInfoRequest;
-import io.seata.core.protocol.client.LeaderInfoResponse;
+import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
+import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
-import io.seata.core.raft.RaftLeader;
+import io.seata.core.raft.RaftMetadata;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
@@ -117,7 +118,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
 
-    private static volatile RaftLeader LEADER_ADDRESS;
+    private static volatile RaftMetadata RAFT_META_DATA;
 
     @Override
     public void init() {
@@ -184,7 +185,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
             try {
                 Object response = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
-                if (!retrying && LEADER_ADDRESS != null) {
+                if (!retrying && RAFT_META_DATA != null) {
                     if (response instanceof AbstractTransactionResponse) {
                         AbstractTransactionResponse transactionResponse = (AbstractTransactionResponse)response;
                         if (transactionResponse.getResultCode() == Failed
@@ -279,9 +280,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
-            if (!(msg instanceof LeaderInfoRequest) && LEADER_ADDRESS != null
-                && LEADER_ADDRESS.getInetSocketAddress() != null) {
-                address = LEADER_ADDRESS.getInetSocketAddress();
+            if (!(msg instanceof RaftClusterMetaDataRequest) && RAFT_META_DATA != null
+                && RAFT_META_DATA.getLeaderAddress() != null) {
+                address = RAFT_META_DATA.getLeaderAddress();
             } else {
                 @SuppressWarnings("unchecked")
                 List<InetSocketAddress> inetSocketAddressList =
@@ -506,10 +507,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     protected void initLeaderAddress() {
-        if (LEADER_ADDRESS == null) {
+        if (RAFT_META_DATA == null) {
             synchronized (FIND_LEADER_EXECUTOR) {
-                if (LEADER_ADDRESS == null) {
-                    LEADER_ADDRESS = new RaftLeader();
+                if (RAFT_META_DATA == null) {
+                    RAFT_META_DATA = new RaftMetadata();
                     boolean raft = findLeader();
                     if (raft) {
                         // The leader election takes 5 second
@@ -528,25 +529,45 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     private boolean findLeader() {
-        if (LEADER_ADDRESS.isExpired()) {
-            synchronized (LEADER_ADDRESS) {
-                if (LEADER_ADDRESS.isExpired()) {
+        if (RAFT_META_DATA.isExpired()) {
+            synchronized (RAFT_META_DATA) {
+                if (RAFT_META_DATA.isExpired()) {
                     for (int i = 0; i < 2; i++) {
-                        LeaderInfoRequest leaderInfoRequest = new LeaderInfoRequest();
+                        RaftClusterMetaDataRequest raftClusterMetaDataRequest = new RaftClusterMetaDataRequest();
                         try {
-                            String tcAddress = loadBalance(getTransactionServiceGroup(), leaderInfoRequest);
+                            String tcAddress = loadBalance(getTransactionServiceGroup(), raftClusterMetaDataRequest);
                             if (StringUtils.isNotBlank(tcAddress)) {
                                 Channel channel = clientChannelManager.acquireChannel(tcAddress);
-                                RpcMessage rpcMessage =
-                                    buildRequestMessage(leaderInfoRequest, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-                                LeaderInfoResponse leaderInfoResponse =
-                                    (LeaderInfoResponse)super.sendSync(channel, rpcMessage, 2000);
-                                if (leaderInfoResponse != null && StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(),
-                                    leaderInfoResponse.getMode())) {
-                                    if (StringUtils.isNotBlank(leaderInfoResponse.getAddress())) {
-                                        String[] address = leaderInfoResponse.getAddress().split(":");
-                                        LEADER_ADDRESS.setInetSocketAddress(
+                                RpcMessage rpcMessage = buildRequestMessage(raftClusterMetaDataRequest,
+                                    ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                                RaftClusterMetaDataResponse raftClusterMetaDataResponse =
+                                    (RaftClusterMetaDataResponse)super.sendSync(channel, rpcMessage, 2000);
+                                if (raftClusterMetaDataResponse != null && StringUtils.equalsIgnoreCase(
+                                    StoreMode.RAFT.getName(), raftClusterMetaDataResponse.getMode())) {
+                                    if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getLeaderAddress())) {
+                                        String[] address = raftClusterMetaDataResponse.getLeaderAddress().split(":");
+                                        RAFT_META_DATA.setLeaderAddress(
                                             new InetSocketAddress(address[0], Integer.parseInt(address[1])));
+                                        if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getFollowers())) {
+                                            String[] followers = raftClusterMetaDataResponse.getFollowers().split(",");
+                                            List<InetSocketAddress> list = new ArrayList<>();
+                                            for (String follower : followers) {
+                                                address = follower.split(":");
+                                                list.add(
+                                                    new InetSocketAddress(address[0], Integer.parseInt(address[1])));
+                                            }
+                                            RAFT_META_DATA.setFollowers(list);
+                                        }
+                                        if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getLearners())) {
+                                            String[] learners = raftClusterMetaDataResponse.getLearners().split(",");
+                                            List<InetSocketAddress> list = new ArrayList<>();
+                                            for (String learner : learners) {
+                                                address = learner.split(":");
+                                                list.add(
+                                                    new InetSocketAddress(address[0], Integer.parseInt(address[1])));
+                                            }
+                                            RAFT_META_DATA.setLearners(list);
+                                        }
                                         return true;
                                     }
                                 } else {
@@ -566,8 +587,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     public void modifyLeader(String ip, int port) {
-        synchronized (LEADER_ADDRESS) {
-            LEADER_ADDRESS.setInetSocketAddress(new InetSocketAddress(ip, port));
+        synchronized (RAFT_META_DATA) {
+            RAFT_META_DATA.setLeaderAddress(new InetSocketAddress(ip, port));
         }
     }
 

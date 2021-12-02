@@ -72,14 +72,14 @@ public interface MessageType {
     short TYPE_GLOBAL_LOCK_QUERY_RESULT = 22;
 
     /**
-     * the constant TYPE_LEADER_INFO
+     * the constant TYPE_RAFT_METADATA
      */
-    short TYPE_LEADER_INFO = 24;
+    short TYPE_RAFT_METADATA = 24;
 
     /**
-     * the constant TYPE_LEADER_INFO_RESULT
+     * the constant TYPE_RAFT_METADATA_RESULT
      */
-    short TYPE_LEADER_INFO_RESULT = 25;
+    short TYPE_RAFT_METADATA_RESULT = 25;
 
     /**
      * The constant TYPE_BRANCH_COMMIT.

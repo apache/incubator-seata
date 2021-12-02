@@ -29,7 +29,7 @@ import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.client.LeaderInfoRequest;
+import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
@@ -164,7 +164,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage)message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            if (!raftMode || msg instanceof LeaderInfoRequest) {
+            if (!raftMode || msg instanceof RaftClusterMetaDataRequest) {
                 remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
             } else {
                 RaftClosure closure = new RaftClosure() {
