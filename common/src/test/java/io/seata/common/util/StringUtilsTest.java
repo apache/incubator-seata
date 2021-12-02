@@ -157,11 +157,16 @@ public class StringUtilsTest {
         list.add(list);
         Assertions.assertEquals("[\"xxx\", 111, (this ArrayList)]", StringUtils.toString(list));
 
-        //case: Array
+        //case: String Array
         String[] strArr = new String[2];
         strArr[0] = "11";
         strArr[1] = "22";
         Assertions.assertEquals("[\"11\", \"22\"]", StringUtils.toString(strArr));
+        //case: int Array
+        int[] intArr = new int[2];
+        intArr[0] = 11;
+        intArr[1] = 22;
+        Assertions.assertEquals("[11, 22]", StringUtils.toString(intArr));
         //case: Array, and cycle dependency
         Object[] array = new Object[3];
         array[0] = 1;
