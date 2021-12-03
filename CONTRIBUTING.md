@@ -76,14 +76,14 @@ To put forward a PR, we assume you have registered a GitHub ID. Then you could f
 
 1. **Set Remote** upstream to be `git@github.com:seata/seata.git` using the following two commands:
 
-```
+```bash
 git remote add upstream git@github.com:seata/seata.git
 git remote set-url --push upstream no-pushing
 ```
 
 With this remote setting, you can check your git remote configuration like this:
 
-```
+```shell
 $ git remote -v
 origin     git@github.com:<your-username>/seata.git (fetch)
 origin     git@github.com:<your-username>/seata.git (push)
@@ -140,7 +140,13 @@ Commit content represents all content changes included in one commit. We had bet
 
 * avoid very large change in a commit;
 * complete and reviewable for each commit.
-* check git config(`user.name`, `user.email`) when committing to ensure that it is associated with your github ID.
+* check git config(`user.name`, `user.email`) when committing to ensure that it is associated with your GitHub ID.
+
+```bash
+git config --get user.name
+git config --get user.email
+```
+
 * when submitting pr, please add a brief description of the current changes to the X.X.X.md file under the 'changes/' folder
 
 
