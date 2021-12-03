@@ -16,11 +16,13 @@
 package io.seata.server.console.controller;
 
 import io.seata.core.store.db.vo.GlobalLockVO;
-import io.seata.server.console.manager.GlobalLockServiceManager;
 import io.seata.server.console.result.PageResult;
+import io.seata.server.console.service.GlobalLockService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 
 /**
@@ -31,6 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("seata/console/globalLock")
 public class GlobalLockController {
 
+    @Resource
+    private GlobalLockService globalLockService;
+
     /**
      * Query all lock by table
      * @param tableName the table name of the lock
@@ -38,7 +43,7 @@ public class GlobalLockController {
      */
     @GetMapping("queryByTable")
     public PageResult<GlobalLockVO> queryByTable(String tableName) {
-        return GlobalLockServiceManager.getInstance().queryByTable(tableName);
+        return globalLockService.queryByTable(tableName);
     }
 
 }

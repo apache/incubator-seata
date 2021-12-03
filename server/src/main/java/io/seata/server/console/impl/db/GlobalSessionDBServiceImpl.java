@@ -16,49 +16,34 @@
 package io.seata.server.console.impl.db;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.exception.StoreException;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.db.vo.GlobalSessionVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.result.SingleResult;
 import io.seata.server.console.service.GlobalSessionService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
-
 /**
  * Global Session DataBase ServiceImpl
+ *
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "db", scope = Scope.SINGLETON)
+@Component
+@org.springframework.context.annotation.Configuration
+@ConditionalOnExpression("'${seata.store.session.mode}'.equals('db')")
 public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    /**
-     * the global session table
-     */
+    @Value("${seata.store.db.global-table}")
     protected String globalTable;
-    /**
-     * the db type
-     */
+    @Value("${seata.store.db.db-type}")
     protected String dbType;
-
-    public GlobalSessionDBServiceImpl() {
-        globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, DEFAULT_STORE_DB_GLOBAL_TABLE);
-        dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-        if (StringUtils.isBlank(dbType)) {
-            throw new StoreException("there must be db type.");
-        }
-    }
+    @Value("${seata.store.db.datasource}")
+    protected String dbDataSource;
 
     @Override
     public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {

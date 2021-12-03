@@ -17,19 +17,17 @@ package io.seata.server.console.impl.db;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import io.seata.core.store.db.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
-import io.seata.server.console.manager.GlobalLockServiceManager;
 import io.seata.server.console.result.PageResult;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -39,34 +37,23 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 
 /**
  * Global Lock DB ServiceImpl
  *
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "db", scope = Scope.SINGLETON)
+@Component
+@org.springframework.context.annotation.Configuration
+@ConditionalOnExpression("'${seata.store.lock.mode}'.equals('db')")
 public class GlobalLockDBServiceImpl implements GlobalLockService {
 
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    /**
-     * the lock table
-     */
+    @Value("${seata.store.db.lock-table}")
     protected String lockTable;
-    /**
-     * the db type
-     */
+    @Value("${seata.store.db.db-type}")
     protected String dbType;
-
-    public GlobalLockDBServiceImpl() {
-        lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
-        dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-        if (StringUtils.isBlank(dbType)) {
-            throw new StoreException("there must be db type.");
-        }
-    }
+    @Value("${seata.store.db.datasource}")
+    protected String dbDataSource;
 
     @Override
     public PageResult<GlobalLockVO> queryByTable(String tableName) {
@@ -74,8 +61,8 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
-        DataSource dataSource = GlobalLockServiceManager.getDataSource();
-        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable,tableName);
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
+        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable, tableName);
         try {
             conn = dataSource.getConnection();
             ps = conn.prepareStatement(queryAllLockSQL);

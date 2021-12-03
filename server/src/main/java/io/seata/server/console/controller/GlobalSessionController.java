@@ -16,12 +16,14 @@
 package io.seata.server.console.controller;
 
 import io.seata.core.store.db.vo.GlobalSessionVO;
-import io.seata.server.console.manager.GlobalSessionServiceManager;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.result.SingleResult;
+import io.seata.server.console.service.GlobalSessionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * Global Session Controller
@@ -31,13 +33,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("seata/console/globalSession")
 public class GlobalSessionController {
 
+    @Resource
+    private GlobalSessionService globalSessionService;
+
     /**
      * Query all globalSession
      * @return
      */
     @GetMapping("queryAll")
     public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
-        return GlobalSessionServiceManager.getInstance().queryAll(applicationId, withBranch);
+        return globalSessionService.queryAll(applicationId, withBranch);
     }
 
     /**

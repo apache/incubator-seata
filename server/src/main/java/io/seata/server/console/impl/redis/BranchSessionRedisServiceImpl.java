@@ -16,17 +16,19 @@
 package io.seata.server.console.impl.redis;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.core.store.db.vo.BranchSessionVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.service.BranchSessionService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 
 /**
  * Branch Session Redis ServiceImpl
  * @author: zhongxiang.wang
  */
-@LoadLevel(name = "redis", scope = Scope.SINGLETON)
+@Component
+@org.springframework.context.annotation.Configuration
+@ConditionalOnExpression("'${seata.store.session.mode}'.equals('redis')")
 public class BranchSessionRedisServiceImpl implements BranchSessionService {
 
     @Override

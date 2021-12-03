@@ -16,11 +16,13 @@
 package io.seata.server.console.controller;
 
 import io.seata.core.store.db.vo.BranchSessionVO;
-import io.seata.server.console.manager.BranchSessionServiceManager;
 import io.seata.server.console.result.PageResult;
+import io.seata.server.console.service.BranchSessionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * Branch Session Controller
@@ -29,13 +31,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("seata/console/branchSession")
 public class BranchSessionController {
+
+    @Resource
+    private BranchSessionService branchSessionService;
+
     /**
      * Query all branchSession
      * @return
      */
     @GetMapping("queryByXid")
     public PageResult<BranchSessionVO> queryByXid(String xid) {
-        return BranchSessionServiceManager.getInstance().queryByXid(xid);
+        return branchSessionService.queryByXid(xid);
     }
 
 }
