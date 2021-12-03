@@ -16,7 +16,6 @@
 package io.seata.server.console.impl.db;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.db.vo.GlobalSessionVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.result.SingleResult;
@@ -24,9 +23,6 @@ import io.seata.server.console.service.GlobalSessionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Global Session DataBase ServiceImpl
@@ -60,19 +56,4 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
         throw new NotSupportYetException();
     }
 
-    private GlobalSessionVO convertGlobalSessionVO(ResultSet rs) throws SQLException {
-        GlobalSessionVO globalSessionVO = new GlobalSessionVO();
-        globalSessionVO.setXid(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_XID));
-        globalSessionVO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
-        globalSessionVO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
-        globalSessionVO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
-        globalSessionVO.setTransactionServiceGroup(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
-        globalSessionVO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
-        globalSessionVO.setTimeout(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
-        globalSessionVO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
-        globalSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
-        globalSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
-        globalSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
-        return globalSessionVO;
-    }
 }

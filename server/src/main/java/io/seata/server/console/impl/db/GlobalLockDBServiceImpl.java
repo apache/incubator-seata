@@ -19,7 +19,6 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
-import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import io.seata.core.store.db.vo.GlobalLockVO;
@@ -68,7 +67,7 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
             ps = conn.prepareStatement(queryAllLockSQL);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
-                list.add(this.convertGlobalLockVO(resultSet));
+                list.add(GlobalLockVO.convert(resultSet));
             }
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -85,17 +84,4 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
     }
 
 
-    private GlobalLockVO convertGlobalLockVO(ResultSet rs) throws SQLException {
-        GlobalLockVO globalLockVO = new GlobalLockVO();
-        globalLockVO.setRowKey(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
-        globalLockVO.setXid(rs.getString(ServerTableColumnsName.LOCK_TABLE_XID));
-        globalLockVO.setTransactionId(rs.getLong(ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID));
-        globalLockVO.setBranchId(rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID));
-        globalLockVO.setResourceId(rs.getString(ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID));
-        globalLockVO.setTableName(rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME));
-        globalLockVO.setPk(rs.getString(ServerTableColumnsName.LOCK_TABLE_PK));
-        globalLockVO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE));
-        globalLockVO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED));
-        return globalLockVO;
-    }
 }

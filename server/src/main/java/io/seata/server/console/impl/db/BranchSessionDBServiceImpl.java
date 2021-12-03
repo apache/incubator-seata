@@ -18,7 +18,6 @@ package io.seata.server.console.impl.db;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
-import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.core.store.db.vo.BranchSessionVO;
@@ -67,7 +66,7 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
 
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
-                list.add(this.convertBranchSessionVO(resultSet));
+                list.add(BranchSessionVO.convert(resultSet));
             }
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -77,19 +76,4 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
         return PageResult.success(list, list.size(), 0, 0, 0);
     }
 
-    private BranchSessionVO convertBranchSessionVO(ResultSet rs) throws SQLException {
-        BranchSessionVO branchSessionVO = new BranchSessionVO();
-        branchSessionVO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
-        branchSessionVO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
-        branchSessionVO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
-        branchSessionVO.setResourceGroupId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID));
-        branchSessionVO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
-        branchSessionVO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
-        branchSessionVO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
-        branchSessionVO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
-        branchSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
-        branchSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
-        branchSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
-        return branchSessionVO;
-    }
 }
