@@ -179,6 +179,12 @@ public class SessionHolder {
                 GlobalSession globalSession = iterator.next();
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
+                    case Begin:
+                        if (storeMode == StoreMode.RAFT) {
+                            globalSession.setLocalStatus(GlobalStatus.RollbackRetrying);
+                            queueToRetryRollback(globalSession);
+                        }
+                        break;
                     case UnKnown:
                     case Committed:
                     case CommitFailed:
@@ -190,12 +196,12 @@ public class SessionHolder {
                         removeGlobalSessions.add(globalSession);
                         break;
                     case AsyncCommitting:
-                        if (storeMode == StoreMode.FILE) {
+                        if (storeMode == StoreMode.FILE || storeMode == StoreMode.RAFT) {
                             queueToAsyncCommitting(globalSession);
                         }
                         break;
                     default: {
-                        if (storeMode == StoreMode.FILE) {
+                        if (storeMode == StoreMode.FILE || storeMode == StoreMode.RAFT) {
                             if (acquireLock) {
                                 lockBranchSessions(globalSession.getSortedBranches());
                             }

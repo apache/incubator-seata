@@ -367,10 +367,12 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                 if (leader != null) {
                     response.setLeaderAddress(leader.getIp() + ":" + (leader.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
                     Configuration configuration = routeTable.getConfiguration(SEATA_RAFT_GROUP);
-                    response.setLearners(String.join(",", configuration.getLearners().parallelStream()
-                        .map(i -> i.getIp() + ":" + i.getPort()).collect(Collectors.toList())));
+                    response.setLearners(String.join(",",
+                        configuration.getLearners().parallelStream()
+                            .map(learner -> learner.getIp() + ":" + (learner.getPort() - DEFAULT_RAFT_PORT_INTERVAL))
+                            .collect(Collectors.toList())));
                     response.setFollowers(String.join(",", configuration.getPeers().parallelStream()
-                        .map(i -> i.getIp() + ":" + i.getPort()).collect(Collectors.toList())));
+                        .map(follower -> follower.getIp() + ":" + (follower.getPort() - DEFAULT_RAFT_PORT_INTERVAL)).collect(Collectors.toList())));
                 }
             } catch (Exception e) {
                 LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);

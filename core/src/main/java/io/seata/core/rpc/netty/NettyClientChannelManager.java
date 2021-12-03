@@ -161,32 +161,10 @@ class NettyClientChannelManager {
     /**
      * Reconnect to remote server of current transaction service group.
      *
+     * @param availList avail list
      * @param transactionServiceGroup transaction service group
      */
-    void reconnect(String transactionServiceGroup) {
-        List<String> availList = null;
-        try {
-            availList = getAvailServerList(transactionServiceGroup);
-        } catch (Exception e) {
-            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
-            return;
-        }
-        if (CollectionUtils.isEmpty(availList)) {
-            RegistryService registryService = RegistryFactory.getInstance();
-            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
-
-            if (StringUtils.isBlank(clusterName)) {
-                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
-                        transactionServiceGroup);
-                return;
-            }
-
-            if (!(registryService instanceof FileRegistryServiceImpl)) {
-                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
-            }
-            return;
-        }
+    void reconnect(List<String> availList, String transactionServiceGroup) {
         try {
             for (String serverAddress : availList) {
                 try {
@@ -209,6 +187,38 @@ class NettyClientChannelManager {
                 RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
             }
         }
+    }
+
+    /**
+     * Reconnect to remote server of current transaction service group.
+     *
+     * @param transactionServiceGroup transaction service group
+     */
+    void reconnect(String transactionServiceGroup) {
+        List<String> availList;
+        try {
+            availList = getAvailServerList(transactionServiceGroup);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
+            return;
+        }
+        if (CollectionUtils.isEmpty(availList)) {
+            RegistryService registryService = RegistryFactory.getInstance();
+            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
+
+            if (StringUtils.isBlank(clusterName)) {
+                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
+                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
+                        transactionServiceGroup);
+                return;
+            }
+
+            if (!(registryService instanceof FileRegistryServiceImpl)) {
+                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
+            }
+            return;
+        }
+        reconnect(availList, transactionServiceGroup);
     }
 
     void invalidateObject(final String serverAddress, final Channel channel) throws Exception {

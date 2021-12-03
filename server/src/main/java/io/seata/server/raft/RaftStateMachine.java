@@ -215,9 +215,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     public void onLeaderStart(final long term) {
         // become the leader again,reloading global session
         if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
-            SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreMode.FILE, false);
+            SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreMode.RAFT, false);
             NettyRemotingServer nettyRemotingServer =
-                    (NettyRemotingServer) DefaultCoordinator.getInstance().getRemotingServer();
+                (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
             LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();
             leaderNotifyRequest.setAddress(XID.getIpAddressAndPort());
             nettyRemotingServer.sendSyncRequestAll(leaderNotifyRequest);

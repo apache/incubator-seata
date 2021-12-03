@@ -69,7 +69,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
     /**
      * The find leader executor.
      */
-    protected static final ScheduledThreadPoolExecutor FIND_LEADER_EXECUTOR =
+    protected final ScheduledThreadPoolExecutor findLeaderExecutor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("findLeader", 1, true));
 
     /**

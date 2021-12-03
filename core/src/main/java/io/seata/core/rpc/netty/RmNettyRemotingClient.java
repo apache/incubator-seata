@@ -80,8 +80,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             if (resourceManager != null
                     && !resourceManager.getManagedResources().isEmpty()
                     && StringUtils.isNotBlank(transactionServiceGroup)) {
-                getClientChannelManager().reconnect(transactionServiceGroup);
-                super.initLeaderAddress();
+                initConnection();
             }
         }
     }
@@ -196,7 +195,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
 
         if (getClientChannelManager().getChannels().isEmpty()) {
-            getClientChannelManager().reconnect(transactionServiceGroup);
+            initConnection();
             return;
         }
         synchronized (getClientChannelManager().getChannels()) {
@@ -310,4 +309,10 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
     }
+
+    private void initConnection() {
+        getClientChannelManager().reconnect(transactionServiceGroup);
+        super.initLeaderAddress();
+    }
+
 }
