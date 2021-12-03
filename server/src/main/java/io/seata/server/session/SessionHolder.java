@@ -179,12 +179,6 @@ public class SessionHolder {
                 GlobalSession globalSession = iterator.next();
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
-                    case Begin:
-                        if (storeMode == StoreMode.RAFT) {
-                            globalSession.setLocalStatus(GlobalStatus.RollbackRetrying);
-                            queueToRetryRollback(globalSession);
-                        }
-                        break;
                     case UnKnown:
                     case Committed:
                     case CommitFailed:
@@ -217,8 +211,13 @@ public class SessionHolder {
                                     queueToRetryRollback(globalSession);
                                     break;
                                 case Begin:
-                                    globalSession.setActive(true);
-                                    break;
+                                    if (storeMode == StoreMode.RAFT) {
+                                        globalSession.setLocalStatus(GlobalStatus.RollbackRetrying);
+                                        queueToRetryRollback(globalSession);
+                                    } else {
+                                        globalSession.setActive(true);
+                                    }
+                                    break; 
                                 default:
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                             }
