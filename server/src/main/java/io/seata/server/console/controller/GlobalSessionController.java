@@ -33,7 +33,7 @@ import javax.annotation.Resource;
 @RequestMapping("seata/console/globalSession")
 public class GlobalSessionController {
 
-    @Resource
+    @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
 
     /**

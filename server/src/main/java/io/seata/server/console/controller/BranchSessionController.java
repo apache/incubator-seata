@@ -32,7 +32,7 @@ import javax.annotation.Resource;
 @RequestMapping("seata/console/branchSession")
 public class BranchSessionController {
 
-    @Resource
+    @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;
 
     /**

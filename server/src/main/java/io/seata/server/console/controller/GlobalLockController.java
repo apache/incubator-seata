@@ -33,7 +33,7 @@ import javax.annotation.Resource;
 @RequestMapping("seata/console/globalLock")
 public class GlobalLockController {
 
-    @Resource
+    @Resource(type = GlobalLockService.class)
     private GlobalLockService globalLockService;
 
     /**
