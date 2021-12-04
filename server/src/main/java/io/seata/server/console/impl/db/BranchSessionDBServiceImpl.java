@@ -46,11 +46,11 @@ import java.util.List;
 public class BranchSessionDBServiceImpl implements BranchSessionService {
 
     @Value("${seata.store.db.branch-table}")
-    protected String branchTable;
+    private String branchTable;
     @Value("${seata.store.db.db-type}")
-    protected String dbType;
+    private String dbType;
     @Value("${seata.store.db.datasource}")
-    protected String dbDataSource;
+    private String dbDataSource;
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {

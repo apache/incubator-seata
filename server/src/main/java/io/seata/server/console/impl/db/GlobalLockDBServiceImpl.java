@@ -48,11 +48,11 @@ import java.util.List;
 public class GlobalLockDBServiceImpl implements GlobalLockService {
 
     @Value("${seata.store.db.lock-table}")
-    protected String lockTable;
+    private String lockTable;
     @Value("${seata.store.db.db-type}")
-    protected String dbType;
+    private String dbType;
     @Value("${seata.store.db.datasource}")
-    protected String dbDataSource;
+    private String dbDataSource;
 
     @Override
     public PageResult<GlobalLockVO> queryByTable(String tableName) {

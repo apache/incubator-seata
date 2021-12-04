@@ -20,7 +20,6 @@ import io.seata.core.store.db.vo.GlobalSessionVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.result.SingleResult;
 import io.seata.server.console.service.GlobalSessionService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -33,13 +32,6 @@ import org.springframework.stereotype.Component;
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("'${seata.store.session.mode}'.equals('db')")
 public class GlobalSessionDBServiceImpl implements GlobalSessionService {
-
-    @Value("${seata.store.db.global-table}")
-    protected String globalTable;
-    @Value("${seata.store.db.db-type}")
-    protected String dbType;
-    @Value("${seata.store.db.datasource}")
-    protected String dbDataSource;
 
     @Override
     public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
