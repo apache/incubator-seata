@@ -38,9 +38,9 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
         String xaBranchXid = xaXid.toString();
         ConnectionProxyXA connectionProxyXA = lookup(xaBranchXid);
         if (connectionProxyXA != null) {
-            if(connectionProxyXA.getWrappedConnection().isClosed()){
-                release(xaBranchXid,connectionProxyXA);
-            }else {
+            if (connectionProxyXA.getWrappedConnection().isClosed()) {
+                release(xaBranchXid, connectionProxyXA);
+            } else {
                 return connectionProxyXA;
             }
         }
