@@ -45,7 +45,6 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
@@ -112,14 +111,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * {@link this#isEnableClientBatchSendRequest()}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
-    private static final io.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
     private final NettyClientBootstrap clientBootstrap;
     private NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
 
-    private RaftMetadata raftMetadata;
+    protected RaftMetadata raftMetadata;
 
     @Override
     public void init() {

@@ -347,7 +347,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
-        if (RaftServerFactory.getInstance().isRaftMode()) {
+        if (RaftServerFactory.getInstance().isRaftMode() && RaftServerFactory.getInstance().isLeader()) {
             CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
             Closure closure = closureStatus -> {
                 if (closureStatus.isOk()) {
@@ -368,7 +368,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                     "remove branch failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
         } else {
-            this.localRemoveBranch(branchSession);
+            throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    " The current TC is not a leader node, interrupt processing !");
         }
     }
 

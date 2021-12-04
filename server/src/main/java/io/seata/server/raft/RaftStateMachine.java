@@ -24,6 +24,7 @@ import java.util.Optional;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
+import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
@@ -41,7 +42,6 @@ import io.seata.core.store.StoreMode;
 import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.raft.execute.RaftMsgExecute;
 import io.seata.server.raft.execute.branch.AddBranchSessionExecute;
@@ -56,6 +56,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.storage.raft.lock.RaftLockManager;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,10 +135,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         });
         maps.put(ROOT_SESSION_MANAGER_NAME, globalSessionByteMap);
         maps.put(BRANCH_SESSION_MAP, branchSessionByteMap);
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
-                branchSessionByteMap.size());
-        }
+        LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
+            branchSessionByteMap.size());
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
         if (snapshot.save(maps)) {
             if (writer.addFile("data")) {
@@ -187,12 +186,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 });
                 rootSessionMap.putAll(sessionMap);
                 if (CollectionUtils.isNotEmpty(branchSessionByteMap)) {
-                    LockManager fileLockManager = LockerManagerFactory.getLockManager();
+                    RaftLockManager fileLockManager = (RaftLockManager) LockerManagerFactory.getLockManager();
                     branchSessionByteMap.forEach((k, v) -> {
                         BranchSession branchSession = new BranchSession();
                         branchSession.decode(v);
                         try {
-                            fileLockManager.acquireLock(branchSession);
+                            fileLockManager.localAcquireLock(branchSession);
                             rootSessionMap.get(branchSession.getXid()).add(branchSession);
                         } catch (TransactionException e) {
                             LOGGER.error(e.getMessage());
@@ -215,6 +214,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     public void onLeaderStart(final long term) {
         // become the leader again,reloading global session
         if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
+            LOGGER.info("session map: {} ",SessionHolder.getRootSessionManager().allSessions().size());
             SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreMode.RAFT, false);
             NettyRemotingServer nettyRemotingServer =
                 (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
@@ -231,6 +231,18 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         this.leaderTerm.set(-1);
         super.onLeaderStop(status);
         LOGGER.info("session map: {} ",SessionHolder.getRootSessionManager().allSessions().size());
+    }
+
+    @Override
+    public void onStopFollowing(final LeaderChangeContext ctx) {
+        super.onStopFollowing(ctx);
+        LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
+    }
+
+    @Override
+    public void onStartFollowing(final LeaderChangeContext ctx) {
+        super.onStartFollowing(ctx);
+        LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) throws Throwable {

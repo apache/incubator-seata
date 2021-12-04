@@ -133,8 +133,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 AbstractResultMessage result = transactionMessageHandler.onRequest(subMessage, rpcContext);
                 results[i] = result;
                 if (result instanceof AbstractTransactionResponse) {
-                    notLeaderError = ((AbstractTransactionResponse)result).getTransactionExceptionCode()
-                        .equals(TransactionExceptionCode.NotRaftLeader) ? true : false;
+                    notLeaderError = TransactionExceptionCode.NotRaftLeader
+                        .equals(((AbstractTransactionResponse)result).getTransactionExceptionCode()) ? true : false;
                     if (notLeaderError) {
                         break;
                     }
@@ -164,7 +164,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage)message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            if (!raftMode || msg instanceof RaftClusterMetaDataRequest) {
+            if (!raftMode || msg instanceof RaftClusterMetaDataRequest
+                || (result instanceof AbstractTransactionResponse && TransactionExceptionCode.NotRaftLeader
+                    .equals(((AbstractTransactionResponse)result).getTransactionExceptionCode()))) {
                 remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
             } else {
                 RaftClosure closure = new RaftClosure() {
