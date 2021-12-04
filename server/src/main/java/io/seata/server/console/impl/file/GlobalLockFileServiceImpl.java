@@ -34,7 +34,7 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
     @Override
     public PageResult<GlobalLockVO> queryByTable(String tableName) {
-       throw new NotSupportYetException();
+        throw new NotSupportYetException();
     }
 
     @Override
