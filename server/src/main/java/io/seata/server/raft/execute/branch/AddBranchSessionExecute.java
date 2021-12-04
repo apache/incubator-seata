@@ -16,7 +16,6 @@
 package io.seata.server.raft.execute.branch;
 
 import io.seata.common.util.StringUtils;
-import io.seata.core.model.BranchType;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
@@ -37,12 +36,9 @@ public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
     public Boolean execute(Object... args) throws Throwable {
         BranchTransactionDO branchTransactionDO = sessionSyncMsg.getBranchSession();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(branchTransactionDO.getXid());
-        BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
-        if (branchSession == null) {
-            branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
-            if (branchSession.getBranchType() == BranchType.AT && StringUtils.isNotBlank(branchSession.getLockKey())) {
-                raftLockManager.acquireLock(branchSession);
-            }
+        // in AT mode, a branch session is added after the lock contention succeeds
+        if (StringUtils.isBlank(branchTransactionDO.getLockKey())) {
+            BranchSession branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
             globalSession.add(branchSession);
             if (logger.isDebugEnabled()) {
                 logger.debug("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),

@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
@@ -102,8 +101,6 @@ public class RaftServerFactory {
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                                 + separator + serverIdStr.split(":")[1];
         final NodeOptions nodeOptions = new NodeOptions();
-        // set the election timeout to 1 second
-        nodeOptions.setElectionTimeoutMs(DEFAULT_RAFT_PORT_INTERVAL);
         // enable the CLI service.
         nodeOptions.setDisableCli(false);
         // snapshot should be made every 30 seconds
@@ -119,6 +116,7 @@ public class RaftServerFactory {
         raftOptions.setMaxReplicatorInflightMsgs(CONFIG.getInt(
                 SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
         nodeOptions.setRaftOptions(raftOptions);
+        // set the election timeout to 1 second
         nodeOptions.setElectionTimeoutMs(
                 CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
         // set up the initial cluster configuration

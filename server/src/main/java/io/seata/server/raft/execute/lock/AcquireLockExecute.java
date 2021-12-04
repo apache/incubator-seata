@@ -42,12 +42,15 @@ public class AcquireLockExecute extends AbstractRaftMsgExecute {
             branchSession = SessionConverter.convertBranchSession(sessionSyncMsg.getBranchSession());
         }
         Boolean owner = raftLockManager.localAcquireLock(branchSession);
-        if (logger.isDebugEnabled()) {
-            logger.debug("acquireLock xid: {}, branch id: {} , owner: {}", branchSession.getXid(),
-                branchSession.getBranchId(), owner);
-        }
         if (owner && !include) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("acquireLock xid: {}, branch id: {} , owner: {}", branchSession.getXid(),
+                    branchSession.getBranchId(), owner);
+            }
             globalSession.add(branchSession);
+            if (logger.isDebugEnabled()) {
+                logger.debug("addBranch xid: {},branchId: {}", branchSession.getXid(), branchSession.getBranchId());
+            }
         }
         return owner;
     }

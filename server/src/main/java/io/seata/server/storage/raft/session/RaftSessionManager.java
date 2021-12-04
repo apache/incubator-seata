@@ -60,7 +60,7 @@ public class RaftSessionManager extends FileSessionManager {
             Closure closure = status -> {
                 if (status.isOk()) {
                     try {
-                        this.addGlobalSession(globalSession);
+                        super.addGlobalSession(globalSession);
                     } catch (TransactionException e) {
                         e.printStackTrace();
                     }
