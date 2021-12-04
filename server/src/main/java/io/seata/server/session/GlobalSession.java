@@ -367,6 +367,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 throw new TransactionException(
                     "remove branch failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
+        } else if (!RaftServerFactory.getInstance().isRaftMode()) {
+            this.localRemoveBranch(branchSession);
         } else {
             throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
                     " The current TC is not a leader node, interrupt processing !");
