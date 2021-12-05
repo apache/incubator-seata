@@ -13,11 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.session.redis;
 
-import io.seata.server.session.SessionCondition;
 import java.io.IOException;
+import java.util.List;
+
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
@@ -27,27 +27,32 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
-import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * @author funkye
  */
+@SpringBootTest
 public class RedisSessionManagerTest {
     private static RedisServer server = null;
     private static SessionManager sessionManager = null;
 
     @BeforeAll
-    public static void start() throws IOException {
+    public static void start(ApplicationContext context) throws IOException {
         server = RedisServer.newRedisServer(6789);
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -104,7 +109,7 @@ public class RedisSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(session.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -131,7 +136,7 @@ public class RedisSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -158,7 +163,7 @@ public class RedisSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -188,7 +193,7 @@ public class RedisSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(session.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -222,7 +227,7 @@ public class RedisSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(session.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -272,7 +277,7 @@ public class RedisSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(session.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -308,7 +313,7 @@ public class RedisSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(session.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -329,6 +334,7 @@ public class RedisSessionManagerTest {
         sessionManager.removeBranchSession(session,branchSession);
         sessionManager.removeGlobalSession(session);
     }
+
 
     @AfterAll
     public static void after() {

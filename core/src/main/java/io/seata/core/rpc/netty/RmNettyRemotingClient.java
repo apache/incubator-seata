@@ -16,10 +16,14 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.util.concurrent.EventExecutorGroup;
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
@@ -265,11 +269,25 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         return transactionServiceGroup;
     }
 
+    @Override
+    public boolean isEnableClientBatchSendRequest() {
+        // New configuration takes precedence
+        String newConfig = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
+        if (StringUtils.isNotBlank(newConfig)) {
+            return Boolean.parseBoolean(newConfig);
+        }
+        // Compatible with old configuration
+        // If the old configuration exists, use the old configuration
+        // RM client Turns on batch sending by default
+        return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST,
+            DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
+    }
+
     private void registerProcessor() {
         // 1.registry rm client handle branch commit processor
         RmBranchCommitProcessor rmBranchCommitProcessor = new RmBranchCommitProcessor(getTransactionMessageHandler(), this);
         super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT, rmBranchCommitProcessor, messageExecutor);
-        // 2.registry rm client handle branch commit processor
+        // 2.registry rm client handle branch rollback processor
         RmBranchRollbackProcessor rmBranchRollbackProcessor = new RmBranchRollbackProcessor(getTransactionMessageHandler(), this);
         super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK, rmBranchRollbackProcessor, messageExecutor);
         // 3.registry rm handler undo log processor

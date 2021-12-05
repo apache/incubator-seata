@@ -188,14 +188,32 @@ public class CollectionUtilsTest {
 
     @Test
     public void testCollectionToString() {
+        List<String> nullCollection = null;
         List<String> emptyCollection = new ArrayList<>();
-        List<String> filledCollection = new ArrayList<>();
+        List<Object> filledCollection = new ArrayList<>();
 
         filledCollection.add("Foo");
         filledCollection.add("Bar");
+        filledCollection.add(filledCollection);
 
-        Assertions.assertEquals("", CollectionUtils.toString(emptyCollection));
-        Assertions.assertEquals("[Foo,Bar]", CollectionUtils.toString(filledCollection));
+        Assertions.assertEquals("null", CollectionUtils.toString(nullCollection));
+        Assertions.assertEquals("[]", CollectionUtils.toString(emptyCollection));
+        Assertions.assertEquals("[\"Foo\", \"Bar\", (this ArrayList)]", CollectionUtils.toString(filledCollection));
+    }
+
+    @Test
+    public void testMapToString() {
+        Map<Object, Object> nullMap = null;
+        Map<Object, Object> emptyMap = new HashMap<>();
+        Map<Object, Object> filledMap = new HashMap<>();
+
+        filledMap.put("aaa", "111");
+        filledMap.put("bbb", "222");
+        filledMap.put("self", filledMap);
+
+        Assertions.assertEquals("null", CollectionUtils.toString(nullMap));
+        Assertions.assertEquals("{}", CollectionUtils.toString(emptyMap));
+        Assertions.assertEquals("{\"aaa\"->\"111\", \"bbb\"->\"222\", \"self\"->(this HashMap)}", CollectionUtils.toString(filledMap));
     }
 
     @Test
@@ -211,14 +229,14 @@ public class CollectionUtilsTest {
     @Test
     public void testObjectMapToStringMap() {
         Map<String, Object> objMap = new HashMap<>();
-        Date now = new Date();
+        Date now = new Date(123);
         objMap.put("a", "aa");
         objMap.put("b", 22);
         objMap.put("c", now);
         Map<String, String> strMap = CollectionUtils.toStringMap(objMap);
         Assertions.assertEquals("aa", strMap.get("a"));
         Assertions.assertEquals("22", strMap.get("b"));
-        Assertions.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(now), strMap.get("c"));
+        Assertions.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(now), strMap.get("c"));
     }
 
     @Test

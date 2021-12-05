@@ -253,8 +253,8 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        //If success and there is no branch, end the global transaction.
-        if (success && globalSession.getBranchSessions().isEmpty()) {
+        // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is executed to improve concurrency performance, and the global transaction ends..
+        if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event

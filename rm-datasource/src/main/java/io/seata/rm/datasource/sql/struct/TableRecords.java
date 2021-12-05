@@ -185,6 +185,7 @@ public class TableRecords implements java.io.Serializable {
     public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+        Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
         int columnCount = resultSetMetaData.getColumnCount();
 
         while (resultSet.next()) {
@@ -195,7 +196,7 @@ public class TableRecords implements java.io.Serializable {
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPrimaryKeyMap().containsKey(colName)) {
+                if (primaryKeyMap.containsKey(colName)) {
                     field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(dataType);

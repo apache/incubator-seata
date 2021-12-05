@@ -15,25 +15,6 @@
  */
 package io.seata.server.session.db;
 
-import io.seata.common.XID;
-import io.seata.common.util.IOUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
-import io.seata.server.session.SessionManager;
-import io.seata.server.storage.db.session.DataBaseSessionManager;
-import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,11 +22,35 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import io.seata.common.XID;
+import io.seata.common.util.IOUtil;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionManager;
+import io.seata.server.storage.db.session.DataBaseSessionManager;
+import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type Data base session manager test.
  *
  * @author zhangsen
  */
+@SpringBootTest
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
@@ -55,7 +60,7 @@ public class DataBaseSessionManagerTest {
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start() throws Exception {
+    public static void start(ApplicationContext context) throws Exception {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
         DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 
@@ -279,7 +284,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -324,7 +329,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -373,7 +378,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -423,7 +428,7 @@ public class DataBaseSessionManagerTest {
         branchSession.setXid(xid);
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
@@ -439,7 +444,7 @@ public class DataBaseSessionManagerTest {
         branchSession2.setXid(xid);
         branchSession2.setTransactionId(globalSession.getTransactionId());
         branchSession2.setBranchId(2L);
-        branchSession2.setResourceGroupId("my_test_tx_group");
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession2.setResourceId("tb_1");
         branchSession2.setLockKey("t_1");
         branchSession2.setBranchType(BranchType.TCC);
@@ -493,7 +498,7 @@ public class DataBaseSessionManagerTest {
             branchSession.setXid(xid);
             branchSession.setTransactionId(globalSession.getTransactionId());
             branchSession.setBranchId(1L);
-            branchSession.setResourceGroupId("my_test_tx_group");
+            branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
             branchSession.setBranchType(BranchType.AT);
@@ -520,7 +525,7 @@ public class DataBaseSessionManagerTest {
             branchSession.setXid(xid2);
             branchSession.setTransactionId(globalSession.getTransactionId());
             branchSession.setBranchId(1L);
-            branchSession.setResourceGroupId("my_test_tx_group");
+            branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
             branchSession.setBranchType(BranchType.AT);

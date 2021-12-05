@@ -22,12 +22,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
+import io.netty.util.concurrent.EventExecutorGroup;
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.RejectedPolicies;
 import io.seata.common.util.NetUtil;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.auth.AuthSigner;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -173,12 +177,21 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
+            if (io.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
+                getClientChannelManager().reconnect(transactionServiceGroup);
+            }
         }
     }
 
     @Override
     public String getTransactionServiceGroup() {
         return transactionServiceGroup;
+    }
+
+    @Override
+    public boolean isEnableClientBatchSendRequest() {
+        return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
+            DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
     }
 
     @Override

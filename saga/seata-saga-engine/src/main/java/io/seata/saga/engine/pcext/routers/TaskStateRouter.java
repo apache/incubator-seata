@@ -23,6 +23,7 @@ import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.StateRouter;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
@@ -34,6 +35,7 @@ import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
+import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -57,6 +59,11 @@ public class TaskStateRouter implements StateRouter {
                     "StateInstruction is ended, Stop the StateMachine executing. StateMachine[{}] Current State[{}]",
                     stateInstruction.getStateMachineName(), state.getName());
             }
+            return null;
+        }
+
+        // check if in loop async condition
+        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
             return null;
         }
 
@@ -97,6 +104,10 @@ public class TaskStateRouter implements StateRouter {
 
         stateInstruction.setStateName(next);
 
+        if (null != LoopTaskUtils.getLoopConfig(context, nextState)) {
+            stateInstruction.setTemporaryState(new LoopStartStateImpl());
+        }
+
         return stateInstruction;
     }
 
@@ -127,7 +138,7 @@ public class TaskStateRouter implements StateRouter {
             StateInstance stateToBeCompensated = stateStackToBeCompensated.pop();
 
             StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
-            State state = stateMachine.getState(stateToBeCompensated.getName());
+            State state = stateMachine.getState(EngineUtils.getOriginStateName(stateToBeCompensated));
             if (state != null && state instanceof AbstractTaskState) {
 
                 AbstractTaskState taskState = (AbstractTaskState)state;
@@ -180,4 +191,5 @@ public class TaskStateRouter implements StateRouter {
         instruction.setStateName(compensationTriggerStateNext);
         return instruction;
     }
+
 }
