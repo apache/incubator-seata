@@ -148,15 +148,15 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         maps.put(BRANCH_SESSION_MAP, branchSessionByteMap);
         LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
             branchSessionByteMap.size());
-        final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
-        if (snapshot.save(maps)) {
+        String path = new StringBuilder(writer.getPath()).append(File.separator).append("data").toString();
+        if (RaftSnapshotFile.save(maps, path)) {
             if (writer.addFile("data")) {
                 done.run(Status.OK());
             } else {
                 done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
             }
         } else {
-            done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", snapshot.getPath()));
+            done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", path));
         }
     }
 
@@ -175,12 +175,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             LOGGER.error("Fail to find data file in {}", reader.getPath());
             return false;
         }
-        final RaftSnapshotFile snapshot = new RaftSnapshotFile(reader.getPath() + File.separator + "data");
+        String path = new StringBuilder(reader.getPath()).append(File.separator).append("data").toString();
         try {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
             }
-            Map<String, Object> maps = snapshot.load();
+            Map<String, Object> maps = RaftSnapshotFile.load(path);
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
             Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
             Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP);
@@ -215,7 +215,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             }
             return true;
         } catch (final Exception e) {
-            LOGGER.error("fail to load snapshot from {}", snapshot.getPath());
+            LOGGER.error("fail to load snapshot from {}", path);
             return false;
         }
 

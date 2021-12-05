@@ -153,9 +153,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                         }
                     }
                 };
-                closure.setChannelHandlerContext(ctx);
-                closure.setRpcMessage(rpcMessage);
-                closure.setMergeResultMessage(resultMessage);
                 final Task task = new Task();
                 task.setDone(closure);
                 RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
@@ -177,9 +174,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                         }
                     }
                 };
-                closure.setChannelHandlerContext(ctx);
-                closure.setRpcMessage(rpcMessage);
-                closure.setAbstractResultMessage(result);
                 final Task task = new Task();
                 task.setDone(closure);
                 RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);

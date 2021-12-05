@@ -31,21 +31,10 @@ public class RaftSnapshotFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftSnapshotFile.class);
 
-    private String path;
-
-    public RaftSnapshotFile(String path) {
-        super();
-        this.path = path;
-    }
-
-    public String getPath() {
-        return this.path;
-    }
-
     /**
      * Save value to snapshot file.
      */
-    public boolean save(final Map<String, Object> value) {
+    public static boolean save(final Map<String, Object> value, String path) {
         KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
         try {
             FileUtils.writeByteArrayToFile(new File(path), kryoInnerSerializer.serialize(value));
@@ -58,7 +47,7 @@ public class RaftSnapshotFile {
         }
     }
 
-    public Map<String, Object> load() throws IOException {
+    public static Map<String, Object> load(String path) throws IOException {
         KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
         try {
             final Map<String, Object> map =
