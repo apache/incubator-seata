@@ -21,19 +21,11 @@ import com.alipay.sofa.jraft.entity.Task;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author funkye
  */
 public class RaftTaskUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RaftTaskUtil.class);
-
-    public static void createTask(Object data) {
-        createTask(null, data);
-    }
 
     public static void createTask(Closure done, Object data) {
         final Task task = new Task();

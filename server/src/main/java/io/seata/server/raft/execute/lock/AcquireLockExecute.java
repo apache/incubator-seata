@@ -26,12 +26,8 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  */
 public class AcquireLockExecute extends AbstractRaftMsgExecute {
 
-    public AcquireLockExecute(RaftSessionSyncMsg sessionSyncMsg) {
-        super(sessionSyncMsg);
-    }
-
     @Override
-    public Boolean execute(Object... args) throws Throwable {
+    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
         boolean include = false;
@@ -47,6 +43,7 @@ public class AcquireLockExecute extends AbstractRaftMsgExecute {
                 logger.debug("acquireLock xid: {}, branch id: {} , owner: {}", branchSession.getXid(),
                     branchSession.getBranchId(), owner);
             }
+            // when the competition lock is successful, it can be added to the global transaction in advance
             globalSession.add(branchSession);
             if (logger.isDebugEnabled()) {
                 logger.debug("addBranch xid: {},branchId: {}", branchSession.getXid(), branchSession.getBranchId());

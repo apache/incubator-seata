@@ -26,12 +26,8 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  */
 public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
 
-    public UpdateBranchSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
-        super(sessionSyncMsg);
-    }
-
     @Override
-    public Boolean execute(Object... args) throws Throwable {
+    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
         BranchStatus status = sessionSyncMsg.getBranchStatus();

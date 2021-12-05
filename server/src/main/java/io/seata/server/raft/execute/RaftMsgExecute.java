@@ -15,6 +15,8 @@
  */
 package io.seata.server.raft.execute;
 
+import io.seata.server.storage.raft.RaftSessionSyncMsg;
+
 /**
  * @author jianbin.chen
  */
@@ -23,10 +25,10 @@ public interface RaftMsgExecute<T> {
     /**
      * Execute t.
      *
-     * @param args the args
+     * @param sessionSyncMsg the sessionSyncMsg
      * @return the t
      * @throws Throwable the throwable
      */
-    T execute(Object... args) throws Throwable;
+    T execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable;
 
 }

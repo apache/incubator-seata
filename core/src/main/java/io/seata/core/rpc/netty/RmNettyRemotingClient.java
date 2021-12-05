@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT;
+import static io.seata.core.constants.ConfigurationKeys.CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT;
 
 /**
  * The Rm netty client.
@@ -285,6 +287,12 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
     }
 
+    @Override
+    protected int acquireClusterRetryCount() {
+        return ConfigurationFactory.getInstance().getInt(CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT,
+            DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT);
+    }
+
     private void registerProcessor() {
         // 1.registry rm client handle branch commit processor
         RmBranchCommitProcessor rmBranchCommitProcessor = new RmBranchCommitProcessor(getTransactionMessageHandler(), this);
@@ -312,7 +320,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private void initConnection() {
         getClientChannelManager().reconnect(transactionServiceGroup);
-        super.initLeaderAddress();
+        super.initClusterMetaData();
     }
 
 }

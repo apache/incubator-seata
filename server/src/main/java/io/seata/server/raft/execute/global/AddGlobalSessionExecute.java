@@ -26,12 +26,8 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  */
 public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 
-    public AddGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
-        super(sessionSyncMsg);
-    }
-
     @Override
-    public Boolean execute(Object... objects) throws Throwable {
+    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         raftSessionManager.addGlobalSession(globalSession);

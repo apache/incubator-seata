@@ -25,12 +25,8 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  */
 public class ReleaseLockExecute extends AbstractRaftMsgExecute {
 
-    public ReleaseLockExecute(RaftSessionSyncMsg sessionSyncMsg) {
-        super(sessionSyncMsg);
-    }
-
     @Override
-    public Boolean execute(Object... args) throws Throwable {
+    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         GlobalSession globalSession =
             SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {

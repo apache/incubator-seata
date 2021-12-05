@@ -86,22 +86,34 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     private static final String BRANCH_SESSION_MAP = "branchSessionMap";
 
+    private static final Map<MsgType, RaftMsgExecute> EXECUTES = new HashMap<>();
+
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
+        EXECUTES.put(ACQUIRE_LOCK, new AcquireLockExecute());
+        EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
+        EXECUTES.put(REMOVE_BRANCH_SESSION, new RemoveBranchSessionExecute());
+        EXECUTES.put(UPDATE_GLOBAL_SESSION_STATUS, new UpdateGlobalSessionExecute());
+        EXECUTES.put(RELEASE_GLOBAL_SESSION_LOCK, new ReleaseLockExecute());
+        EXECUTES.put(REMOVE_GLOBAL_SESSION, new RemoveGlobalSessionExecute());
+        EXECUTES.put(UPDATE_BRANCH_SESSION_STATUS, new UpdateBranchSessionExecute());
     }
 
     @Override
     public void onApply(Iterator iterator) {
         while (iterator.hasNext()) {
-            Closure closure = null;
             if (iterator.done() != null) {
-                closure = iterator.done();
+                // leader does not need to be serialized, just execute the task directly
+                Optional.ofNullable(iterator.done()).ifPresent(done -> done.run(Status.OK()));
             } else {
                 try {
                     ByteBuffer byteBuffer = iterator.getData();
+                    // if data is empty, it is only a heartbeat event and can be ignored
                     if (byteBuffer != null && byteBuffer.hasRemaining()) {
                         try (KryoInnerSerializer kryo = FACTORY.get()) {
                             RaftSessionSyncMsg msg = kryo.deserialize(byteBuffer.array());
+                            // follower executes the corresponding task
                             onExecuteRaft(msg);
                         }
                     }
@@ -109,7 +121,6 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                     LOGGER.error("Message synchronization failure: {}", e.getMessage(), e);
                 }
             }
-            Optional.ofNullable(closure).ifPresent(processor -> processor.run(Status.OK()));
             iterator.next();
         }
     }
@@ -246,27 +257,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) throws Throwable {
-        MsgType msgType = msg.getMsgType();
-        RaftMsgExecute execute = null;
-        if (ADD_GLOBAL_SESSION.equals(msgType)) {
-            execute = new AddGlobalSessionExecute(msg);
-        } else if (ACQUIRE_LOCK.equals(msgType)) {
-            execute = new AcquireLockExecute(msg);
-        } else if (ADD_BRANCH_SESSION.equals(msgType)) {
-            execute = new AddBranchSessionExecute(msg);
-        } else if (UPDATE_GLOBAL_SESSION_STATUS.equals(msgType)) {
-            execute = new UpdateGlobalSessionExecute(msg);
-        } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
-            execute = new RemoveBranchSessionExecute(msg);
-        } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
-            execute = new ReleaseLockExecute(msg);
-        } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
-            execute = new RemoveGlobalSessionExecute(msg);
-        } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
-            execute = new UpdateBranchSessionExecute(msg);
+        RaftMsgExecute execute = EXECUTES.get(msg.getMsgType());
+        if (execute == null) {
+            throw new RuntimeException(
+                "the state machine does not allow events that cannot be executed, please feedback the information to the Seata community !!! msg: "
+                    + msg);
         }
-
-        execute.execute();
-
+        execute.execute(msg);
     }
 }

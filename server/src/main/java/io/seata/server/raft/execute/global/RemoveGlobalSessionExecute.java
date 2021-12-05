@@ -33,12 +33,10 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
         new ThreadPoolExecutor(1, 1, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2048),
             new NamedThreadFactory("RemoveGlobalSessionExecute", 1), new ThreadPoolExecutor.CallerRunsPolicy());
 
-    public RemoveGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
-        super(sessionSyncMsg);
-    }
-
     @Override
-    public Boolean execute(Object... args) {
+    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) {
+        // when the global transaction needs to be deleted, it does not affect any consistency issues, and can be
+        // deleted in an asynchronous thread to improve the throughput of the state machine
         EXECUTOR.execute(() -> {
             GlobalSession globalSession =
                 raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());

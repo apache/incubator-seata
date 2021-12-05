@@ -168,6 +168,11 @@ public interface ConfigurationKeys {
     String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
 
     /**
+     * The constant CLIENT_REPORT_ACQUIRE_CLUSTER_RETRY_COUNT.
+     */
+    String CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT = CLIENT_RM_PREFIX + "acquireClusterRetryCount";
+
+    /**
      * The constant CLIENT_TABLE_META_CHECK_ENABLE.
      */
     String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
@@ -186,10 +191,16 @@ public interface ConfigurationKeys {
      * The constant CLIENT_TM_PREFIX.
      */
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";
+
     /**
      * The constant CLIENT_TM_COMMIT_RETRY_TIMES.
      */
     String CLIENT_TM_COMMIT_RETRY_COUNT = CLIENT_TM_PREFIX + "commitRetryCount";
+
+    /**
+     * The constant CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT.
+     */
+    String CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT = CLIENT_TM_PREFIX + "acquireClusterRetryCount";
 
     /**
      * The constant CLIENT_TM_ROLLBACK_RETRY_TIMES.

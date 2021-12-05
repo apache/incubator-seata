@@ -28,12 +28,8 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  */
 public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
 
-    public AddBranchSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
-        super(sessionSyncMsg);
-    }
-
     @Override
-    public Boolean execute(Object... args) throws Throwable {
+    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         BranchTransactionDO branchTransactionDO = sessionSyncMsg.getBranchSession();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(branchTransactionDO.getXid());
         // in AT mode, a branch session is added after the lock contention succeeds

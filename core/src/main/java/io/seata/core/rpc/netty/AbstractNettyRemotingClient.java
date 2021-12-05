@@ -26,6 +26,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -99,6 +100,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     protected final Object mergeLock = new Object();
+    protected int acquireClusterRetryCount = this.acquireClusterRetryCount();
+    /**
+     * The find leader executor.
+     */
+    protected ScheduledThreadPoolExecutor findLeaderExecutor;
+
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -146,7 +153,20 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
-        return sendSyncRequest(msg, false);
+        Object result = null;
+        for (int i = 0; i < acquireClusterRetryCount; i++) {
+            result = sendSyncRequest(msg, acquireClusterRetryCount > 0);
+            if (raftMetadata != null && result instanceof AbstractTransactionResponse) {
+                AbstractTransactionResponse transactionResponse = (AbstractTransactionResponse)result;
+                if (transactionResponse.getResultCode() == Failed
+                    && transactionResponse.getTransactionExceptionCode() == NotRaftLeader) {
+                    acquireClusterMetaData();
+                }
+            } else {
+                break;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -184,16 +204,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
             try {
                 Object response = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
-                if (!retrying && raftMetadata != null) {
-                    if (response instanceof AbstractTransactionResponse) {
-                        AbstractTransactionResponse transactionResponse = (AbstractTransactionResponse)response;
-                        if (transactionResponse.getResultCode() == Failed
-                            && transactionResponse.getTransactionExceptionCode() == NotRaftLeader) {
-                            findLeader();
-                            return sendSyncRequest(msg, true);
-                        }
-                    }
-                }
                 return response;
             } catch (Exception exx) {
                 LOGGER.error("wait response error:{},ip:{},request:{}",
@@ -202,6 +212,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     throw (TimeoutException) exx;
                 } else {
                     throw new RuntimeException(exx);
+                }
+            } finally {
+                if (retrying) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("leader re-election occurs, RPC retry ");
+                    }
                 }
             }
 
@@ -352,6 +368,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * @return true:enable, false:disable
      */
     protected abstract boolean isEnableClientBatchSendRequest();
+
+    /**
+     * Whether to enable batch sending of requests, hand over to subclass implementation.
+     *
+     * @return true:enable, false:disable
+     */
+    protected abstract int acquireClusterRetryCount();
 
     /**
      * The type Merged send runnable.
@@ -511,43 +534,44 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             super.close(ctx, future);
         }
     }
-    protected void initLeaderAddress() {
+
+    protected void initClusterMetaData() {
         raftMetadata = new RaftMetadata();
-        boolean raft = findLeader();
+        boolean raft = acquireClusterMetaData();
         if (raft) {
+            findLeaderExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("findLeader", 1, true));
             // The leader election takes 5 second
             findLeaderExecutor.scheduleAtFixedRate(() -> {
                 try {
-                    findLeader();
+                    acquireClusterMetaData();
                 } catch (Exception e) {
                     // prevents an exception from being thrown that causes the thread to break
                     LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
                 }
             }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         }
-
     }
 
-    private boolean findLeader() {
+    private boolean acquireClusterMetaData() {
         if (raftMetadata.isExpired()) {
             synchronized (raftMetadata) {
                 if (raftMetadata.isExpired()) {
-                    for (int i = 0; i < 2; i++) {
+                    for (int i = 0; i < acquireClusterRetryCount; i++) {
                         RaftClusterMetaDataRequest raftClusterMetaDataRequest = new RaftClusterMetaDataRequest();
                         try {
                             String tcAddress = loadBalance(getTransactionServiceGroup(), raftClusterMetaDataRequest);
                             if (StringUtils.isNotBlank(tcAddress)) {
                                 Channel channel = clientChannelManager.acquireChannel(tcAddress);
                                 RpcMessage rpcMessage = buildRequestMessage(raftClusterMetaDataRequest,
-                                        ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                                    ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
                                 RaftClusterMetaDataResponse raftClusterMetaDataResponse =
-                                        (RaftClusterMetaDataResponse)super.sendSync(channel, rpcMessage, 2000);
+                                    (RaftClusterMetaDataResponse)super.sendSync(channel, rpcMessage, 2000);
                                 if (raftClusterMetaDataResponse != null && StringUtils.equalsIgnoreCase(
-                                        StoreMode.RAFT.getName(), raftClusterMetaDataResponse.getMode())) {
+                                    StoreMode.RAFT.getName(), raftClusterMetaDataResponse.getMode())) {
                                     if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getLeaderAddress())) {
                                         String[] address = raftClusterMetaDataResponse.getLeaderAddress().split(":");
                                         InetSocketAddress inetSocketAddress =
-                                                new InetSocketAddress(address[0], Integer.parseInt(address[1]));
+                                            new InetSocketAddress(address[0], Integer.parseInt(address[1]));
                                         if (raftMetadata.getLeaderAddress() != null
                                             && !Objects.equals(raftMetadata.getLeaderAddress(), inetSocketAddress)) {
                                             LOGGER.info("seata cluster leader: {}", inetSocketAddress);
@@ -555,27 +579,27 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                                         raftMetadata.setLeaderAddress(inetSocketAddress);
                                         if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getFollowers())) {
                                             String[] followers =
-                                                    raftClusterMetaDataResponse.getFollowers().split(ADDRESS_SPLIT_CHAR);
+                                                raftClusterMetaDataResponse.getFollowers().split(ADDRESS_SPLIT_CHAR);
                                             clientChannelManager.reconnect(Arrays.asList(followers),
-                                                    getTransactionServiceGroup());
+                                                getTransactionServiceGroup());
                                             List<InetSocketAddress> list = new ArrayList<>();
                                             for (String follower : followers) {
                                                 address = follower.split(ADDRESS_LINK_CHAR);
                                                 list.add(
-                                                        new InetSocketAddress(address[0], Integer.parseInt(address[1])));
+                                                    new InetSocketAddress(address[0], Integer.parseInt(address[1])));
                                             }
                                             raftMetadata.setFollowers(list);
                                         }
                                         if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getLearners())) {
                                             String[] learners =
-                                                    raftClusterMetaDataResponse.getLearners().split(ADDRESS_SPLIT_CHAR);
+                                                raftClusterMetaDataResponse.getLearners().split(ADDRESS_SPLIT_CHAR);
                                             clientChannelManager.reconnect(Arrays.asList(learners),
-                                                    getTransactionServiceGroup());
+                                                getTransactionServiceGroup());
                                             List<InetSocketAddress> list = new ArrayList<>();
                                             for (String learner : learners) {
                                                 address = learner.split(ADDRESS_LINK_CHAR);
                                                 list.add(
-                                                        new InetSocketAddress(address[0], Integer.parseInt(address[1])));
+                                                    new InetSocketAddress(address[0], Integer.parseInt(address[1])));
                                             }
                                             raftMetadata.setLearners(list);
                                         }

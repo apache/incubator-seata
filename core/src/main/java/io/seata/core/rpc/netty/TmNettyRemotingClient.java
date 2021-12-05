@@ -20,7 +20,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.DefaultValues;
@@ -42,6 +41,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT;
+import static io.seata.core.constants.ConfigurationKeys.CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT;
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 import static io.seata.core.constants.ConfigurationKeys.SEATA_ACCESS_KEY;
@@ -180,7 +182,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
             super.init();
             if (io.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
                 getClientChannelManager().reconnect(transactionServiceGroup);
-                super.initLeaderAddress();
+                initConnection();
             }
         }
     }
@@ -265,4 +267,16 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(EXTRA_DATA_KV_CHAR).append(timestamp).append(EXTRA_DATA_SPLIT_CHAR);
         return sb.toString();
     }
+
+    private void initConnection() {
+        getClientChannelManager().reconnect(transactionServiceGroup);
+        super.initClusterMetaData();
+    }
+
+    @Override
+    protected int acquireClusterRetryCount() {
+        return ConfigurationFactory.getInstance().getInt(CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT,
+                DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT);
+    }
+
 }

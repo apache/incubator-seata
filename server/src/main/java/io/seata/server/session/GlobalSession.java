@@ -341,11 +341,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void removeBranch(Long branchId) throws TransactionException {
-        this.removeBranch(getBranch(branchId));
-    }
-
-    @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
         if (RaftServerFactory.getInstance().isRaftMode() && RaftServerFactory.getInstance().isLeader()) {
             CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();

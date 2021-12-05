@@ -67,12 +67,6 @@ public abstract class AbstractNettyRemoting implements Disposable {
         new NamedThreadFactory("timeoutChecker", 1, true));
 
     /**
-     * The find leader executor.
-     */
-    protected final ScheduledThreadPoolExecutor findLeaderExecutor =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("findLeader", 1, true));
-
-    /**
      * The Message executor.
      */
     protected final ThreadPoolExecutor messageExecutor;

@@ -100,8 +100,8 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
 
     @Override
     public String toString() {
-        return "RaftSessionSyncMsg{" + "globalSession=" + globalSession + ", branchSession=" + branchSession
-            + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", msgType=" + msgType + '}';
+        return "RaftSessionSyncMsg{" + "msgType=" + msgType + ", globalSession=" + globalSession + ", branchSession="
+            + branchSession + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + '}';
     }
 
 }

@@ -24,12 +24,8 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  */
 public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
 
-    public UpdateGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
-        super(sessionSyncMsg);
-    }
-
     @Override
-    public Boolean execute(Object... args) throws Throwable {
+    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
             globalSession.setLocalStatus(sessionSyncMsg.getGlobalStatus());
