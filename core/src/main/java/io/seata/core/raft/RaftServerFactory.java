@@ -99,30 +99,21 @@ public class RaftServerFactory {
             raftMode = true;
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                                + separator + serverIdStr.split(":")[1];
+            + separator + serverIdStr.split(":")[1];
         final NodeOptions nodeOptions = new NodeOptions();
         // enable the CLI service.
         nodeOptions.setDisableCli(false);
         // snapshot should be made every 30 seconds
         Integer snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
-        RaftOptions raftOptions = new RaftOptions();
-        raftOptions
-                .setApplyBatch(CONFIG.getInt(SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
-        raftOptions.setMaxAppendBufferSize(
-                CONFIG.getInt(SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
-        raftOptions.setDisruptorBufferSize(
-                CONFIG.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
-        raftOptions.setMaxReplicatorInflightMsgs(CONFIG.getInt(
-                SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
-        nodeOptions.setRaftOptions(raftOptions);
+        nodeOptions.setRaftOptions(initRaftOptions());
         // set the election timeout to 1 second
-        nodeOptions.setElectionTimeoutMs(
-                CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
+        nodeOptions
+            .setElectionTimeoutMs(CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
         // set up the initial cluster configuration
         nodeOptions.setInitialConf(initConf);
         raftServer = EnhancedServiceLoader.load(AbstractRaftServer.class, RAFT_TAG,
-                new Object[] {dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions});
+            new Object[] {dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions});
         stateMachine = raftServer.getAbstractRaftStateMachine();
         LOGGER.info("started counter server at port:{}", raftServer.node.getNodeId().getPeerId().getPort());
         // whether to join an existing cluster
@@ -172,6 +163,18 @@ public class RaftServerFactory {
 
     public Boolean isNotRaftModeLeader() {
         return !isLeader() && isRaftMode();
+    }
+
+    private RaftOptions initRaftOptions() {
+        RaftOptions raftOptions = new RaftOptions();
+        raftOptions.setApplyBatch(CONFIG.getInt(SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
+        raftOptions.setMaxAppendBufferSize(
+            CONFIG.getInt(SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
+        raftOptions.setDisruptorBufferSize(
+            CONFIG.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
+        raftOptions.setMaxReplicatorInflightMsgs(
+            CONFIG.getInt(SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
+        return raftOptions;
     }
 
     private static class SingletonHandler {
