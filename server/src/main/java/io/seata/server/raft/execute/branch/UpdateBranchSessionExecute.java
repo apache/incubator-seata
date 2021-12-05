@@ -32,6 +32,9 @@ public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
         BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
         BranchStatus status = sessionSyncMsg.getBranchStatus();
         branchSession.setStatus(status);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update branch: {} , status: {}", branchSession.getBranchId(), branchSession.getStatus());
+        }
         return true;
     }
 

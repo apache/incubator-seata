@@ -100,18 +100,7 @@ public class RaftServerFactory {
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + serverIdStr.split(":")[1];
-        final NodeOptions nodeOptions = new NodeOptions();
-        // enable the CLI service.
-        nodeOptions.setDisableCli(false);
-        // snapshot should be made every 30 seconds
-        Integer snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
-        nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
-        nodeOptions.setRaftOptions(initRaftOptions());
-        // set the election timeout to 1 second
-        nodeOptions
-            .setElectionTimeoutMs(CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
-        // set up the initial cluster configuration
-        nodeOptions.setInitialConf(initConf);
+        final NodeOptions nodeOptions = initNodeOptions(initConf);
         raftServer = EnhancedServiceLoader.load(AbstractRaftServer.class, RAFT_TAG,
             new Object[] {dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions});
         stateMachine = raftServer.getAbstractRaftStateMachine();
@@ -175,6 +164,22 @@ public class RaftServerFactory {
         raftOptions.setMaxReplicatorInflightMsgs(
             CONFIG.getInt(SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
         return raftOptions;
+    }
+
+    private NodeOptions initNodeOptions(Configuration initConf) {
+        NodeOptions nodeOptions = new NodeOptions();
+        // enable the CLI service.
+        nodeOptions.setDisableCli(false);
+        // snapshot should be made every 30 seconds
+        Integer snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
+        nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
+        nodeOptions.setRaftOptions(initRaftOptions());
+        // set the election timeout to 1 second
+        nodeOptions
+            .setElectionTimeoutMs(CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
+        // set up the initial cluster configuration
+        nodeOptions.setInitialConf(initConf);
+        return nodeOptions;
     }
 
     private static class SingletonHandler {

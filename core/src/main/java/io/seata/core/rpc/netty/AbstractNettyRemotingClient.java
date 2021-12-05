@@ -161,10 +161,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 if (transactionResponse.getResultCode() == Failed
                     && transactionResponse.getTransactionExceptionCode() == NotRaftLeader) {
                     acquireClusterMetaData();
+                    continue;
                 }
-            } else {
-                break;
             }
+            break;
         }
         return result;
     }

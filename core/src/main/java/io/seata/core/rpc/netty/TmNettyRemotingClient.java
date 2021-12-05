@@ -181,7 +181,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         if (initialized.compareAndSet(false, true)) {
             super.init();
             if (io.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
-                getClientChannelManager().reconnect(transactionServiceGroup);
                 initConnection();
             }
         }
