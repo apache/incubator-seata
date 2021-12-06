@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'${seata.store.lock.mode}'.equals('redis') and '${seata.store.mode}'.equals('redis')}")
+@ConditionalOnExpression("#{'${seata.store.mode}'.equals('redis') and '${seata.store.lock.mode}'.equals('redis')}")
 public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
     @Override
