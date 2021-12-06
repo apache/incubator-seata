@@ -13,8 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.raft;
+package io.seata.server.raft;
 
+import java.io.IOException;
 import java.util.List;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
@@ -26,7 +27,6 @@ import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.option.RaftOptions;
 import com.alipay.sofa.jraft.rpc.CliClientService;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -45,7 +45,6 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_ELECTION_TIM
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
-import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
 import static java.io.File.separator;
 
 /**
@@ -55,7 +54,7 @@ public class RaftServerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerFactory.class);
 
-    private AbstractRaftServer raftServer;
+    private RaftServer raftServer;
 
     private AbstractRaftStateMachine stateMachine;
 
@@ -101,10 +100,13 @@ public class RaftServerFactory {
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + serverIdStr.split(":")[1];
         final NodeOptions nodeOptions = initNodeOptions(initConf);
-        raftServer = EnhancedServiceLoader.load(AbstractRaftServer.class, RAFT_TAG,
-            new Object[] {dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions});
+        try {
+            raftServer = new RaftServer(dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
+        }
         stateMachine = raftServer.getAbstractRaftStateMachine();
-        LOGGER.info("started counter server at port:{}", raftServer.node.getNodeId().getPeerId().getPort());
+        LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         // whether to join an existing cluster
         if (CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false)) {
             List<PeerId> currentPeers = null;
@@ -125,11 +127,11 @@ public class RaftServerFactory {
         }
     }
 
-    public AbstractRaftServer getRaftServer() {
+    public RaftServer getRaftServer() {
         return raftServer;
     }
 
-    public void setRaftServer(AbstractRaftServer raftServer) {
+    public void setRaftServer(RaftServer raftServer) {
         this.raftServer = raftServer;
     }
 

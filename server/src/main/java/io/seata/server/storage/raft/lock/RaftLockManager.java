@@ -33,8 +33,8 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
 
 
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 
 /**
  * @author funkye

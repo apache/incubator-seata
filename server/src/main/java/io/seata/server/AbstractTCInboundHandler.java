@@ -52,7 +52,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.TCInboundHandler;
-import io.seata.core.raft.RaftServerFactory;
+import io.seata.server.raft.RaftServerFactory;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;

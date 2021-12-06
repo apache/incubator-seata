@@ -21,7 +21,7 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.raft.RaftServerFactory;
+import io.seata.server.raft.RaftServerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;

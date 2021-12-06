@@ -26,7 +26,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.raft.RaftServerFactory;
+import io.seata.server.raft.RaftServerFactory;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -35,8 +35,8 @@ import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
 
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
 
 /**
  * @author funkye

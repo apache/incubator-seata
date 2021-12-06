@@ -38,7 +38,7 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.raft.RaftServerFactory;
+import io.seata.server.raft.RaftServerFactory;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.UUIDGenerator;
@@ -55,10 +55,10 @@ import org.slf4j.LoggerFactory;
 import static io.seata.core.model.GlobalStatus.AsyncCommitting;
 import static io.seata.core.model.GlobalStatus.CommitRetrying;
 import static io.seata.core.model.GlobalStatus.Committing;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  * The type Global session.

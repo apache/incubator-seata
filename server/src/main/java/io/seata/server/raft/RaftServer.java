@@ -28,15 +28,10 @@ import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.codahale.metrics.Slf4jReporter;
-import io.seata.common.loader.LoadLevel;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.raft.AbstractRaftServer;
-import io.seata.core.raft.AbstractRaftStateMachine;
-import io.seata.core.raft.RaftServer;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.server.session.SessionHolder;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -47,18 +42,21 @@ import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_CLUSTER;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
-import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
 
 /**
  * @author funkye
  */
-@LoadLevel(name = RAFT_TAG)
-public class RaftServerImpl extends AbstractRaftServer implements ConfigurationChangeListener {
+public class RaftServer implements ConfigurationChangeListener, AutoCloseable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftServer.class);
 
-    public RaftServerImpl(final String dataPath, final String groupId, final PeerId serverId,
-        final NodeOptions nodeOptions) throws IOException {
+    private AbstractRaftStateMachine raftStateMachine;
+    private RaftGroupService raftGroupService;
+    private Node node;
+    private CliService cliService;
+
+    public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions)
+        throws IOException {
         // Initialization path
         FileUtils.forceMkdir(new File(dataPath));
 
@@ -91,14 +89,10 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         }
     }
 
-    public RaftServerImpl() {}
-
-    @Override
     public Node getNode() {
         return this.node;
     }
 
-    @Override
     public AbstractRaftStateMachine getAbstractRaftStateMachine() {
         return raftStateMachine;
     }
@@ -131,12 +125,6 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
                 }
             }
         }
-    }
-
-    @Override
-    public RaftServer init(String dataPath, String groupId, PeerId serverId, NodeOptions nodeOptions)
-        throws IOException {
-        return new RaftServerImpl(dataPath, groupId, serverId, nodeOptions);
     }
 
     @Override

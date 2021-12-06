@@ -13,18 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.raft;
+package io.seata.server.raft;
 
-import com.alipay.sofa.jraft.Closure;
-import com.alipay.sofa.jraft.Status;
+import java.util.concurrent.atomic.AtomicLong;
+import com.alipay.sofa.jraft.core.StateMachineAdapter;
 
 /**
  * @author funkye
  */
-public class RaftClosure implements Closure {
+public abstract class AbstractRaftStateMachine extends StateMachineAdapter {
 
-    @Override
-    public void run(Status status) {
+    /**
+     * Leader term
+     */
+    protected final AtomicLong leaderTerm = new AtomicLong(-1);
+
+    protected String mode;
+
+    protected boolean isLeader() {
+        return this.leaderTerm.get() > 0;
     }
 
 }

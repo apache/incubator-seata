@@ -17,9 +17,9 @@ package io.seata.server.storage.raft;
 
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.raft.msg.RaftSyncMsg;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.raft.execute.RaftSyncMsg;
 
 /**
  * @author funkye

@@ -18,7 +18,7 @@ package io.seata.server.storage.raft;
 import java.nio.ByteBuffer;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
-import io.seata.core.raft.RaftServerFactory;
+import io.seata.server.raft.RaftServerFactory;
 import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
 

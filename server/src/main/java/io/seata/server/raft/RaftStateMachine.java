@@ -35,8 +35,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.protocol.LeaderNotifyRequest;
-import io.seata.core.raft.AbstractRaftStateMachine;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.store.StoreMode;
 import io.seata.serializer.kryo.KryoInnerSerializer;
@@ -62,15 +60,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 
 /**
