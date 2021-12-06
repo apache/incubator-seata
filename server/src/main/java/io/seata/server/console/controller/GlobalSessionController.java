@@ -54,11 +54,11 @@ public class GlobalSessionController {
      */
     @GetMapping("queryByStatus")
     public PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch) {
-        return null;
+        return globalSessionService.queryByStatus(applicationId, status, withBranch);
     }
 
     @GetMapping("queryByXid")
-    SingleResult<GlobalSessionVO> queryByXid(String xid) {
-        return null;
+    SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch) {
+        return globalSessionService.queryByXid(xid, withBranch);
     }
 }

@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("'${seata.store.session.mode}'.equals('db')")
+@ConditionalOnExpression("#{'${seata.store.session.mode}'.equals('db') and '${seata.store.mode}'.equals('db')}")
 public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
     @Override

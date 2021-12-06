@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("'${seata.store.session.mode}'.equals('redis')")
+@ConditionalOnExpression("#{'${seata.store.session.mode}'.equals('redis') and '${seata.store.mode}'.equals('redis')}")
 public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
     @Override
