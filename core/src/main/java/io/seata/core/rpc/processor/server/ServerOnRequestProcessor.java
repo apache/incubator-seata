@@ -15,9 +15,6 @@
  */
 package io.seata.core.rpc.processor.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
@@ -33,11 +30,13 @@ import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalReportRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * process RM/TM client request message.
@@ -113,16 +112,15 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         if (message instanceof MergedWarpMessage) {
             AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
             for (int i = 0; i < results.length; i++) {
-                final AbstractMessage subMessage = ((MergedWarpMessage)message).msgs.get(i);
-                AbstractResultMessage result = transactionMessageHandler.onRequest(subMessage, rpcContext);
-                results[i] = result;
+                final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
+                results[i] = transactionMessageHandler.onRequest(subMessage, rpcContext);
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
         } else {
             // the single send request message
-            final AbstractMessage msg = (AbstractMessage)message;
+            final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
         }
