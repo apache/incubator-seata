@@ -16,18 +16,26 @@
 package io.seata.server.storage.raft;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
-import io.seata.server.raft.RaftServerFactory;
+
+import io.seata.core.exception.GlobalTransactionException;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
+import io.seata.server.raft.RaftServerFactory;
 
 /**
  * @author funkye
  */
 public class RaftTaskUtil {
 
-    public static void createTask(Closure done, Object data) {
+    public static boolean createTask(Closure done, Object data, CompletableFuture<Boolean> completableFuture)
+        throws TransactionException {
         final Task task = new Task();
         if (data != null) {
             try (KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get()) {
@@ -36,10 +44,31 @@ public class RaftTaskUtil {
         }
         task.setDone(done);
         RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
+        if (completableFuture != null) {
+            return futureGet(completableFuture);
+        }
+        return true;
     }
 
-    public static void createTask(Closure done) {
-        createTask(done, null);
+    public static boolean createTask(Closure done, CompletableFuture<Boolean> completableFuture)
+        throws TransactionException {
+        return createTask(done, null, completableFuture);
+    }
+
+    public static boolean futureGet(CompletableFuture<Boolean> completableFuture) throws TransactionException {
+        try {
+            return completableFuture.get();
+        } catch (InterruptedException e) {
+            throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
+                "Fail to store global session: " + e.getMessage());
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof TransactionException) {
+                throw (TransactionException)e.getCause();
+            } else {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
+                    "Fail to store global session: " + e.getMessage());
+            }
+        }
     }
 
 }

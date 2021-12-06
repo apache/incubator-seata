@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -38,11 +37,11 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.raft.RaftServerFactory;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerManagerFactory;
+import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
@@ -218,19 +217,25 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException {
         if (RaftServerFactory.getInstance().isRaftMode()) {
+            CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
             Closure closure = closureStatus -> {
                 if (closureStatus.isOk()) {
                     try {
                         this.localChangeBranchStatus(branchSession, status);
+                        completableFuture.complete(true);
                     } catch (TransactionException e) {
-                        e.printStackTrace();
+                        completableFuture.completeExceptionally(e);
                     }
+                } else {
+                    completableFuture
+                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            " The current TC is not a leader node, interrupt processing !"));
                 }
             };
             BranchTransactionDO branchTransactionDO = new BranchTransactionDO(xid, branchSession.getBranchId());
             RaftSessionSyncMsg raftSyncMsg =
                 new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, status);
-            RaftTaskUtil.createTask(closure, raftSyncMsg);
+            RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
         } else {
             this.localChangeBranchStatus(branchSession, status);
         }
@@ -325,18 +330,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             };
             BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
             RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_BRANCH_SESSION, branchTransactionDO);
-            RaftTaskUtil.createTask(closure, raftSyncMsg);
-            try {
-                completableFuture.get();
-            } catch (InterruptedException | ExecutionException e) {
-                if (e instanceof InterruptedException) {
-                    if (e.getCause() instanceof TransactionException) {
-                        throw (TransactionException)e.getCause();
-                    }
-                }
-                throw new TransactionException("add branch failed, xid = " + this.xid + ", branchId = "
-                    + branchSession.getBranchId() + " error:" + e.getMessage());
-            }
+            RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
         } else {
             this.localAddBranch(branchSession);
         }
@@ -359,19 +353,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                     try {
                         completableFuture.complete(this.localRemoveBranch(branchSession));
                     } catch (TransactionException e) {
-                        LOGGER.error("raft mode remove branch error: {}", e.getMessage(), e);
+                        LOGGER.error("raft mode add branch error: {}", e.getMessage(), e);
+                        completableFuture.completeExceptionally(e);
                     }
+                } else {
+                    completableFuture
+                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            " The current TC is not a leader node, interrupt processing !"));
                 }
             };
             BranchTransactionDO branchTransactionDO = new BranchTransactionDO(this.xid, branchSession.getBranchId());
             RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, branchTransactionDO);
-            RaftTaskUtil.createTask(closure, raftSyncMsg);
-            try {
-                completableFuture.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new TransactionException(
-                    "remove branch failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
-            }
+            RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
         } else if (!RaftServerFactory.getInstance().isRaftMode()) {
             this.localRemoveBranch(branchSession);
         } else {
@@ -491,15 +484,21 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void setStatus(GlobalStatus status) throws TransactionException {
         if (RaftServerFactory.getInstance().isRaftMode()) {
+            CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
             Closure closure = closureStatus -> {
                 if (closureStatus.isOk()) {
                     this.setLocalStatus(status);
+                    completableFuture.complete(true);
+                } else {
+                    completableFuture
+                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            " The current TC is not a leader node, interrupt processing !"));
                 }
             };
             GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(this.xid);
             RaftSessionSyncMsg raftSyncMsg =
                 new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, status);
-            RaftTaskUtil.createTask(closure, raftSyncMsg);
+            RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
         } else {
             this.setLocalStatus(status);
         }

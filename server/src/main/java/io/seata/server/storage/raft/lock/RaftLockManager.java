@@ -16,9 +16,7 @@
 package io.seata.server.storage.raft.lock;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import com.alipay.sofa.jraft.Closure;
-import io.seata.common.exception.StoreException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -59,19 +57,9 @@ public class RaftLockManager extends FileLockManager {
                     " The current TC is not a leader node, interrupt processing !"));
             }
         };
-        RaftTaskUtil.createTask(closure, raftSyncMsg);
-        try {
-            return completableFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            if (e instanceof InterruptedException) {
-                if (e.getCause() instanceof TransactionException) {
-                    throw (TransactionException)e.getCause();
-                }
-            }
-            throw new StoreException(e);
-        }
+        return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
-    
+
     public boolean localAcquireLock(BranchSession branchSession) throws TransactionException {
         return super.acquireLock(branchSession);
     }
@@ -102,17 +90,7 @@ public class RaftLockManager extends FileLockManager {
                     " The current TC is not a leader node, interrupt processing !"));
             }
         };
-        RaftTaskUtil.createTask(closure, raftSyncMsg);
-        try {
-            return completableFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            if (e instanceof InterruptedException) {
-                if (e.getCause() instanceof TransactionException) {
-                    throw (TransactionException)e.getCause();
-                }
-            }
-            throw new StoreException(e);
-        }
+        return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
     @Override
@@ -131,17 +109,7 @@ public class RaftLockManager extends FileLockManager {
                     " The current TC is not a leader node, interrupt processing !"));
             }
         };
-        RaftTaskUtil.createTask(closure);
-        try {
-            return completableFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            if (e instanceof InterruptedException) {
-                if (e.getCause() instanceof TransactionException) {
-                    throw (TransactionException)e.getCause();
-                }
-            }
-            throw new StoreException(e);
-        }
+        return RaftTaskUtil.createTask(closure, completableFuture);
     }
 
 }
