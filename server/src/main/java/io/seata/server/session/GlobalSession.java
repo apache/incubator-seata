@@ -315,7 +315,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                         completableFuture.complete(this.localAddBranch(branchSession));
                     } catch (TransactionException e) {
                         LOGGER.error("raft mode add branch error: {}", e.getMessage(), e);
+                        completableFuture.completeExceptionally(e);
                     }
+                } else {
+                    completableFuture
+                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            " The current TC is not a leader node, interrupt processing !"));
                 }
             };
             BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
@@ -324,8 +329,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             try {
                 completableFuture.get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new TransactionException(
-                        "add branch failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
+                if (e instanceof InterruptedException) {
+                    if (e.getCause() instanceof TransactionException) {
+                        throw (TransactionException)e.getCause();
+                    }
+                }
+                throw new TransactionException("add branch failed, xid = " + this.xid + ", branchId = "
+                    + branchSession.getBranchId() + " error:" + e.getMessage());
             }
         } else {
             this.localAddBranch(branchSession);

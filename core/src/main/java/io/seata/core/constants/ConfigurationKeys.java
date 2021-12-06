@@ -740,7 +740,6 @@ public interface ConfigurationKeys {
     String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 
     /**
-<<<<<<< HEAD
      * The constant SERVER_RAFT.
      */
     String SERVER_RAFT = SERVER_PREFIX + "raft.";

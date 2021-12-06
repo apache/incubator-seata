@@ -16,10 +16,14 @@
 package io.seata.server.storage.raft.session;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import com.alipay.sofa.jraft.Closure;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
+import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.RaftServerFactory;
@@ -56,19 +60,38 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void onBegin(GlobalSession globalSession) throws TransactionException {
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         if (RaftServerFactory.getInstance().isLeader()) {
             Closure closure = status -> {
                 if (status.isOk()) {
                     try {
                         super.addGlobalSession(globalSession);
+                        completableFuture.complete(true);
                     } catch (TransactionException e) {
-                        e.printStackTrace();
+                        completableFuture.completeExceptionally(e);
                     }
+                } else {
+                    completableFuture
+                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            " The current TC is not a leader node, interrupt processing !"));
                 }
             };
             GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
             RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDO);
             RaftTaskUtil.createTask(closure, raftSyncMsg);
+            try {
+                completableFuture.get();
+            } catch (InterruptedException e) {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
+                    "Fail to store global session: " + e.getMessage());
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof TransactionException) {
+                    throw (TransactionException)e.getCause();
+                } else {
+                    throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
+                        "Fail to store global session: " + e.getMessage());
+                }
+            }
         }
     }
 

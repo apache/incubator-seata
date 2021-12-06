@@ -21,6 +21,7 @@ import com.alipay.sofa.jraft.Closure;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.lock.Locker;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
@@ -53,12 +54,20 @@ public class RaftLockManager extends FileLockManager {
                 } catch (TransactionException e) {
                     completableFuture.completeExceptionally(e);
                 }
+            } else {
+                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    " The current TC is not a leader node, interrupt processing !"));
             }
         };
         RaftTaskUtil.createTask(closure, raftSyncMsg);
         try {
             return completableFuture.get();
         } catch (InterruptedException | ExecutionException e) {
+            if (e instanceof InterruptedException) {
+                if (e.getCause() instanceof TransactionException) {
+                    throw (TransactionException)e.getCause();
+                }
+            }
             throw new StoreException(e);
         }
     }
@@ -88,12 +97,49 @@ public class RaftLockManager extends FileLockManager {
                 } catch (TransactionException e) {
                     completableFuture.completeExceptionally(e);
                 }
+            } else {
+                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    " The current TC is not a leader node, interrupt processing !"));
             }
         };
         RaftTaskUtil.createTask(closure, raftSyncMsg);
         try {
             return completableFuture.get();
         } catch (InterruptedException | ExecutionException e) {
+            if (e instanceof InterruptedException) {
+                if (e.getCause() instanceof TransactionException) {
+                    throw (TransactionException)e.getCause();
+                }
+            }
+            throw new StoreException(e);
+        }
+    }
+
+    @Override
+    public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        Closure closure = status -> {
+            if (status.isOk()) {
+                try {
+                    // ensure consistency through state machine reading
+                    completableFuture.complete(super.isLockable(xid, resourceId, lockKey));
+                } catch (TransactionException e) {
+                    completableFuture.completeExceptionally(e);
+                }
+            } else {
+                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    " The current TC is not a leader node, interrupt processing !"));
+            }
+        };
+        RaftTaskUtil.createTask(closure);
+        try {
+            return completableFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            if (e instanceof InterruptedException) {
+                if (e.getCause() instanceof TransactionException) {
+                    throw (TransactionException)e.getCause();
+                }
+            }
             throw new StoreException(e);
         }
     }

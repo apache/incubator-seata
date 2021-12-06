@@ -18,19 +18,13 @@ package io.seata.core.rpc.processor.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alipay.sofa.jraft.Status;
-import com.alipay.sofa.jraft.entity.Task;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
-import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
-import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
@@ -39,9 +33,6 @@ import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalReportRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
-import io.seata.core.raft.AbstractRaftServer;
-import io.seata.core.raft.RaftClosure;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
@@ -76,15 +67,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
 
     private TransactionMessageHandler transactionMessageHandler;
 
-    private Boolean raftMode = false;
-
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
-        AbstractRaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
-        if (raftServer != null) {
-            this.raftMode = RaftServerFactory.getInstance().isRaftMode();
-        }
     }
 
     @Override
@@ -127,57 +112,19 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
         if (message instanceof MergedWarpMessage) {
             AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
-            boolean notLeaderError = false;
             for (int i = 0; i < results.length; i++) {
                 final AbstractMessage subMessage = ((MergedWarpMessage)message).msgs.get(i);
                 AbstractResultMessage result = transactionMessageHandler.onRequest(subMessage, rpcContext);
                 results[i] = result;
-                if (result instanceof AbstractTransactionResponse) {
-                    notLeaderError = TransactionExceptionCode.NotRaftLeader
-                        .equals(((AbstractTransactionResponse)result).getTransactionExceptionCode()) ? true : false;
-                    if (notLeaderError) {
-                        break;
-                    }
-                }
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            if (!raftMode || notLeaderError) {
-                remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
-            } else {
-                RaftClosure closure = new RaftClosure() {
-                    @Override
-                    public void run(Status status) {
-                        if (status.isOk()) {
-                            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
-                        }
-                    }
-                };
-                final Task task = new Task();
-                task.setDone(closure);
-                RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
-            }
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage)message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            if (!raftMode || msg instanceof RaftClusterMetaDataRequest
-                || (result instanceof AbstractTransactionResponse && TransactionExceptionCode.NotRaftLeader
-                    .equals(((AbstractTransactionResponse)result).getTransactionExceptionCode()))) {
-                remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
-            } else {
-                RaftClosure closure = new RaftClosure() {
-                    @Override
-                    public void run(Status status) {
-                        if (status.isOk()) {
-                            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
-                        }
-                    }
-                };
-                final Task task = new Task();
-                task.setDone(closure);
-                RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
-            }
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
         }
     }
 

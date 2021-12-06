@@ -29,12 +29,17 @@ public class RaftTaskUtil {
 
     public static void createTask(Closure done, Object data) {
         final Task task = new Task();
-        try (KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get()) {
-            task.setData(ByteBuffer.wrap(kryo.serialize(data)));
+        if (data != null) {
+            try (KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get()) {
+                task.setData(ByteBuffer.wrap(kryo.serialize(data)));
+            }
         }
-        task.setDone(done == null ? status -> {
-        } : done);
+        task.setDone(done);
         RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
+    }
+
+    public static void createTask(Closure done) {
+        createTask(done, null);
     }
 
 }
