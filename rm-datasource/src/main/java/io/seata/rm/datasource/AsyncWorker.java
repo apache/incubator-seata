@@ -154,7 +154,6 @@ public class AsyncWorker {
         } catch (SQLException sqlExx) {
             addAllToCommitQueue(contexts);
             LOGGER.error("failed to get connection for async committing on {} and requeue", resourceId, sqlExx);
-            return;
         } finally {
             IOUtil.close(conn);
         }
