@@ -42,7 +42,7 @@ import java.util.List;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'${seata.store.mode}'.equals('db') and '${seata.store.session.mode}'.equals('db')}")
+@ConditionalOnExpression("#{'db'.equals(environment.getProperty('sessionMode'))}")
 public class BranchSessionDBServiceImpl implements BranchSessionService {
 
     @Value("${seata.store.db.branch-table}")

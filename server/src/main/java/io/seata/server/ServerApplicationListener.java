@@ -31,6 +31,9 @@ import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_STORE_SESSION_MODE;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_STORE_LOCK_MODE;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_STORE_MODE;
 
 /**
  * @author slievrly
@@ -52,7 +55,6 @@ public class ServerApplicationListener implements GenericApplicationListener {
         ApplicationEnvironmentPreparedEvent environmentPreparedEvent = (ApplicationEnvironmentPreparedEvent)event;
         ConfigurableEnvironment environment = environmentPreparedEvent.getEnvironment();
         String[] args = environmentPreparedEvent.getArgs();
-
 
         // port: -h > -D > env > yml > default
 
@@ -94,6 +96,12 @@ public class ServerApplicationListener implements GenericApplicationListener {
         }
         String servicePort = String.valueOf(Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT);
         setTargetPort(environment, servicePort, true);
+
+        // Load by priority
+        setProperty(environment, "sessionMode",
+                environment.getProperty(SERVER_STORE_SESSION_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
+        setProperty(environment, "lockMode",
+                environment.getProperty(SERVER_STORE_LOCK_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
     }
 
     private void setTargetPort(ConfigurableEnvironment environment, String port, boolean needAddPropertySource) {
@@ -106,6 +114,19 @@ public class ServerApplicationListener implements GenericApplicationListener {
             pro.setProperty(SERVER_SERVICE_PORT_CONFIG, port);
             environment.getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", pro));
         }
+    }
+
+
+    /**
+     * set property
+     * @param environment
+     * @param key the key
+     * @param value the value
+     */
+    private void setProperty(ConfigurableEnvironment environment, String key, String value) {
+        Properties pro = new Properties();
+        pro.setProperty(key, value);
+        environment.getPropertySources().addFirst(new PropertiesPropertySource(key, pro));
     }
 
     /**

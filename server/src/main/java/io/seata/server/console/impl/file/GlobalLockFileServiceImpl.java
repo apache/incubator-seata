@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("'${seata.store.mode}'.equals('file')")
+@ConditionalOnExpression("#{'file'.equals(environment.getProperty('lockMode'))}")
 public class GlobalLockFileServiceImpl implements GlobalLockService {
 
     @Override
