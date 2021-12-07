@@ -19,6 +19,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
@@ -53,6 +55,16 @@ public class TransportProperties {
      * enable client batch send request
      */
     private boolean enableClientBatchSendRequest = DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable TM client batch send request
+     */
+    private boolean enableTmClientBatchSendRequest = DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable RM client batch send request
+     */
+    private boolean enableRmClientBatchSendRequest = DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
 
     public String getType() {
         return type;
@@ -105,6 +117,24 @@ public class TransportProperties {
 
     public TransportProperties setEnableClientBatchSendRequest(boolean enableClientBatchSendRequest) {
         this.enableClientBatchSendRequest = enableClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableTmClientBatchSendRequest() {
+        return enableTmClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableTmClientBatchSendRequest(boolean enableTmClientBatchSendRequest) {
+        this.enableTmClientBatchSendRequest = enableTmClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableRmClientBatchSendRequest() {
+        return enableRmClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableRmClientBatchSendRequest(boolean enableRmClientBatchSendRequest) {
+        this.enableRmClientBatchSendRequest = enableRmClientBatchSendRequest;
         return this;
     }
 }

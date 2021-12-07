@@ -1,7 +1,7 @@
 seata:
   enabled: true
   application-id: applicationName
-  tx-service-group: my_test_tx_group
+  tx-service-group: default_tx_group
   enable-auto-data-source-proxy: true
   data-source-proxy-mode: AT
   use-jdk-proxy: false
@@ -45,7 +45,7 @@ seata:
       virtual-nodes: 10
   service:
     vgroup-mapping:
-      my_test_tx_group: default
+      default_tx_group: default
     grouplist:
       default: 127.0.0.1:8091
     enable-degrade: false
@@ -68,7 +68,8 @@ seata:
     heartbeat: true
     serialization: seata
     compressor: none
-    enable-client-batch-send-request: true
+    enable-tm-client-batch-send-request: false
+    enable-rm-client-batch-send-request: true
   config:
     type: file
     consul:
