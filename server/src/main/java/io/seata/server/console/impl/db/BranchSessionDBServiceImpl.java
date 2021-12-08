@@ -45,11 +45,11 @@ import java.util.List;
 @ConditionalOnExpression("#{'db'.equals(environment.getProperty('sessionMode'))}")
 public class BranchSessionDBServiceImpl implements BranchSessionService {
 
-    @Value("${seata.store.db.branch-table}")
+    @Value("#{environment.getProperty('seata.store.db.branch-table')}")
     private String branchTable;
-    @Value("${seata.store.db.db-type}")
+    @Value("#{environment.getProperty('seata.store.db.db-type')}")
     private String dbType;
-    @Value("${seata.store.db.datasource}")
+    @Value("#{environment.getProperty('seata.store.db.datasource')}")
     private String dbDataSource;
 
     @Override
