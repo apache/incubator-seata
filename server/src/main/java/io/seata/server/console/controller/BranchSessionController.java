@@ -29,7 +29,7 @@ import javax.annotation.Resource;
  * @author: zhongxiang.wang
  */
 @RestController
-@RequestMapping("seata/console/branchSession")
+@RequestMapping("console/branchSession")
 public class BranchSessionController {
 
     @Resource(type = BranchSessionService.class)

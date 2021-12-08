@@ -30,7 +30,7 @@ import javax.annotation.Resource;
  * @author: zhongxiang.wang
  */
 @RestController
-@RequestMapping("seata/console/globalSession")
+@RequestMapping("console/globalSession")
 public class GlobalSessionController {
 
     @Resource(type = GlobalSessionService.class)
