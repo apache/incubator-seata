@@ -197,10 +197,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeStatus(GlobalStatus status) throws TransactionException {
+        this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
-        this.setStatus(status);
     }
 
     @Override

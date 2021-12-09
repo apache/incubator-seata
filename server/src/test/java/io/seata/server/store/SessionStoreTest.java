@@ -201,7 +201,6 @@ public class SessionStoreTest {
             // Re-init SessionHolder: restore sessions from file
             SessionHolder.init("file");
 
-            long tid = globalSession.getTransactionId();
             GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
 
