@@ -44,7 +44,7 @@ import java.util.List;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'db'.equals(environment.getProperty('lockMode'))}")
+@ConditionalOnExpression("#{'db'.equals('${lockMode}')}")
 public class GlobalLockDBServiceImpl implements GlobalLockService {
 
     @Value("#{environment.getProperty('seata.store.db.lock-table')}")

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'file'.equals(environment.getProperty('lockMode'))}")
+@ConditionalOnExpression("#{'file'.equals('${lockMode}')}")
 public class GlobalLockFileServiceImpl implements GlobalLockService {
 
     @Override

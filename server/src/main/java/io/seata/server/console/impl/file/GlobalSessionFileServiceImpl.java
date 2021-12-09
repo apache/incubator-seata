@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'file'.equals(environment.getProperty('sessionMode'))}")
+@ConditionalOnExpression("#{'file'.equals('${sessionMode}')}")
 public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
     @Override

@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'db'.equals(environment.getProperty('sessionMode'))}")
+@ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
     @Override

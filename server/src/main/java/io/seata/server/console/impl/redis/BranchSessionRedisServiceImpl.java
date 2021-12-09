@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'redis'.equals(environment.getProperty('sessionMode'))}")
+@ConditionalOnExpression("#{'redis'.equals('${sessionMode}')}")
 public class BranchSessionRedisServiceImpl implements BranchSessionService {
 
     @Override

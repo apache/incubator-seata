@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @org.springframework.context.annotation.Configuration
-@ConditionalOnExpression("#{'redis'.equals(environment.getProperty('sessionMode'))}")
+@ConditionalOnExpression("#{'redis'.equals('${sessionMode}')}")
 public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
     @Override
