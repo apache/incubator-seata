@@ -98,9 +98,9 @@ public class ServerApplicationListener implements GenericApplicationListener {
         setTargetPort(environment, servicePort, true);
 
         // Load by priority
-        setProperty(environment, "sessionMode",
+        System.setProperty("sessionMode",
                 environment.getProperty(SERVER_STORE_SESSION_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
-        setProperty(environment, "lockMode",
+        System.setProperty("lockMode",
                 environment.getProperty(SERVER_STORE_LOCK_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
     }
 
@@ -114,19 +114,6 @@ public class ServerApplicationListener implements GenericApplicationListener {
             pro.setProperty(SERVER_SERVICE_PORT_CONFIG, port);
             environment.getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", pro));
         }
-    }
-
-
-    /**
-     * set property
-     * @param environment
-     * @param key the key
-     * @param value the value
-     */
-    private void setProperty(ConfigurableEnvironment environment, String key, String value) {
-        Properties pro = new Properties();
-        pro.setProperty(key, value);
-        environment.getPropertySources().addFirst(new PropertiesPropertySource(key, pro));
     }
 
     /**
