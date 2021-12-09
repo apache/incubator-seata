@@ -212,7 +212,7 @@ public class SessionHolder {
                                     break;
                                 case Begin:
                                     if (storeMode == StoreMode.RAFT) {
-                                        globalSession.setLocalStatus(GlobalStatus.RollbackRetrying);
+                                        globalSession.setStatus(GlobalStatus.RollbackRetrying);
                                         queueToRetryRollback(globalSession);
                                     } else {
                                         globalSession.setActive(true);

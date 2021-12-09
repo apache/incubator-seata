@@ -42,7 +42,8 @@ public class RaftTaskUtil {
                 task.setData(ByteBuffer.wrap(kryo.serialize(data)));
             }
         }
-        task.setDone(done);
+        task.setDone(done == null ? status -> {
+        } : done);
         RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
         if (completableFuture != null) {
             return futureGet(completableFuture);

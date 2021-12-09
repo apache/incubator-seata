@@ -49,7 +49,8 @@ import io.seata.server.raft.execute.global.AddGlobalSessionExecute;
 import io.seata.server.raft.execute.global.RemoveGlobalSessionExecute;
 import io.seata.server.raft.execute.global.UpdateGlobalSessionExecute;
 import io.seata.server.raft.execute.lock.AcquireLockExecute;
-import io.seata.server.raft.execute.lock.ReleaseLockExecute;
+import io.seata.server.raft.execute.lock.BranchReleaseLockExecute;
+import io.seata.server.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -59,11 +60,11 @@ import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
@@ -93,9 +94,10 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
         EXECUTES.put(REMOVE_BRANCH_SESSION, new RemoveBranchSessionExecute());
         EXECUTES.put(UPDATE_GLOBAL_SESSION_STATUS, new UpdateGlobalSessionExecute());
-        EXECUTES.put(RELEASE_GLOBAL_SESSION_LOCK, new ReleaseLockExecute());
+        EXECUTES.put(RELEASE_GLOBAL_SESSION_LOCK, new GlobalReleaseLockExecute());
         EXECUTES.put(REMOVE_GLOBAL_SESSION, new RemoveGlobalSessionExecute());
         EXECUTES.put(UPDATE_BRANCH_SESSION_STATUS, new UpdateBranchSessionExecute());
+        EXECUTES.put(RELEASE_BRANCH_SESSION_LOCK, new BranchReleaseLockExecute());
     }
 
     @Override
@@ -254,13 +256,17 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
     }
 
-    private void onExecuteRaft(RaftSessionSyncMsg msg) throws Throwable {
+    private void onExecuteRaft(RaftSessionSyncMsg msg) {
         RaftMsgExecute execute = EXECUTES.get(msg.getMsgType());
         if (execute == null) {
             throw new RuntimeException(
                 "the state machine does not allow events that cannot be executed, please feedback the information to the Seata community !!! msg: "
                     + msg);
         }
-        execute.execute(msg);
+        try {
+            execute.execute(msg);
+        } catch (Throwable e) {
+            LOGGER.error("Message synchronization failure: {}, msgType: {}", e.getMessage(), msg.getMsgType(), e);
+        }
     }
 }

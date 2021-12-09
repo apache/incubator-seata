@@ -24,6 +24,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.session.BranchSession;
@@ -33,8 +34,12 @@ import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
 
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  * @author funkye
@@ -82,23 +87,73 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void onStatusChange(GlobalSession globalSession, GlobalStatus globalStatus) throws TransactionException {
-        this.updateGlobalSessionStatus(globalSession, globalStatus);
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        Closure closure = closureStatus -> {
+            if (closureStatus.isOk()) {
+                completableFuture.complete(true);
+            } else {
+                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    " The current TC is not a leader node, interrupt processing !"));
+            }
+        };
+        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(globalSession.getXid());
+        RaftSessionSyncMsg raftSyncMsg =
+            new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, globalStatus);
+        RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
     @Override
     public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession,
         BranchStatus branchStatus) throws TransactionException {
-        this.updateBranchSessionStatus(branchSession, branchStatus);
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        Closure closure = closureStatus -> {
+            if (closureStatus.isOk()) {
+                completableFuture.complete(true);
+            } else {
+                completableFuture
+                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                                " The current TC is not a leader node, interrupt processing !"));
+            }
+        };
+        BranchTransactionDO branchTransactionDO = new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
+        RaftSessionSyncMsg raftSyncMsg =
+                new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
+        RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
     @Override
     public void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
-        this.addBranchSession(globalSession, branchSession);
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        branchSession.setStatus(BranchStatus.Registered);
+        Closure closure = status -> {
+            if (status.isOk()) {
+                completableFuture.complete(globalSession.add(branchSession));
+            } else {
+                completableFuture
+                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                                " The current TC is not a leader node, interrupt processing !"));
+            }
+        };
+        BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_BRANCH_SESSION, branchTransactionDO);
+        RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
     @Override
     public void onRemoveBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
-        this.removeBranchSession(globalSession, branchSession);
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        Closure closure = closureStatus -> {
+            if (closureStatus.isOk()) {
+                completableFuture.complete(globalSession.remove(branchSession));
+            } else {
+                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    " The current TC is not a leader node, interrupt processing !"));
+            }
+        };
+        BranchTransactionDO branchTransactionDO =
+            new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, branchTransactionDO);
+        RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
     @Override

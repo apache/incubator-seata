@@ -13,26 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute.global;
+package io.seata.server.raft.execute.lock;
 
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 
 /**
  * @author jianbin.chen
  */
-public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
+public class GlobalReleaseLockExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
-        GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
+        GlobalSession globalSession =
+            SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
-            globalSession.setStatus(sessionSyncMsg.getGlobalStatus());
             if (logger.isDebugEnabled()) {
-                logger.debug("xid: {},status: {}", globalSession.getXid(), globalSession.getStatus());
+                logger.debug("releaseGlobalSessionLock xid: {}", globalSession.getXid());
             }
+            return raftLockManager.localReleaseGlobalSessionLock(globalSession);
         }
-        return true;
+        return false;
     }
+
 }

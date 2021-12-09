@@ -26,7 +26,11 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
+import io.seata.server.lock.LockManager;
+import io.seata.server.lock.LockerManagerFactory;
+import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.session.BranchSession;
+import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * The type Memory locker.
@@ -90,7 +94,12 @@ public class FileLocker extends AbstractLocker {
                 LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockTransactionId);
                 try {
                     // Release all acquired locks.
-                    branchSession.unlock();
+                    LockManager lockManager = LockerManagerFactory.getLockManager();
+                    if (RaftServerFactory.getInstance().isRaftMode()) {
+                        ((RaftLockManager)lockManager).localReleaseLock(branchSession);
+                    } else {
+                        branchSession.unlock();
+                    }
                 } catch (TransactionException e) {
                     throw new FrameworkException(e);
                 }

@@ -231,7 +231,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                         }
                     } else {
                         if (this.checkSessionStatus(globalSession)) {
-                            foundGlobalSession.setLocalStatus(globalSession.getStatus());
+                            foundGlobalSession.setStatus(globalSession.getStatus());
                         } else {
                             sessionMap.remove(globalSession.getXid());
                             removedGlobalBuffer.add(globalSession.getXid());

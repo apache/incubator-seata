@@ -115,7 +115,7 @@ public class SessionConverterTest {
         GlobalSession globalSession = new GlobalSession("application1","fsp_tx","createOrder",60);
         globalSession.setXid("192.168.158.80:8091:39372760251957248");
         globalSession.setTransactionId(39372760251957248L);
-        globalSession.setLocalStatus(GlobalStatus.Begin);
+        globalSession.setStatus(GlobalStatus.Begin);
         globalSession.setBeginTime(now);
         globalSession.setApplicationData("id=1,product=2");
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);

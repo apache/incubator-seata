@@ -42,7 +42,7 @@ public class SessionConverter {
                 globalTransactionDO.getTimeout());
         session.setXid(globalTransactionDO.getXid());
         session.setTransactionId(globalTransactionDO.getTransactionId());
-        session.setLocalStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
+        session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
         return session;

@@ -16,6 +16,7 @@
 package io.seata.server.raft.execute.lock;
 
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
@@ -23,17 +24,18 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
 /**
  * @author jianbin.chen
  */
-public class ReleaseLockExecute extends AbstractRaftMsgExecute {
+public class BranchReleaseLockExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         GlobalSession globalSession =
-            SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
-        if (globalSession != null) {
+            SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
+        BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
+        if (branchSession != null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("releaseGlobalSessionLock xid: {}", globalSession.getXid());
+                logger.debug("releaseBranchSessionLock xid: {}", globalSession.getXid());
             }
-            return raftLockManager.localReleaseGlobalSessionLock(globalSession);
+            return raftLockManager.localReleaseLock(branchSession);
         }
         return false;
     }

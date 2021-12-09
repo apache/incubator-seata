@@ -66,6 +66,10 @@ public class RaftSyncMsg implements java.io.Serializable {
          */
         RELEASE_GLOBAL_SESSION_LOCK,
         /**
+         * releaseBranchSessionLock
+         */
+        RELEASE_BRANCH_SESSION_LOCK,
+        /**
          * ServerOnRequestProcessor
          */
         SERVER_ON_REQUEST

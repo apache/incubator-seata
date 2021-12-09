@@ -32,6 +32,7 @@ import io.seata.server.storage.raft.RaftTaskUtil;
 
 
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
+import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 
 /**
@@ -75,7 +76,8 @@ public class RaftLockManager extends FileLockManager {
     
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
-        GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
+        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
+        globalTransactionDO.setXid(globalSession.getXid());
         RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = status -> {
@@ -110,6 +112,33 @@ public class RaftLockManager extends FileLockManager {
             }
         };
         return RaftTaskUtil.createTask(closure, completableFuture);
+    }
+
+    public boolean localReleaseLock(BranchSession branchSession) throws TransactionException {
+        return super.releaseLock(branchSession);
+    }
+
+    @Override
+    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
+        branchTransactionDO.setBranchId(branchSession.getBranchId());
+        branchTransactionDO.setXid(branchSession.getXid());
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_BRANCH_SESSION_LOCK, branchTransactionDO);
+        Closure closure = status -> {
+            if (status.isOk()) {
+                try {
+                    // ensure consistency through state machine reading
+                    completableFuture.complete(super.releaseLock(branchSession));
+                } catch (TransactionException e) {
+                    completableFuture.completeExceptionally(e);
+                }
+            } else {
+                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    " The current TC is not a leader node, interrupt processing !"));
+            }
+        };
+        return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
 }
