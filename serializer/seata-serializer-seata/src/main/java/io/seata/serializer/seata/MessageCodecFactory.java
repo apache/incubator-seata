@@ -18,8 +18,8 @@ package io.seata.serializer.seata;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
-import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
+import io.seata.core.protocol.client.ClusterMetaDataRequest;
+import io.seata.core.protocol.client.ClusterMetaDataResponse;
 import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
 import io.seata.serializer.seata.protocol.RegisterRMRequestCodec;
@@ -46,8 +46,8 @@ import io.seata.serializer.seata.protocol.transaction.GlobalRollbackRequestCodec
 import io.seata.serializer.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.RaftClusterMetaDataRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.RaftClusterMetaDataResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.ClusterMetaDataRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.ClusterMetaDataResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.LeaderNotifyRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractMessage;
@@ -185,7 +185,7 @@ public class MessageCodecFactory {
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequestCodec();
             case MessageType.TYPE_RAFT_METADATA:
-                return new RaftClusterMetaDataRequestCodec();
+                return new ClusterMetaDataRequestCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -212,7 +212,7 @@ public class MessageCodecFactory {
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponseCodec();
             case MessageType.TYPE_RAFT_METADATA_RESULT:
-                return new RaftClusterMetaDataResponseCodec();
+                return new ClusterMetaDataResponseCodec();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponseCodec();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:
@@ -320,7 +320,7 @@ public class MessageCodecFactory {
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequest();
             case MessageType.TYPE_RAFT_METADATA:
-                return new RaftClusterMetaDataRequest();
+                return new ClusterMetaDataRequest();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -347,7 +347,7 @@ public class MessageCodecFactory {
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponse();
             case MessageType.TYPE_RAFT_METADATA_RESULT:
-                return new RaftClusterMetaDataResponse();
+                return new ClusterMetaDataResponse();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponse();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:

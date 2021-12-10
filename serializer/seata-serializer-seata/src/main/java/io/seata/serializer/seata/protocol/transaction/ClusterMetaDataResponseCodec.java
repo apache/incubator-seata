@@ -19,18 +19,18 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
+import io.seata.core.protocol.client.ClusterMetaDataResponse;
 
 /**
  * The type Branch report response codec.
  *
  * @author zhangsen
  */
-public class RaftClusterMetaDataResponseCodec extends AbstractTransactionResponseCodec implements Serializable {
+public class ClusterMetaDataResponseCodec extends AbstractTransactionResponseCodec implements Serializable {
 
     @Override
     public Class<?> getMessageClassType() {
-        return RaftClusterMetaDataResponse.class;
+        return ClusterMetaDataResponse.class;
     }
 
 
@@ -38,8 +38,8 @@ public class RaftClusterMetaDataResponseCodec extends AbstractTransactionRespons
     public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
-        RaftClusterMetaDataResponse raftClusterMetaDataResponse = (RaftClusterMetaDataResponse)t;
-        String address = raftClusterMetaDataResponse.getLeaderAddress();
+        ClusterMetaDataResponse clusterMetaDataResponse = (ClusterMetaDataResponse)t;
+        String address = clusterMetaDataResponse.getLeaderAddress();
         if (StringUtils.isNotBlank(address)) {
             byte[] bs = address.getBytes(UTF8);
             out.writeShort((short)bs.length);
@@ -49,7 +49,7 @@ public class RaftClusterMetaDataResponseCodec extends AbstractTransactionRespons
         } else {
             out.writeShort((short)0);
         }
-        String mode = raftClusterMetaDataResponse.getMode();
+        String mode = clusterMetaDataResponse.getMode();
         if (StringUtils.isNotBlank(mode)) {
             byte[] bs = mode.getBytes(UTF8);
             out.writeShort((short)bs.length);
@@ -59,7 +59,7 @@ public class RaftClusterMetaDataResponseCodec extends AbstractTransactionRespons
         } else {
             out.writeShort((short)0);
         }
-        String learners = raftClusterMetaDataResponse.getLearners();
+        String learners = clusterMetaDataResponse.getLearners();
         if (StringUtils.isNotBlank(learners)) {
             byte[] bs = learners.getBytes(UTF8);
             out.writeShort((short)bs.length);
@@ -69,7 +69,7 @@ public class RaftClusterMetaDataResponseCodec extends AbstractTransactionRespons
         } else {
             out.writeShort((short)0);
         }
-        String followers = raftClusterMetaDataResponse.getFollowers();
+        String followers = clusterMetaDataResponse.getFollowers();
         if (StringUtils.isNotBlank(followers)) {
             byte[] bs = followers.getBytes(UTF8);
             out.writeShort((short)bs.length);
@@ -85,31 +85,31 @@ public class RaftClusterMetaDataResponseCodec extends AbstractTransactionRespons
     public <T> void decode(T t, ByteBuffer in) {
         super.decode(t, in);
 
-        RaftClusterMetaDataResponse raftClusterMetaDataResponse = (RaftClusterMetaDataResponse)t;
+        ClusterMetaDataResponse clusterMetaDataResponse = (ClusterMetaDataResponse)t;
         short len = in.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
             in.get(bs);
-            raftClusterMetaDataResponse.setLeaderAddress(new String(bs, UTF8));
+            clusterMetaDataResponse.setLeaderAddress(new String(bs, UTF8));
         }
 
         len = in.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
             in.get(bs);
-            raftClusterMetaDataResponse.setMode(new String(bs, UTF8));
+            clusterMetaDataResponse.setMode(new String(bs, UTF8));
         }
         len = in.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
             in.get(bs);
-            raftClusterMetaDataResponse.setLearners(new String(bs, UTF8));
+            clusterMetaDataResponse.setLearners(new String(bs, UTF8));
         }
         len = in.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
             in.get(bs);
-            raftClusterMetaDataResponse.setFollowers(new String(bs, UTF8));
+            clusterMetaDataResponse.setFollowers(new String(bs, UTF8));
         }
     }
 

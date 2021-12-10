@@ -29,8 +29,8 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
-import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
+import io.seata.core.protocol.client.ClusterMetaDataRequest;
+import io.seata.core.protocol.client.ClusterMetaDataResponse;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractGlobalEndResponse;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
@@ -339,18 +339,18 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
     }
 
     @Override
-    public RaftClusterMetaDataResponse handle(RaftClusterMetaDataRequest request, final RpcContext rpcContext) {
-        RaftClusterMetaDataResponse response = new RaftClusterMetaDataResponse();
+    public ClusterMetaDataResponse handle(ClusterMetaDataRequest request, final RpcContext rpcContext) {
+        ClusterMetaDataResponse response = new ClusterMetaDataResponse();
         String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
         response.setMode(mode);
         if (StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(), mode)) {
-            getRaftCluster(response);
+            getCluster(response);
         }
         response.setResultCode(ResultCode.Success);
         return response;
     }
 
-    protected RaftClusterMetaDataResponse getRaftCluster(RaftClusterMetaDataResponse response) {
+    protected ClusterMetaDataResponse getCluster(ClusterMetaDataResponse response) {
         String currentConf = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (!StringUtils.isBlank(currentConf)) {
             final Configuration currentClusters = new Configuration();

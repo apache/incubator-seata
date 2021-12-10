@@ -53,8 +53,8 @@ import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
-import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
+import io.seata.core.protocol.client.ClusterMetaDataRequest;
+import io.seata.core.protocol.client.ClusterMetaDataResponse;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -295,7 +295,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
-            if (!(msg instanceof RaftClusterMetaDataRequest) && raftMetadata != null
+            if (!(msg instanceof ClusterMetaDataRequest) && raftMetadata != null
                 && raftMetadata.getLeaderAddress() != null) {
                 address = raftMetadata.getLeaderAddress();
             } else {
@@ -557,19 +557,19 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             synchronized (raftMetadata) {
                 if (raftMetadata.isExpired()) {
                     for (int i = 0; i < acquireClusterRetryCount; i++) {
-                        RaftClusterMetaDataRequest raftClusterMetaDataRequest = new RaftClusterMetaDataRequest();
+                        ClusterMetaDataRequest clusterMetaDataRequest = new ClusterMetaDataRequest();
                         try {
-                            String tcAddress = loadBalance(getTransactionServiceGroup(), raftClusterMetaDataRequest);
+                            String tcAddress = loadBalance(getTransactionServiceGroup(), clusterMetaDataRequest);
                             if (StringUtils.isNotBlank(tcAddress)) {
                                 Channel channel = clientChannelManager.acquireChannel(tcAddress);
-                                RpcMessage rpcMessage = buildRequestMessage(raftClusterMetaDataRequest,
+                                RpcMessage rpcMessage = buildRequestMessage(clusterMetaDataRequest,
                                     ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-                                RaftClusterMetaDataResponse raftClusterMetaDataResponse =
-                                    (RaftClusterMetaDataResponse)super.sendSync(channel, rpcMessage, 2000);
-                                if (raftClusterMetaDataResponse != null && StringUtils.equalsIgnoreCase(
-                                    StoreMode.RAFT.getName(), raftClusterMetaDataResponse.getMode())) {
-                                    if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getLeaderAddress())) {
-                                        String[] address = raftClusterMetaDataResponse.getLeaderAddress().split(":");
+                                ClusterMetaDataResponse clusterMetaDataResponse =
+                                    (ClusterMetaDataResponse)super.sendSync(channel, rpcMessage, 2000);
+                                if (clusterMetaDataResponse != null && StringUtils.equalsIgnoreCase(
+                                    StoreMode.RAFT.getName(), clusterMetaDataResponse.getMode())) {
+                                    if (StringUtils.isNotBlank(clusterMetaDataResponse.getLeaderAddress())) {
+                                        String[] address = clusterMetaDataResponse.getLeaderAddress().split(":");
                                         InetSocketAddress inetSocketAddress =
                                             new InetSocketAddress(address[0], Integer.parseInt(address[1]));
                                         if (raftMetadata.getLeaderAddress() != null
@@ -577,9 +577,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                                             LOGGER.info("seata cluster leader: {}", inetSocketAddress);
                                         }
                                         raftMetadata.setLeaderAddress(inetSocketAddress);
-                                        if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getFollowers())) {
+                                        if (StringUtils.isNotBlank(clusterMetaDataResponse.getFollowers())) {
                                             String[] followers =
-                                                raftClusterMetaDataResponse.getFollowers().split(ADDRESS_SPLIT_CHAR);
+                                                clusterMetaDataResponse.getFollowers().split(ADDRESS_SPLIT_CHAR);
                                             clientChannelManager.reconnect(Arrays.asList(followers),
                                                 getTransactionServiceGroup());
                                             List<InetSocketAddress> list = new ArrayList<>();
@@ -590,9 +590,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                                             }
                                             raftMetadata.setFollowers(list);
                                         }
-                                        if (StringUtils.isNotBlank(raftClusterMetaDataResponse.getLearners())) {
+                                        if (StringUtils.isNotBlank(clusterMetaDataResponse.getLearners())) {
                                             String[] learners =
-                                                raftClusterMetaDataResponse.getLearners().split(ADDRESS_SPLIT_CHAR);
+                                                clusterMetaDataResponse.getLearners().split(ADDRESS_SPLIT_CHAR);
                                             clientChannelManager.reconnect(Arrays.asList(learners),
                                                 getTransactionServiceGroup());
                                             List<InetSocketAddress> list = new ArrayList<>();

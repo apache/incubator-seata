@@ -48,7 +48,9 @@ public interface RemotingClient {
 
     /**
      * client send sync request.
-     * In this request, if {@link NettyClientConfig#isEnableClientBatchSendRequest} is enabled,
+     * In this request, if
+     * {@link RmNettyRemotingClient#isEnableClientBatchSendRequest()}
+     * {@link TmNettyRemotingClient#isEnableClientBatchSendRequest()}
      * the message will be sent in batches.
      *
      * @param msg transaction message {@link io.seata.core.protocol}

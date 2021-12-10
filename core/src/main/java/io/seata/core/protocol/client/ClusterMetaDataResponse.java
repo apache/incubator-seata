@@ -23,7 +23,7 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 /**
  * @author funkye
  */
-public class RaftClusterMetaDataResponse extends AbstractTransactionResponse implements Serializable {
+public class ClusterMetaDataResponse extends AbstractTransactionResponse implements Serializable {
 
     private String leaderAddress;
 

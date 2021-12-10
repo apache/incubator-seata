@@ -29,7 +29,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -65,7 +64,6 @@ public abstract class AbstractNettyRemoting implements Disposable {
      */
     protected final ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("timeoutChecker", 1, true));
-
     /**
      * The Message executor.
      */

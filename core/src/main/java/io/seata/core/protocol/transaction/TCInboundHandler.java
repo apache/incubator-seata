@@ -15,8 +15,8 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.protocol.client.RaftClusterMetaDataRequest;
-import io.seata.core.protocol.client.RaftClusterMetaDataResponse;
+import io.seata.core.protocol.client.ClusterMetaDataRequest;
+import io.seata.core.protocol.client.ClusterMetaDataResponse;
 import io.seata.core.rpc.RpcContext;
 
 /**
@@ -101,10 +101,10 @@ public interface TCInboundHandler {
     /**
      * Handle branch register response.
      *
-     * @param raftClusterMetaDataRequest the raft cluster metadata request
+     * @param clusterMetaDataRequest the cluster metadata request
      * @param rpcContext     the rpc context
      * @return raft cluster metadata response
      */
-    RaftClusterMetaDataResponse handle(RaftClusterMetaDataRequest raftClusterMetaDataRequest, RpcContext rpcContext);
+    ClusterMetaDataResponse handle(ClusterMetaDataRequest clusterMetaDataRequest, RpcContext rpcContext);
 
 }

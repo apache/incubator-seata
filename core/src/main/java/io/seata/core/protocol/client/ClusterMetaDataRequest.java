@@ -23,7 +23,7 @@ import io.seata.core.rpc.RpcContext;
 /**
  * @author funkye
  */
-public class RaftClusterMetaDataRequest extends AbstractTransactionRequestToTC {
+public class ClusterMetaDataRequest extends AbstractTransactionRequestToTC {
 
     @Override
     public short getTypeCode() {
