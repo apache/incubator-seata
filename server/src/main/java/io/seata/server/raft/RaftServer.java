@@ -22,7 +22,6 @@ import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.conf.Configuration;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
@@ -50,7 +49,7 @@ public class RaftServer implements ConfigurationChangeListener, AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServer.class);
 
-    private AbstractRaftStateMachine raftStateMachine;
+    private RaftStateMachine raftStateMachine;
     private RaftGroupService raftGroupService;
     private Node node;
     private CliService cliService;
@@ -93,24 +92,12 @@ public class RaftServer implements ConfigurationChangeListener, AutoCloseable {
         return this.node;
     }
 
-    public AbstractRaftStateMachine getAbstractRaftStateMachine() {
-        return raftStateMachine;
-    }
-
-    public StateMachineAdapter getRaftStateMachine() {
-        return raftStateMachine;
-    }
-
-    public void setRaftStateMachine(RaftStateMachine raftStateMachine) {
-        this.raftStateMachine = raftStateMachine;
-    }
-
     public CliService getCliService() {
         return cliService;
     }
 
-    public void setCliService(CliService cliService) {
-        this.cliService = cliService;
+    public RaftStateMachine getRaftStateMachine() {
+        return raftStateMachine;
     }
 
     @Override

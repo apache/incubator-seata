@@ -30,7 +30,22 @@ seata:
     type: file
   store:
     # support: file 、 db 、 redis 、 raft
-    mode: file
+    mode: raft
+    db:
+      datasource: druid
+      db-type: mysql
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
+      user: root
+      password: 123456
+      min-conn: 5
+      max-conn: 100
+      global-table: global_table
+      branch-table: branch_table
+      lock-table: lock_table
+      distributed-lock-table: distributed_lock
+      query-limit: 100
+      max-wait: 5000
 #  server:
 #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
   security:
@@ -38,3 +53,6 @@ seata:
     tokenValidityInMilliseconds: 1800000
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
+  server:
+    raft:
+      cluster: 192.168.31.181:9091,192.168.31.181:9092,192.168.31.181:9093

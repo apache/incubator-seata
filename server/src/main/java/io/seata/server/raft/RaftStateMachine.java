@@ -21,9 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
+import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -60,6 +62,7 @@ import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
@@ -75,7 +78,7 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 /**
  * @author funkye
  */
-public class RaftStateMachine extends AbstractRaftStateMachine {
+public class RaftStateMachine extends StateMachineAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
@@ -86,6 +89,15 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     private static final String BRANCH_SESSION_MAP = "branchSessionMap";
 
     private static final Map<MsgType, RaftMsgExecute> EXECUTES = new HashMap<>();
+
+    /**
+     * Leader term
+     */
+    private final AtomicLong leaderTerm = new AtomicLong(-1);
+
+    public boolean isLeader() {
+        return this.leaderTerm.get() > 0;
+    }
 
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);

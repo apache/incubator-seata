@@ -56,7 +56,7 @@ public class RaftServerFactory {
 
     private RaftServer raftServer;
 
-    private AbstractRaftStateMachine stateMachine;
+    private RaftStateMachine stateMachine;
 
     private Boolean raftMode = false;
 
@@ -105,7 +105,7 @@ public class RaftServerFactory {
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
         }
-        stateMachine = raftServer.getAbstractRaftStateMachine();
+        stateMachine = raftServer.getRaftStateMachine();
         LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         // whether to join an existing cluster
         if (CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false)) {
@@ -135,11 +135,11 @@ public class RaftServerFactory {
         this.raftServer = raftServer;
     }
 
-    public AbstractRaftStateMachine getStateMachine() {
+    public RaftStateMachine getStateMachine() {
         return stateMachine;
     }
 
-    public void setStateMachine(AbstractRaftStateMachine stateMachine) {
+    public void setStateMachine(RaftStateMachine stateMachine) {
         this.stateMachine = stateMachine;
     }
 
