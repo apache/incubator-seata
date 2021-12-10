@@ -3,6 +3,7 @@ transport.server=NIO
 transport.heartbeat=true
 transport.enableTmClientBatchSendRequest=false
 transport.enableRmClientBatchSendRequest=true
+transport.rpcRequestTimeout=5000
 transport.threadFactory.bossThreadPrefix=NettyBoss
 transport.threadFactory.workerThreadPrefix=NettyServerNIOWorker
 transport.threadFactory.serverExecutorThreadPrefix=NettyServerBizHandler

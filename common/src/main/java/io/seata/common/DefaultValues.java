@@ -161,4 +161,9 @@ public interface DefaultValues {
      * the constant TCC_FENCE_BEAN_NAME
      */
     String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+
+    /**
+     * the constant DEFAULT_RPC_REQUEST_TIMEOUT
+     */
+    int DEFAULT_RPC_REQUEST_TIMEOUT = 10 * 1000;
 }

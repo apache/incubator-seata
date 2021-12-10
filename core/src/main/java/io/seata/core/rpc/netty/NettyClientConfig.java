@@ -20,6 +20,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
@@ -39,7 +40,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     private int perHostMaxConn = 2;
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
-    private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
+    private static final int RPC_REQUEST_TIMEOUT = CONFIG.getInt(ConfigurationKeys.RPC_REQUEST_TIMEOUT, DEFAULT_RPC_REQUEST_TIMEOUT);
     private static String vgroup;
     private static String clientAppName;
     private static int clientType;

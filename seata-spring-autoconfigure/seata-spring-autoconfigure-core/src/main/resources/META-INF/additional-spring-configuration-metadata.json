@@ -94,6 +94,16 @@
         "replacement": "seata.log.exception-rate",
         "reason": "Please configure to 'seata.log.exception-rate'."
       }
+    },
+    {
+      "name": "seata.transport.rpcRequestTimeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
+      "deprecation": {
+        "level": "error",
+        "replacement": "seata.log.exception-rate",
+        "reason": "Please configure to 'seata.log.exception-rate'."
+      }
     }
   ],
   "hints": [
