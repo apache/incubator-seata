@@ -49,7 +49,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
     private static final int DEFAULT_LISTEN_PORT = 8091;
-    private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);;
+    private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
     private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
