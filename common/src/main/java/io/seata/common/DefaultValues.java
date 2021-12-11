@@ -173,4 +173,9 @@ public interface DefaultValues {
      * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
      */
     long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(10).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(10).toMillis();
 }

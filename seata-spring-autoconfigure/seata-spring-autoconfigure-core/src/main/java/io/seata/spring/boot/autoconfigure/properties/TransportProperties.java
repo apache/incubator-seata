@@ -22,6 +22,7 @@ import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQ
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
@@ -77,6 +78,11 @@ public class TransportProperties {
      * rpcRmRequestTimeout
      */
     private long rpcTmRequestTimeout = DEFAULT_RPC_TM_REQUEST_TIMEOUT;
+
+    /**
+     * rpcTcRequestTimeout
+     */
+    private long rpcTcRequestTimeout = DEFAULT_RPC_TC_REQUEST_TIMEOUT;
 
 
     public String getType() {
@@ -165,5 +171,13 @@ public class TransportProperties {
 
     public void setRpcTmRequestTimeout(long rpcTmRequestTimeout) {
         this.rpcTmRequestTimeout = rpcTmRequestTimeout;
+    }
+
+    public long getRpcTcRequestTimeout() {
+        return rpcTcRequestTimeout;
+    }
+
+    public void setRpcTcRequestTimeout(long rpcTcRequestTimeout) {
+        this.rpcTcRequestTimeout = rpcTcRequestTimeout;
     }
 }

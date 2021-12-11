@@ -752,4 +752,9 @@ public interface ConfigurationKeys {
      * The constant RPC_TM_REQUEST_TIMEOUT
      */
     String RPC_TM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TC_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTcRequestTimeout";
 }

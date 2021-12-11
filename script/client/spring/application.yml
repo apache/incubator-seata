@@ -72,6 +72,7 @@ seata:
     enable-rm-client-batch-send-request: true
     rpc-rm-request-timeout: 5000
     rpc-tm-request-timeout: 10000
+    rpc-tc-request-timeout: 10000
   config:
     type: file
     consul:
