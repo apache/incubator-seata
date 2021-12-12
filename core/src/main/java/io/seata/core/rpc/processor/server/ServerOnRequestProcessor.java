@@ -102,10 +102,10 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
         batchResponseExecutorService = new ThreadPoolExecutor(MAX_BATCH_RESPONSE_THREAD,
-            MAX_BATCH_RESPONSE_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
+                MAX_BATCH_RESPONSE_THREAD,
+                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
         batchResponseExecutorService.submit(new BatchResponseRunnable());
     }
 
@@ -141,12 +141,12 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
-                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
         } else {
             try {
                 BatchLogHandler.INSTANCE.getLogQueue()
-                    .put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
-                        + rpcContext.getTransactionServiceGroup());
+                        .put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
+                                + rpcContext.getTransactionServiceGroup());
             } catch (InterruptedException e) {
                 LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
             }
@@ -209,7 +209,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                           AbstractResultMessage resultMessage, int msgId, Channel channel) {
         if (!msgQueue.offer(new QueueItem(resultMessage, msgId, rpcMessage.getCodec(), rpcMessage.getCompressor()))) {
             LOGGER.error("put message into basketMap offer failed, channel:{},rpcMessage:{},resultMessage:{}",
-                channel, rpcMessage, resultMessage);
+                    channel, rpcMessage, resultMessage);
         }
     }
 
@@ -242,8 +242,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     while (!msgQueue.isEmpty()) {
                         QueueItem item = msgQueue.poll();
                         BatchResultMessage batchResultMessage = CollectionUtils.computeIfAbsent(batchResultMessageMap,
-                            new ClientRequestRpcInfo(item.getCodec(), item.getCompressor()),
-                            key -> new BatchResultMessage());
+                                new ClientRequestRpcInfo(item.getCodec(), item.getCompressor()),
+                                key -> new BatchResultMessage());
                         batchResultMessage.getResultMessages().add(item.getResultMessage());
                         batchResultMessage.getMsgIds().add(item.getMsgId());
                     }
