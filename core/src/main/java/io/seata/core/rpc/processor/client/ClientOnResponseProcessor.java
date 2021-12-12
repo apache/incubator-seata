@@ -17,9 +17,8 @@ package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.AbstractResultMessage;
-import io.seata.core.protocol.MergeMessage;
+import io.seata.core.protocol.BatchResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
-import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMResponse;
@@ -36,7 +35,6 @@ import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -66,42 +64,34 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 
     /**
-     * The Merge msg map from io.seata.core.rpc.netty.AbstractNettyRemotingClient#mergeMsgMap.
-     */
-    private Map<Integer, MergeMessage> mergeMsgMap;
-
-    /**
      * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
      */
-    private ConcurrentMap<Integer, MessageFuture> futures;
+    private final ConcurrentMap<Integer, MessageFuture> futures;
 
     /**
      * To handle the received RPC message on upper level.
      */
-    private TransactionMessageHandler transactionMessageHandler;
+    private final TransactionMessageHandler transactionMessageHandler;
 
-    public ClientOnResponseProcessor(Map<Integer, MergeMessage> mergeMsgMap,
-                                     ConcurrentHashMap<Integer, MessageFuture> futures,
+    public ClientOnResponseProcessor(ConcurrentHashMap<Integer, MessageFuture> futures,
                                      TransactionMessageHandler transactionMessageHandler) {
-        this.mergeMsgMap = mergeMsgMap;
         this.futures = futures;
         this.transactionMessageHandler = transactionMessageHandler;
     }
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        if (rpcMessage.getBody() instanceof MergeResultMessage) {
-            MergeResultMessage results = (MergeResultMessage) rpcMessage.getBody();
-            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(rpcMessage.getId());
-            for (int i = 0; i < mergeMessage.msgs.size(); i++) {
-                int msgId = mergeMessage.msgIds.get(i);
+        if (rpcMessage.getBody() instanceof BatchResultMessage) {
+            BatchResultMessage batchResultMessage = (BatchResultMessage) rpcMessage.getBody();
+            for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
+                int msgId = batchResultMessage.getMsgIds().get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("msg: {} is not found in futures.", msgId);
                     }
                 } else {
-                    future.setResultMessage(results.getMsgs()[i]);
+                    future.setResultMessage(batchResultMessage.getResultMessages().get(i));
                 }
             }
         } else {

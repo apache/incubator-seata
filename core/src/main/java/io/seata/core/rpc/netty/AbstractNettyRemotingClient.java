@@ -18,7 +18,6 @@ package io.seata.core.rpc.netty;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -45,7 +44,6 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
@@ -87,11 +85,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     protected final Object mergeLock = new Object();
-
-    /**
-     * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
-     */
-    protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
@@ -207,9 +200,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         RpcMessage rpcMessage = buildRequestMessage(msg, msg instanceof HeartbeatMessage
             ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
             : ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        if (rpcMessage.getBody() instanceof MergeMessage) {
-            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) rpcMessage.getBody());
-        }
         super.sendAsync(channel, rpcMessage);
     }
 
