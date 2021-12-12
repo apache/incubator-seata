@@ -260,10 +260,23 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         }
     }
 
+    /**
+     * For saving client request rpc info
+     * <p>
+     * Because the serialization and compressor of the response
+     * needs to be the same as the serialization and compressor of the request.
+     * Assemble by grouping according to the serialization and compressor dimensions.
+     */
     private static class ClientRequestRpcInfo {
 
+        /**
+         * client send request message codec
+         */
         private byte codec;
 
+        /**
+         * client send request message compressor
+         */
         private byte compressor;
 
         public ClientRequestRpcInfo(byte codec, byte compressor) {
@@ -305,16 +318,31 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         }
     }
 
+    /**
+     * the queue item
+     *
+     * @see ServerOnRequestProcessor#basketMap
+     */
     private static class QueueItem {
 
+        /**
+         * the result message
+         */
         private AbstractResultMessage resultMessage;
 
+        /**
+         * result message id
+         */
         private Integer msgId;
 
-        // 请求的序列化
+        /**
+         * client send request message codec
+         */
         private byte codec;
 
-        // 请求压缩
+        /**
+         * client send request message compressor
+         */
         private byte compressor;
 
         public QueueItem(AbstractResultMessage resultMessage, int msgId, byte codec, byte compressor) {
