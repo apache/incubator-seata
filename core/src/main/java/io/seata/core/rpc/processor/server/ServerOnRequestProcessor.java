@@ -102,10 +102,10 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
         batchResponseExecutorService = new ThreadPoolExecutor(MAX_BATCH_RESPONSE_THREAD,
-                MAX_BATCH_RESPONSE_THREAD,
-                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
+            MAX_BATCH_RESPONSE_THREAD,
+            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(),
+            new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
         batchResponseExecutorService.submit(new BatchResponseRunnable());
     }
 
@@ -209,7 +209,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                           AbstractResultMessage resultMessage, int msgId, Channel channel) {
         if (!msgQueue.offer(new QueueItem(resultMessage, msgId, rpcMessage.getCodec(), rpcMessage.getCompressor()))) {
             LOGGER.error("put message into basketMap offer failed, channel:{},rpcMessage:{},resultMessage:{}",
-                    channel, rpcMessage, resultMessage);
+                channel, rpcMessage, resultMessage);
         }
     }
 
@@ -242,8 +242,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     while (!msgQueue.isEmpty()) {
                         QueueItem item = msgQueue.poll();
                         BatchResultMessage batchResultMessage = CollectionUtils.computeIfAbsent(batchResultMessageMap,
-                                new ClientRequestRpcInfo(item.getCodec(), item.getCompressor()),
-                                key -> new BatchResultMessage());
+                            new ClientRequestRpcInfo(item.getCodec(), item.getCompressor()),
+                            key -> new BatchResultMessage());
                         batchResultMessage.getResultMessages().add(item.getResultMessage());
                         batchResultMessage.getMsgIds().add(item.getMsgId());
                     }
@@ -289,8 +289,12 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {return true;}
-            if (o == null || getClass() != o.getClass()) {return false;}
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             ClientRequestRpcInfo that = (ClientRequestRpcInfo) o;
             return codec == that.codec && compressor == that.compressor;
         }
