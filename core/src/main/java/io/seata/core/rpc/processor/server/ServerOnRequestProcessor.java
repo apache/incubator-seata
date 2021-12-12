@@ -231,7 +231,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                 }
                 isResponding = true;
                 basketMap.forEach(((channel, msgQueue) -> {
-                    LOGGER.info("channel:{},queueMap:{}", channel, msgQueue);
                     if (msgQueue.isEmpty()) {
                         return;
                     }
