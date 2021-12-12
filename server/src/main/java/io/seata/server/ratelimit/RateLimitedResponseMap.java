@@ -48,28 +48,28 @@ public class RateLimitedResponseMap {
 
     private RateLimitedResponseMap() {
         BranchReportResponse branchReportResponse = new BranchReportResponse();
-        branchReportResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchReportFailed);
+        branchReportResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchReportRateLimited);
 
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
-        globalBeginResponse.setTransactionExceptionCode(TransactionExceptionCode.BeginFailed);
+        globalBeginResponse.setTransactionExceptionCode(TransactionExceptionCode.BeginRateLimited);
 
         GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
-        globalCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.CommitFailed);
-        globalCommitResponse.setGlobalStatus(GlobalStatus.CommitFailed);
+        globalCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.CommitRateLimited);
+        globalCommitResponse.setGlobalStatus(GlobalStatus.UnKnown);
 
         GlobalLockQueryResponse globalLockQueryResponse = new GlobalLockQueryResponse();
-        globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalLockQueryFailed);
+        globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalLockQueryRateLimited);
 
         GlobalReportResponse globalReportResponse = new GlobalReportResponse();
-        globalReportResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalReportFailed);
+        globalReportResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalReportRateLimited);
         globalReportResponse.setGlobalStatus(GlobalStatus.UnKnown);
 
         GlobalRollbackResponse globalRollbackResponse = new GlobalRollbackResponse();
-        globalRollbackResponse.setTransactionExceptionCode(TransactionExceptionCode.RollbackFailed);
-        globalRollbackResponse.setGlobalStatus(GlobalStatus.RollbackFailed);
+        globalRollbackResponse.setTransactionExceptionCode(TransactionExceptionCode.RollbackRateLimited);
+        globalRollbackResponse.setGlobalStatus(GlobalStatus.UnKnown);
 
         GlobalStatusResponse globalStatusResponse = new GlobalStatusResponse();
-        globalStatusResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalStatusFailed);
+        globalStatusResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalStatusRateLimited);
         globalStatusResponse.setGlobalStatus(GlobalStatus.UnKnown);
 
         responseMap.put(BranchReportRequest.class, branchReportResponse);

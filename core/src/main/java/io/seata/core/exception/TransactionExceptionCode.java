@@ -33,29 +33,34 @@ public enum TransactionExceptionCode {
     BeginFailed,
 
     /**
-     * CommitFailed
+     * BeginRateLimited
      */
-    CommitFailed,
+    BeginRateLimited,
 
     /**
-     * RollbackFailed
+     * CommitRateLimited
      */
-    RollbackFailed,
+    CommitRateLimited,
 
     /**
-     * GlobalLockQueryFailed
+     * RollbackRateLimited
      */
-    GlobalLockQueryFailed,
+    RollbackRateLimited,
 
     /**
-     * GlobalReportFailed
+     * GlobalLockQueryRateLimited
      */
-    GlobalReportFailed,
+    GlobalLockQueryRateLimited,
 
     /**
-     * GlobalStatusFailed
+     * GlobalReportRateLimited
      */
-    GlobalStatusFailed,
+    GlobalReportRateLimited,
+
+    /**
+     * GlobalStatusRateLimited
+     */
+    GlobalStatusRateLimited,
 
     /**
      * Lock key conflict transaction exception code.
@@ -86,6 +91,11 @@ public enum TransactionExceptionCode {
      * Branch report failed transaction exception code.
      */
     BranchReportFailed,
+
+    /**
+     * BranchReportRateLimited
+     */
+    BranchReportRateLimited,
 
     /**
      * Lockable check failed transaction exception code.
