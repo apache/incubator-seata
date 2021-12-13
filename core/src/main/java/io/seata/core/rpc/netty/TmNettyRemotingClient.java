@@ -197,7 +197,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     @Override
     public long getRpcRequestTimeout() {
-        return NettyClientConfig.getRpcRmRequestTimeout();
+        return NettyClientConfig.getRpcTmRequestTimeout();
     }
 
     @Override
