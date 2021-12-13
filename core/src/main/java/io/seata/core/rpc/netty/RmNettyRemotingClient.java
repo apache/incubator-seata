@@ -284,6 +284,11 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
     }
 
+    @Override
+    public long getRpcRequestTimeout() {
+        return NettyClientConfig.getRpcRmRequestTimeout();
+    }
+
     private void registerProcessor() {
         // 1.registry rm client handle branch commit processor
         RmBranchCommitProcessor rmBranchCommitProcessor = new RmBranchCommitProcessor(getTransactionMessageHandler(), this);

@@ -742,4 +742,19 @@ public interface ConfigurationKeys {
      * The constant TCC_FENCE_LOG_TABLE_NAME
      */
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant rpcRmRequestTimeout
+     */
+    String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TC_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTcRequestTimeout";
 }
