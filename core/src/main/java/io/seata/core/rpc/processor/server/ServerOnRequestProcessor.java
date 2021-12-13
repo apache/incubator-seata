@@ -230,7 +230,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     }
                 }
                 isResponding = true;
-                basketMap.forEach(((channel, msgQueue) -> {
+                basketMap.forEach((channel, msgQueue) -> {
                     if (msgQueue.isEmpty()) {
                         return;
                     }
@@ -253,7 +253,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                         rpcMessage.setCompressor(clientRequestRpcInfo.getCompressor());
                         remotingServer.sendAsyncResponse(rpcMessage, channel, batchResultMessage);
                     });
-                }));
+                });
                 isResponding = false;
             }
         }
