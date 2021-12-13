@@ -30,7 +30,7 @@ import static io.seata.common.DefaultValues.DEFAULT_SERVER_RATELIMIT_DELAY;
 /**
  * RateLimiter based on the token bucket algorithm.
  */
-@LoadLevel(name = "token-bucket", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "token-bucket", scope = Scope.SINGLETON)
 public class TokenBucketLimiter implements RateLimiter, Initialize {
 
     /**
