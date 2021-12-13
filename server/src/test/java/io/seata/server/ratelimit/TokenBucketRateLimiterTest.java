@@ -15,19 +15,19 @@
  */
 package io.seata.server.ratelimit;
 
-import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.server.ServerApplication;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.StopWatch;
 
+@SpringBootTest
 public class TokenBucketRateLimiterTest {
 
     /**
@@ -35,31 +35,22 @@ public class TokenBucketRateLimiterTest {
      **/
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBucketRateLimiterTest.class);
 
-    // can test performance
-    public static void main(String[] args) throws IOException {
-        // Init the CONFIG in the TokenBucketRateLimiter
-        SpringApplication.run(ServerApplication.class, args);
-        // test the performance
-        testPerformanceOfTokenBucketLimiter();
-        // test the performance with warmup and default value of burst
-        //testPerformanceOfTokenBucketLimiterWithWarmup();
-        // test the performance with delay and default value of burst
-        //testPerformanceOfTokenBucketLimiterWithDelay();
-    }
-
-    public static void testPerformanceOfTokenBucketLimiter() {
+    @Test
+    public void testPerformanceOfTokenBucketLimiter() throws InterruptedException {
         RateLimiter rateLimiter = new TokenBucketLimiter(1000);
         int threads = 50;
+        final int count = 1000;
+        final CountDownLatch cnt = new CountDownLatch(count * threads);
+
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<Runnable>(), new NamedThreadFactory("test1", false));
         for (int i = 0; i < threads; i++) {
             service1.execute(() -> {
-                int count = 1000;
                 int pass = 0;
                 int reject = 0;
                 StopWatch w = new StopWatch();
                 w.start();
-                while (count > 0) {
+                for (int u = 0; u < count; u++) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
@@ -71,15 +62,17 @@ public class TokenBucketRateLimiterTest {
                     } else {
                         reject++;
                     }
-                    count--;
+                    cnt.countDown();
                 }
                 w.stop();
                 LOGGER.info("total time:{}ms, pass:{}, reject:{}", w.getLastTaskTimeMillis(), pass, reject);
             });
         }
+        cnt.await();
     }
 
-    public static void testPerformanceOfTokenBucketLimiterWithWarmup() {
+    @Test
+    public void testPerformanceOfTokenBucketLimiterWithWarmup() throws InterruptedException {
         RateLimiter rateLimiter = new TokenBucketLimiter(1000);
         // warm up
         try {
@@ -88,52 +81,59 @@ public class TokenBucketRateLimiterTest {
             e.printStackTrace();
         }
         int threads = 50;
+        final int count = 1000;
+        final CountDownLatch cnt = new CountDownLatch(count * threads);
+
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<Runnable>(), new NamedThreadFactory("test2", false));
         for (int i = 0; i < threads; i++) {
             service1.execute(() -> {
-                int count = 1000;
                 int pass = 0;
                 int reject = 0;
                 StopWatch w = new StopWatch();
                 w.start();
-                while (count > 0) {
+                for (int u = 0; u < count; u++) {
                     boolean result = rateLimiter.canPass();
                     if (result) {
                         pass++;
                     } else {
                         reject++;
                     }
-                    count--;
+                    cnt.countDown();
                 }
                 w.stop();
                 LOGGER.info("total time:{}ms, pass:{}, reject:{}", w.getLastTaskTimeMillis(), pass, reject);
             });
         }
+        cnt.await();
     }
 
-    public static void testPerformanceOfTokenBucketLimiterWithDelay() {
+    @Test
+    public void testPerformanceOfTokenBucketLimiterWithDelay() throws InterruptedException {
         RateLimiter rateLimiter = new TokenBucketLimiter(1000, true, 1000);
         int threads = 50;
+        final int count = 1000;
+        final CountDownLatch cnt = new CountDownLatch(count * threads);
+
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<Runnable>(), new NamedThreadFactory("test3", false));
         for (int i = 0; i < threads; i++) {
             service1.execute(() -> {
-                int count = 100;
                 int pass = 0;
                 int reject = 0;
                 StopWatch w = new StopWatch();
                 w.start();
-                while (count > 0) {
+                for (int u = 0; u < count; u++) {
                     boolean result = rateLimiter.canPass();
                     if (result) {
                         pass++;
                     }
-                    count--;
+                    cnt.countDown();
                 }
                 w.stop();
                 LOGGER.info("total time:{}ms, pass:{}, reject:{}", w.getLastTaskTimeMillis(), pass, reject);
             });
         }
+        cnt.await();
     }
 }
