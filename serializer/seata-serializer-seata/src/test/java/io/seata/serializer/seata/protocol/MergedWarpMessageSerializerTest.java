@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -45,11 +46,16 @@ public class MergedWarpMessageSerializerTest {
     public void test_codec(){
         MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
         final ArrayList<AbstractMessage> msgs = new ArrayList<>();
+        List<Integer> msgIds = new ArrayList<>();
         final GlobalBeginRequest globalBeginRequest1 = buildGlobalBeginRequest("x1");
         final GlobalBeginRequest globalBeginRequest2 = buildGlobalBeginRequest("x2");
         msgs.add(globalBeginRequest1);
+        msgIds.add(1);
         msgs.add(globalBeginRequest2);
+        msgIds.add(2);
         mergedWarpMessage.msgs = msgs;
+        mergedWarpMessage.msgIds = msgIds;
+
 
         byte[] body = seataSerializer.serialize(mergedWarpMessage);
 
