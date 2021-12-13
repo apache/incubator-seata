@@ -15,17 +15,16 @@
  */
 package io.seata.rm.datasource.xa;
 
-import java.sql.SQLException;
-import javax.transaction.xa.XAException;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.datasource.AbstractDataSourceCacheResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.transaction.xa.XAException;
+import java.sql.SQLException;
 
 /**
  * RM for XA mode.
@@ -77,15 +76,10 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
             } catch (XAException | SQLException sqle) {
                 if (sqle instanceof XAException) {
                     if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
-                        try {
-                            if (committed) {
-                                return BranchStatus.PhaseTwo_Committed;
-                            } else {
-                                return BranchStatus.PhaseTwo_Rollbacked;
-                            }
-                        } finally {
-                            BaseDataSourceResource.setBranchStatus(xaBranchXid.toString(),
-                                committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
+                        if (committed) {
+                            return BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable;
+                        } else {
+                            return BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable;
                         }
                     }
                 }

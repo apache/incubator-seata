@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -55,9 +54,6 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     protected Driver driver;
 
     private Map<String, T> keeper = new ConcurrentHashMap<>();
-
-    private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
-        CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
     /**
      * Gets target data source.
@@ -197,20 +193,6 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     @Override
     public T lookup(String key) {
         return keeper.get(key);
-    }
-
-    public static void setBranchStatus(String xaBranchXid, BranchStatus branchStatus) {
-        BRANCH_STATUS_CACHE.put(xaBranchXid, branchStatus);
-    }
-
-    public static BranchStatus getBranchStatus(String xaBranchXid) {
-        return BRANCH_STATUS_CACHE.getIfPresent(xaBranchXid);
-    }
-
-    public static void remove(String xaBranchXid) {
-        if (StringUtils.isNotBlank(xaBranchXid)) {
-            BRANCH_STATUS_CACHE.invalidate(xaBranchXid);
-        }
     }
 
 }

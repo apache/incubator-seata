@@ -85,7 +85,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             if (isHeld()) {
                 resource.release(xaBranchXid, this);
             }
-            BaseDataSourceResource.remove(xaBranchXid);
         }
     }
 
@@ -237,18 +236,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private synchronized void start() throws XAException, SQLException {
         // 3. XA Start
         xaResource.start(this.xaBranchXid, XAResource.TMNOFLAGS);
-        try {
-            termination();
-        } catch (SQLException e) {
-            // the framework layer does not actively call ROLLBACK when setAutoCommit throws an SQL exception
-            xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
-            xaRollback(xaBranchXid);
-            throw  e;
-        }
     }
 
     private synchronized void end(int flags) throws XAException, SQLException {
-        termination();
         // XA End: Success
         xaResource.end(xaBranchXid, flags);
     }
@@ -285,20 +275,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     public boolean shouldBeHeld() {
         return JdbcConstants.MYSQL.equals(resource.getDbType()) || JdbcConstants.MARIADB.equals(resource.getDbType())
                || StringUtils.isBlank(resource.getDbType());
-    }
-
-    private void termination() throws SQLException {
-        termination(this.xaBranchXid.toString());
-    }
-
-    private void termination(String xaBranchXid) throws SQLException {
-        // if it is not empty, the resource will hang and need to be terminated early
-        BranchStatus branchStatus = BaseDataSourceResource.getBranchStatus(xaBranchXid);
-        if (branchStatus != null) {
-            releaseIfNecessary();
-            throw new SQLException("failed xa branch " + xid
-                + " the global transaction has finish, branch status: " + branchStatus.getCode());
-        }
     }
 
 }

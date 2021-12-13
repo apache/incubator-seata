@@ -742,4 +742,15 @@ public interface ConfigurationKeys {
      * The constant TCC_FENCE_LOG_TABLE_NAME
      */
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant XA_PREFIX
+     */
+    String XA_PREFIX = "xa.";
+
+    /**
+     * The constant XAER_NOTA_ROLLBACK_RETRY_TIMEOUT
+     */
+    String XAER_NOTA_RETRY_TIMEOUT = XA_PREFIX + "xaerNoteRetryTimeout";
+
 }

@@ -161,4 +161,10 @@ public interface DefaultValues {
      * the constant TCC_FENCE_BEAN_NAME
      */
     String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+
+    /**
+     * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
+     */
+    long DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
+
 }
