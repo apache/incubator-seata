@@ -21,8 +21,10 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.exception.RateLimitedException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
@@ -117,6 +119,11 @@ public final class BusinessActionContextUtil {
             actionContext.setUpdated(null);
             return true;
         } catch (TransactionException e) {
+            if (TransactionExceptionCode.BranchReportRateLimited.equals(e.getCode())) {
+                String msg = String.format("TCC branch update rate limited, xid: %s", actionContext.getXid());
+                LOGGER.error("{}, error: {}", msg, e.getMessage());
+                throw new RateLimitedException(msg, e);
+            }
             String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
             LOGGER.error("{}, error: {}", msg, e.getMessage());
             throw new FrameworkException(e, msg);
