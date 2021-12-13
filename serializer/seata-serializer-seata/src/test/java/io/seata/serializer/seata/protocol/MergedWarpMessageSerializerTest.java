@@ -46,7 +46,7 @@ public class MergedWarpMessageSerializerTest {
     public void test_codec(){
         MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
         final ArrayList<AbstractMessage> msgs = new ArrayList<>();
-        List<Integer> msgIds = new ArrayList<>();
+        final List<Integer> msgIds = new ArrayList<>();
         final GlobalBeginRequest globalBeginRequest1 = buildGlobalBeginRequest("x1");
         final GlobalBeginRequest globalBeginRequest2 = buildGlobalBeginRequest("x2");
         msgs.add(globalBeginRequest1);
@@ -61,6 +61,10 @@ public class MergedWarpMessageSerializerTest {
 
         MergedWarpMessage mergedWarpMessage2 = seataSerializer.deserialize(body);
         assertThat(mergedWarpMessage2.msgs.size()).isEqualTo(mergedWarpMessage.msgs.size());
+
+        assertThat(mergedWarpMessage2.msgIds.size()).isEqualTo(2);
+        assertThat(mergedWarpMessage2.msgIds.get(0)).isEqualTo(1);
+        assertThat(mergedWarpMessage2.msgIds.get(1)).isEqualTo(2);
 
         GlobalBeginRequest globalBeginRequest21 = (GlobalBeginRequest) mergedWarpMessage2.msgs.get(0);
         assertThat(globalBeginRequest21.getTimeout()).isEqualTo(globalBeginRequest1.getTimeout());
