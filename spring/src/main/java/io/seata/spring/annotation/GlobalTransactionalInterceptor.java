@@ -253,12 +253,23 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     succeed = false;
                     failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
+                case BeginRateLimited:
+                    succeed = false;
+                    failureHandler.onBeginRateLimited(e.getTransaction(), e.getCause());
+                    throw e.getCause();
                 case CommitFailure:
                     succeed = false;
                     failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
+                case CommitRateLimited:
+                    succeed = false;
+                    failureHandler.onCommitRateLimited(e.getTransaction(), e.getCause());
+                    throw e.getCause();
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
+                    throw e.getOriginalException();
+                case RollbackRateLimited:
+                    failureHandler.onRollbackRateLimited(e.getTransaction(), e.getOriginalException());
                     throw e.getOriginalException();
                 case RollbackRetrying:
                     failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());

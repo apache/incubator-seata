@@ -51,7 +51,10 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
-        if (response.getResultCode() == ResultCode.Failed || response.getResultCode() == ResultCode.RateLimited) {
+        if (response.getResultCode() == ResultCode.RateLimited) {
+            throw new TmTransactionException(TransactionExceptionCode.BeginRateLimited, response.getMsg());
+        }
+        if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
         }
         return response.getXid();
@@ -63,7 +66,7 @@ public class DefaultTransactionManager implements TransactionManager {
         globalCommit.setXid(xid);
         GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
         if (response.getResultCode() == ResultCode.RateLimited) {
-            throw new TmTransactionException(TransactionExceptionCode.CommitFailed, response.getMsg());
+            throw new TmTransactionException(TransactionExceptionCode.CommitRateLimited, response.getMsg());
         }
         return response.getGlobalStatus();
     }
@@ -74,7 +77,7 @@ public class DefaultTransactionManager implements TransactionManager {
         globalRollback.setXid(xid);
         GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
         if (response.getResultCode() == ResultCode.RateLimited) {
-            throw new TmTransactionException(TransactionExceptionCode.RollbackFailed, response.getMsg());
+            throw new TmTransactionException(TransactionExceptionCode.RollbackRateLimited, response.getMsg());
         }
         return response.getGlobalStatus();
     }
@@ -85,7 +88,7 @@ public class DefaultTransactionManager implements TransactionManager {
         queryGlobalStatus.setXid(xid);
         GlobalStatusResponse response = (GlobalStatusResponse) syncCall(queryGlobalStatus);
         if (response.getResultCode() == ResultCode.RateLimited) {
-            throw new TmTransactionException(TransactionExceptionCode.GlobalStatusFailed, response.getMsg());
+            throw new TmTransactionException(TransactionExceptionCode.GlobalStatusRateLimited, response.getMsg());
         }
         return response.getGlobalStatus();
     }
@@ -97,7 +100,7 @@ public class DefaultTransactionManager implements TransactionManager {
         globalReport.setGlobalStatus(globalStatus);
         GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
         if (response.getResultCode() == ResultCode.RateLimited) {
-            throw new TmTransactionException(TransactionExceptionCode.GlobalReportFailed, response.getMsg());
+            throw new TmTransactionException(TransactionExceptionCode.GlobalReportRateLimited, response.getMsg());
         }
         return response.getGlobalStatus();
     }
