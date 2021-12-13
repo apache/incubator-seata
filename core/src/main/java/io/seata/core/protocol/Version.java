@@ -98,7 +98,7 @@ public class Version {
      * Determine whether the client version is greater than or equal to version 1.5.0
      *
      * @param version client version
-     * @return true: client version is above or equal version 1.5.0, false：on the contrary
+     * @return true: client version is above or equal version 1.5.0, false: on the contrary
      */
     public static boolean isAboveOrEqualVersion150(String version) {
         boolean isAboveOrEqualVersion150 = false;
