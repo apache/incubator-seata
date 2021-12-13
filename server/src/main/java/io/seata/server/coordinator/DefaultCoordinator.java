@@ -35,6 +35,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -419,6 +420,34 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
+     * Handle rate limited.
+     */
+    protected void handleRateLimited(AbstractTransactionRequestToTC transactionRequest) {
+        if (transactionRequest instanceof GlobalCommitRequest || transactionRequest instanceof GlobalRollbackRequest) {
+            AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest) transactionRequest;
+            String xid = abstractGlobalEndRequest.getXid();
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+
+            try {
+                SessionHolder.lockAndExecute(globalSession, () -> {
+                    if (globalSession == null || !globalSession.hasATBranch() || globalSession.isTimeout()) {
+                        return false;
+                    }
+                    LOGGER.info("Global transaction[{}] is rate limited and will be rollback.", globalSession.getXid());
+                    globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+                    globalSession.close();
+                    globalSession.changeStatus(GlobalStatus.Rollbacking);
+                    core.doGlobalRollback(globalSession, true);
+                    return true;
+                });
+            } catch (TransactionException e) {
+                LOGGER.info("Failed to handle rateLimited global transaction [{}] {} {}",
+                    globalSession.getXid(), e.getCode(), e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -448,6 +477,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (ENABLE_SERVER_RATELIMIT) {
             AbstractResultMessage resultMessage = rateLimitedResponseMap.get(request.getClass());
             if (resultMessage != null && !rateLimiter.canPass()) {
+                handleRateLimited(transactionRequest);
                 return resultMessage;
             }
         }
