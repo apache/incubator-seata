@@ -18,6 +18,7 @@ package io.seata.saga.tm;
 import java.util.List;
 
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -66,6 +67,10 @@ public class DefaultSagaTransactionalTemplate
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
+            if (TransactionExceptionCode.CommitRateLimited.equals(txe.getCode())) {
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        TransactionalExecutor.Code.CommitRateLimited);
+            }
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
         }
     }
@@ -87,6 +92,10 @@ public class DefaultSagaTransactionalTemplate
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
             triggerAfterBegin();
         } catch (TransactionException txe) {
+            if (TransactionExceptionCode.BeginRateLimited.equals(txe.getCode())) {
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        TransactionalExecutor.Code.BeginRateLimited);
+            }
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
 
         }
@@ -105,6 +114,10 @@ public class DefaultSagaTransactionalTemplate
             tx.globalReport(globalStatus);
             triggerAfterCompletion();
         } catch (TransactionException txe) {
+            if (TransactionExceptionCode.GlobalReportRateLimited.equals(txe.getCode())) {
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        TransactionalExecutor.Code.ReportRateLimited);
+            }
 
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
         }
