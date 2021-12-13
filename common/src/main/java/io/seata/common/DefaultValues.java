@@ -15,6 +15,8 @@
  */
 package io.seata.common;
 
+import java.time.Duration;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -161,4 +163,19 @@ public interface DefaultValues {
      * the constant TCC_FENCE_BEAN_NAME
      */
     String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+
+    /**
+     * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(2).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(10).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(5).toMillis();
 }

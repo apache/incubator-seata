@@ -94,6 +94,33 @@
         "replacement": "seata.log.exception-rate",
         "reason": "Please configure to 'seata.log.exception-rate'."
       }
+    },
+    {
+      "name": "seata.transport.rpcRmRequestTimeout",
+      "type": "java.lang.Long",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
+      "deprecation": {
+        "level": "error",
+        "reason": "Please configure to 'seata.transport.rpcRmRequestTimeout'."
+      }
+    },
+    {
+      "name": "seata.transport.rpcTmRequestTimeout",
+      "type": "java.lang.Long",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
+      "deprecation": {
+        "level": "error",
+        "reason": "Please configure to 'seata.transport.rpcTmRequestTimeout'."
+      }
+    },
+    {
+      "name": "seata.transport.rpcTcRequestTimeout",
+      "type": "java.lang.Long",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
+      "deprecation": {
+        "level": "error",
+        "reason": "Please configure to 'seata.transport.rpcTcRequestTimeout'."
+      }
     }
   ],
   "hints": [
