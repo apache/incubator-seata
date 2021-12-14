@@ -18,6 +18,7 @@ package io.seata.server.ratelimit;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.seata.common.XID;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -52,6 +53,7 @@ public class RateLimitedResponseMap {
 
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setTransactionExceptionCode(TransactionExceptionCode.BeginRateLimited);
+        globalBeginResponse.setXid(XID.generateXID(-1));
 
         GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
         globalCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.CommitRateLimited);
