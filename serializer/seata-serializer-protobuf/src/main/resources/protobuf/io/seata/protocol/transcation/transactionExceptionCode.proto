@@ -16,102 +16,144 @@ enum TransactionExceptionCodeProto {
     Unknown = 0;
 
     /**
+     * Begin rate limited transaction exception code.
+     */
+    //
+    BeginRateLimited = 1;
+
+    /**
+     * Commit rate limited transaction exception code.
+     */
+    //
+    CommitRateLimited = 2;
+
+    /**
+     * Rollback rate limited transaction exception code.
+     */
+    //
+    RollbackRateLimited = 3;
+
+    /**
+     * Global lock query rate limited transaction exception code.
+     */
+    //
+    GlobalLockQueryRateLimited = 4;
+
+    /**
+     * Global report rate limited transaction exception code.
+     */
+    //
+    GlobalReportRateLimited = 5;
+
+    /**
+     * Global status rate limited transaction exception code.
+     */
+    //
+    GlobalStatusRateLimited = 6;
+
+    /**
      * Lock key conflict transaction exception code.
      */
     //
-    LockKeyConflict = 1;
+    LockKeyConflict = 7;
 
     /**
      * Io transaction exception code.
      */
     //
-    IO = 2;
+    IO = 8;
 
     /**
      * Branch rollback failed retriable transaction exception code.
      */
     //
-    BranchRollbackFailed_Retriable = 3;
+    BranchRollbackFailed_Retriable = 9;
 
     /**
      * Branch rollback failed unretriable transaction exception code.
      */
     //
-    BranchRollbackFailed_Unretriable = 4;
+    BranchRollbackFailed_Unretriable = 10;
 
     /**
      * Branch register failed transaction exception code.
      */
     //
-    BranchRegisterFailed = 5;
+    BranchRegisterFailed = 11;
 
     /**
      * Branch report failed transaction exception code.
      */
     //
-    BranchReportFailed = 6;
+    BranchReportFailed = 12;
+
+    /**
+     * Branch report rate limited transaction exception code.
+     */
+    //
+    BranchReportRateLimited = 13;
 
     /**
      * Lockable check failed transaction exception code.
      */
     //
-    LockableCheckFailed = 7;
+    LockableCheckFailed = 14;
 
     /**
      * Branch transaction not exist transaction exception code.
      */
     //
-    BranchTransactionNotExist = 8;
+    BranchTransactionNotExist = 15;
 
     /**
      * Global transaction not exist transaction exception code.
      */
     //
-    GlobalTransactionNotExist = 9;
+    GlobalTransactionNotExist = 16;
 
     /**
      * Global transaction not active transaction exception code.
      */
     //
-    GlobalTransactionNotActive = 10;
+    GlobalTransactionNotActive = 17;
 
     /**
      * Global transaction status invalid transaction exception code.
      */
     //
-    GlobalTransactionStatusInvalid = 11;
+    GlobalTransactionStatusInvalid = 18;
 
     /**
      * Failed to send branch commit request transaction exception code.
      */
     //
-    FailedToSendBranchCommitRequest = 12;
+    FailedToSendBranchCommitRequest = 19;
 
     /**
      * Failed to send branch rollback request transaction exception code.
      */
     //
-    FailedToSendBranchRollbackRequest = 13;
+    FailedToSendBranchRollbackRequest = 20;
 
     /**
      * Failed to add branch transaction exception code.
      */
     //
-    FailedToAddBranch = 14;
+    FailedToAddBranch = 21;
 
     /**
   *  Failed to lock global transaction exception code.
   */
-    FailedLockGlobalTranscation = 15;
+    FailedLockGlobalTranscation = 22;
 
     /**
      * FailedWriteSession
      */
-    FailedWriteSession = 16;
+    FailedWriteSession = 23;
 
     /**
      * FailedStore
      */
-    FailedStore = 17;
+    FailedStore = 24;
 
 }
