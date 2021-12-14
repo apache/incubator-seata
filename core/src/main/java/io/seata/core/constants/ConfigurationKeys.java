@@ -48,14 +48,29 @@ public interface ConfigurationKeys {
     String STORE_MODE = STORE_PREFIX + MODE;
 
     /**
+     * The constant SERVER_STORE_MODE.
+     */
+    String SERVER_STORE_MODE = SEATA_PREFIX + STORE_PREFIX + MODE;
+
+    /**
      * The constant STORE_LOCK_MODE.
      */
     String STORE_LOCK_MODE = STORE_PREFIX + "lock." + MODE;
 
     /**
+     * The constant SERVER_STORE_LOCK_MODE.
+     */
+    String SERVER_STORE_LOCK_MODE = SEATA_PREFIX + STORE_PREFIX + "lock." + MODE;
+
+    /**
      * The constant STORE_SESSION_MODE.
      */
     String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
+
+    /**
+     * The constant SERVER_STORE_SESSION_MODE.
+     */
+    String SERVER_STORE_SESSION_MODE = SEATA_PREFIX + STORE_PREFIX + "session." + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
@@ -742,4 +757,19 @@ public interface ConfigurationKeys {
      * The constant TCC_FENCE_LOG_TABLE_NAME
      */
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant rpcRmRequestTimeout
+     */
+    String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TC_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTcRequestTimeout";
 }
