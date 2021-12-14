@@ -23,6 +23,8 @@ import io.seata.common.loader.Scope;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_DELAY_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RATELIMIT_DELAY;
@@ -32,6 +34,8 @@ import static io.seata.common.DefaultValues.DEFAULT_SERVER_RATELIMIT_DELAY;
  */
 @LoadLevel(name = "token-bucket", scope = Scope.SINGLETON)
 public class TokenBucketLimiter implements RateLimiter, Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenBucketLimiter.class);
 
     /**
      * The constant CONFIG.
@@ -137,7 +141,7 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
         try {
             TimeUnit.MICROSECONDS.sleep(waitTimeInMicros);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.warn("Sleep to wait for token error:{}", e.getMessage(), e);
         }
         return true;
     }
