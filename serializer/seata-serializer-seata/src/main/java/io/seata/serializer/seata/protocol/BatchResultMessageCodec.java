@@ -15,6 +15,10 @@
  */
 package io.seata.serializer.seata.protocol;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.core.protocol.AbstractMessage;
@@ -22,10 +26,6 @@ import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
 import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * the type batch result message codec

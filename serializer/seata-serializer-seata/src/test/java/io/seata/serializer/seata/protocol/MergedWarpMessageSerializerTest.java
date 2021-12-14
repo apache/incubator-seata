@@ -15,16 +15,16 @@
  */
 package io.seata.serializer.seata.protocol;
 
-import io.seata.serializer.seata.SeataSerializer;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**

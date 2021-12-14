@@ -15,6 +15,9 @@
  */
 package io.seata.serializer.seata.protocol;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
@@ -22,9 +25,6 @@ import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -15,6 +15,9 @@
  */
 package io.seata.core.rpc.processor.client;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
@@ -34,9 +37,6 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * process TC response message.
