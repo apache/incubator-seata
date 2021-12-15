@@ -13,7 +13,7 @@
             <!-- the global custom fields -->
             <customFields>
                 {
-                    "app_name": "${APPLICATION_NAME:seata-server}"
+                    "app_name": "${APPLICATION_NAME:-seata-server}"
                 }
             </customFields>
 
