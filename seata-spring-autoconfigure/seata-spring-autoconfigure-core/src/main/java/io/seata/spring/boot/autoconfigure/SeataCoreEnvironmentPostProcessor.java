@@ -16,7 +16,6 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.boot.autoconfigure.properties.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.ServerRaftProperties;
 import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
@@ -63,7 +62,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
@@ -101,7 +99,6 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
         PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
         PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
         PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
-        PROPERTY_BEAN_MAP.put(SERVER_RAFT_PREFIX, ServerRaftProperties.class);
         PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
     }
 
