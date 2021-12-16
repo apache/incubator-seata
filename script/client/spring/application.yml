@@ -70,6 +70,9 @@ seata:
     compressor: none
     enable-tm-client-batch-send-request: false
     enable-rm-client-batch-send-request: true
+    rpc-rm-request-timeout: 2000
+    rpc-tm-request-timeout: 10000
+    rpc-tc-request-timeout: 5000
   config:
     type: file
     consul:

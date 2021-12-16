@@ -13,31 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.transaction;
+package io.seata.server.console.service;
 
-import java.nio.ByteBuffer;
-
-import io.netty.buffer.ByteBuf;
-import io.seata.core.protocol.client.ClusterMetaDataRequest;
+import io.seata.core.store.db.vo.BranchSessionVO;
+import io.seata.server.console.result.PageResult;
 
 /**
- * The type Global begin request codec.
- *
- * @author zhangsen
+ * Branch session service
+ * @author wangzhongxiang
  */
-public class ClusterMetaDataRequestCodec extends AbstractTransactionRequestToTCCodec {
+public interface BranchSessionService {
 
-    @Override
-    public Class<?> getMessageClassType() {
-        return ClusterMetaDataRequest.class;
-    }
-
-    @Override
-    public <T> void encode(T t, ByteBuf out) {
-    }
-
-    @Override
-    public <T> void decode(T t, ByteBuffer in) {
-    }
+    /**
+     * Query branch session by xid
+     * @param xid the xid
+     * @return the BranchSessionVO list
+     */
+    PageResult<BranchSessionVO> queryByXid(String xid);
 
 }

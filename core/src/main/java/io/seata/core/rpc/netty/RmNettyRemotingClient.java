@@ -288,9 +288,14 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    protected int acquireClusterRetryCount() {
+    public int acquireClusterRetryCount() {
         return ConfigurationFactory.getInstance().getInt(CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT,
             DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT);
+    }
+
+    @Override
+    public long getRpcRequestTimeout() {
+        return NettyClientConfig.getRpcRmRequestTimeout();
     }
 
     private void registerProcessor() {
