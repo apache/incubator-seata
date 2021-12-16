@@ -16,7 +16,8 @@
 package io.seata.server.console.impl.redis;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.store.db.vo.GlobalSessionVO;
+import io.seata.core.console.param.GlobalSessionParam;
+import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.result.SingleResult;
 import io.seata.server.console.service.GlobalSessionService;
@@ -33,12 +34,7 @@ import org.springframework.stereotype.Component;
 public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
     @Override
-    public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
-        throw new NotSupportYetException();
-    }
-
-    @Override
-    public PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch) {
+    public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         throw new NotSupportYetException();
     }
 
@@ -46,4 +42,5 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
     public SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch) {
         throw new NotSupportYetException();
     }
+
 }

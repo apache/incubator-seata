@@ -13,25 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.console.service;
+package io.seata.core.console.param;
 
-import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.vo.GlobalLockVO;
-import io.seata.server.console.result.PageResult;
-
+import java.io.Serializable;
 
 /**
- * Global lock service
- * @author wangzhongxiang
+ * @description: Branch session param
+ * @author: zhongxiang.wang
  */
-public interface GlobalLockService {
+public class BranchSessionParam implements Serializable {
 
-    /**
-     * Query locks by param
-     * @param param the param
-     * @return the list of GlobalLockVO
-     */
-    PageResult<GlobalLockVO> query(GlobalLockParam param);
-
+    private static final long serialVersionUID = 6154882528070131284L;
 
 }

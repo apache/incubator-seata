@@ -16,7 +16,7 @@
 package io.seata.server.console.impl.redis;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.store.db.vo.BranchSessionVO;
+import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.service.BranchSessionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;

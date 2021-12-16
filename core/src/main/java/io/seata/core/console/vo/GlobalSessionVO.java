@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.vo;
+package io.seata.core.console.vo;
 
 import io.seata.core.constants.ServerTableColumnsName;
 

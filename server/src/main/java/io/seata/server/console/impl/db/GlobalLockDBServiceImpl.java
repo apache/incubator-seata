@@ -15,13 +15,13 @@
  */
 package io.seata.server.console.impl.db;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
+import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
-import io.seata.core.store.db.vo.GlobalLockVO;
+import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.console.result.PageResult;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,13 +55,14 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
     private String dbDataSource;
 
     @Override
-    public PageResult<GlobalLockVO> queryByTable(String tableName) {
+    public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         List<GlobalLockVO> list = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
-        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable, tableName);
+        //TODO 根据param中不为空的入参来判断处理拼接sql
+        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable, param.getTableName());
         try {
             conn = dataSource.getConnection();
             ps = conn.prepareStatement(queryAllLockSQL);
@@ -76,12 +77,5 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
         }
         return PageResult.success(list, list.size(), 0, 0, 0);
     }
-
-
-    @Override
-    public PageResult<GlobalLockVO> queryByXid(String xid) {
-        throw new NotSupportYetException();
-    }
-
 
 }

@@ -20,7 +20,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
-import io.seata.core.store.db.vo.BranchSessionVO;
+import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.service.BranchSessionService;
 import org.springframework.beans.factory.annotation.Value;

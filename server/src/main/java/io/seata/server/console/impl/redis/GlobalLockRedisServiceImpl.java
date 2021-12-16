@@ -16,7 +16,8 @@
 package io.seata.server.console.impl.redis;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.store.db.vo.GlobalLockVO;
+import io.seata.core.console.param.GlobalLockParam;
+import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.server.console.result.PageResult;
 import io.seata.server.console.service.GlobalLockService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -32,12 +33,8 @@ import org.springframework.stereotype.Component;
 public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
     @Override
-    public PageResult<GlobalLockVO> queryByTable(String tableName) {
+    public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         throw new NotSupportYetException();
     }
 
-    @Override
-    public PageResult<GlobalLockVO> queryByXid(String xid) {
-        throw new NotSupportYetException();
-    }
 }
