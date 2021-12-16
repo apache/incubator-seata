@@ -61,7 +61,7 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
         PreparedStatement ps = null;
         ResultSet resultSet = null;
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
-        //TODO 根据param中不为空的入参来判断处理拼接sql
+        //need to check the param to assemble the sql
         String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable, param.getTableName());
         try {
             conn = dataSource.getConnection();
