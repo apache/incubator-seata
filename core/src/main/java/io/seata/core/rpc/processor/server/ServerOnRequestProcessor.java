@@ -207,7 +207,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     private void offerMsg(BlockingQueue<QueueItem> msgQueue, RpcMessage rpcMessage,
                           AbstractResultMessage resultMessage, int msgId, Channel channel) {
-        if (!msgQueue.offer(new QueueItem(resultMessage, msgId, rpcMessage.getCodec(), rpcMessage.getCompressor()))) {
+        if (!msgQueue.offer(new QueueItem(resultMessage, msgId, rpcMessage))) {
             LOGGER.error("put message into basketMap offer failed, channel:{},rpcMessage:{},resultMessage:{}",
                 channel, rpcMessage, resultMessage);
         }
@@ -241,22 +241,33 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     while (!msgQueue.isEmpty()) {
                         QueueItem item = msgQueue.poll();
                         BatchResultMessage batchResultMessage = CollectionUtils.computeIfAbsent(batchResultMessageMap,
-                            new ClientRequestRpcInfo(item.getCodec(), item.getCompressor()),
+                            ClientRequestRpcInfo.build(item.getRpcMessage()),
                             key -> new BatchResultMessage());
                         batchResultMessage.getResultMessages().add(item.getResultMessage());
                         batchResultMessage.getMsgIds().add(item.getMsgId());
                     }
-                    batchResultMessageMap.forEach((clientRequestRpcInfo, batchResultMessage) -> {
-                        RpcMessage rpcMessage = new RpcMessage();
-                        rpcMessage.setId(idGenerator.incrementAndGet());
-                        rpcMessage.setCodec(clientRequestRpcInfo.getCodec());
-                        rpcMessage.setCompressor(clientRequestRpcInfo.getCompressor());
-                        remotingServer.sendAsyncResponse(rpcMessage, channel, batchResultMessage);
-                    });
+                    batchResultMessageMap.forEach((clientRequestRpcInfo, batchResultMessage) ->
+                        remotingServer.sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo),
+                            channel, batchResultMessage));
                 });
                 isResponding = false;
             }
         }
+    }
+
+    /**
+     * build RpcMessage
+     *
+     * @param clientRequestRpcInfo For saving client request rpc info
+     * @return rpcMessage
+     */
+    private RpcMessage buildRpcMessage(ClientRequestRpcInfo clientRequestRpcInfo) {
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setId(clientRequestRpcInfo.getRpcMessageId());
+        rpcMessage.setCodec(clientRequestRpcInfo.getCodec());
+        rpcMessage.setCompressor(clientRequestRpcInfo.getCompressor());
+        rpcMessage.setHeadMap(clientRequestRpcInfo.getHeadMap());
+        return rpcMessage;
     }
 
     /**
@@ -269,18 +280,43 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     private static class ClientRequestRpcInfo {
 
         /**
-         * client send request message codec
+         * the Outer layer rpcMessage id
+         */
+        private int rpcMessageId;
+
+        /**
+         * the Outer layer rpcMessage client send request message codec
          */
         private byte codec;
 
         /**
-         * client send request message compressor
+         * the Outer layer rpcMessage client send request message compressor
          */
         private byte compressor;
 
-        public ClientRequestRpcInfo(byte codec, byte compressor) {
+        /**
+         * the Outer layer rpcMessage headMap
+         */
+        private Map<String, String> headMap;
+
+        public ClientRequestRpcInfo(int rpcMessageId, byte codec, byte compressor, Map<String, String> heaMap) {
+            this.rpcMessageId = rpcMessageId;
             this.codec = codec;
             this.compressor = compressor;
+            this.headMap = heaMap;
+        }
+
+        public static ClientRequestRpcInfo build(RpcMessage rpcMessage) {
+            return new ClientRequestRpcInfo(rpcMessage.getId(), rpcMessage.getCodec(),
+                rpcMessage.getCompressor(), rpcMessage.getHeadMap());
+        }
+
+        public int getRpcMessageId() {
+            return rpcMessageId;
+        }
+
+        public void setRpcMessageId(int rpcMessageId) {
+            this.rpcMessageId = rpcMessageId;
         }
 
         public byte getCodec() {
@@ -299,21 +335,30 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             this.compressor = compressor;
         }
 
+        public Map<String, String> getHeadMap() {
+            return headMap;
+        }
+
+        public void setHeadMap(Map<String, String> headMap) {
+            this.headMap = headMap;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
-            }
+            };
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
             ClientRequestRpcInfo that = (ClientRequestRpcInfo) o;
-            return codec == that.codec && compressor == that.compressor;
+            return rpcMessageId == that.rpcMessageId && codec == that.codec
+                && compressor == that.compressor && headMap.equals(that.headMap);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(codec, compressor);
+            return Objects.hash(rpcMessageId, codec, compressor, headMap);
         }
     }
 
@@ -335,20 +380,14 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         private Integer msgId;
 
         /**
-         * client send request message codec
+         * the Outer layer rpcMessage
          */
-        private byte codec;
+        private RpcMessage rpcMessage;
 
-        /**
-         * client send request message compressor
-         */
-        private byte compressor;
-
-        public QueueItem(AbstractResultMessage resultMessage, int msgId, byte codec, byte compressor) {
+        public QueueItem(AbstractResultMessage resultMessage, int msgId, RpcMessage rpcMessage) {
             this.resultMessage = resultMessage;
             this.msgId = msgId;
-            this.codec = codec;
-            this.compressor = compressor;
+            this.rpcMessage = rpcMessage;
         }
 
         public AbstractResultMessage getResultMessage() {
@@ -367,20 +406,12 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             this.msgId = msgId;
         }
 
-        public byte getCodec() {
-            return codec;
+        public RpcMessage getRpcMessage() {
+            return rpcMessage;
         }
 
-        public void setCodec(byte codec) {
-            this.codec = codec;
-        }
-
-        public byte getCompressor() {
-            return compressor;
-        }
-
-        public void setCompressor(byte compressor) {
-            this.compressor = compressor;
+        public void setRpcMessage(RpcMessage rpcMessage) {
+            this.rpcMessage = rpcMessage;
         }
     }
 
