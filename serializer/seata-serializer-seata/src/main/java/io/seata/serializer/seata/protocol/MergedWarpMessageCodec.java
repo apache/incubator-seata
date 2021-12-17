@@ -94,7 +94,6 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
     private void doDecode(MergedWarpMessage mergedWarpMessage, ByteBuffer byteBuffer) {
         short msgNum = byteBuffer.getShort();
         List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
-        List<Integer> msgIds = new ArrayList<>();
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
             AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typeCode);
@@ -103,12 +102,15 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
             msgs.add(abstractMessage);
         }
 
-        for (int idx = 0; idx < msgNum; idx++) {
-            msgIds.add(byteBuffer.getInt());
+        if (byteBuffer.hasRemaining()) {
+            List<Integer> msgIds = new ArrayList<>();
+            for (int idx = 0; idx < msgNum; idx++) {
+                msgIds.add(byteBuffer.getInt());
+            }
+            mergedWarpMessage.msgIds = msgIds;
         }
 
         mergedWarpMessage.msgs = msgs;
-        mergedWarpMessage.msgIds = msgIds;
     }
 
 }
