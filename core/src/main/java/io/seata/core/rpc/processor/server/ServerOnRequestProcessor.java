@@ -241,7 +241,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     while (!msgQueue.isEmpty()) {
                         QueueItem item = msgQueue.poll();
                         BatchResultMessage batchResultMessage = CollectionUtils.computeIfAbsent(batchResultMessageMap,
-                            ClientRequestRpcInfo.build(item.getRpcMessage()),
+                            new ClientRequestRpcInfo(item.getRpcMessage()),
                             key -> new BatchResultMessage());
                         batchResultMessage.getResultMessages().add(item.getResultMessage());
                         batchResultMessage.getMsgIds().add(item.getMsgId());
@@ -299,16 +299,11 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
          */
         private Map<String, String> headMap;
 
-        public ClientRequestRpcInfo(int rpcMessageId, byte codec, byte compressor, Map<String, String> heaMap) {
-            this.rpcMessageId = rpcMessageId;
-            this.codec = codec;
-            this.compressor = compressor;
-            this.headMap = heaMap;
-        }
-
-        public static ClientRequestRpcInfo build(RpcMessage rpcMessage) {
-            return new ClientRequestRpcInfo(rpcMessage.getId(), rpcMessage.getCodec(),
-                rpcMessage.getCompressor(), rpcMessage.getHeadMap());
+        public ClientRequestRpcInfo(RpcMessage rpcMessage) {
+            this.rpcMessageId = rpcMessage.getId();
+            this.codec = rpcMessage.getCodec();
+            this.compressor = rpcMessage.getCompressor();
+            this.headMap = rpcMessage.getHeadMap();
         }
 
         public int getRpcMessageId() {
