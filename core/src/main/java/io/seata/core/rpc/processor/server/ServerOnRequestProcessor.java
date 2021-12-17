@@ -234,9 +234,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     if (msgQueue.isEmpty()) {
                         return;
                     }
-                    // Because the serialization and compressor of the response
-                    // needs to be the same as the serialization and compressor of the request.
-                    // Assemble by grouping according to the serialization and compressor dimensions.
+                    // Because the [serialization,compressor,rpcMessageId,headMap] of the response
+                    // needs to be the same as the [serialization,compressor,rpcMessageId,headMap] of the request.
+                    // Assemble by grouping according to the [serialization,compressor,rpcMessageId,headMap] dimensions.
                     Map<ClientRequestRpcInfo, BatchResultMessage> batchResultMessageMap = new HashMap<>();
                     while (!msgQueue.isEmpty()) {
                         QueueItem item = msgQueue.poll();
@@ -273,9 +273,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     /**
      * For saving client request rpc info
      * <p>
-     * Because the serialization and compressor of the response
-     * needs to be the same as the serialization and compressor of the request.
-     * Assemble by grouping according to the serialization and compressor dimensions.
+     * Because the [serialization,compressor,rpcMessageId,headMap] of the response
+     * needs to be the same as the [serialization,compressor,rpcMessageId,headMap] of the request.
+     * Assemble by grouping according to the [serialization,compressor,rpcMessageId,headMap] dimensions.
      */
     private static class ClientRequestRpcInfo {
 
