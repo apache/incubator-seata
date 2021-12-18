@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.controller;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.server.console.result.PageResult;
@@ -44,7 +45,7 @@ public class GlobalLockController {
      */
     @GetMapping("query")
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
-        return globalLockService.query(param);
+        throw new NotSupportYetException();
     }
 
 }

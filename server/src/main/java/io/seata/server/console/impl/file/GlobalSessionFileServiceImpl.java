@@ -19,7 +19,6 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.result.PageResult;
-import io.seata.server.console.result.SingleResult;
 import io.seata.server.console.service.GlobalSessionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
@@ -36,11 +35,6 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
-        throw new NotSupportYetException();
-    }
-
-    @Override
-    public SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch) {
         throw new NotSupportYetException();
     }
 

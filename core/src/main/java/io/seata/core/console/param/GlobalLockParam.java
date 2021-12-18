@@ -21,13 +21,42 @@ import java.io.Serializable;
  * @description: Global lock param
  * @author: zhongxiang.wang
  */
-public class GlobalLockParam implements Serializable {
+public class GlobalLockParam extends BaseParam implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
+    /**
+     * the xid
+     */
     private String xid;
-
+    /**
+     * the table name
+     */
     private String tableName;
+    /**
+     * the transaction id
+     */
+    private String transactionId;
+    /**
+     * the branch id
+     */
+    private String branchId;
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public String getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(String branchId) {
+        this.branchId = branchId;
+    }
 
     public String getXid() {
         return xid;

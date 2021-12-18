@@ -21,9 +21,13 @@ import java.io.Serializable;
  * @description: Global session param
  * @author: zhongxiang.wang
  */
-public class GlobalSessionParam implements Serializable {
+public class GlobalSessionParam extends BaseParam implements Serializable {
 
     private static final long serialVersionUID = 115488252809011284L;
+    /**
+     * the xid
+     */
+    private String xid;
     /**
      * the application id
      */
@@ -33,11 +37,31 @@ public class GlobalSessionParam implements Serializable {
      */
     private Integer status;
     /**
+     * the transaction name
+     */
+    private String transactionName;
+    /**
      * if with branch
      * true: with branch session
      * false: no branch session
      */
     private boolean withBranch;
+
+    public String getXid() {
+        return xid;
+    }
+
+    public void setXid(String xid) {
+        this.xid = xid;
+    }
+
+    public String getTransactionName() {
+        return transactionName;
+    }
+
+    public void setTransactionName(String transactionName) {
+        this.transactionName = transactionName;
+    }
 
     public String getApplicationId() {
         return applicationId;

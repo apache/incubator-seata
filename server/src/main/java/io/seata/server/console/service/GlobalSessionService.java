@@ -18,7 +18,6 @@ package io.seata.server.console.service;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.result.PageResult;
-import io.seata.server.console.result.SingleResult;
 
 /**
  * Global session service
@@ -32,13 +31,5 @@ public interface GlobalSessionService {
      * @return the GlobalSessionVO list
      */
     PageResult<GlobalSessionVO> query(GlobalSessionParam param);
-
-    /**
-     * Query by xid
-     * @param xid the xid
-     * @param withBranch if with branch session
-     * @return the GlobalSessionVO
-     */
-    SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch);
 
 }
