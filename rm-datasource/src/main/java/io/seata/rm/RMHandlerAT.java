@@ -61,42 +61,35 @@ public class RMHandlerAT extends AbstractRMHandler {
             return;
         }
 
-        Connection conn = getConnection(dataSourceProxy);
-        if (conn == null) {
-            LOGGER.warn("Failed to get connection to delete expired undo_log for {}", resourceId);
-            return;
-        }
-
         Date division = getLogCreated(request.getSaveDays());
 
         UndoLogManager manager = getUndoLogManager(dataSourceProxy);
 
-        int deleteRows;
-        do {
-            deleteRows = deleteUndoLog(manager, conn, division);
-        } while (deleteRows == LIMIT_ROWS);
-
-        try {
-            conn.close();
-        } catch (SQLException closeEx) {
-            LOGGER.warn("Failed to close JDBC resource after deleting undo_log", closeEx);
+        try (Connection conn = getConnection(dataSourceProxy)) {
+            if (conn == null) {
+                LOGGER.warn("Failed to get connection to delete expired undo_log for {}", resourceId);
+                return;
+            }
+            int deleteRows;
+            do {
+                deleteRows = deleteUndoLog(manager, conn, division);
+            } while (deleteRows == LIMIT_ROWS);
+        } catch (Exception e) {
+            // should never happen, deleteUndoLog method had catch all Exception
         }
     }
 
     boolean checkUndoLogTableExist(DataSourceProxy dataSourceProxy) {
-        Connection connection = getConnection(dataSourceProxy);
-        if (connection == null) {
+        UndoLogManager manager = getUndoLogManager(dataSourceProxy);
+        try (Connection connection = getConnection(dataSourceProxy)) {
+            if (connection == null) {
+                return false;
+            }
+            return manager.hasUndoLogTable(connection);
+        } catch (Exception e) {
+            // should never happen, hasUndoLogTable method had catch all Exception
             return false;
         }
-        UndoLogManager manager = getUndoLogManager(dataSourceProxy);
-        boolean isExisted = manager.hasUndoLogTable(connection);
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            String resourceId = dataSourceProxy.getResourceId();
-            LOGGER.warn("Failed to close JDBC resource for {}", resourceId, e);
-        }
-        return isExisted;
     }
 
     Connection getConnection(DataSourceProxy dataSourceProxy) {
