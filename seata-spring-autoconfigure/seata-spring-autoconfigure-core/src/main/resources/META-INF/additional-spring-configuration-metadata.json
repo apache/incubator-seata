@@ -26,6 +26,12 @@
       "defaultValue": true
     },
     {
+      "name": "seata.transport.enable-tc-server-batch-send-response",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": true
+    },
+    {
       "name": "seata.transport.shutdown.wait",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.ShutdownProperties",

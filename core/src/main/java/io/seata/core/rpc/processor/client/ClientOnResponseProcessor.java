@@ -15,13 +15,16 @@
  */
 package io.seata.core.rpc.processor.client;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
+import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MergeResultMessage;
+import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMResponse;
@@ -64,6 +67,11 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 
     /**
+     * The Merge msg map from io.seata.core.rpc.netty.AbstractNettyRemotingClient#mergeMsgMap.
+     */
+    private Map<Integer, MergeMessage> mergeMsgMap;
+
+    /**
      * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
      */
     private final ConcurrentMap<Integer, MessageFuture> futures;
@@ -73,26 +81,49 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
      */
     private final TransactionMessageHandler transactionMessageHandler;
 
-    public ClientOnResponseProcessor(ConcurrentHashMap<Integer, MessageFuture> futures,
+    public ClientOnResponseProcessor(Map<Integer, MergeMessage> mergeMsgMap,
+                                     ConcurrentHashMap<Integer, MessageFuture> futures,
                                      TransactionMessageHandler transactionMessageHandler) {
+        this.mergeMsgMap = mergeMsgMap;
         this.futures = futures;
         this.transactionMessageHandler = transactionMessageHandler;
     }
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        if (rpcMessage.getBody() instanceof BatchResultMessage) {
-            BatchResultMessage batchResultMessage = (BatchResultMessage) rpcMessage.getBody();
-            for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
-                int msgId = batchResultMessage.getMsgIds().get(i);
+        if (rpcMessage.getBody() instanceof MergeResultMessage) {
+            MergeResultMessage results = (MergeResultMessage) rpcMessage.getBody();
+            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(rpcMessage.getId());
+            for (int i = 0; i < mergeMessage.msgs.size(); i++) {
+                int msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("msg: {} is not found in futures.", msgId);
                     }
                 } else {
-                    future.setResultMessage(batchResultMessage.getResultMessages().get(i));
+                    future.setResultMessage(results.getMsgs()[i]);
                 }
+            }
+        } else if (rpcMessage.getBody() instanceof BatchResultMessage) {
+            try {
+                BatchResultMessage batchResultMessage = (BatchResultMessage) rpcMessage.getBody();
+                for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
+                    int msgId = batchResultMessage.getMsgIds().get(i);
+                    MessageFuture future = futures.remove(msgId);
+                    if (future == null) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("msg: {} is not found in futures.", msgId);
+                        }
+                    } else {
+                        future.setResultMessage(batchResultMessage.getResultMessages().get(i));
+                    }
+                }
+            } finally {
+                // In order to be compatible with the old version, in the batch sending of version 1.5.0,
+                // batch messages will also be placed in the local cache of mergeMsgMap,
+                // but version 1.5.0 no longer needs to obtain batch messages from mergeMsgMap
+                mergeMsgMap.clear();
             }
         } else {
             MessageFuture messageFuture = futures.remove(rpcMessage.getId());

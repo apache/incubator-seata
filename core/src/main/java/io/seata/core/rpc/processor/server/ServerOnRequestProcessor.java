@@ -55,6 +55,7 @@ import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
+import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,9 +156,10 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             return;
         }
         String version = rpcMessage.getHeadMap().get(HeapMapKey.VERSION_KEY);
-        if (StringUtils.isNotBlank(version) && Version.isAboveOrEqualVersion150(version)) {
-            // the batch send request message
-            if (message instanceof MergedWarpMessage) {
+        // the batch send request message
+        if (message instanceof MergedWarpMessage) {
+            if (NettyServerConfig.isEnableTcServerBatchSendResponse() &&
+                StringUtils.isNotBlank(version) && Version.isAboveOrEqualVersion150(version)) {
                 List<AbstractMessage> msgs = ((MergedWarpMessage) message).msgs;
                 List<Integer> msgIds = ((MergedWarpMessage) message).msgIds;
                 for (int i = 0; i < msgs.size(); i++) {
@@ -167,15 +169,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     notifyBatchRespondingThread();
                 }
             } else {
-                // the single send request message
-                final AbstractMessage msg = (AbstractMessage) message;
-                AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(msg, rpcContext);
-                BlockingQueue<QueueItem> msgQueue = computeIfAbsentMsgQueue(ctx.channel());
-                offerMsg(msgQueue, rpcMessage, resultMessage, rpcMessage.getId(), ctx.channel());
-                notifyBatchRespondingThread();
-            }
-        } else {
-            if (message instanceof MergedWarpMessage) {
                 AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
                 for (int i = 0; i < results.length; i++) {
                     final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
@@ -184,12 +177,12 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                 MergeResultMessage resultMessage = new MergeResultMessage();
                 resultMessage.setMsgs(results);
                 remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
-            } else {
-                // the single send request message
-                final AbstractMessage msg = (AbstractMessage) message;
-                AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-                remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
             }
+        } else {
+            // the single send request message
+            final AbstractMessage msg = (AbstractMessage) message;
+            AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
         }
     }
 
