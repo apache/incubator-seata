@@ -15,6 +15,8 @@
  */
 package io.seata.common;
 
+import java.time.Duration;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -45,9 +47,10 @@ public interface DefaultValues {
 
     String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
     String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
+    @Deprecated
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
-    boolean DEFAULT_SERVER_RATELIMIT_DELAY = false;
-    long DEFAULT_DELAY_TIMEOUT = 1000;
+    boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
+    boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
 
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
@@ -86,7 +89,9 @@ public interface DefaultValues {
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
-    String DEFAULT_TX_GROUP = "my_test_tx_group";
+    String DEFAULT_TX_GROUP = "default_tx_group";
+    @Deprecated
+    String DEFAULT_TX_GROUP_OLD = "my_test_tx_group";
     String DEFAULT_TC_CLUSTER = "default";
     String DEFAULT_GROUPLIST = "127.0.0.1:8091";
 
@@ -158,4 +163,28 @@ public interface DefaultValues {
      * the constant TCC_FENCE_BEAN_NAME
      */
     String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+
+    /**
+     * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(2).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(10).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(5).toMillis();
+
+    /**
+     * the constant DEFAULT_SERVER_RATELIMIT_DELAY
+     */
+    boolean DEFAULT_SERVER_RATELIMIT_DELAY = false;
+    /**
+     * the constant DEFAULT_DELAY_TIMEOUT
+     */
+    long DEFAULT_DELAY_TIMEOUT = Duration.ofSeconds(1).toMillis();
 }
