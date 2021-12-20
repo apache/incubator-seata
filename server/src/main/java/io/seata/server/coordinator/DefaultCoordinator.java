@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -215,9 +216,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
                                     RpcContext rpcContext) throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
-        response.setBranchId(
-                core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                        request.getXid(), request.getApplicationData(), request.getLockKey()));
+        BranchRegisterResult result = core.branchRegisterAndGetResult(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
+                request.getXid(), request.getApplicationData(), request.getLockKey());
+        response.setBranchId(result.getBranchId());
+        response.setTimeout(result.getTimeout());
     }
 
     @Override

@@ -165,6 +165,16 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
      */
-    long DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
+    int DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
+
+    /**
+     * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
+     */
+    int DEFAULT_XA_CONNECTION_HOLD_TIMEOUT = 50000;
+
+    /**
+     * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
+     */
+    int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
 
 }

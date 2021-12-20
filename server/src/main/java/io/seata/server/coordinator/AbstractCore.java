@@ -18,6 +18,7 @@ package io.seata.server.coordinator;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
@@ -74,6 +75,21 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
+        return dobranchRegister(globalSession,branchType,resourceId,clientId,xid,applicationData,lockKeys);
+    }
+
+    @Override
+    public BranchRegisterResult branchRegisterAndGetResult(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
+            TransactionException{
+        BranchRegisterResult result = new BranchRegisterResult();
+        GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
+        result.setTimeout(globalSession.getTimeout());
+        result.setBranchId(dobranchRegister(globalSession,branchType,resourceId,clientId,xid,applicationData,lockKeys));
+        return result;
+    }
+
+    private Long dobranchRegister(GlobalSession globalSession,BranchType branchType, String resourceId, String clientId, String xid,
+                                       String applicationData, String lockKeys) throws TransactionException {
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -91,7 +107,7 @@ public abstract class AbstractCore implements Core {
             }
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
-                    globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
+                        globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
             }
             return branchSession.getBranchId();
         });

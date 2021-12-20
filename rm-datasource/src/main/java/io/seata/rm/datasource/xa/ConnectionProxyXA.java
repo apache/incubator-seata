@@ -21,6 +21,8 @@ import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 
+import io.seata.common.DefaultValues;
+import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -49,7 +51,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private volatile boolean kept = false;
 
     private volatile boolean rollBacked = false;
-    
+
+    private volatile Long branchRegisterTime = null;
+
+    private volatile Long prepareTime = null;
+
+    private volatile Integer timeout = null;
+
     /**
      * Constructor of Connection Proxy for XA mode.
      *
@@ -143,8 +151,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             long branchId;
             try {
                 // 1. register branch to TC then get the branchId
-                branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
-                    null);
+                setBranchRegisterTime(System.currentTimeMillis());
+                BranchRegisterResult result = DefaultResourceManager.get().branchRegisterAndGetResult(BranchType.XA, resource.getResourceId(), null, xid, null,
+                        null);
+                branchId = result.getBranchId();
+                timeout = Math.max(DefaultValues.DEFAULT_XA_CONNECTION_HOLD_TIMEOUT, result.getTimeout() - 10000);
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
@@ -184,6 +195,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             end(XAResource.TMSUCCESS);
             xaResource.prepare(xaBranchXid);
+            setPrepareTime(System.currentTimeMillis());
         } catch (XAException xe) {
             try {
                 // Branch Report to TC: Failed
@@ -233,18 +245,20 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
     }
 
-    private synchronized void start() throws XAException, SQLException {
+    private synchronized void start() throws XAException {
         // 3. XA Start
         xaResource.start(this.xaBranchXid, XAResource.TMNOFLAGS);
     }
 
-    private synchronized void end(int flags) throws XAException, SQLException {
+    private synchronized void end(int flags) throws XAException {
         // XA End: Success
         xaResource.end(xaBranchXid, flags);
     }
 
     private void cleanXABranchContext() {
         xaActive = false;
+        branchRegisterTime = null;
+        prepareTime = null;
         if (!isHeld()) {
             xaBranchXid = null;
         }
@@ -275,6 +289,30 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     public boolean shouldBeHeld() {
         return JdbcConstants.MYSQL.equals(resource.getDbType()) || JdbcConstants.MARIADB.equals(resource.getDbType())
                || StringUtils.isBlank(resource.getDbType());
+    }
+
+    public synchronized Long getBranchRegisterTime() {
+        return branchRegisterTime;
+    }
+
+    private synchronized void setBranchRegisterTime(Long branchRegisterTime) {
+        this.branchRegisterTime = branchRegisterTime;
+    }
+
+    public synchronized Long getPrepareTime() {
+        return prepareTime;
+    }
+
+    private synchronized void setPrepareTime(Long prepareTime) {
+        this.prepareTime = prepareTime;
+    }
+
+    public synchronized Integer getTimeout() {
+        return timeout;
+    }
+
+    private synchronized void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 
 }

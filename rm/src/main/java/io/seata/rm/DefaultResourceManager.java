@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -95,6 +96,12 @@ public class DefaultResourceManager implements ResourceManager {
         throws TransactionException {
         return getResourceManager(branchType).branchRegister(branchType, resourceId, clientId, xid, applicationData,
             lockKeys);
+    }
+
+    @Override
+    public BranchRegisterResult branchRegisterAndGetResult(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+        return getResourceManager(branchType).branchRegisterAndGetResult(branchType, resourceId, clientId, xid, applicationData,
+                lockKeys);
     }
 
     @Override

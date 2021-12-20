@@ -28,6 +28,8 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
 
     private long branchId;
 
+    private int timeout;
+
     /**
      * Gets branch id.
      *
@@ -44,6 +46,14 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
      */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     @Override

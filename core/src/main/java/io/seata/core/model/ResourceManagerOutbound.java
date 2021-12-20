@@ -15,6 +15,7 @@
  */
 package io.seata.core.model;
 
+import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.core.exception.TransactionException;
 
 /**
@@ -38,6 +39,10 @@ public interface ResourceManagerOutbound {
      */
     Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
         TransactionException;
+
+
+    BranchRegisterResult branchRegisterAndGetResult(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
+            TransactionException;
 
     /**
      * Branch report.

@@ -15,24 +15,24 @@
  */
 package io.seata.rm;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.Resource;
+import io.seata.rm.datasource.SeataDataSourceProxy;
+import io.seata.rm.datasource.xa.ConnectionProxyXA;
+import io.seata.rm.datasource.xa.Holdable;
+import io.seata.rm.datasource.xa.Holder;
+
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.Resource;
-import io.seata.rm.datasource.SeataDataSourceProxy;
-import io.seata.rm.datasource.xa.Holdable;
-import io.seata.rm.datasource.xa.Holder;
 
 /**
  * Base class of those DataSources working as Seata Resource.
@@ -193,6 +193,10 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     @Override
     public T lookup(String key) {
         return keeper.get(key);
+    }
+
+    public Map<String, T> getKeeper() {
+        return keeper;
     }
 
 }
