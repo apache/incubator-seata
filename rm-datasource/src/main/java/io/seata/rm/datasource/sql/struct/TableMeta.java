@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.rm.datasource.ColumnUtils;
 
 /**
@@ -38,12 +39,12 @@ public class TableMeta {
     /**
      * key: column name
      */
+    private final Map<String, ColumnMeta> allColumns = new LowerCaseLinkHashMap<>();
 
-    private Map<String, ColumnMeta> allColumns = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     /**
      * key: index name
      */
-    private Map<String, IndexMeta> allIndexes = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<String, IndexMeta> allIndexes = new LowerCaseLinkHashMap<>();
 
     /**
      * Gets table name.
