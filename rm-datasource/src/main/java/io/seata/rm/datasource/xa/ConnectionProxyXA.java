@@ -17,6 +17,7 @@ package io.seata.rm.datasource.xa;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
@@ -155,7 +156,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 BranchRegisterResult result = DefaultResourceManager.get().branchRegisterAndGetResult(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
                 branchId = result.getBranchId();
-                timeout = Math.max(DefaultValues.DEFAULT_XA_CONNECTION_HOLD_TIMEOUT, result.getTimeout() - 10000);
+                setTimeout(Math.max(DefaultValues.DEFAULT_XA_CONNECTION_HOLD_TIMEOUT, result.getTimeout() - 10000));
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
@@ -195,7 +196,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             end(XAResource.TMSUCCESS);
             xaResource.prepare(xaBranchXid);
-            setPrepareTime(System.currentTimeMillis());
+            long now = System.currentTimeMillis();
+            if(now - branchRegisterTime > timeout){
+                xaRollback(xaBranchXid);
+                throw new XAException(" XA branch timeout error");
+            }
+            setPrepareTime(now);
         } catch (XAException xe) {
             try {
                 // Branch Report to TC: Failed
@@ -257,8 +263,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private void cleanXABranchContext() {
         xaActive = false;
-        branchRegisterTime = null;
-        prepareTime = null;
         if (!isHeld()) {
             xaBranchXid = null;
         }
@@ -273,6 +277,19 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         cleanXABranchContext();
         originalConnection.close();
+    }
+
+    protected synchronized void closeForce() throws SQLException {
+        Connection physicalConn = getWrappedConnection();
+        if (physicalConn instanceof PooledConnection) {
+            physicalConn = ((PooledConnection) physicalConn).getConnection();
+        }
+        // Force close the physical connection
+        physicalConn.close();
+        rollBacked = false;
+        cleanXABranchContext();
+        originalConnection.close();
+        releaseIfNecessary();
     }
 
     @Override
