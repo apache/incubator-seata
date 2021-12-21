@@ -311,6 +311,11 @@
             <artifactId>seata-compressor-deflater</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-zstd</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- saga -->
         <dependency>
