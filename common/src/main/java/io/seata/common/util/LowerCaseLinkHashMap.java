@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -174,5 +175,24 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
     @Override
     protected LowerCaseLinkHashMap<V> clone() throws CloneNotSupportedException {
         return new LowerCaseLinkHashMap<>(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LowerCaseLinkHashMap<?> that = (LowerCaseLinkHashMap<?>) o;
+        return Objects.equals(targetMap, that.targetMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(targetMap);
     }
 }
