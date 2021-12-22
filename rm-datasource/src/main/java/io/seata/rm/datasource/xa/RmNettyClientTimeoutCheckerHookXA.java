@@ -38,17 +38,10 @@ public class RmNettyClientTimeoutCheckerHookXA implements NettyClientTimeoutChec
                 ConnectionProxyXA connection = connectionEntry.getValue();
                 long now = System.currentTimeMillis();
                 synchronized (connection) {
-                    if ((connection.getPrepareTime() != null && now - connection.getPrepareTime() > DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT) ||
-                            (now - connection.getBranchRegisterTime() > connection.getTimeout())) {
+                    if (connection.getPrepareTime() != null &&
+                            now - connection.getPrepareTime() > DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT) {
                         try {
-                            connection.close();
-                            Connection physicalConn = connection.getWrappedConnection();
-                            if (physicalConn instanceof PooledConnection) {
-                                physicalConn = ((PooledConnection) physicalConn).getConnection();
-                            }
-                            // Force close the physical connection
-                            physicalConn.close();
-                            resource.release(connectionEntry.getKey(),connection);
+                            connection.closeForce();
                         } catch (SQLException e) {
                             LOGGER.info("Force close the xa physical connection fail", e);
                         }

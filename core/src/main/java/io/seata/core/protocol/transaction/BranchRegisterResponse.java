@@ -67,6 +67,9 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
         result.append("BranchRegisterResponse: branchId=");
         result.append(branchId);
         result.append(",");
+        result.append("timeout =");
+        result.append(getTimeout());
+        result.append(",");
         result.append("result code =");
         result.append(getResultCode());
         result.append(",");

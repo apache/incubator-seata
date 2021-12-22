@@ -168,9 +168,9 @@ public interface DefaultValues {
     int DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
 
     /**
-     * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
+     * the constant DEFAULT_XA_CONNECTION_HOLD_TIMEOUT
      */
-    int DEFAULT_XA_CONNECTION_HOLD_TIMEOUT = 50000;
+    int DEFAULT_XA_CONNECTION_HOLD_TIMEOUT = 60000;
 
     /**
      * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
