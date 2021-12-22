@@ -18,7 +18,7 @@ package io.seata.server.console.impl.file;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.vo.GlobalLockVO;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.result.PageResult;
 import io.seata.server.console.service.GlobalLockService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;

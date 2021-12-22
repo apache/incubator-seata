@@ -16,7 +16,7 @@
 package io.seata.server.console.service;
 
 import io.seata.core.console.vo.BranchSessionVO;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.result.PageResult;
 
 /**
  * Branch session service

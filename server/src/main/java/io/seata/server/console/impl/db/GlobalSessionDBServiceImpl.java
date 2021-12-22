@@ -18,7 +18,7 @@ package io.seata.server.console.impl.db;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.vo.GlobalSessionVO;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.result.PageResult;
 import io.seata.server.console.service.GlobalSessionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;

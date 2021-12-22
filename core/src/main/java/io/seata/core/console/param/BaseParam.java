@@ -15,13 +15,14 @@
  */
 package io.seata.core.console.param;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @description: The base param
  * @author: zhongxiang.wang
  */
-public class BaseParam {
+public class BaseParam implements Serializable {
 
     private static final long serialVersionUID = 1124252809011284L;
 

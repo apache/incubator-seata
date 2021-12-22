@@ -17,7 +17,7 @@ package io.seata.server.console.service;
 
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.vo.GlobalLockVO;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.result.PageResult;
 
 
 /**

@@ -18,7 +18,7 @@ package io.seata.server.console.controller;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.vo.GlobalLockVO;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.result.PageResult;
 import io.seata.server.console.service.GlobalLockService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
