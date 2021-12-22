@@ -13,33 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.compressor.zstd;
 
-import com.github.luben.zstd.Zstd;
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.compressor.Compressor;
 
 /**
- * the Zstd Util
+ * the Zstd Compressor
  *
  * @author chd
  */
-public class ZstdUtil {
+@LoadLevel(name = "ZSTD")
+public class ZstdCompressor implements Compressor {
 
-    public static byte[] compress(byte[] bytes) {
-        if (bytes == null) {
-            throw new NullPointerException("bytes is null");
-        }
-
-        return Zstd.compress(bytes);
+    @Override
+    public byte[] compress(byte[] bytes) {
+        return ZstdUtil.compress(bytes);
     }
 
-    public static byte[] decompress(byte[] bytes) {
-        if (bytes == null) {
-            throw new NullPointerException("bytes is null");
-        }
-
-        int size = (int) Zstd.decompressedSize(bytes);
-        byte[] decompressBytes = new byte[size];
-        Zstd.decompress(decompressBytes, bytes);
-        return decompressBytes;
+    @Override
+    public byte[] decompress(byte[] bytes) {
+        return ZstdUtil.decompress(bytes);
     }
+
 }
