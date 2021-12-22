@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.compressor.zstd;
 
 import org.junit.jupiter.api.Test;
 

@@ -11,6 +11,7 @@
 
     <artifactId>seata-spring-autoconfigure-core</artifactId>
     <name>seata-spring-autoconfigure-core ${project.version}</name>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -19,4 +20,19 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/META-INF/additional-spring-configuration-metadata.json</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
