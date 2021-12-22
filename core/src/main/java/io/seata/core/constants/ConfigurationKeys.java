@@ -48,14 +48,29 @@ public interface ConfigurationKeys {
     String STORE_MODE = STORE_PREFIX + MODE;
 
     /**
+     * The constant SERVER_STORE_MODE.
+     */
+    String SERVER_STORE_MODE = SEATA_PREFIX + STORE_PREFIX + MODE;
+
+    /**
      * The constant STORE_LOCK_MODE.
      */
     String STORE_LOCK_MODE = STORE_PREFIX + "lock." + MODE;
 
     /**
+     * The constant SERVER_STORE_LOCK_MODE.
+     */
+    String SERVER_STORE_LOCK_MODE = SEATA_PREFIX + STORE_PREFIX + "lock." + MODE;
+
+    /**
      * The constant STORE_SESSION_MODE.
      */
     String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
+
+    /**
+     * The constant SERVER_STORE_SESSION_MODE.
+     */
+    String SERVER_STORE_SESSION_MODE = SEATA_PREFIX + STORE_PREFIX + "session." + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
@@ -131,7 +146,6 @@ public interface ConfigurationKeys {
      * The constant CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT.
      */
     String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
-
 
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
@@ -235,6 +249,11 @@ public interface ConfigurationKeys {
     String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
 
     /**
+     * The constant DISTRIBUTED_LOCK_DB_TABLE.
+     */
+    String DISTRIBUTED_LOCK_DB_TABLE = STORE_DB_PREFIX + "distributedLockTable";
+
+    /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
     String STORE_DB_DATASOURCE_TYPE = STORE_DB_PREFIX + "datasource";
@@ -292,7 +311,17 @@ public interface ConfigurationKeys {
     /**
      * The constant SERVER_RPC_PORT.
      */
-    String SERVER_RPC_PORT = SERVER_PREFIX + "rpcPort";
+    String SERVER_SERVICE_PORT_CAMEL = SERVER_PREFIX + "servicePort";
+
+    /**
+     * The constant SERVER_SERVICE_PORT_CONFIG.
+     */
+    String SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "service-port";
+
+    /**
+     * The constant ENV_SEATA_PORT_KEY.
+     */
+    String ENV_SEATA_PORT_KEY = "SEATA_PORT";
 
     /**
      * The constant RECOVERY_PREFIX.
@@ -446,6 +475,16 @@ public interface ConfigurationKeys {
     String MAX_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "maxServerPoolSize";
 
     /**
+     * The constant MIN_BRANCH_RESULT_POOL_SIZE.
+     */
+    String MIN_BRANCH_RESULT_POOL_SIZE = TRANSPORT_PREFIX + "minBranchResultPoolSize";
+
+    /**
+     * The constant MAX_BRANCH_RESULT_POOL_SIZE.
+     */
+    String MAX_BRANCH_RESULT_POOL_SIZE = TRANSPORT_PREFIX + "maxBranchResultPoolSize";
+
+    /**
      * The constant MAX_TASK_QUEUE_SIZE.
      */
     String MAX_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "maxTaskQueueSize";
@@ -533,7 +572,18 @@ public interface ConfigurationKeys {
     /**
      * The constant ENABLE_CLIENT_BATCH_SEND_REQUEST
      */
+    @Deprecated
     String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableClientBatchSendRequest";
+
+    /**
+     * The constant ENABLE_TM_CLIENT_BATCH_SEND_REQUEST
+     */
+    String ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableTmClientBatchSendRequest";
+
+    /**
+     * The constant ENABLE_RM_CLIENT_BATCH_SEND_REQUEST
+     */
+    String ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableRmClientBatchSendRequest";
 
     /**
      * The constant DISABLE_GLOBAL_TRANSACTION.
@@ -687,4 +737,39 @@ public interface ConfigurationKeys {
      * The constant DATA_SOURCE_PROXY_MODE.
      */
     String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
+
+    /**
+     * The constant TCC_PREFIX
+     */
+    String TCC_PREFIX = "tcc.";
+
+    /**
+     * The constant TCC_FENCE_PREFIX
+     */
+    String TCC_FENCE_PREFIX = TCC_PREFIX + "fence.";
+
+    /**
+     * The constant TCC_FENCE_CLEAN_PERIOD
+     */
+    String TCC_FENCE_CLEAN_PERIOD = TCC_FENCE_PREFIX + "cleanPeriod";
+
+    /**
+     * The constant TCC_FENCE_LOG_TABLE_NAME
+     */
+    String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant rpcRmRequestTimeout
+     */
+    String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TC_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTcRequestTimeout";
 }

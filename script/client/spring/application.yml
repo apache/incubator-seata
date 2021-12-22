@@ -1,7 +1,7 @@
 seata:
   enabled: true
   application-id: applicationName
-  tx-service-group: my_test_tx_group
+  tx-service-group: default_tx_group
   enable-auto-data-source-proxy: true
   data-source-proxy-mode: AT
   use-jdk-proxy: false
@@ -45,7 +45,7 @@ seata:
       virtual-nodes: 10
   service:
     vgroup-mapping:
-      my_test_tx_group: default
+      default_tx_group: default
     grouplist:
       default: 127.0.0.1:8091
     enable-degrade: false
@@ -68,7 +68,11 @@ seata:
     heartbeat: true
     serialization: seata
     compressor: none
-    enable-client-batch-send-request: true
+    enable-tm-client-batch-send-request: false
+    enable-rm-client-batch-send-request: true
+    rpc-rm-request-timeout: 2000
+    rpc-tm-request-timeout: 10000
+    rpc-tc-request-timeout: 5000
   config:
     type: file
     consul:
@@ -139,10 +143,24 @@ seata:
     exception-rate: 100
   tcc:
     fence:
-      enabled: true
       log-table-name: tcc_fence_log
-      clean-mode: hour
-      clean-period: 1
+      clean-period: 1h
+  saga:
+    enabled: false
+    state-machine:
+      table-prefix: seata_
+      enable-async: false
+      async-thread-pool:
+        core-pool-size: 1
+        max-pool-size: 20
+        keep-alive-time: 60
+      trans-operation-timeout: 1800000
+      service-invoke-timeout: 300000
+      auto-register-resources: true
+      resources:
+        - classpath*:seata/saga/statelang/**/*.json
+      default-tenant-id: 000001
+      charset: UTF-8
   proxy:
     enabled: false
     proxy-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000

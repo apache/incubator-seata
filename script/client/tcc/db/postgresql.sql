@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS public.tcc_fence_log
 (
     xid              VARCHAR(128)  NOT NULL,
     branch_id        BIGINT        NOT NULL,
+    action_name      VARCHAR(64)   NOT NULL,
     status           SMALLINT      NOT NULL,
     gmt_create       TIMESTAMP(3)  NOT NULL,
     gmt_modified     TIMESTAMP(3)  NOT NULL,

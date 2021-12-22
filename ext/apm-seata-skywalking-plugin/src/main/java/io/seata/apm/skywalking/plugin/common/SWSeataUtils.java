@@ -17,6 +17,7 @@ package io.seata.apm.skywalking.plugin.common;
 
 import io.netty.channel.Channel;
 import io.seata.core.protocol.RpcMessage;
+import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 /**
  * @author zhaoyuguang
@@ -34,13 +35,11 @@ public class SWSeataUtils {
     public static String convertOperationName(RpcMessage rpcMessage) {
         String requestSimpleName = rpcMessage.getBody().getClass().getSimpleName();
         if (SeataPluginConfig.Plugin.SEATA.SERVER) {
-            return SWSeataConstants.SEATA_NAME + "/TC/" + requestSimpleName;
+            return ComponentsDefine.SEATA.getName() + "/TC/" + requestSimpleName;
         }
-        String operationName = SWSeataConstants.OPERATION_NAME_MAPPING.get(requestSimpleName);
-        if (operationName == null) {
-            operationName = SWSeataConstants.SEATA_NAME + "/" + requestSimpleName;
+        if (SWSeataConstants.isTransactionManagerOperationName(requestSimpleName)) {
+            return ComponentsDefine.SEATA.getName() + "/TM/" + requestSimpleName;
         }
-        return operationName;
-
+        return ComponentsDefine.SEATA.getName() + "/RM/" + requestSimpleName;
     }
 }

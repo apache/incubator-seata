@@ -46,7 +46,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
  * @author xingfudeshi@gmail.com
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-@AutoConfigureAfter({SeataCorePropertiesAutoConfiguration.class, SeataClientPropertiesAutoConfiguration.class})
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
@@ -86,6 +86,4 @@ public class SeataAutoConfiguration {
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(),
                 failureHandler, config, registers);
     }
-
-
 }

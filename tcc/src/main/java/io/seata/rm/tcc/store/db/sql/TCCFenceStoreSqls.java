@@ -33,8 +33,8 @@ public class TCCFenceStoreSqls {
      * The constant INSERT_LOCAL_TCC_LOG.
      */
     protected static final String INSERT_LOCAL_TCC_LOG = "insert into " + LOCAL_TCC_LOG_PLACEHOLD
-            + " (xid, branch_id, status, gmt_create, gmt_modified) "
-            + " values (?, ?, ?, ?, ?) ";
+            + " (xid, branch_id, action_name, status, gmt_create, gmt_modified) "
+            + " values (?, ?, ?, ?, ?, ?) ";
 
     /**
      * The constant QUERY_BY_BRANCH_ID_AND_XID.

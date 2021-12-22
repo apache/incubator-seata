@@ -41,7 +41,12 @@ public class ReflectionUtilTest {
     public void testGetFieldValue() throws NoSuchFieldException {
         Assertions.assertEquals("d",
                 ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT"));
+        Assertions.assertThrows(ClassCastException.class, () -> {
+            Integer var = ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT");
+        });
 
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ReflectionUtil.getFieldValue(null, "a1b2c3"));
         Assertions.assertThrows(NoSuchFieldException.class,
                 () -> ReflectionUtil.getFieldValue(new Object(), "A1B2C3"));
     }

@@ -63,7 +63,7 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     @Override
     public Map<String,List<Object>> getPkValues() throws SQLException {
         Map<String,List<Object>> pkValuesMap = null;
-        Boolean isContainsPk = containsPK();
+        boolean isContainsPk = containsPK();
         //when there is only one pk in the table
         if (isContainsPk) {
             pkValuesMap = getPkValuesByColumn();

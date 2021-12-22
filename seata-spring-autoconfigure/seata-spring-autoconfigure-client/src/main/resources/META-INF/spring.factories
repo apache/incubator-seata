@@ -1,5 +1,8 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  io.seata.spring.boot.autoconfigure.SeataClientPropertiesAutoConfiguration,\
-  io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration,\
-  io.seata.spring.boot.autoconfigure.SeataProxyAutoConfiguration
+io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration,\
+io.seata.spring.boot.autoconfigure.SeataProxyAutoConfiguration
+
+# Environment Post Processors
+org.springframework.boot.env.EnvironmentPostProcessor=\
+io.seata.spring.boot.autoconfigure.SeataClientEnvironmentPostProcessor

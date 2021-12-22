@@ -34,7 +34,7 @@ import org.springframework.core.annotation.AliasFor;
  * .annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object)// the scanner for TM, GlobalLock, and
  * TCC mode
  * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation,
- * GlobalTransactional) io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction
+ * AspectTransactional) io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction
  * (MethodInvocation,
  * GlobalTransactional)// TM: the interceptor of TM
  * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) io.seata.spring

@@ -50,9 +50,19 @@
                 <include>**/*.xml</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>../ext/apm-seata-skywalking-plugin/target/ext/skywalking-agent/</directory>
+            <outputDirectory>ext/apm-skywalking/</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>
+        <file>
+            <source>Dockerfile</source>
+            <destName>Dockerfile</destName>
+        </file>
+
         <file>
             <source>LICENSE-BIN</source>
             <destName>LICENSE</destName>

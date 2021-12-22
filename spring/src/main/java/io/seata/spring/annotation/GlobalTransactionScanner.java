@@ -73,6 +73,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 
 /**
  * The type Global transaction scanner.
@@ -146,6 +148,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private MethodInterceptor globalTransactionalInterceptor;
 
     //endregion
+
 
     /**
      * Instantiates a new Global transaction scanner.
@@ -257,6 +260,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
+        if (DEFAULT_TX_GROUP_OLD.equals(txServiceGroup)) {
+            LOGGER.warn("the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5, " +
+                    "please change your default configuration as soon as possible " +
+                    "and we don't recommend you to use default tx-service-group's value provided by seata",
+                    DEFAULT_TX_GROUP_OLD, DEFAULT_TX_GROUP);
+        }
         if (StringUtils.isNullOrEmpty(applicationId) || StringUtils.isNullOrEmpty(txServiceGroup)) {
             throw new IllegalArgumentException(String.format("applicationId: %s, txServiceGroup: %s", applicationId, txServiceGroup));
         }
@@ -293,12 +302,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * TM:
      * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
      * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, GlobalTransactional) // TM handler
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, AspectTransactional) // TM handler
      *
      * GlobalLock:
      * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock) // GlobalLock handler
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // GlobalLock handler
      *
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
@@ -351,10 +360,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
                 //check TCC proxy
                 else if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
+                    // init tcc fence clean task if enable useTccFence
+                    TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext);
                     //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
                     interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
                     ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                        (ConfigurationChangeListener)interceptor);
+                            (ConfigurationChangeListener)interceptor);
                 }
                 //check TM and GlobalLock
                 else {
@@ -369,8 +380,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     if (globalTransactionalInterceptor == null) {
                         globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
                         ConfigurationCache.addConfigListener(
-                            ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                            (ConfigurationChangeListener)globalTransactionalInterceptor);
+                                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                                (ConfigurationChangeListener)globalTransactionalInterceptor);
                     }
                     interceptor = globalTransactionalInterceptor;
                 }
@@ -398,7 +409,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private boolean doCheckers(Object bean, String beanName) {
         if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
-                || FactoryBean.class.isAssignableFrom(bean.getClass())) {
+            || FactoryBean.class.isAssignableFrom(bean.getClass())) {
             return false;
         }
 
