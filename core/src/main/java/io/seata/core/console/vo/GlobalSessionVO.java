@@ -163,4 +163,22 @@ public class GlobalSessionVO {
         globalSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
         return globalSessionVO;
     }
+
+    @Override
+    public String toString() {
+        return "GlobalSessionVO{" +
+                "xid='" + xid + '\'' +
+                ", transactionId=" + transactionId +
+                ", status=" + status +
+                ", applicationId='" + applicationId + '\'' +
+                ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
+                ", transactionName='" + transactionName + '\'' +
+                ", timeout=" + timeout +
+                ", beginTime=" + beginTime +
+                ", applicationData='" + applicationData + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModified=" + gmtModified +
+                ", branchSessionVOs=" + branchSessionVOs +
+                '}';
+    }
 }

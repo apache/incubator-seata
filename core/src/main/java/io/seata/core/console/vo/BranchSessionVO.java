@@ -153,4 +153,21 @@ public class BranchSessionVO {
         branchSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
         return branchSessionVO;
     }
+
+    @Override
+    public String toString() {
+        return "BranchSessionVO{" +
+                "xid='" + xid + '\'' +
+                ", transactionId=" + transactionId +
+                ", branchId=" + branchId +
+                ", resourceGroupId='" + resourceGroupId + '\'' +
+                ", resourceId='" + resourceId + '\'' +
+                ", branchType='" + branchType + '\'' +
+                ", status=" + status +
+                ", clientId='" + clientId + '\'' +
+                ", applicationData='" + applicationData + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModified=" + gmtModified +
+                '}';
+    }
 }

@@ -131,4 +131,19 @@ public class GlobalLockVO {
         globalLockVO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED));
         return globalLockVO;
     }
+
+    @Override
+    public String toString() {
+        return "GlobalLockVO{" +
+                "xid='" + xid + '\'' +
+                ", transactionId=" + transactionId +
+                ", branchId=" + branchId +
+                ", resourceId='" + resourceId + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", pk='" + pk + '\'' +
+                ", rowKey='" + rowKey + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModified=" + gmtModified +
+                '}';
+    }
 }
