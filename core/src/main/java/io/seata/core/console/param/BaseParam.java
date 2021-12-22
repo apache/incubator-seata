@@ -65,4 +65,14 @@ public class BaseParam implements Serializable {
     public void setTimeEnd(Date timeEnd) {
         this.timeEnd = timeEnd;
     }
+
+    @Override
+    public String toString() {
+        return "BaseParam{" +
+                "pageNum=" + pageNum +
+                ", pageSize=" + pageSize +
+                ", timeStart=" + timeStart +
+                ", timeEnd=" + timeEnd +
+                '}';
+    }
 }

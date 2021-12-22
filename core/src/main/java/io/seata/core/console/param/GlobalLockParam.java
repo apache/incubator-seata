@@ -73,4 +73,14 @@ public class GlobalLockParam extends BaseParam implements Serializable {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
+
+    @Override
+    public String toString() {
+        return "GlobalLockParam{" +
+                "xid='" + xid + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", transactionId='" + transactionId + '\'' +
+                ", branchId='" + branchId + '\'' +
+                '}';
+    }
 }

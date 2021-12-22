@@ -86,4 +86,15 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
     public void setWithBranch(boolean withBranch) {
         this.withBranch = withBranch;
     }
+
+    @Override
+    public String toString() {
+        return "GlobalSessionParam{" +
+                "xid='" + xid + '\'' +
+                ", applicationId='" + applicationId + '\'' +
+                ", status=" + status +
+                ", transactionName='" + transactionName + '\'' +
+                ", withBranch=" + withBranch +
+                '}';
+    }
 }
