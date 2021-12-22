@@ -97,28 +97,6 @@ public final class ReflectionUtil {
         return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
     }
 
-    /**
-     * class name set to class set
-     *
-     * @param classNames the class names
-     * @return the class set
-     */
-    public static Set<Class<?>> classNamesToClassSet(Collection<String> classNames) {
-        Set<Class<?>> classSet = new HashSet<>();
-        if (classNames != null) {
-            Class<?> clazz;
-            for (String className : classNames) {
-                try {
-                    clazz = getClassByName(className);
-                    classSet.add(clazz);
-                } catch (ClassNotFoundException ignore) {
-                    // do nothing
-                }
-            }
-        }
-        return classSet;
-    }
-
     //endregion
 
 
