@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
@@ -72,6 +74,7 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
 
 import static io.seata.common.Constants.HANDLE_ALL_SESSION;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
@@ -130,17 +133,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
-    private final ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("RetryRollbacking", 1));
+    private final ThreadPoolExecutor retryRollbacking = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue<>(), new NamedThreadFactory("RetryRollbacking", 1));
 
-    private final ScheduledThreadPoolExecutor retryCommitting = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("RetryCommitting", 1));
+    private final ThreadPoolExecutor retryCommitting = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue<>(), new NamedThreadFactory("RetryCommitting", 1));
 
-    private final ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("AsyncCommitting", 1));
+    private final ThreadPoolExecutor asyncCommitting = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue<>(), new NamedThreadFactory("AsyncCommitting", 1));
 
-    private final ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("TxTimeoutCheck", 1));
+    private final ThreadPoolExecutor timeoutCheck = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue<>(), new NamedThreadFactory("TxTimeoutCheck", 1));
 
     private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("UndoLogDelete", 1));
