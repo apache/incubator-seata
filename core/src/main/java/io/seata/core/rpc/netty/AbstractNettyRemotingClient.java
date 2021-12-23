@@ -495,14 +495,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         }
     }
 
-    private void dobeforeCheckerHooks(){
-        for(NettyClientTimeoutCheckerHook hook:nettyClientTimeoutCheckerHooks){
+    private void dobeforeCheckerHooks() {
+        for (NettyClientTimeoutCheckerHook hook : nettyClientTimeoutCheckerHooks) {
             hook.doBeforeChecker(getTransactionServiceGroup());
         }
     }
 
-    private void doAfterCheckerHooks(){
-        for(NettyClientTimeoutCheckerHook hook:nettyClientTimeoutCheckerHooks){
+    private void doAfterCheckerHooks() {
+        for (NettyClientTimeoutCheckerHook hook : nettyClientTimeoutCheckerHooks) {
             hook.doAfterChecker(getTransactionServiceGroup());
         }
     }
