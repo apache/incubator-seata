@@ -97,11 +97,18 @@ public class ServerApplicationListener implements GenericApplicationListener {
         }
 
         // server.port=7091
-        String serverPort = environment.getProperty("server.port");
-        if (StringUtils.isBlank(serverPort)) {
-            serverPort = "8080";
+        String serverPortStr = environment.getProperty("server.port", "8080");
+        int serverPort;
+        try {
+            serverPort = Integer.parseInt(serverPortStr);
+        } catch (Exception e) {
+            serverPort = 8080;
         }
-        String servicePort = String.valueOf(Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT);
+        // Under Linux OS, if the port is less than 1024 and there is no root permission, it will throw 'java.net.SocketException'
+        if (serverPort < 24) {
+            serverPort = 8080;
+        }
+        String servicePort = String.valueOf(serverPort + SERVICE_OFFSET_SPRING_BOOT);
         setTargetPort(environment, servicePort, true);
     }
 
