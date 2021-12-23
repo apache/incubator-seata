@@ -139,7 +139,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
         String serverAddress = loadBalance(getTransactionServiceGroup(), msg);
-        int timeoutMillis = NettyClientConfig.getRpcRequestTimeout();
+        long timeoutMillis = this.getRpcRequestTimeout();
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
 
         // send batch message
@@ -195,7 +195,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             return null;
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return super.sendSync(channel, rpcMessage, NettyClientConfig.getRpcRequestTimeout());
+        return super.sendSync(channel, rpcMessage, this.getRpcRequestTimeout());
     }
 
     @Override
@@ -322,6 +322,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * @return true:enable, false:disable
      */
     protected abstract boolean isEnableClientBatchSendRequest();
+
+    /**
+     * get Rpc Request Timeout
+     *
+     * @return the Rpc Request Timeout
+     */
+    protected abstract long getRpcRequestTimeout();
 
     /**
      * The type Merged send runnable.
