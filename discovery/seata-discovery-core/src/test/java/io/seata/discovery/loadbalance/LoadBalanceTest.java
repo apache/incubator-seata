@@ -110,11 +110,11 @@ public class LoadBalanceTest {
         RpcStatus.beginCount(socketAddress.toString());
         Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, loadBalance);
         for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
+            long count = counter.get(address).get();
             if (address == socketAddress) {
-                Assertions.assertEquals(count, 0);
+                Assertions.assertEquals(count, 0L);
             } else {
-                Assertions.assertTrue(count > 0);
+                Assertions.assertTrue(count > 0L);
             }
         }
     }
