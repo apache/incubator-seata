@@ -9,15 +9,11 @@ import io.seata.rm.DefaultResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.PooledConnection;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
 /**
  * @author longchenming
- * @date 2021/12/20 11:01
- * @desc
  */
 public class RmNettyClientTimeoutCheckerHookXA implements NettyClientTimeoutCheckerHook {
 

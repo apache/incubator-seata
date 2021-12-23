@@ -1,9 +1,9 @@
 package io.seata.common.rpc;
 
 /**
+ * Result of branch register.
+ *
  * @author longchenming
- * @date 2021/12/20 16:10
- * @desc
  */
 public class BranchRegisterResult {
 
