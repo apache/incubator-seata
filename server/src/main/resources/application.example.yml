@@ -101,10 +101,7 @@ seata:
     enableCheckAuth: true
     retryDeadThreshold: 130000
     recovery:
-      committing-retry-period: 1000
-      asyn-committing-retry-period: 1000
-      rollbacking-retry-period: 1000
-      timeout-retry-period: 1000
+      handle-all-session-period: 1000
     undo:
       log-save-days: 7
       log-delete-period: 86400000

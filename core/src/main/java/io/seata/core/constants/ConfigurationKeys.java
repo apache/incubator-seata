@@ -327,25 +327,11 @@ public interface ConfigurationKeys {
      * The constant RECOVERY_PREFIX.
      */
     String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
-    /**
-     * The constant COMMITING_RETRY_PERIOD.
-     */
-    String COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "committingRetryPeriod";
 
     /**
-     * The constant ASYN_COMMITING_RETRY_PERIOD.
+     * The constant HANDLE_ALL_SESSION_PERIOD.
      */
-    String ASYN_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asynCommittingRetryPeriod";
-
-    /**
-     * The constant ROLLBACKING_RETRY_PERIOD.
-     */
-    String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
-
-    /**
-     * The constant TIMEOUT_RETRY_PERIOD.
-     */
-    String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
+    String HANDLE_ALL_SESSION_PERIOD = RECOVERY_PREFIX + "handleAllSessionPeriod";
 
     /**
      * The constant CLIENT_UNDO_PREFIX.

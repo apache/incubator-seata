@@ -89,27 +89,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
 
     /**
-     * The constant COMMITTING_RETRY_PERIOD.
+     * The constant HANDLE_ALL_SESSION_PERIOD.
      */
-    protected static final long COMMITTING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.COMMITING_RETRY_PERIOD,
+    protected static final long HANDLE_ALL_SESSION_PERIOD = CONFIG.getLong(ConfigurationKeys.HANDLE_ALL_SESSION_PERIOD,
             1000L);
-
-    /**
-     * The constant ASYNC_COMMITTING_RETRY_PERIOD.
-     */
-    protected static final long ASYNC_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
-            ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD, 1000L);
-
-    /**
-     * The constant ROLLBACKING_RETRY_PERIOD.
-     */
-    protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
-            1000L);
-
-    /**
-     * The constant TIMEOUT_RETRY_PERIOD.
-     */
-    protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.TIMEOUT_RETRY_PERIOD, 1000L);
 
     /**
      * The Transaction undo log delete period.
@@ -510,7 +493,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     public void init() {
         handleAllSession.scheduleAtFixedRate(
             () -> SessionHolder.distributedLockAndExecute(HANDLE_ALL_SESSION, this::handleAllSession), 0,
-            ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+                HANDLE_ALL_SESSION_PERIOD, TimeUnit.MILLISECONDS);
         undoLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
                 UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
