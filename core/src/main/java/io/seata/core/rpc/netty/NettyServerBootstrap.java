@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -133,6 +134,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         if (port <= 0) {
             LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT);
             port = SERVICE_DEFAULT_PORT;
+        } else {
+            LOGGER.info("listen port is: {}", port);
         }
         listenPort = port;
         return port;
@@ -171,10 +174,12 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             LOGGER.info("Server started, service listen port: {}", getListenPort());
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
+        } catch (SocketException se) {
+            LOGGER.error("Server start failed, the listen port: {}", getListenPort());
+            throw new RuntimeException("Server start failed", se);
         } catch (Exception exx) {
-            throw new RuntimeException(exx);
+            throw new RuntimeException("Server start failed", exx);
         }
-
     }
 
     @Override
