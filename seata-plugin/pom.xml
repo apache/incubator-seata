@@ -14,16 +14,18 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-build</artifactId>
+        <version>${revision}</version>
+        <relativePath>../build/pom.xml</relativePath>
+    </parent>
 
-    <groupId>io.seata</groupId>
     <artifactId>seata-plugin</artifactId>
-    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -31,27 +33,18 @@
     </modules>
 
     <properties>
-        <!-- seata plugin version -->
-        <revision>1.5.0-SNAPSHOT</revision>
-
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
-        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-
-        <ojdbc.version>19.3.0.0</ojdbc.version>
         <seata.version>1.5.0-SNAPSHOT</seata.version>
 
+        <ojdbc.version>19.3.0.0</ojdbc.version>
+
+        <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
     </properties>
 
-    <!--test-->
+    <!-- test -->
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -90,21 +83,21 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>seata-rm-datasource</artifactId>
+                <version>${seata.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.oracle.ojdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${ojdbc.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-rm-datasource</artifactId>
-                <version>${seata.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
-
 
     <build>
         <plugins>
@@ -148,5 +141,4 @@
             </releases>
         </repository>
     </repositories>
-
 </project>

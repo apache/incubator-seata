@@ -8,12 +8,25 @@ on:
 
 jobs:
   build:
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [8, 11]
-        os: [ ubuntu-18.04 ]
+        java: [ 8, 11, 17 ]
+        springboot: [
+            2.6.2,
+            2.5.8,
+            2.4.13,
+            2.3.12.RELEASE,
+            2.2.13.RELEASE,
+            2.1.18.RELEASE,
+            2.0.9.RELEASE,
+            1.5.22.RELEASE,
+            1.4.7.RELEASE
+            #1.3.8.RELEASE,
+            #1.2.8.RELEASE,
+            #1.1.12.RELEASE,
+            #1.0.2.RELEASE
+        ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -25,9 +38,11 @@ jobs:
       - name: Set up ENV
         # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         run: if [ "${{ matrix.java }}" == "8" ]; then
-                echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
+               echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
              elif [ "${{ matrix.java }}" == "11" ]; then
-                echo "IMAGE_NAME=openjdk:11-jre-stretch" >> $GITHUB_ENV;
+               echo "IMAGE_NAME=openjdk:11-jre-stretch" >> $GITHUB_ENV;
+             elif [ "${{ matrix.java }}" == "17" ]; then
+               echo "IMAGE_NAME=openjdk:17.0.1-slim" >> $GITHUB_ENV;
              fi
       - name: Build with Maven
         env:
@@ -35,9 +50,9 @@ jobs:
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: if [ "${{github.event_name}}" == "push" ] && [ "${{github.ref}}" == "refs/heads/develop" ]; then
-            ./mvnw clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-            else
-             ./mvnw clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+               ./mvnw clean install -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+             else
+               ./mvnw clean install -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              fi
       - name: Codecov
         uses: codecov/codecov-action@v1.5.0

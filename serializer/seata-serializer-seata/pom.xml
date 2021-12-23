@@ -17,22 +17,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.seata</groupId>
         <artifactId>seata-serializer</artifactId>
         <version>${revision}</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-serializer-seata</artifactId>
-    <packaging>jar</packaging>
-    <name>seata-serializer-seata ${project.version}</name>
-    <dependencies>
 
+    <artifactId>seata-serializer-seata</artifactId>
+
+    <name>seata-serializer-seata ${project.version}</name>
+
+    <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
     </dependencies>
 </project>

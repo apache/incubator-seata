@@ -14,34 +14,35 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
+
     <artifactId>seata-saga</artifactId>
+    <packaging>pom</packaging>
+
     <name>seata-saga ${project.version}</name>
 
     <modules>
-        <module>seata-saga-processctrl</module>
-        <module>seata-saga-statelang</module>
         <module>seata-saga-engine</module>
-        <module>seata-saga-rm</module>
-        <module>seata-saga-tm</module>
         <module>seata-saga-engine-store</module>
+        <module>seata-saga-processctrl</module>
+        <module>seata-saga-rm</module>
+        <module>seata-saga-statelang</module>
+        <module>seata-saga-tm</module>
     </modules>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-common</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

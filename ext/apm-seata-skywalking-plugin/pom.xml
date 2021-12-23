@@ -17,15 +17,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
+
     <artifactId>apm-seata-skywalking-plugin</artifactId>
-    <packaging>jar</packaging>
+
     <name>apm-seata-skywalking-plugin ${project.version}</name>
 
     <properties>
@@ -35,7 +36,6 @@
         <agent-config.dir>${agent.dir}/config</agent-config.dir>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>org.apache.skywalking</groupId>
@@ -44,15 +44,15 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.seata</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>seata-all</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.seata</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>seata-server</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -68,7 +68,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>${maven-shade-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -94,6 +94,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy</id>
@@ -154,7 +155,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
+                <version>${maven-antrun-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

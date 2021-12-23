@@ -17,17 +17,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>seata-parent</artifactId>
         <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-grpc</artifactId>
-    <packaging>jar</packaging>
-    <name>seata-grpc ${project.version}</name>
 
+    <artifactId>seata-grpc</artifactId>
+
+    <name>seata-grpc ${project.version}</name>
 
     <dependencies>
         <dependency>
@@ -52,8 +52,8 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-testing</artifactId>
             <scope>test</scope>
-            <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
@@ -65,6 +65,7 @@
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${protobuf-maven-plugin.version}</version>
                 <configuration>
                     <protocArtifact>com.google.protobuf:protoc:3.3.0:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
@@ -81,5 +82,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
