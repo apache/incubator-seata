@@ -31,6 +31,9 @@ import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_STORE_SESSION_MODE;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_STORE_LOCK_MODE;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_STORE_MODE;
 
 /**
  * @author slievrly
@@ -51,8 +54,14 @@ public class ServerApplicationListener implements GenericApplicationListener {
 
         ApplicationEnvironmentPreparedEvent environmentPreparedEvent = (ApplicationEnvironmentPreparedEvent)event;
         ConfigurableEnvironment environment = environmentPreparedEvent.getEnvironment();
-        String[] args = environmentPreparedEvent.getArgs();
 
+        // Load by priority
+        System.setProperty("sessionMode",
+                environment.getProperty(SERVER_STORE_SESSION_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
+        System.setProperty("lockMode",
+                environment.getProperty(SERVER_STORE_LOCK_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
+
+        String[] args = environmentPreparedEvent.getArgs();
 
         // port: -h > -D > env > yml > default
 
