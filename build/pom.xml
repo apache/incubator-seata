@@ -462,6 +462,7 @@
                                 <exclude>**/antlr/mysql/parser/*.*</exclude>
                                 <exclude>**/antlr/mysql/antlr/*.*</exclude>
                                 <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
+                                <exclude>**/pom.properties</exclude>
                             </excludes>
                             <strictCheck>true</strictCheck>
                             <mapping>
