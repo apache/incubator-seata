@@ -41,6 +41,18 @@ public interface ResourceManagerOutbound {
         TransactionException;
 
 
+    /**
+     * Branch register and get result.
+     *
+     * @param branchType the branch type
+     * @param resourceId the resource id
+     * @param clientId   the client id
+     * @param xid        the xid
+     * @param applicationData the context
+     * @param lockKeys   the lock keys
+     * @return
+     * @throws TransactionException the transaction exception
+     */
     BranchRegisterResult branchRegisterAndGetResult(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
             TransactionException;
 

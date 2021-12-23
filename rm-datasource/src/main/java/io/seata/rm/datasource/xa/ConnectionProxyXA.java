@@ -156,7 +156,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 BranchRegisterResult result = DefaultResourceManager.get().branchRegisterAndGetResult(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
                 branchId = result.getBranchId();
-                setTimeout(Math.max(DefaultValues.DEFAULT_XA_CONNECTION_HOLD_TIMEOUT, result.getTimeout() - 10000));
+                setTimeout(Math.max(DefaultValues.DEFAULT_XA_CONNECTION_HOLD_TIMEOUT, result.getTimeout()));
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);

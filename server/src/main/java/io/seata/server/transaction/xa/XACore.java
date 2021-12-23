@@ -43,8 +43,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class XACore extends AbstractCore {
 
-    private static final int XAER_NOTA_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getInt(
-            ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT, DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT);
+    private static final int XAER_NOTA_RETRY_TIMEOUT = DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT;
 
     private static final Cache<Long, Long> BRANCH_FINISHED_BEGIN_TIME_CACHE =
             CacheBuilder.newBuilder().maximumSize(2048).expireAfterAccess(1, TimeUnit.MINUTES).build();
