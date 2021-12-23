@@ -197,7 +197,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             end(XAResource.TMSUCCESS);
             xaResource.prepare(xaBranchXid);
             long now = System.currentTimeMillis();
-            if(now - branchRegisterTime > timeout){
+            if (now - branchRegisterTime > timeout) {
                 xaRollback(xaBranchXid);
                 throw new XAException(" XA branch timeout error");
             }
