@@ -19,11 +19,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
@@ -43,6 +43,7 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import static io.seata.core.model.GlobalStatus.AsyncCommitting;
 import static io.seata.core.model.GlobalStatus.CommitRetrying;
@@ -87,7 +88,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private boolean lazyLoadBranch;
+    private volatile boolean lazyLoadBranch;
 
     private volatile boolean active = true;
 
@@ -124,6 +125,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean canBeCommittedAsync() {
+        List<BranchSession> branchSessions = getBranchSessions();
         for (BranchSession branchSession : branchSessions) {
             if (!branchSession.canBeCommittedAsync()) {
                 return false;
@@ -138,6 +140,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean hasATBranch() {
+        List<BranchSession> branchSessions = getBranchSessions();
         for (BranchSession branchSession : branchSessions) {
             if (branchSession.getBranchType() == BranchType.AT) {
                 return true;
@@ -152,6 +155,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return is saga
      */
     public boolean isSaga() {
+        List<BranchSession> branchSessions = getBranchSessions();
         if (branchSessions.size() > 0) {
             return BranchType.SAGA == branchSessions.get(0).getBranchType();
         } else {
@@ -296,6 +300,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public BranchSession getBranch(long branchId) {
         synchronized (branchSessions) {
+            List<BranchSession> branchSessions = getBranchSessions();
             for (BranchSession branchSession : branchSessions) {
                 if (branchSession.getBranchId() == branchId) {
                     return branchSession;
@@ -312,7 +317,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the sorted branches
      */
     public ArrayList<BranchSession> getSortedBranches() {
-        return new ArrayList<>(branchSessions);
+        return new ArrayList<>(getBranchSessions());
     }
 
     /**
@@ -321,7 +326,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the reverse sorted branches
      */
     public ArrayList<BranchSession> getReverseSortedBranches() {
-        ArrayList<BranchSession> reversed = new ArrayList<>(branchSessions);
+        ArrayList<BranchSession> reversed = new ArrayList<>(getBranchSessions());
         Collections.reverse(reversed);
         return reversed;
     }
@@ -683,9 +688,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public ArrayList<BranchSession> getBranchSessions() {
-        if (lazyLoadBranch) {
-            loadBranch();
-        }
+        loadBranch();
         return branchSessions;
     }
 
