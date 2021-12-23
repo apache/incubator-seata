@@ -35,10 +35,11 @@ public class BranchRegisterResponseTest {
     public void toStringTest() {
         BranchRegisterResponse branchRegisterResponse = new BranchRegisterResponse();
         branchRegisterResponse.setBranchId(123457L);
+        branchRegisterResponse.setTimeout(60000);
         branchRegisterResponse.setResultCode(ResultCode.Success);
         branchRegisterResponse.setMsg("");
         Assertions.assertEquals(
-            "BranchRegisterResponse: branchId=123457,result code =Success,getMsg =",
+            "BranchRegisterResponse: branchId=123457,timeout =60000,result code =Success,getMsg =",
             branchRegisterResponse.toString());
 
     }
