@@ -18,8 +18,6 @@ package io.seata.server.transaction.xa;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.seata.common.DefaultValues;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
