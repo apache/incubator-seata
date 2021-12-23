@@ -75,21 +75,21 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        return dobranchRegister(globalSession,branchType,resourceId,clientId,xid,applicationData,lockKeys);
+        return dobranchRegister(globalSession, branchType, resourceId, clientId, xid, applicationData, lockKeys);
     }
 
     @Override
     public BranchRegisterResult branchRegisterAndGetResult(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
-            TransactionException{
+            TransactionException {
         BranchRegisterResult result = new BranchRegisterResult();
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
         result.setTimeout(globalSession.getTimeout());
-        result.setBranchId(dobranchRegister(globalSession,branchType,resourceId,clientId,xid,applicationData,lockKeys));
+        result.setBranchId(dobranchRegister(globalSession, branchType, resourceId, clientId, xid, applicationData, lockKeys));
         return result;
     }
 
-    private Long dobranchRegister(GlobalSession globalSession,BranchType branchType, String resourceId, String clientId, String xid,
-                                       String applicationData, String lockKeys) throws TransactionException {
+    private Long dobranchRegister(GlobalSession globalSession, BranchType branchType, String resourceId, String clientId, String xid,
+                                  String applicationData, String lockKeys) throws TransactionException {
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());

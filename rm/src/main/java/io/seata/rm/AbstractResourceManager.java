@@ -63,7 +63,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     @Override
     public BranchRegisterResult branchRegisterAndGetResult(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
-            TransactionException{
+            TransactionException {
         BranchRegisterResponse response = doBranchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
         BranchRegisterResult result = new BranchRegisterResult();
         result.setBranchId(response.getBranchId());
