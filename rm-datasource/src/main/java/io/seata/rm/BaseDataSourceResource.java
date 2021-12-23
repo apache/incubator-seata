@@ -19,14 +19,11 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.datasource.SeataDataSourceProxy;
-import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.Holdable;
 import io.seata.rm.datasource.xa.Holder;
 
 import javax.sql.DataSource;
-import javax.sql.PooledConnection;
 import java.io.PrintWriter;
-import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
