@@ -142,13 +142,13 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     @Override
-    public void register(InetSocketAddress address) {
+    public void register(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
         doRegister(address);
         RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, this::doRegister);
     }
 
-    private void doRegister(InetSocketAddress address) {
+    private void doRegister(InetSocketAddress address) throws Exception {
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource(); Pipeline pipelined = jedis.pipelined()) {
             pipelined.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
@@ -158,7 +158,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     @Override
-    public void unregister(InetSocketAddress address) {
+    public void unregister(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource(); Pipeline pipelined = jedis.pipelined()) {

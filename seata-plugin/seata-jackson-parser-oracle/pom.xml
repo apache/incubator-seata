@@ -32,10 +32,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-rm-datasource</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.oracle.ojdbc</groupId>
             <artifactId>ojdbc8</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
