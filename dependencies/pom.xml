@@ -91,9 +91,9 @@
 
         <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
+        <junit-platform.version>1.4.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
-        <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
     </properties>
 
     <dependencyManagement>
@@ -508,24 +508,16 @@
 
             <!-- test -->
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
                 <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.platform</groupId>
                 <artifactId>junit-platform-launcher</artifactId>
-                <version>${junit-platform-launcher.version}</version>
+                <version>${junit-platform.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
