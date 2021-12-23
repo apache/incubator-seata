@@ -65,7 +65,7 @@ public class PrometheusExporter extends Collector implements Collector.Describab
             measurements.forEach(measurement -> samples.add(convertMeasurementToSample(measurement)));
 
             if (!samples.isEmpty()) {
-                familySamples.add(new MetricFamilySamples("seata", Type.UNTYPED, "seata", samples));
+                familySamples.add(new MetricFamilySamples("seata", Collector.Type.UNTYPED, "seata", samples));
             }
         }
         return familySamples;
