@@ -73,8 +73,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-
-import static io.seata.common.Constants.RETRY_ROLLBACKING;
+import static io.seata.common.Constants.HANDLE_ALL_SESSION;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
 
 /**
@@ -146,8 +145,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("UndoLogDelete", 1));
 
-    private final ScheduledThreadPoolExecutor findAllSession = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("FindAllSession", 1));
+    private final ScheduledThreadPoolExecutor handleAllSession = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("HandleAllSession", 1));
 
     private final List<GlobalStatus> rollbackingStatus = Arrays.asList(GlobalStatus.TimeoutRollbacking,
             GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking);
@@ -506,8 +505,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Init.
      */
     public void init() {
-        findAllSession.scheduleAtFixedRate(()-> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleAllSession),
-                0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        handleAllSession.scheduleAtFixedRate(
+            () -> SessionHolder.distributedLockAndExecute(HANDLE_ALL_SESSION, this::handleAllSession), 0,
+            ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
         undoLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
                 UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
