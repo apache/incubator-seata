@@ -15,8 +15,6 @@
  */
 package io.seata.config;
 
-import io.seata.discovery.loadbalance.ConsistentHashLoadBalance;
-import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -30,16 +28,6 @@ class ConfigurationFactoryTest {
         Configuration configuration = ConfigurationFactory.getInstance();
         // check singleton
         Assertions.assertEquals(configuration.getClass().getName(), ConfigurationFactory.getInstance().getClass().getName());
-    }
-
-
-    @Test
-    void getLoadBalance() {
-        Configuration configuration = ConfigurationFactory.getInstance();
-        String loadBalanceType = configuration.getConfig(LoadBalanceFactory.LOAD_BALANCE_TYPE);
-        int visualNode = configuration.getInt(ConsistentHashLoadBalance.LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES);
-        Assertions.assertEquals("RandomLoadBalance", loadBalanceType);
-        Assertions.assertEquals(10,visualNode);
     }
 
 }

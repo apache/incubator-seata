@@ -16,7 +16,10 @@
 package io.seata.discovery.loadbalance;
 
 import io.seata.common.rpc.RpcStatus;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -34,6 +37,15 @@ import java.util.stream.Stream;
 public class LoadBalanceTest {
 
     private static final String XID = "XID";
+
+    @Test
+    void getLoadBalance() {
+        Configuration configuration = ConfigurationFactory.getInstance();
+        String loadBalanceType = configuration.getConfig(LoadBalanceFactory.LOAD_BALANCE_TYPE);
+        int visualNode = configuration.getInt(ConsistentHashLoadBalance.LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES);
+        Assertions.assertEquals("RandomLoadBalance", loadBalanceType);
+        Assertions.assertEquals(10,visualNode);
+    }
 
     /**
      * Test random load balance select.
