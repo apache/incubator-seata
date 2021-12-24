@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -58,12 +60,14 @@ public class ZookeeperRegisterServiceImplTest {
     }
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17)
     public void buildZkTest() {
         ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
         Assertions.assertTrue(client.exists("/zookeeper"));
     }
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17)
     public void testAll() throws Exception {
         service.register(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
 
