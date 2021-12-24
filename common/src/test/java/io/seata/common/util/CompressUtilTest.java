@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 
@@ -35,7 +36,7 @@ public class CompressUtilTest {
 
 
     @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11})
+    @DisabledOnJre(JRE.JAVA_17)
     public void testCompress() throws IOException {
         byte[] compressedBytes = CompressUtil.compress(originBytes);
         Assertions.assertEquals(StringUtils.toString(compressedBytes1), StringUtils.toString(compressedBytes));
@@ -53,10 +54,8 @@ public class CompressUtilTest {
 
     @Test
     public void testUncompress() throws IOException {
-        Assertions.assertEquals(StringUtils.toString(originBytes),
-                StringUtils.toString(CompressUtil.uncompress(compressedBytes1)));
-        Assertions.assertEquals(StringUtils.toString(originBytes),
-                StringUtils.toString(CompressUtil.uncompress(compressedBytes2)));
+        Assertions.assertEquals(StringUtils.toString(originBytes), StringUtils.toString(CompressUtil.uncompress(compressedBytes1)));
+        Assertions.assertEquals(StringUtils.toString(originBytes), StringUtils.toString(CompressUtil.uncompress(compressedBytes2)));
     }
 
     @Test
