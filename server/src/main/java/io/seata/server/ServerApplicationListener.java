@@ -55,6 +55,13 @@ public class ServerApplicationListener implements GenericApplicationListener {
 
         ApplicationEnvironmentPreparedEvent environmentPreparedEvent = (ApplicationEnvironmentPreparedEvent)event;
         ConfigurableEnvironment environment = environmentPreparedEvent.getEnvironment();
+
+        // Load by priority
+        System.setProperty("sessionMode",
+                environment.getProperty(SERVER_STORE_SESSION_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
+        System.setProperty("lockMode",
+                environment.getProperty(SERVER_STORE_LOCK_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
+
         String[] args = environmentPreparedEvent.getArgs();
 
         // port: -h > -D > env > yml > default
@@ -97,12 +104,6 @@ public class ServerApplicationListener implements GenericApplicationListener {
         }
         String servicePort = String.valueOf(Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT);
         setTargetPort(environment, servicePort, true);
-
-        // Load by priority
-        System.setProperty("sessionMode",
-                environment.getProperty(SERVER_STORE_SESSION_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
-        System.setProperty("lockMode",
-                environment.getProperty(SERVER_STORE_LOCK_MODE, environmentPreparedEvent.getEnvironment().getProperty(SERVER_STORE_MODE, "file")));
     }
 
     private void setTargetPort(ConfigurableEnvironment environment, String port, boolean needAddPropertySource) {
