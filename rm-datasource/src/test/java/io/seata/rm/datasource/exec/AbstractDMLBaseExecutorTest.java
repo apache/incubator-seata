@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
@@ -45,6 +47,7 @@ import java.util.Arrays;
  *
  * @author ggndnn
  */
+@DisabledOnJre(JRE.JAVA_17)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AbstractDMLBaseExecutorTest {
     private ConnectionProxy connectionProxy;
