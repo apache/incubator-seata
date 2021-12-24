@@ -24,7 +24,7 @@ import org.junit.jupiter.api.condition.JRE;
 /**
  * @author funkye
  */
-@DisabledOnJre(JRE.JAVA_17)
+@DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
 public class FstUndoLogParserTest extends BaseUndoLogParserTest {
 
     FstUndoLogParser parser = (FstUndoLogParser)EnhancedServiceLoader.load(UndoLogParser.class, FstUndoLogParser.NAME);

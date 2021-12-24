@@ -41,7 +41,7 @@ import java.util.Arrays;
  *
  * @author ggndnn
  */
-@DisabledOnJre(JRE.JAVA_17)
+@DisabledOnJre(JRE.JAVA_17) // `cglib:cglib:3.1~3.3.0` does not supported java17
 public class AbstractDMLBaseExecutorTest {
     private ConnectionProxy connectionProxy;
 

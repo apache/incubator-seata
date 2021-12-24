@@ -60,7 +60,7 @@ class UndoLogParserProviderTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17)
+    @DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
     void testLoadFstUndoLogParser(){
         UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fst");
         Assertions.assertNotNull(parser);

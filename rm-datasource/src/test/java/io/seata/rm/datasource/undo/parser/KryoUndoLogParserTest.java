@@ -24,7 +24,7 @@ import org.junit.jupiter.api.condition.JRE;
 /**
  * @author jsbxyyx
  */
-@DisabledOnJre(JRE.JAVA_17)
+@DisabledOnJre(JRE.JAVA_17) // `kryo` does not supported java17
 public class KryoUndoLogParserTest extends BaseUndoLogParserTest {
 
     KryoUndoLogParser parser = (KryoUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, KryoUndoLogParser.NAME);
