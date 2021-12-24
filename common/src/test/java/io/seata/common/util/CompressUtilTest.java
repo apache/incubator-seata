@@ -24,11 +24,18 @@ public class CompressUtilTest {
 
     @Test
     public void testCompress() throws IOException {
-        byte[] bytes = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, 0,
-                99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
+        byte[] compressBytes = CompressUtil.compress(new byte[]{1, 2, 3});
 
-        Assertions.assertArrayEquals(bytes,
-                CompressUtil.compress(new byte[]{1, 2, 3}));
+        try {
+            byte[] bytes = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0,  0,
+                    99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
+            Assertions.assertEquals(StringUtils.toString(bytes), StringUtils.toString(compressBytes));
+        } catch (Throwable t) {
+            // for java17
+            byte[] bytes = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, -1,
+                    99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
+            Assertions.assertEquals(StringUtils.toString(bytes), StringUtils.toString(compressBytes));
+        }
     }
 
     @Test
