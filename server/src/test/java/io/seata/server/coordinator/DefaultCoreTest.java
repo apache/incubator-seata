@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author zhimo.xiao @gmail.com
  */
-@SpringBootTest(classes = ServerApplication.class)
+@SpringBootTest
 public class DefaultCoreTest {
 
     private static DefaultCore core;
