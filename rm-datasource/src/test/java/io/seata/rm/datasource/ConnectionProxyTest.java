@@ -26,10 +26,8 @@ import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 
 /**
@@ -37,9 +35,8 @@ import org.mockito.Mockito;
  *
  * @author ggndnn
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ConnectionProxyTest {
-    private static DataSourceProxy dataSourceProxy;
+    private DataSourceProxy dataSourceProxy;
 
     private final static String TEST_RESOURCE_ID = "testResourceId";
 
@@ -47,8 +44,11 @@ public class ConnectionProxyTest {
 
     private final static String lockKey = "order:123";
 
-    @BeforeAll
-    public void initBeforeAll() throws Exception {
+
+    @BeforeEach
+    public void initBeforeEach() throws Exception {
+        Assertions.assertTrue(ConnectionProxy.LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict());
+
         dataSourceProxy = Mockito.mock(DataSourceProxy.class);
         Mockito.when(dataSourceProxy.getResourceId())
                 .thenReturn(TEST_RESOURCE_ID);
@@ -58,11 +58,6 @@ public class ConnectionProxyTest {
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
         DefaultResourceManager.mockResourceManager(BranchType.AT, rm);
-    }
-
-    @BeforeEach
-    public void initBeforeEach() {
-        Assertions.assertTrue(ConnectionProxy.LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict());
     }
 
     @AfterEach

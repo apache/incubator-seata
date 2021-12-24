@@ -19,7 +19,6 @@ import io.seata.core.model.GlobalLockConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opentest4j.AssertionFailedError;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,10 +42,6 @@ public class GlobalLockConfigHolderTest {
 
     @AfterEach
     void tearDown() {
-        try {
-            GlobalLockConfigHolder.remove();
-        } catch (Exception e) {
-            throw new AssertionFailedError("clear method should not throw anything", e);
-        }
+        assertDoesNotThrow(GlobalLockConfigHolder::remove, "clear method should not throw anything");
     }
 }
