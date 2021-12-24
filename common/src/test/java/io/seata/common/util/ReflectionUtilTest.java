@@ -100,8 +100,17 @@ public class ReflectionUtilTest {
     @Test
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
         Assertions.assertEquals("hello", testValue);
-        ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
-        Assertions.assertEquals("hello world", testValue);
+        try {
+            ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
+            Assertions.assertEquals("hello world", testValue);
+        } catch (NoSuchFieldException e) {
+            if (e.getMessage() != null && e.getMessage().contains("modifiers")) {
+                // for java17: the class of the Field has no modifiers with java17
+                Assertions.assertEquals("hello", testValue);
+            } else {
+                throw e;
+            }
+        }
 
         // case: not a static field
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
