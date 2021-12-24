@@ -25,21 +25,15 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
@@ -48,14 +42,15 @@ import java.util.Arrays;
  * @author ggndnn
  */
 @DisabledOnJre(JRE.JAVA_17)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AbstractDMLBaseExecutorTest {
     private ConnectionProxy connectionProxy;
 
     private AbstractDMLBaseExecutor executor;
 
-    @BeforeAll
-    public void initBeforeAll() throws Exception {
+    @BeforeEach
+    public void initBeforeEach() throws Exception {
+        Assertions.assertTrue(ConnectionProxy.LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict());
+
         Connection targetConnection = Mockito.mock(Connection.class);
         connectionProxy = Mockito.mock(ConnectionProxy.class);
         Mockito.doThrow(new LockConflictException())
@@ -80,16 +75,6 @@ public class AbstractDMLBaseExecutorTest {
                 .when(executor).beforeImage();
         Mockito.doReturn(tableRecords)
                 .when(executor).afterImage(tableRecords);
-    }
-
-    @AfterAll
-    public void cleanAfterAll() throws Exception {
-        connectionProxy.close();
-    }
-
-    @BeforeEach
-    public void initBeforeEach() {
-        Assertions.assertTrue(ConnectionProxy.LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict());
     }
 
     @AfterEach

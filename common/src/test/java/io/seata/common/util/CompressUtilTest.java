@@ -30,7 +30,6 @@ public class CompressUtilTest {
     final byte[] compressedBytes1 = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, 0,
             99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
 
-    // for java17
     final byte[] compressedBytes2 = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, -1,
             99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
 
@@ -46,7 +45,6 @@ public class CompressUtilTest {
     @Test
     @EnabledOnJre(JRE.JAVA_17)
     public void testCompressForJava17() throws IOException {
-        // for java17
         byte[] compressedBytes = CompressUtil.compress(originBytes);
         Assertions.assertEquals(StringUtils.toString(compressedBytes2), StringUtils.toString(compressedBytes));
         Assertions.assertEquals(StringUtils.toString(originBytes), StringUtils.toString(CompressUtil.uncompress(compressedBytes)));
