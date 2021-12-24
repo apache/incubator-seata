@@ -335,13 +335,18 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         public static void setLockRetryPolicyBranchRollbackOnConflict(Boolean b) {
             LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT_THREAD_LOCAL.set(b);
         }
+
         public static void removeLockRetryPolicyBranchRollbackOnConflict() {
             LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT_THREAD_LOCAL.remove();
         }
 
         public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
-            return Boolean.TRUE.equals(LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT_THREAD_LOCAL.get())
-                    || LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
+            Boolean b = LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT_THREAD_LOCAL.get();
+            if (b != null) {
+                return b;
+            } else {
+                return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
+            }
         }
 
         //endregion
