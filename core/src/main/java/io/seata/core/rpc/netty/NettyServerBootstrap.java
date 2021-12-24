@@ -183,8 +183,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     @Override
     public void shutdown() {
         try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Shutting server down. ");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Shutting server down, the listen port: {}", XID.getPort());
             }
             if (initialized.get()) {
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
@@ -196,7 +196,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
-            LOGGER.error("shutdown execute error:{}",exx.getMessage(),exx);
+            LOGGER.error("shutdown execute error: {}",exx.getMessage(),exx);
         }
     }
 }
