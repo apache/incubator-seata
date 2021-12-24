@@ -56,6 +56,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -165,6 +167,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17)
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
@@ -190,6 +193,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17)
     public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
         NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);

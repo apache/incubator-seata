@@ -25,6 +25,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 public class ReflectionUtilTest {
 
@@ -98,19 +100,11 @@ public class ReflectionUtilTest {
     }
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17)
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
         Assertions.assertEquals("hello", testValue);
-        try {
-            ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
-            Assertions.assertEquals("hello world", testValue);
-        } catch (NoSuchFieldException e) {
-            if (e.getMessage() != null && e.getMessage().contains("modifiers")) {
-                // for java17: the class of the Field has no modifiers with java17
-                Assertions.assertEquals("hello", testValue);
-            } else {
-                throw e;
-            }
-        }
+        ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
+        Assertions.assertEquals("hello world", testValue);
 
         // case: not a static field
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
