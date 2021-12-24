@@ -145,7 +145,7 @@ public class Result<T> implements Serializable {
     }
 
 
-    //region Getter、Setter
+    //region Getter, Setter
 
     public String getMessage() {
         return message;
