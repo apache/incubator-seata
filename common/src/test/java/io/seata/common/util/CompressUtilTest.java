@@ -19,32 +19,44 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 public class CompressUtilTest {
 
-    @Test
-    public void testCompress() throws IOException {
-        byte[] compressedBytes = CompressUtil.compress(new byte[]{1, 2, 3});
+    final byte[] originBytes = new byte[]{1, 2, 3};
 
-        try {
-            byte[] bytes = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, 0,
-                    99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
-            Assertions.assertEquals(StringUtils.toString(bytes), StringUtils.toString(compressedBytes));
-        } catch (Throwable t) {
-            // for java17
-            byte[] bytes = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, -1,
-                    99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
-            Assertions.assertEquals(StringUtils.toString(bytes), StringUtils.toString(compressedBytes));
-        }
+    final byte[] compressedBytes1 = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, 0,
+            99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
+
+    // for java17
+    final byte[] compressedBytes2 = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, -1,
+            99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
+
+
+    @Test
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11})
+    public void testCompress() throws IOException {
+        byte[] compressedBytes = CompressUtil.compress(originBytes);
+        Assertions.assertEquals(StringUtils.toString(compressedBytes1), StringUtils.toString(compressedBytes));
+        Assertions.assertEquals(StringUtils.toString(originBytes), StringUtils.toString(CompressUtil.uncompress(compressedBytes)));
+    }
+
+    @Test
+    @EnabledOnJre(JRE.JAVA_17)
+    public void testCompressForJava17() throws IOException {
+        // for java17
+        byte[] compressedBytes = CompressUtil.compress(originBytes);
+        Assertions.assertEquals(StringUtils.toString(compressedBytes2), StringUtils.toString(compressedBytes));
+        Assertions.assertEquals(StringUtils.toString(originBytes), StringUtils.toString(CompressUtil.uncompress(compressedBytes)));
     }
 
     @Test
     public void testUncompress() throws IOException {
-        byte[] bytes = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, 0,
-                99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
-
-        Assertions.assertArrayEquals(new byte[]{1, 2, 3},
-                CompressUtil.uncompress(bytes));
+        Assertions.assertEquals(StringUtils.toString(originBytes),
+                StringUtils.toString(CompressUtil.uncompress(compressedBytes1)));
+        Assertions.assertEquals(StringUtils.toString(originBytes),
+                StringUtils.toString(CompressUtil.uncompress(compressedBytes2)));
     }
 
     @Test
