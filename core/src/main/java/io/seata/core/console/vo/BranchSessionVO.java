@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.vo;
+package io.seata.core.console.vo;
 
 import io.seata.core.constants.ServerTableColumnsName;
 
@@ -152,5 +152,22 @@ public class BranchSessionVO {
         branchSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
         branchSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
         return branchSessionVO;
+    }
+
+    @Override
+    public String toString() {
+        return "BranchSessionVO{" +
+                "xid='" + xid + '\'' +
+                ", transactionId=" + transactionId +
+                ", branchId=" + branchId +
+                ", resourceGroupId='" + resourceGroupId + '\'' +
+                ", resourceId='" + resourceId + '\'' +
+                ", branchType='" + branchType + '\'' +
+                ", status=" + status +
+                ", clientId='" + clientId + '\'' +
+                ", applicationData='" + applicationData + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModified=" + gmtModified +
+                '}';
     }
 }

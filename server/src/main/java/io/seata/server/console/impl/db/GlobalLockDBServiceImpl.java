@@ -15,15 +15,14 @@
  */
 package io.seata.server.console.impl.db;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.IOUtil;
+import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
-import io.seata.core.store.db.vo.GlobalLockVO;
+import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.result.PageResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
@@ -55,33 +54,23 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
     private String dbDataSource;
 
     @Override
-    public PageResult<GlobalLockVO> queryByTable(String tableName) {
+    public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         List<GlobalLockVO> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet resultSet = null;
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
-        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable, tableName);
-        try {
-            conn = dataSource.getConnection();
-            ps = conn.prepareStatement(queryAllLockSQL);
-            resultSet = ps.executeQuery();
+        //!!! need to check the param to assemble the sql
+        //!!! need to note that if all input parameters are empty
+        //!!! it is a sample,you need to solve different input parameters
+        String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable, param.getTableName());
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(queryAllLockSQL);
+             ResultSet resultSet = ps.executeQuery()) {
             while (resultSet.next()) {
                 list.add(GlobalLockVO.convert(resultSet));
             }
         } catch (SQLException e) {
             throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, conn, resultSet);
         }
         return PageResult.success(list, list.size(), 0, 0, 0);
     }
-
-
-    @Override
-    public PageResult<GlobalLockVO> queryByXid(String xid) {
-        throw new NotSupportYetException();
-    }
-
 
 }

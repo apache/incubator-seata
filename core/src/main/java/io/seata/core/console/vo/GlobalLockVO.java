@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.vo;
+package io.seata.core.console.vo;
 
 import io.seata.core.constants.ServerTableColumnsName;
 
@@ -130,5 +130,20 @@ public class GlobalLockVO {
         globalLockVO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE));
         globalLockVO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED));
         return globalLockVO;
+    }
+
+    @Override
+    public String toString() {
+        return "GlobalLockVO{" +
+                "xid='" + xid + '\'' +
+                ", transactionId=" + transactionId +
+                ", branchId=" + branchId +
+                ", resourceId='" + resourceId + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", pk='" + pk + '\'' +
+                ", rowKey='" + rowKey + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModified=" + gmtModified +
+                '}';
     }
 }
