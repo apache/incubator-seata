@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -134,11 +135,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor handleAllSession = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("HandleAllSession", 1));
 
-    private final List<GlobalStatus> rollbackingStatus = Arrays.asList(GlobalStatus.TimeoutRollbacking,
-            GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking);
+    private final List<GlobalStatus> rollbackingStatus =
+        Collections.unmodifiableList(Arrays.asList(GlobalStatus.TimeoutRollbacking,
+            GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking));
 
-    private final List<GlobalStatus> retryCommittingStatus =
-            Arrays.asList(GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.CommitFailed);
+    private final List<GlobalStatus> retryCommittingStatus = Collections.unmodifiableList(
+        Arrays.asList(GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.CommitFailed));
 
     private RemotingServer remotingServer;
 
