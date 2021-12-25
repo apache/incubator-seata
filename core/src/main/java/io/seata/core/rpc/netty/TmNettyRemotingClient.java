@@ -194,6 +194,11 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
+    public long getRpcRequestTimeout() {
+        return NettyClientConfig.getRpcTmRequestTimeout();
+    }
+
+    @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
         RegisterTMRequest registerTMRequest = (RegisterTMRequest) requestMessage;

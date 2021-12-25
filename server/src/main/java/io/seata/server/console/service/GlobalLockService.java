@@ -13,27 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.server.console.service;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.compressor.Compressor;
+import io.seata.core.store.db.vo.GlobalLockVO;
+import io.seata.server.console.result.PageResult;
+
 
 /**
- * the Zstd Compressor
- *
- * @author chd
+ * Global lock service
+ * @author wangzhongxiang
  */
-@LoadLevel(name = "ZSTD")
-public class ZstdCompressor implements Compressor {
+public interface GlobalLockService {
 
-    @Override
-    public byte[] compress(byte[] bytes) {
-        return ZstdUtil.compress(bytes);
-    }
+    /**
+     * Query locks by table
+     * @param tableName the table name of the lock
+     * @return the GlobalLockVO list
+     */
+    PageResult<GlobalLockVO> queryByTable(String tableName);
 
-    @Override
-    public byte[] decompress(byte[] bytes) {
-        return ZstdUtil.decompress(bytes);
-    }
+    /**
+     * Query by xid
+     * @param xid the xid
+     * @return the GlobalLockVO list
+     */
+    PageResult<GlobalLockVO> queryByXid(String xid);
 
 }
