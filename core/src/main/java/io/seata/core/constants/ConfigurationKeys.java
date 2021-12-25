@@ -573,7 +573,7 @@ public interface ConfigurationKeys {
     /**
      * The constant ENABLE_TC_SERVER_BATCH_SEND_RESPONSE
      */
-    String ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = TRANSPORT_PREFIX + "enableTcSeverBatchSendResponse";
+    String ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = TRANSPORT_PREFIX + "enableTcServerBatchSendResponse";
 
     /**
      * The constant DISABLE_GLOBAL_TRANSACTION.

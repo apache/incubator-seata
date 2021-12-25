@@ -73,7 +73,7 @@ public class TransportProperties {
     /**
      * enable TC server batch send response
      */
-    private boolean enableTcSeverBatchSendResponse = DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
+    private boolean enableTcServerBatchSendResponse = DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
 
     /**
      * rpcRmRequestTimeout
@@ -163,12 +163,12 @@ public class TransportProperties {
         return this;
     }
 
-    public boolean isEnableTcSeverBatchSendResponse() {
-        return enableTcSeverBatchSendResponse;
+    public boolean isEnableTcServerBatchSendResponse() {
+        return enableTcServerBatchSendResponse;
     }
 
-    public void setEnableTcSeverBatchSendResponse(boolean enableTcSeverBatchSendResponse) {
-        this.enableTcSeverBatchSendResponse = enableTcSeverBatchSendResponse;
+    public void setEnableTcServerBatchSendResponse(boolean enableTcServerBatchSendResponse) {
+        this.enableTcServerBatchSendResponse = enableTcServerBatchSendResponse;
     }
 
     public long getRpcRmRequestTimeout() {
