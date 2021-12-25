@@ -248,7 +248,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         List<GlobalSession> retryRollbackingSessions = new ArrayList<>();
-        List<GlobalSession> beginGlobalsessions = new ArrayList<>();
+        List<GlobalSession> beginGlobalSessions = new ArrayList<>();
         List<GlobalSession> retryCommittingSessions = new ArrayList<>();
         List<GlobalSession> asyncCommittingSessions = new ArrayList<>();
         for (GlobalSession session : allSessions) {
@@ -259,14 +259,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             } else if (GlobalStatus.AsyncCommitting.equals(session.getStatus())) {
                 asyncCommittingSessions.add(session);
             } else {
-                beginGlobalsessions.add(session);
+                beginGlobalSessions.add(session);
             }
         }
         List<CompletableFuture> futures = new ArrayList<>(4);
         futures
                 .add(CompletableFuture.runAsync(() -> handleRetryRollbacking(retryRollbackingSessions), retryRollbacking));
         futures
-                .add(CompletableFuture.runAsync(() -> timeoutCheck(beginGlobalsessions), timeoutCheck));
+                .add(CompletableFuture.runAsync(() -> timeoutCheck(beginGlobalSessions), timeoutCheck));
         futures
                 .add(CompletableFuture.runAsync(() -> handleRetryCommitting(retryCommittingSessions), retryCommitting));
         futures
