@@ -19,12 +19,11 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.raft.execute.RaftSyncMsg;
 
 /**
  * @author funkye
  */
-public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializable {
+public class RaftSessionSyncMsg implements java.io.Serializable {
 
     private static final long serialVersionUID = -6737504033652157760L;
 
@@ -35,6 +34,8 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
     private GlobalStatus globalStatus;
 
     private BranchStatus branchStatus;
+
+    private MsgType msgType;
 
     public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
@@ -98,10 +99,61 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
         this.branchStatus = branchStatus;
     }
 
-    @Override
-    public String toString() {
-        return "RaftSessionSyncMsg{" + "msgType=" + msgType + ", globalSession=" + globalSession + ", branchSession="
-            + branchSession + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + '}';
+    public MsgType getMsgType() {
+        return this.msgType;
     }
 
+    public void setMsgType(MsgType msgType) {
+        this.msgType = msgType;
+    }
+
+    public enum MsgType {
+        /**
+         * addGlobalSession
+         */
+        ADD_GLOBAL_SESSION,
+        /**
+         * removeGlobalSession
+         */
+        REMOVE_GLOBAL_SESSION,
+        /**
+         *
+         */
+        ADD_BRANCH_SESSION,
+        /**
+         * addBranchSession
+         */
+        REMOVE_BRANCH_SESSION,
+        /**
+         * updateGlobalSessionStatus
+         */
+        UPDATE_GLOBAL_SESSION_STATUS,
+        /**
+         * updateBranchSessionStatus
+         */
+        UPDATE_BRANCH_SESSION_STATUS,
+        /**
+         * acquireLock
+         */
+        ACQUIRE_LOCK,
+        /**
+         * releaseGlobalSessionLock
+         */
+        RELEASE_GLOBAL_SESSION_LOCK,
+        /**
+         * releaseBranchSessionLock
+         */
+        RELEASE_BRANCH_SESSION_LOCK,
+        /**
+         * ServerOnRequestProcessor
+         */
+        SERVER_ON_REQUEST
+    }
+
+    @Override
+    public String toString() {
+        return "RaftSessionSyncMsg{" + "globalSession=" + globalSession + ", branchSession=" + branchSession
+            + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", msgType=" + msgType + '}';
+    }
+    
 }

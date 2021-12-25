@@ -15,64 +15,92 @@
  */
 package io.seata.server.raft.execute;
 
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.compressor.CompressorType;
+import io.seata.core.serializer.SerializerType;
+
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SERIALIZATION;
+
 /**
  * @author funkye
  */
 public class RaftSyncMsg implements java.io.Serializable {
 
     private static final long serialVersionUID = 8225279734319945365L;
+    private byte codec = SerializerType
+        .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SERIALIZATION, DEFAULT_RAFT_SERIALIZATION))
+        .getCode();
+    private byte compressor = CompressorType
+        .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
+        .getCode();
+    private Object body;
 
-    protected MsgType msgType;
-
-    public MsgType getMsgType() {
-        return this.msgType;
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
+    public Object getBody() {
+        return body;
     }
 
-    public void setMsgType(MsgType msgType) {
-        this.msgType = msgType;
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     */
+    public void setBody(Object body) {
+        this.body = body;
     }
 
-    public enum MsgType {
-        /**
-         * addGlobalSession
-         */
-        ADD_GLOBAL_SESSION,
-        /**
-         * removeGlobalSession
-         */
-        REMOVE_GLOBAL_SESSION,
-        /**
-         *
-         */
-        ADD_BRANCH_SESSION,
-        /**
-         * addBranchSession
-         */
-        REMOVE_BRANCH_SESSION,
-        /**
-         * updateGlobalSessionStatus
-         */
-        UPDATE_GLOBAL_SESSION_STATUS,
-        /**
-         * updateBranchSessionStatus
-         */
-        UPDATE_BRANCH_SESSION_STATUS,
-        /**
-         * acquireLock
-         */
-        ACQUIRE_LOCK,
-        /**
-         * releaseGlobalSessionLock
-         */
-        RELEASE_GLOBAL_SESSION_LOCK,
-        /**
-         * releaseBranchSessionLock
-         */
-        RELEASE_BRANCH_SESSION_LOCK,
-        /**
-         * ServerOnRequestProcessor
-         */
-        SERVER_ON_REQUEST
+    /**
+     * Gets codec.
+     *
+     * @return the codec
+     */
+    public byte getCodec() {
+        return codec;
+    }
+
+    /**
+     * Sets codec.
+     *
+     * @param codec the codec
+     * @return the codec
+     */
+    public RaftSyncMsg setCodec(byte codec) {
+        this.codec = codec;
+        return this;
+    }
+
+    /**
+     * Gets compressor.
+     *
+     * @return the compressor
+     */
+    public byte getCompressor() {
+        return compressor;
+    }
+
+    /**
+     * Sets compressor.
+     *
+     * @param compressor the compressor
+     * @return the compressor
+     */
+    public RaftSyncMsg setCompressor(byte compressor) {
+        this.compressor = compressor;
+        return this;
+    }
+
+
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 
 }

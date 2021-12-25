@@ -30,10 +30,9 @@ import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
 
-
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ACQUIRE_LOCK;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 
 /**
  * @author funkye
@@ -43,22 +42,29 @@ public class RaftLockManager extends FileLockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
-        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
-        BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ACQUIRE_LOCK, branchTransactionDO);
-        Closure closure = status -> {
-            if (status.isOk()) {
-                try {
-                    completableFuture.complete(super.acquireLock(branchSession));
-                } catch (TransactionException e) {
-                    completableFuture.completeExceptionally(e);
+        // perform competitive lock first to avoid meaningless state machine execution
+        if (super.acquireLock(branchSession)) {
+            CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+            BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
+            RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ACQUIRE_LOCK, branchTransactionDO);
+            Closure closure = status -> {
+                if (status.isOk()) {
+                    completableFuture.complete(true);
+                } else {
+                    try {
+                        // avoid data inconsistency after a new election
+                        localReleaseLock(branchSession);
+                        completableFuture
+                                .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                                        " The current TC is not a leader node, interrupt processing !"));
+                    } catch (TransactionException e) {
+                        completableFuture.completeExceptionally(e);
+                    }
                 }
-            } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
-            }
-        };
-        return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
+            };
+            return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
+        }
+        return false;
     }
 
     public boolean localAcquireLock(BranchSession branchSession) throws TransactionException {

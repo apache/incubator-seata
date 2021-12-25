@@ -15,31 +15,34 @@
  */
 package io.seata.server.storage.raft;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
-
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.serializer.kryo.KryoInnerSerializer;
-import io.seata.serializer.kryo.KryoSerializerFactory;
 import io.seata.server.raft.RaftServerFactory;
+import io.seata.server.raft.RaftSyncMsgSerializer;
+import io.seata.server.raft.execute.RaftSyncMsg;
 
 /**
  * @author funkye
  */
 public class RaftTaskUtil {
 
-    public static boolean createTask(Closure done, Object data, CompletableFuture<Boolean> completableFuture)
+    public static boolean createTask(Closure done, RaftSessionSyncMsg data, CompletableFuture<Boolean> completableFuture)
         throws TransactionException {
         final Task task = new Task();
         if (data != null) {
-            try (KryoInnerSerializer kryo = KryoSerializerFactory.getInstance().get()) {
-                task.setData(ByteBuffer.wrap(kryo.serialize(data)));
+            RaftSyncMsg raftSyncMsg = new RaftSyncMsg();
+            raftSyncMsg.setBody(data);
+            try {
+                task.setData(ByteBuffer.wrap(RaftSyncMsgSerializer.encode(raftSyncMsg)));
+            } catch (IOException e) {
+                throw new TransactionException(e);
             }
         }
         task.setDone(done == null ? status -> {

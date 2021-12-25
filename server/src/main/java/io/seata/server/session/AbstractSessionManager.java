@@ -21,7 +21,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
@@ -47,6 +46,11 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
      * The Name.
      */
     protected String name;
+
+    /**
+     * The Name.
+     */
+    protected static volatile boolean write = true;
 
     /**
      * Instantiates a new Abstract session manager.
@@ -150,8 +154,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
-        if (!RaftServerFactory.getInstance().isRaftMode()
-            && !transactionStoreManager.writeSession(logOperation, sessionStorable)) {
+        if (write && !transactionStoreManager.writeSession(logOperation, sessionStorable)) {
             if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
                 throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
                     "Fail to store global session");

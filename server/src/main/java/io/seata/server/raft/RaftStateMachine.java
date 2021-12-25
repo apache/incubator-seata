@@ -39,7 +39,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.store.StoreMode;
-import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
@@ -63,17 +62,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static io.seata.server.raft.execute.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ACQUIRE_LOCK;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  * @author funkye
@@ -123,11 +122,10 @@ public class RaftStateMachine extends StateMachineAdapter {
                     ByteBuffer byteBuffer = iterator.getData();
                     // if data is empty, it is only a heartbeat event and can be ignored
                     if (byteBuffer != null && byteBuffer.hasRemaining()) {
-                        try (KryoInnerSerializer kryo = FACTORY.get()) {
-                            RaftSessionSyncMsg msg = kryo.deserialize(byteBuffer.array());
-                            // follower executes the corresponding task
-                            onExecuteRaft(msg);
-                        }
+                        RaftSessionSyncMsg msg =
+                            (RaftSessionSyncMsg)RaftSyncMsgSerializer.decode(byteBuffer.array()).getBody();
+                        // follower executes the corresponding task
+                        onExecuteRaft(msg);
                     }
                 } catch (Throwable e) {
                     LOGGER.error("Message synchronization failure: {}", e.getMessage(), e);
@@ -247,25 +245,25 @@ public class RaftStateMachine extends StateMachineAdapter {
         }
         this.leaderTerm.set(term);
         super.onLeaderStart(term);
+        DefaultCoordinator.getInstance().setPrevent(true);
     }
 
     @Override
     public void onLeaderStop(final Status status) {
         this.leaderTerm.set(-1);
         super.onLeaderStop(status);
-        LOGGER.info("session map: {} ",SessionHolder.getRootSessionManager().allSessions().size());
+        DefaultCoordinator.getInstance().setPrevent(false);
     }
 
     @Override
     public void onStopFollowing(final LeaderChangeContext ctx) {
         super.onStopFollowing(ctx);
-        LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
     }
 
     @Override
     public void onStartFollowing(final LeaderChangeContext ctx) {
         super.onStartFollowing(ctx);
-        LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
+        DefaultCoordinator.getInstance().setPrevent(false);
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) {

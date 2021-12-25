@@ -810,6 +810,16 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_REPORTER_INITIAL_DELAY = SERVER_RAFT + "reporterInitialDelay";
 
     /**
+     * The constant SERVER_RAFT_SERIALIZATION.
+     */
+    String SERVER_RAFT_SERIALIZATION = SERVER_RAFT + "serialization";
+
+    /**
+     * The constant SERVER_RAFT_COMPRESSOR.
+     */
+    String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
+
+    /**
      * The constant TCC_PREFIX
      */
     String TCC_PREFIX = "tcc.";

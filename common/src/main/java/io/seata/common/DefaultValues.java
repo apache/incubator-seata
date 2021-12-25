@@ -41,6 +41,9 @@ public interface DefaultValues {
     String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
     boolean DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = false;
     boolean DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = false;
+    String DEFAULT_RAFT_SERIALIZATION = "fst";
+    String DEFAULT_RAFT_COMPRESSOR = "none";
+
     /**
      * Shutdown timeout default 3s
      */

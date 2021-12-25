@@ -48,6 +48,10 @@ public class ServerRaftProperties {
 
     private Integer reporterInitialDelay = 30;
 
+    private String serialization = "fst";
+
+    private String compressor = "none";
+
     public String getCluster() {
         return cluster;
     }
@@ -136,6 +140,22 @@ public class ServerRaftProperties {
     public ServerRaftProperties setAutoJoin(Boolean autoJoin) {
         this.autoJoin = autoJoin;
         return this;
+    }
+
+    public String getSerialization() {
+        return serialization;
+    }
+
+    public void setSerialization(String serialization) {
+        this.serialization = serialization;
+    }
+
+    public String getCompressor() {
+        return compressor;
+    }
+
+    public void setCompressor(String compressor) {
+        this.compressor = compressor;
     }
 
 }

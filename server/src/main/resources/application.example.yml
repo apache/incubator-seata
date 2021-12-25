@@ -104,6 +104,8 @@ seata:
       electionTimeoutMs: 1000
       reporterEnabled: false
       reporterInitialDelay: 30
+      serialization: fst
+      compressor: none
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1

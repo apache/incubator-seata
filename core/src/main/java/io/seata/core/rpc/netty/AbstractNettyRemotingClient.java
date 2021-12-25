@@ -124,7 +124,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
 
-    protected RaftMetadata raftMetadata;
+    private RaftMetadata raftMetadata;
+
+    private boolean raft;
 
     @Override
     public void init() {
@@ -154,17 +156,21 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
         Object result = null;
-        for (int i = 0; i < acquireClusterRetryCount; i++) {
-            result = sendSyncRequest(msg, acquireClusterRetryCount > 0);
-            if (raftMetadata != null && result instanceof AbstractTransactionResponse) {
-                AbstractTransactionResponse transactionResponse = (AbstractTransactionResponse)result;
-                if (transactionResponse.getResultCode() == Failed
-                    && transactionResponse.getTransactionExceptionCode() == NotRaftLeader) {
-                    acquireClusterMetaData();
-                    continue;
+        if (raft) {
+            for (int i = 0; i < acquireClusterRetryCount; i++) {
+                result = sendSyncRequest(msg, i > 0);
+                if (result instanceof AbstractTransactionResponse) {
+                    AbstractTransactionResponse transactionResponse = (AbstractTransactionResponse)result;
+                    if (transactionResponse.getResultCode() == Failed
+                        && transactionResponse.getTransactionExceptionCode() == NotRaftLeader) {
+                        acquireClusterMetaData();
+                        continue;
+                    }
                 }
+                break;
             }
-            break;
+        } else {
+            result = sendSyncRequest(msg, false);
         }
         return result;
     }
@@ -544,7 +550,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     protected void initClusterMetaData() {
         raftMetadata = new RaftMetadata();
-        boolean raft = acquireClusterMetaData();
+        raft = acquireClusterMetaData();
         if (raft) {
             findLeaderExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("findLeader", 1, true));
             // The leader election takes 5 second

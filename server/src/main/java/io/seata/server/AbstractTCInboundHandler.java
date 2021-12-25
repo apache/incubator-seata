@@ -73,6 +73,8 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTCInboundHandler.class);
 
+    protected volatile boolean prevent = true;
+
     @Override
     public GlobalBeginResponse handle(GlobalBeginRequest request, final RpcContext rpcContext) {
         GlobalBeginResponse response = new GlobalBeginResponse();
@@ -417,7 +419,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
     @Override
     public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
         try {
-            if (RaftServerFactory.getInstance().isNotRaftModeLeader()) {
+            if (!prevent) {
                 throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
                         " The current TC is not a leader node, interrupt processing !");
             }
@@ -428,4 +430,12 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         }
     }
 
+    public boolean isPrevent() {
+        return prevent;
+    }
+
+    public void setPrevent(boolean prevent) {
+        this.prevent = prevent;
+    }
+    
 }
