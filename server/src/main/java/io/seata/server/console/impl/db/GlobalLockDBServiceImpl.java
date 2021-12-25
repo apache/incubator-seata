@@ -17,7 +17,6 @@ package io.seata.server.console.impl.db;
 
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.IOUtil;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
@@ -57,23 +56,19 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         List<GlobalLockVO> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet resultSet = null;
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
-        //need to check the param to assemble the sql
+        //!!! need to check the param to assemble the sql
+        //!!! need to note that if all input parameters are empty
+        //!!! it is a sample,you need to solve different input parameters
         String queryAllLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSQL(lockTable, param.getTableName());
-        try {
-            conn = dataSource.getConnection();
-            ps = conn.prepareStatement(queryAllLockSQL);
-            resultSet = ps.executeQuery();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(queryAllLockSQL);
+             ResultSet resultSet = ps.executeQuery()) {
             while (resultSet.next()) {
                 list.add(GlobalLockVO.convert(resultSet));
             }
         } catch (SQLException e) {
             throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, conn, resultSet);
         }
         return PageResult.success(list, list.size(), 0, 0, 0);
     }
