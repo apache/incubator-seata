@@ -126,8 +126,6 @@ public class DefaultCoreForEventBusTest {
             subscriber.getDownLatch().await(1000, TimeUnit.MILLISECONDS);
             Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacked).get());
-
 
             //start more one new transaction for test timeout and let this transaction immediately timeout
             subscriber.setDownLatch(new CountDownLatch(1));
