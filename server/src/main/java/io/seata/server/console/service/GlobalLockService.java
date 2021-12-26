@@ -13,30 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.server.console.service;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import io.seata.core.console.param.GlobalLockParam;
+import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.core.console.result.PageResult;
 
 
 /**
- * the Zstd Util test
- *
- * @author chd
+ * Global lock service
+ * @author wangzhongxiang
  */
-public class ZstdUtilTest {
+public interface GlobalLockService {
 
-    @Test
-    public void test_compress() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            ZstdUtil.compress(null);
-        });
-    }
+    /**
+     * Query locks by param
+     * @param param the param
+     * @return the list of GlobalLockVO
+     */
+    PageResult<GlobalLockVO> query(GlobalLockParam param);
 
-    @Test
-    public void test_decompress() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            ZstdUtil.decompress(null);
-        });
-    }
+
 }
