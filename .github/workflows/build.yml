@@ -11,11 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [
-            8,
-            11,
-            17
-        ]
+        java: [ 8, 11, 17 ]
         springboot: [
             2.6.2,
             2.5.8,
