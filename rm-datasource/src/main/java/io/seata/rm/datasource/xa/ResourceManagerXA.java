@@ -23,7 +23,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.BaseDataSourceResource;
-import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.AbstractDataSourceCacheResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,9 @@ import org.slf4j.LoggerFactory;
 import javax.transaction.xa.XAException;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.seata.core.constants.ConfigurationKeys.XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
 
@@ -44,7 +45,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceManagerXA.class);
 
-    private static final int twoPhaseHoldTimeout = ConfigurationFactory.getInstance().getInt(XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT,
+    private static final int TWO_PHASE_HOLD_TIMEOUT = ConfigurationFactory.getInstance().getInt(XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT,
             DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT);
 
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
@@ -69,7 +70,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                         long now = System.currentTimeMillis();
                         synchronized (connection) {
                             if (connection.getPrepareTime() != null &&
-                                    now - connection.getPrepareTime() > twoPhaseHoldTimeout) {
+                                    now - connection.getPrepareTime() > TWO_PHASE_HOLD_TIMEOUT) {
                                 try {
                                     connection.closeForce();
                                 } catch (SQLException e) {

@@ -45,7 +45,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxyXA.class);
 
-    private static final int branchExecutionTimeout = ConfigurationFactory.getInstance().getInt(XA_BRANCH_EXECUTION_TIMEOUT,
+    private static final int BRANCH_EXECUTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(XA_BRANCH_EXECUTION_TIMEOUT,
             DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT);
 
     private volatile boolean currentAutoCommitStatus = true;
@@ -161,7 +161,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 BranchRegisterResult result = DefaultResourceManager.get().branchRegisterAndGetResult(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
                 branchId = result.getBranchId();
-                setTimeout(Math.max(branchExecutionTimeout, result.getTimeout()));
+                setTimeout(Math.max(BRANCH_EXECUTION_TIMEOUT, result.getTimeout()));
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
