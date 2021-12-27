@@ -284,7 +284,7 @@ public class ConnectionContext {
             this.applicationData.put(SKIP_CHECK_LOCK, true);
         }
 
-        if (this.applicationData.isEmpty()) {
+        if (!this.applicationData.isEmpty()) {
             try {
                 return MAPPER.writeValueAsString(this.applicationData);
             } catch (JsonProcessingException e) {
@@ -382,7 +382,7 @@ public class ConnectionContext {
     private boolean allBeforeImageEmpty() {
         for (List<SQLUndoLog> sqlUndoLogs : sqlUndoItemsBuffer.values()) {
             for (SQLUndoLog undoLog : sqlUndoLogs) {
-                if (undoLog.getBeforeImage().size() != 0) {
+                if (null == undoLog.getBeforeImage() || undoLog.getBeforeImage().size() != 0) {
                     return false;
                 }
             }
