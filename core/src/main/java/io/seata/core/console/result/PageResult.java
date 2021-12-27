@@ -13,17 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.console.result;
+package io.seata.core.console.result;
 
 import io.seata.common.exception.FrameworkErrorCode;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * The page result
  * @author: zhongxiang.wang
  */
-public class PageResult<T> extends Result<T> {
+public class PageResult<T> extends Result<T>  implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
 
     /**
@@ -47,7 +48,11 @@ public class PageResult<T> extends Result<T> {
      */
     private List<T> data;
 
-    public PageResult(String errCode, String code) {
+    public PageResult() {
+    }
+
+    public PageResult(String code, String message) {
+        super(code, message);
     }
 
     public PageResult(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
@@ -64,14 +69,10 @@ public class PageResult<T> extends Result<T> {
     }
 
     public static <T> PageResult<T> failure(FrameworkErrorCode errorCode) {
-        return new PageResult(errorCode.getErrCode(), errorCode.getErrMessage());
+        return new PageResult<>(errorCode.getErrCode(), errorCode.getErrMessage());
     }
 
     public static <T> PageResult<T> success() {
-        return new PageResult<>(SUCCESS_CODE, SUCCESS_MSG);
-    }
-
-    public static <T> PageResult<T> create() {
         return new PageResult<>(SUCCESS_CODE, SUCCESS_MSG);
     }
 

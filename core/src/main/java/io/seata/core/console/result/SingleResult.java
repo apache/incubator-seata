@@ -13,15 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.console.result;
+package io.seata.core.console.result;
 
 import io.seata.common.exception.FrameworkErrorCode;
+
+import java.io.Serializable;
 
 /**
  * The single result
  * @author: zhongxiang.wang
  */
-public class SingleResult<T> extends Result<T> {
+public class SingleResult<T> extends Result<T>  implements Serializable {
     private static final long serialVersionUID = 77612626624298767L;
 
     /**
