@@ -55,7 +55,7 @@ public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
 
-    private static final int xaerNotaRetryTimeout = ConfigurationFactory.getInstance().getInt(XAER_NOTA_RETRY_TIMEOUT,
+    private static final int RETRY_XAER_NOTA_TIMEOUT = ConfigurationFactory.getInstance().getInt(XAER_NOTA_RETRY_TIMEOUT,
             DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT);
 
     private EventBus eventBus = EventBusManager.get();
@@ -216,7 +216,7 @@ public class DefaultCore implements Core {
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
                     if (BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable.equals(branchStatus) &&
-                            System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() + Math.max(xaerNotaRetryTimeout, globalSession.getTimeout())) {
+                            System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() + Math.max(RETRY_XAER_NOTA_TIMEOUT, globalSession.getTimeout())) {
                         LOGGER.info("Commit branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                         branchStatus = BranchStatus.PhaseTwo_Committed;
                     }
@@ -330,7 +330,7 @@ public class DefaultCore implements Core {
                 try {
                     BranchStatus branchStatus = branchRollback(globalSession, branchSession);
                     if (BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable.equals(branchStatus) &&
-                            System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() + Math.max(xaerNotaRetryTimeout, globalSession.getTimeout())) {
+                            System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() + Math.max(RETRY_XAER_NOTA_TIMEOUT, globalSession.getTimeout())) {
                         LOGGER.info("Rollback branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                         branchStatus = BranchStatus.PhaseTwo_Rollbacked;
                     }
