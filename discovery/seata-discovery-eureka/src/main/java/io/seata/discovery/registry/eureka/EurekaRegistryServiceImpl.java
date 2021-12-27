@@ -39,10 +39,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 /**
  * The type Eureka registry service.
@@ -165,11 +165,15 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
 
         for (Application application : applications) {
             List<InstanceInfo> instances = application.getInstances();
-
             if (CollectionUtils.isNotEmpty(instances)) {
-                Set<InetSocketAddress> addressSet = instances.stream()
-                        .map(instance -> new InetSocketAddress(instance.getIPAddr(), instance.getPort()))
-                        .collect(Collectors.toSet());
+                Set<InetSocketAddress> addressSet = new HashSet<>(instances.size());
+                for (InstanceInfo instance : instances) {
+                    try {
+                        addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+                    } catch (IllegalArgumentException e) {
+                        LOGGER.error(e.getMessage());
+                    }
+                }
                 collect.put(application.getName(), addressSet);
             }
         }
