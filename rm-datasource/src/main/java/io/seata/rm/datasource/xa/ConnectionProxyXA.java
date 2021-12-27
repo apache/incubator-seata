@@ -21,10 +21,10 @@ import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
-
 import io.seata.common.DefaultValues;
 import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -34,6 +34,8 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.ConfigurationKeys.XA_BRANCH_EXECUTION_TIMEOUT;
+
 /**
  * Connection proxy for XA mode.
  *
@@ -42,6 +44,9 @@ import org.slf4j.LoggerFactory;
 public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Holdable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxyXA.class);
+
+    private static final int branchExecutionTimeout = ConfigurationFactory.getInstance().getInt(XA_BRANCH_EXECUTION_TIMEOUT,
+            DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT);
 
     private volatile boolean currentAutoCommitStatus = true;
 
@@ -151,12 +156,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             // Start a XA branch
             long branchId;
             try {
-                // 1. register branch to TC then get the branchId
+                // 1. register branch to TC then get the branch message
                 setBranchRegisterTime(System.currentTimeMillis());
                 BranchRegisterResult result = DefaultResourceManager.get().branchRegisterAndGetResult(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
                 branchId = result.getBranchId();
-                setTimeout(Math.max(DefaultValues.DEFAULT_XA_CONNECTION_HOLD_TIMEOUT, result.getTimeout()));
+                setTimeout(Math.max(branchExecutionTimeout, result.getTimeout()));
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
@@ -308,7 +313,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                || StringUtils.isBlank(resource.getDbType());
     }
 
-    public synchronized Long getBranchRegisterTime() {
+    public Long getBranchRegisterTime() {
         return branchRegisterTime;
     }
 

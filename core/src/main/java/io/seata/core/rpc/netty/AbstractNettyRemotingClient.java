@@ -39,7 +39,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
@@ -57,7 +56,6 @@ import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.hook.NettyClientTimeoutCheckerHook;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
@@ -108,16 +106,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
 
-    protected final List<NettyClientTimeoutCheckerHook> nettyClientTimeoutCheckerHooks = EnhancedServiceLoader.loadAll(NettyClientTimeoutCheckerHook.class);
-
     @Override
     public void init() {
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                dobeforeCheckerHooks();
                 clientChannelManager.reconnect(getTransactionServiceGroup());
-                doAfterCheckerHooks();
             }
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (this.isEnableClientBatchSendRequest()) {
@@ -492,18 +486,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 LOGGER.info(ctx + " will closed");
             }
             super.close(ctx, future);
-        }
-    }
-
-    private void dobeforeCheckerHooks() {
-        for (NettyClientTimeoutCheckerHook hook : nettyClientTimeoutCheckerHooks) {
-            hook.doBeforeChecker(getTransactionServiceGroup());
-        }
-    }
-
-    private void doAfterCheckerHooks() {
-        for (NettyClientTimeoutCheckerHook hook : nettyClientTimeoutCheckerHooks) {
-            hook.doAfterChecker(getTransactionServiceGroup());
         }
     }
 

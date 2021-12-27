@@ -772,4 +772,20 @@ public interface ConfigurationKeys {
      * The constant RPC_TM_REQUEST_TIMEOUT
      */
     String RPC_TC_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTcRequestTimeout";
+
+    /**
+     * The constant XAER_NOTA_RETRY_TIMEOUT
+     */
+    String XAER_NOTA_RETRY_TIMEOUT = SERVER_PREFIX + "xaerNotaRetryTimeout";
+
+    /**
+     * The constant XA_BRANCH_EXECUTION_TIMEOUT
+     */
+    String XA_BRANCH_EXECUTION_TIMEOUT = CLIENT_RM_PREFIX + "branchExecutionTimeoutXA";
+
+    /**
+     * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
+     */
+    String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
+
 }
