@@ -32,15 +32,15 @@ public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 
     @Override
     public boolean doRegTransactionManagerCheck(RegisterTMRequest request, ChannelHandlerContext ctx) {
-        String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
-        if (blackList.contains(ip)) {
-            return false;
-        }
-        return true;
+        return doIpCheck(ctx);
     }
 
     @Override
     public boolean doRegResourceManagerCheck(RegisterRMRequest request, ChannelHandlerContext ctx) {
+        return doIpCheck(ctx);
+    }
+
+    private boolean doIpCheck(ChannelHandlerContext ctx) {
         String ip = NetUtil.toStringAddress(ctx.channel().remoteAddress()).split(":")[0];
         if (blackList.contains(ip)) {
             return false;
