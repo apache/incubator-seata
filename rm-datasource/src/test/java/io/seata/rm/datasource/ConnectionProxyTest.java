@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchType;
@@ -53,7 +55,7 @@ public class ConnectionProxyTest {
         Mockito.when(dataSourceProxy.getResourceId())
                 .thenReturn(TEST_RESOURCE_ID);
         ResourceManager rm = Mockito.mock(ResourceManager.class);
-        Mockito.when(rm.branchRegister(BranchType.AT, dataSourceProxy.getResourceId(), null, TEST_XID, null, lockKey))
+        Mockito.when(rm.branchRegister(BranchType.AT, dataSourceProxy.getResourceId(), null, TEST_XID, "{\"autoCommit\":false}", lockKey))
                 .thenThrow(new TransactionException(TransactionExceptionCode.LockKeyConflict));
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
