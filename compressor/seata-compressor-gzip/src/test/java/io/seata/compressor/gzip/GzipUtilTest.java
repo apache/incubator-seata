@@ -81,17 +81,17 @@ public class GzipUtilTest {
         Assertions.assertArrayEquals(new byte[]{1, 2, 3},new GzipCompressor().decompress(bytes));
     }
 
-    @Test
-    public void testIsCompressData() {
-        GzipCompressor gzipCompressor = new GzipCompressor();
-        Assertions.assertFalse(gzipCompressor.isCompressData(null));
-        Assertions.assertFalse(gzipCompressor.isCompressData(new byte[0]));
-        Assertions.assertFalse(gzipCompressor.isCompressData(new byte[]{31, 11}));
-        Assertions.assertFalse(
-                gzipCompressor.isCompressData(new byte[]{99, 111, 109, 112, 114, 101, 115, 115, 101, 101,31, 11, 0}));
-
-        Assertions.assertTrue(
-                gzipCompressor.isCompressData(new byte[]{99, 111, 109, 112, 114, 101, 115, 115, 101, 100,31, -117, 0}));
-    }
+//    @Test
+//    public void testIsCompressData() {
+//        GzipCompressor gzipCompressor = new GzipCompressor();
+//        Assertions.assertFalse(gzipCompressor.isCompressData(null));
+//        Assertions.assertFalse(gzipCompressor.isCompressData(new byte[0]));
+//        Assertions.assertFalse(gzipCompressor.isCompressData(new byte[]{31, 11}));
+//        Assertions.assertFalse(
+//                gzipCompressor.isCompressData(new byte[]{99, 111, 109, 112, 114, 101, 115, 115, 101, 101,31, 11, 0}));
+//
+//        Assertions.assertTrue(
+//                gzipCompressor.isCompressData(new byte[]{99, 111, 109, 112, 114, 101, 115, 115, 101, 100,31, -117, 0}));
+//    }
 
 }

@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import io.seata.compressor.gzip.GzipCompressor;
 import io.seata.server.storage.file.lock.FileLocker;
-import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -294,6 +293,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     @Override
     public byte[] encode() {
 
+        byte[] sessionEncodeFlag = SESSION_ENCODE_FLAG.getBytes();
+
         byte[] resourceIdBytes = resourceId != null ? resourceId.getBytes() : null;
 
         byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;
@@ -327,6 +328,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         //recycle
         byteBuffer.clear();
 
+        byteBuffer.put(sessionEncodeFlag);
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
 
@@ -408,15 +410,15 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (lockKeyLen > 0) {
             byte[] byLockKey = new byte[lockKeyLen];
             byteBuffer.get(byLockKey);
-            if (CompressUtil.isCompressData(byLockKey)) {
-                try {
-                    this.lockKey = new String(CompressUtil.uncompress(byLockKey));
-                } catch (IOException e) {
-                    throw new RuntimeException("decompress lockKey error", e);
-                }
-            } else {
-                this.lockKey = new String(byLockKey);
-            }
+//            if (CompressUtil.isCompressData(byLockKey)) {
+//                try {
+//                    this.lockKey = new String(CompressUtil.uncompress(byLockKey));
+//                } catch (IOException e) {
+//                    throw new RuntimeException("decompress lockKey error", e);
+//                }
+//            } else {
+//                this.lockKey = new String(byLockKey);
+//            }
 
         }
         short clientIdLen = byteBuffer.getShort();
