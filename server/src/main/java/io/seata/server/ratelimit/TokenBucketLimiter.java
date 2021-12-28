@@ -134,6 +134,10 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
     }
 
     public boolean acquire() {
+        return acquire(timeout);
+    }
+
+    public boolean acquire(long timeout) {
         long waitTimeInMicros = tryGetTokenWithDelay();
         if (TimeUnit.MICROSECONDS.toMillis(waitTimeInMicros) > timeout) {
             return false;
