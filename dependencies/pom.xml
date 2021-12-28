@@ -32,8 +32,6 @@
     <description>Seata dependencies</description>
 
     <properties>
-        <spring-boot.version>2.4.13</spring-boot.version>
-
         <netty.version>4.1.70.Final</netty.version>
         <dubbo.version>2.7.4</dubbo.version>
         <hsf.version>1.8.3</hsf.version>
