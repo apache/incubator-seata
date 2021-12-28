@@ -27,6 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type Branch session test.
  *
@@ -72,7 +74,7 @@ public class BranchSessionTest {
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(1L);
         branchSession.setClientId("c1");
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
