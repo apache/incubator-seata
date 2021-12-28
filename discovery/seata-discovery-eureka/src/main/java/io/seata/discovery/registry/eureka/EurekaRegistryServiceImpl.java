@@ -168,10 +168,10 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             if (CollectionUtils.isNotEmpty(instances)) {
                 Set<InetSocketAddress> addressSet = new HashSet<>(instances.size());
                 for (InstanceInfo instance : instances) {
-                    try {
+                    if(instance.getIPAddr() == null || instance.getPort() < 0 || instance.getPort() > 0xFFFF){
+                        LOGGER.error("eureka instance info illegal:{}",instance.toString());
+                    }else {
                         addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
-                    } catch (IllegalArgumentException e) {
-                        LOGGER.error(e.getMessage());
                     }
                 }
                 collect.put(application.getName(), addressSet);
