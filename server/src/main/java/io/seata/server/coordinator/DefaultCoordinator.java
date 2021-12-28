@@ -477,6 +477,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (ENABLE_SERVER_RATELIMIT) {
             AbstractResultMessage resultMessage = rateLimitedResponseMap.get(request.getClass());
             if (resultMessage != null && !rateLimiter.canPass()) {
+                eventBus.post(new GlobalTransactionEvent(-1, GlobalTransactionEvent.ROLE_TC, null,
+                    context.getApplicationId(), context.getTransactionServiceGroup(),
+                    null, null, null, true));
                 handleRateLimited(transactionRequest);
                 return resultMessage;
             }

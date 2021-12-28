@@ -39,6 +39,11 @@ public interface MeterIdConstants {
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
 
+    Id COUNTER_RATELIMITED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.RATELIMITED_KEY, IdConstants.RATELIMITED_VALUE_TRUE);
+
     Id SUMMARY_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
@@ -58,4 +63,9 @@ public interface MeterIdConstants {
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
+
+    Id SUMMARY_RATELIMITED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
+            .withTag(IdConstants.RATELIMITED_KEY, IdConstants.RATELIMITED_VALUE_TRUE);
 }

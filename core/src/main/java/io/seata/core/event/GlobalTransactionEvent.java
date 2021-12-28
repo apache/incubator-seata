@@ -69,6 +69,11 @@ public class GlobalTransactionEvent implements Event {
      */
     private final GlobalStatus status;
 
+    /**
+     * Transaction Rate Limited
+     */
+    private final boolean rateLimited;
+
     public long getId() {
         return id;
     }
@@ -101,6 +106,10 @@ public class GlobalTransactionEvent implements Event {
         return status;
     }
 
+    public boolean isRateLimited() {
+        return rateLimited;
+    }
+
     public GlobalTransactionEvent(long id, String role, String name, String applicationId,
             String group, Long beginTime, Long endTime, GlobalStatus status) {
         this.id = id;
@@ -111,12 +120,26 @@ public class GlobalTransactionEvent implements Event {
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.status = status;
+        this.rateLimited = false;
+    }
+
+    public GlobalTransactionEvent(long id, String role, String name , String applicationId,
+            String group, Long beginTime, Long endTime, GlobalStatus status, boolean rateLimited) {
+        this.id = id;
+        this.role = role;
+        this.name = name;
+        this.applicationId = applicationId;
+        this.group = group;
+        this.beginTime = beginTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.rateLimited = rateLimited;
     }
 
     @Override
     public String toString() {
         return "GlobalTransactionEvent{" + "id=" + id + ", role='" + role + '\'' + ", name='" + name + '\''
             + ", applicationId='" + applicationId + '\'' + ", group='" + group + '\'' + ", beginTime=" + beginTime
-            + ", endTime=" + endTime + ", status=" + status + '}';
+            + ", endTime=" + endTime + ", status=" + status + ", rateLimited=" + rateLimited + '}';
     }
 }

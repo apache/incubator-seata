@@ -123,10 +123,25 @@ public class MetricsSubscriber {
                 .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
+    private void processRateLimited(GlobalTransactionEvent event) {
+        registry.getCounter(MeterIdConstants.COUNTER_RATELIMITED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getSummary(MeterIdConstants.SUMMARY_RATELIMITED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
-        if (registry != null && consumers.containsKey(event.getStatus())) {
-            consumers.get(event.getStatus()).accept(event);
+        if (registry != null) {
+            if (event.isRateLimited()) {
+                processRateLimited(event);
+                return;
+            }
+            if (consumers.containsKey(event.getStatus())) {
+                consumers.get(event.getStatus()).accept(event);
+            }
         }
     }
 
