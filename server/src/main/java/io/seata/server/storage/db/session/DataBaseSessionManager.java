@@ -17,6 +17,7 @@ package io.seata.server.storage.db.session;
 
 import java.util.Collection;
 import java.util.List;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 @LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class DataBaseSessionManager extends AbstractSessionManager
-    implements Initialize {
+        implements Initialize {
 
     /**
      * The constant LOGGER.
@@ -107,6 +108,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
      * remove globalSession
      * 1. rootSessionManager remove normal globalSession
      * 2. retryCommitSessionManager and retryRollbackSessionManager remove retry expired globalSession
+     *
      * @param session the session
      * @throws TransactionException
      */
@@ -167,17 +169,19 @@ public class DataBaseSessionManager extends AbstractSessionManager
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
-                GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.RollbackRetrying,
+                    GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
+        } else if (SessionHolder.ROLLBACKED_CHECK_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked}));
         } else {
             // all data
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {
-                GlobalStatus.UnKnown, GlobalStatus.Begin,
-                GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
-                GlobalStatus.RollbackRetrying,
-                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{
+                    GlobalStatus.UnKnown, GlobalStatus.Begin,
+                    GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
+                    GlobalStatus.RollbackRetrying,
+                    GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting}));
         }
     }
 

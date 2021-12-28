@@ -148,6 +148,11 @@ public interface Constants {
     String UNDOLOG_DELETE = "UndologDelete";
 
     /**
+     * The constant ROLLBACKED_CHECK
+     */
+    String ROLLBACKED_CHECK = "RollbackedCheck";
+
+    /**
      * The constant AUTO_COMMIT
      */
     String AUTO_COMMIT = "autoCommit";

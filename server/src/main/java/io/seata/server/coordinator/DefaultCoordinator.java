@@ -61,6 +61,7 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
+import io.seata.server.session.BranchSessionHandler;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
@@ -68,11 +69,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.RETRY_COMMITTING;
-import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
-import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.Constants.*;
 
 /**
  * The type Default coordinator.
@@ -105,6 +102,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * The constant TIMEOUT_RETRY_PERIOD.
      */
     protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.TIMEOUT_RETRY_PERIOD, 1000L);
+
+    /**
+     * The constant ROLLBACKED_CHECK_PERIOD.
+     */
+    protected static final long ROLLBACKED_CHECK_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKED_CHECK_PERIOD, 1000L);
 
     /**
      * The Transaction undo log delete period.
@@ -142,6 +144,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("UndoLogDelete", 1));
+
+    private final ScheduledThreadPoolExecutor rollbackedCheck = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("rollbackedCheck", 1));
 
     private RemotingServer remotingServer;
 
@@ -404,6 +409,35 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
     }
 
+
+    /**
+     * Rollbacked Check
+     */
+    protected void handleRollbackedCheck() {
+        Collection<GlobalSession> allSessions = SessionHolder.getRollbackedCheckSessionManager().allSessions();
+        if (allSessions.isEmpty()) {
+            return;
+        }
+        if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Global transaction rollbacked check begin, size: {}", allSessions.size());
+        }
+        SessionHelper.forEach(allSessions, rollbackedSession -> SessionHolder.lockAndExecute(rollbackedSession, () -> {
+            if (!rollbackedSession.isTimeout()) {
+                return false;
+            }
+            LOGGER.info("Global transaction[{}] is timeout and will be rollback.", rollbackedSession.getXid());
+            rollbackedSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+            Boolean result = SessionHelper.forEach(rollbackedSession.getReverseSortedBranches(), branchSession -> {
+                rollbackedSession.removeBranch(branchSession);
+                return BranchSessionHandler.CONTINUE;
+            });
+            if (result == null) {
+                SessionHelper.endRollbacked(rollbackedSession);
+            }
+            return result;
+        }));
+    }
+
     /**
      * Init.
      */
@@ -422,6 +456,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         undoLogDelete.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
                 UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+
+        rollbackedCheck.scheduleAtFixedRate(() -> SessionHolder.distributedLockAndExecute(ROLLBACKED_CHECK, this::handleRollbackedCheck),
+                0, ROLLBACKED_CHECK_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -468,6 +505,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     /**
      * only used for mock test
+     *
      * @param remotingServer
      */
     public void setRemotingServer(RemotingServer remotingServer) {
