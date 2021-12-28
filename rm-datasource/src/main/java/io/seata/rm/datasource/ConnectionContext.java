@@ -17,18 +17,25 @@ package io.seata.rm.datasource;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.Set;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+
+
+import static io.seata.common.Constants.AUTO_COMMIT;
 
 /**
  * The type Connection context.
@@ -36,7 +43,7 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
  * @author sharajava
  */
 public class ConnectionContext {
-    private static final Savepoint DEFAULT_SAVEPOINT = new Savepoint() {
+    private static final Savepoint    DEFAULT_SAVEPOINT = new Savepoint() {
         @Override
         public int getSavepointId() throws SQLException {
             return 0;
@@ -48,11 +55,14 @@ public class ConnectionContext {
         }
     };
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private String xid;
     private Long branchId;
     private boolean isGlobalLockRequire;
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
     private boolean autoCommitChanged;
+    private Map<String, Object> applicationData = new HashMap<>(2);
 
     /**
      * the lock keys buffer
@@ -257,6 +267,24 @@ public class ConnectionContext {
         this.autoCommitChanged = autoCommitChanged;
     }
 
+    /**
+     * Gets applicationData.
+     *
+     * @return the application data
+     */
+    public String getApplicationData() throws TransactionException {
+        boolean autoCommit = this.isAutoCommitChanged();
+        // when transaction are enabled, it must be false
+        if (!autoCommit) {
+            this.applicationData.put(AUTO_COMMIT, autoCommit);
+            try {
+                return MAPPER.writeValueAsString(this.applicationData);
+            } catch (JsonProcessingException e) {
+                throw new TransactionException(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
 
     /**
      * Reset.
@@ -278,6 +306,7 @@ public class ConnectionContext {
         lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
         this.autoCommitChanged = false;
+        applicationData.clear();
     }
 
     /**
@@ -338,8 +367,7 @@ public class ConnectionContext {
 
     @Override
     public String toString() {
-        return "ConnectionContext [xid=" + xid + ", branchId=" + branchId + ", lockKeysBuffer=" + lockKeysBuffer
-            + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + "]";
+        return StringUtils.toString(this);
     }
 
 }
