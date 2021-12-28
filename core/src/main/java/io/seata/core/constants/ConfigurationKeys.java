@@ -348,6 +348,11 @@ public interface ConfigurationKeys {
     String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
 
     /**
+     * The constant ROLLBACKED_CHECK_PERIOD.
+     */
+    String ROLLBACKED_CHECK_PERIOD = RECOVERY_PREFIX + "rollbackedCheckPeriod";
+
+    /**
      * The constant CLIENT_UNDO_PREFIX.
      */
     String CLIENT_UNDO_PREFIX = "client.undo.";
