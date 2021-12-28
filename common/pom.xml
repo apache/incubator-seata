@@ -25,7 +25,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-common</artifactId>
-    <packaging>jar</packaging>
 
     <name>seata-common ${project.version}</name>
 
