@@ -123,8 +123,8 @@ public class DefaultCoordinatorMetricsTest {
             Thread.sleep(2000);
             MetricsManager.get().getRegistry().measure().forEach(
                 measurement -> measurements.put(measurement.getId().toString(), measurement));
-            Assertions.assertEquals(17, measurements.size());
-            Assertions.assertEquals(0,
+            Assertions.assertEquals(9, measurements.size());
+            Assertions.assertEquals(1,
                 measurements.get("seata.transaction(applicationId=null,group=null,meter=counter,role=tc,status=active)")
                     .getValue(), 0);
 
@@ -142,22 +142,16 @@ public class DefaultCoordinatorMetricsTest {
             Assertions.assertEquals(0, measurements.get(
                 "seata.transaction(applicationId=null,group=null,meter=timer,role=tc,statistic=count,status=committed)")
                 .getValue(), 0);
+            Assertions.assertEquals(null, measurements.get(
+                    "seata.transaction(applicationId=null,group=null,meter=summary,role=tc,statistic=count,"
+                            + "status=rollbacked)"));
 
-            Assertions.assertEquals(1, measurements
-                .get("seata.transaction(applicationId=null,group=null,meter=counter,role=tc,status=rollbacked)")
-                .getValue(), 0);
-            Assertions.assertEquals(1, measurements.get(
-                "seata.transaction(applicationId=null,group=null,meter=summary,role=tc,statistic=count,"
-                    + "status=rollbacked)")
-                .getValue(), 0);
-            Assertions.assertEquals(1, measurements.get(
+            Assertions.assertEquals(null, measurements.get(
                 "seata.transaction(applicationId=null,group=null,meter=summary,role=tc,statistic=total,"
-                    + "status=rollbacked)")
-                .getValue(), 0);
-            Assertions.assertEquals(1, measurements.get(
+                    + "status=rollbacked)"));
+            Assertions.assertEquals(null, measurements.get(
                 "seata.transaction(applicationId=null,group=null,meter=timer,role=tc,statistic=count,"
-                    + "status=rollbacked)")
-                .getValue(), 0);
+                    + "status=rollbacked)"));
         } finally {
             // call SpringContextShutdownHook
         }
