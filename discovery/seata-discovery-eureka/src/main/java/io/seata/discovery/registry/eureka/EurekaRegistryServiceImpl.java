@@ -148,7 +148,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private void refreshCluster(String clusterName) {
-        Application application = getEurekaClient(false).getApplications().getRegisteredApplications(clusterName);
+        Application application = getEurekaClient(false).getApplication(clusterName);
 
         if (application == null || CollectionUtils.isEmpty(application.getInstances())) {
             clusterAddressMap.remove(clusterName);
