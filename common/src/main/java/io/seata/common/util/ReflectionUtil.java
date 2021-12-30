@@ -306,8 +306,6 @@ public final class ReflectionUtil {
 
     /**
      * modify `static` or `static final` field value
-     * <p>
-     * In Java 17, this method cannot be used for final fields
      *
      * @param staticField the static field
      * @param newValue    the new value

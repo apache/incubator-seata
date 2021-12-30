@@ -19,14 +19,10 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
 
 public class ReflectionUtilTest {
 
@@ -95,12 +91,11 @@ public class ReflectionUtilTest {
                 ReflectionUtil.getInterfaces(Serializable.class).toArray());
 
         Assertions.assertArrayEquals(new Object[]{
-                        Map.class, Cloneable.class, Serializable.class},
-                ReflectionUtil.getInterfaces(HashMap.class).toArray());
+                        Serializable.class, Comparable.class, CharSequence.class},
+                ReflectionUtil.getInterfaces(String.class).toArray());
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
         Assertions.assertEquals("hello", testValue);
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");

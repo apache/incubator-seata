@@ -32,7 +32,7 @@
     <description>Seata dependencies</description>
 
     <properties>
-        <netty4.version>4.1.30.Final</netty4.version>
+        <netty.version>4.1.30.Final</netty.version>
         <dubbo.version>2.7.4</dubbo.version>
         <hsf.version>1.8.3</hsf.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
@@ -98,7 +98,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- spring-boot  -->
+            <!-- spring-boot -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -111,7 +111,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>${netty4.version}</version>
+                <version>${netty.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -25,8 +25,6 @@ import io.seata.rm.datasource.undo.parser.FstUndoLogParser;
 import io.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import io.seata.rm.datasource.undo.parser.KryoUndoLogParser;
 import io.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
 
 /**
  * @author Geng Zhang
@@ -47,6 +45,10 @@ class UndoLogParserProviderTest {
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof ProtostuffUndoLogParser);
         
+        parser = EnhancedServiceLoader.load(UndoLogParser.class, "fst");
+        Assertions.assertNotNull(parser);
+        Assertions.assertTrue(parser instanceof FstUndoLogParser);
+
         parser = EnhancedServiceLoader.load(UndoLogParser.class, "kryo");
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof KryoUndoLogParser);
@@ -57,13 +59,5 @@ class UndoLogParserProviderTest {
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof EnhancedServiceNotFoundException);
         }
-    }
-
-    @Test
-    @DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
-    void testLoadFstUndoLogParser(){
-        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fst");
-        Assertions.assertNotNull(parser);
-        Assertions.assertTrue(parser instanceof FstUndoLogParser);
     }
 }
