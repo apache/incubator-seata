@@ -24,9 +24,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-hsf</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-hsf ${project.version}</name>
 
     <dependencies>
@@ -40,4 +39,6 @@
             <artifactId>edas-sdk</artifactId>
         </dependency>
     </dependencies>
+
+
 </project>

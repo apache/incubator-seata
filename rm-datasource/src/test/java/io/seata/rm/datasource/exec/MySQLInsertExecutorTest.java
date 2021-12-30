@@ -15,7 +15,10 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.mysql.jdbc.ResultSetImpl;
+import com.mysql.jdbc.util.ResultSetUtil;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;

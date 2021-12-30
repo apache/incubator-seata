@@ -85,7 +85,7 @@ public class PrometheusExporter extends Collector implements Collector.Describab
     }
 
     /**
-     * For compatibility with high and low versions
+     * For compatibility with high and low versions of the 'io.prometheus:simpleclient'
      *
      * @return the unknown collector type
      */

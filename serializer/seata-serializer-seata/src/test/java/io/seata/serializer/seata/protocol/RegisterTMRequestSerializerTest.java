@@ -115,7 +115,7 @@ public class RegisterTMRequestSerializerTest {
         BB.clear();
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode empty should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }
@@ -132,7 +132,7 @@ public class RegisterTMRequestSerializerTest {
         }
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode less than two should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }
@@ -142,14 +142,14 @@ public class RegisterTMRequestSerializerTest {
      * Test decode method with initialized parameter
      */
     @Test
-    public void testDecodeLessThanThree() {
+    public void testDecodeMoreThanThree() {
         BB.clear();
         for (int i = 0; i < 3; i++) {
             BB.writeShort(i);
         }
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode less than three should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }
@@ -166,7 +166,7 @@ public class RegisterTMRequestSerializerTest {
         }
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode less than four should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }
@@ -176,14 +176,14 @@ public class RegisterTMRequestSerializerTest {
      * Test decode method with initialized parameter
      */
     @Test
-    public void testDecodeLessThanOne() {
+    public void testDecodeMoreLessThanOne() {
         BB.clear();
         for (int i = 0; i < 1; i++) {
             BB.writeShort(i);
         }
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode less than one should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }
@@ -193,7 +193,7 @@ public class RegisterTMRequestSerializerTest {
      * Test decode method with initialized parameter
      */
     @Test
-    public void testDecodeLessThanFourWithZero() {
+    public void testDecodeMoreLessThanFourWithZero() {
         BB.clear();
         for (int i = 0; i < 4; i++) {
             BB.writeZero(i);
@@ -201,7 +201,7 @@ public class RegisterTMRequestSerializerTest {
 
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode less than four with zero should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }
@@ -211,7 +211,7 @@ public class RegisterTMRequestSerializerTest {
      * Test decode method with initialized parameter
      */
     @Test
-    public void testDecodeLessThanFiveWithSomeZero() {
+    public void testDecodeTrueLessThanFive() {
         BB.clear();
         for (int i = 0; i < 4; i++) {
             BB.writeZero(i);
@@ -221,7 +221,7 @@ public class RegisterTMRequestSerializerTest {
         }
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode less than five with some zero should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }
@@ -231,7 +231,7 @@ public class RegisterTMRequestSerializerTest {
      * Test decode method with initialized parameter
      */
     @Test
-    public void testDecodeLessThanSixteenWithSomeZero() {
+    public void testDecodeTrueLessThanSixteen() {
         BB.clear();
         for (int i = 0; i < 15; i++) {
             BB.writeZero(i);
@@ -241,7 +241,7 @@ public class RegisterTMRequestSerializerTest {
         }
         try {
             seataSerializer.deserialize(BB.array());
-            Assertions.fail("decode less than sixteen with some zero should throw an exception");
+            Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
         }

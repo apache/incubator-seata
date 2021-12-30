@@ -56,7 +56,7 @@ public class MySQLInsertRecognizerTest {
 
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
         Assertions.assertEquals(Collections.singletonList("id"), Arrays.asList(visitorSqlContext.getInsertColumnNames().get(0).getInsertColumnName()));
-        Assertions.assertEquals(1, visitorSqlContext.insertRows.intValue());
+        Assertions.assertEquals(1, visitorSqlContext.insertRows);
         Assertions.assertEquals(Arrays.asList("1"), visitorSqlContext.getInsertForValColumnNames().get(0));
     }
 
@@ -84,7 +84,7 @@ public class MySQLInsertRecognizerTest {
         Assertions.assertEquals(Arrays.asList("name1", "name2"), visitorSqlContext.getInsertColumnNames().stream().map(insert -> {
             return insert.getInsertColumnName();
         }).collect(Collectors.toList()));
-        Assertions.assertEquals(1, visitorSqlContext.insertRows.intValue());
+        Assertions.assertEquals(1, visitorSqlContext.insertRows);
         Assertions.assertEquals(Arrays.asList("name1", "12"), visitorSqlContext.getInsertForValColumnNames().get(0));
     }
 
@@ -112,7 +112,7 @@ public class MySQLInsertRecognizerTest {
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
         Assertions.assertEquals("name2", visitorSqlContext.getInsertColumnNames().get(1).getInsertColumnName());
 
-        int insertRows = visitorSqlContext.insertRows;
+        Integer insertRows = visitorSqlContext.insertRows;
         Assertions.assertEquals(3, insertRows);
 
         Assertions.assertEquals(Arrays.asList("name1", "name2"), visitorSqlContext.getInsertForValColumnNames().get(0));

@@ -178,6 +178,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         } catch (Exception exx) {
             throw new RuntimeException("Server start failed", exx);
         }
+
     }
 
     @Override
@@ -196,7 +197,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
-            LOGGER.error("shutdown execute error: {}",exx.getMessage(),exx);
+            LOGGER.error("shutdown execute error: {}", exx.getMessage(), exx);
         }
     }
 }

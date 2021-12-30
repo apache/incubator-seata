@@ -23,9 +23,8 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-rm</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-rm ${project.version}</name>
 
     <dependencies>
@@ -39,4 +38,6 @@
             <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
+
+
 </project>

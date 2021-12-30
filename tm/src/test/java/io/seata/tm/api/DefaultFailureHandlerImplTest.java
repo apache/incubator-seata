@@ -94,7 +94,7 @@ class DefaultFailureHandlerImplTest {
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
-        long pendingTimeout = timer.pendingTimeouts();
+        Long pendingTimeout = timer.pendingTimeouts();
         Assertions.assertEquals(pendingTimeout,1L);
         //set globalStatus
         globalStatus= GlobalStatus.Committed;
@@ -120,7 +120,7 @@ class DefaultFailureHandlerImplTest {
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
-        long pendingTimeout = timer.pendingTimeouts();
+        Long pendingTimeout = timer.pendingTimeouts();
         Assertions.assertEquals(pendingTimeout,1L);
         //set globalStatus
         globalStatus= GlobalStatus.Rollbacked;

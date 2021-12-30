@@ -24,9 +24,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-sofa-rpc</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-sofa-rpc ${project.version}</name>
 
     <dependencies>
@@ -39,5 +38,7 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-all</artifactId>
         </dependency>
+
     </dependencies>
+
 </project>

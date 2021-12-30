@@ -25,7 +25,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,8 @@ import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.util.Arrays;
 
@@ -41,15 +42,23 @@ import java.util.Arrays;
  *
  * @author ggndnn
  */
-@DisabledOnJre(JRE.JAVA_17) // `cglib:cglib:3.1~3.3.0` does not supported java17
+@DisabledOnJre(JRE.JAVA_17) // `cglib:cglib:3.1~3.3.0` and `ReflectionUtil.modifyStaticFinalField` does not supported java17
 public class AbstractDMLBaseExecutorTest {
     private ConnectionProxy connectionProxy;
 
     private AbstractDMLBaseExecutor executor;
 
+    private Field branchRollbackFlagField;
+
     @BeforeEach
     public void initBeforeEach() throws Exception {
-        Assertions.assertTrue(ConnectionProxy.LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict());
+        branchRollbackFlagField = ConnectionProxy.LockRetryPolicy.class.getDeclaredField("LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT");
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(branchRollbackFlagField, branchRollbackFlagField.getModifiers() & ~Modifier.FINAL);
+        branchRollbackFlagField.setAccessible(true);
+        boolean branchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
+        Assertions.assertTrue(branchRollbackFlag);
 
         Connection targetConnection = Mockito.mock(Connection.class);
         connectionProxy = Mockito.mock(ConnectionProxy.class);
@@ -77,28 +86,25 @@ public class AbstractDMLBaseExecutorTest {
                 .when(executor).afterImage(tableRecords);
     }
 
-    @AfterEach
-    public void cleanAfterEach() {
-        ConnectionProxy.LockRetryPolicy.removeLockRetryPolicyBranchRollbackOnConflict();
-    }
-
     @Test
     public void testLockRetryPolicyRollbackOnConflict() throws Exception {
-        ConnectionProxy.LockRetryPolicy.setLockRetryPolicyBranchRollbackOnConflict(true);
-
+        boolean oldBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
+        branchRollbackFlagField.set(null, true);
         Assertions.assertThrows(LockWaitTimeoutException.class, executor::execute);
         Mockito.verify(connectionProxy.getTargetConnection(), Mockito.atLeastOnce())
                 .rollback();
         Mockito.verify(connectionProxy, Mockito.never()).rollback();
+        branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }
 
     @Test
     public void testLockRetryPolicyNotRollbackOnConflict() throws Throwable {
-        ConnectionProxy.LockRetryPolicy.setLockRetryPolicyBranchRollbackOnConflict(false);
-
+        boolean oldBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
+        branchRollbackFlagField.set(null, false);
         Assertions.assertThrows(LockConflictException.class, executor::execute);
         Mockito.verify(connectionProxy.getTargetConnection(), Mockito.times(1)).rollback();
         Mockito.verify(connectionProxy, Mockito.never()).rollback();
+        branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }
 
     @Test

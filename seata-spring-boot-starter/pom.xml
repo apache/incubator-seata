@@ -23,9 +23,8 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-spring-boot-starter</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-spring-boot-starter ${project.version}</name>
 
     <dependencies>
@@ -34,14 +33,12 @@
             <artifactId>seata-spring-autoconfigure-client</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <!--seata-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-all</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <!--spring-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -54,4 +51,5 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
 </project>

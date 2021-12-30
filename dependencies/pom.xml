@@ -28,20 +28,20 @@
     <artifactId>seata-dependencies</artifactId>
     <packaging>pom</packaging>
 
-    <name>Seata Dependencies ${project.version}</name>
+    <name>Seata dependencies ${project.version}</name>
     <description>Seata dependencies</description>
 
     <properties>
-        <netty.version>4.1.70.Final</netty.version>
+        <netty4.version>4.1.30.Final</netty4.version>
         <dubbo.version>2.7.4</dubbo.version>
         <hsf.version>1.8.3</hsf.version>
-        <alibaba-dubbo.version>2.6.5</alibaba-dubbo.version>
-        <sofa-rpc.version>5.5.3</sofa-rpc.version>
-        <fastjson.version>1.2.78</fastjson.version>
+        <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
+        <sofa.rpc.version>5.5.3</sofa.rpc.version>
+        <fastjson.version>1.2.73</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
-        <commons-lang.version>2.6</commons-lang.version>
         <commons-logging.version>1.2</commons-logging.version>
+        <commons-lang.version>2.6</commons-lang.version>
         <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
@@ -61,13 +61,18 @@
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <antlr4.version>4.8</antlr4.version>
         <druid.version>1.2.6</druid.version>
+        <mysql5.version>5.1.35</mysql5.version>
+        <mysql8.version>8.0.19</mysql8.version>
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.72</jcommander.version>
+        <annotation.api.version>1.2</annotation.api.version>
+        <servlet-api.version>4.0.1</servlet-api.version>
         <xz.version>1.8</xz.version>
         <commons-compress.version>1.19</commons-compress.version>
         <ant.version>1.10.6</ant.version>
         <snakeyaml.version>1.26</snakeyaml.version>
         <lz4.version>1.7.1</lz4.version>
+
         <protobuf.version>3.7.1</protobuf.version>
         <grpc.version>1.17.1</grpc.version>
         <kryo.version>4.0.2</kryo.version>
@@ -76,16 +81,13 @@
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
+
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
         <kotlin.version>1.4.0</kotlin.version>
         <kotlin-coroutines.version>1.4.0</kotlin-coroutines.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
-        <mysql.version>5.1.35</mysql.version>
-        <mysql8.version>8.0.19</mysql8.version>
-        <javax-annotation.version>1.3.2</javax-annotation.version>
-        <servlet-api.version>4.0.1</servlet-api.version>
 
         <!-- for test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -109,7 +111,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>${netty.version}</version>
+                <version>${netty4.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -131,7 +133,7 @@
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-all</artifactId>
-                <version>${sofa-rpc.version}</version>
+                <version>${sofa.rpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.protostuff</groupId>
@@ -154,14 +156,14 @@
                 <version>${snakeyaml.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>${commons-logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -176,7 +178,7 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>dubbo</artifactId>
-                <version>${alibaba-dubbo.version}</version>
+                <version>${dubbo.alibaba.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.edas</groupId>
@@ -337,7 +339,7 @@
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.version}</version>
+                <version>${mysql5.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>
@@ -543,7 +545,7 @@
             <dependency>
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
-                <version>${javax-annotation.version}</version>
+                <version>${annotation.api.version}</version>
             </dependency>
 
             <!-- test -->

@@ -23,9 +23,8 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-compressor-lz4</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-compressor-lz4 ${project.version}</name>
 
     <dependencies>
@@ -39,4 +38,5 @@
             <artifactId>lz4-java</artifactId>
         </dependency>
     </dependencies>
+
 </project>

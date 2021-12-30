@@ -23,9 +23,8 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-compressor-gzip</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-compressor-gzip ${project.version}</name>
 
     <dependencies>
@@ -35,4 +34,6 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
+
 </project>

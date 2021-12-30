@@ -23,9 +23,8 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-compressor-bzip2</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-compressor-bzip2 ${project.version}</name>
 
     <dependencies>
@@ -39,4 +38,6 @@
             <artifactId>ant</artifactId>
         </dependency>
     </dependencies>
+
+
 </project>

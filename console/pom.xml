@@ -8,9 +8,8 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-console</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-console ${project.version}</name>
 
     <dependencies>

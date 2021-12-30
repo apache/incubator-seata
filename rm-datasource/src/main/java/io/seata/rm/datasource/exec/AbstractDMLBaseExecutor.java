@@ -179,7 +179,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
 
         @Override
         public <T> T execute(Callable<T> callable) throws Exception {
-            if (isLockRetryPolicyBranchRollbackOnConflict()) {
+            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
                 return doRetryOnLockConflict(callable);
             } else {
                 return callable.call();
@@ -192,6 +192,10 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             //UndoItems can't use the Set collection class to prevent ABA
             context.removeSavepoint(null);
             connection.getTargetConnection().rollback();
+        }
+
+        public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
+            return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
         }
     }
 }

@@ -23,9 +23,8 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-compressor-zstd</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-compressor-zstd ${project.version}</name>
 
     <dependencies>
@@ -38,5 +37,8 @@
             <groupId>com.github.luben</groupId>
             <artifactId>zstd-jni</artifactId>
         </dependency>
+
     </dependencies>
+
+
 </project>

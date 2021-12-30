@@ -24,9 +24,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-dubbo</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-dubbo ${project.version}</name>
 
     <dependencies>
@@ -40,4 +39,6 @@
             <artifactId>dubbo</artifactId>
         </dependency>
     </dependencies>
+
+
 </project>

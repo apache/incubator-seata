@@ -24,9 +24,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-http</artifactId>
-
+    <packaging>jar</packaging>
     <name>seata-http ${project.version}</name>
 
     <dependencies>
@@ -54,5 +53,8 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
+
     </dependencies>
+
+
 </project>

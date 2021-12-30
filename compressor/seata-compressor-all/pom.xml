@@ -23,12 +23,15 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-compressor-all</artifactId>
-
     <name>seata-compressor-all ${project.version}</name>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-compressor-gzip</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-compressor-7z</artifactId>
@@ -41,12 +44,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-compressor-deflater</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-compressor-gzip</artifactId>
+            <artifactId>seata-compressor-zip</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -56,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-compressor-zip</artifactId>
+            <artifactId>seata-compressor-deflater</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -65,4 +63,5 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
 </project>

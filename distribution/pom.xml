@@ -23,25 +23,21 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-distribution</artifactId>
     <packaging>pom</packaging>
-
     <name>seata-distribution ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>io.seata</groupId>
             <artifactId>seata-server</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
     <profiles>
         <profile>
             <id>release-seata</id>
             <build>
-                <finalName>seata</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -63,10 +59,10 @@
                         </executions>
                     </plugin>
                 </plugins>
+                <finalName>seata</finalName>
             </build>
         </profile>
     </profiles>
-
     <build>
         <plugins>
             <plugin>
