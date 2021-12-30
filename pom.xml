@@ -291,18 +291,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <!-- Compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <parameters>true</parameters>
-                </configuration>
-            </plugin>
             <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -384,30 +372,6 @@
                 <version>${maven-resources-plugin.version}</version>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-            <!-- Jar -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven-jar-plugin.version}</version>
-                <configuration>
-                    <archive>
-                        <addMavenDescriptor>true</addMavenDescriptor>
-                        <index>true</index>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
-                        </manifestEntries>
-                    </archive>
-                    <excludes>
-                        <exclude>**/META-INF/additional-spring-configuration-metadata.json</exclude>
-                        <exclude>protobuf/**</exclude>
-                        <exclude>**/*.proto</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
         </plugins>
