@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import io.seata.common.util.CompressUtil;
+import io.seata.compressor.gzip.GzipCompressor;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -312,6 +313,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;
 
+        int isCompress = null != lockKeyBytes && lockKeyBytes.length > 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+
         byte[] clientIdBytes = clientId != null ? clientId.getBytes() : null;
 
         byte[] applicationDataBytes = applicationData != null ? applicationData.getBytes() : null;
@@ -322,26 +325,14 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
 
+        GzipCompressor compressor = new GzipCompressor();
+
         if (size > MAX_BRANCH_SESSION_SIZE) {
             if (lockKeyBytes == null) {
                 throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : "
                     + MAX_BRANCH_SESSION_SIZE);
             }
-            // try compress lockkey
-            try {
-                size -= lockKeyBytes.length;
-                lockKeyBytes = CompressUtil.compress(lockKeyBytes);
-            } catch (IOException e) {
-                LOGGER.error("compress lockKey error", e);
-            } finally {
-                size += lockKeyBytes.length;
-            }
-
-            if (size > MAX_BRANCH_SESSION_SIZE) {
-                throw new RuntimeException(
-                    "compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : "
-                        + MAX_BRANCH_SESSION_SIZE);
-            }
+            lockKeyBytes = compressor.compress(lockKeyBytes);
         }
 
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
@@ -361,6 +352,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (lockKeyBytes != null) {
             byteBuffer.putInt(lockKeyBytes.length);
             byteBuffer.put(lockKeyBytes);
+            byteBuffer.putInt(isCompress);
         } else {
             byteBuffer.putInt(0);
         }
@@ -418,6 +410,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public void decode(byte[] a) {
+        GzipCompressor compressor = new GzipCompressor();
         ByteBuffer byteBuffer = ByteBuffer.wrap(a);
         this.transactionId = byteBuffer.getLong();
         this.branchId = byteBuffer.getLong();
@@ -431,12 +424,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (lockKeyLen > 0) {
             byte[] byLockKey = new byte[lockKeyLen];
             byteBuffer.get(byLockKey);
-            if (CompressUtil.isCompressData(byLockKey)) {
-                try {
-                    this.lockKey = new String(CompressUtil.uncompress(byLockKey));
-                } catch (IOException e) {
-                    throw new RuntimeException("decompress lockKey error", e);
-                }
+            int isCompress = byteBuffer.getInt();
+            if (isCompress == Integer.MAX_VALUE) {
+                this.lockKey = new String(compressor.decompress(byLockKey));
             } else {
                 this.lockKey = new String(byLockKey);
             }
