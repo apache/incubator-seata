@@ -159,7 +159,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             return;
         }
 
-        List<InetSocketAddress> list = new ArrayList<>(application.size());
+        List<InetSocketAddress> list = new ArrayList<>(application.getInstances().size());
         for (InstanceInfo instance : application.getInstances()) {
             if (instance.getIPAddr() == null || instance.getPort() < 0 || instance.getPort() > 0xFFFF) {
                 LOGGER.error("eureka instance info illegal:{}", instance.toString());
