@@ -152,4 +152,9 @@ public interface Constants {
      */
     String UNDOLOG_DELETE = "UndologDelete";
 
+    /**
+     * The constant AUTO_COMMIT
+     */
+    String AUTO_COMMIT = "autoCommit";
+
 }
