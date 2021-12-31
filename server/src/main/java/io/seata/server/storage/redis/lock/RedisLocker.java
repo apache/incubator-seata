@@ -15,10 +15,6 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
-import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
-
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,14 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-
-import javax.ws.rs.HEAD;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
-
 import io.seata.common.exception.StoreException;
 import io.seata.common.io.FileLoader;
 import io.seata.common.util.CollectionUtils;
@@ -54,9 +43,13 @@ import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
+import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 /**
  * The redis lock store operation
  *
