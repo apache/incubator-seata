@@ -17,11 +17,10 @@ package io.seata.server.console.impl.db;
 
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.IOUtil;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
-import io.seata.core.store.db.vo.BranchSessionVO;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.vo.BranchSessionVO;
+import io.seata.core.console.result.PageResult;
 import io.seata.server.console.service.BranchSessionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -55,23 +54,16 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
         List<BranchSessionVO> list = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet resultSet = null;
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
         String queryAllBranchSessionSQL = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllBranchSessionSQL(branchTable, xid);
-        try {
-            conn = dataSource.getConnection();
-            ps = conn.prepareStatement(queryAllBranchSessionSQL);
-
-            resultSet = ps.executeQuery();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(queryAllBranchSessionSQL);
+             ResultSet resultSet = ps.executeQuery()) {
             while (resultSet.next()) {
                 list.add(BranchSessionVO.convert(resultSet));
             }
         } catch (SQLException e) {
             throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, conn, resultSet);
         }
         return PageResult.success(list, list.size(), 0, 0, 0);
     }

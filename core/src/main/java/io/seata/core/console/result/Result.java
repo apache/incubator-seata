@@ -13,13 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.console.result;
+package io.seata.core.console.result;
+
+import java.io.Serializable;
 
 /**
  * @description: The basic result
  * @author: zhongxiang.wang
  */
-public class Result<T> {
+public class Result<T>  implements Serializable {
+    private static final long serialVersionUID = 7761261124298767L;
+
     public static final String SUCCESS_CODE = "200";
     public static final String SUCCESS_MSG = "success";
 
