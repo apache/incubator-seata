@@ -28,6 +28,7 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
@@ -183,9 +184,11 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             // pk auto generated while single insert primary key is expression
             if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
                 pkValuesMap.putAll(getPkValuesByAuto());
-            }
-            // pk auto generated while column exists and value is null
-            else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
+            } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
+                // pk auto generated while column exists and value is null
+                pkValuesMap.putAll(getPkValuesByAuto());
+            } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
+                // pk auto generated while column exists and value is null
                 pkValuesMap.putAll(getPkValuesByAuto());
             }
         }

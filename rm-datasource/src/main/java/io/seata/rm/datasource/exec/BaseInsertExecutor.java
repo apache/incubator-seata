@@ -382,7 +382,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             if (m > 0) {
                 return false;
             }
-            if (n == 1 && v == 0 && m == 0 && s == 0 && d == 0) {
+            if (n > 1 && v == 0 && m == 0 && s == 0 && d == 0) {
                 return true;
             }
             if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
@@ -391,7 +391,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             if (n == 0 && v == 0 && m == 0 && s == 1 && d == 0) {
                 return true;
             }
-            if (n == 0 && v == 0 && m == 0 && s == 0 && d == 1) {
+            if (n == 0 && v == 0 && m == 0 && s == 0 && d > 0) {
                 return true;
             }
             return false;
