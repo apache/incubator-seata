@@ -78,7 +78,7 @@ public class ATCore extends AbstractCore {
             }
         } catch (StoreException e) {
             if (e.getCause() instanceof BranchTransactionException) {
-                throw new BranchTransactionException((((BranchTransactionException)e.getCause())).getCode(),
+                throw new BranchTransactionException(((BranchTransactionException)e.getCause()).getCode(),
                     String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
                         branchSession.getBranchId()));
             }
