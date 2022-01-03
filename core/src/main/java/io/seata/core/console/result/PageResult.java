@@ -16,6 +16,7 @@
 package io.seata.core.console.result;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -64,6 +65,46 @@ public class PageResult<T> extends Result<T>  implements Serializable {
         this.data = data;
     }
 
+    public PageResult(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
+        super(SUCCESS_CODE, SUCCESS_MSG);
+        this.total = total;
+        this.pageNum = pageNum;
+        this.pageSize = pageSize;
+        this.data = pageingDate(data,total,pageNum,pageSize);
+    }
+
+    private List<T> pageingDate(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
+        if (CollectionUtils.isEmpty(data)){
+            return null;
+        }
+        if (total.equals(0)){
+            return null;
+        }
+        if (total % pageSize == 0){
+            this.pages = total / pageSize;
+        }else {
+            this.pages = total / pageSize +1;
+        }
+
+        int startIndex = 0;
+        int endIndex = 0;
+
+        if (pageNum > pages){
+            return null;
+        }
+
+        startIndex = (pageNum-1) * pageSize;
+
+        if (!pageNum.equals(pages)){
+            endIndex = startIndex + pageSize;
+        }else {
+            endIndex = total;
+        }
+
+        return data.subList(startIndex, endIndex);
+
+    }
+
     public static <T> PageResult<T> failure(String code, String msg) {
         return new PageResult<>(code, msg);
     }
@@ -79,7 +120,9 @@ public class PageResult<T> extends Result<T>  implements Serializable {
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pages, pageNum, pageSize);
     }
-
+    public static <T> PageResult<T> success(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
+        return new PageResult<>(data, total, pageNum, pageSize);
+    }
     public Integer getTotal() {
         return total;
     }
