@@ -58,7 +58,7 @@ public class FileLocker extends AbstractLocker {
 
         CLEAN_EMPTY_EXECUTOR.scheduleAtFixedRate(() -> {
             cleanEmptyMap();
-            }, MAX_EMPTY_MAP_CLEAN_DELAY, MAX_EMPTY_MAP_CLEAN_DELAY / 2, TimeUnit.MILLISECONDS);
+        }, MAX_EMPTY_MAP_CLEAN_DELAY, MAX_EMPTY_MAP_CLEAN_DELAY / 2, TimeUnit.MILLISECONDS);
     }
 
     /**
