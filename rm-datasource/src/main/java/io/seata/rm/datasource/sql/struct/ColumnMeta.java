@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.struct;
 
 import java.util.Objects;
+import io.seata.common.util.StringUtils;
 
 /**
  * The type Column meta.
@@ -41,6 +42,7 @@ public class ColumnMeta {
     private int ordinalPosition;
     private String isNullAble;
     private String isAutoincrement;
+    private String generationExpression;
 
     /**
      * Instantiates a new Column meta.
@@ -51,25 +53,26 @@ public class ColumnMeta {
     @Override
     public String toString() {
         return "ColumnMeta{" +
-                "tableCat='" + tableCat + '\'' +
-                ", tableSchemaName='" + tableSchemaName + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", columnName='" + columnName + '\'' +
-                ", dataType=" + dataType +
-                ", dataTypeName='" + dataTypeName + '\'' +
-                ", columnSize=" + columnSize +
-                ", decimalDigits=" + decimalDigits +
-                ", numPrecRadix=" + numPrecRadix +
-                ", nullAble=" + nullAble +
-                ", remarks='" + remarks + '\'' +
-                ", columnDef='" + columnDef + '\'' +
-                ", sqlDataType=" + sqlDataType +
-                ", sqlDatetimeSub=" + sqlDatetimeSub +
-                ", charOctetLength=" + charOctetLength +
-                ", ordinalPosition=" + ordinalPosition +
-                ", isNullAble='" + isNullAble + '\'' +
-                ", isAutoincrement='" + isAutoincrement + '\'' +
-                '}';
+               "tableCat='" + tableCat + '\'' +
+               ", tableSchemaName='" + tableSchemaName + '\'' +
+               ", tableName='" + tableName + '\'' +
+               ", columnName='" + columnName + '\'' +
+               ", dataType=" + dataType +
+               ", dataTypeName='" + dataTypeName + '\'' +
+               ", columnSize=" + columnSize +
+               ", decimalDigits=" + decimalDigits +
+               ", numPrecRadix=" + numPrecRadix +
+               ", nullAble=" + nullAble +
+               ", remarks='" + remarks + '\'' +
+               ", columnDef='" + columnDef + '\'' +
+               ", sqlDataType=" + sqlDataType +
+               ", sqlDatetimeSub=" + sqlDatetimeSub +
+               ", charOctetLength=" + charOctetLength +
+               ", ordinalPosition=" + ordinalPosition +
+               ", isNullAble='" + isNullAble + '\'' +
+               ", isAutoincrement='" + isAutoincrement + '\'' +
+               ", generationExpression='" + generationExpression + '\'' +
+               '}';
     }
 
     /**
@@ -403,6 +406,33 @@ public class ColumnMeta {
      */
     public void setIsAutoincrement(String isAutoincrement) {
         this.isAutoincrement = isAutoincrement;
+    }
+
+    /**
+     * Gets generation expression.
+     * 
+     * @return the generation expression
+     */
+    public String getGenerationExpression() {
+        return generationExpression;
+    }
+
+    /**
+     * Sets generation expression.
+     *
+     * @param generationExpression the generationExpression
+     */
+    public void setGenerationExpression(String generationExpression) {
+        this.generationExpression = generationExpression;
+    }
+
+    /**
+     * Gets is virtual generated column
+     * 
+     * @return the generation expression
+     */
+    public boolean isVirtualGeneratedColumn() {
+        return StringUtils.isNotBlank(generationExpression);
     }
 
     @Override

@@ -436,11 +436,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 selectSQLJoin.add(columnName);
             }
         } else {
-            selectSQLJoin.add(" * ");
+            Set<String> columns = tableMeta.getAllColumns().keySet();
+            for (String columnName : columns) {
+                selectSQLJoin.add(columnName);
+            }
         }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
-
             int paramIndex = 1;
             for (int r = 0; r < rowSize; r++) {
                 for (int c = 0; c < pkColumnNameList.size(); c++) {
