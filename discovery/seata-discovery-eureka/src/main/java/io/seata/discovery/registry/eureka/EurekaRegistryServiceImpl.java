@@ -161,7 +161,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
 
         ConcurrentMap<String, List<InetSocketAddress>> collect = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         List<InetSocketAddress> list = new ArrayList<>(application.getInstances().size());
-        collect.put(clusterName,list);
+        collect.put(clusterName, list);
         for (InstanceInfo instance : application.getInstances()) {
             if (instance.getIPAddr() == null || instance.getPort() < 0 || instance.getPort() > 0xFFFF) {
                 LOGGER.error("eureka instance info illegal:{}", instance.toString());
