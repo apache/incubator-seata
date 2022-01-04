@@ -465,7 +465,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             this.branchType = BranchType.values()[branchTypeId];
         }
         this.status = BranchStatus.get(byteBuffer.get());
-        this.lockStatus = LockStatus.get(byteBuffer.get());
+        if (byteBuffer.hasRemaining()) {
+            this.lockStatus = LockStatus.get(byteBuffer.get());
+        }
     }
 
 }
