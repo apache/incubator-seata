@@ -438,7 +438,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } else {
             Set<String> columns = tableMeta.getAllColumns().keySet();
             for (String columnName : columns) {
-                selectSQLJoin.add(columnName);
+                selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));
             }
         }
         ResultSet rs = null;
