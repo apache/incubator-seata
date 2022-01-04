@@ -17,10 +17,10 @@ package io.seata.server.storage.db.session;
 
 import java.util.Collection;
 import java.util.List;
-
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -32,7 +32,6 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
-import io.seata.common.loader.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
