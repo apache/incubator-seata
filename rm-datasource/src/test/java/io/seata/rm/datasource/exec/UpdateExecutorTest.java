@@ -55,8 +55,8 @@ public class UpdateExecutorTest {
             new Object[] {2, "Jack"},
         };
         Object[][] columnMetas = new Object[][] {
-            new Object[] {"", "", "table_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {"", "", "table_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {"", "", "table_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES", "NO"},
+            new Object[] {"", "", "table_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO", "NO"},
         };
         Object[][] indexMetas = new Object[][] {
             new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
