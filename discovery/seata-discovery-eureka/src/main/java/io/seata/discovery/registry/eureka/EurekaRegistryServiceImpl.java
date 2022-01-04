@@ -151,7 +151,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         Application application = getEurekaClient(false).getApplication(clusterName);
 
         if (application == null || CollectionUtils.isEmpty(application.getInstances())) {
-            clusterAddressMap.remove(clusterName);
+            clusterAddressMap.clear();
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("refreshCluster success, cluster empty!");
@@ -159,7 +159,9 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             return;
         }
 
+        ConcurrentMap<String, List<InetSocketAddress>> collect = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         List<InetSocketAddress> list = new ArrayList<>(application.getInstances().size());
+        collect.put(clusterName,list);
         for (InstanceInfo instance : application.getInstances()) {
             if (instance.getIPAddr() == null || instance.getPort() < 0 || instance.getPort() > 0xFFFF) {
                 LOGGER.error("eureka instance info illegal:{}", instance.toString());
@@ -172,7 +174,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             LOGGER.debug("refreshCluster success, cluster: " + list);
         }
 
-        clusterAddressMap.put(clusterName, list);
+        clusterAddressMap = collect;
     }
 
     private Properties getEurekaProperties(boolean needRegister) {
