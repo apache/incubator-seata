@@ -115,7 +115,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
     }
 
     /**
-     * the modify for test
+     * Get the pk values by auto
      */
     public Map<String, List<Object>> getPkValuesByAuto() throws SQLException {
         // PK is just auto generated

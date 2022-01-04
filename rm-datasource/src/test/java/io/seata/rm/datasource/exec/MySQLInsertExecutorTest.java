@@ -439,7 +439,7 @@ public class MySQLInsertExecutorTest {
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(Null.get());
-        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
@@ -475,7 +475,7 @@ public class MySQLInsertExecutorTest {
         pkValues = new ArrayList<>();
         pkValues.add(SqlDefaultExpr.get());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         // not support.
         pkValues = new ArrayList<>();
