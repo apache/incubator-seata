@@ -15,9 +15,6 @@
  */
 package io.seata.rm.datasource.undo;
 
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialDatalink;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.JDBCType;
@@ -26,6 +23,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialDatalink;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.BlobUtils;
@@ -49,9 +52,6 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 /**
  * The type Abstract undo executor.
  *
@@ -69,7 +69,7 @@ public abstract class AbstractUndoExecutor {
      * template of check sql
      * TODO support multiple primary key
      */
-    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s FOR UPDATE";
+    private static final String CHECK_SQL_TEMPLATE = "SELECT %s FROM %s WHERE %s FOR UPDATE";
 
     /**
      * Switch of undo data validation
@@ -298,8 +298,10 @@ public abstract class AbstractUndoExecutor {
         // build check sql
         String firstKey = pkRowValues.keySet().stream().findFirst().get();
         int pkRowSize = pkRowValues.get(firstKey).size();
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
-                SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, getDbType(conn)));
+        StringJoiner stringJoiner = new StringJoiner(", ");
+        tableMeta.getAllColumns().keySet().forEach(columnName -> stringJoiner.add(columnName));
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, stringJoiner, sqlUndoLog.getTableName(),
+            SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, getDbType(conn)));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;

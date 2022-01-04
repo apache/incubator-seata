@@ -136,7 +136,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
-                col.setGenerationExpression(rsColumns.getString("GENERATION_EXPRESSION"));
+                col.setGenerationExpression(rsColumns.getString("IS_GENERATEDCOLUMN"));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");

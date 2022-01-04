@@ -436,10 +436,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 selectSQLJoin.add(columnName);
             }
         } else {
-            Set<String> columns = tableMeta.getAllColumns().keySet();
-            for (String columnName : columns) {
-                selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));
-            }
+            buildSelectSql(selectSQLJoin);
         }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
@@ -466,6 +463,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected String getDbType() {
         return statementProxy.getConnectionProxy().getDbType();
+    }
+
+    /**
+     * build select sql
+     * @param selectSQLJoiner the selectSQLJoiner
+     */
+    protected void buildSelectSql(StringJoiner selectSQLJoiner) {
+        Set<String> columns = tableMeta.getAllColumns().keySet();
+        for (String columnName : columns) {
+            selectSQLJoiner.add(ColumnUtils.addEscape(columnName, getDbType()));
+        }
     }
 
 }

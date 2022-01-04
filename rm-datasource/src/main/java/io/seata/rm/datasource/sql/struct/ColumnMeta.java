@@ -432,7 +432,7 @@ public class ColumnMeta {
      * @return the generation expression
      */
     public boolean isVirtualGeneratedColumn() {
-        return StringUtils.isNotBlank(generationExpression);
+        return StringUtils.equalsIgnoreCase("YES", generationExpression);
     }
 
     @Override

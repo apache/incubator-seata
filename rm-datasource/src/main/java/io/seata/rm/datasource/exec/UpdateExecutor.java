@@ -137,9 +137,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 selectSQLJoiner.add(columnName);
             }
         } else {
-            for (String columnName : tableMeta.getAllColumns().keySet()) {
-                selectSQLJoiner.add(ColumnUtils.addEscape(columnName, getDbType()));
-            }
+            buildSelectSql(selectSQLJoiner);
         }
         return selectSQLJoiner.toString();
     }
