@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Objects;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -139,7 +140,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     col.setGenerationExpression(rsColumns.getString("IS_GENERATEDCOLUMN"));
                 } catch (SQLException e) {
                     // in the lower version of mysql, there is no such column to read
-                    if (!e.getSQLState().equals("S0022")) {
+                    if (!Objects.equals(e.getSQLState(), "S0022")) {
                         throw e;
                     }
                 }
