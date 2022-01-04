@@ -50,7 +50,8 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
         "CHAR_OCTET_LENGTH",
         "ORDINAL_POSITION",
         "IS_NULLABLE",
-        "IS_AUTOINCREMENT"
+        "IS_AUTOINCREMENT",
+        "IS_GENERATEDCOLUMN"
     );
 
     private static List<String> indexMetaColumnLabels = Arrays.asList(

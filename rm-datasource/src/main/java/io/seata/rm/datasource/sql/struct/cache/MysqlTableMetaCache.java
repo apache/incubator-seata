@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -136,8 +135,14 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
-                col.setGenerationExpression(rsColumns.getString("IS_GENERATEDCOLUMN"));
-
+                try {
+                    col.setGenerationExpression(rsColumns.getString("IS_GENERATEDCOLUMN"));
+                } catch (SQLException e) {
+                    // in the lower version of mysql, there is no such column to read
+                    if (!e.getSQLState().equals("S0022")) {
+                        throw e;
+                    }
+                }
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
                 }
