@@ -39,11 +39,11 @@ public class GlobalSessionController {
 
     /**
      * Query all globalSession
-     * @param param
+     * @param param param for query globalSession
      * @return  the list of GlobalSessionVO
      */
     @GetMapping("query")
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
-        throw new NotSupportYetException();
+        return globalSessionService.query(param);
     }
 }
