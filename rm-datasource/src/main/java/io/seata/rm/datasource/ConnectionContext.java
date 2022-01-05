@@ -36,6 +36,7 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 
 
 import static io.seata.common.Constants.AUTO_COMMIT;
+import static io.seata.common.Constants.SKIP_CHECK_LOCK;
 
 /**
  * The type Connection context.
@@ -62,7 +63,7 @@ public class ConnectionContext {
     private boolean isGlobalLockRequire;
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
     private boolean autoCommitChanged;
-    private Map<String, Object> applicationData = new HashMap<>(2);
+    private final Map<String, Object> applicationData = new HashMap<>(2, 1.0001f);
 
     /**
      * the lock keys buffer
@@ -277,12 +278,20 @@ public class ConnectionContext {
         // when transaction are enabled, it must be false
         if (!autoCommit) {
             this.applicationData.put(AUTO_COMMIT, autoCommit);
+        }
+
+        if (allBeforeImageEmpty()) {
+            this.applicationData.put(SKIP_CHECK_LOCK, true);
+        }
+
+        if (!this.applicationData.isEmpty()) {
             try {
                 return MAPPER.writeValueAsString(this.applicationData);
             } catch (JsonProcessingException e) {
                 throw new TransactionException(e.getMessage(), e);
             }
         }
+
         return null;
     }
 
@@ -363,6 +372,23 @@ public class ConnectionContext {
         }
 
         return new ArrayList<>(savepoints.subList(savepoints.indexOf(savepoint), savepoints.size()));
+    }
+
+    /**
+     * Check whether all the before image is empty.
+     *
+     * @return if all is empty, return true
+     */
+    private boolean allBeforeImageEmpty() {
+        for (List<SQLUndoLog> sqlUndoLogs : sqlUndoItemsBuffer.values()) {
+            for (SQLUndoLog undoLog : sqlUndoLogs) {
+                if (null == undoLog.getBeforeImage() || undoLog.getBeforeImage().size() != 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     @Override

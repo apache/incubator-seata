@@ -41,10 +41,11 @@ public interface LockManager {
      *
      * @param branchSession the branch session
      * @param autoCommit the auto commit
+     * @param skipCheckLock whether skip check lock or not
      * @return the boolean
      * @throws TransactionException the transaction exception
      */
-    boolean acquireLock(BranchSession branchSession, boolean autoCommit) throws TransactionException;
+    boolean acquireLock(BranchSession branchSession, boolean autoCommit, boolean skipCheckLock) throws TransactionException;
 
     /**
      * Un lock boolean.

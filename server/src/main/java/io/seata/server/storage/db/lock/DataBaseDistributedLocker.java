@@ -61,7 +61,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     private DataSource distributedLockDataSource;
 
     /**
-     * weather the distribute lock demotion
+     * whether the distribute lock demotion
      * using for 1.5.0 only and will remove in 1.6.0
      */
     @Deprecated

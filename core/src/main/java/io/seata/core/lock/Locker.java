@@ -36,9 +36,10 @@ public interface Locker {
      *
      * @param rowLock the row lock
      * @param autoCommit the auto commit
+     * @param skipCheckLock whether skip check lock or not
      * @return the boolean
      */
-    boolean acquireLock(List<RowLock> rowLock, boolean autoCommit);
+    boolean acquireLock(List<RowLock> rowLock, boolean autoCommit, boolean skipCheckLock);
 
     /**
      * Release lock boolean.
