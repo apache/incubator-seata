@@ -31,7 +31,7 @@ public class LocalDBLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean acquireLock(List<RowLock> rowLock, boolean autoCommit) {
+    public boolean acquireLock(List<RowLock> rowLock, boolean autoCommit, boolean skipCheckLock) {
         return false;
     }
 
