@@ -42,7 +42,7 @@ public class ColumnMeta {
     private int ordinalPosition;
     private String isNullAble;
     private String isAutoincrement;
-    private String generationExpression;
+    private String isGenerationColumn;
 
     /**
      * Instantiates a new Column meta.
@@ -71,7 +71,7 @@ public class ColumnMeta {
                ", ordinalPosition=" + ordinalPosition +
                ", isNullAble='" + isNullAble + '\'' +
                ", isAutoincrement='" + isAutoincrement + '\'' +
-               ", generationExpression='" + generationExpression + '\'' +
+               ", isGenerationColumn='" + isGenerationColumn + '\'' +
                '}';
     }
 
@@ -409,21 +409,12 @@ public class ColumnMeta {
     }
 
     /**
-     * Gets generation expression.
-     * 
-     * @return the generation expression
-     */
-    public String getGenerationExpression() {
-        return generationExpression;
-    }
-
-    /**
-     * Sets generation expression.
+     * Sets is generation column.
      *
-     * @param generationExpression the generationExpression
+     * @param isGenerationColumn the is generation column
      */
-    public void setGenerationExpression(String generationExpression) {
-        this.generationExpression = generationExpression;
+    public void setIsGenerationColumn(String isGenerationColumn) {
+        this.isGenerationColumn = isGenerationColumn;
     }
 
     /**
@@ -432,7 +423,7 @@ public class ColumnMeta {
      * @return the generation expression
      */
     public boolean isVirtualGeneratedColumn() {
-        return StringUtils.equalsIgnoreCase("YES", generationExpression);
+        return StringUtils.equalsIgnoreCase("YES", isGenerationColumn);
     }
 
     @Override

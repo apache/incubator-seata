@@ -17,14 +17,15 @@ package io.seata.rm.datasource.sql.struct.cache;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Objects;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.NumberUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
@@ -88,8 +89,19 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
-        throws SQLException {
+    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd) throws SQLException {
+        boolean virtualGeneratedColumn = false;
+        Connection connection = dbmd.getConnection();
+        if (connection != null) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                ResultSet versionResult = preparedStatement.executeQuery()) {
+                if (versionResult.next()) {
+                    String version = versionResult.getString("VERSION()");
+                    virtualGeneratedColumn =
+                        NumberUtils.compareVersion(version, "5.7.0") && !NumberUtils.compareVersion(version, "8.0.0");
+                }
+            }
+        }
         //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
         String catalogName = rsmd.getCatalogName(1);
@@ -136,13 +148,8 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
-                try {
-                    col.setGenerationExpression(rsColumns.getString("IS_GENERATEDCOLUMN"));
-                } catch (SQLException e) {
-                    // in the lower version of mysql, there is no such column to read
-                    if (!Objects.equals(e.getSQLState(), "S0022")) {
-                        throw e;
-                    }
+                if (virtualGeneratedColumn) {
+                    col.setIsGenerationColumn(rsColumns.getString("IS_GENERATEDCOLUMN"));
                 }
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
@@ -188,4 +195,5 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
         return tm;
     }
+
 }
