@@ -24,6 +24,10 @@ import io.seata.rm.tcc.constant.TCCFenceConstant;
  */
 public class TCCFenceStoreSqls {
 
+    private TCCFenceStoreSqls() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * The constant LOCAL_TCC_LOG_PLACEHOLD.
      */

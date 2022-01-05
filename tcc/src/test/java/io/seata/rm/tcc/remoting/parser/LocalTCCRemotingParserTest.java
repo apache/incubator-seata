@@ -66,7 +66,7 @@ public class LocalTCCRemotingParserTest {
         RemotingDesc remotingDesc = localTCCRemotingParser.getServiceDesc(tccAction, "c");
         Assertions.assertNotNull(remotingDesc);
 
-        Assertions.assertEquals(remotingDesc.getInterfaceClassName(), "io.seata.rm.tcc.TccAction");
+        Assertions.assertEquals("io.seata.rm.tcc.TccAction", remotingDesc.getInterfaceClassName());
         Assertions.assertEquals(remotingDesc.getInterfaceClass(), TccAction.class);
         Assertions.assertEquals(remotingDesc.getTargetBean(), tccAction);
     }
