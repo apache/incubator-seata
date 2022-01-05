@@ -45,7 +45,7 @@ public class GlobalLockController {
      */
     @GetMapping("query")
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
-        throw new NotSupportYetException();
+        return globalLockService.query(param);
     }
 
 }
