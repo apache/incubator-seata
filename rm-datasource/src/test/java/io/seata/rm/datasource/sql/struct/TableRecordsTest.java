@@ -42,10 +42,10 @@ public class TableRecordsTest {
 
     private static Object[][] columnMetas =
         new Object[][] {
-            new Object[] {"", "", "table_records_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {"", "", "table_records_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-            new Object[] {"", "", "table_records_test", "information", Types.BLOB, "BLOB", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-            new Object[] {"", "", "table_records_test", "description", Types.CLOB, "CLOB", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {"", "", "table_records_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES", "NO"},
+            new Object[] {"", "", "table_records_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO", "NO"},
+            new Object[] {"", "", "table_records_test", "information", Types.BLOB, "BLOB", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO", "NO"},
+            new Object[] {"", "", "table_records_test", "description", Types.CLOB, "CLOB", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO", "NO"},
         };
 
     private static Object[][] indexMetas =
