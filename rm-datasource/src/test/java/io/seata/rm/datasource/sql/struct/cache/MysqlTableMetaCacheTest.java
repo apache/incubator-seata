@@ -140,13 +140,13 @@ public class MysqlTableMetaCacheTest {
         //change the columns meta
         columnMetas =
             new Object[][] {
-                new Object[] {"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES", "NO"},
                 new Object[] {"", "", "mt1", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
-                    "NO"},
+                    "NO", "NO"},
                 new Object[] {"", "", "mt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
-                    "NO"},
+                    "NO", "NO"},
                 new Object[] {"", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
-                    "NO"}
+                    "NO", "NO"}
             };
         mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         getTableMetaCache().refresh(dataSourceProxy.getPlainConnection(), dataSourceProxy.getResourceId());

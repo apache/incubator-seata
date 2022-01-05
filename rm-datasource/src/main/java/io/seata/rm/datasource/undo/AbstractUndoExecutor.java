@@ -24,12 +24,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
-
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.IOUtil;
@@ -49,6 +49,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
 
@@ -298,8 +299,13 @@ public abstract class AbstractUndoExecutor {
         // build check sql
         String firstKey = pkRowValues.keySet().stream().findFirst().get();
         int pkRowSize = pkRowValues.get(firstKey).size();
+        Set<String> columns = tableMeta.getAllColumns().keySet();
         StringJoiner stringJoiner = new StringJoiner(", ");
-        tableMeta.getAllColumns().keySet().forEach(columnName -> stringJoiner.add(columnName));
+        if (columns.isEmpty()) {
+            stringJoiner.add(" * ");
+        } else {
+            columns.forEach(columnName -> stringJoiner.add(columnName));
+        }
         String checkSQL = String.format(CHECK_SQL_TEMPLATE, stringJoiner, sqlUndoLog.getTableName(),
             SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, getDbType(conn)));
 
