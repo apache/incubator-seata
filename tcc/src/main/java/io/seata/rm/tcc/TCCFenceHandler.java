@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
-import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
@@ -41,6 +40,11 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @author kaka2code
  */
 public class TCCFenceHandler {
+
+    private TCCFenceHandler() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceHandler.class);
 
     private static final TCCFenceStore TCC_FENCE_DAO = TCCFenceStoreDataBaseDAO.getInstance();
@@ -90,13 +94,12 @@ public class TCCFenceHandler {
      *
      * @param commitMethod          commit method
      * @param targetTCCBean         target tcc bean
-     * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
      * @param args                  commit method's parameters
      * @return the boolean
      */
-    public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
+    public static boolean commitFence(Method commitMethod, Object targetTCCBean,
                                       String xid, Long branchId, Object[] args) {
         return transactionTemplate.execute(status -> {
             try {
@@ -116,7 +119,7 @@ public class TCCFenceHandler {
                     }
                     return false;
                 }
-                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status, args);
+                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -129,14 +132,13 @@ public class TCCFenceHandler {
      *
      * @param rollbackMethod        rollback method
      * @param targetTCCBean         target tcc bean
-     * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
      * @param args                  rollback method's parameters
      * @param actionName            the action name
      * @return the boolean
      */
-    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
+    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
                                         String xid, Long branchId, Object[] args, String actionName) {
         return transactionTemplate.execute(status -> {
             try {
@@ -163,7 +165,7 @@ public class TCCFenceHandler {
                         return false;
                     }
                 }
-                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status, args);
+                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -194,15 +196,13 @@ public class TCCFenceHandler {
      *
      * @param method                target method
      * @param targetTCCBean         target bean
-     * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
      * @param status                the tcc fence status
      * @return the boolean
      */
     private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean,
-                                                             BusinessActionContext businessActionContext, String xid,
-                                                             Long branchId, int status,
+                                                             String xid, Long branchId, int status,
                                                              TransactionStatus transactionStatus,
                                                              Object[] args) throws Exception {
         boolean result = TCC_FENCE_DAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);

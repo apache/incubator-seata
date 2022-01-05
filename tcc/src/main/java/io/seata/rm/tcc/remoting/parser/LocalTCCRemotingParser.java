@@ -32,26 +32,12 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
 
     @Override
     public boolean isReference(Object bean, String beanName) {
-        Class<?> classType = bean.getClass();
-        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
-        for (Class<?> interClass : interfaceClasses) {
-            if (interClass.isAnnotationPresent(LocalTCC.class)) {
-                return true;
-            }
-        }
-        return false;
+        return isLocalTCC(bean);
     }
 
     @Override
     public boolean isService(Object bean, String beanName) {
-        Class<?> classType = bean.getClass();
-        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
-        for (Class<?> interClass : interfaceClasses) {
-            if (interClass.isAnnotationPresent(LocalTCC.class)) {
-                return true;
-            }
-        }
-        return false;
+        return isLocalTCC(bean);
     }
 
     @Override
@@ -78,5 +64,21 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
     @Override
     public short getProtocol() {
         return Protocols.IN_JVM;
+    }
+
+    /**
+     * Determine whether there is an annotation {@link LocalTCC}
+     * @param bean the bean
+     * @return boolean
+     */
+    private boolean isLocalTCC(Object bean) {
+        Class<?> classType = bean.getClass();
+        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
+        for (Class<?> interClass : interfaceClasses) {
+            if (interClass.isAnnotationPresent(LocalTCC.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

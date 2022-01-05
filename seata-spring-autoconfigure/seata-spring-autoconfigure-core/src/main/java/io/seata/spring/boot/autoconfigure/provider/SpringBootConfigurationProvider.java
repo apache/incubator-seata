@@ -57,9 +57,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                     String rawDataId = (String) args[0];
                     if (args.length == 1) {
                         result = get(convertDataId(rawDataId));
-                    } else if (args.length == 2) {
-                        result = get(convertDataId(rawDataId), args[1]);
-                    } else if (args.length == 3) {
+                    } else {
                         result = get(convertDataId(rawDataId), args[1]);
                     }
                     if (result != null) {
