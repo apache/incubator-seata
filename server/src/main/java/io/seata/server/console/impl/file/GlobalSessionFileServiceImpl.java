@@ -15,39 +15,37 @@
  */
 package io.seata.server.console.impl.file;
 
-import com.netflix.discovery.converters.Auto;
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.BranchSessionVO;
-import io.seata.core.console.vo.GlobalSessionVO;
-import io.seata.core.console.result.PageResult;
-import io.seata.server.console.service.GlobalSessionService;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHolder;
-import io.seata.server.session.SessionManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import io.seata.common.util.StringUtils;
+import io.seata.core.console.vo.BranchSessionVO;
+import io.seata.server.session.BranchSession;
+import io.seata.core.console.param.GlobalSessionParam;
+import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalSessionVO;
+import io.seata.server.console.service.GlobalSessionService;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
+
+import static java.util.Objects.isNull;
 import static io.seata.common.util.CollectionUtils.isEmpty;
 import static io.seata.common.util.CollectionUtils.isNotEmpty;
 import static io.seata.common.util.StringUtils.isBlank;
-import static io.seata.common.util.StringUtils.isNotBlank;
-import static java.util.Collections.singletonList;
-import static java.util.Objects.isNull;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 
 /**
  * Global Session File ServiceImpl
  *
- * @author: zhongxiang.wang
+ * @author miaoxueyu
  */
 @Component
 @org.springframework.context.annotation.Configuration
@@ -71,7 +69,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
 
         final List<GlobalSession> filteredSessions = allSessions
-                .stream()
+                .parallelStream()
                 .filter(obtainPredicate(param))
                 .skip((long) Math.max(param.getPageSize(), pages) * (param.getPageNum() - 1))
                 .limit(param.getPageSize())
@@ -83,6 +81,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
     /**
      * convert GlobalSession to GlobalSessionVO
+     *
      * @param filteredSessions the GlobalSession list
      * @return the GlobalSessionVO list
      */
@@ -108,6 +107,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
     /**
      * convert BranchSession to BranchSessionVO
+     *
      * @param branchSessions the BranchSession list
      * @return the BranchSessionVO list
      */
