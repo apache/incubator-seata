@@ -15,6 +15,9 @@
  */
 package io.seata.core.store.db.sql.lock;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -29,6 +32,8 @@ import io.seata.core.constants.ServerTableColumnsName;
  * @since 1.2.0
  */
 public class AbstractLockStoreSql implements LockStoreSql {
+
+    private static final int MAX_IN_SIZE = 1000;
 
     /**
      * The constant CONFIG.
@@ -50,6 +55,17 @@ public class AbstractLockStoreSql implements LockStoreSql {
     protected static final String IN_PARAMS_PLACE_HOLD = " #in_params# ";
 
     /**
+     * The constant LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD.
+     */
+    protected static final String LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD = " #lock_table_pk_where_condition# ";
+
+    /**
+     * The constant LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD.
+     */
+    protected static final String LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD = " #lock_table_branch_id_where_condition# ";
+
+    
+    /**
      * The constant ALL_COLUMNS.
      * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
      */
@@ -70,7 +86,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant BATCH_DELETE_LOCK_SQL.
      */
     private static final String BATCH_DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACE_HOLD + ") ";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and (" + LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD + ") ";
 
     /**
      * The constant BATCH_DELETE_LOCK_BY_BRANCH_SQL.
@@ -88,7 +104,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant BATCH_DELETE_LOCK_BY_BRANCHS_SQL.
      */
     private static final String BATCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + " in (" + IN_PARAMS_PLACE_HOLD + ") ";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and (" + LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD + ") ";
 
 
     /**
@@ -101,7 +117,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant CHECK_LOCK_SQL.
      */
     private static final String CHECK_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACE_HOLD + ")"
+        + " where " + LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD
         + " order by status desc ";
 
     /**
@@ -127,9 +143,11 @@ public class AbstractLockStoreSql implements LockStoreSql {
     }
 
     @Override
-    public String getBatchDeleteLockSql(String lockTable, String paramPlaceHold) {
-        return BATCH_DELETE_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(IN_PARAMS_PLACE_HOLD,
-            paramPlaceHold);
+    public String getBatchDeleteLockSql(String lockTable, int rowSize) {
+        List<String> pkNameList = new ArrayList<>();
+        pkNameList.add(ServerTableColumnsName.LOCK_TABLE_ROW_KEY);
+        String whereCondition = buildWhereConditionByPKs(pkNameList,rowSize,MAX_IN_SIZE);
+        return BATCH_DELETE_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD, whereCondition);
     }
 
     @Override
@@ -138,9 +156,12 @@ public class AbstractLockStoreSql implements LockStoreSql {
     }
 
     @Override
-    public String getBatchDeleteLockSqlByBranchs(String lockTable, String paramPlaceHold) {
-        return BATCH_DELETE_LOCK_BY_BRANCHS_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(IN_PARAMS_PLACE_HOLD,
-            paramPlaceHold);
+    public String getBatchDeleteLockSqlByBranchs(String lockTable, int branchSize) {
+        List<String> pkNameList = new ArrayList<>();
+        pkNameList.add(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID);
+        String whereCondition = buildWhereConditionByPKs(pkNameList,branchSize,MAX_IN_SIZE);
+        return BATCH_DELETE_LOCK_BY_BRANCHS_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD,
+            whereCondition);
     }
 
     @Override
@@ -149,13 +170,75 @@ public class AbstractLockStoreSql implements LockStoreSql {
     }
 
     @Override
-    public String getCheckLockableSql(String lockTable, String paramPlaceHold) {
-        return CHECK_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(IN_PARAMS_PLACE_HOLD, paramPlaceHold);
+    public String getCheckLockableSql(String lockTable, int rowSize) {
+        List<String> pkNameList = new ArrayList<>();
+        pkNameList.add(ServerTableColumnsName.LOCK_TABLE_ROW_KEY);
+        String whereCondition = buildWhereConditionByPKs(pkNameList,rowSize,MAX_IN_SIZE);
+        return CHECK_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD, whereCondition);
     }
 
     @Override
     public String getBatchUpdateStatusLockByGlobalSql(String lockTable) {
         return BATCH_UPDATE_STATUS_LOCK_BY_GLOBAL_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
     }
+
+    /**
+     * each pk is a condition.the result will like :" (id,userCode) in ((?,?),(?,?)) or (id,userCode) in ((?,?),(?,?)
+     * ) or (id,userCode) in ((?,?))"
+     * Build where condition by pks string.
+     *
+     * @param pkNameList pk column name list
+     * @param rowSize    the row size of records
+     * @param maxInSize  the max in size
+     * @return return where condition sql string.the sql can search all related records not just one.
+     */
+    private String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, int maxInSize) {
+        StringBuilder whereStr = new StringBuilder();
+        //we must consider the situation of composite primary key
+        int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
+        for (int batch = 0; batch < batchSize; batch++) {
+            if (batch > 0) {
+                whereStr.append(" or ");
+            }
+            if (pkNameList.size() > 1) {
+                whereStr.append("(");
+            }
+            for (int i = 0; i < pkNameList.size(); i++) {
+                if (i > 0) {
+                    whereStr.append(",");
+                }
+                whereStr.append(pkNameList.get(i));
+            }
+            if (pkNameList.size() > 1) {
+                whereStr.append(")");
+            }
+            whereStr.append(" in ( ");
+
+            int eachSize = (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize)
+                : maxInSize;
+            for (int i = 0; i < eachSize; i++) {
+                //each row is a bracket
+                if (i > 0) {
+                    whereStr.append(",");
+                }
+                if (pkNameList.size() > 1) {
+                    whereStr.append("(");
+                }
+                for (int x = 0; x < pkNameList.size(); x++) {
+                    if (x > 0) {
+                        whereStr.append(",");
+                    }
+                    whereStr.append("?");
+                }
+                if (pkNameList.size() > 1) {
+                    whereStr.append(")");
+                }
+            }
+            whereStr.append(" )");
+        }
+
+        return whereStr.toString();
+    }
+
 
 }
