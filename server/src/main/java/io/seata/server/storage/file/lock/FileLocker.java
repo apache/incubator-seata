@@ -63,11 +63,11 @@ public class FileLocker extends AbstractLocker {
 
     @Override
     public boolean acquireLock(List<RowLock> rowLocks) {
-        return acquireLock(rowLocks, true);
+        return acquireLock(rowLocks, true, false);
     }
 
     @Override
-    public boolean acquireLock(List<RowLock> rowLocks, boolean autoCommit) {
+    public boolean acquireLock(List<RowLock> rowLocks, boolean autoCommit, boolean skipCheckLock) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return true;
