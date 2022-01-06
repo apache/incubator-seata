@@ -47,9 +47,10 @@ public interface LockStore {
      *
      * @param lockDOs the lock d os
      * @param autoCommit the auto commit
+     * @param skipCheckLock whether skip check lock or not
      * @return the boolean
      */
-    boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit);
+    boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit, boolean skipCheckLock);
 
     /**
      * Un lock boolean.

@@ -100,11 +100,11 @@ public class LockStoreDataBaseDAO implements LockStore {
 
     @Override
     public boolean acquireLock(List<LockDO> lockDOs) {
-        return acquireLock(lockDOs, true);
+        return acquireLock(lockDOs, true, false);
     }
 
     @Override
-    public boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit) {
+    public boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit, boolean skipCheckLock) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -118,57 +118,61 @@ public class LockStoreDataBaseDAO implements LockStore {
             if (originalAutoCommit = conn.getAutoCommit()) {
                 conn.setAutoCommit(false);
             }
-            //check lock
-            boolean canLock = true;
-            //query
-            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, lockDOs.size());
-            ps = conn.prepareStatement(checkLockSQL);
-            for (int i = 0; i < lockDOs.size(); i++) {
-                ps.setString(i + 1, lockDOs.get(i).getRowKey());
-            }
-            rs = ps.executeQuery();
-            String currentXID = lockDOs.get(0).getXid();
-            boolean failFast = false;
-            while (rs.next()) {
-                String dbXID = rs.getString(ServerTableColumnsName.LOCK_TABLE_XID);
-                if (!StringUtils.equals(dbXID, currentXID)) {
-                    if (LOGGER.isInfoEnabled()) {
-                        String dbPk = rs.getString(ServerTableColumnsName.LOCK_TABLE_PK);
-                        String dbTableName = rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME);
-                        long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
-                        LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID, dbBranchId);
-                    }
-                    if (!autoCommit) {
-                        int status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
-                        if (status == LockStatus.Rollbacking.getCode()) {
-                            failFast = true;
-                        }
-                    }
-                    canLock = false;
-                    break;
-                }
+            List<LockDO> unrepeatedLockDOs = lockDOs;
 
-                dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
-            }
-            if (!canLock) {
-                conn.rollback();
-                if (failFast) {
-                    throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+            //check lock
+            if (!skipCheckLock) {
+
+                boolean canLock = true;
+                //query
+                String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, lockDOs.size());
+                ps = conn.prepareStatement(checkLockSQL);
+                for (int i = 0; i < lockDOs.size(); i++) {
+                    ps.setString(i + 1, lockDOs.get(i).getRowKey());
                 }
-                return false;
+                rs = ps.executeQuery();
+                String currentXID = lockDOs.get(0).getXid();
+                boolean failFast = false;
+                while (rs.next()) {
+                    String dbXID = rs.getString(ServerTableColumnsName.LOCK_TABLE_XID);
+                    if (!StringUtils.equals(dbXID, currentXID)) {
+                        if (LOGGER.isInfoEnabled()) {
+                            String dbPk = rs.getString(ServerTableColumnsName.LOCK_TABLE_PK);
+                            String dbTableName = rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME);
+                            long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
+                            LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID, dbBranchId);
+                        }
+                        if (!autoCommit) {
+                            int status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
+                            if (status == LockStatus.Rollbacking.getCode()) {
+                                failFast = true;
+                            }
+                        }
+                        canLock = false;
+                        break;
+                    }
+
+                    dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
+                }
+                if (!canLock) {
+                    conn.rollback();
+                    if (failFast) {
+                        throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+                    }
+                    return false;
+                }
+                // If the lock has been exists in db, remove it from the lockDOs
+                if (CollectionUtils.isNotEmpty(dbExistedRowKeys)) {
+                    unrepeatedLockDOs = lockDOs.stream().filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey()))
+                            .collect(Collectors.toList());
+                }
+                if (CollectionUtils.isEmpty(unrepeatedLockDOs)) {
+                    conn.rollback();
+                    return true;
+                }
             }
-            List<LockDO> unrepeatedLockDOs = null;
-            if (CollectionUtils.isNotEmpty(dbExistedRowKeys)) {
-                unrepeatedLockDOs = lockDOs.stream().filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey()))
-                    .collect(Collectors.toList());
-            } else {
-                unrepeatedLockDOs = lockDOs;
-            }
-            if (CollectionUtils.isEmpty(unrepeatedLockDOs)) {
-                conn.rollback();
-                return true;
-            }
-            //lock
+
+            // lock
             if (unrepeatedLockDOs.size() == 1) {
                 LockDO lockDO = unrepeatedLockDOs.get(0);
                 if (!doAcquireLock(conn, lockDO)) {
