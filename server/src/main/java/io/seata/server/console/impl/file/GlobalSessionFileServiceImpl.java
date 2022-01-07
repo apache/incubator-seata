@@ -21,9 +21,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import io.seata.common.exception.InvalidParamException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.server.session.BranchSession;
@@ -55,7 +57,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         if (param.getPageSize() == 0 || param.getPageNum() == 0) {
-            return PageResult.success();
+            throw new InvalidParamException("wrong pageSize or pageNum");
         }
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
@@ -67,16 +69,18 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
             pages++;
         }
 
+        final AtomicInteger total = new AtomicInteger();
 
         final List<GlobalSession> filteredSessions = allSessions
                 .parallelStream()
                 .filter(obtainPredicate(param))
-                .skip((long) Math.max(param.getPageSize(), pages) * (param.getPageNum() - 1))
+                .peek(globalSession -> total.incrementAndGet())
+                .skip((long) Math.min(param.getPageSize(), pages) * (param.getPageNum() - 1))
                 .limit(param.getPageSize())
                 .collect(Collectors.toList());
 
 
-        return new PageResult<>(convert(filteredSessions), allSessions.size(), pages, param.getPageNum(), param.getPageSize());
+        return new PageResult<>(convert(filteredSessions), total.get(), pages, param.getPageNum(), param.getPageSize());
     }
 
     /**
