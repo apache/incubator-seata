@@ -119,14 +119,14 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
             } catch (XAException | SQLException sqle) {
                 if (sqle instanceof XAException) {
                     try {
-                        if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
+                        if (((XAException) sqle).errorCode == XAException.XAER_NOTA) {
                             if (committed) {
                                 return BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable;
                             } else {
                                 return BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable;
                             }
                         }
-                    }finally {
+                    } finally {
                         BaseDataSourceResource.setBranchStatus(xaBranchXid.toString(),
                                 committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
                     }
