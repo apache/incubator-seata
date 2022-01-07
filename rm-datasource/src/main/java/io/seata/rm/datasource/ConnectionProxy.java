@@ -269,6 +269,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
+        
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), context.getApplicationData(), context.buildLockKeys());
         context.setBranchId(branchId);
