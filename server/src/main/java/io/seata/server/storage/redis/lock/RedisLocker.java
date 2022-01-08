@@ -353,11 +353,12 @@ public class RedisLocker extends AbstractLocker {
     private boolean doReleaseLock(String xid, Long branchId) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String xidLockKey = buildXidLockKey(xid);
-            List<String> rowKeys;
+            final List<String> rowKeys = new ArrayList<>();
             if (null == branchId) {
-                rowKeys = jedis.hmget(xidLockKey);
+                Map<String, String> rowKeyMap = jedis.hgetAll(xidLockKey);
+                rowKeyMap.forEach((branch, rowKey) -> rowKeys.add(rowKey));
             } else {
-                rowKeys = jedis.hmget(xidLockKey, branchId.toString());
+                rowKeys.addAll(jedis.hmget(xidLockKey, branchId.toString()));
             }
             if (CollectionUtils.isNotEmpty(rowKeys)) {
                 Pipeline pipelined = jedis.pipelined();
