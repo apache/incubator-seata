@@ -48,9 +48,9 @@ public class LockStoreSqlFactoryTest {
 
     private static String EXPECT_BATCH_BRANCH_DELETE_LOCK_SQL = "delete from " + BRANCH_TABLE + " where xid = ? and (row_key in ( ?,?,? )) ";
 
-    private static String EXPECT_BATCH_GLOBAL_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + GLOBAL_TABLE + " where xid = ? and (branch_id in ( ?,?,? )) ";
+    private static String EXPECT_BATCH_GLOBAL_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + GLOBAL_TABLE + " where xid = ? ";
 
-    private static String EXPECT_BATCH_BRANCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + BRANCH_TABLE + " where xid = ? and (branch_id in ( ?,?,? )) ";
+    private static String EXPECT_BATCH_BRANCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + BRANCH_TABLE + " where xid = ? ";
 
     @Test
     public void mysqlLockTest() {
