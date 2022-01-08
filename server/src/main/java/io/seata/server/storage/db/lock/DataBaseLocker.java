@@ -99,17 +99,13 @@ public class DataBaseLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseLock(String xid, List<Long> branchIds) {
-        if (CollectionUtils.isEmpty(branchIds)) {
-            // no lock
-            return true;
-        }
+    public boolean releaseLock(String xid) {
         try {
-            return lockStore.unLock(xid, branchIds);
+            return lockStore.unLock(xid);
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {
-            LOGGER.error("unLock by branchIds error, xid {}, branchIds:{}", xid, CollectionUtils.toString(branchIds), t);
+            LOGGER.error("unLock by branchIds error, xid {}", xid, t);
             return false;
         }
     }

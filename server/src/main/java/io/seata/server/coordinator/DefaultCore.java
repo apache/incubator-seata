@@ -345,7 +345,7 @@ public class DefaultCore implements Core {
         }
         // In db mode, lock and branch data residual problems may occur.
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
-        if (success & retrying) {
+        if (success && retrying) {
             SessionHelper.endRollbacked(globalSession);
 
             // rollbacked event

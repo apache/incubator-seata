@@ -69,10 +69,9 @@ public interface LockStoreSql {
      * Get batch delete lock sql string.
      *
      * @param lockTable      the lock table
-     * @param paramPlaceHold the param place hold
      * @return the string
      */
-    String getBatchDeleteLockSqlByBranchs(String lockTable, String paramPlaceHold);
+    String getBatchDeleteLockSqlByXid(String lockTable);
 
     /**
      * Get query lock sql string.

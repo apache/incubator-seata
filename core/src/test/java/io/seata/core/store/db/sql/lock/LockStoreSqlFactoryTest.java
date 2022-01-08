@@ -68,9 +68,9 @@ public class LockStoreSqlFactoryTest {
         Assertions.assertNotNull(sql);
 
         // Get batch delete lock sql string.
-        sql = MYSQL_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = MYSQL_LOCK_STORE.getBatchDeleteLockSqlByXid(GLOBAL_TABLE);
         Assertions.assertNotNull(sql);
-        sql = MYSQL_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = MYSQL_LOCK_STORE.getBatchDeleteLockSqlByXid(BRANCH_TABLE);
         Assertions.assertNotNull(sql);
 
         // Get query lock sql string.
@@ -115,9 +115,9 @@ public class LockStoreSqlFactoryTest {
         Assertions.assertNotNull(sql);
 
         // Get batch delete lock sql string.
-        sql = ORACLE_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = ORACLE_LOCK_STORE.getBatchDeleteLockSqlByXid(GLOBAL_TABLE);
         Assertions.assertNotNull(sql);
-        sql = ORACLE_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = ORACLE_LOCK_STORE.getBatchDeleteLockSqlByXid(BRANCH_TABLE);
         Assertions.assertNotNull(sql);
 
         // Get query lock sql string.
@@ -161,9 +161,9 @@ public class LockStoreSqlFactoryTest {
         Assertions.assertNotNull(sql);
 
         // Get batch delete lock sql string.
-        sql = POSTGRESQL_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = POSTGRESQL_LOCK_STORE.getBatchDeleteLockSqlByXid(GLOBAL_TABLE);
         Assertions.assertNotNull(sql);
-        sql = POSTGRESQL_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = POSTGRESQL_LOCK_STORE.getBatchDeleteLockSqlByXid(BRANCH_TABLE);
         Assertions.assertNotNull(sql);
 
         // Get query lock sql string.
@@ -207,9 +207,9 @@ public class LockStoreSqlFactoryTest {
         Assertions.assertNotNull(sql);
 
         // Get batch delete lock sql string.
-        sql = H2_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = H2_LOCK_STORE.getBatchDeleteLockSqlByXid(GLOBAL_TABLE);
         Assertions.assertNotNull(sql);
-        sql = H2_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = H2_LOCK_STORE.getBatchDeleteLockSqlByXid(BRANCH_TABLE);
         Assertions.assertNotNull(sql);
 
         // Get query lock sql string.
@@ -253,9 +253,9 @@ public class LockStoreSqlFactoryTest {
         Assertions.assertNotNull(sql);
 
         // Get batch delete lock sql string.
-        sql = OCEANBASE_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = OCEANBASE_LOCK_STORE.getBatchDeleteLockSqlByXid(GLOBAL_TABLE);
         Assertions.assertNotNull(sql);
-        sql = OCEANBASE_LOCK_STORE.getBatchDeleteLockSqlByBranchs(GLOBAL_TABLE, "1");
+        sql = OCEANBASE_LOCK_STORE.getBatchDeleteLockSqlByXid(BRANCH_TABLE);
         Assertions.assertNotNull(sql);
 
         // Get query lock sql string.

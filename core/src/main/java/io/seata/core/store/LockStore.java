@@ -69,7 +69,7 @@ public interface LockStore {
 
     boolean unLock(String xid, Long branchId);
 
-    boolean unLock(String xid, List<Long> branchIds);
+    boolean unLock(String xid);
 
     /**
      * Is lockable boolean.

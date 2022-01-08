@@ -69,16 +69,10 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
 
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
-        List<BranchSession> branchSessions = globalSession.getBranchSessions();
-        if (CollectionUtils.isEmpty(branchSessions)) {
-            return true;
-        }
-        List<Long> branchIds = branchSessions.stream().map(BranchSession::getBranchId).collect(Collectors.toList());
         try {
-            return getLocker().releaseLock(globalSession.getXid(), branchIds);
+            return getLocker().releaseLock(globalSession.getXid());
         } catch (Exception t) {
-            LOGGER.error("unLock globalSession error, xid:{} branchIds:{}", globalSession.getXid(),
-                CollectionUtils.toString(branchIds), t);
+            LOGGER.error("unLock globalSession error, xid:{}", globalSession.getXid(), t);
             return false;
         }
     }
