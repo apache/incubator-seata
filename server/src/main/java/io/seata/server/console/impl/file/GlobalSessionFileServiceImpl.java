@@ -77,7 +77,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
         // calculate pages
         int pages = total.get() / param.getPageSize();
-        if (allSessions.size() % param.getPageSize() != 0) {
+        if (total.get() % param.getPageSize() != 0) {
             pages++;
         }
 
