@@ -20,7 +20,7 @@ package io.seata.common.exception;
  *
  * @author miaoxueyu
  */
-public class InvalidParamException extends RuntimeException{
+public class InvalidParamException extends RuntimeException {
 
     /**
      * Instantiates a new Invalid param exception.
