@@ -26,6 +26,7 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -116,7 +117,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         tmNettyRemotingClient.destroy();
     }
 
-    @Test
+    @Disabled
     public void testSendMsgWithResponse() throws Exception {
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
