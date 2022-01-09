@@ -167,6 +167,15 @@ public class RedisLocker extends AbstractLocker {
             });
             List<List<String>> existedLockInfos =
                     Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
+
+            // When the local transaction and the global transaction are enabled,
+            // the branch registration fails to acquire the global lock,
+            // the lock holder is in the second-stage rollback,
+            // and the branch registration fails to be retried quickly,
+            // because the retry with the local transaction does not release the database lock ,
+            // resulting in a two-phase rollback wait.
+            // Therefore, if a global lock is found in the Rollbacking state,
+            // the fail-fast code is returned directly.
             if (!autoCommit) {
                 boolean hasRollBackingLock = existedLockInfos.parallelStream().anyMatch(
                     result -> StringUtils.equals(result.get(1), String.valueOf(LockStatus.Rollbacking.getCode())));
