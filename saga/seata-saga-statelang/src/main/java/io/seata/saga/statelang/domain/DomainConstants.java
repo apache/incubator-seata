@@ -32,6 +32,7 @@ public interface DomainConstants {
     String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
     String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
     String STATE_TYPE_LOOP_START = "LoopStart";
+    String STATE_TYPE_PARALLEL = "Parallel";
     //endregion
 
     String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
@@ -71,6 +72,7 @@ public interface DomainConstants {
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
     String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
     String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
+    String VAR_NAME_IS_PARALLEL_STATE = "_is_parallel_state_";
     //endregion
 
     // region of loop
@@ -80,6 +82,12 @@ public interface DomainConstants {
     String NUMBER_OF_INSTANCES = "nrOfInstances";
     String NUMBER_OF_ACTIVE_INSTANCES = "nrOfActiveInstances";
     String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";
+    // endregion
+
+    // region of parallel
+    String PARALLEL_SEMAPHORE = "parallelSemaphore";
+    String PARALLEL_BRANCH_INDEX = "parallelBranchIndex";
+    String PARALLEL_PARENT_STATE_NAME = "parallelParentStateName";
     // endregion
 
     String OPERATION_NAME_START = "start";

@@ -22,8 +22,10 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineEngine;
+import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
+import io.seata.saga.engine.invoker.impl.SpringBeanServiceInvoker;
 import io.seata.saga.engine.mock.DemoService.Engineer;
 import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.proctrl.ProcessContext;
@@ -285,6 +287,44 @@ public class StateMachineDBTests extends AbstractServerTest {
         System.out.println("====== XID: " + instance.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
+    }
+
+    @Test
+    public void testStateMachineWithComplexParamsWithFastjson() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        People people = new People();
+        people.setName("lilei");
+        people.setAge(18);
+
+        Engineer engineer = new Engineer();
+        engineer.setName("programmer");
+
+        paramMap.put("people", people);
+        paramMap.put("career", engineer);
+
+        DbStateMachineConfig dbStateMachineConfig = (DbStateMachineConfig) stateMachineEngine.getStateMachineConfig();
+        SpringBeanServiceInvoker serviceInvoker =
+            (SpringBeanServiceInvoker) dbStateMachineConfig.getServiceInvokerManager().getServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN);
+        dbStateMachineConfig.setSagaJsonParser("fastjson");
+        serviceInvoker.setSagaJsonParser("fastjson");
+        String stateMachineName = "simpleStateMachineWithComplexParams";
+
+        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        People peopleResult = (People) instance.getEndParams().get("complexParameterMethodResult");
+        Assertions.assertNotNull(peopleResult);
+        Assertions.assertTrue(people.getName().equals(people.getName()));
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + instance.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
+
+        serviceInvoker.setSagaJsonParser("jackson");
+        dbStateMachineConfig.setSagaJsonParser("jackson");
     }
 
     @Test
@@ -1028,6 +1068,45 @@ public class StateMachineDBTests extends AbstractServerTest {
         Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithParallel() {
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "simpleParallelTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+    }
+
+    @Test
+    public void testSimpleStateMachineWithParallelForward() throws InterruptedException {
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("fooThrowException", "true");
+
+        String stateMachineName = "simpleParallelTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+
+        Thread.sleep(sleepTime);
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {

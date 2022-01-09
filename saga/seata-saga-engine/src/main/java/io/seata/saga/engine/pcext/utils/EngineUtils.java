@@ -29,6 +29,7 @@ import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
+import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
@@ -68,6 +69,8 @@ public class EngineUtils {
             int end = stateName.lastIndexOf(LoopTaskUtils.LOOP_STATE_NAME_PATTERN);
             if (end > -1) {
                 return stateName.substring(0, end);
+            } else if (stateName.contains("parallel")) {
+                return stateName.substring(stateName.lastIndexOf("-")+1);
             }
         }
         return stateName;
@@ -83,6 +86,14 @@ public class EngineUtils {
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
             if (context.hasVariable(DomainConstants.LOOP_SEMAPHORE)) {
                 Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
+                semaphore.release();
+            }
+            return;
+        }
+
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
+            if (context.hasVariable(DomainConstants.PARALLEL_SEMAPHORE)) {
+                Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.PARALLEL_SEMAPHORE);
                 semaphore.release();
             }
             return;
@@ -138,7 +149,12 @@ public class EngineUtils {
     public static void failStateMachine(ProcessContext context, Exception exp) {
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+            LOGGER.info("fail state machine");
             return;
+        }
+
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
+            ((ProcessContextImpl)context).setVariableLocally("PARALLEL_END", true);
         }
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(

@@ -67,6 +67,10 @@ public class TaskStateRouter implements StateRouter {
             return null;
         }
 
+        if (Boolean.TRUE.equals(context.getVariable("PARALLEL_END"))) {
+            return null;
+        }
+
         //The current CompensationTriggerState can mark the compensation process is started and perform compensation
         // route processing.
         State compensationTriggerState = (State)context.getVariable(

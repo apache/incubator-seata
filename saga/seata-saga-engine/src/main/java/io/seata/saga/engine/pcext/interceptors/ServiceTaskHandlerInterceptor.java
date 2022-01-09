@@ -37,6 +37,7 @@ import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.engine.pcext.utils.ParallelTaskUtils;
 import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
@@ -128,6 +129,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 stateInstance.getName());
             stateInstance.setStateIdRetriedFor(
                 lastRetriedStateInstance == null ? null : lastRetriedStateInstance.getId());
+        } else if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
+            stateInstance.setName(ParallelTaskUtils.generateParallelSubStateName(context, state.getName()));
         } else {
             stateInstance.setName(state.getName());
             stateInstance.setStateIdRetriedFor(
