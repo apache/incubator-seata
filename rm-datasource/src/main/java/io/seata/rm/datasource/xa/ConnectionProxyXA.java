@@ -157,7 +157,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             long branchId;
             try {
                 // 1. register branch to TC then get the branch message
-                setBranchRegisterTime(System.currentTimeMillis());
+                branchRegisterTime = System.currentTimeMillis();
                 BranchRegisterResult result = DefaultResourceManager.get().branchRegisterAndGetResult(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
                 branchId = result.getBranchId();
@@ -320,14 +320,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     public boolean shouldBeHeld() {
         return JdbcConstants.MYSQL.equals(resource.getDbType()) || JdbcConstants.MARIADB.equals(resource.getDbType())
                || StringUtils.isBlank(resource.getDbType());
-    }
-
-    public Long getBranchRegisterTime() {
-        return branchRegisterTime;
-    }
-
-    private synchronized void setBranchRegisterTime(Long branchRegisterTime) {
-        this.branchRegisterTime = branchRegisterTime;
     }
 
     public synchronized Long getPrepareTime() {
