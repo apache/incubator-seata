@@ -17,6 +17,7 @@ package io.seata.server.console.impl.file;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +36,7 @@ import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.common.util.CollectionUtils;
 
 import static java.util.Objects.isNull;
 import static io.seata.common.util.CollectionUtils.isEmpty;
@@ -63,23 +65,21 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
 
-
-        // calculate pages
-        int pages = allSessions.size() / param.getPageSize();
-        if (allSessions.size() % param.getPageSize() != 0) {
-            pages++;
-        }
-
         final AtomicInteger total = new AtomicInteger();
 
         final List<GlobalSession> filteredSessions = allSessions
                 .parallelStream()
                 .filter(obtainPredicate(param))
                 .peek(globalSession -> total.incrementAndGet())
-                .skip((long) Math.min(param.getPageSize(), pages) * (param.getPageNum() - 1))
+                .skip((long) param.getPageSize() * (param.getPageNum() - 1))
                 .limit(param.getPageSize())
                 .collect(Collectors.toList());
 
+        // calculate pages
+        int pages = total.get() / param.getPageSize();
+        if (allSessions.size() % param.getPageSize() != 0) {
+            pages++;
+        }
 
         return new PageResult<>(convert(filteredSessions), total.get(), pages, param.getPageNum(), param.getPageSize());
     }
@@ -91,6 +91,11 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
      * @return the GlobalSessionVO list
      */
     private List<GlobalSessionVO> convert(List<GlobalSession> filteredSessions) {
+
+        if (CollectionUtils.isEmpty(filteredSessions)) {
+            return Collections.emptyList();
+        }
+
         final ArrayList<GlobalSessionVO> result = new ArrayList<>(filteredSessions.size());
 
         for (GlobalSession session : filteredSessions) {
@@ -117,6 +122,11 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
      * @return the BranchSessionVO list
      */
     private Set<BranchSessionVO> convert(ArrayList<BranchSession> branchSessions) {
+
+        if (CollectionUtils.isEmpty(branchSessions)) {
+            return Collections.emptySet();
+        }
+
         final Set<BranchSessionVO> result = new HashSet<>(branchSessions.size());
 
         for (BranchSession session : branchSessions) {

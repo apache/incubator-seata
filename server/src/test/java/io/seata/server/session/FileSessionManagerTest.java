@@ -271,12 +271,12 @@ public class FileSessionManagerTest {
             );
 
             // page
-            globalSessionParam.setPageSize(2);
+            globalSessionParam.setPageSize(1);
             globalSessionParam.setPageNum(1);
             final PageResult<GlobalSessionVO> sizeAndNumTestResult = globalSessionService.query(globalSessionParam);
             Assertions.assertEquals(1, sizeAndNumTestResult.getCurrPage());
             Assertions.assertEquals(2, sizeAndNumTestResult.getPages());
-            Assertions.assertEquals(2, sizeAndNumTestResult.getData().size());
+            Assertions.assertEquals(1, sizeAndNumTestResult.getData().size());
             Assertions.assertEquals(2, sizeAndNumTestResult.getTotal());
 
             // xid
@@ -295,6 +295,7 @@ public class FileSessionManagerTest {
                     transactionNameTestResult.getData().get(0).getTransactionName());
 
             // application id
+            globalSessionParam.setPageSize(3);
             globalSessionParam.setTransactionName(null);
             globalSessionParam.setApplicationId("demo-app");
             final PageResult<GlobalSessionVO> applicationIdTestResult = globalSessionService.query(globalSessionParam);
