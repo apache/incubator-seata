@@ -167,15 +167,15 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(2).toMillis();
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
 
     /**
      * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(10).toMillis();
+    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
 
     /**
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(5).toMillis();
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
 }
