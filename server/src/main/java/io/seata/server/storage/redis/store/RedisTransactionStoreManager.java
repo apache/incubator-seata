@@ -15,22 +15,14 @@
  */
 package io.seata.server.storage.redis.store;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Transaction;
+import redis.clients.jedis.*;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -77,6 +69,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**the prefix of the global transaction status*/
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
+
+    /**the prefix of the global transaction all keys */
+    private static final String REDIS_SEATA_GLOBAL_PREFIX_KEYS = "SEATA_GLOBAL_*";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -549,6 +544,64 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private String buildGlobalStatus(Integer status) {
         return REDIS_SEATA_STATUS_PREFIX + status;
+    }
+
+    public List<GlobalSession> findGlobalSessionKeys(int pageNum,int pageSize){
+        Set<String> keys = new HashSet<>();
+        String cursor = String.valueOf(pageNum);
+        ScanParams sp = new ScanParams();
+        sp.match(REDIS_SEATA_GLOBAL_PREFIX_KEYS);
+        sp.count(pageSize);
+
+        try(Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+
+            do {
+                ScanResult<String> res = jedis.scan(cursor, sp);
+                List<String> result = res.getResult();
+
+                if(result != null && result.size() > 0){
+                    keys.addAll(result);
+                }
+
+                cursor = res.getCursor();
+            }while (!cursor.equals(ScanParams.SCAN_POINTER_START));
+
+            return readGlobalSession(jedis,keys,false);
+        } catch (Exception ex) {
+            throw new RedisException(ex);
+        }
+    }
+
+    public int countByClobalSesisons(){
+        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+            Pipeline pipelined = jedis.pipelined();
+            return pipelined.keys(REDIS_SEATA_GLOBAL_PREFIX_KEYS).get().size();
+        } catch (Exception ex) {
+            throw new RedisException(ex);
+        }
+    }
+
+    private List<GlobalSession> readGlobalSession(Jedis jedis, Set<String> keys,boolean withBranchSessions) {
+        ArrayList<GlobalSession> globalSessions = new ArrayList<>();
+        String xid = null;
+        if (CollectionUtils.isNotEmpty(keys)){
+            for (String key : keys) {
+                Map<String, String> map = jedis.hgetAll(key);
+                if (CollectionUtils.isEmpty(map)) {
+                    return null;
+                }
+                GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
+                if (globalTransactionDO != null) {
+                     xid = globalTransactionDO.getXid();
+                }
+                List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
+                if (withBranchSessions) {
+                    branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
+                }
+                globalSessions.add(getGlobalSession(globalTransactionDO,branchTransactionDOs));
+            }
+        }
+        return globalSessions;
     }
 
 }
