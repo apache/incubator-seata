@@ -16,7 +16,6 @@
 package io.seata.server.console.impl.redis;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.core.console.vo.GlobalSessionVO;
@@ -33,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static io.seata.common.util.StringUtils.isBlank;
 
 /**
  * Global Session Redis ServiceImpl
@@ -51,8 +52,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         Integer queryFlag = checkParams(param);
         if (queryFlag == 0){
             total = instance.countByClobalSesisons();
-            int pageNum = param.getPageNum() * param.getPageSize() +1;
-            List<GlobalSession> globalSessions = instance.findGlobalSessionKeys(pageNum, param.getPageSize());
+            List<GlobalSession> globalSessions = instance.findGlobalSessionKeys(calculateOffset(param), param.getPageSize());
             convertToVos(result,globalSessions);
         }else{
 
@@ -61,6 +61,10 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         return PageResult.success(result,total,param.getPageNum(),param.getPageSize());
     }
 
+    private int calculateOffset(GlobalSessionParam param) {
+        int start = param.getPageNum() * param.getPageSize();
+        return param.getPageNum() == 0 ? start : (start+1);
+    }
 
 
     private void convertToVos(List<GlobalSessionVO> result,List<GlobalSession> globalSessions) {
@@ -108,8 +112,8 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
             param.setPageSize(20);
         }
 
-        if (StringUtils.isBlank(param.getXid()) && StringUtils.isBlank(param.getApplicationId())
-                && param.getStatus() == null){
+        if (isBlank(param.getXid()) && isBlank(param.getApplicationId())
+                && param.getStatus() == null && (param.getTimeStart() == null || param.getTimeEnd() == null)){
             queryFlag =  0;
         }
 
