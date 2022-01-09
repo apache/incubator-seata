@@ -363,7 +363,7 @@ public class RedisLocker extends AbstractLocker {
             if (CollectionUtils.isNotEmpty(rowKeys)) {
                 Pipeline pipelined = jedis.pipelined();
                 if (null == branchId) {
-                    pipelined.hdel(xidLockKey);
+                    pipelined.del(xidLockKey);
                 } else {
                     pipelined.hdel(xidLockKey, branchId.toString());
                 }
