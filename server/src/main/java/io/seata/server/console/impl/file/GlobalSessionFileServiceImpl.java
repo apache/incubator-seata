@@ -47,6 +47,7 @@ import org.springframework.stereotype.Component;
 /**
  * Global Session File ServiceImpl
  *
+ * @author zhongxiang.wang
  * @author miaoxueyu
  */
 @Component
@@ -56,7 +57,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
-        if (param.getPageSize() == 0 || param.getPageNum() == 0) {
+        if (param.getPageSize() <= 0 || param.getPageNum() <= 0) {
             throw new InvalidParamException("wrong pageSize or pageNum");
         }
 
