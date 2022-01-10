@@ -50,10 +50,11 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
-        if (param.getTimeStart() != null || param.getTimeEnd() != null){
-            return PageResult.failure("1001","redis mode not support time range query");
-        }
         List<GlobalSessionVO> result = new ArrayList<>();
+        if (param.getTimeStart() != null || param.getTimeEnd() != null){
+            //not support time range query
+            return PageResult.success(result,0,param.getPageNum(),param.getPageSize());
+        }
         List<GlobalSession> globalSessions = new ArrayList<>();
         int total = 0;
         RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
