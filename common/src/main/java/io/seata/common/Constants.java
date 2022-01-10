@@ -152,4 +152,9 @@ public interface Constants {
      */
     String AUTO_COMMIT = "autoCommit";
 
+    /**
+     * The constant SKIP_CHECK_LOCK
+     */
+    String SKIP_CHECK_LOCK = "skipCheckLock";
+
 }
