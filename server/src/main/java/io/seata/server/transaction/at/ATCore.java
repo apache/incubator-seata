@@ -31,6 +31,7 @@ import io.seata.server.session.GlobalSession;
 
 
 import static io.seata.common.Constants.AUTO_COMMIT;
+import static io.seata.common.Constants.SKIP_CHECK_LOCK;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
 
 /**
@@ -56,6 +57,7 @@ public class ATCore extends AbstractCore {
         throws TransactionException {
         String applicationData = branchSession.getApplicationData();
         boolean autoCommit = true;
+        boolean skipCheckLock = false;
         if (StringUtils.isNotBlank(applicationData)) {
             if (objectMapper == null) {
                 objectMapper = new ObjectMapper();
@@ -66,19 +68,23 @@ public class ATCore extends AbstractCore {
                 if (clientAutoCommit != null && !(boolean)clientAutoCommit) {
                     autoCommit = (boolean)clientAutoCommit;
                 }
+                Object clientSkipCheckLock = data.get(SKIP_CHECK_LOCK);
+                if (clientSkipCheckLock instanceof Boolean) {
+                    skipCheckLock = (boolean)clientSkipCheckLock;
+                }
             } catch (IOException e) {
                 LOGGER.error("failed to get application data: {}", e.getMessage(), e);
             }
         }
         try {
-            if (!branchSession.lock(autoCommit)) {
+            if (!branchSession.lock(autoCommit, skipCheckLock)) {
                 throw new BranchTransactionException(LockKeyConflict,
                     String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
                         branchSession.getBranchId()));
             }
         } catch (StoreException e) {
             if (e.getCause() instanceof BranchTransactionException) {
-                throw new BranchTransactionException((((BranchTransactionException)e.getCause())).getCode(),
+                throw new BranchTransactionException(((BranchTransactionException)e.getCause()).getCode(),
                     String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
                         branchSession.getBranchId()));
             }
