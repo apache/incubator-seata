@@ -241,7 +241,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void closeAndClean() throws TransactionException {
         close();
-        clean();
+        if (this.hasATBranch()) {
+            clean();
+        }
     }
 
     /**
