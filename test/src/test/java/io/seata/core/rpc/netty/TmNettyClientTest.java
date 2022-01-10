@@ -29,6 +29,7 @@ import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.saga.engine.db.AbstractServerTest;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -119,6 +120,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         new Thread(() -> {
+            SessionHolder.init(null);
             nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
             // set registry
             XID.setIpAddress(NetUtil.getLocalIp());
@@ -145,7 +147,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
         Assertions.assertNotNull(branchRegisterResponse);
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
-        Assertions.assertEquals("RuntimeException[SessionManager is NOT init!]",
+        Assertions.assertEquals("TransactionException[Could not found global transaction xid = 127.0.0.1:8091:1249853, may be has finished.]",
                 branchRegisterResponse.getMsg());
         nettyRemotingServer.destroy();
         tmNettyRemotingClient.destroy();
