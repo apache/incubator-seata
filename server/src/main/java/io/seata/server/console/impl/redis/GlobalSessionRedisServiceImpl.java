@@ -51,14 +51,18 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         List<GlobalSessionVO> result = new ArrayList<>();
+        int total = 0;
+
         if (param.getTimeStart() != null || param.getTimeEnd() != null){
             //not support time range query
             return PageResult.success(result,0,param.getPageNum(),param.getPageSize());
         }
         List<GlobalSession> globalSessions = new ArrayList<>();
-        int total = 0;
+
         RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
+
         Integer queryFlag = checkParams(param);
+
         if (queryFlag == 0){
             total = instance.countByClobalSesisons();
             globalSessions = instance.findGlobalSessionKeys(calculateOffset(param), param.getPageSize(),param.isWithBranch());
@@ -79,6 +83,9 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
         return PageResult.success(result,total,param.getPageNum(),param.getPageSize());
     }
+
+
+
 
     private List<GlobalSession> getFinalGlobalSessions(RedisTransactionStoreManager instance,GlobalSessionParam param, List<GlobalSession> globalSessions) {
         List<GlobalSession> globalSessionsNew = new ArrayList<>();
