@@ -20,9 +20,11 @@ import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.model.GlobalStatus;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -32,8 +34,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.seata.common.util.StringUtils.isBlank;
+import static io.seata.common.util.StringUtils.isNotBlank;
 
 /**
  * Global Session Redis ServiceImpl
@@ -46,19 +50,85 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
+        if (param.getTimeStart() != null || param.getTimeEnd() != null){
+            return PageResult.failure("1001","redis mode not support time range query");
+        }
         List<GlobalSessionVO> result = new ArrayList<>();
+        List<GlobalSession> globalSessions = new ArrayList<>();
         int total = 0;
         RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
         Integer queryFlag = checkParams(param);
         if (queryFlag == 0){
             total = instance.countByClobalSesisons();
-            List<GlobalSession> globalSessions = instance.findGlobalSessionKeys(calculateOffset(param), param.getPageSize());
+            globalSessions = instance.findGlobalSessionKeys(calculateOffset(param), param.getPageSize(),param.isWithBranch());
             convertToVos(result,globalSessions);
         }else{
 
+            if (isBlank(param.getXid()) && param.getStatus() == null){
+                //not support query applicationId or transactionName
+                return PageResult.success(result,total,param.getPageNum(),param.getPageSize());
+            }
+
+            List<GlobalSession> finalGlobalSessions = getFinalGlobalSessions(instance, param, globalSessions);
+
+
+            total = finalGlobalSessions.size();
+            convertToVos(result,finalGlobalSessions);
         }
 
         return PageResult.success(result,total,param.getPageNum(),param.getPageSize());
+    }
+
+    private List<GlobalSession> getFinalGlobalSessions(RedisTransactionStoreManager instance,GlobalSessionParam param, List<GlobalSession> globalSessions) {
+        List<GlobalSession> globalSessionsNew = new ArrayList<>();
+        if (isNotBlank(param.getXid())){
+            SessionCondition sessionCondition = new SessionCondition();
+            sessionCondition.setXid(param.getXid());
+            globalSessions = instance.readSession(sessionCondition, param.isWithBranch());
+        }
+
+        if (param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null){
+
+            GlobalStatus globalStatus = GlobalStatus.get(param.getStatus());
+
+            if (CollectionUtils.isNotEmpty(globalSessions)){
+                globalSessionsNew = globalSessions.stream().filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus())).collect(Collectors.toList());
+
+            }else{
+                SessionCondition sessionCondition = new SessionCondition();
+                sessionCondition.setStatus(globalStatus);
+                globalSessionsNew = instance.readSession(sessionCondition, param.isWithBranch());
+            }
+        }
+
+
+        List<GlobalSession> finalGlobalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
+
+
+
+        if (isNotBlank(param.getApplicationId())){
+            List<GlobalSession> collect = finalGlobalSessions.stream().filter(globalSession -> globalSession.getApplicationId().equals(param.getApplicationId())).collect(Collectors.toList());
+            if (isNotBlank(param.getTransactionName())){
+                return collect.stream().filter(globalSession -> globalSession.getTransactionName().equals(param.getTransactionName()))
+                        .collect(Collectors.toList());
+
+            }else {
+                return collect;
+            }
+        }
+
+        if (isNotBlank(param.getTransactionName())){
+            List<GlobalSession> collect = finalGlobalSessions.stream().filter(globalSession -> globalSession.getTransactionName().equals(param.getTransactionName()))
+                    .collect(Collectors.toList());
+            if (isNotBlank(param.getApplicationId())){
+                return collect.stream().filter(globalSession -> globalSession.getApplicationId().equals(param.getApplicationId())).collect(Collectors.toList());
+            }else{
+                return collect;
+            }
+        }
+
+
+        return globalSessionsNew;
     }
 
     private int calculateOffset(GlobalSessionParam param) {
@@ -113,7 +183,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         }
 
         if (isBlank(param.getXid()) && isBlank(param.getApplicationId())
-                && param.getStatus() == null && (param.getTimeStart() == null || param.getTimeEnd() == null)){
+                && param.getStatus() == null){
             queryFlag =  0;
         }
 

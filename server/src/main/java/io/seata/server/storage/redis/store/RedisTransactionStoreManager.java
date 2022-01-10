@@ -440,6 +440,28 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return null;
     }
 
+    public List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions){
+        List<GlobalSession> globalSessions = new ArrayList<>();
+        if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
+            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), withBranchSessions);
+            if (globalSession != null) {
+                globalSessions.add(globalSession);
+            }
+            return globalSessions;
+        } else if (sessionCondition.getTransactionId() != null) {
+            GlobalSession globalSession = this
+                    .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), withBranchSessions);
+            if (globalSession != null) {
+                globalSessions.add(globalSession);
+            }
+            return globalSessions;
+        } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
+            globalSessions = readSession(sessionCondition.getStatuses());
+            return readSession(sessionCondition.getStatuses());
+        }
+        return globalSessions;
+    }
+
     /**
      * assemble the global session and branch session
      * @param globalTransactionDO the global transactionDo
@@ -546,7 +568,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return REDIS_SEATA_STATUS_PREFIX + status;
     }
 
-    public List<GlobalSession> findGlobalSessionKeys(int pageNum,int pageSize){
+    public List<GlobalSession> findGlobalSessionKeys(int pageNum,int pageSize,boolean withBranch){
         Set<String> keys = new HashSet<>();
         String cursor = String.valueOf(pageNum);
         ScanParams sp = new ScanParams();
@@ -566,7 +588,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 cursor = res.getCursor();
             }while (!cursor.equals(ScanParams.SCAN_POINTER_START));
 
-            return readGlobalSession(jedis,keys,false);
+            return readGlobalSession(jedis,keys,withBranch);
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
