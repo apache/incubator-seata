@@ -15,6 +15,11 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.lang.management.ManagementFactory;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.netty.channel.Channel;
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
@@ -25,15 +30,7 @@ import io.seata.saga.engine.db.AbstractServerTest;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-
-import java.lang.management.ManagementFactory;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author slievrly
@@ -117,7 +114,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         tmNettyRemotingClient.destroy();
     }
 
-    @Disabled
+    @Test
     public void testSendMsgWithResponse() throws Exception {
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
