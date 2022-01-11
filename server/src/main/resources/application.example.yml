@@ -115,8 +115,8 @@ seata:
       log-save-days: 7
       log-delete-period: 86400000
     session:
-      branch-async-queue-size: 5000
-      enable-branch-async-remove: true
+      branch-async-queue-size: 5000 #branch async remove queue size
+      enable-branch-async-remove: true #enable to asynchronous remove branchSession
   store:
     # support: file 、 db 、 redis
     mode: file
