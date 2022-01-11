@@ -47,7 +47,7 @@ public class DataSourceManager extends AbstractResourceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceManager.class);
 
-    private final AsyncWorker asyncWorker = new AsyncWorker(this);
+    private final AsyncWorker asyncWorker = AsyncWorker.getInstance(this);
 
     private final Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
 

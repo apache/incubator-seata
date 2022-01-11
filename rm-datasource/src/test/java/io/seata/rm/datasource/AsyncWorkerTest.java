@@ -47,27 +47,27 @@ class AsyncWorkerTest {
 
     @Test
     void groupedByResourceId() {
-        List<AsyncWorker.Phase2Context> contexts = getRandomContexts();
-        Map<String, List<AsyncWorker.Phase2Context>> groupedContexts = worker.groupedByResourceId(contexts);
+        List<AsyncWorker.BranchPhaseContext> contexts = getRandomContexts();
+        Map<String, List<AsyncWorker.BranchPhaseContext>> groupedContexts = worker.groupedByResourceId(contexts);
         groupedContexts.forEach((resourceId, group) -> group.forEach(context -> {
             String message = "each context in the group should has the same resourceId";
             assertEquals(resourceId, context.resourceId, message);
         }));
     }
 
-    private List<AsyncWorker.Phase2Context> getRandomContexts() {
+    private List<AsyncWorker.BranchPhaseContext> getRandomContexts() {
         return random.ints().limit(16)
                 .mapToObj(String::valueOf)
                 .flatMap(this::generateContextStream)
                 .collect(Collectors.toList());
     }
 
-    private Stream<AsyncWorker.Phase2Context> generateContextStream(String resourceId) {
+    private Stream<AsyncWorker.BranchPhaseContext> generateContextStream(String resourceId) {
         int size = random.nextInt(10);
         return IntStream.range(0, size).mapToObj(i -> buildContext(resourceId));
     }
 
-    private AsyncWorker.Phase2Context buildContext(String resourceId) {
-        return new AsyncWorker.Phase2Context("test", 0, resourceId);
+    private AsyncWorker.BranchPhaseContext buildContext(String resourceId) {
+        return new AsyncWorker.BranchPhaseContext("test", 0, resourceId);
     }
 }
