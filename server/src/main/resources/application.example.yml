@@ -157,7 +157,7 @@ seata:
     exporter-list: prometheus
     exporter-prometheus-port: 9898
   transport:
-    rpc-tc-request-timeout: 5000
+    rpc-tc-request-timeout: 30000
     enable-tc-server-batch-send-response: false
     shutdown:
       wait: 3
