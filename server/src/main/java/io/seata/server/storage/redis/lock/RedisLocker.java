@@ -303,42 +303,16 @@ public class RedisLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseLock(String xid, List<Long> branchIds) {
-        if (CollectionUtils.isEmpty(branchIds)) {
-            return true;
-        }
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String xidLockKey = buildXidLockKey(xid);
-            String[] branchIdsArray = new String[branchIds.size()];
-            for (int i = 0; i < branchIds.size(); i++) {
-                branchIdsArray[i] = branchIds.get(i).toString();
-            }
-            List<String> rowKeys = jedis.hmget(xidLockKey, branchIdsArray);
-
-            if (CollectionUtils.isNotEmpty(rowKeys)) {
-                Pipeline pipelined = jedis.pipelined();
-                pipelined.hdel(xidLockKey, branchIdsArray);
-                rowKeys.forEach(rowKeyStr -> {
-                    if (StringUtils.isNotEmpty(rowKeyStr)) {
-                        if (rowKeyStr.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
-                            String[] keys = rowKeyStr.split(ROW_LOCK_KEY_SPLIT_CHAR);
-                            pipelined.del(keys);
-                        } else {
-                            pipelined.del(rowKeyStr);
-                        }
-                    }
-                });
-                pipelined.sync();
-            }
-            return true;
-        }
+    public boolean releaseLock(String xid) {
+        return doReleaseLock(xid, null);
     }
 
     @Override
     public boolean releaseLock(String xid, Long branchId) {
-        List<Long> branchIds = new ArrayList<>();
-        branchIds.add(branchId);
-        return releaseLock(xid, branchIds);
+        if (branchId == null) {
+            return true;
+        }
+        return doReleaseLock(xid, branchId);
     }
 
     @Override
@@ -373,6 +347,39 @@ public class RedisLocker extends AbstractLocker {
                     pipeline.sync();
                 }
             }
+        }
+    }
+
+    private boolean doReleaseLock(String xid, Long branchId) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String xidLockKey = buildXidLockKey(xid);
+            final List<String> rowKeys = new ArrayList<>();
+            if (null == branchId) {
+                Map<String, String> rowKeyMap = jedis.hgetAll(xidLockKey);
+                rowKeyMap.forEach((branch, rowKey) -> rowKeys.add(rowKey));
+            } else {
+                rowKeys.addAll(jedis.hmget(xidLockKey, branchId.toString()));
+            }
+            if (CollectionUtils.isNotEmpty(rowKeys)) {
+                Pipeline pipelined = jedis.pipelined();
+                if (null == branchId) {
+                    pipelined.del(xidLockKey);
+                } else {
+                    pipelined.hdel(xidLockKey, branchId.toString());
+                }
+                rowKeys.forEach(rowKeyStr -> {
+                    if (StringUtils.isNotEmpty(rowKeyStr)) {
+                        if (rowKeyStr.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
+                            String[] keys = rowKeyStr.split(ROW_LOCK_KEY_SPLIT_CHAR);
+                            pipelined.del(keys);
+                        } else {
+                            pipelined.del(rowKeyStr);
+                        }
+                    }
+                });
+                pipelined.sync();
+            }
+            return true;
         }
     }
 
