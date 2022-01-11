@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -103,8 +104,10 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             beforeImage = TableRecords.empty(getTableMeta());
         }
         Object result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        TableRecords afterImage = afterImage(beforeImage);
-        prepareUndoLogAll(beforeImage, afterImage);
+        if(CollectionUtils.isNotEmpty(beforeImage.getRows())){
+            TableRecords afterImage = afterImage(beforeImage);
+            prepareUndoLogAll(beforeImage, afterImage);
+        }
         return result;
     }
 
@@ -243,7 +246,8 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL + " FOR UPDATE")) {
+        Connection connection = statementProxy.getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(selectSQL + " FOR UPDATE")) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
                     List<Object> paramAppender = paramAppenderList.get(i);
