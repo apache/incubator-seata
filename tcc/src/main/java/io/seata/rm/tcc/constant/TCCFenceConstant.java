@@ -22,6 +22,10 @@ package io.seata.rm.tcc.constant;
  */
 public class TCCFenceConstant {
 
+    private TCCFenceConstant() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * PHASE 1: The Commit tried.
      */
