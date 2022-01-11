@@ -15,12 +15,11 @@
  */
 package io.seata.server.session;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import io.seata.common.util.CompressUtil;
+
 import io.seata.compressor.gzip.GzipCompressor;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -313,7 +312,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;
 
-        int isCompress = null != lockKeyBytes && lockKeyBytes.length > 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        int isCompress = null != lockKeyBytes && lockKeyBytes.length > MAX_BRANCH_SESSION_SIZE ? Integer.MAX_VALUE : Integer.MIN_VALUE;
 
         byte[] clientIdBytes = clientId != null ? clientId.getBytes() : null;
 
