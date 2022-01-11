@@ -18,7 +18,9 @@ package io.seata.server.coordinator;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
@@ -61,6 +63,7 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
+import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
@@ -119,6 +122,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
+    /**
+     * default branch async queue size
+     */
+    private static final int DEFAULT_BRANCH_ASYNC_QUEUE_SIZE = 5000;
+
+    /**
+     * the pool size of branch asynchronous remove thread pool
+     */
+    private static final int BRANCH_ASYNC_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
             ConfigurationKeys.MAX_COMMIT_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
 
@@ -143,6 +156,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("UndoLogDelete", 1));
 
+    private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(
+                    CONFIG.getInt(ConfigurationKeys.SESSION_BRANCH_ASYNC_QUEUE_SIZE, DEFAULT_BRANCH_ASYNC_QUEUE_SIZE)
+            ), new NamedThreadFactory("branchSessionRemove", 2, true),
+            new ThreadPoolExecutor.CallerRunsPolicy());
+
+
     private RemotingServer remotingServer;
 
     private final DefaultCore core;
@@ -157,6 +178,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * @param remotingServer the remoting server
      */
     private DefaultCoordinator(RemotingServer remotingServer) {
+        if (remotingServer == null) {
+            throw new IllegalArgumentException("RemotingServer not allowed be null.");
+        }
         this.remotingServer = remotingServer;
         this.core = new DefaultCore(remotingServer);
     }
@@ -170,6 +194,32 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }
         return instance;
+    }
+
+    public static DefaultCoordinator getInstance() {
+        if (null == instance) {
+            throw new IllegalArgumentException("The instance has not been created.");
+        }
+        return instance;
+    }
+
+    /**
+     * Asynchronous remove branch
+     *
+     * @param globalSession the globalSession
+     * @param branchSession the branchSession
+     */
+    public void doBranchRemoveAsync(GlobalSession globalSession, BranchSession branchSession) {
+        branchRemoveExecutor.submit(new BranchRemoveTask(globalSession, branchSession));
+    }
+
+    /**
+     * Asynchronous remove all branch
+     *
+     * @param globalSession the globalSession
+     */
+    public void doBranchRemoveAllAsync(GlobalSession globalSession) {
+        branchRemoveExecutor.submit(new BranchRemoveTask(globalSession));
     }
 
     @Override
@@ -450,11 +500,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
+        branchRemoveExecutor.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 
         }
@@ -462,7 +514,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (remotingServer instanceof NettyRemotingServer) {
             ((NettyRemotingServer) remotingServer).destroy();
         }
-        // 3. last destroy SessionHolder
+        // 3. third destroy SessionHolder
         SessionHolder.destroy();
     }
 
@@ -472,5 +524,59 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void setRemotingServer(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
+    }
+
+    /**
+     * the task to remove branchSession
+     */
+    static class BranchRemoveTask implements Runnable {
+
+        /**
+         * the globalSession
+         */
+        private final GlobalSession globalSession;
+
+        /**
+         * the branchSession
+         */
+        private final BranchSession branchSession;
+
+        public BranchRemoveTask(GlobalSession globalSession, BranchSession branchSession) {
+            this.globalSession = globalSession;
+            this.branchSession = branchSession;
+        }
+
+        public BranchRemoveTask(GlobalSession globalSession) {
+            this.globalSession = globalSession;
+            this.branchSession = null;
+        }
+
+        @Override
+        public void run() {
+            if (globalSession == null) {
+                return;
+            }
+            try {
+                if (branchSession != null) {
+                    LOGGER.info("Asynchronous delete bt successfully, xid = {}, branchId = {}",
+                            globalSession.getXid(), branchSession.getBranchId());
+                    globalSession.removeBranch(branchSession);
+                } else {
+                    SessionHelper.forEach(globalSession.getSortedBranches(), bt -> {
+                        try {
+                            LOGGER.info("Asynchronous delete bt successfully, xid = {}, branchId = {}",
+                                    globalSession.getXid(), bt.getBranchId());
+                            globalSession.removeBranch(bt);
+                        } catch (TransactionException transactionException) {
+                            LOGGER.warn("Asynchronous delete bt error, xid = {}, branchId = {}, msg = {}",
+                                    globalSession.getXid(), bt.getBranchId(), transactionException.getMessage());
+                        }
+                        return null;
+                    });
+                }
+            } catch (TransactionException e) {
+                LOGGER.warn("Asynchronous delete branchSession error, xid = {}, msg = {}", globalSession.getXid(), e.getMessage());
+            }
+        }
     }
 }
