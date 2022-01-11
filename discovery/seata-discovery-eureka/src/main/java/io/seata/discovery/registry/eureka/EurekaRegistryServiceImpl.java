@@ -38,11 +38,8 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 /**
  * The type Eureka registry service.
@@ -67,7 +64,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final String DEFAULT_WEIGHT = "1";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
-    private static ConcurrentMap<String, Set<InetSocketAddress>> clusterAddressMap;
+    private static ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
 
     private static volatile boolean subscribeListener = false;
     private static volatile ApplicationInfoManager applicationInfoManager;
@@ -128,17 +125,18 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         if (clusterName == null) {
             return null;
         }
+        String clusterUpperName = clusterName.toUpperCase();
         if (!subscribeListener) {
-            refreshCluster();
+            refreshCluster(clusterUpperName);
             subscribe(null, event -> {
                 try {
-                    refreshCluster();
+                    refreshCluster(clusterUpperName);
                 } catch (Exception e) {
                     LOGGER.error("Eureka event listener refreshCluster error:{}", e.getMessage(), e);
                 }
             });
         }
-        return new ArrayList<>(clusterAddressMap.getOrDefault(clusterName.toUpperCase(), Collections.emptySet()));
+        return clusterAddressMap.get(clusterUpperName);
     }
 
     @Override
@@ -149,10 +147,10 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         clean();
     }
 
-    private void refreshCluster() {
-        List<Application> applications = getEurekaClient(false).getApplications().getRegisteredApplications();
+    private void refreshCluster(String clusterName) {
+        Application application = getEurekaClient(false).getApplication(clusterName);
 
-        if (CollectionUtils.isEmpty(applications)) {
+        if (application == null || CollectionUtils.isEmpty(application.getInstances())) {
             clusterAddressMap.clear();
 
             if (LOGGER.isDebugEnabled()) {
@@ -161,21 +159,19 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             return;
         }
 
-        ConcurrentMap<String, Set<InetSocketAddress>> collect = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-
-        for (Application application : applications) {
-            List<InstanceInfo> instances = application.getInstances();
-
-            if (CollectionUtils.isNotEmpty(instances)) {
-                Set<InetSocketAddress> addressSet = instances.stream()
-                        .map(instance -> new InetSocketAddress(instance.getIPAddr(), instance.getPort()))
-                        .collect(Collectors.toSet());
-                collect.put(application.getName(), addressSet);
+        ConcurrentMap<String, List<InetSocketAddress>> collect = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        List<InetSocketAddress> list = new ArrayList<>(application.getInstances().size());
+        collect.put(clusterName, list);
+        for (InstanceInfo instance : application.getInstances()) {
+            if (instance.getIPAddr() == null || instance.getPort() < 0 || instance.getPort() > 0xFFFF) {
+                LOGGER.error("eureka instance info illegal:{}", instance.toString());
+            } else {
+                list.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
             }
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("refreshCluster success, cluster: " + collect);
+            LOGGER.debug("refreshCluster success, cluster: " + list);
         }
 
         clusterAddressMap = collect;
