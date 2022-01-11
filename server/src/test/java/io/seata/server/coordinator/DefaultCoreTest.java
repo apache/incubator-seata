@@ -229,7 +229,7 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void rollBackTest(String xid) throws Exception {
         GlobalStatus globalStatus = core.rollback(xid);
-        Assertions.assertEquals(globalStatus, GlobalStatus.Rollbacked);
+        Assertions.assertEquals(globalStatus, GlobalStatus.Rollbacking);
     }
 
     /**
@@ -249,7 +249,7 @@ public class DefaultCoreTest {
         core.mockCore(BranchType.AT,
                 new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
     }
 
     /**

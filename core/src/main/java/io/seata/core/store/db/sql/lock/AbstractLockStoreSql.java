@@ -64,7 +64,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
      */
     protected static final String LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD = " #lock_table_branch_id_where_condition# ";
 
-    
+
     /**
      * The constant ALL_COLUMNS.
      * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
@@ -104,7 +104,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant BATCH_DELETE_LOCK_BY_BRANCHS_SQL.
      */
     private static final String BATCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and (" + LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD + ") ";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? ";
 
 
     /**
@@ -156,12 +156,8 @@ public class AbstractLockStoreSql implements LockStoreSql {
     }
 
     @Override
-    public String getBatchDeleteLockSqlByBranchs(String lockTable, int branchSize) {
-        List<String> pkNameList = new ArrayList<>();
-        pkNameList.add(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID);
-        String whereCondition = buildWhereConditionByPKs(pkNameList,branchSize,MAX_IN_SIZE);
-        return BATCH_DELETE_LOCK_BY_BRANCHS_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD,
-            whereCondition);
+    public String getBatchDeleteLockSqlByXid(String lockTable) {
+        return BATCH_DELETE_LOCK_BY_BRANCHS_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
     }
 
     @Override
