@@ -36,9 +36,10 @@ public interface Locker {
      *
      * @param rowLock the row lock
      * @param autoCommit the auto commit
+     * @param skipCheckLock whether skip check lock or not
      * @return the boolean
      */
-    boolean acquireLock(List<RowLock> rowLock, boolean autoCommit);
+    boolean acquireLock(List<RowLock> rowLock, boolean autoCommit, boolean skipCheckLock);
 
     /**
      * Release lock boolean.
@@ -61,10 +62,9 @@ public interface Locker {
      * Release lock boolean.
      *
      * @param xid       the xid
-     * @param branchIds the branch ids
      * @return the boolean
      */
-    boolean releaseLock(String xid, List<Long> branchIds);
+    boolean releaseLock(String xid);
 
     /**
      * Is lockable boolean.
