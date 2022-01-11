@@ -70,39 +70,13 @@ public class PageResult<T> extends Result<T>  implements Serializable {
         this.total = total;
         this.pageNum = pageNum;
         this.pageSize = pageSize;
-        this.data = pageingDate(data,total,pageNum,pageSize);
-    }
+        this.data = data;
 
-    private List<T> pageingDate(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
-        if (CollectionUtils.isEmpty(data)){
-            return null;
-        }
-        if (total.equals(0)){
-            return null;
-        }
         if (total % pageSize == 0){
             this.pages = total / pageSize;
         }else {
             this.pages = total / pageSize +1;
         }
-
-        int startIndex = 0;
-        int endIndex = 0;
-
-        if (pageNum > pages){
-            return null;
-        }
-
-        startIndex = (pageNum-1) * pageSize;
-
-        if (!pageNum.equals(pages)){
-            endIndex = startIndex + pageSize;
-        }else {
-            endIndex = total;
-        }
-
-        return data.subList(startIndex, endIndex);
-
     }
 
     public static <T> PageResult<T> failure(String code, String msg) {

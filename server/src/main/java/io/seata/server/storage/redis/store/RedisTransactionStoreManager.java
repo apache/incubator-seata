@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
+import io.seata.core.console.param.GlobalSessionParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
@@ -456,10 +457,41 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             return globalSessions;
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            globalSessions = readSession(sessionCondition.getStatuses());
             return readSession(sessionCondition.getStatuses());
         }
         return globalSessions;
+    }
+
+    public List<GlobalSession> readSessionStatusByPage(GlobalSessionParam param){
+        int start = param.getPageNum()*param.getPageSize()-param.getPageSize();
+        int end = param.getPageNum()*param.getPageSize()-1;
+
+        List<GlobalSession> globalSessions = new ArrayList<>();
+         if (param.getStatus() != null) {
+             String statusKey = buildGlobalStatus(GlobalStatus.get(param.getStatus()).getCode());
+            try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+                Pipeline pipelined = jedis.pipelined();
+                List<String> xids = pipelined.lrange(statusKey, start, end).get();
+
+                xids.parallelStream().forEach(xid -> {
+                    GlobalSession globalSession = this.readSession(xid, param.isWithBranch());
+                    if (globalSession != null) {
+                        globalSessions.add(globalSession);
+                    }
+                });
+
+            }
+
+        }
+        return globalSessions;
+    }
+
+    public Integer countStatusByClobalSesisons(Integer status){
+        String statusKey = buildGlobalStatus(GlobalStatus.get(status).getCode());
+        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+            Pipeline pipelined = jedis.pipelined();
+            return pipelined.lrange(statusKey, 0, -1).get().size();
+        }
     }
 
     /**
