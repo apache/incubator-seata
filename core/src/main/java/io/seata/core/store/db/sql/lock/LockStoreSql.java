@@ -24,6 +24,15 @@ package io.seata.core.store.db.sql.lock;
 public interface LockStoreSql {
 
     /**
+     * Get all lock sql string.
+     *
+     * @param lockTable the lock table
+     * @param tableName the table name of the lock
+     * @return the string
+     */
+    String getAllLockSQL(String lockTable, String tableName);
+
+    /**
      * Get insert lock sql string.
      *
      * @param lockTable the lock table
@@ -81,5 +90,13 @@ public interface LockStoreSql {
      * @return the string
      */
     String getCheckLockableSql(String lockTable, String paramPlaceHold);
+
+    /**
+     * get batch update status lock by global sql
+     *
+     * @param lockTable      the lock table
+     * @return the string
+     */
+    String getBatchUpdateStatusLockByGlobalSql(String lockTable) ;
 
 }
