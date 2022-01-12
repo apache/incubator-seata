@@ -15,19 +15,6 @@
  */
 package io.seata.discovery.registry.nacos;
 
-import com.alibaba.nacos.api.NacosFactory;
-import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.listener.EventListener;
-import com.alibaba.nacos.api.naming.listener.NamingEvent;
-import com.alibaba.nacos.api.naming.pojo.Instance;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
-import io.seata.discovery.registry.RegistryService;
-
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +23,30 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.naming.NamingService;
+import com.alibaba.nacos.api.naming.listener.EventListener;
+import com.alibaba.nacos.api.naming.listener.NamingEvent;
+import com.alibaba.nacos.api.naming.pojo.Instance;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
+import io.seata.discovery.registry.RegistryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The type Nacos registry service.
  *
  * @author slievrly
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NacosRegistryServiceImpl.class);
     private static final String DEFAULT_NAMESPACE = "";
     private static final String DEFAULT_CLUSTER = "default";
     private static final String DEFAULT_GROUP = "DEFAULT_GROUP";
@@ -54,6 +59,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String PRO_GROUP_KEY = "group";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
+    private static final String ENDPOINT_KEY = "endpoint";
+    private static final String ACCESS_KEY = "accessKey";
+    private static final String SECRET_KEY = "secretKey";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
@@ -176,7 +184,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     private static Properties getNamingProperties() {
         Properties properties = new Properties();
-        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+        if (System.getProperty(ENDPOINT_KEY) != null) {
+            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
+        } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
@@ -193,14 +203,22 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
-                : FILE_CONFIG.getConfig(getNacosUserName());
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
-                    : FILE_CONFIG.getConfig(getNacosPassword());
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
+            }
+        } else {
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ? System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
+            if (StringUtils.isNotBlank(accessKey)) {
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ? System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                if (StringUtils.isNotBlank(secretKey)) {
+                    properties.put(ACCESS_KEY, accessKey);
+                    properties.put(SECRET_KEY, secretKey);
+                    LOGGER.info("Nacos check auth with ak/sk.");
+                }
             }
         }
         return properties;
@@ -244,5 +262,13 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     private static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PASSWORD);
+    }
+
+    public static String getNacosAccessKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, ACCESS_KEY);
+    }
+
+    public static String getNacosSecretKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
     }
 }

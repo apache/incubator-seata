@@ -31,6 +31,8 @@ public class ConfigNacosProperties {
     private String group = "SEATA_GROUP";
     private String username = "";
     private String password = "";
+    private String accessKey = "";
+    private String secretKey = "";
     private String dataId = "seata.properties";
 
     public String getServerAddr() {
@@ -84,6 +86,24 @@ public class ConfigNacosProperties {
 
     public ConfigNacosProperties setDataId(String dataId) {
         this.dataId = dataId;
+        return this;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public ConfigNacosProperties setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+        return this;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public ConfigNacosProperties setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
         return this;
     }
 }
