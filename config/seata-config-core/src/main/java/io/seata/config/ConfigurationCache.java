@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.StringUtils;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
 
 /**
  * @author funkye
