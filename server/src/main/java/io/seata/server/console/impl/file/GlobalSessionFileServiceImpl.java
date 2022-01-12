@@ -64,6 +64,9 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
         }
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
+        if (CollectionUtils.isEmpty(allSessions)) {
+            return PageResult.success();
+        }
 
         final AtomicInteger total = new AtomicInteger();
 
