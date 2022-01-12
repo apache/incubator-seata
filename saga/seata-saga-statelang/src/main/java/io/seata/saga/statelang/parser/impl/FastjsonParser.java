@@ -80,7 +80,7 @@ public class FastjsonParser implements JsonParser {
     @Override
     public <T> T parse(String json, Class<T> type, boolean ignoreAutoType) {
         if (ignoreAutoType) {
-            return JSON.parseObject(json, type, Feature.DisableSpecialKeyDetect, Feature.OrderedField);
+            return JSON.parseObject(json, type, Feature.IgnoreAutoType, Feature.OrderedField);
         }
         else {
             return JSON.parseObject(json, type, Feature.SupportAutoType, Feature.OrderedField);
