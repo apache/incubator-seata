@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 
+import com.alibaba.druid.mock.MockStatement;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.*;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
@@ -32,6 +33,8 @@ import org.mockito.Mockito;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -129,14 +132,20 @@ public class AbstractDMLBaseExecutorTest {
         PreparedStatementProxy statementProxy = Mockito.mock(PreparedStatementProxy.class);
         Mockito.when(statementProxy.getConnectionProxy())
                 .thenReturn(connectionProxy);
-        StatementCallback statementCallback = Mockito.mock(StatementCallback.class);
+        MockStatement mockStatement = new MockStatement(connectionProxy);
+        StatementCallback statementCallback = new StatementCallback() {
+            @Override
+            public Object execute(Statement statement, Object... args) throws SQLException {
+                return mockStatement;
+            }
+        };
         SQLInsertRecognizer sqlInsertRecognizer = Mockito.mock(SQLInsertRecognizer.class);
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         executor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
         Mockito.when(executor.getDbType()).thenReturn(JdbcConstants.ORACLE);
         Mockito.doReturn(tableMeta).when(executor).getTableMeta();
         Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
-        Assertions.assertNull(executor.executeAutoCommitFalse(null));
+        Assertions.assertEquals(mockStatement,executor.executeAutoCommitFalse(null));
     }
 
 

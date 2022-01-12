@@ -15,10 +15,7 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,9 +101,10 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             beforeImage = TableRecords.empty(getTableMeta());
         }
         Object result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        if(CollectionUtils.isNotEmpty(beforeImage.getRows())){
+        Statement statement = (Statement)result;
+        if(null != statement && statement.getUpdateCount()>0){
             TableRecords afterImage = afterImage(beforeImage);
-            prepareUndoLogAll(beforeImage, afterImage);
+            prepareUndoLog(beforeImage, afterImage);
         }
         return result;
     }
