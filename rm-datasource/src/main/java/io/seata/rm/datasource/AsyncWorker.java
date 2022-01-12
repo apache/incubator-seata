@@ -65,7 +65,7 @@ public class AsyncWorker {
 
         ThreadFactory threadFactory = new NamedThreadFactory("AsyncWorker", 2, true);
         scheduledExecutor = new ScheduledThreadPoolExecutor(2, threadFactory);
-        scheduledExecutor.scheduleAtFixedRate(this::doBranchCommitSafely, 10, 1000, TimeUnit.MILLISECONDS);
+        scheduledExecutor.scheduleAtFixedRate(this::doUndoLogCleanSafely, 10, 1000, TimeUnit.MILLISECONDS);
     }
 
     public static AsyncWorker getInstance(DataSourceManager dataSourceManager) {
@@ -92,14 +92,14 @@ public class AsyncWorker {
     }
 
     /**
-     * try add context to commitQueue directly, if fail(which means the queue is full),
-     * then doBranchCommit urgently(so that the queue could be empty again) and retry this process.
+     * try add context to undoLogQueue directly, if fail(which means the queue is full),
+     * then doUndoLogClean urgently(so that the queue could be empty again) and retry this process.
      */
     private void addToUndoLogQueue(BranchPhaseContext context) {
         if (undoLogQueue.offer(context)) {
             return;
         }
-        CompletableFuture.runAsync(this::doBranchCommitSafely, scheduledExecutor)
+        CompletableFuture.runAsync(this::doUndoLogCleanSafely, scheduledExecutor)
                 .thenRun(() -> addToUndoLogQueue(context));
     }
 
@@ -109,15 +109,15 @@ public class AsyncWorker {
         }
     }
 
-    void doBranchCommitSafely() {
+    void doUndoLogCleanSafely() {
         try {
-            doBranchCommit();
+            doUndoLogClean();
         } catch (Throwable e) {
-            LOGGER.error("Exception occur when doing branch commit", e);
+            LOGGER.error("Exception occur when doing branch commit or clean suspend undo log", e);
         }
     }
 
-    private void doBranchCommit() {
+    private void doUndoLogClean() {
         if (undoLogQueue.isEmpty()) {
             return;
         }

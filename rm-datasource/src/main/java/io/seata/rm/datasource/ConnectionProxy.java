@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.concurrent.Callable;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -26,6 +27,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.ResourceManager;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
@@ -52,10 +54,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private final LockRetryPolicy lockRetryPolicy = new LockRetryPolicy(this);
 
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
+            ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
 
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+            ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
     /**
      * Instantiates a new Connection proxy.
@@ -116,7 +118,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         // Just check lock without requiring lock by now.
         try {
             boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
-                getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
+                    getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
                 throw new LockConflictException();
             }
@@ -137,7 +139,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         boolean result = false;
         try {
             result = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(),
-                context.getXid(), lockKeys);
+                    context.getXid(), lockKeys);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, lockKeys);
         }
@@ -150,7 +152,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void recognizeLockKeyConflictException(TransactionException te, String lockKeys) throws SQLException {
         if (te.getCode() == TransactionExceptionCode.LockKeyConflict
-            || te.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
+                || te.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
             StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:");
             reasonBuilder.append(context.getXid());
             if (StringUtils.isNotBlank(lockKeys)) {
@@ -269,9 +271,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
-        
+
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), context.getApplicationData(), context.buildLockKeys());
+                null, context.getXid(), context.getApplicationData(), context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -311,11 +313,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                    commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
+                        commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
-                    + commitDone + "] Retry Countdown: " + retry);
+                        + commitDone + "] Retry Countdown: " + retry);
                 retry--;
 
                 if (retry == 0) {
@@ -327,7 +329,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     public static class LockRetryPolicy {
         protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
-            .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
+                .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
 
         protected final ConnectionProxy connection;
 
@@ -357,7 +359,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                     onException(lockConflict);
                     // AbstractDMLBaseExecutor#executeAutoCommitTrue the local lock is released
                     if (connection.getContext().isAutoCommitChanged()
-                        && lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
+                            && lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
                         lockConflict.setCode(TransactionExceptionCode.LockKeyConflict);
                     }
                     lockRetryController.sleep(lockConflict);

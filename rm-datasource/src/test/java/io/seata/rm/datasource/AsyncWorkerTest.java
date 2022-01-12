@@ -42,7 +42,7 @@ class AsyncWorkerTest {
 
     @Test
     void doBranchCommitSafely() {
-        assertDoesNotThrow(worker::doBranchCommitSafely, "this method should never throw anything");
+        assertDoesNotThrow(worker::doUndoLogCleanSafely, "this method should never throw anything");
     }
 
     @Test
