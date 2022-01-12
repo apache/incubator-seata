@@ -27,11 +27,8 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.LockStatus;
 import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 import static io.seata.core.model.LockStatus.Locked;
@@ -43,7 +40,6 @@ import static io.seata.core.model.LockStatus.Locked;
  */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 
     private static final int MAX_BRANCH_SESSION_SIZE = StoreConfig.getMaxBranchSessionSize();
 
