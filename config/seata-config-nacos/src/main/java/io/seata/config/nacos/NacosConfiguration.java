@@ -18,7 +18,6 @@ package io.seata.config.nacos;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -206,8 +205,6 @@ public class NacosConfiguration extends AbstractConfiguration {
         Properties properties = new Properties();
         if (System.getProperty(ENDPOINT_KEY) != null) {
             properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
-            properties.put(ACCESS_KEY, Objects.toString(System.getProperty(ACCESS_KEY), ""));
-            properties.put(SECRET_KEY, Objects.toString(System.getProperty(SECRET_KEY), ""));
         } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
@@ -226,14 +223,25 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
-                : FILE_CONFIG.getConfig(getNacosUserName());
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
-                    : FILE_CONFIG.getConfig(getNacosPassword());
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
+                LOGGER.info("Nacos check auth with userName/password.");
+            }
+        } else {
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ?
+                System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
+            if (StringUtils.isNotBlank(accessKey)) {
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ?
+                    System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                if (StringUtils.isNotBlank(secretKey)) {
+                    properties.put(ACCESS_KEY, accessKey);
+                    properties.put(SECRET_KEY, secretKey);
+                    LOGGER.info("Nacos check auth with ak/sk.");
+                }
             }
         }
         return properties;
@@ -263,6 +271,14 @@ public class NacosConfiguration extends AbstractConfiguration {
     public static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
                 PASSWORD);
+    }
+
+    public static String getNacosAccessKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, ACCESS_KEY);
+    }
+
+    public static String getNacosSecretKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, SECRET_KEY);
     }
 
     private static String getNacosGroup() {

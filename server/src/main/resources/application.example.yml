@@ -26,6 +26,9 @@ seata:
       group: SEATA_GROUP
       username:
       password:
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
       data-id: seataServer.properties
     consul:
       server-addr: 127.0.0.1:8500
@@ -60,6 +63,9 @@ seata:
       cluster: default
       username:
       password:
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
     eureka:
       service-url: http://localhost:8761/eureka
       application: default
