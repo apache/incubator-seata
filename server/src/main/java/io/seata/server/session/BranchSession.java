@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.compressor.gzip.GzipCompressor;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -48,6 +49,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_BRANCH_SESSION_SIZE));
+
+    private static final String SESSION_ENCODE_FLAG = "SESSION_ENCODE";
 
     private String xid;
 
@@ -308,6 +311,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     @Override
     public byte[] encode() {
 
+        byte[] sessionEncodeFlag = SESSION_ENCODE_FLAG.getBytes();
+
         byte[] resourceIdBytes = resourceId != null ? resourceId.getBytes() : null;
 
         byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;
@@ -380,7 +385,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         byteBuffer.put(branchTypeByte);
 
         byteBuffer.put((byte)status.getCode());
-        byteBuffer.put((byte)lockStatus.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
