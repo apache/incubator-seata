@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -117,16 +118,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
-    private final ThreadPoolExecutor retryRollbacking = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+    private final ExecutorService retryRollbacking = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<>(), new NamedThreadFactory("RetryRollbacking", 1));
 
-    private final ThreadPoolExecutor retryCommitting = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+    private final ExecutorService retryCommitting = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<>(), new NamedThreadFactory("RetryCommitting", 1));
 
-    private final ThreadPoolExecutor asyncCommitting = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+    private final ExecutorService asyncCommitting = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<>(), new NamedThreadFactory("AsyncCommitting", 1));
 
-    private final ThreadPoolExecutor timeoutCheck = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+    private final ExecutorService timeoutCheck = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<>(), new NamedThreadFactory("TxTimeoutCheck", 1));
 
     private final ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
@@ -262,7 +263,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 beginGlobalSessions.add(session);
             }
         }
-        List<CompletableFuture> futures = new ArrayList<>(4);
+        List<CompletableFuture<Void>> futures = new ArrayList<>(4);
         futures
                 .add(CompletableFuture.runAsync(() -> handleRetryRollbacking(retryRollbackingSessions), retryRollbacking));
         futures
@@ -284,6 +285,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     /**
      * Timeout check.
      */
+    @Deprecated
     protected void timeoutCheck() {
         SessionCondition sessionCondition = new SessionCondition(new GlobalStatus[] {GlobalStatus.Begin});
         sessionCondition.setLazyLoadBranch(true);
@@ -344,6 +346,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     /**
      * Handle retry rollbacking.
      */
+    @Deprecated
     protected void handleRetryRollbacking() {
         SessionCondition sessionCondition =
                 new SessionCondition(rollbackingStatus.toArray(new GlobalStatus[0]));
@@ -389,17 +392,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     /**
      * Handle retry committing.
-     */
-    protected void handleRetryCommitting() {
-        SessionCondition sessionCondition = new SessionCondition(
-                new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.CommitFailed});
-        Collection<GlobalSession> committingSessions =
-                SessionHolder.getRetryCommittingSessionManager().findGlobalSessions(sessionCondition);
-        handleRetryCommitting(committingSessions);
-    }
-
-    /**
-     * Handle retry committing.
      *
      * @param committingSessions
      */
@@ -432,16 +424,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private boolean isRetryTimeout(long now, long timeout, long beginTime) {
         return timeout >= ALWAYS_RETRY_BOUNDARY && now - beginTime > timeout;
-    }
-
-    /**
-     * Handle async committing.
-     */
-    protected void handleAsyncCommitting() {
-        SessionCondition sessionCondition = new SessionCondition(new GlobalStatus[] {GlobalStatus.AsyncCommitting});
-        Collection<GlobalSession> asyncCommittingSessions =
-                SessionHolder.getAsyncCommittingSessionManager().findGlobalSessions(sessionCondition);
-        handleRetryCommitting(asyncCommittingSessions);
     }
 
     /**

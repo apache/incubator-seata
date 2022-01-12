@@ -230,7 +230,7 @@ public class SessionHolder {
         }
     }
 
-    private static void lockBranchSessions(ArrayList<BranchSession> branchSessions) {
+    private static void lockBranchSessions(List<BranchSession> branchSessions) {
         branchSessions.forEach(branchSession -> {
             try {
                 branchSession.lock();

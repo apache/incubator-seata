@@ -16,7 +16,7 @@
 package io.seata.server.transaction.saga;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -227,7 +227,7 @@ public class SagaCore extends AbstractCore {
      * @throws TransactionException the TransactionException
      */
     private void removeAllBranches(GlobalSession globalSession) throws TransactionException {
-        ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
+        List<BranchSession> branchSessions = globalSession.getSortedBranches();
         for (BranchSession branchSession : branchSessions) {
             globalSession.removeBranch(branchSession);
         }

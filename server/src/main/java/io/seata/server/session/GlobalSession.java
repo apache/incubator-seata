@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -44,7 +45,6 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import static io.seata.core.model.GlobalStatus.AsyncCommitting;
 import static io.seata.core.model.GlobalStatus.CommitRetrying;
@@ -93,7 +93,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private volatile boolean active = true;
 
-    private ArrayList<BranchSession> branchSessions = new ArrayList<>();
+    private final List<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
@@ -320,7 +320,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the sorted branches
      */
-    public ArrayList<BranchSession> getSortedBranches() {
+    public List<BranchSession> getSortedBranches() {
         return new ArrayList<>(getBranchSessions());
     }
 
@@ -329,8 +329,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the reverse sorted branches
      */
-    public ArrayList<BranchSession> getReverseSortedBranches() {
-        ArrayList<BranchSession> reversed = new ArrayList<>(getBranchSessions());
+    public List<BranchSession> getReverseSortedBranches() {
+        List<BranchSession> reversed = new ArrayList<>(getBranchSessions());
         Collections.reverse(reversed);
         return reversed;
     }
@@ -691,7 +691,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         V call() throws TransactionException;
     }
 
-    public ArrayList<BranchSession> getBranchSessions() {
+    public List<BranchSession> getBranchSessions() {
         loadBranch();
         return branchSessions;
     }
@@ -723,8 +723,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         if (lazyLoadBranch && CollectionUtils.isEmpty(branchSessions)) {
             synchronized (branchSessions) {
                 if (lazyLoadBranch && CollectionUtils.isEmpty(branchSessions)) {
-                    branchSessions
-                        .addAll(SessionHolder.getRootSessionManager().findGlobalSession(xid, true).getBranchSessions());
+                    Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
+                        .ifPresent(globalSession -> branchSessions.addAll(globalSession.getBranchSessions()));
                     lazyLoadBranch = false;
                 }
             }
