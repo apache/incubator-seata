@@ -15,10 +15,18 @@
  */
 package io.seata.server.storage.redis.store;
 
-import java.util.*;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
+import java.util.Optional;
+import java.util.Collections;
 import com.google.common.collect.ImmutableMap;
 import io.seata.core.console.param.GlobalSessionParam;
 import org.slf4j.Logger;
@@ -486,14 +494,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return globalSessions;
     }
 
-    public Integer countStatusByClobalSesisons(Integer status){
-        String statusKey = buildGlobalStatus(GlobalStatus.get(status).getCode());
-        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
-            Pipeline pipelined = jedis.pipelined();
-            return pipelined.lrange(statusKey, 0, -1).get().size();
-        }
-    }
-
     /**
      * assemble the global session and branch session
      * @param globalTransactionDO the global transactionDo
@@ -584,28 +584,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return keys;
     }
 
-    private String buildBranchListKeyByXid(String xid) {
-        return REDIS_SEATA_BRANCHES_PREFIX + xid;
-    }
-
-    private String buildGlobalKeyByTransactionId(Object transactionId) {
-        return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
-    }
-
-    private String buildBranchKey(Long branchId) {
-        return REDIS_SEATA_BRANCH_PREFIX + branchId;
-    }
-
-    private String buildGlobalStatus(Integer status) {
-        return REDIS_SEATA_STATUS_PREFIX + status;
-    }
-
-    public List<GlobalSession> findGlobalSessionKeys(int pageNum,int pageSize,boolean withBranch){
+    public List<GlobalSession> findGlobalSessionKeys(int start,int end,boolean withBranch){
         Set<String> keys = new HashSet<>();
-        String cursor = String.valueOf(pageNum);
+        String cursor = String.valueOf(start);
         ScanParams sp = new ScanParams();
         sp.match(REDIS_SEATA_GLOBAL_PREFIX_KEYS);
-        sp.count(pageSize);
+        sp.count(end);
 
         try(Jedis jedis = JedisPooledFactory.getJedisInstance()) {
 
@@ -626,12 +610,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    public int countByClobalSesisons(){
-        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+    public Long countByClobalSesisons(GlobalStatus[] values){
+        List<String> statusKeys = new ArrayList<>();
+        for (GlobalStatus status : values) {
+            statusKeys.add(buildGlobalStatus(status.getCode()));
+        }
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            return pipelined.keys(REDIS_SEATA_GLOBAL_PREFIX_KEYS).get().size();
-        } catch (Exception ex) {
-            throw new RedisException(ex);
+            statusKeys.stream().forEach(statusKey -> pipelined.llen(statusKey));
+            List<Long> list = (List<Long>)(List)pipelined.syncAndReturnAll();
+            return list.stream().collect(Collectors.summingLong(value -> value));
         }
     }
 
@@ -656,6 +644,23 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
         }
         return globalSessions;
+    }
+
+
+    private String buildBranchListKeyByXid(String xid) {
+        return REDIS_SEATA_BRANCHES_PREFIX + xid;
+    }
+
+    private String buildGlobalKeyByTransactionId(Object transactionId) {
+        return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
+    }
+
+    private String buildBranchKey(Long branchId) {
+        return REDIS_SEATA_BRANCH_PREFIX + branchId;
+    }
+
+    private String buildGlobalStatus(Integer status) {
+        return REDIS_SEATA_STATUS_PREFIX + status;
     }
 
 }
