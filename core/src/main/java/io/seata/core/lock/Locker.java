@@ -62,10 +62,9 @@ public interface Locker {
      * Release lock boolean.
      *
      * @param xid       the xid
-     * @param branchIds the branch ids
      * @return the boolean
      */
-    boolean releaseLock(String xid, List<Long> branchIds);
+    boolean releaseLock(String xid);
 
     /**
      * Is lockable boolean.
