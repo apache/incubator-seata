@@ -584,30 +584,39 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return keys;
     }
 
-    public List<GlobalSession> findGlobalSessionKeys(int start,int end,boolean withBranch){
+    public List<GlobalSession> findGlobalSessionKeys(int pageNum,int pageSize,boolean withBranch){
+
+        int start = (pageNum - 1) * pageSize;
+        int end = pageNum * pageSize;
+
         Set<String> keys = new HashSet<>();
         String cursor = String.valueOf(start);
         ScanParams sp = new ScanParams();
         sp.match(REDIS_SEATA_GLOBAL_PREFIX_KEYS);
         sp.count(end);
 
-        try(Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+        while (true) {
 
-            do {
-                ScanResult<String> res = jedis.scan(cursor, sp);
-                List<String> result = res.getResult();
+            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
 
-                if(result != null && result.size() > 0){
-                    keys.addAll(result);
+                ScanResult<String> scan = jedis.scan(cursor, sp);
+                cursor = scan.getCursor();
+                List<String> list = scan.getResult();
+                for(int m = 0;m < list.size();m++){
+                    String mapentry = list.get(m);
+                    keys.add(mapentry);
+                    if (keys.size() == pageSize){
+                        return readGlobalSession(keys,withBranch);
+                    }
                 }
 
-                cursor = res.getCursor();
-            }while (!cursor.equals(ScanParams.SCAN_POINTER_START));
+            }
 
-            return readGlobalSession(jedis,keys,withBranch);
-        } catch (Exception ex) {
-            throw new RedisException(ex);
+            if ("0".equals(cursor)){
+                return readGlobalSession(keys,withBranch);
+            }
         }
+
     }
 
     public Long countByClobalSesisons(GlobalStatus[] values){
@@ -623,27 +632,30 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    private List<GlobalSession> readGlobalSession(Jedis jedis, Set<String> keys,boolean withBranchSessions) {
+    private List<GlobalSession> readGlobalSession(Set<String> keys,boolean withBranchSessions) {
         ArrayList<GlobalSession> globalSessions = new ArrayList<>();
         String xid = null;
-        if (CollectionUtils.isNotEmpty(keys)){
-            for (String key : keys) {
-                Map<String, String> map = jedis.hgetAll(key);
-                if (CollectionUtils.isEmpty(map)) {
-                    return null;
+        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+            if (CollectionUtils.isNotEmpty(keys)){
+                for (String key : keys) {
+                    Map<String, String> map = jedis.hgetAll(key);
+                    if (CollectionUtils.isEmpty(map)) {
+                        return null;
+                    }
+                    GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
+                    if (globalTransactionDO != null) {
+                        xid = globalTransactionDO.getXid();
+                    }
+                    List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
+                    if (withBranchSessions) {
+                        branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
+                    }
+                    globalSessions.add(getGlobalSession(globalTransactionDO,branchTransactionDOs));
                 }
-                GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
-                if (globalTransactionDO != null) {
-                     xid = globalTransactionDO.getXid();
-                }
-                List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
-                if (withBranchSessions) {
-                    branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
-                }
-                globalSessions.add(getGlobalSession(globalTransactionDO,branchTransactionDOs));
             }
+            return globalSessions;
         }
-        return globalSessions;
+
     }
 
 
