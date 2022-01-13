@@ -89,6 +89,9 @@ seata:
       group: SEATA_GROUP
       username: ""
       password: ""
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
       data-id: seata.properties
     zk:
       server-addr: 127.0.0.1:2181
@@ -118,6 +121,9 @@ seata:
       namespace: ""
       username: ""
       password: ""
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
     redis:
       server-addr: localhost:6379
       db: 0
