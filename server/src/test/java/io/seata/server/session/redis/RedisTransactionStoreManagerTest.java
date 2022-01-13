@@ -15,51 +15,28 @@
  */
 package io.seata.server.session.redis;
 
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 import com.github.fppt.jedismock.RedisServer;
-import com.netflix.discovery.converters.Auto;
-import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
 import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalSessionVO;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.console.impl.redis.GlobalSessionRedisServiceImpl;
-import io.seata.server.console.service.GlobalSessionService;
-import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
-import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
-
-import javax.annotation.Resource;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
-
 /**
  * @author doubleDimple
  */
@@ -77,7 +54,7 @@ public class RedisTransactionStoreManagerTest {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "47.105.165.195", 6879, 60000,"ren1004940725@"));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6879, 60000,"xxxxxxxx"));
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
 
 
