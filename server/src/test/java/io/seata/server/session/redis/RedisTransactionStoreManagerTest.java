@@ -61,7 +61,7 @@ import java.util.List;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
- * @author funkye
+ * @author doubleDimple
  */
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
