@@ -18,6 +18,7 @@ package io.seata.server.session.redis;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
@@ -37,6 +38,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
+
 /**
  * @author doubleDimple
  */
@@ -99,7 +101,7 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
-    public void testQueryGlobslSession(){
+    public void testQueryGlobalslSession(){
 
         Long aLong = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
         System.out.print(aLong);
@@ -107,13 +109,13 @@ public class RedisTransactionStoreManagerTest {
 
 
     @Test
-    public void testredisQuery(){
+    public void testreadisQuery(){
         GlobalSessionParam param = new GlobalSessionParam();
-        param.setPageNum(1);
+        param.setPageNum(0);
         param.setPageSize(5);
         param.setWithBranch(false);
 
-        List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionKeys(param.getPageNum(), param.getPageSize(), param.isWithBranch());
+        List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
         System.out.print(globalSessionKeys.size());
         System.out.print(globalSessionKeys);
     }

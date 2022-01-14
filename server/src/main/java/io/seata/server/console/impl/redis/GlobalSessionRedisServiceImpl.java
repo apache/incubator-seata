@@ -143,9 +143,11 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
      */
     private Integer checkParams(GlobalSessionParam param) {
         Integer queryFlag = 1;
-        if (param.getPageNum() == 0 || param.getPageSize() == 0){
-            param.setPageNum(0);
+        if (param.getPageSize() <= 0){
             param.setPageSize(20);
+        }
+        if (param.getPageNum() <=0){
+            param.setPageNum(1);
         }
 
         if (isBlank(param.getXid()) && param.getStatus() == null){

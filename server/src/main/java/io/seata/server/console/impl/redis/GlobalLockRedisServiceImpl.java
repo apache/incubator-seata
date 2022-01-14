@@ -56,17 +56,17 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         int queryFlag = checkParams(param);
         int total;
-        List<GlobalLockVO> globalLockVOS;
+        List<GlobalLockVO> globalLockVOs;
 
         if (queryFlag == 0){
             //query all
-            globalLockVOS = queryAllPage(param.getPageNum(),param.getPageSize());
+            globalLockVOs = queryAllPage(param.getPageNum(),param.getPageSize());
             total = queryAllTotal();
         }else {
-             globalLockVOS = queryGlobalByParam(param);
-             total = globalLockVOS.size();
+            globalLockVOs = queryGlobalByParam(param);
+             total = globalLockVOs.size();
         }
-        return PageResult.success(globalLockVOS,total,param.getPageNum(),param.getPageSize());
+        return PageResult.success(globalLockVOs,total,param.getPageNum(),param.getPageSize());
     }
 
     private int queryAllTotal() {
@@ -89,7 +89,7 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
     }
 
     private List<GlobalLockVO> queryAllPage(int pageNum,int pageSize) {
-        int start = (pageNum - 1) * pageSize;
+        int start = (pageNum - 1) * pageSize <0 ? 0 : (pageNum - 1) * pageSize;
         int end = pageNum * pageSize;
 
         Set<String> keys = new HashSet<>();
@@ -170,8 +170,11 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
 
     private int checkParams(GlobalLockParam param) {
-        if (param.getPageSize() == 0){
+        if (param.getPageSize() <= 0){
             param.setPageSize(20);
+        }
+        if (param.getPageNum() <= 0){
+            param.setPageNum(1);
         }
 
         if (isNotBlank(param.getXid()) || isNotBlank(param.getTransactionId())){

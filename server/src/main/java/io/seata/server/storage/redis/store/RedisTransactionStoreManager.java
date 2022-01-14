@@ -592,7 +592,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     public List<GlobalSession> findGlobalSessionByPage(int pageNum,int pageSize,boolean withBranch){
 
-        int start = (pageNum - 1) * pageSize;
+        int start = (pageNum - 1) * pageSize < 0 ? 0 : (pageNum - 1) * pageSize;
         int end = pageNum * pageSize;
 
         Set<String> keys = new HashSet<>();
