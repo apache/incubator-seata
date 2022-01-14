@@ -599,20 +599,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
 
-                ScanResult<String> scan = jedis.scan(cursor, sp);
-                cursor = scan.getCursor();
-                List<String> list = scan.getResult();
-                for(int m = 0;m < list.size();m++){
-                    String mapentry = list.get(m);
-                    keys.add(mapentry);
-                    if (keys.size() == pageSize){
-                        return readGlobalSession(keys,withBranch);
+                    ScanResult<String> scan = jedis.scan(cursor, sp);
+                    cursor = scan.getCursor();
+                    List<String> list = scan.getResult();
+                    for(int i = 0;i < list.size();i++){
+                        keys.add(list.get(i));
+                        if (keys.size() == pageSize){
+                            return readGlobalSession(keys,withBranch);
+                        }
                     }
                 }
 
-            }
-
-            if ("0".equals(cursor)){
+            if (ScanParams.SCAN_POINTER_START.equals(cursor)){
                 return readGlobalSession(keys,withBranch);
             }
         }
