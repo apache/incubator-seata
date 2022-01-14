@@ -449,7 +449,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return null;
     }
 
-    public List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions){
+    public List<GlobalSession> findGlobalSessionByStatusWithPage(SessionCondition sessionCondition, boolean withBranchSessions){
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
             GlobalSession globalSession = this.readSession(sessionCondition.getXid(), withBranchSessions);
@@ -584,7 +584,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return keys;
     }
 
-    public List<GlobalSession> findGlobalSessionKeys(int pageNum,int pageSize,boolean withBranch){
+    public List<BranchTransactionDO> findBranchSessionByXid(String xid){
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            return readBranchSessionByXid(jedis,xid);
+        }
+    }
+
+    public List<GlobalSession> findGlobalSessionByPage(int pageNum,int pageSize,boolean withBranch){
 
         int start = (pageNum - 1) * pageSize;
         int end = pageNum * pageSize;

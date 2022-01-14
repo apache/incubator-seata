@@ -15,10 +15,16 @@
  */
 package io.seata.server.console.impl.redis;
 
-import io.seata.common.exception.NotSupportYetException;
+import java.util.List;
+import com.google.common.collect.Lists;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.console.service.BranchSessionService;
+import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +39,24 @@ public class BranchSessionRedisServiceImpl implements BranchSessionService {
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
-        throw new NotSupportYetException();
+        if (StringUtils.isBlank(xid)){
+            return PageResult.success();
+        }
+
+        List<BranchSessionVO> branchSessionVOS = Lists.newArrayList();
+
+        RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
+
+        List<BranchTransactionDO> branchSessionDos = instance.findBranchSessionByXid(xid);
+
+        if (CollectionUtils.isNotEmpty(branchSessionDos)){
+            for (BranchTransactionDO branchSessionDo : branchSessionDos) {
+                BranchSessionVO branchSessionVO = new BranchSessionVO();
+                BeanUtils.copyProperties(branchSessionDo,branchSessionVO);
+                branchSessionVOS.add(branchSessionVO);
+            }
+        }
+
+        return PageResult.success(branchSessionVOS,branchSessionVOS.size(),0,branchSessionVOS.size());
     }
 }
