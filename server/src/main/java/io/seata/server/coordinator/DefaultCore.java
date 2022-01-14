@@ -342,20 +342,10 @@ public class DefaultCore implements Core {
             if (result != null) {
                 return result;
             }
-
-            // In db mode, there is a problem of inconsistent data in multiple copies, resulting in new branch
-            // transaction registration when rolling back.
-            // 1. New branch transaction and rollback branch transaction have no data association
-            // 2. New branch transaction has data association with rollback branch transaction
-            // The second query can solve the first problem, and if it is the second problem, it may cause a rollback
-            // failure due to data changes.
-            GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
-            if (globalSessionTwice != null && globalSessionTwice.hasBranch()) {
-                LOGGER.info("Rollbacking global transaction is NOT done, xid = {}.", globalSession.getXid());
-                return false;
-            }
         }
-        if (success) {
+        // In db mode, lock and branch data residual problems may occur.
+        // Therefore, execution needs to be delayed here and cannot be executed synchronously.
+        if (success && retrying) {
             SessionHelper.endRollbacked(globalSession);
 
             // rollbacked event
