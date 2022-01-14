@@ -43,6 +43,7 @@ import static io.seata.common.util.StringUtils.isNotBlank;
 /**
  * Global Lock Redis Service Impl
  * @author: zhongxiang.wang
+ * @author: doubleDimple
  */
 @Component
 @org.springframework.context.annotation.Configuration

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 /**
  * Branch Session Redis ServiceImpl
  * @author: zhongxiang.wang
+ * @author: doubleDimple
  */
 @Component
 @org.springframework.context.annotation.Configuration

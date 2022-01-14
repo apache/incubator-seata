@@ -62,6 +62,7 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICA
  *
  * @author funkye
  * @author wangzhongxiang
+ * @author: doubleDimple
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
