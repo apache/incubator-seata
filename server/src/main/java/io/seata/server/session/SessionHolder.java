@@ -145,7 +145,7 @@ public class SessionHolder {
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
         RaftServerFactory.getInstance().init(XID.getIpAddress(),
-            Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL)));
+            Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "9091")));
         if (RaftServerFactory.getInstance().getRaftServer() != null) {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.RAFT.getName());
         } else {
