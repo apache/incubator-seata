@@ -322,11 +322,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                || StringUtils.isBlank(resource.getDbType());
     }
 
-    public synchronized Long getPrepareTime() {
+    public Long getPrepareTime() {
         return prepareTime;
     }
 
-    private synchronized void setPrepareTime(Long prepareTime) {
+    private void setPrepareTime(Long prepareTime) {
         this.prepareTime = prepareTime;
     }
 

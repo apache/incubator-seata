@@ -48,7 +48,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
             DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT);
 
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
-    private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
+    private static final long SCHEDULE_INTERVAL_MILLS = 1000L;
     /**
      * The Timer check xa branch two phase hold timeout.
      */
