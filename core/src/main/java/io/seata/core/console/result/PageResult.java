@@ -16,14 +16,15 @@
 package io.seata.core.console.result;
 
 import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.common.util.CollectionUtils;
+import io.seata.core.console.param.BaseParam;
 
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * The page result
- * @author: zhongxiang.wang
+ * @author zhongxiang.wang
+ * @author doubleDimple
  */
 public class PageResult<T> extends Result<T>  implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
@@ -97,6 +98,17 @@ public class PageResult<T> extends Result<T>  implements Serializable {
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pageNum, pageSize);
     }
+
+    public static void checkPage(BaseParam param) {
+        if (param.getPageNum() <= 0){
+            param.setPageNum(1);
+        }
+
+        if (param.getPageSize() <= 0){
+            param.setPageSize(20);
+        }
+    }
+
     public Integer getTotal() {
         return total;
     }

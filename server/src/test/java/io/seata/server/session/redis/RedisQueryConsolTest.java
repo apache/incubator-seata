@@ -22,9 +22,9 @@ public class RedisQueryConsolTest {
 
     /**
      *
-     *if you test globalSessionService and  globalLockService
-     *please update config information ths file: application.yml
+     *if you want test globalSessionService and  globalLockService
      *
+     *please update config information ths file: application.yml
      * store:
      *     # support: file 、 db 、 redis
      *     mode: redis
@@ -39,6 +39,8 @@ public class RedisQueryConsolTest {
      *       single:
      *         host: real redis host
      *         port: 6879
+     *
+     *!!!!!!!when you test finish,please restore the modified configuration!!!!!!!!
      */
 
 
@@ -52,7 +54,8 @@ public class RedisQueryConsolTest {
     @Test
     public void test_globalRedisServiceQuery(){
         GlobalSessionParam param = new GlobalSessionParam();
-
+        param.setPageNum(1);
+        param.setPageSize(4);
         PageResult<GlobalSessionVO> query = globalSessionService.query(param);
         System.out.print(JSON.toJSON(query));
     }

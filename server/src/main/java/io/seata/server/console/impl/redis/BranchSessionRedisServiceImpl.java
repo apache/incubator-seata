@@ -15,12 +15,11 @@
  */
 package io.seata.server.console.impl.redis;
 
-import java.util.List;
 import com.google.common.collect.Lists;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.BranchSessionVO;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
@@ -28,8 +27,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Branch Session Redis ServiceImpl
+ *
  * @author: zhongxiang.wang
  * @author: doubleDimple
  */
@@ -40,24 +42,24 @@ public class BranchSessionRedisServiceImpl implements BranchSessionService {
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
-        if (StringUtils.isBlank(xid)){
+        if (StringUtils.isBlank(xid)) {
             return PageResult.success();
         }
 
-        List<BranchSessionVO> branchSessionVOS = Lists.newArrayList();
+        List<BranchSessionVO> branchSessionVOs = Lists.newArrayList();
 
         RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
 
         List<BranchTransactionDO> branchSessionDos = instance.findBranchSessionByXid(xid);
 
-        if (CollectionUtils.isNotEmpty(branchSessionDos)){
+        if (CollectionUtils.isNotEmpty(branchSessionDos)) {
             for (BranchTransactionDO branchSessionDo : branchSessionDos) {
                 BranchSessionVO branchSessionVO = new BranchSessionVO();
-                BeanUtils.copyProperties(branchSessionDo,branchSessionVO);
-                branchSessionVOS.add(branchSessionVO);
+                BeanUtils.copyProperties(branchSessionDo, branchSessionVO);
+                branchSessionVOs.add(branchSessionVO);
             }
         }
 
-        return PageResult.success(branchSessionVOS,branchSessionVOS.size(),0,branchSessionVOS.size());
+        return PageResult.success(branchSessionVOs, branchSessionVOs.size(), 0, branchSessionVOs.size());
     }
 }

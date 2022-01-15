@@ -19,6 +19,7 @@ package io.seata.core.constants;
  * The redis key constants
  *
  * @author wangzhongxiang
+ * @author doubleDimple
  */
 public class RedisKeyConstants {
 
@@ -140,5 +141,15 @@ public class RedisKeyConstants {
      * The constant redis key of branch transaction name gmtModified
      */
     public static final String REDIS_KEY_BRANCH_GMT_MODIFIED = "gmtModified";
+
+    /**
+     * The globalLock key
+     */
+    public static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX = "SEATA_GLOBAL_LOCK";
+
+    /**
+     * The globalLock keys
+     */
+    public static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX+"*";
 
 }

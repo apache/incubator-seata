@@ -48,7 +48,6 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
-
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
@@ -62,7 +61,7 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICA
  *
  * @author funkye
  * @author wangzhongxiang
- * @author: doubleDimple
+ * @author doubleDimple
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
@@ -81,7 +80,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
     /**the prefix of the global transaction all keys */
-    private static final String REDIS_SEATA_GLOBAL_PREFIX_KEYS = "SEATA_GLOBAL_*";
+    private static final String REDIS_SEATA_GLOBAL_PREFIX_KEYS = REDIS_SEATA_GLOBAL_PREFIX+"*";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -450,6 +449,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return null;
     }
 
+    /**
+     * the globalSessionStatus query by page
+     * @param sessionCondition
+     * @param withBranchSessions
+     * @return List<GlobalSession>
+     */
     public List<GlobalSession> findGlobalSessionByStatusWithPage(SessionCondition sessionCondition, boolean withBranchSessions){
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
@@ -471,6 +476,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return globalSessions;
     }
 
+    /**
+     * query GlobalSession by status with page
+     * @param param
+     * @return List<GlobalSession>
+     */
     public List<GlobalSession> readSessionStatusByPage(GlobalSessionParam param){
         int start = param.getPageNum()*param.getPageSize()-param.getPageSize();
         int end = param.getPageNum()*param.getPageSize()-1;
@@ -482,7 +492,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 Pipeline pipelined = jedis.pipelined();
                 List<String> xids = pipelined.lrange(statusKey, start, end).get();
 
-                xids.parallelStream().forEach(xid -> {
+                xids.stream().forEach(xid -> {
                     GlobalSession globalSession = this.readSession(xid, param.isWithBranch());
                     if (globalSession != null) {
                         globalSessions.add(globalSession);
@@ -591,6 +601,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
+    /**
+     * query globalSession by page
+     * @param pageNum
+     * @param pageSize
+     * @param withBranch
+     * @return List<GlobalSession>
+     */
     public List<GlobalSession> findGlobalSessionByPage(int pageNum,int pageSize,boolean withBranch){
 
         int start = (pageNum - 1) * pageSize < 0 ? 0 : (pageNum - 1) * pageSize;
@@ -624,6 +641,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     }
 
+    /**
+     * count GlobalSession total by status
+     * @param values
+     * @return Long
+     */
     public Long countByClobalSesisons(GlobalStatus[] values){
         List<String> statusKeys = new ArrayList<>();
         for (GlobalStatus status : values) {

@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.google.common.collect.Lists;
 import io.seata.common.XID;
 import io.seata.common.util.BeanUtils;
@@ -35,10 +34,10 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
-
-
 import static io.seata.common.util.StringUtils.isBlank;
 import static io.seata.common.util.StringUtils.isNotBlank;
+import static io.seata.core.console.result.PageResult.checkPage;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS;
 
 /**
  * Global Lock Redis Service Impl
@@ -50,22 +49,21 @@ import static io.seata.common.util.StringUtils.isNotBlank;
 @ConditionalOnExpression("#{'redis'.equals('${lockMode}')}")
 public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX = "SEATA_GLOBAL_LOCK";
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX+"*";
-
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
-        int queryFlag = checkParams(param);
+
         int total;
         List<GlobalLockVO> globalLockVOs;
 
-        if (queryFlag == 0){
+        checkPage(param);
+
+        if (isNotBlank(param.getXid()) || isNotBlank(param.getTransactionId())){
+            globalLockVOs = queryGlobalByParam(param);
+            total = globalLockVOs.size();
+        }else{
             //query all
             globalLockVOs = queryAllPage(param.getPageNum(),param.getPageSize());
             total = queryAllTotal();
-        }else {
-            globalLockVOs = queryGlobalByParam(param);
-             total = globalLockVOs.size();
         }
         return PageResult.success(globalLockVOs,total,param.getPageNum(),param.getPageSize());
     }
@@ -103,15 +101,15 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
 
-                ScanResult<String> scan = jedis.scan(cursor, sp);
-                cursor = scan.getCursor();
-                List<String> list = scan.getResult();
-                for(int i = 0;i < list.size();i++){
-                    keys.add(list.get(i));
-                    if (keys.size() == pageSize){
-                        return readGlobalocks(keys);
+                    ScanResult<String> scan = jedis.scan(cursor, sp);
+                    cursor = scan.getCursor();
+                    List<String> list = scan.getResult();
+                    for(int i = 0;i < list.size();i++){
+                        keys.add(list.get(i));
+                        if (keys.size() == pageSize){
+                            return readGlobalocks(keys);
+                        }
                     }
-                }
             }
 
             if (ScanParams.SCAN_POINTER_START.equals(cursor)){
@@ -146,7 +144,7 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         xidStr = isNotBlank(xidStr) && isNotBlank(transactionId) ? getxidStr(param) : StringUtils.EMPTY;
 
 
-        String key = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX+xidStr;
+        String key = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS+xidStr;
         if (isNotBlank(xidStr)){
             try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
                 Map<String, String> map = jedis.hgetAll(key);
@@ -166,23 +164,6 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             return StringUtils.EMPTY;
         }else {
             return xid;
-        }
-    }
-
-
-    private int checkParams(GlobalLockParam param) {
-        if (param.getPageSize() <= 0){
-            param.setPageSize(20);
-        }
-        if (param.getPageNum() <= 0){
-            param.setPageNum(1);
-        }
-
-        if (isNotBlank(param.getXid()) || isNotBlank(param.getTransactionId())){
-            return 1;
-        }else{
-            //not support other query param
-            return 0;
         }
     }
 
