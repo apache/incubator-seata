@@ -20,9 +20,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.DataSource;
 import java.util.Objects;
-
+import javax.sql.DataSource;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
@@ -31,9 +30,9 @@ import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationChangeEvent;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.DistributedLockDO;
@@ -86,6 +85,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                     if (StringUtils.isNotBlank(newValue) && newValue.equalsIgnoreCase(distributedLockTable)) {
                         distributedLockTable = newValue;
                         init();
+                        demotion = false;
                         ConfigurationCache.removeConfigListener(DISTRIBUTED_LOCK_DB_TABLE, this);
                     }
                 }

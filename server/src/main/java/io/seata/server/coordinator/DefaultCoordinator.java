@@ -244,7 +244,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.values());
         sessionCondition.setLazyLoadBranch(true);
         Collection<GlobalSession> allSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+            SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(allSessions)) {
             return;
         }
@@ -264,21 +264,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }
         List<CompletableFuture<Void>> futures = new ArrayList<>(4);
-        futures
-                .add(CompletableFuture.runAsync(() -> handleRetryRollbacking(retryRollbackingSessions), retryRollbacking));
-        futures
-                .add(CompletableFuture.runAsync(() -> timeoutCheck(beginGlobalSessions), timeoutCheck));
-        futures
-                .add(CompletableFuture.runAsync(() -> handleRetryCommitting(retryCommittingSessions), retryCommitting));
-        futures
-                .add(CompletableFuture.runAsync(() -> handleAsyncCommitting(asyncCommittingSessions), asyncCommitting));
-        try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
-        } catch (InterruptedException e) {
-            LOGGER.error("transaction task thread ran abnormally: {}", e.getMessage(), e);
-        } catch (ExecutionException e) {
-            Throwable throwable = e.getCause() != null ? e.getCause() : e;
-            LOGGER.error("task execution exception: {}", throwable.getMessage(), throwable);
+        runAsyncTask(futures, retryRollbackingSessions, retryRollbacking);
+        runAsyncTask(futures, beginGlobalSessions, timeoutCheck);
+        runAsyncTask(futures, retryCommittingSessions, retryCommitting);
+        runAsyncTask(futures, asyncCommittingSessions, asyncCommitting);
+        if (CollectionUtils.isNotEmpty(futures)) {
+            try {
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
+            } catch (InterruptedException e) {
+                LOGGER.error("transaction task thread ran abnormally: {}", e.getMessage(), e);
+            } catch (ExecutionException e) {
+                Throwable throwable = e.getCause() != null ? e.getCause() : e;
+                LOGGER.error("task execution exception: {}", throwable.getMessage(), throwable);
+            }
         }
     }
 
@@ -524,6 +522,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHolder.destroy();
     }
 
+    /**
+     * runAsyncTask
+     * @param asyncTasks
+     * @param sessions
+     * @param executorService
+     */
+    private void runAsyncTask(List<CompletableFuture<Void>> asyncTasks, List<GlobalSession> sessions,
+                              ExecutorService executorService) {
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            asyncTasks.add(CompletableFuture.runAsync(() -> handleRetryRollbacking(sessions), executorService));
+        }
+    }
+    
     /**
      * only used for mock test
      * @param remotingServer
