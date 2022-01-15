@@ -211,10 +211,8 @@ public class RedisLocker extends AbstractLocker {
             pipeline.hset(key, TABLE_NAME, value.getTableName());
             pipeline.hset(key, PK, value.getPk());
         });
-
         List<Integer> results = (List<Integer>) (List) pipeline.syncAndReturnAll();
         List<List<Integer>> partitions = Lists.partition(results, 7);
-
 
         ArrayList<String> success = new ArrayList<>(partitions.size());
         Integer status = SUCCEED;
