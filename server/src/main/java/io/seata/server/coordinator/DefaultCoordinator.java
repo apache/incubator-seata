@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -264,10 +265,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }
         List<CompletableFuture<Void>> futures = new ArrayList<>(4);
-        runAsyncTask(futures, retryRollbackingSessions, retryRollbacking);
-        runAsyncTask(futures, beginGlobalSessions, timeoutCheck);
-        runAsyncTask(futures, retryCommittingSessions, retryCommitting);
-        runAsyncTask(futures, asyncCommittingSessions, asyncCommitting);
+        runAsync(!retryRollbackingSessions.isEmpty(), futures, () -> handleRetryRollbacking(retryRollbackingSessions),
+            retryRollbacking);
+        runAsync(!beginGlobalSessions.isEmpty(), futures, () -> timeoutCheck(beginGlobalSessions), timeoutCheck);
+        runAsync(!retryCommittingSessions.isEmpty(), futures, () -> handleRetryCommitting(retryCommittingSessions),
+            retryCommitting);
+        runAsync(!asyncCommittingSessions.isEmpty(), futures, () -> handleAsyncCommitting(asyncCommittingSessions),
+            asyncCommitting);
         if (CollectionUtils.isNotEmpty(futures)) {
             try {
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
@@ -359,9 +363,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * @param rollbackingSessions
      */
     protected void handleRetryRollbacking(Collection<GlobalSession> rollbackingSessions) {
-        if (CollectionUtils.isEmpty(rollbackingSessions)) {
-            return;
-        }
         long now = System.currentTimeMillis();
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
@@ -523,18 +524,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
-     * runAsyncTask
-     * @param asyncTasks
-     * @param sessions
-     * @param executorService
+     * runAsync
+     * @param condition
+     * @param runnable
+     * @param executor
+     * @return
      */
-    private void runAsyncTask(List<CompletableFuture<Void>> asyncTasks, List<GlobalSession> sessions,
-                              ExecutorService executorService) {
-        if (CollectionUtils.isNotEmpty(sessions)) {
-            asyncTasks.add(CompletableFuture.runAsync(() -> handleRetryRollbacking(sessions), executorService));
+    public void runAsync(boolean condition, List<CompletableFuture<Void>> futures, Runnable runnable,
+        Executor executor) {
+        if (condition) {
+            futures.add(CompletableFuture.runAsync(runnable, executor));
         }
     }
-    
+
     /**
      * only used for mock test
      * @param remotingServer
