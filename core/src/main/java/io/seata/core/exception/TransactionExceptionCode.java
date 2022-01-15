@@ -120,7 +120,12 @@ public enum TransactionExceptionCode {
     /**
      * not raft leader exception code
      */
-    NotRaftLeader
+    NotRaftLeader,
+  
+    /**
+     * Lock key conflict fail fast transaction exception code.
+     */
+    LockKeyConflictFailFast
     ;
 
 
