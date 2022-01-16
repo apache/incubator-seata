@@ -20,6 +20,7 @@ import java.util.List;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalLockConfig;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
@@ -179,6 +180,10 @@ public class TransactionalTemplate {
                 rollbackTransaction(tx, originalException);
             } catch (TransactionException txe) {
                 // Failed to rollback
+                if (TransactionExceptionCode.RollbackRateLimited.equals(txe.getCode())) {
+                    throw new TransactionalExecutor.ExecutionException(tx, txe,
+                            TransactionalExecutor.Code.RollbackRateLimited, originalException);
+                }
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
                         TransactionalExecutor.Code.RollbackFailure, originalException);
             }
@@ -195,6 +200,10 @@ public class TransactionalTemplate {
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
+            if (TransactionExceptionCode.CommitRateLimited.equals(txe.getCode())) {
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        TransactionalExecutor.Code.CommitRateLimited);
+            }
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                 TransactionalExecutor.Code.CommitFailure);
         }
@@ -215,6 +224,10 @@ public class TransactionalTemplate {
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
             triggerAfterBegin();
         } catch (TransactionException txe) {
+            if (TransactionExceptionCode.BeginRateLimited.equals(txe.getCode())) {
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                    TransactionalExecutor.Code.BeginRateLimited);
+            }
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                 TransactionalExecutor.Code.BeginFailure);
 

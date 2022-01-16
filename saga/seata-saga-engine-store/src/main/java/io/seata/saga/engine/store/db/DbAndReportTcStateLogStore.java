@@ -26,6 +26,7 @@ import java.util.Map;
 
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.exception.RateLimitedException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
@@ -55,6 +56,7 @@ import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import io.seata.saga.tm.SagaTransactionalTemplate;
 import io.seata.tm.api.GlobalTransaction;
+import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
@@ -140,6 +142,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     machineContext.put(DomainConstants.VAR_NAME_GLOBAL_TX, globalTransaction);
                 }
             } catch (ExecutionException e) {
+                if (TransactionalExecutor.Code.BeginRateLimited.equals(e.getCode())) {
+                    throw new RateLimitedException("RateLimited to begin transaction", e);
+                }
                 String xid = null;
                 if (e.getTransaction() != null) {
                     xid = e.getTransaction().getXid();

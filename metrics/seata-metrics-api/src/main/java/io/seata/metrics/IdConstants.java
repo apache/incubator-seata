@@ -37,6 +37,8 @@ public interface IdConstants {
 
     String STATUS_KEY = "status";
 
+    String RATELIMITED_KEY = "rateLimited";
+
     String ROLE_VALUE_TC = "tc";
 
     String ROLE_VALUE_TM = "tm";
@@ -66,4 +68,6 @@ public interface IdConstants {
     String STATUS_VALUE_COMMITTED = "committed";
 
     String STATUS_VALUE_ROLLBACKED = "rollbacked";
+
+    String RATELIMITED_VALUE_TRUE = "true";
 }

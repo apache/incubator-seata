@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -34,6 +35,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -60,6 +62,8 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.ratelimit.RateLimitedResponseMap;
+import io.seata.server.ratelimit.RateLimiter;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -128,6 +132,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
+    private static final boolean ENABLE_SERVER_RATELIMIT = ConfigurationFactory.getInstance().getBoolean(
+            ConfigurationKeys.ENABLE_SERVER_RATELIMIT, false);
+
     private final ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("RetryRollbacking", 1));
 
@@ -151,6 +158,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private static volatile DefaultCoordinator instance;
 
+    private RateLimiter rateLimiter;
+
+    private RateLimitedResponseMap rateLimitedResponseMap;
+
     /**
      * Instantiates a new Default coordinator.
      *
@@ -159,6 +170,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private DefaultCoordinator(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
         this.core = new DefaultCore(remotingServer);
+        if (ENABLE_SERVER_RATELIMIT) {
+            rateLimiter = EnhancedServiceLoader.load(RateLimiter.class);
+            rateLimitedResponseMap = RateLimitedResponseMap.getInstance();
+        }
     }
 
     public static DefaultCoordinator getInstance(RemotingServer remotingServer) {
@@ -405,6 +420,34 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
+     * Handle rate limited.
+     */
+    protected void handleRateLimited(AbstractTransactionRequestToTC transactionRequest) {
+        if (transactionRequest instanceof GlobalCommitRequest || transactionRequest instanceof GlobalRollbackRequest) {
+            AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest) transactionRequest;
+            String xid = abstractGlobalEndRequest.getXid();
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+
+            try {
+                SessionHolder.lockAndExecute(globalSession, () -> {
+                    if (globalSession == null || !globalSession.hasATBranch() || globalSession.isTimeout()) {
+                        return false;
+                    }
+                    LOGGER.info("Global transaction[{}] is rate limited and will be rollback.", globalSession.getXid());
+                    globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+                    globalSession.close();
+                    globalSession.changeStatus(GlobalStatus.Rollbacking);
+                    core.doGlobalRollback(globalSession, true);
+                    return true;
+                });
+            } catch (TransactionException e) {
+                LOGGER.info("Failed to handle rateLimited global transaction [{}] {} {}",
+                    globalSession.getXid(), e.getCode(), e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -431,6 +474,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
+        if (ENABLE_SERVER_RATELIMIT) {
+            AbstractResultMessage resultMessage = rateLimitedResponseMap.get(request.getClass());
+            if (resultMessage != null && !rateLimiter.canPass()) {
+                eventBus.post(new GlobalTransactionEvent(-1, GlobalTransactionEvent.ROLE_TC, null,
+                    context.getApplicationId(), context.getTransactionServiceGroup(),
+                    null, null, null, true));
+                handleRateLimited(transactionRequest);
+                return resultMessage;
+            }
+        }
 
         return transactionRequest.handle(context);
     }

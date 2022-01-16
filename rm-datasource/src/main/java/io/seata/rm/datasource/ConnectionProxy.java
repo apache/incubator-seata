@@ -121,6 +121,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 throw new LockConflictException();
             }
         } catch (TransactionException e) {
+            recognizeLockQueryRateLimitedException(e);
             recognizeLockKeyConflictException(e, lockKeys);
         }
     }
@@ -139,6 +140,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             result = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(),
                 context.getXid(), lockKeys);
         } catch (TransactionException e) {
+            recognizeLockQueryRateLimitedException(e);
             recognizeLockKeyConflictException(e, lockKeys);
         }
         return result;
@@ -161,6 +163,12 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             throw new SQLException(te);
         }
 
+    }
+
+    private void recognizeLockQueryRateLimitedException(TransactionException te) throws SQLException {
+        if (TransactionExceptionCode.GlobalLockQueryRateLimited.equals(te.getCode())) {
+            throw new SQLException("RateLimited to check global lock, xid:" + context.getXid(), te);
+        }
     }
 
     /**
@@ -316,6 +324,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
                     + commitDone + "] Retry Countdown: " + retry);
+                if (ex instanceof TransactionException &&
+                        TransactionExceptionCode.BranchReportRateLimited.equals(((TransactionException) ex).getCode())) {
+                    throw new SQLException("RateLimited to report branch status " + commitDone, ex);
+                }
                 retry--;
 
                 if (retry == 0) {

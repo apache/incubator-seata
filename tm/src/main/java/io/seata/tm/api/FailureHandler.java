@@ -31,6 +31,14 @@ public interface FailureHandler {
     void onBeginFailure(GlobalTransaction tx, Throwable cause);
 
     /**
+     * On begin rate limited.
+     *
+     * @param tx    the tx
+     * @param cause the cause
+     */
+    void onBeginRateLimited(GlobalTransaction tx, Throwable cause);
+
+    /**
      * On commit failure.
      *
      * @param tx    the tx
@@ -39,12 +47,28 @@ public interface FailureHandler {
     void onCommitFailure(GlobalTransaction tx, Throwable cause);
 
     /**
+     * On commit rate limited.
+     *
+     * @param tx    the tx
+     * @param cause the cause
+     */
+    void onCommitRateLimited(GlobalTransaction tx, Throwable cause);
+
+    /**
      * On rollback failure.
      *
      * @param tx                the tx
      * @param originalException the originalException
      */
     void onRollbackFailure(GlobalTransaction tx, Throwable originalException);
+
+    /**
+     * On rollback rate limited.
+     *
+     * @param tx                the tx
+     * @param originalException the originalException
+     */
+    void onRollbackRateLimited(GlobalTransaction tx, Throwable originalException);
 
     /**
      * On rollback retrying

@@ -178,4 +178,13 @@ public interface DefaultValues {
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
     long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(5).toMillis();
+
+    /**
+     * the constant DEFAULT_SERVER_RATELIMIT_DELAY
+     */
+    boolean DEFAULT_SERVER_RATELIMIT_DELAY = false;
+    /**
+     * the constant DEFAULT_DELAY_TIMEOUT
+     */
+    long DEFAULT_DELAY_TIMEOUT = Duration.ofSeconds(1).toMillis();
 }

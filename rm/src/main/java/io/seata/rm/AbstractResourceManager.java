@@ -96,7 +96,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setApplicationData(applicationData);
 
             BranchReportResponse response = (BranchReportResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
-            if (response.getResultCode() == ResultCode.Failed) {
+            if (response.getResultCode() == ResultCode.Failed || response.getResultCode() == ResultCode.RateLimited) {
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
         } catch (TimeoutException toe) {

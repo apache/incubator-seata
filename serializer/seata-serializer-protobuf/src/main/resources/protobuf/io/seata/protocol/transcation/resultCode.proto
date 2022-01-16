@@ -13,4 +13,6 @@ enum ResultCodeProto {
 
     Success = 1;
 
+    RateLimited = 2;
+
 }

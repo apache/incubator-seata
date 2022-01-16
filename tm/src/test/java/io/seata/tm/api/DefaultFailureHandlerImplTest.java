@@ -81,6 +81,14 @@ class DefaultFailureHandlerImplTest {
     }
 
     @Test
+    void onBeginRateLimited() {
+        RootContext.bind(DEFAULT_XID);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        FailureHandler failureHandler = new DefaultFailureHandlerImpl();
+        failureHandler.onBeginRateLimited(tx, new MyRuntimeException("").getCause());
+    }
+
+    @Test
     void onCommitFailure() throws Exception{
 
         RootContext.bind(DEFAULT_XID);
@@ -98,6 +106,31 @@ class DefaultFailureHandlerImplTest {
         Assertions.assertEquals(pendingTimeout,1L);
         //set globalStatus
         globalStatus= GlobalStatus.Committed;
+        Thread.sleep(25*1000L);
+        pendingTimeout = timer.pendingTimeouts();
+        LOGGER.info("pendingTimeout {}" ,pendingTimeout);
+        //all timer is done
+        Assertions.assertEquals(pendingTimeout,0L);
+    }
+
+    @Test
+    void onCommitRateLimited() throws Exception{
+
+        RootContext.bind(DEFAULT_XID);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        FailureHandler failureHandler = new DefaultFailureHandlerImpl();
+        failureHandler.onCommitRateLimited(tx, new MyRuntimeException("").getCause());
+
+        // get timer
+        Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
+        Field field = c.getDeclaredField("timer");
+        field.setAccessible(true);
+        HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
+        // assert timer pendingCount: first time is 1
+        Long pendingTimeout = timer.pendingTimeouts();
+        Assertions.assertEquals(pendingTimeout,1L);
+        //set globalStatus
+        globalStatus = GlobalStatus.Committed;
         Thread.sleep(25*1000L);
         pendingTimeout = timer.pendingTimeouts();
         LOGGER.info("pendingTimeout {}" ,pendingTimeout);
@@ -133,5 +166,28 @@ class DefaultFailureHandlerImplTest {
 
     }
 
+    @Test
+    void onRollbackRateLimited() throws Exception{
 
+        RootContext.bind(DEFAULT_XID);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        FailureHandler failureHandler = new DefaultFailureHandlerImpl();
+        failureHandler.onRollbackRateLimited(tx, new MyRuntimeException("").getCause());
+
+        // get timer
+        Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
+        Field field = c.getDeclaredField("timer");
+        field.setAccessible(true);
+        HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
+        // assert timer pendingCount: first time is 1
+        Long pendingTimeout = timer.pendingTimeouts();
+        Assertions.assertEquals(pendingTimeout,1L);
+        //set globalStatus
+        globalStatus = GlobalStatus.Rollbacked;
+        Thread.sleep(25*1000L);
+        pendingTimeout = timer.pendingTimeouts();
+        LOGGER.info("pendingTimeout {}" ,pendingTimeout);
+        //all timer is done
+        Assertions.assertEquals(pendingTimeout,0L);
+    }
 }

@@ -57,14 +57,31 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     }
 
     @Override
+    public void onBeginRateLimited(GlobalTransaction tx, Throwable cause) {
+        LOGGER.warn("RateLimited to begin transaction. ", cause);
+    }
+
+    @Override
     public void onCommitFailure(GlobalTransaction tx, Throwable cause) {
         LOGGER.warn("Failed to commit transaction[" + tx.getXid() + "]", cause);
         timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Committed), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override
+    public void onCommitRateLimited(GlobalTransaction tx, Throwable cause) {
+        LOGGER.warn("RateLimited to commit transaction[" + tx.getXid() + "]", cause);
+        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Committed), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
+    @Override
     public void onRollbackFailure(GlobalTransaction tx, Throwable originalException) {
         LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", originalException);
+        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void onRollbackRateLimited(GlobalTransaction tx, Throwable originalException) {
+        LOGGER.warn("RateLimited to rollback transaction[" + tx.getXid() + "]", originalException);
         timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 

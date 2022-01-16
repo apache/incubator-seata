@@ -65,7 +65,7 @@ public class DataSourceManager extends AbstractResourceManager {
                 throw new RuntimeException("unknow situation!");
             }
 
-            if (response.getResultCode() == ResultCode.Failed) {
+            if (response.getResultCode() == ResultCode.Failed || response.getResultCode() == ResultCode.RateLimited) {
                 throw new TransactionException(response.getTransactionExceptionCode(),
                     "Response[" + response.getMsg() + "]");
             }

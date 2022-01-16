@@ -26,7 +26,7 @@ public class TransactionExceptionCodeTest {
     private static final int BEGIN_CODE = 1;
     private static final int NONE = 99;
     private static final int MIN_CODE = 0;
-    private static final int Max_CODE = 18;
+    private static final int Max_CODE = 25;
 
     @Test
     public void testGetCode() {

@@ -51,16 +51,34 @@ public interface TransactionalExecutor {
         BeginFailure,
 
         /**
+         * Begin rate limited code.
+         */
+        //
+        BeginRateLimited,
+
+        /**
          * Commit failure code.
          */
         //
         CommitFailure,
 
         /**
+         * Commit rate limited code.
+         */
+        //
+        CommitRateLimited,
+
+        /**
          * Rollback failure code.
          */
         //
         RollbackFailure,
+
+        /**
+         * Rollback rate limited code.
+         */
+        //
+        RollbackRateLimited,
 
         /**
          * Rollback done code.
@@ -73,6 +91,12 @@ public interface TransactionalExecutor {
          */
         //
         ReportFailure,
+
+        /**
+         * Report rate limited code.
+         */
+        //
+        ReportRateLimited,
 
         /**
          * Rollback retrying code.

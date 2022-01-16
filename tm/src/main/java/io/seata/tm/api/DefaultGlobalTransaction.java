@@ -19,6 +19,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -130,6 +131,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                     break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                    if (ex instanceof TransactionException
+                            && TransactionExceptionCode.CommitRateLimited.equals(((TransactionException) ex).getCode())) {
+                        throw (TransactionException) ex;
+                    }
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global commit", ex);
                     }
@@ -166,6 +171,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                     break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                    if (ex instanceof TransactionException
+                            && TransactionExceptionCode.RollbackRateLimited.equals(((TransactionException) ex).getCode())) {
+                        throw (TransactionException) ex;
+                    }
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global rollback", ex);
                     }
