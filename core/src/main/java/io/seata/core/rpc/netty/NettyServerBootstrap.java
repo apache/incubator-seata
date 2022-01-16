@@ -184,8 +184,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 LOGGER.debug("Shutting server down. ");
             }
             if (initialized.get()) {
-                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
-                RegistryFactory.getInstance().close();
                 //wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
             }
