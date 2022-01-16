@@ -107,7 +107,7 @@ public class Version {
             long divideVersion = convertVersion(VERSION_1_5_0);
             isAboveOrEqualVersion150 = clientVersion >= divideVersion;
         } catch (Exception e) {
-            LOGGER.error("convert version error, clientVersion:" + version, e);
+            LOGGER.error("convert version error, clientVersion:{}", version, e);
         }
         return isAboveOrEqualVersion150;
     }

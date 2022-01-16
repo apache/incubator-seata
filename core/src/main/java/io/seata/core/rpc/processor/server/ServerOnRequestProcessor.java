@@ -88,7 +88,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     private final TransactionMessageHandler transactionMessageHandler;
 
-    private final ExecutorService batchResponseExecutorService;
+    private ExecutorService batchResponseExecutorService;
 
     private final ConcurrentMap<Channel, BlockingQueue<QueueItem>> basketMap = new ConcurrentHashMap<>();
     protected final Object batchResponseLock = new Object();
@@ -102,12 +102,14 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
-        batchResponseExecutorService = new ThreadPoolExecutor(MAX_BATCH_RESPONSE_THREAD,
-            MAX_BATCH_RESPONSE_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
-        batchResponseExecutorService.submit(new BatchResponseRunnable());
+        if (NettyServerConfig.isEnableTcServerBatchSendResponse()) {
+            batchResponseExecutorService = new ThreadPoolExecutor(MAX_BATCH_RESPONSE_THREAD,
+                MAX_BATCH_RESPONSE_THREAD,
+                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
+            batchResponseExecutorService.submit(new BatchResponseRunnable());
+        }
     }
 
     @Override
