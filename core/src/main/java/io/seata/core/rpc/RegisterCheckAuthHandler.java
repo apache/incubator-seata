@@ -15,6 +15,7 @@
  */
 package io.seata.core.rpc;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 
@@ -29,15 +30,17 @@ public interface RegisterCheckAuthHandler {
      * Reg transaction manager check auth boolean.
      *
      * @param request the request
+     * @param ctx the ctx
      * @return the boolean
      */
-    boolean regTransactionManagerCheckAuth(RegisterTMRequest request);
+    boolean regTransactionManagerCheckAuth(RegisterTMRequest request, ChannelHandlerContext ctx);
 
     /**
      * Reg resource manager check auth boolean.
      *
      * @param request the request
+     * @param ctx the ctx
      * @return the boolean
      */
-    boolean regResourceManagerCheckAuth(RegisterRMRequest request);
+    boolean regResourceManagerCheckAuth(RegisterRMRequest request, ChannelHandlerContext ctx);
 }
