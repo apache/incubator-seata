@@ -157,7 +157,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         if (!(message instanceof AbstractMessage)) {
             return;
         }
-        String version = rpcMessage.getHeadMap().get(HeapMapKey.VERSION_KEY);
+        String version = rpcMessage.getHead(HeapMapKey.VERSION_KEY);
         // the batch send request message
         if (message instanceof MergedWarpMessage) {
             if (NettyServerConfig.isEnableTcServerBatchSendResponse() &&
