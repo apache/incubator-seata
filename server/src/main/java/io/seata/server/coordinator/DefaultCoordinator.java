@@ -15,7 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
@@ -23,7 +22,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
-import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -61,7 +59,6 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.discovery.registry.RegistryFactory;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
@@ -448,13 +445,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     public void destroy() {
-        try {
-            RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
-            RegistryFactory.getInstance().close();
-        } catch (Exception e) {
-            LOGGER.error("shutdown RegistryService failed", e);
-        }
-
         // 1. first shutdown timed task
         retryRollbacking.shutdown();
         retryCommitting.shutdown();
