@@ -20,6 +20,7 @@ import io.seata.rm.datasource.SeataDataSourceProxy;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.beans.factory.BeanCreationNotAllowedException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -33,6 +34,7 @@ import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
@@ -60,7 +62,7 @@ class SeataAutoDataSourceProxyTest {
         String[] excludes = new String[0];
         String dataSourceProxyMode = BranchType.AT.name();
 
-        advice= spy(new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode));
+        advice = spy(new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode));
         Object[] advices = new Object[]{new DefaultIntroductionAdvisor(advice)};
 
         creator = spy(new SeataAutoDataSourceProxyCreator(useJdkProxy, excludes, dataSourceProxyMode));
@@ -75,6 +77,9 @@ class SeataAutoDataSourceProxyTest {
         }
     }
 
+    /**
+     * this configuration manually register a normal DataSource bean
+     */
     @Configuration
     static class DataSourceConfiguration1 {
 
@@ -88,6 +93,10 @@ class SeataAutoDataSourceProxyTest {
         }
     }
 
+
+    /**
+     * this configuration manually register a {@link SeataDataSourceProxy} bean
+     */
     @Configuration
     static class DataSourceConfiguration2 {
 
@@ -102,6 +111,11 @@ class SeataAutoDataSourceProxyTest {
         }
     }
 
+    /**
+     * this configuration manually register
+     * <p>1. a normal DataSource bean</p>
+     * <p>2. a {@link SeataDataSourceProxy} bean as primary bean</p>
+     */
     @Configuration
     static class DataSourceConfiguration3 {
 
@@ -127,11 +141,22 @@ class SeataAutoDataSourceProxyTest {
         testProxy(DataSourceConfiguration1.origin, DataSourceConfiguration1.proxy, DataSourceConfiguration1.class);
         verify(creator, times(1)).buildProxy(any(), anyString());
 
-        testProxy(DataSourceConfiguration2.origin, DataSourceConfiguration2.proxy, DataSourceConfiguration2.class);
-        verify(creator, times(1)).buildProxy(any(), anyString());
 
-        testProxy(DataSourceConfiguration3.origin, DataSourceConfiguration3.proxy, DataSourceConfiguration3.class);
-        verify(creator, times(2)).buildProxy(any(), anyString());
+    }
+
+    /**
+     *
+     * don't allow manually register {@link SeataDataSourceProxy}
+     * when using {@link SeataAutoDataSourceProxyCreator}
+     */
+    @Test
+    void testManuallyRegisterSeataDataSourceProxyWhileUsingStarter() {
+
+        assertThrows(BeanCreationNotAllowedException.class, () ->
+                testProxy(DataSourceConfiguration2.origin, DataSourceConfiguration2.proxy, DataSourceConfiguration2.class));
+
+        assertThrows(BeanCreationNotAllowedException.class, () ->
+                testProxy(DataSourceConfiguration3.origin, DataSourceConfiguration3.proxy, DataSourceConfiguration3.class));
     }
 
     private void testProxy(DataSource origin, SeataDataSourceProxy proxy, Class<?> dataSourceConfiguration) throws SQLException {

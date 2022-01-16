@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
+import org.springframework.beans.factory.BeanCreationNotAllowedException;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -89,6 +90,9 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
             SeataDataSourceProxy proxy = buildProxy(origin, dataSourceProxyMode);
             DataSourceProxyHolder.put(origin, proxy);
             return enhancer;
+        } else {
+            throw new BeanCreationNotAllowedException(beanName, "don't manually register SeataDataSourceProxy(or its subclass) bean " +
+                    "when seata auto datasource proxy is enabled ");
         }
 
         /*
@@ -96,17 +100,7 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
          * if you insist on doing so, you must make sure your method return type is DataSource,
          * because this processor will never return any subclass of SeataDataSourceProxy
          */
-        LOGGER.warn("Manually register SeataDataSourceProxy(or its subclass) bean is discouraged! bean name: {}", beanName);
-        SeataDataSourceProxy proxy = (SeataDataSourceProxy) bean;
-        DataSource origin = proxy.getTargetDataSource();
-        Object originEnhancer = super.wrapIfNecessary(origin, beanName, cacheKey);
-        // this mean origin is either excluded by user or had been proxy before
-        if (origin == originEnhancer) {
-            return origin;
-        }
-        // else, put <origin, proxy> to holder and return originEnhancer
-        DataSourceProxyHolder.put(origin, proxy);
-        return originEnhancer;
+
     }
 
     SeataDataSourceProxy buildProxy(DataSource origin, String proxyMode) {
