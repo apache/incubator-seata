@@ -148,6 +148,23 @@ public interface ConfigurationKeys {
     String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
 
     /**
+     * The constant CLIENT_TLS_PREFIX.
+     */
+    String CLIENT_TLS_PREFIX = CLIENT_PREFIX + "tls.";
+    /**
+     * The constant CLIENT_ENABLE_TLS.
+     */
+    String CLIENT_ENABLE_TLS = CLIENT_TLS_PREFIX + "enableTls";
+    /**
+     * The constant CLIENT_TLS_VERSION.
+     */
+    String CLIENT_TLS_VERSION = CLIENT_TLS_PREFIX + "tlsVersion";
+    /**
+     * The constant CLIENT_TRUST_CERTIFICATE_PATH.
+     */
+    String CLIENT_TRUST_CERTIFICATE_PATH = CLIENT_TLS_PREFIX + "trustCertificatePath";
+
+    /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
      */
     String SERVICE_SESSION_RELOAD_READ_SIZE = STORE_FILE_PREFIX + "sessionReloadReadSize";
@@ -463,6 +480,35 @@ public interface ConfigurationKeys {
      * the constant DISTRIBUTED_LOCK_EXPIRE_TIME
      */
     String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
+
+    /**
+     * The constant SERVER_TLS_PREFIX.
+     */
+    String SERVER_TLS_PREFIX = SERVER_PREFIX + "tls.";
+    /**
+     * The constant SERVER_CERTIFICATE_TYPE
+     */
+    String SERVER_CERTIFICATE_TYPE = SERVER_TLS_PREFIX + "certificateType";
+    /**
+     * The constant SERVER_CERTIFICATE_PATH
+     */
+    String SERVER_CERTIFICATE_PATH = SERVER_TLS_PREFIX + "certificatePath";
+    /**
+     * The constant SERVER_CERTIFICATE_PASSWORD
+     */
+    String SERVER_CERTIFICATE_PASSWORD = SERVER_TLS_PREFIX + "certificatePassword";
+    /**
+     * The constant SERVER_ENABLE_TLS
+     */
+    String SERVER_ENABLE_TLS = SERVER_TLS_PREFIX + "enableTls";
+    /**
+     * The constant SERVER_KEY_FILE_PATH
+     */
+    String SERVER_KEY_FILE_PATH = SERVER_TLS_PREFIX + "keyFilePath";
+    /**
+     * The constant SERVER_TLS_VERSION
+     */
+    String SERVER_TLS_VERSION = SERVER_TLS_PREFIX + "tlsVersion";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.

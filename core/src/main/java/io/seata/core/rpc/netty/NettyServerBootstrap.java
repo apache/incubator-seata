@@ -29,6 +29,7 @@ import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
@@ -155,6 +156,11 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
+                    boolean enableTls = nettyServerConfig.isEnableTls();
+                    if (enableTls) {
+                        SslContext sslContext = nettyServerConfig.getSslContext();
+                        ch.pipeline().addLast(sslContext.newHandler(ch.alloc()));
+                    }
                     ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
                         .addLast(new ProtocolV1Decoder())
                         .addLast(new ProtocolV1Encoder());

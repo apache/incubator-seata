@@ -22,6 +22,9 @@ import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ClientTlsProperties;
+import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -91,6 +94,10 @@ public class ClientPropertiesTest {
         assertFalse(serviceProperties.isDisableGlobalTransaction());
     }
 
+    @Test
+    public void testClientTlsProperties() {
+        assertFalse(context.getBean(ClientTlsProperties.class).isEnableTls());
+    }
 
     @Test
     public void testTmProperties() {

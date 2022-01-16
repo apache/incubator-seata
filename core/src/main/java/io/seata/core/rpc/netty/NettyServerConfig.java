@@ -18,7 +18,10 @@ package io.seata.core.rpc.netty;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.handler.ssl.SslContext;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.netty.tls.ServerCertificateType;
+
 
 import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
@@ -26,6 +29,8 @@ import static io.seata.common.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_TLS;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_CERTIFICATE_TYPE;
 
 /**
  * The type Netty server config.
@@ -322,5 +327,74 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public static int getMaxBranchResultPoolSize() {
         return maxBranchResultPoolSize;
+    }
+
+    /**
+     * Get whether enable tls.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableTls() {
+        return CONFIG.getBoolean(ConfigurationKeys.SERVER_ENABLE_TLS,
+                DEFAULT_SERVER_ENABLE_TLS);
+    }
+
+    /**
+     * Get the server SslContext.
+     *
+     * @return the SslContext
+     */
+    public SslContext getSslContext() {
+        return ServerCertificateType.valueOf(getServerCertificateType())
+            .getSslContext(getTlsVersion(), getServerCertificatePath(),
+                 getServerCertificatePassword(), getServerKeyFilePath());
+    }
+
+    /**
+     * Get the certificate type, support PKCS12, JKS and PEM.
+     *
+     * @return the String
+     */
+    private String getServerCertificateType() {
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_CERTIFICATE_TYPE,
+                DEFAULT_SERVER_CERTIFICATE_TYPE);
+    }
+
+    /**
+     * Get the certificate path.
+     *
+     * @return the String
+     */
+    private String getServerCertificatePath() {
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_CERTIFICATE_PATH);
+    }
+
+    /**
+     * Get the certificate password used to check the integrity of
+     * the keystore or to unlock the keystore.
+     *
+     * @return the String
+     */
+    private String getServerCertificatePassword() {
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_CERTIFICATE_PASSWORD);
+    }
+
+    /**
+     * Get the PKCS#8 private key file path.
+     *
+     * @return the String
+     */
+    private String getServerKeyFilePath() {
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_KEY_FILE_PATH);
+    }
+
+    /**
+     * Get the TLS protocol version to enable
+     * or {@code null} to enable the default version.
+     *
+     * @return the String
+     */
+    private String getTlsVersion() {
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_TLS_VERSION);
     }
 }

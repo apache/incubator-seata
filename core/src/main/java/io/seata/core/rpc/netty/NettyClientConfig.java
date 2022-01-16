@@ -15,9 +15,18 @@
  */
 package io.seata.core.rpc.netty;
 
+import javax.net.ssl.SSLException;
+import java.io.File;
+
 import io.netty.channel.Channel;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
@@ -25,6 +34,7 @@ import static io.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ENABLE_TLS;
 
 /**
  * The type Netty client config.
@@ -32,6 +42,8 @@ import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
  * @author slievrly
  */
 public class NettyClientConfig extends NettyBaseConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientConfig.class);
 
     private int connectTimeoutMillis = 10000;
     private int clientSocketSndBufSize = 153600;
@@ -454,5 +466,60 @@ public class NettyClientConfig extends NettyBaseConfig {
     @Deprecated
     public static boolean isEnableClientBatchSendRequest() {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
+    }
+
+    /**
+     * Get whether enable tls.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableTls() {
+        return CONFIG.getBoolean(ConfigurationKeys.CLIENT_ENABLE_TLS, DEFAULT_CLIENT_ENABLE_TLS);
+    }
+
+    /**
+     * Get the client SslContext.
+     *
+     * @return the SslContext
+     */
+    public SslContext getSslContext() {
+        SslContext sslContext = null;
+        String tlsVersion = getTlsVersion();
+        String trustCertificatePath = getTrustCertificatePath();
+        File trustCertificate = null;
+        if (StringUtils.isNotBlank(trustCertificatePath)) {
+            trustCertificate = new File(trustCertificatePath);
+        }
+        try {
+            SslContextBuilder sslContextBuilder = SslContextBuilder.forClient()
+                .trustManager(trustCertificate).clientAuth(ClientAuth.NONE);
+            if (tlsVersion != null) {
+                sslContextBuilder.protocols(tlsVersion);
+            }
+            sslContext = sslContextBuilder.build();
+        } catch (SSLException e) {
+            LOGGER.error("init client ssl context error:{}", e.getMessage(), e);
+        }
+        return sslContext;
+    }
+
+    /**
+     * Get trusted certificate path. The file should contain an X.509
+     * certificate in PEM format. {@code null} uses the system default.
+     *
+     * @return the String
+     */
+    private String getTrustCertificatePath() {
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_TRUST_CERTIFICATE_PATH);
+    }
+
+    /**
+     * Get the TLS protocol version to enable
+     * or {@code null} to enable the default version.
+     *
+     * @return the String
+     */
+    private String getTlsVersion() {
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_TLS_VERSION);
     }
 }
