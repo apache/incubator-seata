@@ -48,12 +48,12 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected String targetSQL;
 
     /**
-     * The cache of generatedKeysCache
+     * The cache of scrollable generatedKeys
      */
     protected CachedRowSet scrollableGeneratedKeysCache;
 
     /**
-     * The cache of generatedKeysCache
+     * The cache of generatedKeys
      */
     protected ResultSet generatedKeysCache;
 
@@ -66,7 +66,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * @throws SQLException the sql exception
      */
     public AbstractStatementProxy(AbstractConnectionProxy connectionProxy, T targetStatement, String targetSQL)
-            throws SQLException {
+        throws SQLException {
         this.connectionProxy = connectionProxy;
         this.targetStatement = targetStatement;
         this.targetSQL = targetSQL;
