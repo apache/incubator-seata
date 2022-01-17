@@ -75,6 +75,10 @@ public class RegistryHeartBeats {
         }, period, period, TimeUnit.MILLISECONDS);
     }
 
+    public static void close() {
+        HEARTBEAT_SCHEDULED.shutdown();
+    }
+
     private static long getHeartbeatPeriod(String registryType) {
         String propertySuffix = String.join("-", HEARTBEAT_KEY, HEARTBEAT_PERIOD_KEY);
         //  FILE_CONFIG.getLong("registry.${registryType}.heartbeat-period");
