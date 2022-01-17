@@ -22,7 +22,7 @@ public class RedisQueryConsolTest {
 
     /**
      *
-     *if you want test globalSessionService and  globalLockService
+     *if you want test redis mode globalSessionService and  globalLockService
      *
      *please update config information ths file: application.yml
      * store:
