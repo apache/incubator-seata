@@ -210,7 +210,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * @param branchSession the branchSession
      */
     public void doBranchRemoveAsync(GlobalSession globalSession, BranchSession branchSession) {
-        branchRemoveExecutor.submit(new BranchRemoveTask(globalSession, branchSession));
+        branchRemoveExecutor.execute(new BranchRemoveTask(globalSession, branchSession));
     }
 
     /**
@@ -219,7 +219,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * @param globalSession the globalSession
      */
     public void doBranchRemoveAllAsync(GlobalSession globalSession) {
-        branchRemoveExecutor.submit(new BranchRemoveTask(globalSession));
+        branchRemoveExecutor.execute(new BranchRemoveTask(globalSession));
     }
 
     @Override
