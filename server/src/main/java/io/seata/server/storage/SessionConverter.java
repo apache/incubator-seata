@@ -114,7 +114,7 @@ public class SessionConverter {
     }
 
     public static void convertToGlobalSessionVo(List<GlobalSessionVO> result, List<GlobalSession> globalSessions) {
-        if (CollectionUtils.isNotEmpty(globalSessions)){
+        if (CollectionUtils.isNotEmpty(globalSessions)) {
             for (GlobalSession globalSession : globalSessions) {
                 GlobalSessionVO globalSessionVO = new GlobalSessionVO();
                 BeanUtils.copyProperties(globalSession,globalSessionVO);
@@ -128,7 +128,7 @@ public class SessionConverter {
 
     public static Set<BranchSessionVO> converToBranchSession(ArrayList<BranchSession> branchSessions) {
         Set<BranchSessionVO> branchSessionVOs = new HashSet<>(branchSessions.size());
-        if (CollectionUtils.isNotEmpty(branchSessions)){
+        if (CollectionUtils.isNotEmpty(branchSessions)) {
             for (BranchSession branchSession : branchSessions) {
                 BranchSessionVO branchSessionVONew = new BranchSessionVO();
                 BeanUtils.copyProperties(branchSession,branchSessionVONew);

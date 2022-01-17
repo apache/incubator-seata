@@ -150,6 +150,6 @@ public class RedisKeyConstants {
     /**
      * The globalLock keys
      */
-    public static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX+"*";
+    public static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + "*";
 
 }

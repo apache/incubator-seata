@@ -27,11 +27,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.Collections;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.Transaction;
+import redis.clients.jedis.ScanResult;
 import com.google.common.collect.ImmutableMap;
 import io.seata.core.console.param.GlobalSessionParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.*;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -80,7 +84,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
     /**the prefix of the global transaction all keys */
-    private static final String REDIS_SEATA_GLOBAL_PREFIX_KEYS = REDIS_SEATA_GLOBAL_PREFIX+"*";
+    private static final String REDIS_SEATA_GLOBAL_PREFIX_KEYS = REDIS_SEATA_GLOBAL_PREFIX + "*";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -455,7 +459,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param withBranchSessions
      * @return List<GlobalSession>
      */
-    public List<GlobalSession> findGlobalSessionByStatusWithPage(SessionCondition sessionCondition, boolean withBranchSessions){
+    public List<GlobalSession> findGlobalSessionByStatusWithPage(SessionCondition sessionCondition, boolean withBranchSessions) {
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
             GlobalSession globalSession = this.readSession(sessionCondition.getXid(), withBranchSessions);
@@ -481,14 +485,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param param
      * @return List<GlobalSession>
      */
-    public List<GlobalSession> readSessionStatusByPage(GlobalSessionParam param){
-        int start = param.getPageNum()*param.getPageSize()-param.getPageSize();
-        int end = param.getPageNum()*param.getPageSize()-1;
+    public List<GlobalSession> readSessionStatusByPage(GlobalSessionParam param) {
+        int start = param.getPageNum() * param.getPageSize() - param.getPageSize();
+        int end = param.getPageNum() * param.getPageSize() - 1;
 
         List<GlobalSession> globalSessions = new ArrayList<>();
-         if (param.getStatus() != null) {
-             String statusKey = buildGlobalStatus(GlobalStatus.get(param.getStatus()).getCode());
-            try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+        if (param.getStatus() != null) {
+            String statusKey = buildGlobalStatus(GlobalStatus.get(param.getStatus()).getCode());
+            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                 Pipeline pipelined = jedis.pipelined();
                 List<String> xids = pipelined.lrange(statusKey, start, end).get();
 
@@ -595,7 +599,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return keys;
     }
 
-    public List<BranchTransactionDO> findBranchSessionByXid(String xid){
+    public List<BranchTransactionDO> findBranchSessionByXid(String xid) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             return readBranchSessionByXid(jedis,xid);
         }
@@ -608,7 +612,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param withBranch
      * @return List<GlobalSession>
      */
-    public List<GlobalSession> findGlobalSessionByPage(int pageNum,int pageSize,boolean withBranch){
+    public List<GlobalSession> findGlobalSessionByPage(int pageNum,int pageSize,boolean withBranch) {
 
         int start = (pageNum - 1) * pageSize < 0 ? 0 : (pageNum - 1) * pageSize;
         int end = pageNum * pageSize;
@@ -622,19 +626,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         while (true) {
 
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-
-                    ScanResult<String> scan = jedis.scan(cursor, sp);
-                    cursor = scan.getCursor();
-                    List<String> list = scan.getResult();
-                    for(int i = 0;i < list.size();i++){
-                        keys.add(list.get(i));
-                        if (keys.size() == pageSize){
-                            return readGlobalSession(keys,withBranch);
-                        }
+                ScanResult<String> scan = jedis.scan(cursor, sp);
+                cursor = scan.getCursor();
+                List<String> list = scan.getResult();
+                for (int i = 0;i < list.size();i++) {
+                    keys.add(list.get(i));
+                    if (keys.size() == pageSize) {
+                        return readGlobalSession(keys,withBranch);
                     }
                 }
+            }
 
-            if (ScanParams.SCAN_POINTER_START.equals(cursor)){
+            if (ScanParams.SCAN_POINTER_START.equals(cursor)) {
                 return readGlobalSession(keys,withBranch);
             }
         }
@@ -646,7 +649,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param values
      * @return Long
      */
-    public Long countByClobalSesisons(GlobalStatus[] values){
+    public Long countByClobalSesisons(GlobalStatus[] values) {
         List<String> statusKeys = new ArrayList<>();
         for (GlobalStatus status : values) {
             statusKeys.add(buildGlobalStatus(status.getCode()));
@@ -662,8 +665,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private List<GlobalSession> readGlobalSession(Set<String> keys,boolean withBranchSessions) {
         ArrayList<GlobalSession> globalSessions = new ArrayList<>();
         String xid = null;
-        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
-            if (CollectionUtils.isNotEmpty(keys)){
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            if (CollectionUtils.isNotEmpty(keys)) {
                 for (String key : keys) {
                     Map<String, String> map = jedis.hgetAll(key);
                     if (CollectionUtils.isEmpty(map)) {

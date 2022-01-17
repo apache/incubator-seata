@@ -73,10 +73,10 @@ public class PageResult<T> extends Result<T>  implements Serializable {
         this.pageSize = pageSize;
         this.data = data;
 
-        if (total % pageSize == 0){
+        if (total % pageSize == 0) {
             this.pages = total / pageSize;
-        }else {
-            this.pages = total / pageSize +1;
+        } else {
+            this.pages = total / pageSize + 1;
         }
     }
 
@@ -100,11 +100,11 @@ public class PageResult<T> extends Result<T>  implements Serializable {
     }
 
     public static void checkPage(BaseParam param) {
-        if (param.getPageNum() <= 0){
+        if (param.getPageNum() <= 0) {
             param.setPageNum(1);
         }
 
-        if (param.getPageSize() <= 0){
+        if (param.getPageSize() <= 0) {
             param.setPageSize(20);
         }
     }

@@ -65,7 +65,7 @@ public class RedisTransactionStoreManagerTest {
     @Test
     public void testInsertTestData(){
         GlobalStatus[] values = GlobalStatus.values();
-        for (int i = 0;i<15;i++){
+        for (int i = 0;i<15;i++) {
             GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
             globalTransactionDO.setXid("123123123123"+i);
             globalTransactionDO.setStatus(values[i].getCode());
@@ -100,7 +100,7 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
-    public void testQueryGlobalslSession(){
+    public void testQueryGlobalslSession() {
 
         Long aLong = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
         System.out.print(aLong);
@@ -108,7 +108,7 @@ public class RedisTransactionStoreManagerTest {
 
 
     @Test
-    public void testreadisQuery(){
+    public void testreadisQuery() {
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageNum(0);
         param.setPageSize(5);

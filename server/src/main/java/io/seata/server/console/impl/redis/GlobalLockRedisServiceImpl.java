@@ -57,10 +57,10 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
         checkPage(param);
 
-        if (isNotBlank(param.getXid()) || isNotBlank(param.getTransactionId())){
+        if (isNotBlank(param.getXid()) || isNotBlank(param.getTransactionId())) {
             globalLockVOs = queryGlobalByParam(param);
             total = globalLockVOs.size();
-        }else{
+        } else {
             //query all
             globalLockVOs = queryAllPage(param.getPageNum(),param.getPageSize());
             total = queryAllTotal();
@@ -77,18 +77,18 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                 ScanResult<String> scan = jedis.scan(ScanParams.SCAN_POINTER_START, sp);
                 List<String> list = scan.getResult();
-                for(int i = 0;i < list.size();i++){
+                for (int i = 0;i < list.size();i++) {
                     total++;
                 }
             }
-            if (ScanParams.SCAN_POINTER_START.equals(cursor)){
+            if (ScanParams.SCAN_POINTER_START.equals(cursor)) {
                 return total;
             }
         }
     }
 
     private List<GlobalLockVO> queryAllPage(int pageNum,int pageSize) {
-        int start = (pageNum - 1) * pageSize <0 ? 0 : (pageNum - 1) * pageSize;
+        int start = (pageNum - 1) * pageSize < 0 ? 0 : (pageNum - 1) * pageSize;
         int end = pageNum * pageSize;
 
         Set<String> keys = new HashSet<>();
@@ -98,21 +98,19 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         sp.count(end);
 
         while (true) {
-
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-
-                    ScanResult<String> scan = jedis.scan(cursor, sp);
-                    cursor = scan.getCursor();
-                    List<String> list = scan.getResult();
-                    for(int i = 0;i < list.size();i++){
-                        keys.add(list.get(i));
-                        if (keys.size() == pageSize){
-                            return readGlobalocks(keys);
-                        }
+                ScanResult<String> scan = jedis.scan(cursor, sp);
+                cursor = scan.getCursor();
+                List<String> list = scan.getResult();
+                for (int i = 0;i < list.size();i++) {
+                    keys.add(list.get(i));
+                    if (keys.size() == pageSize) {
+                        return readGlobalocks(keys);
                     }
+                }
             }
 
-            if (ScanParams.SCAN_POINTER_START.equals(cursor)){
+            if (ScanParams.SCAN_POINTER_START.equals(cursor)) {
                 return readGlobalocks(keys);
             }
         }
@@ -120,12 +118,12 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
     private List<GlobalLockVO> readGlobalocks(Set<String> keys) {
         List<GlobalLockVO> vos = Lists.newArrayList();
-        if (CollectionUtils.isNotEmpty(keys)){
-            try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+        if (CollectionUtils.isNotEmpty(keys)) {
+            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                 for (String key : keys) {
                     Map<String, String> map = jedis.hgetAll(key);
                     GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
-                    if (vo != null){
+                    if (vo != null) {
                         vos.add(vo);
                     }
                 }
@@ -144,12 +142,12 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         xidStr = isNotBlank(xidStr) && isNotBlank(transactionId) ? getxidStr(param) : StringUtils.EMPTY;
 
 
-        String key = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS+xidStr;
-        if (isNotBlank(xidStr)){
-            try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+        String key = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS + xidStr;
+        if (isNotBlank(xidStr)) {
+            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                 Map<String, String> map = jedis.hgetAll(key);
                 GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
-                if (vo != null){
+                if (vo != null) {
                     vos.add(vo);
                 }
             }
@@ -160,9 +158,9 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
     private String getxidStr(GlobalLockParam param) {
         String xid = XID.generateXID(Long.valueOf(param.getTransactionId()));
-        if (!xid.equals(param.getXid())){
+        if (!xid.equals(param.getXid())) {
             return StringUtils.EMPTY;
-        }else {
+        } else {
             return xid;
         }
     }

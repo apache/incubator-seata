@@ -52,7 +52,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         List<GlobalSessionVO> result = new ArrayList<>();
         Long total = 0L;
-        if (param.getTimeStart() != null || param.getTimeEnd() != null){
+        if (param.getTimeStart() != null || param.getTimeEnd() != null) {
             //not support time range query
             logger.debug("not supported according to time range query");
             return PageResult.success(result,0,param.getPageNum(),param.getPageSize());
@@ -63,40 +63,40 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
         checkPage(param);
 
-        if (isBlank(param.getXid()) && param.getStatus() == null){
+        if (isBlank(param.getXid()) && param.getStatus() == null) {
             total = instance.countByClobalSesisons(GlobalStatus.values());
             globalSessions = instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(),param.isWithBranch());
-        }else{
-            if (isBlank(param.getXid()) && param.getStatus() == null){
+        } else {
+            if (isBlank(param.getXid()) && param.getStatus() == null) {
                 //not support query applicationId or transactionName
                 logger.debug("not supported according to applicationId or transactionName query");
                 return PageResult.success(result,total.intValue(),param.getPageNum(),param.getPageSize());
             }
 
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
-            if (isNotBlank(param.getXid())){
+            if (isNotBlank(param.getXid())) {
                 SessionCondition sessionCondition = new SessionCondition();
                 sessionCondition.setXid(param.getXid());
                 globalSessions = instance.findGlobalSessionByStatusWithPage(sessionCondition, param.isWithBranch());
                 total = (long)globalSessions.size();
             }
 
-            if (param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null){
+            if (param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null) {
 
-                if (CollectionUtils.isNotEmpty(globalSessions)){
+                if (CollectionUtils.isNotEmpty(globalSessions)) {
                     globalSessionsNew = globalSessions.stream().filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus())).collect(Collectors.toList());
                     total = (long)globalSessionsNew.size();
-                }else{
+                } else {
                     total = instance.countByClobalSesisons(new GlobalStatus[]{GlobalStatus.get(param.getStatus())});
                     globalSessionsNew = instance.readSessionStatusByPage(param);
                 }
             }
 
-            if (isNotBlank(param.getApplicationId())){
+            if (isNotBlank(param.getApplicationId())) {
                 //not support
                 logger.debug("not supported according to applicationId query");
             }
-            if (isNotBlank(param.getTransactionName())){
+            if (isNotBlank(param.getTransactionName())) {
                 //not support
                 logger.debug("not supported according to transactionName query");
             }
