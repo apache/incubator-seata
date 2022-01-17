@@ -144,8 +144,7 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
      * @return the string
      */
     protected String getRowKey(String resourceId, String tableName, String pk) {
-        return new StringBuilder().append(resourceId).append(LOCK_SPLIT).append(tableName).append(LOCK_SPLIT).append(pk)
-                .toString();
+        return resourceId + LOCK_SPLIT + tableName + LOCK_SPLIT + pk;
     }
 
 
