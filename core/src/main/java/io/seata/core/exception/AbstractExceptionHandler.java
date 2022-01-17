@@ -123,6 +123,9 @@ public abstract class AbstractExceptionHandler {
         try {
             callback.execute(request, response);
             callback.onSuccess(request, response);
+        } catch (GlobalLockFailException gex) {
+            LOGGER.info("this request cannot acquire global lock, you can do retry or lower lock concurrency. request: {}", request);
+            callback.onTransactionException(request, response, gex);
         } catch (TransactionException tex) {
             LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
             callback.onTransactionException(request, response, tex);
