@@ -57,17 +57,9 @@ public class SeataProperties {
      */
     private String[] scanPackages = {};
     /**
-     * Specifies classnames that won't be scanned in the GlobalTransactionScanner
-     */
-    private String[] excludesForScanning = {};
-    /**
      * Specifies beans that won't be scanned in the GlobalTransactionScanner
      */
-    private String[] excludeNamesForScanning = {};
-    /**
-     * Specifies classes that won't be scanned in the GlobalTransactionScanner
-     */
-    private Class<?>[] excludeClassesForScanning = {};
+    private String[] excludesForScanning = {};
     /**
      * Specifies which datasource classname are not eligible for auto-proxying
      */
@@ -168,25 +160,6 @@ public class SeataProperties {
     public SeataProperties setExcludesForScanning(String[] excludesForScanning) {
         this.excludesForScanning = excludesForScanning;
         return this;
-    }
-
-    public String[] getExcludeNamesForScanning() {
-        return excludeNamesForScanning;
-    }
-
-    public SeataProperties setExcludeNamesForScanning(String[] excludeNamesForScanning) {
-        this.excludeNamesForScanning = excludeNamesForScanning;
-        return this;
-    }
-
-    public Class<?>[] getExcludeClassesForScanning() {
-        return excludeClassesForScanning;
-    }
-
-    public SeataProperties setExcludeClassesForScanning(Class<?>[] excludeClassesForScanning) {
-        this.excludeClassesForScanning = excludeClassesForScanning;
-        return this;
-
     }
 
     public String[] getExcludeNamesForAutoProxying() {
