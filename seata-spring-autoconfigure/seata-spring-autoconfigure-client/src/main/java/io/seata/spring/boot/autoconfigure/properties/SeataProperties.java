@@ -71,7 +71,7 @@ public class SeataProperties {
     /**
      * Specifies which datasource class are not eligible for auto-proxying
      */
-    private Class<?>[] excludeClassesForAutoProxying = {};
+    private String[] excludeClassesForAutoProxying = {};
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
@@ -172,11 +172,11 @@ public class SeataProperties {
 
     }
 
-    public Class<?>[] getExcludeClassesForAutoProxying() {
+    public String[] getExcludeClassesForAutoProxying() {
         return excludeClassesForAutoProxying;
     }
 
-    public SeataProperties setExcludeClassesForAutoProxying(Class<?>[] excludeClassesForAutoProxying) {
+    public SeataProperties setExcludeClassesForAutoProxying(String[] excludeClassesForAutoProxying) {
         this.excludeClassesForAutoProxying = excludeClassesForAutoProxying;
         return this;
 

@@ -60,7 +60,7 @@ public @interface EnableAutoDataSourceProxy {
      * @return excludeClasses
      */
 
-    Class<?>[] excludeClasses() default {};
+    String[] excludeClasses() default {};
 
     /**
      * Data source proxy mode, AT or XA

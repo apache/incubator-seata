@@ -59,7 +59,7 @@ class SeataAutoDataSourceProxyTest {
         boolean useJdkProxy = true;
         String[] excludes = new String[0];
         String[] excludeNames = new String[0];
-        Class<?>[] excludeClasses = new Class[0];
+        String[] excludeClasses = new String[0];
         String dataSourceProxyMode = BranchType.AT.name();
 
         advice= spy(new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode));
