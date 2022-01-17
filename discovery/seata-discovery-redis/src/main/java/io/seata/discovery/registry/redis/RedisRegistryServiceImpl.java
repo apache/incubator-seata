@@ -252,7 +252,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
+        threadPoolExecutorForSubscribe.shutdown();
+        threadPoolExecutorForUpdateMap.shutdown();
+        RegistryHeartBeats.close();
         jedisPool.destroy();
     }
 
