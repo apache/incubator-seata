@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.impl.redis;
 
+import java.util.List;
 import com.google.common.collect.Lists;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -26,8 +27,6 @@ import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Branch Session Redis ServiceImpl
