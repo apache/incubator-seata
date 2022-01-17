@@ -252,8 +252,8 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
         ResultSet rs = targetStatement.getGeneratedKeys();
         if (null == scrollableGeneratedKeysCache || !rs.isAfterLast()) {
             //Conditions for flushing the cache:
-            //1、originally not cached
-            //2、the original ResultSet was not traversed, including executed repeatedly
+            //1.originally not cached
+            //2.the original ResultSet was not traversed, including executed repeatedly
             scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
             scrollableGeneratedKeysCache.populate(rs);
         }
