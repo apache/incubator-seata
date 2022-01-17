@@ -41,10 +41,26 @@ public @interface EnableAutoDataSourceProxy {
 
     /**
      * Specifies which datasource bean are not eligible for auto-proxying
+     * You can use excludeClasses instead
      *
      * @return excludes
      */
+    @Deprecated
     String[] excludes() default {};
+    /**
+     * Specifies which datasource bean are not eligible for auto-proxying
+     *
+     * @return excludeNames
+     */
+    String[] excludeNames() default {};
+
+    /**
+     * Specifies which datasource class are not eligible for auto-proxying
+     *
+     * @return excludeClasses
+     */
+
+    Class<?>[] excludeClasses() default {};
 
     /**
      * Data source proxy mode, AT or XA

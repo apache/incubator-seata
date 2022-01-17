@@ -58,12 +58,15 @@ class SeataAutoDataSourceProxyTest {
     static void beforeAll() {
         boolean useJdkProxy = true;
         String[] excludes = new String[0];
+        String[] excludeNames = new String[0];
+        Class<?>[] excludeClasses = new Class[0];
         String dataSourceProxyMode = BranchType.AT.name();
 
         advice= spy(new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode));
         Object[] advices = new Object[]{new DefaultIntroductionAdvisor(advice)};
 
-        creator = spy(new SeataAutoDataSourceProxyCreator(useJdkProxy, excludes, dataSourceProxyMode));
+        creator = spy(new SeataAutoDataSourceProxyCreator(useJdkProxy, excludes,excludeNames,excludeClasses,
+                dataSourceProxyMode));
         doReturn(advices).when(creator).getAdvicesAndAdvisorsForBean(any(), anyString(), any());
     }
 

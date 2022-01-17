@@ -57,13 +57,29 @@ public class SeataProperties {
      */
     private String[] scanPackages = {};
     /**
-     * Specifies beans that won't be scanned in the GlobalTransactionScanner
+     * Specifies classnames that won't be scanned in the GlobalTransactionScanner
      */
     private String[] excludesForScanning = {};
     /**
-     * Specifies which datasource bean are not eligible for auto-proxying
+     * Specifies beans that won't be scanned in the GlobalTransactionScanner
+     */
+    private String[] excludeNamesForScanning = {};
+    /**
+     * Specifies classes that won't be scanned in the GlobalTransactionScanner
+     */
+    private Class<?>[] excludeClassesForScanning = {};
+    /**
+     * Specifies which datasource classname are not eligible for auto-proxying
      */
     private String[] excludesForAutoProxying = {};
+    /**
+     * Specifies which datasource bean are not eligible for auto-proxying
+     */
+    private String[] excludeNamesForAutoProxying = {};
+    /**
+     * Specifies which datasource class are not eligible for auto-proxying
+     */
+    private Class<?>[] excludeClassesForAutoProxying = {};
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
@@ -152,5 +168,44 @@ public class SeataProperties {
     public SeataProperties setExcludesForScanning(String[] excludesForScanning) {
         this.excludesForScanning = excludesForScanning;
         return this;
+    }
+
+    public String[] getExcludeNamesForScanning() {
+        return excludeNamesForScanning;
+    }
+
+    public SeataProperties setExcludeNamesForScanning(String[] excludeNamesForScanning) {
+        this.excludeNamesForScanning = excludeNamesForScanning;
+        return this;
+    }
+
+    public Class<?>[] getExcludeClassesForScanning() {
+        return excludeClassesForScanning;
+    }
+
+    public SeataProperties setExcludeClassesForScanning(Class<?>[] excludeClassesForScanning) {
+        this.excludeClassesForScanning = excludeClassesForScanning;
+        return this;
+
+    }
+
+    public String[] getExcludeNamesForAutoProxying() {
+        return excludeNamesForAutoProxying;
+    }
+
+    public SeataProperties setExcludeNamesForAutoProxying(String[] excludeNamesForAutoProxying) {
+        this.excludeNamesForAutoProxying = excludeNamesForAutoProxying;
+        return this;
+
+    }
+
+    public Class<?>[] getExcludeClassesForAutoProxying() {
+        return excludeClassesForAutoProxying;
+    }
+
+    public SeataProperties setExcludeClassesForAutoProxying(Class<?>[] excludeClassesForAutoProxying) {
+        this.excludeClassesForAutoProxying = excludeClassesForAutoProxying;
+        return this;
+
     }
 }

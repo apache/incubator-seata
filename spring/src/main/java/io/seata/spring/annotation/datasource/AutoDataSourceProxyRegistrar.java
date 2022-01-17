@@ -30,6 +30,8 @@ import org.springframework.core.type.AnnotationMetadata;
 public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistrar {
     private static final String ATTRIBUTE_KEY_USE_JDK_PROXY = "useJdkProxy";
     private static final String ATTRIBUTE_KEY_EXCLUDES = "excludes";
+    private static final String ATTRIBUTE_KEY_EXCLUDE_NAMES = "excludeNames";
+    private static final String ATTRIBUTE_KEY_EXCLUDE_CLASSES = "excludeClasses";
     private static final String ATTRIBUTE_KEY_DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 
     public static final String BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR = "seataAutoDataSourceProxyCreator";
@@ -40,6 +42,8 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
 
         boolean useJdkProxy = Boolean.parseBoolean(annotationAttributes.get(ATTRIBUTE_KEY_USE_JDK_PROXY).toString());
         String[] excludes = (String[]) annotationAttributes.get(ATTRIBUTE_KEY_EXCLUDES);
+        String[] excludeNames = (String[]) annotationAttributes.get(ATTRIBUTE_KEY_EXCLUDE_NAMES);
+        Class<?>[] excludeClasses = (Class<?>[]) annotationAttributes.get(ATTRIBUTE_KEY_EXCLUDE_CLASSES);
         String dataSourceProxyMode = (String) annotationAttributes.get(ATTRIBUTE_KEY_DATA_SOURCE_PROXY_MODE);
 
         //register seataAutoDataSourceProxyCreator bean def
@@ -48,6 +52,8 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
                 .genericBeanDefinition(SeataAutoDataSourceProxyCreator.class)
                 .addConstructorArgValue(useJdkProxy)
                 .addConstructorArgValue(excludes)
+                .addConstructorArgValue(excludeNames)
+                .addConstructorArgValue(excludeClasses)
                 .addConstructorArgValue(dataSourceProxyMode)
                 .getBeanDefinition();
             registry.registerBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR, beanDefinition);

@@ -41,13 +41,20 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     private final Set<String> excludes;
 
+    private final Set<String> excludeNames;
+
+    private final Set<Class<?>> excludeClasses;
+
     private final String dataSourceProxyMode;
 
     private final Object[] advisors;
 
-    public SeataAutoDataSourceProxyCreator(boolean useJdkProxy, String[] excludes, String dataSourceProxyMode) {
+    public SeataAutoDataSourceProxyCreator(boolean useJdkProxy, String[] excludes, String[] excludeNames,
+                                           Class<?>[] excludeClasses, String dataSourceProxyMode) {
         setProxyTargetClass(!useJdkProxy);
         this.excludes = new HashSet<>(Arrays.asList(excludes));
+        this.excludeNames = new HashSet<>(Arrays.asList(excludeNames));
+        this.excludeClasses = new HashSet<>(Arrays.asList(excludeClasses));
         this.dataSourceProxyMode = dataSourceProxyMode;
         this.advisors = buildAdvisors(dataSourceProxyMode);
     }
@@ -64,6 +71,12 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        if (excludeClasses.contains(beanClass)) {
+            return true;
+        }
+        if (excludeNames.contains(beanName)) {
+            return true;
+        }
         if (excludes.contains(beanClass.getName())) {
             return true;
         }
