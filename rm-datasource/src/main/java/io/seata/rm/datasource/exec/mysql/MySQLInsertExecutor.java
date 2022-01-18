@@ -144,14 +144,14 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
                 int updateCount = statementProxy.getUpdateCount();
                 try {
                     genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
-                    isManualCloseResultSet = true;
                     // If there is batch insert
                     // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
                     if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
-                        isManualCloseResultSet = false;
                         genKeys.next();
                         BigDecimal firstId = new BigDecimal(genKeys.getString(1));
                         return autoGeneratePks(firstId, autoColumnName, updateCount);
+                    }else{
+                        isManualCloseResultSet = true;
                     }
                 } finally {
                     if(!isManualCloseResultSet){
