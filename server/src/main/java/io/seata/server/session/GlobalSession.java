@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
@@ -229,8 +230,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void clean() throws TransactionException {
-        if (!LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this)) {
-            throw new TransactionException("UnLock globalSession error, xid = " + this.xid);
+        if (this.hasATBranch()) {
+            if (!LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this)) {
+                throw new TransactionException("UnLock globalSession error, xid = " + this.xid);
+            }
         }
     }
 
@@ -241,9 +244,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void closeAndClean() throws TransactionException {
         close();
-        if (this.hasATBranch()) {
-            clean();
-        }
+        clean();
     }
 
     /**
