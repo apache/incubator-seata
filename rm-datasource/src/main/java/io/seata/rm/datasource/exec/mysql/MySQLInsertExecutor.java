@@ -132,7 +132,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         }
 
         ResultSet genKeys = null;
-        boolean isBySelectLastInsertId=false;
+        boolean isManualCloseResultSet = false;
         try {
             genKeys = statementProxy.getGeneratedKeys();
         } catch (SQLException e) {
@@ -142,20 +142,19 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
                 LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
-                boolean isBatchInsert = false;
                 try {
                     genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
-                    isBySelectLastInsertId=true;
+                    isManualCloseResultSet = true;
                     // If there is batch insert
                     // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
                     if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
-                        isBatchInsert = true;
+                        isManualCloseResultSet = false;
                         genKeys.next();
                         BigDecimal firstId = new BigDecimal(genKeys.getString(1));
                         return autoGeneratePks(firstId, autoColumnName, updateCount);
                     }
                 } finally {
-                    if(isBatchInsert){
+                    if(!isManualCloseResultSet){
                         IOUtil.close(genKeys);
                     }
                 }
@@ -173,7 +172,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         } catch (SQLException e) {
             LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
         }finally {
-            if(isBySelectLastInsertId){
+            if(isManualCloseResultSet){
                 IOUtil.close(genKeys);
             }
         }
