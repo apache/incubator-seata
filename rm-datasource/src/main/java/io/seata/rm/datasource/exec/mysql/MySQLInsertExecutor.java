@@ -150,7 +150,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
                         genKeys.next();
                         BigDecimal firstId = new BigDecimal(genKeys.getString(1));
                         return autoGeneratePks(firstId, autoColumnName, updateCount);
-                    }else{
+                    } else {
                         isManualCloseResultSet = true;
                     }
                 } finally {
