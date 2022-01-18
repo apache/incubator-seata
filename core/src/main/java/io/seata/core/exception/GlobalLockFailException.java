@@ -18,7 +18,7 @@ package io.seata.core.exception;
 /**
  * @author zhang.siyu
  */
-public class GlobalLockFailException extends BranchTransactionException{
+public class GlobalLockFailException extends BranchTransactionException {
 
     public GlobalLockFailException(TransactionExceptionCode code) {
         super(code);
