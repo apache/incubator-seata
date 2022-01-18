@@ -64,6 +64,8 @@ public interface StarterConstants {
     String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
+    //Redis Config
+    String CONFIG_REDIS_PREFIX = CONFIG_PREFIX + ".redis";
 
 
     String SERVER_PREFIX = SEATA_PREFIX + ".server";
