@@ -71,7 +71,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
     private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
         DatabaseMetaData dbmd = connection.getMetaData();
-
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
