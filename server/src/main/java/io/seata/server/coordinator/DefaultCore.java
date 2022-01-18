@@ -208,15 +208,11 @@ public class DefaultCore implements Core {
                             globalSession.removeBranch(branchSession);
                             return CONTINUE;
                         case PhaseTwo_CommitFailed_Unretryable:
-                            if (globalSession.canBeCommittedAsync()) {
-                                LOGGER.error(
-                                    "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
-                                return CONTINUE;
-                            } else {
-                                SessionHelper.endCommitFailed(globalSession);
-                                LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
-                                return false;
-                            }
+                            //not at branch
+                            SessionHelper.endCommitFailed(globalSession);
+                            LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
+                            return false;
+
                         default:
                             if (!retrying) {
                                 globalSession.queueToRetryCommit();
