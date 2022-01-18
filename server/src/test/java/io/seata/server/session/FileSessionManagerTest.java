@@ -22,13 +22,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.annotation.Resource;
 
 import io.seata.common.XID;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.storage.file.session.FileSessionManager;
-import javax.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -256,6 +256,7 @@ public class FileSessionManagerTest {
     @ParameterizedTest
     @MethodSource("globalSessionsWithPageResultProvider")
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
+        SessionHolder.init("file");
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
 
         try {
@@ -327,20 +328,21 @@ public class FileSessionManagerTest {
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             globalSessionParam.setWithBranch(false);
-            globalSessionParam.setTimeStart(dateFormat.parse("2020-1-1 08:00:00"));
+            globalSessionParam.setTimeStart(dateFormat.parse("2220-1-1 08:00:00"));
             Assertions.assertEquals(2, globalSessionService.query(globalSessionParam).getData().size());
 
             globalSessionParam.setTimeStart(null);
-            globalSessionParam.setTimeEnd(dateFormat.parse("2020-1-1 08:02:00"));
+            globalSessionParam.setTimeEnd(dateFormat.parse("2220-1-1 08:02:00"));
             Assertions.assertEquals(1, globalSessionService.query(globalSessionParam).getData().size());
 
-            globalSessionParam.setTimeStart(dateFormat.parse("2020-1-1 08:03:00"));
-            globalSessionParam.setTimeEnd(dateFormat.parse("2020-1-1 08:05:00"));
+            globalSessionParam.setTimeStart(dateFormat.parse("2220-1-1 08:03:00"));
+            globalSessionParam.setTimeEnd(dateFormat.parse("2220-1-1 08:05:00"));
             Assertions.assertEquals(1, globalSessionService.query(globalSessionParam).getData().size());
         } finally {
             for (GlobalSession globalSession : globalSessions) {
                 sessionManager.removeGlobalSession(globalSession);
             }
+            SessionHolder.destroy();
         }
 
     }
@@ -498,13 +500,13 @@ public class FileSessionManagerTest {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 6000);
-        globalSession1.setBeginTime(dateFormat.parse("2020-1-1 08:02:00").getTime());
+        globalSession1.setBeginTime(dateFormat.parse("2220-1-1 08:02:00").getTime());
 
         GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
-        globalSession2.setBeginTime(dateFormat.parse("2020-1-1 08:04:00").getTime());
+        globalSession2.setBeginTime(dateFormat.parse("2220-1-1 08:04:00").getTime());
 
         GlobalSession globalSession3 = new GlobalSession("with-branchSession-app", DEFAULT_TX_GROUP, "test3", 6000);
-        globalSession3.setBeginTime(dateFormat.parse("2020-1-1 08:20:00").getTime());
+        globalSession3.setBeginTime(dateFormat.parse("2220-1-1 08:20:00").getTime());
         globalSession3.setStatus(GlobalStatus.CommitFailed);
 
 
