@@ -131,7 +131,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             throw new ShouldNeverHappenException();
         }
 
-        ResultSet genKeys;
+        ResultSet genKeys = null;
         try {
             genKeys = statementProxy.getGeneratedKeys();
         } catch (SQLException e) {
@@ -141,19 +141,20 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
                 LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
-                ResultSet rsFirstId = null;
                 try {
-                    rsFirstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+                    genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
 
                     // If there is batch insert
                     // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
                     if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
-                        rsFirstId.next();
-                        BigDecimal firstId = new BigDecimal(rsFirstId.getString(1));
+                        genKeys.next();
+                        BigDecimal firstId = new BigDecimal(genKeys.getString(1));
                         return autoGeneratePks(firstId, autoColumnName, updateCount);
                     }
                 } finally {
-                    IOUtil.close(rsFirstId);
+                    if(updateCount > 1 && canAutoIncrement(pkMetaMap)){
+                        IOUtil.close(genKeys);
+                    }
                 }
             } else {
                 throw e;
