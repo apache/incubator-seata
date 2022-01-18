@@ -154,7 +154,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
                         isManualCloseResultSet = true;
                     }
                 } finally {
-                    if(!isManualCloseResultSet){
+                    if (!isManualCloseResultSet){
                         IOUtil.close(genKeys);
                     }
                 }
@@ -171,8 +171,8 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             genKeys.beforeFirst();
         } catch (SQLException e) {
             LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
-        }finally {
-            if(isManualCloseResultSet){
+        } finally {
+            if (isManualCloseResultSet){
                 IOUtil.close(genKeys);
             }
         }
