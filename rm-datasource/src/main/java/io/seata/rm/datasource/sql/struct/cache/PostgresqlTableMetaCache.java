@@ -61,8 +61,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
-            DatabaseMetaData dbmd = connection.getMetaData();
-            return resultSetMetaToSchema(dbmd, tableName);
+            return resultSetMetaToSchema(connection, tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {
@@ -70,7 +69,8 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
+    private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
+        DatabaseMetaData dbmd = connection.getMetaData();
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
@@ -99,7 +99,10 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             } else {
                 schemaName = schemaName.toLowerCase();
             }
+        } else {
+            schemaName = connection.getSchema();
         }
+
         if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
             tableName = tableName.replaceAll("(^\")|(\"$)", "");
         } else {
