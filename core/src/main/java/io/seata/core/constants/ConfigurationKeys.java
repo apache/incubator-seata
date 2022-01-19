@@ -38,6 +38,16 @@ public interface ConfigurationKeys {
     String STORE_PREFIX = "store.";
 
     /**
+     * The constant SESSION_PREFIX.
+     */
+    String SESSION_PREFIX = "session.";
+
+    /**
+     * The constant STORE_SESSION_PREFIX.
+     */
+    String STORE_SESSION_PREFIX = STORE_PREFIX + SESSION_PREFIX;
+
+    /**
      * The constant MODE.
      */
     String MODE = "mode";
@@ -65,12 +75,12 @@ public interface ConfigurationKeys {
     /**
      * The constant STORE_SESSION_MODE.
      */
-    String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
+    String STORE_SESSION_MODE = STORE_SESSION_PREFIX + MODE;
 
     /**
      * The constant SERVER_STORE_SESSION_MODE.
      */
-    String SERVER_STORE_SESSION_MODE = SEATA_PREFIX + STORE_PREFIX + "session." + MODE;
+    String SERVER_STORE_SESSION_MODE = SEATA_PREFIX + STORE_SESSION_PREFIX + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
@@ -772,4 +782,14 @@ public interface ConfigurationKeys {
      * The constant RPC_TM_REQUEST_TIMEOUT
      */
     String RPC_TC_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTcRequestTimeout";
+
+    /**
+     * The constant SESSION_BRANCH_ASYNC_QUEUE_SIZE
+     */
+    String SESSION_BRANCH_ASYNC_QUEUE_SIZE = SERVER_PREFIX + SESSION_PREFIX + "branchAsyncQueueSize";
+
+    /**
+     * The constant ENABLE_BRANCH_ASYNC_REMOVE
+     */
+    String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
 }

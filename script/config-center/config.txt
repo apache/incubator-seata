@@ -100,3 +100,5 @@ metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898
 tcc.fence.logTableName=tcc_fence_log
 tcc.fence.cleanPeriod=1h
+server.session.branchAsyncQueueSize=5000
+server.session.enableBranchAsyncRemove=true
