@@ -29,11 +29,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.HashMap;
-import java.util.Comparator;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -87,7 +83,6 @@ public class DataCompareUtils {
             }
         }
     }
-
     private static void convertType(Field f0, Field f1) {
         int f0Type = f0.getType();
         int f1Type = f1.getType();
@@ -141,7 +136,33 @@ public class DataCompareUtils {
             }
         }
     }
-
+    /**
+     * Is records equals result.
+     *
+     * @param beforeImage the before image
+     * @param afterImage  the after image
+     * @param  ignoreColumns field compare ignore columns,comma separated string
+     * @return the result
+     */
+    public static Result<Boolean> isRecordsEquals(TableRecords beforeImage, TableRecords afterImage,String ignoreColumns) {
+        if (beforeImage == null) {
+            return Result.build(afterImage == null, null);
+        } else {
+            if (afterImage == null) {
+                return Result.build(false, null);
+            }
+            if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
+                    && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
+                //when image is EmptyTableRecords, getTableMeta will throw an exception
+                if (CollectionUtils.isEmpty(beforeImage.getRows())) {
+                    return Result.ok();
+                }
+                return compareRows(beforeImage.getTableMeta(), beforeImage.getRows(), afterImage.getRows(),ignoreColumns);
+            } else {
+                return Result.build(false, null);
+            }
+        }
+    }
     /**
      * Is rows equals result.
      *
@@ -180,6 +201,45 @@ public class DataCompareUtils {
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
                 if (!oldEqualsNewFieldResult.getResult()) {
                     return oldEqualsNewFieldResult;
+                }
+            }
+        }
+        return Result.ok();
+    }
+    private static boolean isCompareField(String field,String ignoreColumns){
+        if(ignoreColumns == null || ignoreColumns.isEmpty()){
+            return true;
+        }
+        if(Arrays.asList(ignoreColumns.toLowerCase().split(",")).contains(field.toLowerCase())){
+            return false;
+        }
+        return true;
+    }
+    private static Result<Boolean> compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows,String ignoreColumns) {
+        // old row to map
+        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPrimaryKeyOnlyName());
+        // new row to map
+        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPrimaryKeyOnlyName());
+        // compare data
+        for (Map.Entry<String, Map<String, Field>> oldEntry : oldRowsMap.entrySet()) {
+            String key = oldEntry.getKey();
+            Map<String, Field> oldRow = oldEntry.getValue();
+            Map<String, Field> newRow = newRowsMap.get(key);
+            if (newRow == null) {
+                return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", key);
+            }
+            for (Map.Entry<String, Field> oldRowEntry : oldRow.entrySet()) {
+                String fieldName = oldRowEntry.getKey();
+                Field oldField = oldRowEntry.getValue();
+                Field newField = newRow.get(fieldName);
+                if (newField == null) {
+                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
+                }
+                if(isCompareField(fieldName,ignoreColumns)) {
+                    Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
+                    if (!oldEqualsNewFieldResult.getResult()) {
+                        return oldEqualsNewFieldResult;
+                    }
                 }
             }
         }
