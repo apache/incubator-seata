@@ -197,7 +197,7 @@ public class DefaultCore implements Core {
 
                 BranchStatus currentStatus = branchSession.getStatus();
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
-                    globalSession.removeBranch(branchSession);
+                    SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                     return CONTINUE;
                 }
                 try {
@@ -205,7 +205,7 @@ public class DefaultCore implements Core {
 
                     switch (branchStatus) {
                         case PhaseTwo_Committed:
-                            globalSession.removeBranch(branchSession);
+                            SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                             return CONTINUE;
                         case PhaseTwo_CommitFailed_Unretryable:
                             if (globalSession.canBeCommittedAsync()) {
@@ -307,14 +307,14 @@ public class DefaultCore implements Core {
             Boolean result = SessionHelper.forEach(globalSession.getReverseSortedBranches(), branchSession -> {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
-                    globalSession.removeBranch(branchSession);
+                    SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                     return CONTINUE;
                 }
                 try {
                     BranchStatus branchStatus = branchRollback(globalSession, branchSession);
                     switch (branchStatus) {
                         case PhaseTwo_Rollbacked:
-                            globalSession.removeBranch(branchSession);
+                            SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                             LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return CONTINUE;
                         case PhaseTwo_RollbackFailed_Unretryable:
