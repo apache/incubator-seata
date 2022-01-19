@@ -16,6 +16,7 @@
 package io.seata.server.transaction.saga;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -105,12 +106,12 @@ public class SagaCore extends AbstractCore {
 
             switch (branchStatus) {
                 case PhaseTwo_Committed:
-                    SessionHelper.removeAllBranch(globalSession, !retrying);
+                    removeAllBranches(globalSession);
                     LOGGER.info("Successfully committed SAGA global[" + globalSession.getXid() + "]");
                     break;
                 case PhaseTwo_Rollbacked:
                     LOGGER.info("Successfully rollbacked SAGA global[" + globalSession.getXid() + "]");
-                    SessionHelper.removeAllBranch(globalSession, !retrying);
+                    removeAllBranches(globalSession);
                     SessionHelper.endRollbacked(globalSession);
                     return false;
                 case PhaseTwo_RollbackFailed_Retryable:
@@ -121,7 +122,7 @@ public class SagaCore extends AbstractCore {
                     return false;
                 case PhaseOne_Failed:
                     LOGGER.error("By [{}], finish SAGA global [{}]", branchStatus, globalSession.getXid());
-                    SessionHelper.removeAllBranch(globalSession, !retrying);
+                    removeAllBranches(globalSession);
                     globalSession.changeStatus(GlobalStatus.Finished);
                     globalSession.end();
                     return false;
@@ -163,7 +164,7 @@ public class SagaCore extends AbstractCore {
 
             switch (branchStatus) {
                 case PhaseTwo_Rollbacked:
-                    SessionHelper.removeAllBranch(globalSession, !retrying);
+                    removeAllBranches(globalSession);
                     LOGGER.info("Successfully rollbacked SAGA global[{}]",globalSession.getXid());
                     break;
                 case PhaseTwo_RollbackFailed_Unretryable:
@@ -195,12 +196,12 @@ public class SagaCore extends AbstractCore {
     @Override
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
         if (GlobalStatus.Committed.equals(globalStatus)) {
-            SessionHelper.removeAllBranch(globalSession, false);
+            removeAllBranches(globalSession);
             SessionHelper.endCommitted(globalSession);
             LOGGER.info("Global[{}] committed", globalSession.getXid());
         } else if (GlobalStatus.Rollbacked.equals(globalStatus)
                 || GlobalStatus.Finished.equals(globalStatus)) {
-            SessionHelper.removeAllBranch(globalSession, false);
+            removeAllBranches(globalSession);
             SessionHelper.endRollbacked(globalSession);
             LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
         } else {
@@ -216,6 +217,19 @@ public class SagaCore extends AbstractCore {
                 globalSession.queueToRetryCommit();
                 LOGGER.info("Global[{}] will retry commit", globalSession.getXid());
             }
+        }
+    }
+
+    /**
+     * remove all branches
+     *
+     * @param globalSession the globalSession
+     * @throws TransactionException the TransactionException
+     */
+    private void removeAllBranches(GlobalSession globalSession) throws TransactionException {
+        ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
+        for (BranchSession branchSession : branchSessions) {
+            globalSession.removeBranch(branchSession);
         }
     }
 
