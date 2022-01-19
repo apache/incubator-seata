@@ -256,6 +256,7 @@ public class FileSessionManagerTest {
     @ParameterizedTest
     @MethodSource("globalSessionsWithPageResultProvider")
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
+        SessionHolder.getRootSessionManager().destroy();
         SessionHolder.init("file");
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
 
