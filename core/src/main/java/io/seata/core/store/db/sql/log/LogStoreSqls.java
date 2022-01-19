@@ -22,6 +22,15 @@ package io.seata.core.store.db.sql.log;
 public interface LogStoreSqls {
 
     /**
+     * Get all global session sql string.
+     *
+     * @param globalTable the global table
+     * @param whereCondition the where condition
+     * @return the string
+     */
+    String getAllGlobalSessionSql(String globalTable, String whereCondition);
+
+    /**
      * Get all branch session sql string.
      *
      * @param branchTable the branch table

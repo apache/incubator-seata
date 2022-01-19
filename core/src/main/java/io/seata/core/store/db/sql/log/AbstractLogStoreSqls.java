@@ -46,6 +46,11 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String XID_PLACEHOLD = " #xid# ";
 
     /**
+     * The constant WHERE_PLACEHOLD
+     */
+    public static final String WHERE_PLACEHOLD = " #where# ";
+
+    /**
      * The constant ALL_GLOBAL_COLUMNS.
      * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
@@ -138,6 +143,17 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant QUERY_ALL_BRANCH.
      */
     public static final String QUERY_ALL_BRANCH_WITH_XID = "select " + ALL_BRANCH_COLUMNS + " from " + BRANCH_TABLE_PLACEHOLD + " where xid = '" + XID_PLACEHOLD + "' order by gmt_create desc";
+
+    /**
+     * The constant QUERY_ALL_GLOBAL_SESSION.
+     */
+    private static final String QUERY_ALL_GLOBAL_SESSION = "select " + ALL_GLOBAL_COLUMNS + " from "
+            + GLOBAL_TABLE_PLACEHOLD + WHERE_PLACEHOLD + " order by gmt_create desc ";
+
+    @Override
+    public String getAllGlobalSessionSql(String globalTable, String whereCondition) {
+        return QUERY_ALL_GLOBAL_SESSION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(WHERE_PLACEHOLD, whereCondition);
+    }
 
     @Override
     public String getAllBranchSessionSQL(String branchTable, String xid) {
