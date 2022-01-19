@@ -63,4 +63,9 @@ public class MockConnection extends com.alibaba.druid.mock.MockConnection {
     public MockDriver getDriver() {
         return mockDriver;
     }
+
+    @Override
+    public String getSchema() {
+        return null;
+    }
 }
