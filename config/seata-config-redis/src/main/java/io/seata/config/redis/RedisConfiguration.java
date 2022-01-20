@@ -15,23 +15,28 @@
  */
 package io.seata.config.redis;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.LinkedBlockingQueue;
 
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.config.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
-import io.seata.config.ConfigurationChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 
 /**
@@ -41,17 +46,21 @@ public class RedisConfiguration extends AbstractConfiguration {
     private static volatile RedisConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisConfiguration.class);
+
     private static final String DB_KEY = "db";
     private static final String PASSWORD_KEY = "password";
     private static final String TIMEOUT_KEY = "timeout";
     private static final String CONFIG_TYPE = "redis";
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_KEY_NAME_KEY = "keyName";
-    private static final String DEFAULT_CONFIG_KEY_NAME = "seataConfig";
+    private static final String LISTENER_ENABLED_KEY = "listenerEnabled";
     private static final String REDIS_PING_STR = "PONG";
+    private static final long LISTENER_CONFIG_INTERVAL = 1000;
+
     private static String keyName;
-    private static final int MAP_INITIAL_CAPACITY = 16;
-    private static final ConcurrentMap<String,String> CONFIG_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+    private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
+    private final Map<String, String> listenedConfigMap = new HashMap<>(8);
+    private final RedisListener redisListener = new RedisListener();
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile JedisPool jedisPool;
 
@@ -77,36 +86,31 @@ public class RedisConfiguration extends AbstractConfiguration {
     private RedisConfiguration(){
         if (null == jedisPool){
             synchronized (RedisConfiguration.class){
-                String serverAddr = StringUtils.isNotBlank(System.getProperty(SERVER_ADDR_KEY))?System.getProperty(SERVER_ADDR_KEY) : FILE_CONFIG.getConfig(getRedisServerAddr());
-                String passWord = StringUtils.isNotBlank(System.getProperty(PASSWORD_KEY))?System.getProperty(PASSWORD_KEY) : FILE_CONFIG.getConfig(getRedisPassWord());
+                String serverAddr = FILE_CONFIG.getConfig(getRedisServerAddr());
+                String passWord = FILE_CONFIG.getConfig(getRedisPassWord());
                 String[] uri = serverAddr.split(":");
                 String host = uri[0];
                 int port = Integer.parseInt(uri[1]);
-                int db = StringUtils.isNotBlank(System.getProperty(DB_KEY))? Integer.parseInt(System.getProperty(DB_KEY)) : FILE_CONFIG.getInt(getRedisDb());
-                int timeOut = StringUtils.isNotBlank(System.getProperty(TIMEOUT_KEY))? Integer.parseInt(System.getProperty(TIMEOUT_KEY)) : FILE_CONFIG.getInt(getRedisTimeOut());
+                int db = FILE_CONFIG.getInt(getRedisDb());
+                int timeOut = FILE_CONFIG.getInt(getRedisTimeOut());
+                keyName = FILE_CONFIG.getConfig(getRedisConfigKeyName());
+                JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+                jedisPoolConfig.setMaxWaitMillis(DEFAULT_CONFIG_TIMEOUT);
                 if (StringUtils.isNotEmpty(passWord)){
-                    jedisPool = new JedisPool(new JedisPoolConfig(),host,port,timeOut,passWord,db);
+                    jedisPool = new JedisPool(jedisPoolConfig,host,port,timeOut,passWord,db);
                 } else {
-                    jedisPool = new JedisPool(new JedisPoolConfig(),host,port,timeOut,null,db);
+                    jedisPool = new JedisPool(jedisPoolConfig,host,port,timeOut,null,db);
                 }
-                keyName = StringUtils.isNotBlank(System.getProperty(CONFIG_KEY_NAME_KEY))?System.getProperty(CONFIG_KEY_NAME_KEY) : FILE_CONFIG.getConfig(getRedisConfigKeyName());
-                if (StringUtils.isEmpty(keyName)){
-                    keyName = DEFAULT_CONFIG_KEY_NAME;
+                try(Jedis jedis = jedisPool.getResource()) {
+                    if (REDIS_PING_STR.equals(jedis.ping())){
+                        LOGGER.info("redis configuration connection successful!");
+                        LOGGER.info("connected database:{}",db);
+                    }else {
+                        throw new RuntimeException("Redis configuration connection failed!");
+                    }
+                } catch (JedisConnectionException e){
+                    throw new RuntimeException(e);
                 }
-                initSeataConfig();
-            }
-        }
-    }
-
-
-
-    private static void initSeataConfig() {
-        try(Jedis jedis = jedisPool.getResource()) {
-            if (REDIS_PING_STR.equals(jedis.ping())){
-                LOGGER.info("redis configuration connection successful!");
-                CONFIG_MAP.clear();
-                Map<String, String> configMap = jedis.hgetAll(keyName);
-                CONFIG_MAP.putAll(configMap);
             }
         }
     }
@@ -128,6 +132,9 @@ public class RedisConfiguration extends AbstractConfiguration {
     }
     private static String getRedisPassWord(){
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,PASSWORD_KEY);
+    }
+    private static String getRedisListenerEnabled(){
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,LISTENER_ENABLED_KEY);
     }
 
     /**
@@ -156,9 +163,10 @@ public class RedisConfiguration extends AbstractConfiguration {
         try(Jedis jedis = jedisPool.getResource()) {
             Long status = jedis.hset(keyName, dataId, content);
             if (status == 1 || status == 0){
-                initSeataConfig();
                 result = true;
             }
+        }catch (Exception e){
+            LOGGER.error(e.getMessage());
         }
         return result;
     }
@@ -174,7 +182,12 @@ public class RedisConfiguration extends AbstractConfiguration {
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         LOGGER.info("调用了getLatestConfig  dataId={}  defaultValue={}   timeoutMills={}",dataId,defaultValue,timeoutMills);
-        String value = CONFIG_MAP.get(dataId);
+        String value = null;
+        try (Jedis jedis = jedisPool.getResource()){
+            value = jedis.hget(keyName, dataId);
+        }catch (Exception e){
+            LOGGER.error(e.getMessage());
+        }
         return null == value ? defaultValue : value;
     }
 
@@ -206,9 +219,10 @@ public class RedisConfiguration extends AbstractConfiguration {
         try(Jedis jedis = jedisPool.getResource()) {
             Long status = jedis.hdel(keyName, dataId);
             if (status == 1){
-                initSeataConfig();
                 result = true;
             }
+        }catch (Exception e){
+            LOGGER.error(e.getMessage());
         }
         return result;
     }
@@ -222,6 +236,12 @@ public class RedisConfiguration extends AbstractConfiguration {
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
         LOGGER.info("调用了addConfigListener  dataId={}  listener={}",dataId,listener);
+        if (StringUtils.isBlank(dataId) || null == listener){
+            return;
+        }
+        configListenersMap.computeIfAbsent(dataId,value -> ConcurrentHashMap.newKeySet()).add(listener);
+        listenedConfigMap.put(dataId,getConfig(dataId));
+        redisListener.addListener(dataId,listener);
     }
 
     /**
@@ -233,6 +253,18 @@ public class RedisConfiguration extends AbstractConfiguration {
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
         LOGGER.info("调用了removeConfigListener  dataId={}  listener={}",dataId,listener);
+        if (StringUtils.isBlank(dataId) || null == listener){
+            return;
+        }
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListenersMap)) {
+            configListeners.remove(listener);
+            if (configListeners.isEmpty()){
+                configListenersMap.remove(dataId);
+                listenedConfigMap.remove(dataId);
+            }
+        }
+        listener.onShutDown();
     }
 
     /**
@@ -244,6 +276,73 @@ public class RedisConfiguration extends AbstractConfiguration {
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         LOGGER.info("调用了getConfigListeners  dataId="+dataId);
-        return null;
+
+        return configListenersMap.get(dataId);
+    }
+
+    /**
+     * The type RedisListener
+     */
+    class RedisListener implements ConfigurationChangeListener{
+        private final Map<String, Set<ConfigurationChangeListener>> dataIdMap = new HashMap<>();
+
+        private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("redisListener", MAX_LISTENER_THREAD));
+
+        public synchronized void addListener(String dataId, ConfigurationChangeListener listener) {
+            // only the first time add listener will trigger on process event
+            if (dataIdMap.isEmpty()) {
+                redisListener.onProcessEvent(new ConfigurationChangeEvent());
+            }
+            dataIdMap.computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
+        }
+
+        /**
+         * Process.
+         *
+         * @param event the event
+         */
+        @Override
+        public void onChangeEvent(ConfigurationChangeEvent event) {
+            boolean enabled = FILE_CONFIG.getBoolean(getRedisListenerEnabled());
+            while (enabled) {
+                for (String dataId : dataIdMap.keySet()) {
+                    try {
+                        String newConfig = ConfigurationFactory.getInstance().getLatestConfig(dataId,null,DEFAULT_CONFIG_TIMEOUT);
+                        if (StringUtils.isNotBlank(newConfig)){
+                            String oldConfig = listenedConfigMap.get(dataId);
+                            if (!StringUtils.equals(newConfig,oldConfig)){
+                                listenedConfigMap.put(dataId,newConfig);
+                                event.setDataId(dataId).setNewValue(newConfig).setOldValue(oldConfig);
+
+                                for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
+                                    listener.onChangeEvent(event);
+                                }
+                            }
+                        }
+                    } catch (Exception e){
+                        LOGGER.error("redisListener execute error, dataId :{}", dataId, e);
+                    }
+                }
+                try {
+                    Thread.sleep(LISTENER_CONFIG_INTERVAL);
+                } catch (InterruptedException e) {
+                    LOGGER.error("redisListener thread sleep error:{}", e.getMessage());
+                }
+                enabled = FILE_CONFIG.getBoolean(getRedisListenerEnabled());
+            }
+
+        }
+
+        /**
+         * Gets executor service.
+         *
+         * @return the executor service
+         */
+        @Override
+        public ExecutorService getExecutorService() {
+            return executor;
+        }
     }
 }

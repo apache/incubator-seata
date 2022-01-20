@@ -29,6 +29,7 @@ seata:
       server-addr: 42.192.166.127:6379
       password: kBAokRhJ3Mdn9t73F5Pn
       timeout: 60000
+      listener-enabled: true
   registry:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa
     type: nacos
