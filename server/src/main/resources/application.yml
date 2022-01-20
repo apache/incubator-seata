@@ -23,47 +23,16 @@ console:
 
 seata:
   config:
-    # support: nacos, consul, apollo, zk, etcd3, redis
-    type: redis
-    redis:
-      server-addr: localhost:6379
-      password: kBAokRhJ3Mdn9t73F5Pn
-      timeout: 60000
-      listener-enabled: true
-      key-name: seataConfig
+    # support: nacos, consul, apollo, zk, etcd3
+    type: file
   registry:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa
-    type: nacos
-    nacos:
-      server-addr: 192.168.201.66:8848
-      group: SEATA_GROUP
-      cluster: default
-      username: nacos
-      password: nacos
+    type: file
   store:
     # support: file 、 db 、 redis
-    mode: db
-    session:
-      mode: db
-    lock:
-      mode: db
-    db:
-      datasource: druid
-      db-type: mysql
-      driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://192.168.201.9:3307/seata?rewriteBatchedStatements=true
-      user: root
-      password: Password123@mysql
-      min-conn: 5
-      max-conn: 100
-      global-table: global_table
-      branch-table: branch_table
-      lock-table: lock_table
-      distributed-lock-table: distributed_lock
-      query-limit: 100
-      max-wait: 5000
-#  server:
-#    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+    mode: file
+  #  server:
+  #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000
