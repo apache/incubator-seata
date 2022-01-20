@@ -18,27 +18,25 @@ package io.seata.server.console.impl.file;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import io.seata.common.exception.InvalidParamException;
-import io.seata.server.storage.SessionConverter;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.result.PageResult;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.seata.common.util.CollectionUtils;
+import io.seata.server.storage.SessionConverter;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
 import static io.seata.common.util.CollectionUtils.isEmpty;
 import static io.seata.common.util.CollectionUtils.isNotEmpty;
 import static io.seata.common.util.StringUtils.isBlank;
+import static java.util.Objects.isNull;
 
 /**
  * Global Session File ServiceImpl
@@ -58,27 +56,13 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
         }
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
-        if (CollectionUtils.isEmpty(allSessions)) {
-            return PageResult.success();
-        }
-
-        final AtomicInteger total = new AtomicInteger();
 
         final List<GlobalSession> filteredSessions = allSessions
                 .parallelStream()
                 .filter(obtainPredicate(param))
-                .peek(globalSession -> total.incrementAndGet())
-                .skip((long) param.getPageSize() * (param.getPageNum() - 1))
-                .limit(param.getPageSize())
                 .collect(Collectors.toList());
 
-        // calculate pages
-        int pages = total.get() / param.getPageSize();
-        if (total.get() % param.getPageSize() != 0) {
-            pages++;
-        }
-
-        return new PageResult<>(SessionConverter.convert(filteredSessions), total.get(), pages, param.getPageNum(), param.getPageSize());
+        return PageResult.build(SessionConverter.convert(filteredSessions), param.getPageNum(), param.getPageSize());
     }
 
 
