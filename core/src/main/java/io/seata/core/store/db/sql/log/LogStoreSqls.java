@@ -34,10 +34,10 @@ public interface LogStoreSqls {
      * Get all branch session sql string.
      *
      * @param branchTable the branch table
-     * @param xid the xid
+     * @param whereCondition the where condition
      * @return the string
      */
-    String getAllBranchSessionSQL(String branchTable, String xid);
+    String getAllBranchSessionSQL(String branchTable, String whereCondition);
 
     /**
      * Get insert global transaction sql string.

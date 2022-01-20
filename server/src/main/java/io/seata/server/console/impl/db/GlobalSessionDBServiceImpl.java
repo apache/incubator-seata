@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.result.PageResult;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Component;
 /**
  * Global Session DataBase ServiceImpl
  *
- * @author: zhongxiang.wang
+ * @author lvekee 734843455@qq.com
  */
 @Component
 @org.springframework.context.annotation.Configuration
@@ -65,24 +66,31 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         PageUtil.checkParam(param.getPageNum(), param.getPageSize());
 
-        StringBuilder whereConditionBuilder = new StringBuilder("");
+        StringBuilder whereConditionBuilder = new StringBuilder();
+        List<Object> sqlParamList = new ArrayList<>();
         if (StringUtils.isNotBlank(param.getXid())) {
-            whereConditionBuilder.append(" and xid = ").append(param.getXid());
+            whereConditionBuilder.append(" and xid = ? ");
+            sqlParamList.add(param.getXid());
         }
         if (StringUtils.isNotBlank(param.getApplicationId())) {
-            whereConditionBuilder.append(" and application_id = ").append(param.getApplicationId());
+            whereConditionBuilder.append(" and application_id = ? ");
+            sqlParamList.add(param.getApplicationId());
         }
         if (param.getStatus() != null) {
-            whereConditionBuilder.append(" and status = ").append(param.getStatus());
+            whereConditionBuilder.append(" and status = ? ");
+            sqlParamList.add(param.getStatus());
         }
         if (StringUtils.isNotBlank(param.getTransactionName())) {
-            whereConditionBuilder.append(" and transaction_name = ").append(param.getTransactionName());
+            whereConditionBuilder.append(" and transaction_name = ? ");
+            sqlParamList.add(param.getTransactionName());
         }
         if (param.getTimeStart() != null) {
-            whereConditionBuilder.append(" and gmt_create >= ").append(param.getTimeStart());
+            whereConditionBuilder.append(" and gmt_create >= ? ");
+            sqlParamList.add(param.getTimeStart());
         }
         if (param.getTimeEnd() != null) {
-            whereConditionBuilder.append(" and gmt_create <= ").append(param.getTimeEnd());
+            whereConditionBuilder.append(" and gmt_create <= ? ");
+            sqlParamList.add(param.getTimeEnd());
         }
         String whereCondition = whereConditionBuilder.toString();
         whereCondition = whereCondition.replaceFirst("and", "where");
@@ -96,18 +104,26 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(querySessionSql);
-             ResultSet resultSet = ps.executeQuery();
-             PreparedStatement countPs = conn.prepareStatement(sessionCountSql);
-             ResultSet countResultSet = countPs.executeQuery()) {
-            while (resultSet.next()) {
-                list.add(GlobalSessionVO.convert(resultSet));
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        PreparedStatement countPs = null;
+        ResultSet countRs = null;
+        try (Connection conn = dataSource.getConnection()) {
+            ps = conn.prepareStatement(querySessionSql);
+            countPs = conn.prepareStatement(sessionCountSql);
+            for (int i = 0; i < sqlParamList.size(); i++) {
+                ps.setObject(i + 1, sqlParamList.get(i));
+                countPs.setObject(i + 1, sqlParamList.get(i));
             }
-            if (countResultSet.next()) {
-                count = countResultSet.getInt(1);
+            rs = ps.executeQuery();
+            countRs = countPs.executeQuery();
+            while (rs.next()) {
+                list.add(GlobalSessionVO.convert(rs));
             }
-            if(param.isWithBranch()){
+            if (countRs.next()) {
+                count = countRs.getInt(1);
+            }
+            if (param.isWithBranch()) {
                 for (GlobalSessionVO globalSessionVO : list) {
                     PageResult<BranchSessionVO> pageResp = branchSessionService.queryByXid(globalSessionVO.getXid());
                     globalSessionVO.setBranchSessionVOs(new HashSet<>(pageResp.getData()));
@@ -115,6 +131,8 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
             }
         } catch (SQLException e) {
             throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, rs, countPs, countRs);
         }
         return PageResult.success(list, count, (count / param.getPageSize()) + 1, param.getPageNum(), param.getPageSize());
     }

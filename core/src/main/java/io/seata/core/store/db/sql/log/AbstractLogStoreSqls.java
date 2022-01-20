@@ -41,11 +41,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
 
     /**
-     * The constant XID_PLACEHOLD
-     */
-    public static final String XID_PLACEHOLD = " #xid# ";
-
-    /**
      * The constant WHERE_PLACEHOLD
      */
     public static final String WHERE_PLACEHOLD = " #where# ";
@@ -142,7 +137,8 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     /**
      * The constant QUERY_ALL_BRANCH.
      */
-    public static final String QUERY_ALL_BRANCH_WITH_XID = "select " + ALL_BRANCH_COLUMNS + " from " + BRANCH_TABLE_PLACEHOLD + " where xid = '" + XID_PLACEHOLD + "' order by gmt_create desc";
+    public static final String QUERY_ALL_BRANCH_WITH_XID = "select " + ALL_BRANCH_COLUMNS + " from "
+            + BRANCH_TABLE_PLACEHOLD + WHERE_PLACEHOLD + " order by gmt_create desc";
 
     /**
      * The constant QUERY_ALL_GLOBAL_SESSION.
@@ -156,8 +152,8 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public String getAllBranchSessionSQL(String branchTable, String xid) {
-        return QUERY_ALL_BRANCH_WITH_XID.replace(BRANCH_TABLE_PLACEHOLD, branchTable).replace(XID_PLACEHOLD, xid);
+    public String getAllBranchSessionSQL(String branchTable, String whereCondition) {
+        return QUERY_ALL_BRANCH_WITH_XID.replace(BRANCH_TABLE_PLACEHOLD, branchTable).replace(WHERE_PLACEHOLD, whereCondition);
     }
 
     @Override
