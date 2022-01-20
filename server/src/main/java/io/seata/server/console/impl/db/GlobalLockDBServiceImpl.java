@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -107,8 +108,13 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
             ps = conn.prepareStatement(queryLockSql);
             countPs = conn.prepareStatement(lockCountSql);
             for (int i = 0; i < sqlParamList.size(); i++) {
-                ps.setObject(i + 1, sqlParamList.get(i));
-                countPs.setObject(i + 1, sqlParamList.get(i));
+                if (sqlParamList.get(i) instanceof Date) {
+                    ps.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
+                    countPs.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
+                } else {
+                    ps.setObject(i + 1, sqlParamList.get(i));
+                    countPs.setObject(i + 1, sqlParamList.get(i));
+                }
             }
             rs = ps.executeQuery();
             countRs = countPs.executeQuery();

@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -112,8 +113,13 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
             ps = conn.prepareStatement(querySessionSql);
             countPs = conn.prepareStatement(sessionCountSql);
             for (int i = 0; i < sqlParamList.size(); i++) {
-                ps.setObject(i + 1, sqlParamList.get(i));
-                countPs.setObject(i + 1, sqlParamList.get(i));
+                if (sqlParamList.get(i) instanceof Date) {
+                    ps.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
+                    countPs.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
+                } else {
+                    ps.setObject(i + 1, sqlParamList.get(i));
+                    countPs.setObject(i + 1, sqlParamList.get(i));
+                }
             }
             rs = ps.executeQuery();
             countRs = countPs.executeQuery();
