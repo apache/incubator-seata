@@ -524,11 +524,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
-     * runAsync
      * @param condition
+     * @param futures
      * @param runnable
      * @param executor
-     * @return
      */
     public void runAsync(boolean condition, List<CompletableFuture<Void>> futures, Runnable runnable,
         Executor executor) {
