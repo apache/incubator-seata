@@ -26,18 +26,24 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import io.seata.common.exception.RedisException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
-import io.seata.config.*;
+import io.seata.common.util.StringUtils;
+import io.seata.config.AbstractConfiguration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationKeys;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-
-import io.seata.common.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author wangyuewen
@@ -57,12 +63,12 @@ public class RedisConfiguration extends AbstractConfiguration {
     private static final String REDIS_PING_STR = "PONG";
     private static final long LISTENER_CONFIG_INTERVAL = 1000;
 
-    private static String keyName;
     private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
     private final Map<String, String> listenedConfigMap = new HashMap<>(8);
     private final RedisListener redisListener = new RedisListener();
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile JedisPool jedisPool;
+    private String keyName;
 
     /**
      * Get instance of NacosConfiguration
@@ -115,25 +121,25 @@ public class RedisConfiguration extends AbstractConfiguration {
         }
     }
 
-    private static String getRedisConfigKeyName() {
+    private String getRedisConfigKeyName() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,CONFIG_KEY_NAME_KEY);
     }
 
-    private static String getRedisTimeOut() {
+    private String getRedisTimeOut() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,TIMEOUT_KEY);
     }
 
-    private static String getRedisDb() {
+    private String getRedisDb() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,DB_KEY);
     }
 
-    private static String getRedisServerAddr() {
+    private String getRedisServerAddr() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,SERVER_ADDR_KEY);
     }
-    private static String getRedisPassWord(){
+    private String getRedisPassWord(){
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,PASSWORD_KEY);
     }
-    private static String getRedisListenerEnabled(){
+    private String getRedisListenerEnabled(){
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,LISTENER_ENABLED_KEY);
     }
 
@@ -144,7 +150,6 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public String getTypeName() {
-        LOGGER.info("调用了getTypeName");
         return CONFIG_TYPE;
     }
 
@@ -158,14 +163,13 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
-        LOGGER.info("调用了putConfig  dataId={}  content={}   timeoutMills={}",dataId,content,timeoutMills);
         boolean result = false;
         try(Jedis jedis = jedisPool.getResource()) {
             Long status = jedis.hset(keyName, dataId, content);
             if (status == 1 || status == 0){
                 result = true;
             }
-        }catch (Exception e){
+        }catch (RedisException e){
             LOGGER.error(e.getMessage());
         }
         return result;
@@ -181,11 +185,10 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        LOGGER.info("调用了getLatestConfig  dataId={}  defaultValue={}   timeoutMills={}",dataId,defaultValue,timeoutMills);
         String value = null;
         try (Jedis jedis = jedisPool.getResource()){
             value = jedis.hget(keyName, dataId);
-        }catch (Exception e){
+        }catch (RedisException e){
             LOGGER.error(e.getMessage());
         }
         return null == value ? defaultValue : value;
@@ -201,8 +204,18 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        LOGGER.info("调用了putConfigIfAbsent  dataId={}  content={}   timeoutMills={}",dataId,content,timeoutMills);
-        return false;
+        boolean result = false;
+        try (Jedis jedis = jedisPool.getResource()){
+            if (!jedis.hexists(keyName, dataId)){
+                Long status = jedis.hset(keyName, dataId, content);
+                if (status == 1){
+                    result = true;
+                }
+            }
+        }catch (RedisException e){
+            LOGGER.error(e.getMessage());
+        }
+        return result;
     }
 
     /**
@@ -214,14 +227,13 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
-        LOGGER.info("调用了removeConfig  dataId={}  timeoutMills={}",dataId,timeoutMills);
         boolean result = false;
         try(Jedis jedis = jedisPool.getResource()) {
             Long status = jedis.hdel(keyName, dataId);
             if (status == 1){
                 result = true;
             }
-        }catch (Exception e){
+        }catch (RedisException e){
             LOGGER.error(e.getMessage());
         }
         return result;
@@ -235,7 +247,6 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        LOGGER.info("调用了addConfigListener  dataId={}  listener={}",dataId,listener);
         if (StringUtils.isBlank(dataId) || null == listener){
             return;
         }
@@ -252,7 +263,6 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        LOGGER.info("调用了removeConfigListener  dataId={}  listener={}",dataId,listener);
         if (StringUtils.isBlank(dataId) || null == listener){
             return;
         }
@@ -275,8 +285,6 @@ public class RedisConfiguration extends AbstractConfiguration {
      */
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        LOGGER.info("调用了getConfigListeners  dataId="+dataId);
-
         return configListenersMap.get(dataId);
     }
 
