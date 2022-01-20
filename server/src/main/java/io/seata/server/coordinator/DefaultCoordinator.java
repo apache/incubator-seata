@@ -308,6 +308,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     // Prevent thread safety issues
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
+                    SessionHelper.endRollbackFailed(rollbackingSession);
                     //The function of this 'return' is 'continue'.
                     return;
                 }

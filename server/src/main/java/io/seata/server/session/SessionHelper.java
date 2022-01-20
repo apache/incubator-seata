@@ -93,7 +93,7 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endCommitted(GlobalSession globalSession) throws TransactionException {
-        globalSession.changeStatus(GlobalStatus.Committed);
+        globalSession.changeGlobalStatus(GlobalStatus.Committed);
         globalSession.end();
     }
 
@@ -104,7 +104,7 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endCommitFailed(GlobalSession globalSession) throws TransactionException {
-        globalSession.changeStatus(GlobalStatus.CommitFailed);
+        globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
         globalSession.end();
     }
 
@@ -117,9 +117,9 @@ public class SessionHelper {
     public static void endRollbacked(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isTimeoutGlobalStatus(currentStatus)) {
-            globalSession.changeStatus(GlobalStatus.TimeoutRollbacked);
+            globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
         } else {
-            globalSession.changeStatus(GlobalStatus.Rollbacked);
+            globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
         }
         globalSession.end();
     }
@@ -133,9 +133,9 @@ public class SessionHelper {
     public static void endRollbackFailed(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isTimeoutGlobalStatus(currentStatus)) {
-            globalSession.changeStatus(GlobalStatus.TimeoutRollbackFailed);
+            globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
-            globalSession.changeStatus(GlobalStatus.RollbackFailed);
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
         }
         globalSession.end();
     }

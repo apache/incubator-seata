@@ -189,7 +189,7 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.AsyncCommitting);
+            globalSession.changeGlobalStatus(GlobalStatus.AsyncCommitting);
 
             lockManager.cleanAllLocks();
 
@@ -245,9 +245,9 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.Committing);
+            globalSession.changeGlobalStatus(GlobalStatus.Committing);
             globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Retryable);
-            globalSession.changeStatus(GlobalStatus.CommitRetrying);
+            globalSession.changeGlobalStatus(GlobalStatus.CommitRetrying);
 
             lockManager.cleanAllLocks();
 
@@ -306,9 +306,9 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.Rollbacking);
+            globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
             globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_RollbackFailed_Retryable);
-            globalSession.changeStatus(GlobalStatus.RollbackRetrying);
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
 
             lockManager.cleanAllLocks();
 
@@ -367,7 +367,7 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.Rollbacking);
+            globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
             globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Unretryable);
             SessionHelper.endRollbackFailed(globalSession);
 
