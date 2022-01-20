@@ -16,12 +16,18 @@
 package io.seata.server.session;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.coordinator.DefaultCoordinator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -33,6 +39,20 @@ import org.slf4j.MDC;
  */
 public class SessionHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionHelper.class);
+
+    /**
+     * The constant CONFIG.
+     */
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
+            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, true);
+
+    /**
+     * The instance of DefaultCoordinator
+     */
+    private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
+
 
     private SessionHelper() {}
 
@@ -189,5 +209,41 @@ public class SessionHelper {
             }
         }
         return null;
+    }
+
+
+    /**
+     * remove branchSession from globalSession
+     * @param globalSession the globalSession
+     * @param branchSession the branchSession
+     * @param isAsync if asynchronous remove
+     */
+    public static void removeBranch(GlobalSession globalSession, BranchSession branchSession, boolean isAsync)
+            throws TransactionException {
+        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
+            COORDINATOR.doBranchRemoveAsync(globalSession, branchSession);
+        } else {
+            globalSession.removeBranch(branchSession);
+        }
+    }
+
+    /**
+     * remove branchSession from globalSession
+     * @param globalSession the globalSession
+     * @param isAsync if asynchronous remove
+     */
+    public static void removeAllBranch(GlobalSession globalSession, boolean isAsync)
+            throws TransactionException {
+        List<BranchSession> branchSessions = globalSession.getSortedBranches();
+        if (branchSessions == null || branchSessions.isEmpty()) {
+            return;
+        }
+        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
+            COORDINATOR.doBranchRemoveAllAsync(globalSession);
+        } else {
+            for (BranchSession branchSession : branchSessions) {
+                globalSession.removeBranch(branchSession);
+            }
+        }
     }
 }
