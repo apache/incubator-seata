@@ -106,12 +106,12 @@ public class SagaCore extends AbstractCore {
 
             switch (branchStatus) {
                 case PhaseTwo_Committed:
-                    removeAllBranches(globalSession);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
                     LOGGER.info("Successfully committed SAGA global[" + globalSession.getXid() + "]");
                     break;
                 case PhaseTwo_Rollbacked:
                     LOGGER.info("Successfully rollbacked SAGA global[" + globalSession.getXid() + "]");
-                    removeAllBranches(globalSession);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
                     SessionHelper.endRollbacked(globalSession);
                     return false;
                 case PhaseTwo_RollbackFailed_Retryable:
@@ -122,7 +122,7 @@ public class SagaCore extends AbstractCore {
                     return false;
                 case PhaseOne_Failed:
                     LOGGER.error("By [{}], finish SAGA global [{}]", branchStatus, globalSession.getXid());
-                    removeAllBranches(globalSession);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
                     globalSession.changeStatus(GlobalStatus.Finished);
                     globalSession.end();
                     return false;
@@ -164,7 +164,7 @@ public class SagaCore extends AbstractCore {
 
             switch (branchStatus) {
                 case PhaseTwo_Rollbacked:
-                    removeAllBranches(globalSession);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
                     LOGGER.info("Successfully rollbacked SAGA global[{}]",globalSession.getXid());
                     break;
                 case PhaseTwo_RollbackFailed_Unretryable:
@@ -196,12 +196,12 @@ public class SagaCore extends AbstractCore {
     @Override
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
         if (GlobalStatus.Committed.equals(globalStatus)) {
-            removeAllBranches(globalSession);
+            SessionHelper.removeAllBranch(globalSession, false);
             SessionHelper.endCommitted(globalSession);
             LOGGER.info("Global[{}] committed", globalSession.getXid());
         } else if (GlobalStatus.Rollbacked.equals(globalStatus)
                 || GlobalStatus.Finished.equals(globalStatus)) {
-            removeAllBranches(globalSession);
+            SessionHelper.removeAllBranch(globalSession, false);
             SessionHelper.endRollbacked(globalSession);
             LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
         } else {
@@ -221,6 +221,7 @@ public class SagaCore extends AbstractCore {
     }
 
     /**
+<<<<<<< HEAD
      * remove all branches
      *
      * @param globalSession the globalSession
@@ -234,6 +235,8 @@ public class SagaCore extends AbstractCore {
     }
 
     /**
+=======
+>>>>>>> 2c6e647dd906dd7226766c3a307b5a821b069227
      * get saga ResourceId
      *
      * @param globalSession the globalSession
