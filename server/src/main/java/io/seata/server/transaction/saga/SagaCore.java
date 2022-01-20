@@ -138,11 +138,10 @@ public class SagaCore extends AbstractCore {
                 default:
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
-                        return false;
                     } else {
                         LOGGER.error("Failed to commit SAGA global[{}], will retry later.", globalSession.getXid());
-                        return false;
                     }
+                    return false;
             }
         } catch (Exception ex) {
             LOGGER.error("Failed to commit global[" + globalSession.getXid() + "]", ex);
