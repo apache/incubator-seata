@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 public class MariadbInsertExecutorTest extends MySQLInsertExecutorTest {
 
     @BeforeEach
+    @Override
     public void init() throws SQLException {
         ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MARIADB);
