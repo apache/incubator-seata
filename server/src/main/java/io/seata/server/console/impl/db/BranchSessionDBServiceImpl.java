@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Branch Session DataBase ServiceImpl
- *
+ * @author: zhongxiang.wang
  * @author: lvekee 734843455@qq.com
  */
 @Component

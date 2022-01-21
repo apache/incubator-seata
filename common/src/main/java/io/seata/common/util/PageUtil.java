@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.console.impl.db;
+package io.seata.common.util;
 
 import io.seata.common.exception.NotSupportYetException;
 
