@@ -160,7 +160,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<>(
                     CONFIG.getInt(ConfigurationKeys.SESSION_BRANCH_ASYNC_QUEUE_SIZE, DEFAULT_BRANCH_ASYNC_QUEUE_SIZE)
-            ), new NamedThreadFactory("branchSessionRemove", 2, true),
+            ), new NamedThreadFactory("branchSessionRemove", BRANCH_ASYNC_POOL_SIZE),
             new ThreadPoolExecutor.CallerRunsPolicy());
 
 
