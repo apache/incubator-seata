@@ -20,6 +20,7 @@ import io.seata.core.constants.ServerTableColumnsName;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * BranchSessionVO
@@ -49,6 +50,30 @@ public class BranchSessionVO {
 
     private Date gmtModified;
 
+
+    public BranchSessionVO(){
+
+    }
+
+    public BranchSessionVO(String xid,
+                           Long transactionId,
+                           Long branchId,
+                           String resourceGroupId,
+                           String resourceId,
+                           String branchType,
+                           Integer status,
+                           String clientId,
+                           String applicationData) {
+        this.xid = xid;
+        this.transactionId = transactionId;
+        this.branchId = branchId;
+        this.resourceGroupId = resourceGroupId;
+        this.resourceId = resourceId;
+        this.branchType = branchType;
+        this.status = status;
+        this.clientId = clientId;
+        this.applicationData = applicationData;
+    }
 
     public String getXid() {
         return xid;
@@ -152,6 +177,43 @@ public class BranchSessionVO {
         branchSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
         branchSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
         return branchSessionVO;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BranchSessionVO that = (BranchSessionVO) o;
+        return Objects.equals(xid, that.xid)
+                && Objects.equals(transactionId, that.transactionId)
+                && Objects.equals(branchId, that.branchId)
+                && Objects.equals(resourceGroupId, that.resourceGroupId)
+                && Objects.equals(resourceId, that.resourceId)
+                && Objects.equals(branchType, that.branchType)
+                && Objects.equals(status, that.status)
+                && Objects.equals(clientId, that.clientId)
+                && Objects.equals(applicationData, that.applicationData)
+                && Objects.equals(gmtCreate, that.gmtCreate)
+                && Objects.equals(gmtModified, that.gmtModified);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(xid,
+                transactionId,
+                branchId,
+                resourceGroupId,
+                resourceId,
+                branchType,
+                status,
+                clientId,
+                applicationData,
+                gmtCreate,
+                gmtModified);
     }
 
     @Override

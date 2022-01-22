@@ -52,6 +52,33 @@ public class GlobalSessionVO {
 
     private Set<BranchSessionVO> branchSessionVOs;
 
+
+    public GlobalSessionVO() {
+
+    }
+
+    public GlobalSessionVO(String xid,
+                           Long transactionId,
+                           Integer status,
+                           String applicationId,
+                           String transactionServiceGroup,
+                           String transactionName,
+                           Long timeout,
+                           Long beginTime,
+                           String applicationData,
+                           Set<BranchSessionVO> branchSessionVOs) {
+        this.xid = xid;
+        this.transactionId = transactionId;
+        this.status = status;
+        this.applicationId = applicationId;
+        this.transactionServiceGroup = transactionServiceGroup;
+        this.transactionName = transactionName;
+        this.timeout = timeout;
+        this.beginTime = beginTime;
+        this.applicationData = applicationData;
+        this.branchSessionVOs = branchSessionVOs;
+    }
+
     public String getXid() {
         return xid;
     }
