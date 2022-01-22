@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.vo;
+package io.seata.core.console.vo;
 
 import io.seata.core.constants.ServerTableColumnsName;
 
@@ -51,6 +51,33 @@ public class GlobalSessionVO {
     private Date gmtModified;
 
     private Set<BranchSessionVO> branchSessionVOs;
+
+
+    public GlobalSessionVO() {
+
+    }
+
+    public GlobalSessionVO(String xid,
+                           Long transactionId,
+                           Integer status,
+                           String applicationId,
+                           String transactionServiceGroup,
+                           String transactionName,
+                           Long timeout,
+                           Long beginTime,
+                           String applicationData,
+                           Set<BranchSessionVO> branchSessionVOs) {
+        this.xid = xid;
+        this.transactionId = transactionId;
+        this.status = status;
+        this.applicationId = applicationId;
+        this.transactionServiceGroup = transactionServiceGroup;
+        this.transactionName = transactionName;
+        this.timeout = timeout;
+        this.beginTime = beginTime;
+        this.applicationData = applicationData;
+        this.branchSessionVOs = branchSessionVOs;
+    }
 
     public String getXid() {
         return xid;
@@ -162,5 +189,23 @@ public class GlobalSessionVO {
         globalSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
         globalSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
         return globalSessionVO;
+    }
+
+    @Override
+    public String toString() {
+        return "GlobalSessionVO{" +
+                "xid='" + xid + '\'' +
+                ", transactionId=" + transactionId +
+                ", status=" + status +
+                ", applicationId='" + applicationId + '\'' +
+                ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
+                ", transactionName='" + transactionName + '\'' +
+                ", timeout=" + timeout +
+                ", beginTime=" + beginTime +
+                ", applicationData='" + applicationData + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModified=" + gmtModified +
+                ", branchSessionVOs=" + branchSessionVOs +
+                '}';
     }
 }

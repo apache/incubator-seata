@@ -13,17 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.console.result;
+package io.seata.core.console.result;
+
+import java.io.Serializable;
+import java.util.List;
 
 import io.seata.common.exception.FrameworkErrorCode;
-
-import java.util.List;
 
 /**
  * The page result
  * @author: zhongxiang.wang
  */
-public class PageResult<T> extends Result<T> {
+public class PageResult<T> extends Result<T>  implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
 
     /**
@@ -47,7 +48,11 @@ public class PageResult<T> extends Result<T> {
      */
     private List<T> data;
 
-    public PageResult(String errCode, String code) {
+    public PageResult() {
+    }
+
+    public PageResult(String code, String message) {
+        super(code, message);
     }
 
     public PageResult(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
@@ -59,19 +64,34 @@ public class PageResult<T> extends Result<T> {
         this.data = data;
     }
 
+    public static <T> PageResult<T> build(List<T> list, Integer pageNum, Integer pageSize) {
+        // calculate pages
+        int pages = list.size() / pageSize;
+        if (list.size() % pageSize != 0) {
+            pages++;
+        }
+        final int offset = pageSize * (pageNum - 1);
+        return PageResult.success(
+                list.subList(
+                        Math.min(offset, list.size()),
+                        Math.min(offset + pageSize, list.size())
+                ),
+                list.size(),
+                pages,
+                pageNum,
+                pageSize
+        );
+    }
+
     public static <T> PageResult<T> failure(String code, String msg) {
         return new PageResult<>(code, msg);
     }
 
     public static <T> PageResult<T> failure(FrameworkErrorCode errorCode) {
-        return new PageResult(errorCode.getErrCode(), errorCode.getErrMessage());
+        return new PageResult<>(errorCode.getErrCode(), errorCode.getErrMessage());
     }
 
     public static <T> PageResult<T> success() {
-        return new PageResult<>(SUCCESS_CODE, SUCCESS_MSG);
-    }
-
-    public static <T> PageResult<T> create() {
         return new PageResult<>(SUCCESS_CODE, SUCCESS_MSG);
     }
 

@@ -16,6 +16,7 @@
 package io.seata.core.store;
 
 import java.util.List;
+import io.seata.core.model.LockStatus;
 
 /**
  * The interface Lock store.
@@ -42,6 +43,16 @@ public interface LockStore {
     boolean acquireLock(List<LockDO> lockDOs);
 
     /**
+     * Acquire lock boolean.
+     *
+     * @param lockDOs the lock d os
+     * @param autoCommit the auto commit
+     * @param skipCheckLock whether skip check lock or not
+     * @return the boolean
+     */
+    boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit, boolean skipCheckLock);
+
+    /**
      * Un lock boolean.
      *
      * @param lockDO the lock do
@@ -59,7 +70,7 @@ public interface LockStore {
 
     boolean unLock(String xid, Long branchId);
 
-    boolean unLock(String xid, List<Long> branchIds);
+    boolean unLock(String xid);
 
     /**
      * Is lockable boolean.
@@ -68,4 +79,14 @@ public interface LockStore {
      * @return the boolean
      */
     boolean isLockable(List<LockDO> lockDOs);
+
+    /**
+     * update lock status .
+     *
+     * @param xid the xid
+     * @param lockStatus the lock status
+     *
+     */
+    void updateLockStatus(String xid, LockStatus lockStatus);
+
 }
