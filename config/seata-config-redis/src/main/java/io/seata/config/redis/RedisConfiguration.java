@@ -136,9 +136,11 @@ public class RedisConfiguration extends AbstractConfiguration {
     private String getRedisServerAddr() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,SERVER_ADDR_KEY);
     }
+
     private String getRedisPassWord(){
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,PASSWORD_KEY);
     }
+
     private String getRedisListenerEnabled(){
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,ConfigurationKeys.FILE_ROOT_CONFIG,CONFIG_TYPE,LISTENER_ENABLED_KEY);
     }
