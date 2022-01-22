@@ -118,7 +118,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
                 getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
-                throw new LockConflictException();
+                throw new LockConflictException(String.format("get lock failed, lockKey: %s",lockKeys));
             }
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, lockKeys);

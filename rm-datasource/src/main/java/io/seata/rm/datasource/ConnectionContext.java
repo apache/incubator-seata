@@ -34,7 +34,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
-
 import static io.seata.common.Constants.AUTO_COMMIT;
 import static io.seata.common.Constants.SKIP_CHECK_LOCK;
 
@@ -191,7 +190,7 @@ public class ConnectionContext {
             setXid(xid);
         } else {
             if (!this.xid.equals(xid)) {
-                throw new ShouldNeverHappenException();
+                throw new ShouldNeverHappenException(String.format("bind xid: %s, while current xid: %s", xid, this.xid));
             }
         }
     }
