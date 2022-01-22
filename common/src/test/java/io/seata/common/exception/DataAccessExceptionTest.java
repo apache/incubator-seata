@@ -27,11 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DataAccessExceptionTest {
 
     @Test
-    public void testConstructorWithNoParameters() {
-        exceptionAsserts(new DataAccessException());
-    }
-
-    @Test
     public void testConstructorWithFrameworkErrorCode() {
         exceptionAsserts(new DataAccessException(FrameworkErrorCode.UnknownAppError));
     }

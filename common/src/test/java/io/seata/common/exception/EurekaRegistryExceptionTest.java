@@ -27,11 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EurekaRegistryExceptionTest {
 
     @Test
-    public void testConstructorWithNoParameters() {
-        assertThat(new EurekaRegistryException()).isInstanceOf(EurekaRegistryException.class);
-    }
-
-    @Test
     public void testConstructorWithMessage() {
         exceptionAsserts(new EurekaRegistryException(FrameworkErrorCode.UnknownAppError.getErrMessage()));
     }

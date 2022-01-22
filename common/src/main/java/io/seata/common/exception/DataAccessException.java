@@ -22,13 +22,6 @@ package io.seata.common.exception;
 public class DataAccessException extends StoreException {
 
     /**
-     * default constructor
-     */
-    public DataAccessException() {
-    }
-
-
-    /**
      * constructor with framework error code
      * @param err the framework error code
      */

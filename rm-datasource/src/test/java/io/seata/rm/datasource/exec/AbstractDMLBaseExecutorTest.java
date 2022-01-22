@@ -59,7 +59,7 @@ public class AbstractDMLBaseExecutorTest {
 
         Connection targetConnection = Mockito.mock(Connection.class);
         connectionProxy = Mockito.mock(ConnectionProxy.class);
-        Mockito.doThrow(new LockConflictException())
+        Mockito.doThrow(new LockConflictException("mock exception"))
                 .when(connectionProxy).commit();
         Mockito.when(connectionProxy.getAutoCommit())
                 .thenReturn(Boolean.TRUE);
