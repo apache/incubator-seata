@@ -29,12 +29,13 @@ import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.console.result.PageResult;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
-import static io.seata.common.util.StringUtils.isBlank;
 import static io.seata.common.util.StringUtils.isNotBlank;
 import static io.seata.core.console.result.PageResult.checkPage;
 import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS;
@@ -49,23 +50,29 @@ import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOB
 @ConditionalOnExpression("#{'redis'.equals('${lockMode}')}")
 public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
+    private Logger logger = LoggerFactory.getLogger(GlobalLockRedisServiceImpl.class);
+
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
 
         int total;
-        List<GlobalLockVO> globalLockVOs;
+        List<GlobalLockVO> globalLockVos;
 
         checkPage(param);
 
         if (isNotBlank(param.getXid()) || isNotBlank(param.getTransactionId())) {
-            globalLockVOs = queryGlobalByParam(param);
-            total = globalLockVOs.size();
+            globalLockVos = queryGlobalByParam(param);
+            total = globalLockVos.size();
         } else {
+            if (isNotBlank(param.getTableName()) || isNotBlank(param.getBranchId())) {
+                logger.debug("not supported according to tableName or branchId query");
+                return PageResult.success();
+            }
             //query all
-            globalLockVOs = queryAllPage(param.getPageNum(),param.getPageSize());
+            globalLockVos = queryAllPage(param.getPageNum(),param.getPageSize());
             total = queryAllTotal();
         }
-        return PageResult.success(globalLockVOs,total,param.getPageNum(),param.getPageSize());
+        return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
     }
 
     private int queryAllTotal() {
@@ -133,17 +140,11 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
     }
 
     private List<GlobalLockVO> queryGlobalByParam(GlobalLockParam param) {
-        String xidStr = param.getXid();
-        String transactionId = param.getTransactionId();
         List<GlobalLockVO> vos = Lists.newArrayList();
+        String xid = getxidStr(param);
 
-        xidStr = isNotBlank(xidStr) ? xidStr : StringUtils.EMPTY;
-        xidStr = isBlank(xidStr) && isNotBlank(transactionId) ? XID.generateXID(Long.valueOf(param.getTransactionId())) : StringUtils.EMPTY;
-        xidStr = isNotBlank(xidStr) && isNotBlank(transactionId) ? getxidStr(param) : StringUtils.EMPTY;
-
-
-        String key = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS + xidStr;
-        if (isNotBlank(xidStr)) {
+        String key = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS + xid;
+        if (isNotBlank(xid)) {
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                 Map<String, String> map = jedis.hgetAll(key);
                 GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
@@ -157,12 +158,22 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
     }
 
     private String getxidStr(GlobalLockParam param) {
-        String xid = XID.generateXID(Long.valueOf(param.getTransactionId()));
-        if (!xid.equals(param.getXid())) {
-            return StringUtils.EMPTY;
+        String xidStr = param.getXid();
+        String transactionId = param.getTransactionId();
+
+        if (isNotBlank(xidStr) && isNotBlank(transactionId)) {
+            String xid = XID.generateXID(Long.valueOf(param.getTransactionId()));
+            if (!xid.equals(param.getXid())) {
+                return StringUtils.EMPTY;
+            } else {
+                return xid;
+            }
+        } else if (isNotBlank(transactionId)) {
+            return XID.generateXID(Long.valueOf(param.getTransactionId()));
         } else {
-            return xid;
+            return xidStr;
         }
+
     }
 
 }

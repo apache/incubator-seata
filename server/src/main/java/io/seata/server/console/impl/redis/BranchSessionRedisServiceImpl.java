@@ -45,7 +45,7 @@ public class BranchSessionRedisServiceImpl implements BranchSessionService {
             return PageResult.success();
         }
 
-        List<BranchSessionVO> branchSessionVOs = Lists.newArrayList();
+        List<BranchSessionVO> branchSessionVos = Lists.newArrayList();
 
         RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
 
@@ -55,10 +55,10 @@ public class BranchSessionRedisServiceImpl implements BranchSessionService {
             for (BranchTransactionDO branchSessionDo : branchSessionDos) {
                 BranchSessionVO branchSessionVO = new BranchSessionVO();
                 BeanUtils.copyProperties(branchSessionDo, branchSessionVO);
-                branchSessionVOs.add(branchSessionVO);
+                branchSessionVos.add(branchSessionVO);
             }
         }
 
-        return PageResult.success(branchSessionVOs, branchSessionVOs.size(), 0, branchSessionVOs.size());
+        return PageResult.success(branchSessionVos, branchSessionVos.size(), 0, branchSessionVos.size());
     }
 }

@@ -44,7 +44,6 @@ import redis.clients.jedis.Pipeline;
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
     private static RedisServer server = null;
-    private static SessionManager sessionManager = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
 
 

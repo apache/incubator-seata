@@ -20,9 +20,6 @@ import io.seata.core.console.param.BaseParam;
 
 import java.io.Serializable;
 import java.util.List;
-
-import io.seata.common.exception.FrameworkErrorCode;
-
 /**
  * The page result
  * @author zhongxiang.wang
