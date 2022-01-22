@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import io.seata.common.util.CollectionUtils;
+import java.util.Collections;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.vo.BranchSessionVO;
@@ -33,11 +33,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.store.SessionStorable;
 import org.springframework.beans.BeanUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
 
 /**
  * The session converter
@@ -124,7 +120,7 @@ public class SessionConverter {
             for (GlobalSession globalSession : globalSessions) {
                 GlobalSessionVO globalSessionVO = new GlobalSessionVO();
                 BeanUtils.copyProperties(globalSession,globalSessionVO);
-                globalSessionVO.setStatus(0);
+                globalSessionVO.setStatus(globalSession.getStatus().getCode());
                 globalSessionVO.setTimeout(Long.valueOf(globalSession.getTimeout()));
                 globalSessionVO.setBranchSessionVOs(converToBranchSession(globalSession.getBranchSessions()));
                 result.add(globalSessionVO);
@@ -141,10 +137,6 @@ public class SessionConverter {
 
                 branchSessionVONew.setBranchType(branchSession.getBranchType().name());
                 branchSessionVONew.setStatus(branchSession.getStatus().getCode());
-
-                branchSessionVONew.setGmtCreate(null);
-                branchSessionVONew.setGmtModified(null);
-
                 branchSessionVOs.add(branchSessionVONew);
             }
         }
