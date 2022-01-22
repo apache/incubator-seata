@@ -131,7 +131,8 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             throw new ShouldNeverHappenException("auto increment column not exist");
         }
 
-        ResultSet genKeys;
+        ResultSet genKeys = null;
+        boolean isManualCloseResultSet = false;
         try {
             genKeys = statementProxy.getGeneratedKeys();
         } catch (SQLException e) {
@@ -141,19 +142,21 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
                 LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
-                ResultSet rsFirstId = null;
                 try {
-                    rsFirstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
-
+                    genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
                     // If there is batch insert
                     // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
                     if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
-                        rsFirstId.next();
-                        BigDecimal firstId = new BigDecimal(rsFirstId.getString(1));
+                        genKeys.next();
+                        BigDecimal firstId = new BigDecimal(genKeys.getString(1));
                         return autoGeneratePks(firstId, autoColumnName, updateCount);
+                    } else {
+                        isManualCloseResultSet = true;
                     }
                 } finally {
-                    IOUtil.close(rsFirstId);
+                    if (!isManualCloseResultSet) {
+                        IOUtil.close(genKeys);
+                    }
                 }
             } else {
                 throw e;
@@ -168,8 +171,12 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             genKeys.beforeFirst();
         } catch (SQLException e) {
             LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
+        } finally {
+            if (isManualCloseResultSet) {
+                IOUtil.close(genKeys);
+            }
         }
-        pkValuesMap.put(autoColumnName,pkValues);
+        pkValuesMap.put(autoColumnName, pkValues);
         return pkValuesMap;
     }
 
