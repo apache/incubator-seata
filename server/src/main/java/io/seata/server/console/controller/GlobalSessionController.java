@@ -39,7 +39,7 @@ public class GlobalSessionController {
 
     /**
      * Query all globalSession
-     * @param param
+     * @param param param for query globalSession
      * @return  the list of GlobalSessionVO
      */
     @PostMapping("query")

@@ -110,7 +110,7 @@ public class TableRecords implements java.io.Serializable {
      */
     public void setTableMeta(TableMeta tableMeta) {
         if (this.tableMeta != null) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("tableMeta has already been set");
         }
         this.tableMeta = tableMeta;
         this.tableName = tableMeta.getTableName();
