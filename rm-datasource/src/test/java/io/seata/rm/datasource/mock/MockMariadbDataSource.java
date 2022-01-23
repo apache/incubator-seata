@@ -13,35 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.exec;
+package io.seata.rm.datasource.mock;
 
+import java.sql.Connection;
 import java.sql.SQLException;
-import io.seata.core.exception.TransactionExceptionCode;
 
 /**
- * The type Lock conflict exception.
- *
- * @author sharajava
+ * @author funkye
  */
-public class LockConflictException extends SQLException {
-
-    TransactionExceptionCode code;
-
-    public LockConflictException(String message) {
-        super(message);
+public class MockMariadbDataSource extends MockDataSource {
+    @Override
+    public Connection getConnection() throws SQLException {
+        return new MockConnection(new MockDriver(), "jdbc:mariadb://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
     }
-
-    public LockConflictException(String message, TransactionExceptionCode code) {
-        super(message);
-        this.code = code;
-    }
-
-    public TransactionExceptionCode getCode() {
-        return code;
-    }
-
-    public void setCode(TransactionExceptionCode code) {
-        this.code = code;
-    }
-
 }

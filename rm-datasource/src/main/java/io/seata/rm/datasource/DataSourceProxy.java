@@ -104,6 +104,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcUtils.getDbType(jdbcUrl);
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
+            } else if (JdbcConstants.MARIADB.equals(dbType)) {
+                dbType = JdbcConstants.MYSQL;
             }
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
