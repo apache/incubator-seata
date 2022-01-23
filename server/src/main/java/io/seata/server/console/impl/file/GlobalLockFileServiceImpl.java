@@ -27,8 +27,8 @@ import io.seata.common.exception.InvalidParamException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.lock.RowLock;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.session.BranchSession;
@@ -38,9 +38,9 @@ import io.seata.server.session.SessionHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
-import static io.seata.core.console.vo.GlobalLockVO.convert;
 import static io.seata.common.util.StringUtils.isBlank;
+import static io.seata.core.console.vo.GlobalLockVO.convert;
+import static java.util.Objects.isNull;
 
 /**
  * Global Lock File ServiceImpl
@@ -63,9 +63,6 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
         checkParam(param);
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
-        if (CollectionUtils.isEmpty(allSessions)) {
-            return PageResult.success();
-        }
 
         final AtomicInteger total = new AtomicInteger();
         List<RowLock> result = allSessions
@@ -75,24 +72,16 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
                 .filter(obtainBranchSessionPredicate(param))
                 .flatMap(branchSession -> filterAndMap(param, branchSession))
                 .peek(globalSession -> total.incrementAndGet())
-                .skip((long) param.getPageSize() * (param.getPageNum() - 1))
-                .limit(param.getPageSize())
                 .collect(Collectors.toList());
 
-        // calculate pages
-        int pages = total.get() / param.getPageSize();
-        if (total.get() % param.getPageSize() != 0) {
-            pages++;
-        }
-
-        return new PageResult<>(convert(result), total.get(), pages, param.getPageNum(), param.getPageSize());
+        return PageResult.build(convert(result), param.getPageNum(), param.getPageSize());
 
     }
 
     /**
      * filter with tableName and generate RowLock
      *
-     * @param param
+     * @param param the query param
      * @param branchSession the branch session
      * @return the RowLock list
      */
