@@ -265,7 +265,7 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_GLOBAL_REPORT_RESULT:
                 abstractMessage = new GlobalReportResponse();
-
+                break;
             case MessageType.TYPE_BATCH_RESULT_MSG:
                 abstractMessage = new BatchResultMessage();
                 break;
