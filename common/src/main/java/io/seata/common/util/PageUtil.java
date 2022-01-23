@@ -15,12 +15,17 @@
  */
 package io.seata.common.util;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+
 import io.seata.common.exception.NotSupportYetException;
 
 /**
  * db page util
  *
- * @author lvekee 734843455@qq.com
+ * @author: lvekee 734843455@qq.com
  */
 public class PageUtil {
 
@@ -61,6 +66,7 @@ public class PageUtil {
 
     /**
      * check page parm
+     *
      * @param pageNum
      * @param pageSize
      */
@@ -75,6 +81,7 @@ public class PageUtil {
 
     /**
      * get pagesql
+     *
      * @param sourceSql
      * @param dbType
      * @param pageNum
@@ -101,6 +108,7 @@ public class PageUtil {
 
     /**
      * get countsql
+     *
      * @param sourceSql
      * @param dbType
      * @return
@@ -115,6 +123,22 @@ public class PageUtil {
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             default:
                 throw new NotSupportYetException("PageUtil not support this dbType:" + dbType);
+        }
+    }
+
+    /**
+     * set sqlParamList in preparedStatement
+     * @param ps
+     * @param sqlParamList
+     * @throws SQLException
+     */
+    public static void setObject(PreparedStatement ps, List<Object> sqlParamList) throws SQLException {
+        for (int i = 0; i < sqlParamList.size(); i++) {
+            if (sqlParamList.get(i) instanceof Date) {
+                ps.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
+            } else {
+                ps.setObject(i + 1, sqlParamList.get(i));
+            }
         }
     }
 }

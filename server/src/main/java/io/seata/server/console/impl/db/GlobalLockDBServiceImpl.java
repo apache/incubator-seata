@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -45,7 +44,7 @@ import org.springframework.stereotype.Component;
  * Global Lock DB ServiceImpl
  *
  * @author: zhongxiang.wang
- * @author lvekee 734843455@qq.com
+ * @author: lvekee 734843455@qq.com
  */
 @Component
 @org.springframework.context.annotation.Configuration
@@ -63,8 +62,47 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         PageUtil.checkParam(param.getPageNum(), param.getPageSize());
 
-        StringBuilder whereConditionBuilder = new StringBuilder();
         List<Object> sqlParamList = new ArrayList<>();
+        String whereCondition = this.getWhereConditionByParam(param, sqlParamList);
+
+        String sourceSql = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSql(lockTable, whereCondition);
+        String queryLockSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize());
+        String lockCountSql = PageUtil.countSql(sourceSql, dbType);
+
+        List<GlobalLockVO> list = new ArrayList<>();
+        int count = 0;
+
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        PreparedStatement countPs = null;
+        ResultSet countRs = null;
+
+        try (Connection conn = dataSource.getConnection()) {
+            ps = conn.prepareStatement(queryLockSql);
+            PageUtil.setObject(ps, sqlParamList);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(GlobalLockVO.convert(rs));
+            }
+
+            countPs = conn.prepareStatement(lockCountSql);
+            PageUtil.setObject(countPs, sqlParamList);
+            countRs = countPs.executeQuery();
+            if (countRs.next()) {
+                count = countRs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, rs, countPs, countRs);
+        }
+        return PageResult.success(list, count, (count / param.getPageSize()) + 1, param.getPageNum(), param.getPageSize());
+    }
+
+    private String getWhereConditionByParam(GlobalLockParam param, List<Object> sqlParamList) {
+        StringBuilder whereConditionBuilder = new StringBuilder();
         if (StringUtils.isNotBlank(param.getXid())) {
             whereConditionBuilder.append(" and xid = ? ");
             sqlParamList.add(param.getXid());
@@ -90,48 +128,7 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
             sqlParamList.add(param.getTimeEnd());
         }
         String whereCondition = whereConditionBuilder.toString();
-        whereCondition = whereCondition.replaceFirst("and", "where");
-
-        String sourceSql = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSql(lockTable, whereCondition);
-        String queryLockSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize());
-        String lockCountSql = PageUtil.countSql(sourceSql, dbType);
-
-        List<GlobalLockVO> list = new ArrayList<>();
-        int count = 0;
-
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
-
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        PreparedStatement countPs = null;
-        ResultSet countRs = null;
-
-        try (Connection conn = dataSource.getConnection()) {
-            ps = conn.prepareStatement(queryLockSql);
-            countPs = conn.prepareStatement(lockCountSql);
-            for (int i = 0; i < sqlParamList.size(); i++) {
-                if (sqlParamList.get(i) instanceof Date) {
-                    ps.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
-                    countPs.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
-                } else {
-                    ps.setObject(i + 1, sqlParamList.get(i));
-                    countPs.setObject(i + 1, sqlParamList.get(i));
-                }
-            }
-            rs = ps.executeQuery();
-            countRs = countPs.executeQuery();
-            while (rs.next()) {
-                list.add(GlobalLockVO.convert(rs));
-            }
-            if (countRs.next()) {
-                count = countRs.getInt(1);
-            }
-        } catch (SQLException e) {
-            throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, rs, countPs, countRs);
-        }
-        return PageResult.success(list, count, (count / param.getPageSize()) + 1, param.getPageNum(), param.getPageSize());
+        return whereCondition.replaceFirst("and", "where");
     }
 
 }

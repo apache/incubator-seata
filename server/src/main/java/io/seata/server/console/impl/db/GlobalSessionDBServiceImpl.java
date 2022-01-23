@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -48,7 +47,7 @@ import org.springframework.stereotype.Component;
  * Global Session DataBase ServiceImpl
  *
  * @author: zhongxiang.wang
- * @author lvekee 734843455@qq.com
+ * @author: lvekee 734843455@qq.com
  */
 @Component
 @org.springframework.context.annotation.Configuration
@@ -69,8 +68,52 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         PageUtil.checkParam(param.getPageNum(), param.getPageSize());
 
-        StringBuilder whereConditionBuilder = new StringBuilder();
         List<Object> sqlParamList = new ArrayList<>();
+        String whereCondition = getWhereConditionByParam(param, sqlParamList);
+
+        String sourceSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllGlobalSessionSql(globalTable, whereCondition);
+        String querySessionSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize());
+        String sessionCountSql = PageUtil.countSql(sourceSql, dbType);
+
+        List<GlobalSessionVO> list = new ArrayList<>();
+        int count = 0;
+
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        PreparedStatement countPs = null;
+        ResultSet countRs = null;
+        try (Connection conn = dataSource.getConnection()) {
+            ps = conn.prepareStatement(querySessionSql);
+            PageUtil.setObject(ps, sqlParamList);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(GlobalSessionVO.convert(rs));
+            }
+
+            countPs = conn.prepareStatement(sessionCountSql);
+            PageUtil.setObject(countPs, sqlParamList);
+            countRs = countPs.executeQuery();
+            if (countRs.next()) {
+                count = countRs.getInt(1);
+            }
+            if (param.isWithBranch()) {
+                for (GlobalSessionVO globalSessionVO : list) {
+                    PageResult<BranchSessionVO> pageResp = branchSessionService.queryByXid(globalSessionVO.getXid());
+                    globalSessionVO.setBranchSessionVOs(new HashSet<>(pageResp.getData()));
+                }
+            }
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, rs, countPs, countRs);
+        }
+        return PageResult.success(list, count, (count / param.getPageSize()) + 1, param.getPageNum(), param.getPageSize());
+    }
+
+    private String getWhereConditionByParam(GlobalSessionParam param, List<Object> sqlParamList) {
+        StringBuilder whereConditionBuilder = new StringBuilder();
         if (StringUtils.isNotBlank(param.getXid())) {
             whereConditionBuilder.append(" and xid = ? ");
             sqlParamList.add(param.getXid());
@@ -96,53 +139,7 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
             sqlParamList.add(param.getTimeEnd());
         }
         String whereCondition = whereConditionBuilder.toString();
-        whereCondition = whereCondition.replaceFirst("and", "where");
-
-        String sourceSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllGlobalSessionSql(globalTable, whereCondition);
-        String querySessionSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize());
-        String sessionCountSql = PageUtil.countSql(sourceSql, dbType);
-
-        List<GlobalSessionVO> list = new ArrayList<>();
-        int count = 0;
-
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
-
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        PreparedStatement countPs = null;
-        ResultSet countRs = null;
-        try (Connection conn = dataSource.getConnection()) {
-            ps = conn.prepareStatement(querySessionSql);
-            countPs = conn.prepareStatement(sessionCountSql);
-            for (int i = 0; i < sqlParamList.size(); i++) {
-                if (sqlParamList.get(i) instanceof Date) {
-                    ps.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
-                    countPs.setDate(i + 1, new java.sql.Date(((Date) sqlParamList.get(i)).getTime()));
-                } else {
-                    ps.setObject(i + 1, sqlParamList.get(i));
-                    countPs.setObject(i + 1, sqlParamList.get(i));
-                }
-            }
-            rs = ps.executeQuery();
-            countRs = countPs.executeQuery();
-            while (rs.next()) {
-                list.add(GlobalSessionVO.convert(rs));
-            }
-            if (countRs.next()) {
-                count = countRs.getInt(1);
-            }
-            if (param.isWithBranch()) {
-                for (GlobalSessionVO globalSessionVO : list) {
-                    PageResult<BranchSessionVO> pageResp = branchSessionService.queryByXid(globalSessionVO.getXid());
-                    globalSessionVO.setBranchSessionVOs(new HashSet<>(pageResp.getData()));
-                }
-            }
-        } catch (SQLException e) {
-            throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, rs, countPs, countRs);
-        }
-        return PageResult.success(list, count, (count / param.getPageSize()) + 1, param.getPageNum(), param.getPageSize());
+        return whereCondition.replaceFirst("and", "where");
     }
 
 }
