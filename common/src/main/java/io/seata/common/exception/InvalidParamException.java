@@ -16,37 +16,44 @@
 package io.seata.common.exception;
 
 /**
- * eureka registry exception
+ * The type Invalid param exception.
  *
- * @author: rui_849217@163.com
+ * @author miaoxueyu
  */
-public class EurekaRegistryException extends RuntimeException {
+public class InvalidParamException extends RuntimeException {
 
     /**
-     * eureka registry exception.
+     * Instantiates a new Invalid param exception.
+     */
+    public InvalidParamException() {
+        super();
+    }
+
+    /**
+     * Instantiates a new Invalid param exception.
      *
      * @param message the message
      */
-    public EurekaRegistryException(String message) {
+    public InvalidParamException(String message) {
         super(message);
     }
 
     /**
-     * eureka registry exception.
+     * Instantiates a new Invalid param exception.
      *
      * @param message the message
      * @param cause   the cause
      */
-    public EurekaRegistryException(String message, Throwable cause) {
+    public InvalidParamException(String message, Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * eureka registry exception.
+     * Instantiates a new Invalid param exception.
      *
      * @param cause the cause
      */
-    public EurekaRegistryException(Throwable cause) {
+    public InvalidParamException(Throwable cause) {
         super(cause);
     }
 }

@@ -24,12 +24,6 @@ public class RedisException extends FrameworkException {
 
     /**
      * Instantiates a new Redis exception.
-     */
-    public RedisException() {
-    }
-
-    /**
-     * Instantiates a new Redis exception.
      *
      * @param err the err
      */

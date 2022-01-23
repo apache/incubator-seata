@@ -28,7 +28,7 @@ public class ShouldNeverHappenExceptionTest {
 
     @Test
     public void testConstructorWithNoParameters() {
-        assertThat(new ShouldNeverHappenException()).isInstanceOf(ShouldNeverHappenException.class);
+        assertThat(new ShouldNeverHappenException("mock exception")).isInstanceOf(ShouldNeverHappenException.class);
     }
 
     @Test
