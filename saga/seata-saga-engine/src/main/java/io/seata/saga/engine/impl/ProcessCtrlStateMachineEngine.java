@@ -45,7 +45,6 @@ import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
-import io.seata.saga.statelang.domain.impl.ParallelStateImpl;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.slf4j.Logger;
@@ -272,8 +271,9 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         String originStateName = EngineUtils.getOriginStateName(lastForwardState);
         State lastState = stateMachineInstance.getStateMachine().getState(originStateName);
         Loop loop = LoopTaskUtils.getLoopConfig(context, lastState);
-        if (null != loop && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
-            lastForwardState = LoopTaskUtils.findOutLastNeedForwardStateInstance(context);
+        if ((null != loop || DomainConstants.STATE_TYPE_PARALLEL.equals(lastState.getType())) && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+            lastForwardState = findOutLastNeedForwardStateInstanceWithConcurrent(context);
+            context.setVariable(DomainConstants.VAR_NAME_STATE_INST, lastForwardState);
         }
 
         context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
@@ -332,8 +332,6 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             loop = LoopTaskUtils.getLoopConfig(context, inst.getState(context));
             if (null != loop) {
                 inst.setTemporaryState(new LoopStartStateImpl());
-            } else if (lastForwardState.getName().contains("parallel")) {
-                inst.setTemporaryState(new ParallelStateImpl());
             }
 
             if (async) {
@@ -455,6 +453,22 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             }
         }
         return lastForwardStateInstance;
+    }
+
+    public static StateInstance findOutLastNeedForwardStateInstanceWithConcurrent(ProcessContext context) {
+        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateInstance lastForwardState = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+
+        List<StateInstance> actList = stateMachineInstance.getStateList();
+        for (int i = actList.size() - 1; i >= 0; i--) {
+            StateInstance stateInstance = actList.get(i);
+            if (EngineUtils.getOriginStateName(stateInstance).equals(EngineUtils.getOriginStateName(lastForwardState))
+                && !ExecutionStatus.SU.equals(stateInstance.getStatus())) {
+                return stateInstance;
+            }
+        }
+        return lastForwardState;
     }
 
     @Override

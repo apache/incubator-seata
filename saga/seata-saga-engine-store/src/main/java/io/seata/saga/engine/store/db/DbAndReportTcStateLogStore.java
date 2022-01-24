@@ -176,7 +176,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 machineInstance.setSerializedException(exceptionSerializer.serialize(machineInstance.getException()));
                 int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType),
                         STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE, machineInstance);
+                LOGGER.info("execute statemachine finished update");
                 if (effect < 1) {
+                    LOGGER.warn("id: {} | {}", machineInstance.getMachineId(), machineInstance.getId());
                     LOGGER.warn("StateMachineInstance[{}] is recovery by server, skip recordStateMachineFinished.", machineInstance.getId());
                 } else {
                     StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(

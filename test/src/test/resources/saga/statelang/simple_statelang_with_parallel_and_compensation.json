@@ -1,5 +1,5 @@
 {
-  "Name": "simpleParallelTestStateMachine",
+  "Name": "simpleParallelTestStateMachineWithCompensation",
   "Comment": "带并发参数的测试状态机定义",
   "StartState": "FirstState",
   "Version": "0.0.1",
@@ -7,11 +7,10 @@
     "FirstState": {
       "Type": "Parallel",
       "Branches": [
-        "SecondState",
+        "FifthState",
+        "SixState",
         "ThirdState",
-        "ThirdState",
-        "ForthState",
-        "FifthState"
+        "ForthState"
       ],
       "Parallel": 2,
       "Output": {
@@ -25,10 +24,6 @@
         {
           "Expression":"[a] == 1",
           "Next":"SecondState"
-        },
-        {
-          "Expression":"[a] == 2",
-          "Next":"ThirdState"
         }
       ],
       "Default":"Fail"
@@ -39,34 +34,45 @@
       "ServiceMethod": "bar",
       "Input": [
         {
-          "a": "$.[a]",
-          "b": "$.[b]"
+          "a": "$.[a]"
         }
       ]
     },
     "ThirdState": {
       "Type": "ServiceTask",
       "ServiceName": "demoService",
-      "ServiceMethod": "foo",
-      "CompensateState": "CompensateThirdState",
+      "ServiceMethod": "bar",
+      "CompensateState": "CompensateSecondState",
       "Input": [
         {
-          "element": "$.[element]",
-          "throwException": "$.[fooThrowException]"
+          "throwException": "$.[barThrowException]"
         }
       ],
-      "Output": {
-        "fooResult": "$.#root"
-      },
-      "Next": "SecondState"
+      "Catch": [
+        {
+          "Exceptions": [
+            "io.seata.saga.engine.mock.DemoException"
+          ],
+          "Next": "CompensationTriggerTest"
+        }
+      ]
     },
     "ForthState": {
       "Type": "ServiceTask",
       "ServiceName": "demoService",
       "ServiceMethod": "bar",
+      "CompensateState": "CompensateSecondState",
       "Input": [
         {
-          "a": "$.[a]"
+          "throwException": "$.[barThrowException]"
+        }
+      ],
+      "Catch": [
+        {
+          "Exceptions": [
+            "io.seata.saga.engine.mock.DemoException"
+          ],
+          "Next": "CompensationTriggerTest"
         }
       ]
     },
@@ -84,37 +90,9 @@
       "Type": "ServiceTask",
       "ServiceName": "demoService",
       "ServiceMethod": "bar",
-      "CompensateState": "CompensateSecondState",
       "Input": [
         {
-          "throwException": "$.[barThrowException]"
-        }
-      ],
-      "Catch": [
-        {
-          "Exceptions": [
-            "io.seata.saga.engine.mock.DemoException"
-          ],
-          "Next": "CompensationTriggerTest"
-        }
-      ]
-    },
-    "SeventhState": {
-      "Type": "ServiceTask",
-      "ServiceName": "demoService",
-      "ServiceMethod": "bar",
-      "CompensateState": "CompensateSecondState",
-      "Input": [
-        {
-          "throwException": "$.[barThrowException]"
-        }
-      ],
-      "Catch": [
-        {
-          "Exceptions": [
-            "io.seata.saga.engine.mock.DemoException"
-          ],
-          "Next": "CompensationTriggerTest"
+          "a": "$.[a]"
         }
       ]
     },
@@ -126,45 +104,6 @@
         {
           "compensateFooInput": "$.[fooResult]",
           "throwException": "$.[compensateFooThrowException]"
-        }
-      ]
-    },
-    "CallSubStateMachine": {
-      "Type": "SubStateMachine",
-      "StateMachineName": "simpleCompensationStateMachine",
-      "Loop": {
-        "Parallel": 3,
-        "Collection": "$.[collection]",
-        "ElementVariableName": "element",
-        "CompletionCondition": "[nrOfCompletedInstances] / [nrOfInstances] >= 0.4",
-        "ElementIndexName": "loopCounter"
-      },
-      "Input": [
-        {
-          "a": 1,
-          "collection": "$.[collection]",
-          "loopCounter": "$.[loopCounter]",
-          "element": "$.[element]",
-          "barThrowException": "$.[barThrowException]",
-          "fooThrowException": "$.[fooThrowException]",
-          "compensateFooThrowException": "$.[compensateFooThrowException]"
-        }
-      ],
-      "Output": {
-        "fooResult": "$.#root"
-      },
-      "Next": "Succeed"
-    },
-    "CompensateFirstState": {
-      "Type": "ServiceTask",
-      "ServiceName": "demoService",
-      "ServiceMethod": "compensateFoo",
-      "Input": [
-        {
-          "compensateFooInput": "$.[fooResult]",
-          "throwException": "$.[compensateFooThrowException]",
-          "loopCounter": "$.[loopCounter]",
-          "element": "$.[element]"
         }
       ]
     },

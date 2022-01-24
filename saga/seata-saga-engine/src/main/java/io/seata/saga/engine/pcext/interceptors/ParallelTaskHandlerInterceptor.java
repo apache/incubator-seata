@@ -23,6 +23,8 @@ import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
+import io.seata.saga.engine.pcext.utils.ParallelContextHolder;
+import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import org.slf4j.Logger;
@@ -47,26 +49,27 @@ public class ParallelTaskHandlerInterceptor implements StateHandlerInterceptor {
     @Override
     public void preProcess(ProcessContext context) throws EngineExecutionException {
 
-        if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
-
-            if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
-//                throw new EngineExecutionException("stop execute");
-            }
-        }
     }
 
     @Override
     public void postProcess(ProcessContext context, Exception e) throws EngineExecutionException {
-        LOGGER.info("parallel interceptor post process: {}", context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE));
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
 
-            if (null != e) {
-                LOGGER.info("postProcess try release");
+            Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            if (exp == null) {
+                exp = e;
+            }
+            
+            if (e != null) {
                 if (context.hasVariable(DomainConstants.PARALLEL_SEMAPHORE)) {
                     Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.PARALLEL_SEMAPHORE);
                     semaphore.release();
                 }
+            }
+
+            if (exp != null) {
+                ParallelContextHolder.getCurrent(context, true).setFailEnd(true);
             }
         }
     }

@@ -1076,6 +1076,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
+        paramMap.put("b", 2);
 
         String stateMachineName = "simpleParallelTestStateMachine";
 
@@ -1107,6 +1108,26 @@ public class StateMachineDBTests extends AbstractServerTest {
         Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+    }
+
+    @Test
+    public void testSimpleStateMachineWithParallelCompensate() {
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("b", 2);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleParallelTestStateMachineWithCompensation";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {

@@ -24,6 +24,7 @@ import io.seata.saga.engine.pcext.StateRouter;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.engine.pcext.utils.ParallelContextHolder;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
@@ -67,7 +68,8 @@ public class TaskStateRouter implements StateRouter {
             return null;
         }
 
-        if (Boolean.TRUE.equals(context.getVariable("PARALLEL_END"))) {
+        // check if parallel fail end
+        if (ParallelContextHolder.getCurrent(context, true).isFailEnd()) {
             return null;
         }
 
@@ -142,7 +144,7 @@ public class TaskStateRouter implements StateRouter {
             StateInstance stateToBeCompensated = stateStackToBeCompensated.pop();
 
             StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
-            State state = stateMachine.getState(EngineUtils.getOriginStateName(stateToBeCompensated));
+            State state = stateMachine.getState(EngineUtils.getOriginStateNameForCompensate(stateToBeCompensated));
             if (state != null && state instanceof AbstractTaskState) {
 
                 AbstractTaskState taskState = (AbstractTaskState)state;

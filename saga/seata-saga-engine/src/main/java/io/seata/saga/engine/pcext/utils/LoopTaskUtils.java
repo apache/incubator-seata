@@ -132,6 +132,7 @@ public class LoopTaskUtils {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateInstance lastForwardState = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
 
         List<StateInstance> actList = stateMachineInstance.getStateList();
         List<StateInstance> forwardStateList = actList.stream().filter(
@@ -155,6 +156,9 @@ public class LoopTaskUtils {
                     failEndList.addFirst(reloadLoopCounter(stateInstance.getName()));
                 }
                 list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
+            } else if (stateInstance.getName().equals(lastForwardState.getName())) {
+                failEndList.addFirst(reloadLoopCounter(stateInstance.getName()));
+                list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
             }
         }
 
@@ -177,22 +181,6 @@ public class LoopTaskUtils {
         copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter >= 0 ? loopCounter : acquireNextLoopCounter(context));
         copyContext.setInstruction(copyInstruction(context.getInstruction(StateInstruction.class)));
         return copyContext;
-    }
-
-    public static StateInstance findOutLastNeedForwardStateInstance(ProcessContext context) {
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        StateInstance lastForwardState = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
-
-        List<StateInstance> actList = stateMachineInstance.getStateList();
-        for (int i = actList.size() - 1; i >= 0; i--) {
-            StateInstance stateInstance = actList.get(i);
-            if (EngineUtils.getOriginStateName(stateInstance).equals(EngineUtils.getOriginStateName(lastForwardState))
-                && !ExecutionStatus.SU.equals(stateInstance.getStatus())) {
-                return stateInstance;
-            }
-        }
-        return lastForwardState;
     }
 
     public static StateInstance findOutLastRetriedStateInstance(StateMachineInstance stateMachineInstance,

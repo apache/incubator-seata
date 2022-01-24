@@ -29,7 +29,6 @@ import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
@@ -57,20 +56,40 @@ public class EngineUtils {
     }
 
     /**
-     * get origin state name without suffix like fork
+     * get origin state name without suffix like loop
      *
      * @param stateInstance
      * @return
      * @see LoopTaskUtils#generateLoopStateName(ProcessContext, String)
+     * @see ParallelTaskUtils#generateParallelSubStateName(ProcessContext, String)
      */
     public static String getOriginStateName(StateInstance stateInstance) {
         String stateName = stateInstance.getName();
         if (StringUtils.isNotBlank(stateName)) {
-            int end = stateName.lastIndexOf(LoopTaskUtils.LOOP_STATE_NAME_PATTERN);
-            if (end > -1) {
-                return stateName.substring(0, end);
-            } else if (stateName.contains("parallel")) {
-                return stateName.substring(stateName.lastIndexOf("-")+1);
+            if (stateName.contains(LoopTaskUtils.LOOP_STATE_NAME_PATTERN)) {
+                return stateName.split("-")[0];
+            } else if (stateName.contains(ParallelTaskUtils.PARALLEL_STATE_NAME_PATTERN)) {
+                return stateName.split("-")[0];
+            }
+        }
+        return stateName;
+    }
+
+    /**
+     * get origin state name for compensate
+     *
+     * @param stateInstance
+     * @return
+     * @see LoopTaskUtils#generateLoopStateName(ProcessContext, String)
+     * @see ParallelTaskUtils#generateParallelSubStateName(ProcessContext, String)
+     */
+    public static String getOriginStateNameForCompensate(StateInstance stateInstance) {
+        String stateName = stateInstance.getName();
+        if (StringUtils.isNotBlank(stateName)) {
+            if (stateName.contains(LoopTaskUtils.LOOP_STATE_NAME_PATTERN)) {
+                return stateName.split("-")[0];
+            } else if (stateName.contains(ParallelTaskUtils.PARALLEL_STATE_NAME_PATTERN)) {
+                return stateName.split("-")[3];
             }
         }
         return stateName;
@@ -148,13 +167,8 @@ public class EngineUtils {
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
 
-        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
-            LOGGER.info("fail state machine");
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) || context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
             return;
-        }
-
-        if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
-            ((ProcessContextImpl)context).setVariableLocally("PARALLEL_END", true);
         }
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
