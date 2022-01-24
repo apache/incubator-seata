@@ -48,6 +48,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected String targetSQL;
 
     /**
+     * The cache of scrollable generatedKeys
+     */
+    protected CachedRowSet scrollableGeneratedKeysCache;
+
+    /**
      * Instantiates a new Abstract statement proxy.
      *
      * @param connectionProxy the connection proxy
@@ -245,9 +250,14 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
-        CachedRowSet generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
-        generatedKeysRowSet.populate(rs);
-        return generatedKeysRowSet;
+        if (null == scrollableGeneratedKeysCache || !rs.isAfterLast()) {
+            //Conditions for flushing the cache:
+            //1.originally not cached
+            //2.the original ResultSet was not traversed, including executed repeatedly
+            scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
+            scrollableGeneratedKeysCache.populate(rs);
+        }
+        return scrollableGeneratedKeysCache;
     }
 
     @Override
