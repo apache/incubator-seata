@@ -15,14 +15,11 @@
  */
 package io.seata.server.storage;
 
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-=======
->>>>>>> 4c84d20d734a80801c9d2bfa161c36e8ed596801
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.vo.BranchSessionVO;
@@ -35,11 +32,6 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.store.SessionStorable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * The session converter
@@ -126,7 +118,7 @@ public class SessionConverter {
      * @param filteredSessions the GlobalSession list
      * @return the GlobalSessionVO list
      */
-    public static List<GlobalSessionVO> convert(ArrayList<GlobalSession> filteredSessions) {
+    public static List<GlobalSessionVO> convertGlobalSession(List<GlobalSession> filteredSessions) {
 
         if (CollectionUtils.isEmpty(filteredSessions)) {
             return Collections.emptyList();
@@ -145,7 +137,7 @@ public class SessionConverter {
                     (long) session.getTimeout(),
                     session.getBeginTime(),
                     session.getApplicationData(),
-                    convert(session.getBranchSessions())
+                    convertBranchSession(session.getBranchSessions())
             ));
         }
         return result;
@@ -157,7 +149,7 @@ public class SessionConverter {
      * @param branchSessions the BranchSession list
      * @return the BranchSessionVO list
      */
-    public static Set<BranchSessionVO> convert(List<BranchSession> branchSessions) {
+    public static Set<BranchSessionVO> convertBranchSession(List<BranchSession> branchSessions) {
 
         if (CollectionUtils.isEmpty(branchSessions)) {
             return Collections.emptySet();

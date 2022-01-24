@@ -62,7 +62,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
                 .filter(obtainPredicate(param))
                 .collect(Collectors.toList());
 
-        return PageResult.build(SessionConverter.convert(filteredSessions), param.getPageNum(), param.getPageSize());
+        return PageResult.build(SessionConverter.convertGlobalSession(filteredSessions), param.getPageNum(), param.getPageSize());
     }
 
 
