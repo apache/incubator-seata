@@ -160,7 +160,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<>(
                     CONFIG.getInt(ConfigurationKeys.SESSION_BRANCH_ASYNC_QUEUE_SIZE, DEFAULT_BRANCH_ASYNC_QUEUE_SIZE)
-            ), new NamedThreadFactory("branchSessionRemove", 2, true),
+            ), new NamedThreadFactory("branchSessionRemove", BRANCH_ASYNC_POOL_SIZE),
             new ThreadPoolExecutor.CallerRunsPolicy());
 
     private RemotingServer remotingServer;
@@ -557,12 +557,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     public void destroy() {
         // 1. first shutdown timed task
+        handleAllSession.shutdown();
         retryRollbacking.shutdown();
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
         branchRemoveExecutor.shutdown();
         try {
+            handleAllSession.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
