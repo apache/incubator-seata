@@ -17,7 +17,9 @@ package io.seata.rm.datasource.exec;
 
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.rm.datasource.*;
+import io.seata.rm.datasource.ConnectionContext;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import io.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
 import io.seata.rm.datasource.sql.struct.TableMeta;
