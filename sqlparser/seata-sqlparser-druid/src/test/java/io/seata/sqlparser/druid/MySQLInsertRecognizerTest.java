@@ -27,6 +27,8 @@ import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -168,6 +170,27 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
             MySQLInsertRecognizer mysqlInsertRecognizer = new MySQLInsertRecognizer(s, sqlInsertStatement);
             mysqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
+    }
+
+    @Test
+    public void testForNullOrDefault() {
+        String sql = "insert into t(id, time) values (null, now()), (null, now())";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
+        Assertions.assertEquals(2, insertRows.size());
+        Assertions.assertTrue(insertRows.get(0).get(0) instanceof Null);
+        Assertions.assertTrue(insertRows.get(1).get(0) instanceof Null);
+
+        sql = "insert into t(id, time) values (default, now()), (default, now())";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
+        insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
+        Assertions.assertEquals(2, insertRows.size());
+        Assertions.assertTrue(insertRows.get(0).get(0) instanceof SqlDefaultExpr);
+        Assertions.assertTrue(insertRows.get(1).get(0) instanceof SqlDefaultExpr);
     }
 
     @Override
