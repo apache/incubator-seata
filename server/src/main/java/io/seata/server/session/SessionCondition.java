@@ -28,11 +28,12 @@ public class SessionCondition {
     private GlobalStatus status;
     private GlobalStatus[] statuses;
     private long overTimeAliveMills;
+    private Boolean withBranchSessions;
 
     /**
      * Instantiates a new Session condition.
      */
-    public SessionCondition() {
+    public SessionCondition(){
     }
 
     /**
@@ -130,5 +131,13 @@ public class SessionCondition {
 
     public void setStatuses(GlobalStatus[] statuses) {
         this.statuses = statuses;
+    }
+
+    public Boolean getWithBranchSessions() {
+        return withBranchSessions;
+    }
+
+    public void setWithBranchSessions(Boolean withBranchSessions) {
+        this.withBranchSessions = withBranchSessions;
     }
 }

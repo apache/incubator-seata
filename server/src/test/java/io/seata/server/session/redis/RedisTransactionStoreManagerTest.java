@@ -25,7 +25,6 @@ import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;

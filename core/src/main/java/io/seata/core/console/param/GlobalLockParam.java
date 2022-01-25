@@ -41,6 +41,10 @@ public class GlobalLockParam extends BaseParam implements Serializable {
      * the branch id
      */
     private String branchId;
+    /**
+     * the primary Key
+     */
+    private String pk;
 
     public String getTransactionId() {
         return transactionId;
@@ -72,6 +76,14 @@ public class GlobalLockParam extends BaseParam implements Serializable {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getPk() {
+        return pk;
+    }
+
+    public void setPk(String pk) {
+        this.pk = pk;
     }
 
     @Override

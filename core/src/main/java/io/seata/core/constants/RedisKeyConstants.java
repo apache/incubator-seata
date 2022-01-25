@@ -19,7 +19,6 @@ package io.seata.core.constants;
  * The redis key constants
  *
  * @author wangzhongxiang
- * @author doubleDimple
  */
 public class RedisKeyConstants {
 
@@ -150,6 +149,10 @@ public class RedisKeyConstants {
     /**
      * The globalLock keys
      */
-    public static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + "*";
+    public static final String DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX = "SEATA_ROW_LOCK_";
+    /**
+     * The split
+     */
+    public static final String SPLIT= "^^^";
 
 }

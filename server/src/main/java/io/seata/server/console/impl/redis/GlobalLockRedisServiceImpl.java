@@ -15,15 +15,11 @@
  */
 package io.seata.server.console.impl.redis;
 
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.google.common.collect.Lists;
-import io.seata.common.XID;
 import io.seata.common.util.BeanUtils;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.console.result.PageResult;
@@ -34,11 +30,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
+import javax.annotation.Resource;
+import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
 import static io.seata.common.util.StringUtils.isNotBlank;
 import static io.seata.core.console.result.PageResult.checkPage;
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS;
+import static io.seata.core.constants.RedisKeyConstants.*;
 
 /**
  * Global Lock Redis Service Impl
@@ -52,128 +48,57 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
     private Logger logger = LoggerFactory.getLogger(GlobalLockRedisServiceImpl.class);
 
+    @Resource
+    private io.seata.core.model.Resource resource;
+
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
 
-        int total;
+        int total = 0;
         List<GlobalLockVO> globalLockVos;
 
         checkPage(param);
 
-        if (isNotBlank(param.getXid()) || isNotBlank(param.getTransactionId())) {
-            globalLockVos = queryGlobalByParam(param);
+        if (isNotBlank(param.getXid())) {
+            globalLockVos = queryGlobalByXid(param.getXid());
             total = globalLockVos.size();
+            return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
+        } else if (isNotBlank(param.getTableName()) && isNotBlank(param.getPk())) {
+            //SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188
+            String tableName = param.getTableName();
+            String pk = param.getPk();
+            globalLockVos = queryGlobalLockByRowKey(buildRowKey(tableName,pk));
+            return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
         } else {
-            if (isNotBlank(param.getTableName()) || isNotBlank(param.getBranchId())) {
-                logger.debug("not supported according to tableName or branchId query");
-                return PageResult.success();
-            }
-            //query all
-            globalLockVos = queryAllPage(param.getPageNum(),param.getPageSize());
-            total = queryAllTotal();
-        }
-        return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
-    }
-
-    private int queryAllTotal() {
-        int total = 0;
-        String cursor = String.valueOf(total);
-        ScanParams sp = new ScanParams();
-        sp.match(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS);
-        while (true) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                ScanResult<String> scan = jedis.scan(ScanParams.SCAN_POINTER_START, sp);
-                List<String> list = scan.getResult();
-                for (int i = 0;i < list.size();i++) {
-                    total++;
-                }
-            }
-            if (ScanParams.SCAN_POINTER_START.equals(cursor)) {
-                return total;
-            }
+            return PageResult.failure(ParameterRequired.getErrCode(),"not support request param");
         }
     }
 
-    private List<GlobalLockVO> queryAllPage(int pageNum,int pageSize) {
-        int start = (pageNum - 1) * pageSize < 0 ? 0 : (pageNum - 1) * pageSize;
-        int end = pageNum * pageSize;
-
-        Set<String> keys = new HashSet<>();
-        String cursor = String.valueOf(start);
-        ScanParams sp = new ScanParams();
-        sp.match(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS);
-        sp.count(end);
-
-        while (true) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                ScanResult<String> scan = jedis.scan(cursor, sp);
-                cursor = scan.getCursor();
-                List<String> list = scan.getResult();
-                for (int i = 0;i < list.size();i++) {
-                    keys.add(list.get(i));
-                    if (keys.size() == pageSize) {
-                        return readGlobalocks(keys);
-                    }
-                }
-            }
-
-            if (ScanParams.SCAN_POINTER_START.equals(cursor)) {
-                return readGlobalocks(keys);
-            }
-        }
+    private List<GlobalLockVO> queryGlobalLockByRowKey(String buildRowKey) {
+        return readGlobalLock(buildRowKey);
     }
 
-    private List<GlobalLockVO> readGlobalocks(Set<String> keys) {
+    private String buildRowKey(String tableName, String pk) {
+        String resourceId = resource.getResourceId();
+        return DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX + resourceId + SPLIT + tableName + SPLIT + pk;
+    }
+
+
+    private List<GlobalLockVO> queryGlobalByXid(String xid) {
+       return readGlobalLock(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid);
+    }
+
+
+    private List<GlobalLockVO> readGlobalLock(String key) {
         List<GlobalLockVO> vos = Lists.newArrayList();
-        if (CollectionUtils.isNotEmpty(keys)) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                for (String key : keys) {
-                    Map<String, String> map = jedis.hgetAll(key);
-                    GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
-                    if (vo != null) {
-                        vos.add(vo);
-                    }
-                }
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            Map<String, String> map = jedis.hgetAll(key);
+            GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
+            if (vo != null) {
+                vos.add(vo);
             }
         }
         return vos;
-    }
-
-    private List<GlobalLockVO> queryGlobalByParam(GlobalLockParam param) {
-        List<GlobalLockVO> vos = Lists.newArrayList();
-        String xid = getxidStr(param);
-
-        String key = DEFAULT_REDIS_SEATA_GLOBAL_LOCK_KEYS + xid;
-        if (isNotBlank(xid)) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                Map<String, String> map = jedis.hgetAll(key);
-                GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
-                if (vo != null) {
-                    vos.add(vo);
-                }
-            }
-        }
-
-        return vos;
-    }
-
-    private String getxidStr(GlobalLockParam param) {
-        String xidStr = param.getXid();
-        String transactionId = param.getTransactionId();
-
-        if (isNotBlank(xidStr) && isNotBlank(transactionId)) {
-            String xid = XID.generateXID(Long.valueOf(param.getTransactionId()));
-            if (!xid.equals(param.getXid())) {
-                return StringUtils.EMPTY;
-            } else {
-                return xid;
-            }
-        } else if (isNotBlank(transactionId)) {
-            return XID.generateXID(Long.valueOf(param.getTransactionId()));
-        } else {
-            return xidStr;
-        }
-
     }
 
 }

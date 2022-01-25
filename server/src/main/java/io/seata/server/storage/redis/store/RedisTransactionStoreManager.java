@@ -402,6 +402,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return the list
      */
     public List<GlobalSession> readSession(GlobalStatus[] statuses) {
+       return readSession(statuses,true);
+    }
+
+    public List<GlobalSession> readSession(GlobalStatus[] statuses,boolean withBranchSessions) {
         List<String> statusKeys = new ArrayList<>();
         for (int i = 0; i < statuses.length; i++) {
             statusKeys.add(buildGlobalStatus(statuses[i].getCode()));
@@ -414,7 +418,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
                 xids.parallelStream().forEach(xid -> {
-                    GlobalSession globalSession = this.readSession(xid, true);
+                    GlobalSession globalSession = this.readSession(xid, withBranchSessions);
                     if (globalSession != null) {
                         globalSessions.add(globalSession);
                     }
@@ -431,16 +435,20 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
+        Boolean withBranchSessions = sessionCondition.getWithBranchSessions();
+        if (null == withBranchSessions) {
+            withBranchSessions = Boolean.TRUE;
+        }
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
-            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), true);
+            GlobalSession globalSession = this.readSession(sessionCondition.getXid(),withBranchSessions);
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }
             return globalSessions;
         } else if (sessionCondition.getTransactionId() != null) {
             GlobalSession globalSession = this
-                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
+                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(),withBranchSessions);
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }
@@ -448,36 +456,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses());
         } else if (sessionCondition.getStatus() != null) {
-            return readSession(new GlobalStatus[]{sessionCondition.getStatus()});
+            return readSession(new GlobalStatus[]{sessionCondition.getStatus()},withBranchSessions);
         }
         return null;
-    }
-
-    /**
-     * the globalSessionStatus query by page
-     * @param sessionCondition
-     * @param withBranchSessions
-     * @return List<GlobalSession>
-     */
-    public List<GlobalSession> findGlobalSessionByStatusWithPage(SessionCondition sessionCondition, boolean withBranchSessions) {
-        List<GlobalSession> globalSessions = new ArrayList<>();
-        if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
-            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), withBranchSessions);
-            if (globalSession != null) {
-                globalSessions.add(globalSession);
-            }
-            return globalSessions;
-        } else if (sessionCondition.getTransactionId() != null) {
-            GlobalSession globalSession = this
-                    .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), withBranchSessions);
-            if (globalSession != null) {
-                globalSessions.add(globalSession);
-            }
-            return globalSessions;
-        } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            return readSession(sessionCondition.getStatuses());
-        }
-        return globalSessions;
     }
 
     /**
@@ -614,7 +595,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     public List<GlobalSession> findGlobalSessionByPage(int pageNum,int pageSize,boolean withBranch) {
 
-        int start = (pageNum - 1) * pageSize < 0 ? 0 : (pageNum - 1) * pageSize;
+        int start = Math.max((pageNum - 1) * pageSize, 0);
         int end = pageNum * pageSize;
 
         Set<String> keys = new HashSet<>();
@@ -624,7 +605,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         sp.count(end);
 
         while (true) {
-
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                 ScanResult<String> scan = jedis.scan(cursor, sp);
                 cursor = scan.getCursor();
@@ -636,7 +616,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     }
                 }
             }
-
             if (ScanParams.SCAN_POINTER_START.equals(cursor)) {
                 return readGlobalSession(keys,withBranch);
             }
@@ -651,6 +630,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     public Long countByClobalSesisons(GlobalStatus[] values) {
         List<String> statusKeys = new ArrayList<>();
+        Long total = 0L;
         for (GlobalStatus status : values) {
             statusKeys.add(buildGlobalStatus(status.getCode()));
         }
@@ -658,7 +638,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             statusKeys.stream().forEach(statusKey -> pipelined.llen(statusKey));
             List<Long> list = (List<Long>)(List)pipelined.syncAndReturnAll();
-            return list.stream().collect(Collectors.summingLong(value -> value));
+            if (list.size() > 0) {
+                total = list.stream().mapToLong(value -> value).sum();
+            }
+            return total;
         }
     }
 
