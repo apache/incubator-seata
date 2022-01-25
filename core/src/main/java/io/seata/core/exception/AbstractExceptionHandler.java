@@ -23,7 +23,10 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type Abstract exception handler.
@@ -90,7 +93,7 @@ public abstract class AbstractExceptionHandler {
      * @param <S> the type parameter
      */
     public abstract static class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
-        implements Callback<T, S> {
+            implements Callback<T, S> {
 
         @Override
         public void onSuccess(T request, S response) {
@@ -99,7 +102,7 @@ public abstract class AbstractExceptionHandler {
 
         @Override
         public void onTransactionException(T request, S response,
-            TransactionException tex) {
+                                           TransactionException tex) {
             response.setTransactionExceptionCode(tex.getCode());
             response.setResultCode(ResultCode.Failed);
             response.setMsg("TransactionException[" + tex.getMessage() + "]");
@@ -126,7 +129,7 @@ public abstract class AbstractExceptionHandler {
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
-            if (LockKeyConflict.equals(tex.code)) {
+            if (Objects.equals(LockKeyConflict, tex.code) || Objects.equals(LockKeyConflictFailFast, tex.code)) {
                 LOGGER.info("this request cannot acquire global lock, you can do retry or lower lock concurrency. request: {}", request);
             } else {
                 LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
