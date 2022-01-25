@@ -32,23 +32,38 @@ public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder 
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
-        return new MySQLDeleteRecognizer(sql, ast);
+        MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, ast);
+        if (mySQLDeleteRecognizer.isSqlSyntaxSupports(ast)) {
+            return mySQLDeleteRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast) {
-        return new MySQLInsertRecognizer(sql, ast);
+        MySQLInsertRecognizer mySQLInsertRecognizer = new MySQLInsertRecognizer(sql, ast);
+        if (mySQLInsertRecognizer.isSqlSyntaxSupports(ast)) {
+            return mySQLInsertRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast) {
-        return new MySQLUpdateRecognizer(sql, ast);
+        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, ast);
+        if (mySQLUpdateRecognizer.isSqlSyntaxSupports(ast)) {
+            return mySQLUpdateRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
         if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-            return new MySQLSelectForUpdateRecognizer(sql, ast);
+            MySQLSelectForUpdateRecognizer mySQLSelectForUpdateRecognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
+            if (mySQLSelectForUpdateRecognizer.isSqlSyntaxSupports(ast)) {
+                return mySQLSelectForUpdateRecognizer;
+            }
         }
         return null;
     }

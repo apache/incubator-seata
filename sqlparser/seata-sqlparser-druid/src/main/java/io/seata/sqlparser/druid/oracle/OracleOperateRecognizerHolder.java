@@ -32,23 +32,38 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
-        return new OracleDeleteRecognizer(sql, ast);
+        OracleDeleteRecognizer oracleDeleteRecognizer = new OracleDeleteRecognizer(sql, ast);
+        if (oracleDeleteRecognizer.isSqlSyntaxSupports(ast)) {
+            return oracleDeleteRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast) {
-        return new OracleInsertRecognizer(sql, ast);
+        OracleInsertRecognizer oracleInsertRecognizer = new OracleInsertRecognizer(sql, ast);
+        if (oracleInsertRecognizer.isSqlSyntaxSupports(ast)) {
+            return oracleInsertRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast) {
-        return new OracleUpdateRecognizer(sql, ast);
+        OracleUpdateRecognizer oracleUpdateRecognizer = new OracleUpdateRecognizer(sql, ast);
+        if (oracleUpdateRecognizer.isSqlSyntaxSupports(ast)) {
+            return oracleUpdateRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
         if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-            return new OracleSelectForUpdateRecognizer(sql, ast);
+            OracleSelectForUpdateRecognizer oracleSelectForUpdateRecognizer = new OracleSelectForUpdateRecognizer(sql, ast);
+            if (oracleSelectForUpdateRecognizer.isSqlSyntaxSupports(ast)) {
+                return oracleSelectForUpdateRecognizer;
+            }
         }
         return null;
     }

@@ -33,24 +33,39 @@ public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHo
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
-        return new PostgresqlDeleteRecognizer(sql, ast);
+        PostgresqlDeleteRecognizer postgresqlDeleteRecognizer = new PostgresqlDeleteRecognizer(sql, ast);
+        if (postgresqlDeleteRecognizer.isSqlSyntaxSupports(ast)) {
+            return postgresqlDeleteRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast) {
-        return new PostgresqlInsertRecognizer(sql, ast);
+        PostgresqlInsertRecognizer postgresqlInsertRecognizer = new PostgresqlInsertRecognizer(sql, ast);
+        if (postgresqlInsertRecognizer.isSqlSyntaxSupports(ast)) {
+            return postgresqlInsertRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast) {
-        return new PostgresqlUpdateRecognizer(sql, ast);
+        PostgresqlUpdateRecognizer postgresqlUpdateRecognizer = new PostgresqlUpdateRecognizer(sql, ast);
+        if (postgresqlUpdateRecognizer.isSqlSyntaxSupports(ast)) {
+            return postgresqlUpdateRecognizer;
+        }
+        return null;
     }
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
         PGSelectQueryBlock selectQueryBlock = (PGSelectQueryBlock) ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock();
         if (selectQueryBlock.getForClause() != null && selectQueryBlock.getForClause().getOption().equals(PGSelectQueryBlock.ForClause.Option.UPDATE)) {
-            return new PostgresqlSelectForUpdateRecognizer(sql, ast);
+            PostgresqlSelectForUpdateRecognizer postgresqlSelectForUpdateRecognizer = new PostgresqlSelectForUpdateRecognizer(sql, ast);
+            if (postgresqlSelectForUpdateRecognizer.isSqlSyntaxSupports(ast)) {
+                return postgresqlSelectForUpdateRecognizer;
+            }
         }
         return null;
     }
