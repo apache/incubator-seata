@@ -130,7 +130,7 @@ public abstract class AbstractExceptionHandler {
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
             if (Objects.equals(LockKeyConflict, tex.code) || Objects.equals(LockKeyConflictFailFast, tex.code)) {
-                LOGGER.info("this request cannot acquire global lock, you can do retry or lower lock concurrency. request: {}", request);
+                LOGGER.info("this request cannot acquire global lock, you can do retry or increase retry times. request: {}", request);
             } else {
                 LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
             }
