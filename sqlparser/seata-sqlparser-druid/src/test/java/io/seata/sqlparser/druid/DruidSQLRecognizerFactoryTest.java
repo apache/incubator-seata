@@ -70,12 +70,12 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql6, JdbcConstants.ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql6, JdbcConstants.POSTGRESQL));
 
-        String sql7 = "delete t where id = ?";
+        String sql7 = "delete from t where id = ?";
         Assertions.assertNotNull(recognizerFactory.create(sql7, JdbcConstants.MYSQL));
         Assertions.assertNotNull(recognizerFactory.create(sql7, JdbcConstants.ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql7, JdbcConstants.POSTGRESQL));
 
-        String sql8 = "delete t where id in (select id from b)";
+        String sql8 = "delete from t where id in (select id from b)";
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql8, JdbcConstants.MYSQL));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql8, JdbcConstants.ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql8, JdbcConstants.POSTGRESQL));
