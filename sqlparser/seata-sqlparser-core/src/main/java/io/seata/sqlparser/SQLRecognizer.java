@@ -59,7 +59,7 @@ public interface SQLRecognizer {
      * check the sql syntax is supports
      * @return isSupport:true
      */
-    default boolean isSqlSyntaxSupports(){
+    default boolean isSqlSyntaxSupports() {
         return true;
     }
 }
