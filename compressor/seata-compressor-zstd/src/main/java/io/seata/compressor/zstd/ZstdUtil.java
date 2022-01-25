@@ -13,30 +13,33 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.compressor.zstd;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
+import com.github.luben.zstd.Zstd;
 
 /**
- * the Zstd Util test
+ * the Zstd Util
  *
  * @author chd
  */
-public class ZstdUtilTest {
+public class ZstdUtil {
 
-    @Test
-    public void test_compress() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            ZstdUtil.compress(null);
-        });
+    public static byte[] compress(byte[] bytes) {
+        if (bytes == null) {
+            throw new NullPointerException("bytes is null");
+        }
+
+        return Zstd.compress(bytes);
     }
 
-    @Test
-    public void test_decompress() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            ZstdUtil.decompress(null);
-        });
+    public static byte[] decompress(byte[] bytes) {
+        if (bytes == null) {
+            throw new NullPointerException("bytes is null");
+        }
+
+        int size = (int) Zstd.decompressedSize(bytes);
+        byte[] decompressBytes = new byte[size];
+        Zstd.decompress(decompressBytes, bytes);
+        return decompressBytes;
     }
 }

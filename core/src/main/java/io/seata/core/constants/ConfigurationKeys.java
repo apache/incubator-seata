@@ -38,6 +38,16 @@ public interface ConfigurationKeys {
     String STORE_PREFIX = "store.";
 
     /**
+     * The constant SESSION_PREFIX.
+     */
+    String SESSION_PREFIX = "session.";
+
+    /**
+     * The constant STORE_SESSION_PREFIX.
+     */
+    String STORE_SESSION_PREFIX = STORE_PREFIX + SESSION_PREFIX;
+
+    /**
      * The constant MODE.
      */
     String MODE = "mode";
@@ -48,14 +58,29 @@ public interface ConfigurationKeys {
     String STORE_MODE = STORE_PREFIX + MODE;
 
     /**
+     * The constant SERVER_STORE_MODE.
+     */
+    String SERVER_STORE_MODE = SEATA_PREFIX + STORE_PREFIX + MODE;
+
+    /**
      * The constant STORE_LOCK_MODE.
      */
     String STORE_LOCK_MODE = STORE_PREFIX + "lock." + MODE;
 
     /**
+     * The constant SERVER_STORE_LOCK_MODE.
+     */
+    String SERVER_STORE_LOCK_MODE = SEATA_PREFIX + STORE_PREFIX + "lock." + MODE;
+
+    /**
      * The constant STORE_SESSION_MODE.
      */
-    String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
+    String STORE_SESSION_MODE = STORE_SESSION_PREFIX + MODE;
+
+    /**
+     * The constant SERVER_STORE_SESSION_MODE.
+     */
+    String SERVER_STORE_SESSION_MODE = SEATA_PREFIX + STORE_SESSION_PREFIX + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
@@ -460,6 +485,16 @@ public interface ConfigurationKeys {
     String MAX_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "maxServerPoolSize";
 
     /**
+     * The constant MIN_BRANCH_RESULT_POOL_SIZE.
+     */
+    String MIN_BRANCH_RESULT_POOL_SIZE = TRANSPORT_PREFIX + "minBranchResultPoolSize";
+
+    /**
+     * The constant MAX_BRANCH_RESULT_POOL_SIZE.
+     */
+    String MAX_BRANCH_RESULT_POOL_SIZE = TRANSPORT_PREFIX + "maxBranchResultPoolSize";
+
+    /**
      * The constant MAX_TASK_QUEUE_SIZE.
      */
     String MAX_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "maxTaskQueueSize";
@@ -732,4 +767,29 @@ public interface ConfigurationKeys {
      * The constant TCC_FENCE_LOG_TABLE_NAME
      */
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant rpcRmRequestTimeout
+     */
+    String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTmRequestTimeout";
+
+    /**
+     * The constant RPC_TM_REQUEST_TIMEOUT
+     */
+    String RPC_TC_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcTcRequestTimeout";
+
+    /**
+     * The constant SESSION_BRANCH_ASYNC_QUEUE_SIZE
+     */
+    String SESSION_BRANCH_ASYNC_QUEUE_SIZE = SERVER_PREFIX + SESSION_PREFIX + "branchAsyncQueueSize";
+
+    /**
+     * The constant ENABLE_BRANCH_ASYNC_REMOVE
+     */
+    String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
 }

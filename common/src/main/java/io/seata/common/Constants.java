@@ -147,4 +147,14 @@ public interface Constants {
      */
     String UNDOLOG_DELETE = "UndologDelete";
 
+    /**
+     * The constant AUTO_COMMIT
+     */
+    String AUTO_COMMIT = "autoCommit";
+
+    /**
+     * The constant SKIP_CHECK_LOCK
+     */
+    String SKIP_CHECK_LOCK = "skipCheckLock";
+
 }
