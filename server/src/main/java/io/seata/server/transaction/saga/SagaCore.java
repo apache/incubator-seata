@@ -38,7 +38,6 @@ import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 
 import io.netty.channel.Channel;
-
 /**
  * The type saga core.
  *
