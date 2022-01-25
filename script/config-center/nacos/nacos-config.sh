@@ -98,11 +98,15 @@ function addConfig() {
 }
 
 count=0
+COMMENT_START="#"
 for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
+    if [[ "$line" =~ ^"${COMMENT_START}".*  ]]; then
+      continue
+    fi
     count=`expr $count + 1`
-	key=${line%%=*}
+	  key=${line%%=*}
     value=${line#*=}
-	addConfig "${key}" "${value}"
+	  addConfig "${key}" "${value}"
 done
 
 echo "========================================================================="
