@@ -30,5 +30,7 @@ public class RedisConfigurationProvider implements ConfigurationProvider {
      * @return Configuration
      */
     @Override
-    public Configuration provide() { return RedisConfiguration.getInstance(); }
+    public Configuration provide() {
+        return RedisConfiguration.getInstance();
+    }
 }
