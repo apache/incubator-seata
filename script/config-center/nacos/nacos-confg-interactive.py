@@ -15,12 +15,12 @@ def get_params() -> dict:
         'username': '',
         'password': ''
     }
-    host = input("Please enter the host of nacos.\n请输入nacos的host:")
-    port = input("Please enter the port of nacos.\n请输入nacos的port:")
-    group = input("Please enter the group of nacos.\n请输入nacos的group:")
-    tenant = input("Please enter the tenant of nacos.\n请输入nacos的tenant:")
-    username = input("Please enter the username of nacos.\n请输入nacos的username:")
-    password = input("Please enter the password of nacos.\n请输入nacos的password:")
+    host = input("Please enter the host of nacos.\n请输入nacos的host\n>>> ")
+    port = input("Please enter the port of nacos.\n请输入nacos的port\n>>> ")
+    group = input("Please enter the group of nacos.\n请输入nacos的group\n>>> ")
+    tenant = input("Please enter the tenant of nacos.\n请输入nacos的tenant\n>>> ")
+    username = input("Please enter the username of nacos.\n请输入nacos的username\n>>> ")
+    password = input("Please enter the password of nacos.\n请输入nacos的password\n>>> ")
     confirm = input("Are you sure to continue? [y/n]")
     if confirm[0] == 'y' or confirm[0] == 'Y':
         if len(host) != 0: params['host'] = host
