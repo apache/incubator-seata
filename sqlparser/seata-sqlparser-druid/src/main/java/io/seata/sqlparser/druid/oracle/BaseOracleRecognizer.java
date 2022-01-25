@@ -117,7 +117,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
     }
 
     @Override
-    public boolean isSqlSyntaxSupports(SQLStatement ast) {
+    public boolean isSqlSyntaxSupports() {
         OracleASTVisitor visitor = new OracleASTVisitorAdapter() {
             @Override
             public boolean visit(OracleSelectJoin x) {
@@ -164,7 +164,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
                 return true;
             }
         };
-        ast.accept(visitor);
+        getAst().accept(visitor);
         return true;
     }
 }

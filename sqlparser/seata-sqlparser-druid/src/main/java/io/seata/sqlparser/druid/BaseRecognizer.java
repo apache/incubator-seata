@@ -107,13 +107,10 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         return originalSQL;
     }
 
+    protected abstract SQLStatement getAst();
 
-    /**
-     * check the sql syntax is supports
-     * @param ast the sql Statement
-     * @return isSupport:true
-     */
-    public boolean isSqlSyntaxSupports(SQLStatement ast) {
+    @Override
+    public boolean isSqlSyntaxSupports() {
         SQLASTVisitor visitor = new SQLASTVisitorAdapter() {
             @Override
             public boolean visit(SQLJoinTableSource x) {
@@ -160,7 +157,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
                 return true;
             }
         };
-        ast.accept(visitor);
+        getAst().accept(visitor);
         return true;
     }
 }
