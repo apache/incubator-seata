@@ -93,7 +93,7 @@ public abstract class AbstractExceptionHandler {
      * @param <S> the type parameter
      */
     public abstract static class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
-            implements Callback<T, S> {
+        implements Callback<T, S> {
 
         @Override
         public void onSuccess(T request, S response) {
@@ -102,7 +102,7 @@ public abstract class AbstractExceptionHandler {
 
         @Override
         public void onTransactionException(T request, S response,
-                                           TransactionException tex) {
+            TransactionException tex) {
             response.setTransactionExceptionCode(tex.getCode());
             response.setResultCode(ResultCode.Failed);
             response.setMsg("TransactionException[" + tex.getMessage() + "]");
