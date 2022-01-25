@@ -26,12 +26,6 @@ import io.seata.core.exception.TransactionExceptionCode;
 public class LockConflictException extends SQLException {
 
     TransactionExceptionCode code;
-    
-    /**
-     * Instantiates a new Lock conflict exception.
-     */
-    public LockConflictException() {
-    }
 
     public LockConflictException(String message) {
         super(message);

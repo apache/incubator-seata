@@ -21,13 +21,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -129,11 +127,11 @@ public class RedisLocker extends AbstractLocker {
 
     @Override
     public boolean acquireLock(List<RowLock> rowLocks) {
-        return acquireLock(rowLocks, true);
+        return acquireLock(rowLocks, true, false);
     }
 
     @Override
-    public boolean acquireLock(List<RowLock> rowLocks, boolean autoCommit) {
+    public boolean acquireLock(List<RowLock> rowLocks, boolean autoCommit, boolean skipCheckLock) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             return true;
         }
@@ -141,12 +139,12 @@ public class RedisLocker extends AbstractLocker {
             if (ACQUIRE_LOCK_SHA != null && autoCommit) {
                 return acquireLockByLua(jedis, rowLocks);
             } else {
-                return acquireLockByPipeline(jedis, rowLocks, autoCommit);
+                return acquireLockByPipeline(jedis, rowLocks, autoCommit, skipCheckLock);
             }
         }
     }
 
-    private boolean acquireLockByPipeline(Jedis jedis, List<RowLock> rowLocks, boolean autoCommit) {
+    private boolean acquireLockByPipeline(Jedis jedis, List<RowLock> rowLocks, boolean autoCommit, boolean skipCheckLock) {
         String needLockXid = rowLocks.get(0).getXid();
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needLockDOS = convertToLockDO(rowLocks);
@@ -157,65 +155,67 @@ public class RedisLocker extends AbstractLocker {
         }
         List<String> needLockKeys = new ArrayList<>();
         needLockDOS.forEach(lockDO -> needLockKeys.add(buildLockKey(lockDO.getRowKey())));
-
-        Pipeline pipeline1 = jedis.pipelined();
-        needLockKeys.stream().forEachOrdered(needLockKey -> {
-            pipeline1.hget(needLockKey, XID);
-            if (!autoCommit) {
-                pipeline1.hget(needLockKey, STATUS);
-            }
-        });
-        List<List<String>> existedLockInfos =
-            Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
-        if (!autoCommit) {
-            Collections.sort(existedLockInfos, (list1, list2) -> {
-                String status1 = Optional.ofNullable(list1.get(1)).orElse("0");
-                String status2 = Optional.ofNullable(list2.get(1)).orElse("0");
-                return Long.valueOf(status2).compareTo(Long.valueOf(status1));
-            });
-        }
         Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
-        boolean failFast = false;
-        for (int i = 0; i < needLockKeys.size(); i++) {
-            List<String> results = existedLockInfos.get(i);
-            String existedLockXid = CollectionUtils.isEmpty(results) ? null : existedLockInfos.get(i).get(0);
-            if (StringUtils.isEmpty(existedLockXid)) {
-                // If empty,we need to lock this row
-                needAddLock.put(needLockKeys.get(i), needLockDOS.get(i));
-            } else {
-                if (!StringUtils.equals(existedLockXid, needLockXid)) {
-                    if (!autoCommit) {
-                        String status = existedLockInfos.get(i).get(1);
-                        if (StringUtils.equals(status, String.valueOf(LockStatus.Rollbacking.getCode()))) {
-                            failFast = true;
-                            break;
-                        }
-                    }
-                    // If not equals,means the rowkey is holding by another global transaction
-                    return false;
+
+        if (!skipCheckLock) {
+            Pipeline pipeline1 = jedis.pipelined();
+            needLockKeys.stream().forEachOrdered(needLockKey -> {
+                pipeline1.hget(needLockKey, XID);
+                if (!autoCommit) {
+                    pipeline1.hget(needLockKey, STATUS);
+                }
+            });
+            List<List<String>> existedLockInfos =
+                    Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
+
+            // When the local transaction and the global transaction are enabled,
+            // the branch registration fails to acquire the global lock,
+            // the lock holder is in the second-stage rollback,
+            // and the branch registration fails to be retried quickly,
+            // because the retry with the local transaction does not release the database lock ,
+            // resulting in a two-phase rollback wait.
+            // Therefore, if a global lock is found in the Rollbacking state,
+            // the fail-fast code is returned directly.
+            if (!autoCommit) {
+                boolean hasRollBackingLock = existedLockInfos.parallelStream().anyMatch(
+                    result -> StringUtils.equals(result.get(1), String.valueOf(LockStatus.Rollbacking.getCode())));
+                if (hasRollBackingLock) {
+                    throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
                 }
             }
+
+            // The logic is executed here, there must be a lock without Rollbacking status when autoCommit equals false
+            for (int i = 0; i < needLockKeys.size(); i++) {
+                List<String> results = existedLockInfos.get(i);
+                String existedLockXid = CollectionUtils.isEmpty(results) ? null : existedLockInfos.get(i).get(0);
+                if (StringUtils.isEmpty(existedLockXid)) {
+                    // If empty,we need to lock this row
+                    needAddLock.put(needLockKeys.get(i), needLockDOS.get(i));
+                } else {
+                    if (!StringUtils.equals(existedLockXid, needLockXid)) {
+                        // If not equals,means the rowkey is holding by another global transaction
+                        return false;
+                    }
+                }
+            }
+            if (needAddLock.isEmpty()) {
+                return true;
+            }
         }
-        if (failFast) {
-            throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
-        }
-        if (needAddLock.isEmpty()) {
-            return true;
-        }
+
         Pipeline pipeline = jedis.pipelined();
         List<String> readyKeys = new ArrayList<>(needAddLock.keySet());
         needAddLock.forEach((key, value) -> {
             pipeline.hsetnx(key, XID, value.getXid());
             pipeline.hsetnx(key, TRANSACTION_ID, value.getTransactionId().toString());
             pipeline.hsetnx(key, BRANCH_ID, value.getBranchId().toString());
-            pipeline.hsetnx(key, STATUS, String.valueOf(LockStatus.Locked.getCode()));
             pipeline.hset(key, ROW_KEY, value.getRowKey());
             pipeline.hset(key, RESOURCE_ID, value.getResourceId());
             pipeline.hset(key, TABLE_NAME, value.getTableName());
             pipeline.hset(key, PK, value.getPk());
         });
         List<Integer> results = (List<Integer>) (List) pipeline.syncAndReturnAll();
-        List<List<Integer>> partitions = Lists.partition(results, 8);
+        List<List<Integer>> partitions = Lists.partition(results, 7);
 
         ArrayList<String> success = new ArrayList<>(partitions.size());
         Integer status = SUCCEED;
@@ -299,42 +299,16 @@ public class RedisLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseLock(String xid, List<Long> branchIds) {
-        if (CollectionUtils.isEmpty(branchIds)) {
-            return true;
-        }
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String xidLockKey = buildXidLockKey(xid);
-            String[] branchIdsArray = new String[branchIds.size()];
-            for (int i = 0; i < branchIds.size(); i++) {
-                branchIdsArray[i] = branchIds.get(i).toString();
-            }
-            List<String> rowKeys = jedis.hmget(xidLockKey, branchIdsArray);
-
-            if (CollectionUtils.isNotEmpty(rowKeys)) {
-                Pipeline pipelined = jedis.pipelined();
-                pipelined.hdel(xidLockKey, branchIdsArray);
-                rowKeys.forEach(rowKeyStr -> {
-                    if (StringUtils.isNotEmpty(rowKeyStr)) {
-                        if (rowKeyStr.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
-                            String[] keys = rowKeyStr.split(ROW_LOCK_KEY_SPLIT_CHAR);
-                            pipelined.del(keys);
-                        } else {
-                            pipelined.del(rowKeyStr);
-                        }
-                    }
-                });
-                pipelined.sync();
-            }
-            return true;
-        }
+    public boolean releaseLock(String xid) {
+        return doReleaseLock(xid, null);
     }
 
     @Override
     public boolean releaseLock(String xid, Long branchId) {
-        List<Long> branchIds = new ArrayList<>();
-        branchIds.add(branchId);
-        return releaseLock(xid, branchIds);
+        if (branchId == null) {
+            return true;
+        }
+        return doReleaseLock(xid, branchId);
     }
 
     @Override
@@ -369,6 +343,39 @@ public class RedisLocker extends AbstractLocker {
                     pipeline.sync();
                 }
             }
+        }
+    }
+
+    private boolean doReleaseLock(String xid, Long branchId) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String xidLockKey = buildXidLockKey(xid);
+            final List<String> rowKeys = new ArrayList<>();
+            if (null == branchId) {
+                Map<String, String> rowKeyMap = jedis.hgetAll(xidLockKey);
+                rowKeyMap.forEach((branch, rowKey) -> rowKeys.add(rowKey));
+            } else {
+                rowKeys.addAll(jedis.hmget(xidLockKey, branchId.toString()));
+            }
+            if (CollectionUtils.isNotEmpty(rowKeys)) {
+                Pipeline pipelined = jedis.pipelined();
+                if (null == branchId) {
+                    pipelined.del(xidLockKey);
+                } else {
+                    pipelined.hdel(xidLockKey, branchId.toString());
+                }
+                rowKeys.forEach(rowKeyStr -> {
+                    if (StringUtils.isNotEmpty(rowKeyStr)) {
+                        if (rowKeyStr.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
+                            String[] keys = rowKeyStr.split(ROW_LOCK_KEY_SPLIT_CHAR);
+                            pipelined.del(keys);
+                        } else {
+                            pipelined.del(rowKeyStr);
+                        }
+                    }
+                });
+                pipelined.sync();
+            }
+            return true;
         }
     }
 
