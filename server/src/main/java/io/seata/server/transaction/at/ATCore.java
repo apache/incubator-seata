@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.BranchTransactionException;
-import io.seata.core.exception.GlobalLockFailException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.rpc.RemotingServer;
@@ -79,7 +78,7 @@ public class ATCore extends AbstractCore {
         }
         try {
             if (!branchSession.lock(autoCommit, skipCheckLock)) {
-                throw new GlobalLockFailException(LockKeyConflict,
+                throw new BranchTransactionException(LockKeyConflict,
                     String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
                         branchSession.getBranchId()));
             }

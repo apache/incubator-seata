@@ -23,6 +23,8 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+
 /**
  * The type Abstract exception handler.
  *
@@ -123,11 +125,12 @@ public abstract class AbstractExceptionHandler {
         try {
             callback.execute(request, response);
             callback.onSuccess(request, response);
-        } catch (GlobalLockFailException gex) {
-            LOGGER.info("this request cannot acquire global lock, you can do retry or lower lock concurrency. request: {}", request);
-            callback.onTransactionException(request, response, gex);
         } catch (TransactionException tex) {
-            LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
+            if (LockKeyConflict.equals(tex.code)) {
+                LOGGER.info("this request cannot acquire global lock, you can do retry or lower lock concurrency. request: {}", request);
+            } else {
+                LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
+            }
             callback.onTransactionException(request, response, tex);
         } catch (RuntimeException rex) {
             LOGGER.error("Catch RuntimeException while do RPC, request: {}", request, rex);
