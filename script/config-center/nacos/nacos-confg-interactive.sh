@@ -13,52 +13,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-while getopts ":h:p:g:t:u:w:" opt
-do
-  case $opt in
-  h)
-    host=$OPTARG
-    ;;
-  p)
-    port=$OPTARG
-    ;;
-  g)
-    group=$OPTARG
-    ;;
-  t)
-    tenant=$OPTARG
-    ;;
-  u)
-    username=$OPTARG
-    ;;
-  w)
-    password=$OPTARG
-    ;;
-  ?)
-    echo " USAGE OPTION: $0 [-h host] [-p port] [-g group] [-t tenant] [-u username] [-w password] "
-    exit 1
-    ;;
-  esac
-done
+# author:wangyuewen
 
-if [ -z ${host} ]; then
-    host=localhost
-fi
-if [ -z ${port} ]; then
-    port=8848
-fi
-if [ -z ${group} ]; then
-    group="SEATA_GROUP"
-fi
-if [ -z ${tenant} ]; then
-    tenant=""
-fi
-if [ -z ${username} ]; then
-    username=""
-fi
-if [ -z ${password} ]; then
-    password=""
-fi
+# shellcheck disable=SC2039,SC2162,SC2046,SC2013,SC2002,SC2086
+echo -e "Please enter the host of nacos.\n请输入nacos的host:"
+read -p ">>> " host
+echo -e "Please enter the port of nacos.\n请输入nacos的port:"
+read -p ">>> " port
+echo -e "Please enter the group of nacos.\n请输入nacos的group:"
+read -p ">>> " group
+echo -e "Please enter the tenant of nacos.\n请输入nacos的tenant:"
+read -p ">>> " tenant
+echo -e "Please enter the username of nacos.\n请输入nacos的username:"
+read -p ">>> " username
+echo -e "Please enter the password of nacos.\n请输入nacos的password:"
+read -p ">>> " password
+
+read -p "Are you sure to continue? [y/n]" input
+case $input in
+    [yY]*)
+        if [ -z ${host} ]; then
+            host=localhost
+        fi
+        if [ -z ${port} ]; then
+            port=8848
+        fi
+        if [ -z ${group} ]; then
+            group="SEATA_GROUP"
+        fi
+        if [ -z ${tenant} ]; then
+            tenant=""
+        fi
+        if [ -z ${username} ]; then
+            username=""
+        fi
+        if [ -z ${password} ]; then
+            password=""
+        fi
+        ;;
+    [nN]*)
+        exit
+        ;;
+    *)
+        echo "Just enter y or n, please."
+        exit
+        ;;
+esac
 
 nacosAddr=$host:$port
 contentType="content-type:application/json;charset=UTF-8"
@@ -81,7 +81,7 @@ urlencode() {
 
 failCount=0
 tempLog=$(mktemp -u)
-function addConfig() {
+addConfig() {
   dataId=`urlencode $1`
   content=`urlencode $2`
   curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$dataId&group=$group&content=$content&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
@@ -100,13 +100,13 @@ function addConfig() {
 count=0
 COMMENT_START="#"
 for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
-    if [[ "$line" =~ ^"${COMMENT_START}".*  ]]; then
-      continue
-    fi
-    count=`expr $count + 1`
-	  key=${line%%=*}
-    value=${line#*=}
-	  addConfig "${key}" "${value}"
+  if [[ "$line" =~ ^"${COMMENT_START}".*  ]]; then
+    continue
+  fi
+  count=`expr $count + 1`
+	key=${line%%=*}
+  value=${line#*=}
+	addConfig "${key}" "${value}"
 done
 
 echo "========================================================================="
