@@ -33,7 +33,7 @@ public class ConfigProperties {
     /**
      * properties,yaml(only type in nacos, zk, consul, etcd3)
      */
-    private String dataType ;
+    private String dataType;
 
     public String getType() {
         return type;

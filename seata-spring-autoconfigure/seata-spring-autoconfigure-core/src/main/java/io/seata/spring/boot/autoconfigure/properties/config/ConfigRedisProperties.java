@@ -7,9 +7,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_REDIS_P
 
 
 /**
- * <p>
- *     redis配置中心
- * </p>
+ *
  * @author wangyuewen
  */
 @Component
@@ -47,7 +45,7 @@ public class ConfigRedisProperties {
         return this;
     }
 
-    public ConfigRedisProperties setListenerEnabled(Boolean listenerEnabled){
+    public ConfigRedisProperties setListenerEnabled(Boolean listenerEnabled) {
         this.listenerEnabled = listenerEnabled;
         return this;
     }
@@ -72,7 +70,7 @@ public class ConfigRedisProperties {
         return keyName;
     }
 
-    public Boolean getListenerEnabled(){
+    public Boolean getListenerEnabled() {
         return listenerEnabled;
     }
 }
