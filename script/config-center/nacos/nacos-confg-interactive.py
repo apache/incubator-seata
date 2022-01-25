@@ -2,8 +2,6 @@
 #  -*- coding: UTF-8 -*-
 # @Author : wangyeuwen
 import http.client
-import sys
-import getopt as opts
 import urllib.parse
 import re
 
