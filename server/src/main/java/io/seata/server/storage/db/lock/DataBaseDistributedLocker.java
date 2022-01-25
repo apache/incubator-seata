@@ -82,7 +82,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                 @Override
                 public void onChangeEvent(ConfigurationChangeEvent event) {
                     String newValue = event.getNewValue();
-                    if (StringUtils.isNotBlank(newValue) && newValue.equalsIgnoreCase(distributedLockTable)) {
+                    if (StringUtils.isNotBlank(newValue)) {
                         distributedLockTable = newValue;
                         init();
                         demotion = false;
