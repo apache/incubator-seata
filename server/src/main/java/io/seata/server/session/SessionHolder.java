@@ -406,7 +406,7 @@ public class SessionHolder {
     }
 
     @FunctionalInterface
-    public static interface NoArgsFunc {
-        public void call();
+    public interface NoArgsFunc {
+        void call();
     }
 }

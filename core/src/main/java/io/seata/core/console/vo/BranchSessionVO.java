@@ -15,11 +15,12 @@
  */
 package io.seata.core.console.vo;
 
+import io.seata.core.constants.ServerTableColumnsName;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
-import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * BranchSessionVO
@@ -188,16 +189,16 @@ public class BranchSessionVO {
         }
         BranchSessionVO that = (BranchSessionVO) o;
         return Objects.equals(xid, that.xid)
-               && Objects.equals(transactionId, that.transactionId)
-               && Objects.equals(branchId, that.branchId)
-               && Objects.equals(resourceGroupId, that.resourceGroupId)
-               && Objects.equals(resourceId, that.resourceId)
-               && Objects.equals(branchType, that.branchType)
-               && Objects.equals(status, that.status)
-               && Objects.equals(clientId, that.clientId)
-               && Objects.equals(applicationData, that.applicationData)
-               && Objects.equals(gmtCreate, that.gmtCreate)
-               && Objects.equals(gmtModified, that.gmtModified);
+                && Objects.equals(transactionId, that.transactionId)
+                && Objects.equals(branchId, that.branchId)
+                && Objects.equals(resourceGroupId, that.resourceGroupId)
+                && Objects.equals(resourceId, that.resourceId)
+                && Objects.equals(branchType, that.branchType)
+                && Objects.equals(status, that.status)
+                && Objects.equals(clientId, that.clientId)
+                && Objects.equals(applicationData, that.applicationData)
+                && Objects.equals(gmtCreate, that.gmtCreate)
+                && Objects.equals(gmtModified, that.gmtModified);
     }
 
     @Override
@@ -218,17 +219,17 @@ public class BranchSessionVO {
     @Override
     public String toString() {
         return "BranchSessionVO{" +
-               "xid='" + xid + '\'' +
-               ", transactionId=" + transactionId +
-               ", branchId=" + branchId +
-               ", resourceGroupId='" + resourceGroupId + '\'' +
-               ", resourceId='" + resourceId + '\'' +
-               ", branchType='" + branchType + '\'' +
-               ", status=" + status +
-               ", clientId='" + clientId + '\'' +
-               ", applicationData='" + applicationData + '\'' +
-               ", gmtCreate=" + gmtCreate +
-               ", gmtModified=" + gmtModified +
-               '}';
+                "xid='" + xid + '\'' +
+                ", transactionId=" + transactionId +
+                ", branchId=" + branchId +
+                ", resourceGroupId='" + resourceGroupId + '\'' +
+                ", resourceId='" + resourceId + '\'' +
+                ", branchType='" + branchType + '\'' +
+                ", status=" + status +
+                ", clientId='" + clientId + '\'' +
+                ", applicationData='" + applicationData + '\'' +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModified=" + gmtModified +
+                '}';
     }
 }

@@ -55,7 +55,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private final String datasourceType;
 
-    private String distributedLockTable;
+    private volatile String distributedLockTable;
 
     private DataSource distributedLockDataSource;
 
@@ -64,7 +64,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
      * using for 1.5.0 only and will remove in 1.6.0
      */
     @Deprecated
-    private boolean demotion;
+    private volatile boolean demotion;
 
     /**
      * Instantiates a new Log store data base dao.

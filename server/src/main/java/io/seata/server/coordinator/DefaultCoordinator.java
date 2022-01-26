@@ -149,12 +149,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor handleAllSession = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("HandleAllSession", 1));
 
-    private final List<GlobalStatus> rollbackingStatus =
+    private final List<GlobalStatus> rollbackingStatuses =
         Collections.unmodifiableList(Arrays.asList(GlobalStatus.TimeoutRollbacking,
             GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking));
 
-    private final List<GlobalStatus> retryCommittingStatus = Collections.unmodifiableList(
-        Arrays.asList(GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.CommitFailed));
+    private final List<GlobalStatus> retryCommittingStatuses = Collections.unmodifiableList(
+        Arrays.asList(GlobalStatus.Committing, GlobalStatus.CommitRetrying));
 
     private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
@@ -308,13 +308,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         List<GlobalSession> retryCommittingSessions = new ArrayList<>();
         List<GlobalSession> asyncCommittingSessions = new ArrayList<>();
         for (GlobalSession session : allSessions) {
-            if (rollbackingStatus.contains(session.getStatus())) {
+            if (rollbackingStatuses.contains(session.getStatus())) {
                 retryRollbackingSessions.add(session);
-            } else if (retryCommittingStatus.contains(session.getStatus())) {
+            } else if (retryCommittingStatuses.contains(session.getStatus())) {
                 retryCommittingSessions.add(session);
             } else if (GlobalStatus.AsyncCommitting.equals(session.getStatus())) {
                 asyncCommittingSessions.add(session);
-            } else {
+            } else if (GlobalStatus.Begin.equals(session.getStatus())){
                 beginGlobalSessions.add(session);
             }
         }
@@ -405,7 +405,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Deprecated
     protected void handleRetryRollbacking() {
         SessionCondition sessionCondition =
-                new SessionCondition(rollbackingStatus.toArray(new GlobalStatus[0]));
+                new SessionCondition(rollbackingStatuses.toArray(new GlobalStatus[0]));
         Collection<GlobalSession> rollbackingSessions =
                 SessionHolder.getRetryRollbackingSessionManager().findGlobalSessions(sessionCondition);
         handleRetryRollbacking(rollbackingSessions);

@@ -371,7 +371,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (withBranchSessions) {
                 branchTransactionDOs = this.readBranchSessionByXid(jedis, xid);
             }
-            return getGlobalSession(globalTransactionDO, branchTransactionDOs);
+            GlobalSession session = getGlobalSession(globalTransactionDO, branchTransactionDOs);
+            session.setLazyLoadBranch(!withBranchSessions);
+            return session;
         }
     }
 
@@ -410,7 +412,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 xids.parallelStream().forEach(xid -> {
                     GlobalSession globalSession = this.readSession(xid, withBranchSessions);
                     if (globalSession != null) {
-                        globalSession.setLazyLoadBranch(!withBranchSessions);
                         globalSessions.add(globalSession);
                     }
                 });
