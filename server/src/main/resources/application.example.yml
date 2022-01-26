@@ -165,3 +165,12 @@ seata:
     registry-type: compact
     exporter-list: prometheus
     exporter-prometheus-port: 9898
+  transport:
+    rpc-tc-request-timeout: 30000
+    enable-tc-server-batch-send-response: false
+    shutdown:
+      wait: 3
+    thread-factory:
+      boss-thread-prefix: NettyBoss
+      worker-thread-prefix: NettyServerNIOWorker
+      boss-thread-size: 1

@@ -18,6 +18,7 @@ package io.seata.core.rpc.netty;
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.protocol.MessageType;
+import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.server.RegRmProcessor;
 import io.seata.core.rpc.processor.server.RegTmProcessor;
@@ -96,6 +97,7 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         // 1. registry on request message processor
         ServerOnRequestProcessor onRequestProcessor =
             new ServerOnRequestProcessor(this, getHandler());
+        ShutdownHook.getInstance().addDisposable(onRequestProcessor);
         super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestProcessor, messageExecutor);

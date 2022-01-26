@@ -15,6 +15,8 @@
  */
 package io.seata.serializer.protobuf.manager;
 
+import io.seata.core.protocol.BatchResultMessage;
+import io.seata.serializer.protobuf.convertor.BatchResultMessageConvertor;
 import io.seata.serializer.protobuf.convertor.BranchCommitRequestConvertor;
 import io.seata.serializer.protobuf.convertor.BranchCommitResponseConvertor;
 import io.seata.serializer.protobuf.convertor.BranchRegisterRequestConvertor;
@@ -43,6 +45,7 @@ import io.seata.serializer.protobuf.convertor.RegisterRMRequestConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterRMResponseConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterTMRequestConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterTMResponseConvertor;
+import io.seata.serializer.protobuf.generated.BatchResultMessageProto;
 import io.seata.serializer.protobuf.generated.GlobalReportRequestProto;
 import io.seata.serializer.protobuf.generated.GlobalReportResponseProto;
 import io.seata.core.protocol.HeartbeatMessage;
@@ -176,6 +179,8 @@ public class ProtobufConvertManager {
                 new RegisterTMRequestConvertor());
             protobufConvertManager.convertorMap.put(RegisterTMResponse.class.getName(),
                 new RegisterTMResponseConvertor());
+            protobufConvertManager.convertorMap.put(BatchResultMessage.class.getName(),
+                new BatchResultMessageConvertor());
 
             protobufConvertManager.protoClazzMap.put(GlobalBeginRequestProto.getDescriptor().getFullName(),
                 GlobalBeginRequestProto.class);
@@ -234,6 +239,8 @@ public class ProtobufConvertManager {
                 RegisterTMRequestProto.class);
             protobufConvertManager.protoClazzMap.put(RegisterTMResponseProto.getDescriptor().getFullName(),
                 RegisterTMResponseProto.class);
+            protobufConvertManager.protoClazzMap.put(BatchResultMessageProto.getDescriptor().getFullName(),
+                BatchResultMessageProto.class);
 
             protobufConvertManager.reverseConvertorMap.put(GlobalBeginRequestProto.class.getName(),
                 new GlobalBeginRequestConvertor());
@@ -292,6 +299,8 @@ public class ProtobufConvertManager {
                 new RegisterTMRequestConvertor());
             protobufConvertManager.reverseConvertorMap.put(RegisterTMResponseProto.class.getName(),
                 new RegisterTMResponseConvertor());
+            protobufConvertManager.reverseConvertorMap.put(BatchResultMessageProto.class.getName(),
+                new BatchResultMessageConvertor());
 
             INSTANCE = protobufConvertManager;
         }

@@ -596,6 +596,11 @@ public interface ConfigurationKeys {
     String ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableRmClientBatchSendRequest";
 
     /**
+     * The constant ENABLE_TC_SERVER_BATCH_SEND_RESPONSE
+     */
+    String ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = TRANSPORT_PREFIX + "enableTcServerBatchSendResponse";
+
+    /**
      * The constant DISABLE_GLOBAL_TRANSACTION.
      */
     String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
