@@ -16,25 +16,27 @@
 package io.seata.server.console.impl.redis;
 
 
+
 import java.util.List;
 import java.util.Map;
-import com.google.common.collect.Lists;
-import io.seata.common.util.BeanUtils;
-import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.vo.GlobalLockVO;
-import io.seata.core.console.result.PageResult;
-import io.seata.server.console.service.GlobalLockService;
-import io.seata.server.storage.redis.JedisPooledFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+import com.google.common.collect.Lists;
+import io.seata.common.util.BeanUtils;
+import io.seata.core.console.param.GlobalLockParam;
+import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.server.console.service.GlobalLockService;
+import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
-import javax.annotation.Resource;
 import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
 import static io.seata.common.util.StringUtils.isNotBlank;
 import static io.seata.core.console.result.PageResult.checkPage;
-import static io.seata.core.constants.RedisKeyConstants.*;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
+import static io.seata.core.constants.RedisKeyConstants.SPLIT;
 
 /**
  * Global Lock Redis Service Impl
@@ -48,8 +50,6 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
     private Logger logger = LoggerFactory.getLogger(GlobalLockRedisServiceImpl.class);
 
-    @Resource
-    private io.seata.core.model.Resource resource;
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -63,11 +63,12 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             globalLockVos = queryGlobalByXid(param.getXid());
             total = globalLockVos.size();
             return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
-        } else if (isNotBlank(param.getTableName()) && isNotBlank(param.getPk())) {
+        } else if (isNotBlank(param.getTableName()) && isNotBlank(param.getPk()) && isNotBlank(param.getResourceId())) {
             //SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188
             String tableName = param.getTableName();
             String pk = param.getPk();
-            globalLockVos = queryGlobalLockByRowKey(buildRowKey(tableName,pk));
+            String resourceId = param.getResourceId();
+            globalLockVos = queryGlobalLockByRowKey(buildRowKey(tableName,pk,resourceId));
             return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
         } else {
             return PageResult.failure(ParameterRequired.getErrCode(),"not support request param");
@@ -78,14 +79,13 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         return readGlobalLock(buildRowKey);
     }
 
-    private String buildRowKey(String tableName, String pk) {
-        String resourceId = resource.getResourceId();
+    private String buildRowKey(String tableName, String pk,String resourceId) {
         return DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX + resourceId + SPLIT + tableName + SPLIT + pk;
     }
 
 
     private List<GlobalLockVO> queryGlobalByXid(String xid) {
-       return readGlobalLock(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid);
+        return readGlobalLock(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid);
     }
 
 

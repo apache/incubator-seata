@@ -79,6 +79,12 @@ public class RedisQueryConsolTest {
     @Test
     public void test_queryGlobalLock() {
         GlobalLockParam param = new GlobalLockParam();
-        globalLockService.query(param);
+        param.setTableName("tableName");
+        param.setPk("123345435");
+        try {
+            globalLockService.query(param);
+        } catch (Exception e) {
+            System.out.print(e.getMessage());
+        }
     }
 }

@@ -153,6 +153,6 @@ public class RedisKeyConstants {
     /**
      * The split
      */
-    public static final String SPLIT= "^^^";
+    public static final String SPLIT = "^^^";
 
 }

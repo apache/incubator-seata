@@ -16,32 +16,27 @@
 package io.seata.server.storage.redis.store;
 
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.Set;
 import java.util.Optional;
 import java.util.Collections;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.Transaction;
-import redis.clients.jedis.ScanResult;
-import com.google.common.collect.ImmutableMap;
-import io.seata.core.console.param.GlobalSessionParam;
+import java.util.HashSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
+import io.seata.common.XID;
+import io.seata.common.exception.RedisException;
 import io.seata.common.exception.StoreException;
+import io.seata.common.util.BeanUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.common.exception.RedisException;
-import io.seata.common.util.BeanUtils;
-import io.seata.common.XID;
+import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
@@ -52,13 +47,19 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.Transaction;
+import redis.clients.jedis.ScanResult;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
+
 
 /**
  * The redis transaction store manager
@@ -402,7 +403,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return the list
      */
     public List<GlobalSession> readSession(GlobalStatus[] statuses) {
-       return readSession(statuses,true);
+
+        return readSession(statuses, true);
     }
 
     public List<GlobalSession> readSession(GlobalStatus[] statuses,boolean withBranchSessions) {
