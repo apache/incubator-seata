@@ -39,6 +39,7 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.core.store.StoreMode;
+import io.seata.core.model.LockStatus;
 
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
@@ -180,7 +181,11 @@ public class SessionHolder {
                     default: {
                         if (storeMode == StoreMode.FILE) {
                             lockBranchSessions(globalSession.getSortedBranches());
-
+                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())) {
+                                globalSession.getBranchSessions().parallelStream().forEach(branchSession -> {
+                                    branchSession.setLockStatus(LockStatus.Rollbacking);
+                                });
+                            }
                             switch (globalStatus) {
                                 case Committing:
                                 case CommitRetrying:

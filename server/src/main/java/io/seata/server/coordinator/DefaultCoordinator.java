@@ -319,13 +319,21 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }
         List<CompletableFuture<Void>> futures = new ArrayList<>(4);
-        runAsync(!retryRollbackingSessions.isEmpty(), futures, () -> handleRetryRollbacking(retryRollbackingSessions),
-            retryRollbacking);
-        runAsync(!beginGlobalSessions.isEmpty(), futures, () -> timeoutCheck(beginGlobalSessions), timeoutCheck);
-        runAsync(!retryCommittingSessions.isEmpty(), futures, () -> handleRetryCommitting(retryCommittingSessions),
-            retryCommitting);
-        runAsync(!asyncCommittingSessions.isEmpty(), futures, () -> handleAsyncCommitting(asyncCommittingSessions),
-            asyncCommitting);
+        if (!retryRollbackingSessions.isEmpty()) {
+            futures.add(
+                CompletableFuture.runAsync(() -> handleRetryRollbacking(retryRollbackingSessions), retryRollbacking));
+        }
+        if (!beginGlobalSessions.isEmpty()) {
+            futures.add(CompletableFuture.runAsync(() -> timeoutCheck(beginGlobalSessions), timeoutCheck));
+        }
+        if (!retryCommittingSessions.isEmpty()) {
+            futures.add(
+                CompletableFuture.runAsync(() -> handleRetryCommitting(retryCommittingSessions), retryCommitting));
+        }
+        if (!asyncCommittingSessions.isEmpty()) {
+            futures.add(
+                CompletableFuture.runAsync(() -> handleAsyncCommitting(asyncCommittingSessions), asyncCommitting));
+        }
         if (CollectionUtils.isNotEmpty(futures)) {
             try {
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
@@ -579,19 +587,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         // 3. third destroy SessionHolder
         SessionHolder.destroy();
-    }
-
-    /**
-     * @param condition
-     * @param futures
-     * @param runnable
-     * @param executor
-     */
-    public void runAsync(boolean condition, List<CompletableFuture<Void>> futures, Runnable runnable,
-        Executor executor) {
-        if (condition) {
-            futures.add(CompletableFuture.runAsync(runnable, executor));
-        }
     }
 
     /**
