@@ -15,15 +15,16 @@
  */
 package io.seata.serializer.seata.protocol;
 
-import io.seata.serializer.seata.SeataSerializer;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
 
 
 /**
@@ -45,16 +46,25 @@ public class MergedWarpMessageSerializerTest {
     public void test_codec(){
         MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
         final ArrayList<AbstractMessage> msgs = new ArrayList<>();
+        final List<Integer> msgIds = new ArrayList<>();
         final GlobalBeginRequest globalBeginRequest1 = buildGlobalBeginRequest("x1");
         final GlobalBeginRequest globalBeginRequest2 = buildGlobalBeginRequest("x2");
         msgs.add(globalBeginRequest1);
+        msgIds.add(1);
         msgs.add(globalBeginRequest2);
+        msgIds.add(2);
         mergedWarpMessage.msgs = msgs;
+        mergedWarpMessage.msgIds = msgIds;
+
 
         byte[] body = seataSerializer.serialize(mergedWarpMessage);
 
         MergedWarpMessage mergedWarpMessage2 = seataSerializer.deserialize(body);
         assertThat(mergedWarpMessage2.msgs.size()).isEqualTo(mergedWarpMessage.msgs.size());
+
+        assertThat(mergedWarpMessage2.msgIds.size()).isEqualTo(2);
+        assertThat(mergedWarpMessage2.msgIds.get(0)).isEqualTo(1);
+        assertThat(mergedWarpMessage2.msgIds.get(1)).isEqualTo(2);
 
         GlobalBeginRequest globalBeginRequest21 = (GlobalBeginRequest) mergedWarpMessage2.msgs.get(0);
         assertThat(globalBeginRequest21.getTimeout()).isEqualTo(globalBeginRequest1.getTimeout());
