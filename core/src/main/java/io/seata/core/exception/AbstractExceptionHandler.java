@@ -17,6 +17,7 @@ package io.seata.core.exception;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
@@ -129,8 +130,9 @@ public abstract class AbstractExceptionHandler {
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
-            if (Objects.equals(LockKeyConflict, tex.code) || Objects.equals(LockKeyConflictFailFast, tex.code)) {
-                LOGGER.info("this request cannot acquire global lock, you can do retry or increase retry times. request: {}", request);
+            if (Objects.equals(LockKeyConflict, tex.getCode()) || Objects.equals(LockKeyConflictFailFast, tex.getCode())) {
+                LOGGER.info("this request cannot acquire global lock, you can let Seata retry by setting config [{}] = false or manually retry by yourself. request: {}",
+                        ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, request);
             } else {
                 LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
             }
