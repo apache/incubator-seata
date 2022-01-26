@@ -314,7 +314,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 retryCommittingSessions.add(session);
             } else if (GlobalStatus.AsyncCommitting.equals(session.getStatus())) {
                 asyncCommittingSessions.add(session);
-            } else if (GlobalStatus.Begin.equals(session.getStatus())){
+            } else if (GlobalStatus.Begin.equals(session.getStatus())) {
                 beginGlobalSessions.add(session);
             }
         }
