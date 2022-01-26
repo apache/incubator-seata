@@ -21,33 +21,35 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.BatchResultMessage;
 import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.MergedWarpMessage;
 
 /**
- * The type Merged warp message codec.
+ * the type batch result message codec
  *
- * @author zhangsen
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.5.0
  */
-public class MergedWarpMessageCodec extends AbstractMessageCodec {
+public class BatchResultMessageCodec extends AbstractMessageCodec {
 
     @Override
     public Class<?> getMessageClassType() {
-        return MergedWarpMessage.class;
+        return BatchResultMessage.class;
     }
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        MergedWarpMessage mergedWarpMessage = (MergedWarpMessage)t;
-        List<AbstractMessage> msgs = mergedWarpMessage.msgs;
-        List<Integer> msgIds = mergedWarpMessage.msgIds;
+        BatchResultMessage batchResultMessage = (BatchResultMessage) t;
+        List<AbstractResultMessage> msgs = batchResultMessage.getResultMessages();
+        List<Integer> msgIds = batchResultMessage.getMsgIds();
 
         final ByteBuf buffer = Unpooled.buffer(1024);
         buffer.writeInt(0); // write placeholder for content length
 
-        buffer.writeShort((short)msgs.size());
+        buffer.writeShort((short) msgs.size());
         for (final AbstractMessage msg : msgs) {
             final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
@@ -72,11 +74,12 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
             }
         }
         out.writeBytes(content);
+
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        MergedWarpMessage mergedWarpMessage = (MergedWarpMessage)t;
+        BatchResultMessage batchResultMessage = (BatchResultMessage) t;
 
         if (in.remaining() < 4) {
             return;
@@ -88,29 +91,33 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         byte[] buffer = new byte[length];
         in.get(buffer);
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-        doDecode(mergedWarpMessage, byteBuffer);
+        decode(batchResultMessage, byteBuffer);
     }
 
-    private void doDecode(MergedWarpMessage mergedWarpMessage, ByteBuffer byteBuffer) {
+    /**
+     * Decode.
+     *
+     * @param batchResultMessage the batch result message
+     * @param byteBuffer         the byte buffer
+     */
+    protected void decode(BatchResultMessage batchResultMessage, ByteBuffer byteBuffer) {
         short msgNum = byteBuffer.getShort();
-        List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
+        List<AbstractResultMessage> msgs = new ArrayList<>();
+        List<Integer> msgIds = new ArrayList<>();
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
-            AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typeCode);
+            AbstractMessage abstractResultMessage = MessageCodecFactory.getMessage(typeCode);
             MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
-            messageCodec.decode(abstractMessage, byteBuffer);
-            msgs.add(abstractMessage);
+            messageCodec.decode(abstractResultMessage, byteBuffer);
+            msgs.add((AbstractResultMessage) abstractResultMessage);
         }
 
-        if (byteBuffer.hasRemaining()) {
-            List<Integer> msgIds = new ArrayList<>();
-            for (int idx = 0; idx < msgNum; idx++) {
-                msgIds.add(byteBuffer.getInt());
-            }
-            mergedWarpMessage.msgIds = msgIds;
+        for (int idx = 0; idx < msgNum; idx++) {
+            msgIds.add(byteBuffer.getInt());
         }
 
-        mergedWarpMessage.msgs = msgs;
+        batchResultMessage.setResultMessages(msgs);
+        batchResultMessage.setMsgIds(msgIds);
+
     }
-
 }

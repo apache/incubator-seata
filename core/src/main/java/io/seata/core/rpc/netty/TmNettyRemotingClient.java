@@ -247,6 +247,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_BATCH_RESULT_MSG, onResponseProcessor, null);
         // 2.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
