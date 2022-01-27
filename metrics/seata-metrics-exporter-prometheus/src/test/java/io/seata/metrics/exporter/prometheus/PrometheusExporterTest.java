@@ -13,41 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.console.security;
+package io.seata.metrics.exporter.prometheus;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * mock user info
+ * test {@link PrometheusExporter}
  *
- * @author jameslcj
+ * @author wang.liang
  */
-public class User {
-    /**
-     * The Username.
-     */
-    String username;
-    /**
-     * The Password.
-     */
-    String password;
+public class PrometheusExporterTest {
 
-
-    //region Getter && Setter
-
-    public String getUsername() {
-        return username;
+    @Test
+    public void getGetUnknownType() {
+        Assertions.assertDoesNotThrow(() -> {
+            PrometheusExporter.getUnknownType();
+        });
     }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    //endregion
 }
