@@ -1,0 +1,137 @@
+{
+  "Name": "simpleParallelTestStateMachineWithLoop",
+  "Comment": "带并发参数的测试状态机定义",
+  "StartState": "FirstState",
+  "Version": "0.0.1",
+  "States": {
+    "FirstState": {
+      "Type": "Parallel",
+      "Branches": [
+        "SecondState",
+        "ThirdState",
+        "ThirdState",
+        "ForthState",
+        "FifthState"
+      ],
+      "Parallel": 2,
+      "Output": {
+        "parallelResult": "$.#root"
+      },
+      "Next": "ChoiceState"
+    },
+    "ChoiceState":{
+      "Type": "Choice",
+      "Choices":[
+        {
+          "Expression":"[a] == 1",
+          "Next":"SecondState"
+        },
+        {
+          "Expression":"[a] == 2",
+          "Next":"CallSubStateMachine"
+        }
+      ],
+      "Default":"Fail"
+    },
+    "SecondState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "Input": [
+        {
+          "a": "$.[a]",
+          "b": "$.[b]",
+          "parallelResult": "$.[parallelResult]",
+          "fooResult": "$.[fooResult]",
+          "loopResult": "$.[loopResult]"
+        }
+      ]
+    },
+    "ThirdState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "foo",
+      "CompensateState": "CompensateThirdState",
+      "Input": [
+        {
+          "a": "$.[a]",
+          "throwException": "$.[fooThrowException]"
+        }
+      ],
+      "Output": {
+        "fooResult": "$.#root"
+      },
+      "Next": "SecondState"
+    },
+    "ForthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "Input": [
+        {
+          "a": "$.[a]"
+        }
+      ]
+    },
+    "FifthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "Input": [
+        {
+          "a": "$.[a]",
+          "loopCounter": "$.[loopCounter]",
+          "element": "$.[element]"
+        }
+      ],
+      "Loop": {
+        "Parallel": 3,
+        "Collection": "$.[collection]",
+        "ElementVariableName": "element",
+        "ElementIndexName": "loopCounter",
+        "CompletionCondition": "[nrOfCompletedInstances] == ([collection].size()-4)"
+      }
+    },
+    "CallSubStateMachine": {
+      "Type": "SubStateMachine",
+      "StateMachineName": "simpleParallelTestStateMachine",
+      "Input": [
+        {
+          "a": 1
+        }
+      ],
+      "Output": {
+        "fooResult": "$.#root"
+      },
+      "Next": "Succeed"
+    },
+    "CompensateThirdState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateFoo",
+      "Input": [
+        {
+          "compensateFooInput": "$.[fooResult]",
+          "throwException": "$.[compensateFooThrowException]"
+        }
+      ]
+    },
+    "CompensateSecondState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateBar"
+    },
+    "CompensationTriggerTest": {
+      "Type": "CompensationTrigger",
+      "Next": "Fail"
+    },
+    "Succeed": {
+      "Type":"Succeed"
+    },
+    "Fail": {
+      "Type":"Fail",
+      "ErrorCode": "NOT_FOUND",
+      "Message": "not found"
+    }
+  }
+}

@@ -33,7 +33,9 @@ import io.seata.saga.statelang.domain.ParallelState;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
+import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 
 /**
  * @author anselleeyy
@@ -132,11 +134,13 @@ public class ParallelTaskUtils {
             StateMachineConfig stateMachineConfig =
                 (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-            List<Map<String, Object>> asyncContextVariables = new ArrayList<>();
+            List<Object> asyncContextVariables = new ArrayList<>();
             for (ProcessContext processContext : asyncExecutionInstances) {
                 StateInstance stateInstance =
                     (StateInstance) processContext.getVariable(DomainConstants.VAR_NAME_STATE_INST);
-                asyncContextVariables.add((Map<String, Object>) stateInstance.getOutputParams());
+                if (stateInstance != null) {
+                    asyncContextVariables.add(stateInstance.getOutputParams());
+                }
             }
             Map<String, Object> outputVariablesToContext =
                 ParameterUtils.createOutputParams(stateMachineConfig.getExpressionFactoryManager(),
@@ -150,9 +154,13 @@ public class ParallelTaskUtils {
 
         ProcessContextImpl tempContext = new ProcessContextImpl();
         tempContext.setParent(context);
-        tempContext.setInstruction(copyInstruction(context.getInstruction(StateInstruction.class),
-            currentBranchStateName));
+        StateInstruction tempInstruction = copyInstruction(context.getInstruction(StateInstruction.class), currentBranchStateName);
+        tempContext.setInstruction(tempInstruction);
         tempContext.setVariableLocally(DomainConstants.PARALLEL_BRANCH_INDEX, branchIndex);
+        Loop loop = LoopTaskUtils.getLoopConfig(context, tempInstruction.getState(context));
+        if (loop != null) {
+            tempInstruction.setTemporaryState(new LoopStartStateImpl());
+        }
 
         return tempContext;
     }

@@ -48,6 +48,9 @@ public class ParallelTaskStateParser extends AbstractTaskStateParser implements 
         Integer parallel = (Integer) nodeMap.get("Parallel");
         parallelState.setParallel(parallel == null ? 1 : parallel);
 
+        // parallel state should not be configured with loop attribution
+        parallelState.setLoop(null);
+
         return parallelState;
     }
 

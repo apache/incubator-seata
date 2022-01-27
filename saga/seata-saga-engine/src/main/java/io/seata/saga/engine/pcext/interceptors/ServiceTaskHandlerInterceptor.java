@@ -123,14 +123,18 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setMachineInstanceId(stateMachineInstance.getId());
         stateInstance.setStateMachineInstance(stateMachineInstance);
         Object isForCompensation = state.isForCompensation();
-        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
+            stateInstance.setName(ParallelTaskUtils.generateParallelSubStateName(context, state.getName()));
+            // generate loop state name under parallel condition
+            if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+                stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, stateInstance.getName()));
+            }
+        } else if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
             stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, state.getName()));
             StateInstance lastRetriedStateInstance = LoopTaskUtils.findOutLastRetriedStateInstance(stateMachineInstance,
                 stateInstance.getName());
             stateInstance.setStateIdRetriedFor(
                 lastRetriedStateInstance == null ? null : lastRetriedStateInstance.getId());
-        } else if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
-            stateInstance.setName(ParallelTaskUtils.generateParallelSubStateName(context, state.getName()));
         } else {
             stateInstance.setName(state.getName());
             stateInstance.setStateIdRetriedFor(

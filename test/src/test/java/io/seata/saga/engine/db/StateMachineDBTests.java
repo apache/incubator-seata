@@ -1133,6 +1133,30 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
+    @Test
+    public void testSimpleStateMachineWithParallelAndLoop() {
+        long start = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("b", 2);
+        paramMap.put("collection", loopList);
+
+        String stateMachineName = "simpleParallelTestStateMachineWithLoop";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+    }
+
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {
 
         long start = System.currentTimeMillis();
