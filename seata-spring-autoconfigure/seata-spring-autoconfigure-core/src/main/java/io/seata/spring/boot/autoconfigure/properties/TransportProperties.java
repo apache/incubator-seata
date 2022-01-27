@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
@@ -68,6 +69,11 @@ public class TransportProperties {
      * enable RM client batch send request
      */
     private boolean enableRmClientBatchSendRequest = DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable TC server batch send response
+     */
+    private boolean enableTcServerBatchSendResponse = DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
 
     /**
      * rpcRmRequestTimeout
@@ -155,6 +161,14 @@ public class TransportProperties {
     public TransportProperties setEnableRmClientBatchSendRequest(boolean enableRmClientBatchSendRequest) {
         this.enableRmClientBatchSendRequest = enableRmClientBatchSendRequest;
         return this;
+    }
+
+    public boolean isEnableTcServerBatchSendResponse() {
+        return enableTcServerBatchSendResponse;
+    }
+
+    public void setEnableTcServerBatchSendResponse(boolean enableTcServerBatchSendResponse) {
+        this.enableTcServerBatchSendResponse = enableTcServerBatchSendResponse;
     }
 
     public long getRpcRmRequestTimeout() {

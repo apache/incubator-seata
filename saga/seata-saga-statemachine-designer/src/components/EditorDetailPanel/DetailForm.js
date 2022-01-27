@@ -116,7 +116,7 @@ class DetailForm extends React.Component {
             initialValue: JSON.stringify(stateProps, null, 2),
           })(<TextArea onBlur={this.handleSubmit} rows={16} />)}
         </Item>
-        <a target="_blank" style={{ float: 'right' }} href="http://seata.io/zh-cn/docs/user/saga.html">How to fill the properties?</a>
+        <a target="_blank" style={{ float: 'right' }} href="https://seata.io/zh-cn/docs/user/saga.html">How to fill the properties?</a>
       </Fragment >
     );
   };
@@ -142,7 +142,7 @@ class DetailForm extends React.Component {
             initialValue: JSON.stringify(stateProps, null, 2),
           })(<TextArea onBlur={this.handleSubmit} rows={16} />)}
         </Item>
-        <a target="_blank" style={{ float: 'right' }} href="http://seata.io/zh-cn/docs/user/saga.html">How to fill the properties?</a>
+        <a target="_blank" style={{ float: 'right' }} href="https://seata.io/zh-cn/docs/user/saga.html">How to fill the properties?</a>
       </Fragment>
     );
   };
