@@ -35,13 +35,6 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="dataSource2" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-		<property name="url"   value="jdbc:mysql://127.0.0.1:33060/seata?characterEncoding=utf8&amp;useUnicode=true&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
-		<property name="username" value="root"/>
-		<property name="password" value="root1234"/>
-	</bean>
-
 	<!-- 初始化数据表结构 -->
 	<jdbc:initialize-database data-source="dataSource">
 		<jdbc:script location="classpath:saga/sql/h2_init.sql" />
@@ -51,7 +44,7 @@
 		<property name="stateMachineConfig" ref="dbStateMachineConfig"></property>
 	</bean>
 	<bean id="dbStateMachineConfig" class="io.seata.saga.engine.config.DbStateMachineConfig">
-		<property name="dataSource" ref="dataSource2"></property>
+		<property name="dataSource" ref="dataSource"></property>
 		<property name="resources" value="saga/statelang/*.json"></property>
 		<property name="enableAsync" value="true"></property>
 		<property name="threadPoolExecutor" ref="threadExecutor"></property>
