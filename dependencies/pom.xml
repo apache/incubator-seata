@@ -62,8 +62,6 @@
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <antlr4.version>4.8</antlr4.version>
         <druid.version>1.2.6</druid.version>
-        <mysql5.version>5.1.35</mysql5.version>
-        <mysql8.version>8.0.19</mysql8.version>
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.72</jcommander.version>
         <annotation.api.version>1.2</annotation.api.version>
@@ -82,6 +80,9 @@
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
+
+        <mysql5.version>5.1.35</mysql5.version>
+        <mysql8.version>8.0.19</mysql8.version>
 
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
