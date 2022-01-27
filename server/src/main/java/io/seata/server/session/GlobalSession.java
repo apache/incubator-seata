@@ -89,11 +89,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private volatile boolean lazyLoadBranch;
+    private final boolean lazyLoadBranch;
 
     private volatile boolean active = true;
 
-    private final List<BranchSession> branchSessions = new ArrayList<>();
+    private List<BranchSession> branchSessions;
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
@@ -281,6 +281,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         add(branchSession);
     }
 
+    public void loadBranchs() {
+        if (branchSessions == null && isLazyLoadBranch()) {
+            synchronized (branchSessions) {
+                if (branchSessions == null && isLazyLoadBranch()) {
+                    branchSessions = new ArrayList<>();
+                    Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
+                        .ifPresent(globalSession -> branchSessions.addAll(globalSession.getBranchSessions()));
+                }
+            }
+        }
+    }
+
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
         // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
@@ -347,11 +359,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @param transactionServiceGroup the transaction service group
      * @param transactionName         the transaction name
      * @param timeout                 the timeout
+     * @param lazyLoadBranch          the lazy load branch
      */
-    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
+    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout, boolean lazyLoadBranch) {
         this.transactionId = UUIDGenerator.generateUUID();
         this.status = GlobalStatus.Begin;
-
+        if (!lazyLoadBranch) {
+            this.branchSessions = new ArrayList<>();
+        }
+        this.lazyLoadBranch = lazyLoadBranch;
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
         this.transactionName = transactionName;
@@ -489,10 +505,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return lazyLoadBranch;
     }
 
-    public void setLazyLoadBranch(boolean lazyLoadBranch) {
-        this.lazyLoadBranch = lazyLoadBranch;
-    }
-
     /**
      * Create global session global session.
      *
@@ -504,7 +516,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
         int timeout) {
-        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
+        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout, false);
         return session;
     }
 
@@ -692,7 +704,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public List<BranchSession> getBranchSessions() {
-        loadBranch();
+        loadBranchs();
         return branchSessions;
     }
 
@@ -717,18 +729,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.setStatus(GlobalStatus.RollbackRetrying);
         }
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
-    }
-
-    public void loadBranch() {
-        if (lazyLoadBranch && CollectionUtils.isEmpty(branchSessions)) {
-            synchronized (branchSessions) {
-                if (lazyLoadBranch && CollectionUtils.isEmpty(branchSessions)) {
-                    Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
-                        .ifPresent(globalSession -> branchSessions.addAll(globalSession.getBranchSessions()));
-                    lazyLoadBranch = false;
-                }
-            }
-        }
     }
 
 }

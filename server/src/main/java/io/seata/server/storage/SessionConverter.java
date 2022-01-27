@@ -40,14 +40,14 @@ import io.seata.server.store.SessionStorable;
  */
 public class SessionConverter {
 
-    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO, boolean lazyLoadBranch) {
         if (globalTransactionDO == null) {
             return null;
         }
         GlobalSession session = new GlobalSession(globalTransactionDO.getApplicationId(),
                 globalTransactionDO.getTransactionServiceGroup(),
                 globalTransactionDO.getTransactionName(),
-                globalTransactionDO.getTimeout());
+                globalTransactionDO.getTimeout(), lazyLoadBranch);
         session.setXid(globalTransactionDO.getXid());
         session.setTransactionId(globalTransactionDO.getTransactionId());
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));

@@ -35,6 +35,7 @@ import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.db.DataSourceProvider;
+import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.store.AbstractTransactionStoreManager;
@@ -229,8 +230,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
         List<BranchTransactionDO> branchTransactionDOs, boolean withBranchSessions) {
-        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
-        globalSession.setLazyLoadBranch(!withBranchSessions);
+        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO, !withBranchSessions);
         // branch transactions
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
             for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
