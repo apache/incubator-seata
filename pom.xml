@@ -31,9 +31,9 @@
     <description>top seata project pom.xml file</description>
 
     <modules>
+        <module>build</module>
         <module>all</module>
         <module>bom</module>
-        <module>build</module>
         <module>common</module>
         <module>config</module>
         <module>console</module>
@@ -149,7 +149,6 @@
                 </plugins>
             </build>
         </profile>
-
         <!-- profile: image -->
         <profile>
             <id>image</id>
@@ -158,7 +157,6 @@
                 <image.tags>latest</image.tags>
             </properties>
         </profile>
-
         <!-- profile: checkstyle -->
         <profile>
             <id>checkstyle</id>
@@ -226,13 +224,6 @@
     </profiles>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>${os-maven-plugin.version}</version>
-            </extension>
-        </extensions>
         <plugins>
             <!-- Source -->
             <plugin>

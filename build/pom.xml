@@ -105,6 +105,7 @@
         <!-- GPG -->
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <gpg.keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</gpg.keyname>
         <!-- Other -->
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
         <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
@@ -214,7 +215,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
+                                    <keyname>${gpg.keyname}</keyname>
                                 </configuration>
                             </execution>
                         </executions>

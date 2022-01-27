@@ -173,8 +173,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
         } catch (SocketException se) {
-            LOGGER.error("Server start failed, the listen port: {}", getListenPort());
-            throw new RuntimeException("Server start failed", se);
+            throw new RuntimeException("Server start failed, the listen port: " + getListenPort(), se);
         } catch (Exception exx) {
             throw new RuntimeException("Server start failed", exx);
         }

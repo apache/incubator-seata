@@ -28,78 +28,19 @@
     <artifactId>seata-bom</artifactId>
     <packaging>pom</packaging>
 
-    <name>Seata BOM ${project.version}</name>
-    <description>Seata BOM</description>
+    <name>Seata bom ${project.version}</name>
+    <description>Seata bom</description>
 
     <dependencyManagement>
         <dependencies>
-            <!-- All -->
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- common -->
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- Compressor -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-all</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-7z</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-bzip2</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-deflater</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-gzip</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-lz4</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-zip</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-zstd</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- config -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-config-all</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-config-apollo</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-config-consul</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -114,7 +55,7 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-config-etcd3</artifactId>
+                <artifactId>seata-config-apollo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -124,24 +65,32 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-config-zk</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-config-all</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-config-etcd3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-config-consul</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-config-spring-cloud</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-config-zk</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- Core -->
-            <dependency>
-                <groupId>io.seata</groupId>
                 <artifactId>seata-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- Discovery -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-discovery-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -161,7 +110,7 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-discovery-etcd3</artifactId>
+                <artifactId>seata-discovery-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -171,7 +120,7 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-discovery-nacos</artifactId>
+                <artifactId>seata-discovery-zk</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -181,15 +130,24 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-discovery-nacos</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-discovery-etcd3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-discovery-sofa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-discovery-zk</artifactId>
+                <artifactId>seata-brpc</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- Integration -->
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-dubbo</artifactId>
@@ -202,22 +160,7 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-grpc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-brpc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-hsf</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-http</artifactId>
+                <artifactId>seata-sofa-rpc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -227,10 +170,44 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-sofa-rpc</artifactId>
+                <artifactId>seata-grpc</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- Metrics -->
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-http</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-rm</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-rm-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-spring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-tcc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-tm</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-metrics-all</artifactId>
@@ -248,93 +225,17 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-metrics-registry-compact</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-metrics-exporter-prometheus</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-metrics-registry-compact</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- rm -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-rm</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- rm-datasource -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-rm-datasource</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- Saga -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-saga-engine</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-saga-engine-store</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-saga-processctrl</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-saga-rm</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-saga-statelang</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-saga-tm</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- spring-boot-autoconfigure -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-spring-autoconfigure-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-spring-autoconfigure-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- spring-boot-starter -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- Serializer -->
-            <dependency>
-                <groupId>io.seata</groupId>
                 <artifactId>seata-serializer-all</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-serializer-fst</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-serializer-hessian</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-serializer-kryo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -347,13 +248,91 @@
                 <artifactId>seata-serializer-seata</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- Spring -->
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-spring</artifactId>
+                <artifactId>seata-serializer-kryo</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- SQL parser -->
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-serializer-hessian</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-serializer-fst</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-all</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-gzip</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-zip</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-7z</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-bzip2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-lz4</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-deflater</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-saga-processctrl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-saga-statelang</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-saga-engine</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-saga-rm</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-saga-tm</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-saga-engine-store</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-sqlparser-core</artifactId>
@@ -367,18 +346,6 @@
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-sqlparser-druid</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- TCC -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-tcc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <!-- TM -->
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-tm</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
