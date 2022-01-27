@@ -31,6 +31,8 @@ public class User {
     String password;
 
 
+    //region Getter && Setter
+
     public String getUsername() {
         return username;
     }
@@ -46,4 +48,6 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    //endregion
 }

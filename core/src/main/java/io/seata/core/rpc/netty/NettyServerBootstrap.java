@@ -62,7 +62,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     public NettyServerBootstrap(NettyServerConfig nettyServerConfig) {
-
         this.nettyServerConfig = nettyServerConfig;
         if (NettyServerConfig.enableEpoll()) {
             this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
@@ -108,7 +107,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
      * @param listenPort the listen port
      */
     public void setListenPort(int listenPort) {
-
         if (listenPort <= 0) {
             throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
         }
@@ -177,7 +175,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         } catch (Exception exx) {
             throw new RuntimeException("Server start failed", exx);
         }
-
     }
 
     @Override
