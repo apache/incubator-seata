@@ -16,6 +16,7 @@
 package io.seata.core.lock;
 
 import java.util.List;
+import io.seata.core.model.LockStatus;
 
 /**
  * The interface Locker.
@@ -29,6 +30,16 @@ public interface Locker {
      * @return the boolean
      */
     boolean acquireLock(List<RowLock> rowLock) ;
+
+    /**
+     * Acquire lock boolean.
+     *
+     * @param rowLock the row lock
+     * @param autoCommit the auto commit
+     * @param skipCheckLock whether skip check lock or not
+     * @return the boolean
+     */
+    boolean acquireLock(List<RowLock> rowLock, boolean autoCommit, boolean skipCheckLock);
 
     /**
      * Release lock boolean.
@@ -51,10 +62,9 @@ public interface Locker {
      * Release lock boolean.
      *
      * @param xid       the xid
-     * @param branchIds the branch ids
      * @return the boolean
      */
-    boolean releaseLock(String xid, List<Long> branchIds);
+    boolean releaseLock(String xid);
 
     /**
      * Is lockable boolean.
@@ -68,5 +78,15 @@ public interface Locker {
      * Clean all locks.
      */
     void cleanAllLocks();
+
+    /**
+     * update lock status .
+     *
+     * @param xid the xid
+     * @param lockStatus the lock status
+     *
+     */
+    void updateLockStatus(String xid, LockStatus lockStatus);
+
 }
 

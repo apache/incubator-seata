@@ -15,8 +15,9 @@
  */
 package io.seata.server.console.service;
 
-import io.seata.core.store.db.vo.GlobalLockVO;
-import io.seata.server.console.result.PageResult;
+import io.seata.core.console.param.GlobalLockParam;
+import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.core.console.result.PageResult;
 
 
 /**
@@ -26,17 +27,11 @@ import io.seata.server.console.result.PageResult;
 public interface GlobalLockService {
 
     /**
-     * Query locks by table
-     * @param tableName the table name of the lock
-     * @return the GlobalLockVO list
+     * Query locks by param
+     * @param param the param
+     * @return the list of GlobalLockVO
      */
-    PageResult<GlobalLockVO> queryByTable(String tableName);
+    PageResult<GlobalLockVO> query(GlobalLockParam param);
 
-    /**
-     * Query by xid
-     * @param xid the xid
-     * @return the GlobalLockVO list
-     */
-    PageResult<GlobalLockVO> queryByXid(String xid);
 
 }
