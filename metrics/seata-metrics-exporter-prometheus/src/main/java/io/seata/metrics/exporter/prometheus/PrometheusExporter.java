@@ -65,7 +65,8 @@ public class PrometheusExporter extends Collector implements Collector.Describab
             measurements.forEach(measurement -> samples.add(convertMeasurementToSample(measurement)));
 
             if (!samples.isEmpty()) {
-                familySamples.add(new MetricFamilySamples("seata", Type.UNTYPED, "seata", samples));
+                Type unknownType = getUnknownType();
+                familySamples.add(new MetricFamilySamples("seata", unknownType, "seata", samples));
             }
         }
         return familySamples;
@@ -81,6 +82,21 @@ public class PrometheusExporter extends Collector implements Collector.Describab
         }
         return new Sample(prometheusName, labelNames, labelValues, measurement.getValue(),
             (long)measurement.getTimestamp());
+    }
+
+    /**
+     * Compatible with high and low versions of 'io.prometheus:simpleclient'
+     *
+     * @return the unknown collector type
+     */
+    public static Type getUnknownType() {
+        Type unknownType;
+        try {
+            unknownType = Type.valueOf("UNKNOWN");
+        } catch (IllegalArgumentException e) {
+            unknownType = Type.valueOf("UNTYPED");
+        }
+        return unknownType;
     }
 
     @Override
