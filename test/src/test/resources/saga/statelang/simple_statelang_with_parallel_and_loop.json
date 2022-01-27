@@ -1,6 +1,6 @@
 {
   "Name": "simpleParallelTestStateMachineWithLoop",
-  "Comment": "带并发参数的测试状态机定义",
+  "Comment": "带并发与循环参数的测试状态机定义",
   "StartState": "FirstState",
   "Version": "0.0.1",
   "States": {
