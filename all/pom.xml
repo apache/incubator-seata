@@ -232,8 +232,7 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-serializer-protobuf</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        -->
+        </dependency>-->
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-grpc</artifactId>
