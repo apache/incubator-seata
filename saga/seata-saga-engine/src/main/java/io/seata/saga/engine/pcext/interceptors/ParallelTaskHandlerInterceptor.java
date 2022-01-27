@@ -56,19 +56,15 @@ public class ParallelTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_PARALLEL_STATE)) {
 
-            Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
-            if (exp == null) {
-                exp = e;
-            }
-            
-            if (e != null) {
-                if (context.hasVariable(DomainConstants.PARALLEL_SEMAPHORE)) {
-                    Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.PARALLEL_SEMAPHORE);
-                    semaphore.release();
-                }
+            Exception exp =
+                (Exception) ((HierarchicalProcessContext) context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+
+            if (e != null && context.hasVariable(DomainConstants.PARALLEL_SEMAPHORE)) {
+                Semaphore semaphore = (Semaphore) context.getVariable(DomainConstants.PARALLEL_SEMAPHORE);
+                semaphore.release();
             }
 
-            if (exp != null) {
+            if (exp != null || e != null) {
                 ParallelContextHolder.getCurrent(context, true).setFailEnd(true);
             }
         }

@@ -1,6 +1,6 @@
 {
   "Name": "simpleParallelTestStateMachineWithCompensation",
-  "Comment": "带并发参数的测试状态机定义",
+  "Comment": "带并发参数的用于测试事务恢复的状态机定义",
   "StartState": "FirstState",
   "Version": "0.0.1",
   "States": {
@@ -96,21 +96,15 @@
         }
       ]
     },
-    "CompensateThirdState": {
-      "Type": "ServiceTask",
-      "ServiceName": "demoService",
-      "ServiceMethod": "compensateFoo",
-      "Input": [
-        {
-          "compensateFooInput": "$.[fooResult]",
-          "throwException": "$.[compensateFooThrowException]"
-        }
-      ]
-    },
     "CompensateSecondState": {
       "Type": "ServiceTask",
       "ServiceName": "demoService",
-      "ServiceMethod": "compensateBar"
+      "ServiceMethod": "compensateBar",
+      "Input": [
+        {
+          "throwException": "$.[compensateBarThrowException]"
+        }
+      ]
     },
     "CompensationTriggerTest": {
       "Type": "CompensationTrigger",

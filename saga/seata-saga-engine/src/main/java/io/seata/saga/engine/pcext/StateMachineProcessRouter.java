@@ -32,8 +32,6 @@ import io.seata.saga.proctrl.ProcessRouter;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * StateMachine ProcessRouter
@@ -42,8 +40,6 @@ import org.slf4j.LoggerFactory;
  * @see ProcessRouter
  */
 public class StateMachineProcessRouter implements ProcessRouter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineProcessRouter.class);
 
     private final Map<String, StateRouter> stateRouters = new ConcurrentHashMap<>();
 

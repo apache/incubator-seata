@@ -38,7 +38,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -1128,6 +1127,50 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
+    }
+
+    @Test
+    public void testSimpleStateMachineWithParallelCompensateForRecovery() throws InterruptedException {
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("b", 2);
+        paramMap.put("barThrowException", "true");
+        paramMap.put("compensateBarThrowException", "true");
+
+        String stateMachineName = "simpleParallelTestStateMachineWithCompensation";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
+
+        Thread.sleep(sleepTime);
+
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
+    }
+
+    @Test
+    public void testSimpleStateMachineWithParallelSubMachine() {
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 2);
+        paramMap.put("b", 2);
+
+        String stateMachineName = "simpleParallelTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {

@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
@@ -30,12 +29,11 @@ import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.pcext.utils.ParallelContextHolder;
 import io.seata.saga.engine.pcext.utils.ParallelTaskUtils;
-import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.ParallelState;
-import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.StateInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,24 +45,23 @@ import org.slf4j.LoggerFactory;
  */
 public class ParallelStateHandler implements StateHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParallelStateHandler.class);
+    private static final Logger LOGGER        = LoggerFactory.getLogger(ParallelStateHandler.class);
+    private static final int    AWAIT_TIMEOUT = 1000;
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        StateMachineInstance stateMachineInstance =
-            (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateMachineConfig stateMachineConfig =
             (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-        ParallelState state = (ParallelState) instruction.getState(context);
         if (!stateMachineConfig.isEnableAsync() || null == stateMachineConfig.getAsyncProcessCtrlEventPublisher()) {
             throw new EngineExecutionException(
                 "Asynchronous start is disabled. Parallel execution will run asynchronous, please set "
                     + "StateMachineConfig.enableAsync=true and async thread-pool correctly first.", FrameworkErrorCode.AsynchronousStartDisabled);
         }
 
+        ParallelState state = (ParallelState) instruction.getState(context);
         List<String> branches = state.getBranches();
         if (CollectionUtils.isEmpty(branches)) {
             throw new EngineExecutionException(
@@ -72,54 +69,52 @@ public class ParallelStateHandler implements StateHandler {
         }
         // init parallel context
         ParallelTaskUtils.initParallelContext(context, state);
-        ParallelContextHolder contextHolder = ParallelContextHolder.getCurrent(context, true);
+        ParallelContextHolder contextHolder = ParallelContextHolder.getCurrent(context, false);
 
         // decide max concurrent threads
         int totalInstances = branches.size();
-        int maxInstances;
         List<String> unExecutedBranches = new ArrayList<>();
 
         if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
+            // forward scene should reload Retry-Committing parallel state
             ParallelTaskUtils.reloadParallelContext(context, state.getName());
             unExecutedBranches = ParallelTaskUtils.acquireUnExecutedBranches(context);
-            totalInstances = unExecutedBranches.size() + ParallelContextHolder.getCurrent(context, true).getForwardBranches().size();
+            totalInstances = unExecutedBranches.size() + contextHolder.getForwardBranches().size();
         }
-        maxInstances = Math.min(state.getParallel(), totalInstances);
+        int maxInstances = Math.min(state.getParallel(), totalInstances);
 
         Semaphore semaphore = new Semaphore(maxInstances);
         context.setVariable(DomainConstants.PARALLEL_SEMAPHORE, semaphore);
 
         // async publish branches
-        List<ProcessContext> parallelProcessContexts = new ArrayList<>();
+        List<ProcessContext> forkProcessContexts = new ArrayList<>();
         for (int i = 0; i < totalInstances; i++) {
 
-            // each index means one parallel line, if single succeed, then skip.
+            // each index means one parallel line
             try {
                 semaphore.acquire();
-                ProcessContextImpl tempContext;
-
                 if (contextHolder.isFailEnd()) {
                     semaphore.release();
                     break;
                 }
 
+                ProcessContext forkContext;
                 // forward scene
                 if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
                     int forwardIndex;
                     if (contextHolder.getForwardBranches().size() > 0) {
-                        // fail-end, publish again first
+                        // retry-committing branches should be published again first
                         forwardIndex = Integer.parseInt(contextHolder.getForwardBranches().remove(0));
                     } else {
                         forwardIndex = Integer.parseInt(unExecutedBranches.remove(0));
                     }
-                    tempContext =
-                        (ProcessContextImpl) ParallelTaskUtils.createTempContext(context, branches.get(forwardIndex), forwardIndex);
+                    forkContext = ParallelTaskUtils.createTempContext(context, branches.get(forwardIndex), forwardIndex);
                 } else {
-                    tempContext = (ProcessContextImpl) ParallelTaskUtils.createTempContext(context, branches.get(i), i);
+                    forkContext = ParallelTaskUtils.createTempContext(context, branches.get(i), i);
                 }
 
-                stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(tempContext);
-                parallelProcessContexts.add(tempContext);
+                stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(forkContext);
+                forkProcessContexts.add(forkContext);
             } catch (InterruptedException e) {
                 LOGGER.error("try execute parallel task for State: [{}] is interrupted, branch: [{}], message: [{}]",
                     instruction.getStateName(), branches.get(i), e.getMessage());
@@ -131,10 +126,15 @@ public class ParallelStateHandler implements StateHandler {
             boolean isFinished = false;
             while (!isFinished) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("wait {}ms for parallel state [{}] finish", 1000, instruction.getStateName());
+                    LOGGER.debug("wait {}ms for parallel state [{}] finish", AWAIT_TIMEOUT, instruction.getStateName());
                 }
-                isFinished = semaphore.tryAcquire(maxInstances, 1000, TimeUnit.MILLISECONDS);
+                isFinished = semaphore.tryAcquire(maxInstances, AWAIT_TIMEOUT, TimeUnit.MILLISECONDS);
             }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Parallel State [{}] has finished [{}] branches with status [{}]", state.getName(),
+                    forkProcessContexts.size(), decideExecutionStatus(forkProcessContexts));
+            }
+            ParallelTaskUtils.putContextToParent(context, forkProcessContexts, state);
         } catch (InterruptedException e) {
             LOGGER.error("State: [{}] wait parallel execution complete is interrupted, message: [{}]",
                 instruction.getStateName(), e.getMessage());
@@ -144,23 +144,22 @@ public class ParallelStateHandler implements StateHandler {
         }
 
         if (contextHolder.isFailEnd()) {
-            String nextRoute =
-                ParallelTaskUtils.decideCurrentExceptionRoute(parallelProcessContexts, stateMachineInstance.getStateMachine());
+            context.setVariable(DomainConstants.VAR_NAME_ASYNC_EXECUTION_INSTANCE, forkProcessContexts);
+            EngineUtils.handleExceptionWithMultiInstances(context);
+        }
+        
+    }
 
-            if (StringUtils.isNotBlank(nextRoute)) {
-                ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, nextRoute);
-            } else {
-                for (ProcessContext processContext : parallelProcessContexts) {
-                    if (processContext.hasVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION)) {
-                        Exception exception =
-                            (Exception) processContext.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
-                        EngineUtils.failStateMachine(context, exception);
-                        break;
-                    }
+    private static String decideExecutionStatus(List<ProcessContext> asyncExecutionInstances) {
+        if (CollectionUtils.isNotEmpty(asyncExecutionInstances)) {
+            for (ProcessContext processContext : asyncExecutionInstances) {
+                StateInstance stateInstance = (StateInstance) processContext.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+                if (stateInstance != null && stateInstance.getStatus() != ExecutionStatus.SU) {
+                    return stateInstance.getStatus().toString();
                 }
             }
         }
-        
+        return ExecutionStatus.SU.toString();
     }
 
 }

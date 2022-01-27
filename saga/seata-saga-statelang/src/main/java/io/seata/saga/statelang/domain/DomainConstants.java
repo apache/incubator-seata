@@ -70,11 +70,11 @@ public interface DomainConstants {
     String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";
     String VAR_NAME_GLOBAL_TX = "_global_transaction_";
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
+    String VAR_NAME_ASYNC_EXECUTION_INSTANCE = "_async_execution_instance_";
     String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
     String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
     String VAR_NAME_IS_PARALLEL_STATE = "_is_parallel_state_";
     String VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER = "_current_parallel_context_holder_";
-    String VAR_NAME_IS_PARALLEL_FAIL_END = "_is_parallel_fail_end_";
     //endregion
 
     // region of loop
@@ -87,9 +87,9 @@ public interface DomainConstants {
     // endregion
 
     // region of parallel
-    String PARALLEL_SEMAPHORE = "parallelSemaphore";
-    String PARALLEL_BRANCH_INDEX = "parallelBranchIndex";
-    String PARALLEL_PARENT_STATE_NAME = "parallelParentStateName";
+    String PARALLEL_SEMAPHORE        = "parallelSemaphore";
+    String PARALLEL_BRANCH_INDEX     = "parallelBranchIndex";
+    String PARALLEL_START_STATE_NAME = "parallelStartStateName";
     // endregion
 
     String OPERATION_NAME_START = "start";

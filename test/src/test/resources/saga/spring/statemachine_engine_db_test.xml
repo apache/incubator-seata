@@ -37,7 +37,7 @@
 
 	<bean id="dataSource2" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-		<property name="url"   value="jdbc:mysql://127.0.0.1:33060/seata?characterEncoding=utf8&amp;useUnicode=true&amp;useSSL=false"/>
+		<property name="url"   value="jdbc:mysql://127.0.0.1:33060/seata?characterEncoding=utf8&amp;useUnicode=true&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
 		<property name="username" value="root"/>
 		<property name="password" value="root1234"/>
 	</bean>

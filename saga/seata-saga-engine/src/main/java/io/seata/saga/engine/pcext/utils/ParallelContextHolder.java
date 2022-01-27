@@ -22,6 +22,8 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 
 /**
+ * Parallel Context Holder for parallel state
+ *
  * @author anselleeyy
  */
 public class ParallelContextHolder {
@@ -41,7 +43,8 @@ public class ParallelContextHolder {
                     (ParallelContextHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER);
                 if (null == parallelContextHolder) {
                     parallelContextHolder = new ParallelContextHolder();
-                    context.setVariable(DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER, parallelContextHolder);
+                    context.setVariable(DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER,
+                        parallelContextHolder);
                 }
             }
         }

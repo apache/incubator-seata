@@ -14,9 +14,6 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "bar"
-        },
-        "Succeed": {
-            "Type":"Succeed"
         }
     }
 }

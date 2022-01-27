@@ -17,7 +17,6 @@ package io.seata.saga.statelang.domain.impl;
 
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ParallelState;
-import io.seata.saga.statelang.domain.TaskState;
 
 import java.util.List;
 

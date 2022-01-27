@@ -147,6 +147,8 @@ public class LoopTaskUtils {
         }
         int executedNumber = 0;
         LinkedList<Integer> failEndList = new LinkedList<>();
+        failEndList.addFirst(reloadLoopCounter(lastForwardState.getName()));
+        list.remove(Integer.valueOf(reloadLoopCounter(lastForwardState.getName())));
         for (StateInstance stateInstance : forwardStateList) {
             if (!stateInstance.isIgnoreStatus()) {
                 if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
@@ -155,9 +157,6 @@ public class LoopTaskUtils {
                     stateInstance.setIgnoreStatus(true);
                     failEndList.addFirst(reloadLoopCounter(stateInstance.getName()));
                 }
-                list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
-            } else if (stateInstance.getName().equals(lastForwardState.getName())) {
-                failEndList.addFirst(reloadLoopCounter(stateInstance.getName()));
                 list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
             }
         }

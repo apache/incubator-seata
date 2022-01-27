@@ -30,7 +30,9 @@ import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.TaskState;
 import io.seata.saga.statelang.domain.TaskState.ExceptionMatch;
@@ -277,5 +279,43 @@ public class EngineUtils {
 
         LOGGER.error("Task execution failed and no catches configured");
         ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH, true);
+    }
+
+    public static void handleExceptionWithMultiInstances(ProcessContext context) {
+        List<ProcessContext> asyncExecutionInstances =
+            (List<ProcessContext>) context.getVariable(DomainConstants.VAR_NAME_ASYNC_EXECUTION_INSTANCE);
+        if (CollectionUtils.isNotEmpty(asyncExecutionInstances)) {
+            StateMachineInstance stateMachineInstance =
+                (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            StateMachine stateMachine = stateMachineInstance.getStateMachine();
+            String nextRoute = null;
+            Exception exception = null;
+            for (ProcessContext processContext : asyncExecutionInstances) {
+                String next = (String) processContext.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
+                if (StringUtils.isNotBlank(next)) {
+
+                    // compensate must be execute
+                    State state = stateMachine.getState(next);
+                    if (DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER.equals(state.getType())) {
+                        nextRoute = next;
+                        break;
+                    } else if (StringUtils.isBlank(nextRoute)) {
+                        nextRoute = next;
+                    }
+                }
+
+                if (exception == null && processContext.hasVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION)) {
+                    exception = (Exception) processContext.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+                }
+            }
+
+            if (StringUtils.isNotBlank(nextRoute)) {
+                ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, nextRoute);
+            } else if (exception != null) {
+                // no route catch, try to fail end this machine
+                failStateMachine(context, exception);
+            }
+        }
+
     }
 }

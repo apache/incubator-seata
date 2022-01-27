@@ -67,6 +67,9 @@ public class DemoService {
             return null;
         }
         Integer sleepTime = (Integer) input.get("sleepTime");
+        System.out.println("parallelResult=" + input.get("parallelResult"));
+        System.out.println("loopResult=" + input.get("loopResult"));
+        System.out.println("fooResult=" + input.get("fooResult"));
         if(sleepTime != null){
             try {
                 Thread.sleep(sleepTime);

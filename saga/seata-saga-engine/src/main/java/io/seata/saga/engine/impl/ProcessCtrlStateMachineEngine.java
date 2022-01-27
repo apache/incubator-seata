@@ -271,7 +271,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         String originStateName = EngineUtils.getOriginStateName(lastForwardState);
         State lastState = stateMachineInstance.getStateMachine().getState(originStateName);
         Loop loop = LoopTaskUtils.getLoopConfig(context, lastState);
-        if ((null != loop || DomainConstants.STATE_TYPE_PARALLEL.equals(lastState.getType())) && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+        if ((null != loop || DomainConstants.STATE_TYPE_PARALLEL.equals(lastState.getType())) 
+            && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
             lastForwardState = findOutLastNeedForwardStateInstanceWithConcurrent(context);
             context.setVariable(DomainConstants.VAR_NAME_STATE_INST, lastForwardState);
         }
