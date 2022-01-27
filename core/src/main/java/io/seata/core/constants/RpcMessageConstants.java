@@ -13,41 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.console.security;
+package io.seata.core.constants;
 
 /**
- * mock user info
+ * the RpcMessage Constants
  *
- * @author jameslcj
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.5.0
  */
-public class User {
+public class RpcMessageConstants {
+
     /**
-     * The Username.
+     * the HeapMap Key Constants
      */
-    String username;
-    /**
-     * The Password.
-     */
-    String password;
+    public static class HeapMapKey {
 
-
-    //region Getter && Setter
-
-    public String getUsername() {
-        return username;
+        /**
+         * the version key
+         */
+        public static final String VERSION_KEY = "version";
     }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    //endregion
 }
