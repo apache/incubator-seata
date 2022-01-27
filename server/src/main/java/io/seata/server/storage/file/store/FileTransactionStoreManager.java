@@ -337,7 +337,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         try {
             currFileChannel.force(true);
         } catch (IOException e) {
-            LOGGER.error("fileChannel force error{}", e.getMessage(), e);
+            LOGGER.error("fileChannel force error: {}", e.getMessage(), e);
         }
         closeFile(currRaf);
     }
