@@ -138,4 +138,9 @@ public interface MessageType {
      * the constant TYPE_HEARTBEAT_MSG
      */
     short TYPE_HEARTBEAT_MSG = 120;
+
+    /**
+     * the constant TYPE_BATCH_RESULT_MSG
+     */
+    short TYPE_BATCH_RESULT_MSG = 121;
 }
