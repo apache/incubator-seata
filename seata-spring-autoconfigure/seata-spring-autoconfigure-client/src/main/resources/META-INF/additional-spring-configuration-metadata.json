@@ -382,7 +382,8 @@
           "description": "the default type."
         },
         {
-          "value": "antlr"
+          "value": "antlr",
+          "description": "'io.seata:seata-sqlparser-antlr' dependency must be referenced manually."
         }
       ]
     },
