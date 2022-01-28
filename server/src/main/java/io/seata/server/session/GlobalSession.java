@@ -282,7 +282,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void loadBranchs() {
         if (branchSessions == null && isLazyLoadBranch()) {
-            synchronized (branchSessions) {
+            synchronized (this) {
                 if (branchSessions == null && isLazyLoadBranch()) {
                     branchSessions = new ArrayList<>();
                     Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
@@ -314,7 +314,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the branch
      */
     public BranchSession getBranch(long branchId) {
-        synchronized (branchSessions) {
+        synchronized (this) {
             List<BranchSession> branchSessions = getBranchSessions();
             for (BranchSession branchSession : branchSessions) {
                 if (branchSession.getBranchId() == branchId) {
@@ -627,6 +627,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void decode(byte[] a) {
+        this.branchSessions = new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(a);
         this.transactionId = byteBuffer.getLong();
         this.timeout = byteBuffer.getInt();
