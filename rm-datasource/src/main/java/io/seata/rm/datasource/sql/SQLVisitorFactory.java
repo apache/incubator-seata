@@ -32,8 +32,8 @@ public class SQLVisitorFactory {
     private final static SQLRecognizerFactory SQL_RECOGNIZER_FACTORY;
 
     static {
-        String sqlparserType = SqlParserConfigurationFactory.getSqlParserType();
-        SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlparserType);
+        String sqlParserType = SqlParserConfigurationFactory.getSqlParserType();
+        SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlParserType);
     }
 
     /**
