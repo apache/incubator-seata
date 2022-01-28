@@ -17,7 +17,6 @@ package io.seata.rm.datasource.util;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
-import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.sqlparser.SqlParserConfigurationFactory;
