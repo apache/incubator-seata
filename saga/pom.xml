@@ -41,7 +41,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-common</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
