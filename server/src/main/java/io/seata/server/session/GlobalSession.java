@@ -28,7 +28,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -350,7 +349,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     /**
      * Instantiates a new Global session.
      */
-    public GlobalSession() {}
+    public GlobalSession() {
+        this.lazyLoadBranch = false;
+    }
 
     /**
      * Instantiates a new Global session.
@@ -364,15 +365,27 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout, boolean lazyLoadBranch) {
         this.transactionId = UUIDGenerator.generateUUID();
         this.status = GlobalStatus.Begin;
+        this.lazyLoadBranch = lazyLoadBranch;
         if (!lazyLoadBranch) {
             this.branchSessions = new ArrayList<>();
         }
-        this.lazyLoadBranch = lazyLoadBranch;
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
         this.transactionName = transactionName;
         this.timeout = timeout;
         this.xid = XID.generateXID(transactionId);
+    }
+
+    /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     */
+    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
+        this(applicationId, transactionServiceGroup, transactionName, timeout, false);
     }
 
     /**

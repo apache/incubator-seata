@@ -56,6 +56,10 @@ public class SessionConverter {
         return session;
     }
 
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+        return convertGlobalSession(globalTransactionDO, false);
+    }
+
     public static BranchSession convertBranchSession(BranchTransactionDO branchTransactionDO) {
         if (branchTransactionDO == null) {
             return null;
