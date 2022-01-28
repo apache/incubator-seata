@@ -16,11 +16,9 @@
 package io.seata.rm.datasource.sql;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
-import io.seata.sqlparser.SqlParserType;
+import io.seata.sqlparser.SqlParserConfigurationFactory;
 
 import java.util.List;
 
@@ -34,8 +32,8 @@ public class SQLVisitorFactory {
     private final static SQLRecognizerFactory SQL_RECOGNIZER_FACTORY;
 
     static {
-        String sqlparserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
-        SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlparserType);
+        String sqlParserType = SqlParserConfigurationFactory.getSqlParserType();
+        SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlParserType);
     }
 
     /**
