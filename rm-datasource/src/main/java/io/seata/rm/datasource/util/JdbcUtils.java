@@ -17,9 +17,10 @@ package io.seata.rm.datasource.util;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.sqlparser.SqlParserConfigurationFactory;
 import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.DbTypeParser;
 
@@ -42,7 +43,7 @@ public final class JdbcUtils {
         if (dbTypeParser == null) {
             synchronized (JdbcUtils.class) {
                 if (dbTypeParser == null) {
-                    String sqlParserType = SqlParserConfigurationFactory.getSqlParserType();
+                    String sqlParserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
                     try {
                         dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, sqlParserType);
                     } catch (EnhancedServiceNotFoundException e) {
