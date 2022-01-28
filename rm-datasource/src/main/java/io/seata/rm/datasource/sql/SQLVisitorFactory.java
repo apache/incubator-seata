@@ -16,12 +16,9 @@
 package io.seata.rm.datasource.sql;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SqlParserConfigurationFactory;
-import io.seata.sqlparser.SqlParserType;
 
 import java.util.List;
 
