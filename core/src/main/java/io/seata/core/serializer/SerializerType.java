@@ -30,7 +30,7 @@ public enum SerializerType {
     SEATA((byte)0x1),
 
     /**
-     * The protobuf， 'io.seata:seata-serializer-protobuf' dependency must be referenced manually.
+     * The protobuf, 'io.seata:seata-serializer-protobuf' dependency must be referenced manually.
      * <p>
      * Math.pow(2, 1)
      */
