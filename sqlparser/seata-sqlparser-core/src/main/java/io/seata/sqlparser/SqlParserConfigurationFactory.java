@@ -27,29 +27,29 @@ import io.seata.core.constants.ConfigurationKeys;
  */
 public final class SqlParserConfigurationFactory {
 
-	private SqlParserConfigurationFactory() {
-	}
+    private SqlParserConfigurationFactory() {
+    }
 
 
-	private static final String ONE_ANTLR_CLASS_NAME = "io.seata.sqlparser.antlr.SQLOperateRecognizerHolder";
+    private static final String ONE_ANTLR_CLASS_NAME = "io.seata.sqlparser.antlr.SQLOperateRecognizerHolder";
 
 
-	/**
-	 * Get sql parser type
-	 *
-	 * @return the sql parser type
-	 * @throws EnhancedServiceNotFoundException the enhanced service not found exception
-	 */
-	public static String getSqlParserType() {
-		String sqlParserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
-		if (SqlParserType.SQL_PARSER_TYPE_ANTLR.equalsIgnoreCase(sqlParserType)) {
-			try {
-				ReflectionUtil.getClassByName(ONE_ANTLR_CLASS_NAME);
-			} catch (ClassNotFoundException e) {
-				throw new EnhancedServiceNotFoundException("Cannot find SQL parser for 'ANTLR'. " +
-						"Please manually reference 'io.seata:seata-sqlparser-antlr' dependency ", e);
-			}
-		}
-		return sqlParserType;
-	}
+    /**
+     * Get sql parser type
+     *
+     * @return the sql parser type
+     * @throws EnhancedServiceNotFoundException the enhanced service not found exception
+     */
+    public static String getSqlParserType() {
+        String sqlParserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
+        if (SqlParserType.SQL_PARSER_TYPE_ANTLR.equalsIgnoreCase(sqlParserType)) {
+            try {
+                ReflectionUtil.getClassByName(ONE_ANTLR_CLASS_NAME);
+            } catch (ClassNotFoundException e) {
+                throw new EnhancedServiceNotFoundException("Cannot find SQL parser for 'ANTLR'. " +
+                        "Please manually reference 'io.seata:seata-sqlparser-antlr' dependency ", e);
+            }
+        }
+        return sqlParserType;
+    }
 }
