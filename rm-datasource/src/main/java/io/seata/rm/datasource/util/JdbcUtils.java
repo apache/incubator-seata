@@ -18,7 +18,7 @@ package io.seata.rm.datasource.util;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.sqlparser.SqlParserConfigurationFactory;
+import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.DbTypeParser;
 
 import javax.sql.DataSource;
@@ -40,8 +40,7 @@ public final class JdbcUtils {
         if (dbTypeParser == null) {
             synchronized (JdbcUtils.class) {
                 if (dbTypeParser == null) {
-                    String sqlParserType = SqlParserConfigurationFactory.getSqlParserType();
-                    dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, sqlParserType);
+                    dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
                 }
             }
         }
