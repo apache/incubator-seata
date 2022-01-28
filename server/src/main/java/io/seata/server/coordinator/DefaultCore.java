@@ -258,7 +258,7 @@ public class DefaultCore implements Core {
         }
         // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
         // executed to improve concurrency performance, and the global transaction ends..
-       if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
+        if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event
