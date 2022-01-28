@@ -31,7 +31,7 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-metrics-api</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>

@@ -29,7 +29,7 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-discovery-core</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
