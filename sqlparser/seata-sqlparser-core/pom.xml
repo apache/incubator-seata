@@ -27,7 +27,12 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-common</artifactId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-config-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
