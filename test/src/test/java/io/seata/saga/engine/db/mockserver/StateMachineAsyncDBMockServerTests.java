@@ -64,7 +64,7 @@ public class StateMachineAsyncDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class StateMachineAsyncDBMockServerTests {
 
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class StateMachineAsyncDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -130,8 +130,8 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -152,7 +152,7 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -173,7 +173,7 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -197,11 +197,11 @@ public class StateMachineAsyncDBMockServerTests {
 
         People peopleResult = (People) inst.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
-        Assertions.assertTrue(people.getName().equals(people.getName()));
+        Assertions.assertEquals(people.getName(), peopleResult.getName());
 
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -221,7 +221,7 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         try {
             Thread.sleep(500);

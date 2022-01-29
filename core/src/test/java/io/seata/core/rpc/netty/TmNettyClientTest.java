@@ -88,10 +88,10 @@ public class TmNettyClientTest {
         Field optionsField = getDeclaredField(bootstrap, "options");
         optionsField.setAccessible(true);
         Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>)optionsField.get(bootstrap);
-        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.TCP_NODELAY)));
-        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
+        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.TCP_NODELAY));
+        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
         Assertions.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
-        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
+        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
         Assertions.assertEquals(153600, options.get(ChannelOption.SO_RCVBUF));
 
         Field channelFactoryField = getDeclaredField(bootstrap, "channelFactory");
@@ -131,14 +131,13 @@ public class TmNettyClientTest {
      * @return declared field
      */
     public static Field getDeclaredField(Object object, String fieldName) {
-        Field field = null;
+        Field field;
         Class<?> clazz = object.getClass();
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             try {
                 field = clazz.getDeclaredField(fieldName);
                 return field;
-            } catch (Exception e) {
-
+            } catch (Exception ignored) {
             }
         }
 

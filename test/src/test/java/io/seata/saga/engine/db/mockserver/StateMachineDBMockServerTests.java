@@ -69,11 +69,11 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
         Assertions.assertNotNull(inst);
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstanceByBusinessKey(businessKey, null);
         Assertions.assertNotNull(inst);
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         start = System.currentTimeMillis();
         paramMap.put("a", 2);
@@ -82,7 +82,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
         Assertions.assertNotNull(inst);
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class StateMachineDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
 
 
@@ -180,7 +180,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
 
         start = System.currentTimeMillis();
@@ -190,7 +190,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -210,7 +210,7 @@ public class StateMachineDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -230,7 +230,7 @@ public class StateMachineDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -249,8 +249,8 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -269,7 +269,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         start = System.currentTimeMillis();
 
@@ -279,7 +279,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -298,7 +298,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         start = System.currentTimeMillis();
 
@@ -308,7 +308,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -327,7 +327,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         start = System.currentTimeMillis();
 
@@ -337,7 +337,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -356,7 +356,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
         String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
@@ -371,7 +371,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson2);
@@ -395,7 +395,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         start = System.currentTimeMillis();
 
@@ -404,7 +404,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
     }
 
     @Test
@@ -424,7 +424,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
         String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
@@ -438,7 +438,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
 
         String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson2);
@@ -462,7 +462,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         start = System.currentTimeMillis();
 
@@ -472,7 +472,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -491,7 +491,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         paramMap.put("fooThrowException", "false");
 
@@ -502,7 +502,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -521,7 +521,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
         paramMap.put("fooThrowException", "false");
         paramMap.put("barThrowException", "true");
@@ -533,7 +533,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -553,8 +553,8 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
 
         paramMap.put("barThrowException", "false");
         paramMap.put("compensateFooThrowException", "false");
@@ -566,7 +566,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -586,8 +586,8 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
 
         start = System.currentTimeMillis();
 
@@ -596,8 +596,8 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
 
         paramMap.put("barThrowException", "false");
         paramMap.put("compensateFooThrowException", "false");
@@ -609,7 +609,7 @@ public class StateMachineDBMockServerTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -634,12 +634,12 @@ public class StateMachineDBMockServerTests {
 
         People peopleResult = (People) instance.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
-        Assertions.assertTrue(people.getName().equals(people.getName()));
+        Assertions.assertEquals(people.getName(), peopleResult.getName());
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + instance.getId() + " cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, instance.getStatus());
     }
 
     @Test
@@ -657,7 +657,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         try {
             Thread.sleep(500);

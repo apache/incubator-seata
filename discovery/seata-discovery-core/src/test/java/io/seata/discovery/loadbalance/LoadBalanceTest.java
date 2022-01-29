@@ -46,7 +46,7 @@ public class LoadBalanceTest {
         int runs = 10000;
         Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RandomLoadBalance());
         for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
+            long count = counter.get(address).get();
             Assertions.assertTrue(count > 0, "selecte one time at last");
         }
     }
@@ -62,7 +62,7 @@ public class LoadBalanceTest {
         int runs = 10000;
         Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RoundRobinLoadBalance());
         for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
+            long count = counter.get(address).get();
             Assertions.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
         }
     }
