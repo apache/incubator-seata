@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
+import io.seata.sqlparser.SqlParserType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +51,7 @@ public class RmProperties {
     private int tccActionInterceptorOrder = TCC_ACTION_INTERCEPTOR_ORDER;
     private int branchExecutionTimeoutXA = DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
     private int connectionTwoPhaseHoldTimeoutXA = DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
+    private String sqlParserType = SqlParserType.SQL_PARSER_TYPE_DRUID;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -134,6 +136,15 @@ public class RmProperties {
 
     public RmProperties setTccActionInterceptorOrder(int tccActionInterceptorOrder) {
         this.tccActionInterceptorOrder = tccActionInterceptorOrder;
+        return this;
+    }
+
+    public String getSqlParserType() {
+        return sqlParserType;
+    }
+
+    public RmProperties setSqlParserType(String sqlParserType) {
+        this.sqlParserType = sqlParserType;
         return this;
     }
 
