@@ -53,9 +53,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleCachesStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -76,8 +77,6 @@ public class StateMachineAsyncTests {
 
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        waittingForFinish(inst);
-
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
@@ -89,8 +88,6 @@ public class StateMachineAsyncTests {
 
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        waittingForFinish(inst);
-
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
@@ -100,8 +97,6 @@ public class StateMachineAsyncTests {
         start = System.currentTimeMillis();
         paramMap.put("scriptThrowException", true);
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
-
-        waittingForFinish(inst);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -120,9 +115,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleRetryStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -143,9 +139,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleStatusMatchingStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -165,9 +162,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -187,9 +185,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -208,9 +207,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -231,9 +231,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleStateMachineWithComplexParams";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
 
@@ -256,9 +257,10 @@ public class StateMachineAsyncTests {
 
         String stateMachineName = "simpleStateMachineWithAsyncState";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.callback);
 
-        waittingForFinish(inst);
+        waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -272,11 +274,11 @@ public class StateMachineAsyncTests {
         }
     }
 
-    private void waittingForFinish(StateMachineInstance inst) {
-        synchronized (lock) {
+    private void waittingForFinish(StateMachineInstance inst, LockAndCallback lockAndCallback) {
+        synchronized (lockAndCallback.lock) {
             if (ExecutionStatus.RU.equals(inst.getStatus())) {
                 try {
-                    lock.wait();
+                    lockAndCallback.lock.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -284,20 +286,28 @@ public class StateMachineAsyncTests {
         }
     }
 
-    private volatile Object        lock     = new Object();
-    private          AsyncCallback callback = new AsyncCallback() {
-        @Override
-        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-        }
 
-        @Override
-        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
+    private static class LockAndCallback {
+        private final Object lock;
+        private final AsyncCallback callback;
+
+        public LockAndCallback() {
+            lock = new Object();
+            callback = new AsyncCallback() {
+                @Override
+                public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+                    synchronized (lock) {
+                        lock.notifyAll();
+                    }
+                }
+
+                @Override
+                public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+                    synchronized (lock) {
+                        lock.notifyAll();
+                    }
+                }
+            };
         }
-    };
+    }
 }
