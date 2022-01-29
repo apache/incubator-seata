@@ -59,7 +59,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost2-1 :" + cost);
+        System.out.println("====== cost2-1 :" + cost + ", status : " + lockAndCallback.status);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -121,7 +121,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost2-5 :" + cost);
+        System.out.println("====== cost2-5 :" + cost + ", status : " + lockAndCallback.status);
 
 
         Assertions.assertNotNull(inst.getException());
@@ -145,7 +145,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost2-6 :" + cost);
+        System.out.println("====== cost2-6 :" + cost + ", status : " + lockAndCallback.status);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -168,7 +168,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost2-7 :" + cost);
+        System.out.println("====== cost2-7 :" + cost + ", status : " + lockAndCallback.status);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -191,7 +191,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost2-8 :" + cost);
+        System.out.println("====== cost2-8 :" + cost + ", status : " + lockAndCallback.status);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -213,7 +213,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost2-9 :" + cost);
+        System.out.println("====== cost2-9 :" + cost + ", status : " + lockAndCallback.status);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -242,7 +242,7 @@ public class StateMachineAsyncTests {
         Assertions.assertNotNull(peopleResult);
         Assertions.assertEquals(people.getName(), peopleResult.getName());
 
-        System.out.println("====== cost2-10 :" + cost);
+        System.out.println("====== cost2-10 :" + cost + ", status : " + lockAndCallback.status);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
@@ -263,7 +263,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost2-11 :" + cost);
+        System.out.println("====== cost2-11 :" + cost + ", status : " + lockAndCallback.status);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
@@ -290,12 +290,14 @@ public class StateMachineAsyncTests {
     private static class LockAndCallback {
         private final Object lock;
         private final AsyncCallback callback;
+        private String status;
 
         public LockAndCallback() {
             lock = new Object();
             callback = new AsyncCallback() {
                 @Override
                 public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+                    status = "finished";
                     synchronized (lock) {
                         lock.notifyAll();
                     }
@@ -303,6 +305,7 @@ public class StateMachineAsyncTests {
 
                 @Override
                 public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+                    status = "error";
                     synchronized (lock) {
                         lock.notifyAll();
                     }
