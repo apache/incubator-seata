@@ -193,6 +193,13 @@
                 <artifactId>seata-rm-datasource</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- the 'seata-server' is an application, not a dependency
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            -->
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-spring</artifactId>
