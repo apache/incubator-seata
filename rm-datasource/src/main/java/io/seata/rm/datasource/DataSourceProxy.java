@@ -54,6 +54,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String jdbcUrl;
 
+    private String resourceId;
+
     private String dbType;
 
     private String userName;
@@ -163,27 +165,53 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
-        if (JdbcConstants.POSTGRESQL.equals(dbType)) {
-            return getPGResourceId();
-        } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
-            return getDefaultResourceId() + "/" + userName;
+        if (resourceId == null) {
+            if (JdbcConstants.POSTGRESQL.equals(dbType)) {
+                initPGResourceId();
+            } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
+                initDefaultResourceId();
+                resourceId = resourceId + "/" + userName;
+            } else if (JdbcConstants.MYSQL.equals(dbType)) {
+                initMysqlResourceId();
+            } else {
+                initDefaultResourceId();
+            }
+            
+        }
+        return resourceId;
+    }
+
+    /**
+     * init the default resource id
+     * @return resource id
+     */
+    private void initDefaultResourceId() {
+        if (jdbcUrl.contains("?")) {
+            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
         } else {
-            return getDefaultResourceId();
+            resourceId = jdbcUrl;
         }
     }
 
     /**
-     * get the default resource id
-     * @return resource id
+     * prevent pg sql url like
+     * jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.1:3306/seata
+     * cause the duplicated resourceId
+     * it will cause the problem like
+     * 1.rm client is not connected
      */
-    private String getDefaultResourceId() {
-        if (jdbcUrl.contains("?")) {
-            return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+    private void initMysqlResourceId(){
+        String startsWith = "jdbc:mysql:loadbalance://";
+        if (jdbcUrl.startsWith(startsWith)) {
+            if (jdbcUrl.contains("?")) {
+                String url = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+                resourceId = url.replace(",", "|");
+            }
         } else {
-            return jdbcUrl;
+            resourceId = getResourceGroupId();
         }
     }
-
+    
     /**
      * prevent pg sql url like
      * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
@@ -194,12 +222,12 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * 2.error table meta cache
      * @return resourceId
      */
-    private String getPGResourceId() {
+    private void initPGResourceId() {
         if (jdbcUrl.contains("?")) {
             StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
             StringBuilder paramsBuilder = new StringBuilder();
-            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
             String[] urlParams = paramUrl.split("&");
             for (String urlParam : urlParams) {
                 if (urlParam.contains("currentSchema")) {
@@ -215,9 +243,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 jdbcUrlBuilder.append("?");
                 jdbcUrlBuilder.append(paramsBuilder);
             }
-            return jdbcUrlBuilder.toString();
+            resourceId = jdbcUrlBuilder.toString();
         } else {
-            return jdbcUrl;
+            resourceId = jdbcUrl;
         }
     }
 
