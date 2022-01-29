@@ -171,7 +171,7 @@ public class StateMachineAsyncTests {
         System.out.println("====== XID: " + inst.getId() + " cost2-7 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
-        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus(), "XID: " + inst.getId());
     }
 
     @Test
