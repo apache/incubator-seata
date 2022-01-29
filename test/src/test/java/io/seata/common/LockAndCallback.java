@@ -24,42 +24,44 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
  * @author wang.liang
  */
 public class LockAndCallback {
-	private final Object lock;
-	private final AsyncCallback callback;
+    private final Object lock;
+    private final AsyncCallback callback;
 
-	public LockAndCallback() {
-		lock = new Object();
-		callback = new AsyncCallback() {
-			@Override
-			public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-				synchronized (lock) {
-					lock.notifyAll();
-				}
-			}
+    public LockAndCallback() {
+        lock = new Object();
+        callback = new AsyncCallback() {
+            @Override
+            public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+                synchronized (lock) {
+                    lock.notifyAll();
+                }
+            }
 
-			@Override
-			public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-				synchronized (lock) {
-					lock.notifyAll();
-				}
-			}
-		};
-	}
+            @Override
+            public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+                synchronized (lock) {
+                    lock.notifyAll();
+                }
+            }
+        };
+    }
 
-	public void waittingForFinish(StateMachineInstance inst) {
-		synchronized (lock) {
-			if (ExecutionStatus.RU.equals(inst.getStatus())) {
-				try {
-					lock.wait(30000);
-					System.out.printf("end wait ====== XID:%s, %s, %s\r\n", inst.getId(), inst.getStatus(), inst.getCompensationStatus());
-				} catch (InterruptedException e) {
-					throw new RuntimeException("Current thread was Interrupted", e);
-				}
-			}
-		}
-	}
+    public void waittingForFinish(StateMachineInstance inst) {
+        synchronized (lock) {
+            if (ExecutionStatus.RU.equals(inst.getStatus())) {
+                long start = System.nanoTime();
+                try {
+                    lock.wait(30000);
+                    System.out.printf("end wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d\r\n",
+                            inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Current thread was Interrupted", e);
+                }
+            }
+        }
+    }
 
-	public AsyncCallback getCallback() {
-		return callback;
-	}
+    public AsyncCallback getCallback() {
+        return callback;
+    }
 }
