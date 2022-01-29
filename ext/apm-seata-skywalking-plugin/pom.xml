@@ -30,8 +30,6 @@
 
     <properties>
         <skywalking.version>8.6.0</skywalking.version>
-
-        <maven-antrun-plugin.skip>true</maven-antrun-plugin.skip>
         <agent.dir>${project.build.directory}/ext/skywalking-agent/</agent.dir>
         <agent-plugins.dir>${agent.dir}/plugins/</agent-plugins.dir>
         <agent-config.dir>${agent.dir}/config</agent-config.dir>
@@ -152,47 +150,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven-antrun-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy overwrite="true" file="${project.basedir}/config/agent.config" tofile="${agent-config.dir}/agent.config" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>${maven-antrun-plugin.version}</version>
-                    <configuration>
-                        <skip>${maven-antrun-plugin.skip}</skip>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <tasks>
-                                    <copy overwrite="true" file="${project.basedir}/config/agent.config" tofile="${agent-config.dir}/agent.config" />
-                                </tasks>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <properties>
-                <maven-antrun-plugin.skip>false</maven-antrun-plugin.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>release-seata</id>
-            <properties>
-                <maven-antrun-plugin.skip>false</maven-antrun-plugin.skip>
-            </properties>
-        </profile>
-    </profiles>
 </project>
