@@ -63,6 +63,9 @@ public class LockAndCallback {
                             inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000, result, e.getMessage());
                     throw new RuntimeException("waittingForFinish failed", e);
                 }
+            } else {
+                System.out.printf("do not wait ====== XID: %s, status: %s, compensationStatus: %s, result: %s\r\n",
+                        inst.getId(), inst.getStatus(), inst.getCompensationStatus(), result);
             }
         }
     }
