@@ -61,7 +61,7 @@ public class StateMachineAsyncTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class StateMachineAsyncTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
         Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
 
 
@@ -94,7 +94,7 @@ public class StateMachineAsyncTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
 
 
         start = System.currentTimeMillis();
@@ -106,7 +106,7 @@ public class StateMachineAsyncTests {
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class StateMachineAsyncTests {
 
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class StateMachineAsyncTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
     @Test
@@ -172,8 +172,8 @@ public class StateMachineAsyncTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
-        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
     }
 
     @Test
@@ -194,7 +194,7 @@ public class StateMachineAsyncTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
     @Test
@@ -215,7 +215,7 @@ public class StateMachineAsyncTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
     @Test
@@ -239,11 +239,11 @@ public class StateMachineAsyncTests {
 
         People peopleResult = (People) inst.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
-        Assertions.assertEquals(people.getName(), peopleResult.getName());
+        Assertions.assertTrue(people.getName().equals(people.getName()));
 
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
     }
 
     @Test
@@ -263,7 +263,7 @@ public class StateMachineAsyncTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
 
         try {
             Thread.sleep(500);
@@ -284,8 +284,8 @@ public class StateMachineAsyncTests {
         }
     }
 
-    private final Object        lock     = new Object();
-    private final AsyncCallback callback = new AsyncCallback() {
+    private volatile Object        lock     = new Object();
+    private          AsyncCallback callback = new AsyncCallback() {
         @Override
         public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
             synchronized (lock) {
