@@ -27,11 +27,14 @@ public class LockAndCallback {
     private final Object lock;
     private final AsyncCallback callback;
 
+    private String result;
+
     public LockAndCallback() {
         lock = new Object();
         callback = new AsyncCallback() {
             @Override
             public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+                result = "onFinished";
                 synchronized (lock) {
                     lock.notifyAll();
                 }
@@ -39,6 +42,7 @@ public class LockAndCallback {
 
             @Override
             public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+                result = "onError";
                 synchronized (lock) {
                     lock.notifyAll();
                 }
@@ -52,11 +56,11 @@ public class LockAndCallback {
                 long start = System.nanoTime();
                 try {
                     lock.wait(30000);
-                    System.out.printf("finish wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d ms\r\n",
-                            inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000);
+                    System.out.printf("finish wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d ms, result: %s\r\n",
+                            inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000, result);
                 } catch (Exception e) {
-                    System.out.printf("error wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d ms, error: %s\r\n",
-                            inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000, e.getMessage());
+                    System.out.printf("error wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d ms, result: %s, error: %s\r\n",
+                            inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000, result, e.getMessage());
                     throw new RuntimeException("waittingForFinish failed", e);
                 }
             }
