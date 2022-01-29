@@ -131,4 +131,8 @@ public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLD
         return null;
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

@@ -54,4 +54,12 @@ public interface SQLRecognizer {
      * @return The original SQL.
      */
     String getOriginalSQL();
+
+    /**
+     * check the sql syntax is supports
+     * @return isSupport:true
+     */
+    default boolean isSqlSyntaxSupports() {
+        return true;
+    }
 }
