@@ -113,7 +113,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         start = System.currentTimeMillis();
         paramMap.put("a", 2);
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost3-2 :" + cost);
@@ -158,7 +158,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         start = System.currentTimeMillis();
 
         paramMap.put("a", 3);
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost3-5 :" + cost);
