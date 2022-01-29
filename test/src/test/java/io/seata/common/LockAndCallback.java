@@ -52,9 +52,11 @@ public class LockAndCallback {
                 long start = System.nanoTime();
                 try {
                     lock.wait(30000);
-                    System.out.printf("end wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d\r\n",
+                    System.out.printf("finish wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d ms\r\n",
                             inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000);
                 } catch (InterruptedException e) {
+                    System.out.printf("error wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d ms, error: %s\r\n",
+                            inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000, e.getMessage());
                     throw new RuntimeException("Current thread was Interrupted", e);
                 }
             }
