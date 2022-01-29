@@ -385,7 +385,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         // waiting for global transaction recover
         while (!(ExecutionStatus.SU.equals(inst.getStatus()) || ExecutionStatus.SU.equals(inst.getCompensationStatus()))) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-            Thread.sleep(500);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
     }
@@ -546,19 +546,22 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10; i++) {
-            Thread t = new Thread(() -> {
-                for (int j = 0; j < 10; j++) {
-                    Map<String, Object> paramMap = new HashMap<>();
-                    paramMap.put("a", 1);
-                    paramMap.put("barThrowException", "false");
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for (int j = 0; j < 10; j++) {
+                        Map<String, Object> paramMap = new HashMap<>();
+                        paramMap.put("a", 1);
+                        paramMap.put("barThrowException", "false");
 
-                    String stateMachineName = "simpleCompensationStateMachine";
+                        String stateMachineName = "simpleCompensationStateMachine";
 
-                    try {
-                        stateMachineEngine.startAsync(stateMachineName, null, paramMap, asyncCallback);
-                    } catch (Exception e) {
-                        countDownLatch.countDown();
-                        exceptions.add(e);
+                        try {
+                            stateMachineEngine.startAsync(stateMachineName, null, paramMap, asyncCallback);
+                        } catch (Exception e) {
+                            countDownLatch.countDown();
+                            exceptions.add(e);
+                        }
                     }
                 }
             });
@@ -790,7 +793,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
-        Thread.sleep(500);
+        Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(2, inst.getStateList().size());
     }
@@ -814,9 +817,10 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
-        Thread.sleep(500);
+        Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
-        Assertions.assertTrue(inst.getStateList().size() >= 3 && inst.getStateList().size() <= 4);
+        // FIXME: some times, the size is 4
+        Assertions.assertEquals(3, inst.getStateList().size());
     }
 
     @Test
@@ -836,7 +840,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
-        Thread.sleep(500);
+        Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
 
         Assertions.assertEquals(2, inst.getStateList().size());
@@ -859,7 +863,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
-        Thread.sleep(500);
+        Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
 
         Assertions.assertEquals(2, inst.getStateList().size());
@@ -911,7 +915,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
-        Thread.sleep(500);
+        Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -966,7 +970,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
 
-        Thread.sleep(500);
+        Thread.sleep(sleepTime);
 
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getCompensationStatus());
@@ -1018,7 +1022,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
-        Thread.sleep(500);
+        Thread.sleep(sleepTime);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -1048,7 +1052,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         // waiting for global transaction recover
         while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-            Thread.sleep(500);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
@@ -1078,7 +1082,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         // waiting for global transaction recover
         while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-            Thread.sleep(500);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
@@ -1168,7 +1172,7 @@ public class StateMachineDBTests extends AbstractServerTest {
                 && GlobalStatus.Finished.equals(globalTransaction.getStatus()))) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
             System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
-            Thread.sleep(500);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
@@ -1252,7 +1256,7 @@ public class StateMachineDBTests extends AbstractServerTest {
                 && GlobalStatus.Finished.equals(globalTransaction.getStatus()))) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
             System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
-            Thread.sleep(500);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
