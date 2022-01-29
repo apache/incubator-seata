@@ -1,0 +1,65 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package io.seata.common;
+
+import io.seata.saga.engine.AsyncCallback;
+import io.seata.saga.proctrl.ProcessContext;
+import io.seata.saga.statelang.domain.ExecutionStatus;
+import io.seata.saga.statelang.domain.StateMachineInstance;
+
+/**
+ * @author wang.liang
+ */
+public class LockAndCallback {
+	private final Object lock;
+	private final AsyncCallback callback;
+
+	public LockAndCallback() {
+		lock = new Object();
+		callback = new AsyncCallback() {
+			@Override
+			public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+				synchronized (lock) {
+					lock.notifyAll();
+				}
+			}
+
+			@Override
+			public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+				synchronized (lock) {
+					lock.notifyAll();
+				}
+			}
+		};
+	}
+
+	public void waittingForFinish(StateMachineInstance inst) {
+		synchronized (lock) {
+			if (ExecutionStatus.RU.equals(inst.getStatus())) {
+				try {
+					lock.wait(30000);
+					System.out.printf("end wait ====== XID:%s, %s, %s\r\n", inst.getId(), inst.getStatus(), inst.getCompensationStatus());
+				} catch (InterruptedException e) {
+					throw new RuntimeException("Current thread was Interrupted", e);
+				}
+			}
+		}
+	}
+
+	public AsyncCallback getCallback() {
+		return callback;
+	}
+}

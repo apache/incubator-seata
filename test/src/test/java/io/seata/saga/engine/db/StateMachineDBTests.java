@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.db;
 
+import io.seata.common.LockAndCallback;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.core.context.RootContext;
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -56,9 +56,9 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     private static StateMachineEngine stateMachineEngine;
 
-    private static int sleepTime = 3000;
+    private static int sleepTime = 1500;
 
-    private static int sleepTimeLong = 5000;
+    private static int sleepTimeLong = 2500;
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
@@ -106,17 +106,17 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleChoiceTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-1 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-1 :" + cost);
 
         start = System.currentTimeMillis();
         paramMap.put("a", 2);
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-2 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-2 :" + cost);
     }
 
     @Test
@@ -129,14 +129,15 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleChoiceNoDefaultTestStateMachine";
 
+        StateMachineInstance inst = null;
         try {
-            stateMachineEngine.start(stateMachineName, null, paramMap);
+            inst = stateMachineEngine.start(stateMachineName, null, paramMap);
         } catch (EngineExecutionException e) {
             Assertions.assertEquals(FrameworkErrorCode.StateMachineNoChoiceMatched, e.getErrcode());
             e.printStackTrace(System.out);
         }
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-3 :" + cost);
+        System.out.println("====== XID: " + (inst != null ? inst.getId() : null) + " cost3-3 :" + cost);
     }
 
     @Test
@@ -149,10 +150,10 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleChoiceAndEndTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-4 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-4 :" + cost);
 
         start = System.currentTimeMillis();
 
@@ -160,7 +161,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-5 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-5 :" + cost);
     }
 
     @Test
@@ -173,19 +174,19 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleInputAssignmentStateMachine";
 
-        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        String businessKey = instance.getStateList().get(0).getBusinessKey();
+        String businessKey = inst.getStateList().get(0).getBusinessKey();
         Assertions.assertNotNull(businessKey);
         System.out.println("====== businessKey :" + businessKey);
 
-        String contextBusinessKey = (String) instance.getEndParams().get(
-                instance.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
+        String contextBusinessKey = (String) inst.getEndParams().get(
+                inst.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
         Assertions.assertNotNull(contextBusinessKey);
         System.out.println("====== context businessKey :" + businessKey);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-6 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-6 :" + cost);
     }
 
     @Test
@@ -202,7 +203,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-7 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-7 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -226,7 +227,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-8 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-8 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -246,7 +247,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-9 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-9 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -301,7 +302,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-11 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-11 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -326,7 +327,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-12 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-12 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -349,7 +350,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-13 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-13 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -375,7 +376,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-14 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-14 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -384,7 +385,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         // waiting for global transaction recover
         while (!(ExecutionStatus.SU.equals(inst.getStatus()) || ExecutionStatus.SU.equals(inst.getCompensationStatus()))) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
     }
@@ -409,7 +410,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-15 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-15 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
@@ -431,12 +432,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleCachesStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-16 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-16 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -453,12 +455,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleRetryStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-17 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-17 :" + cost);
 
 
         Assertions.assertNotNull(inst.getException());
@@ -476,12 +479,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleStatusMatchingStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-18 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-18 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -502,12 +506,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-19 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-19 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -541,22 +546,19 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10; i++) {
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for (int j = 0; j < 10; j++) {
-                        Map<String, Object> paramMap = new HashMap<>();
-                        paramMap.put("a", 1);
-                        paramMap.put("barThrowException", "false");
+            Thread t = new Thread(() -> {
+                for (int j = 0; j < 10; j++) {
+                    Map<String, Object> paramMap = new HashMap<>();
+                    paramMap.put("a", 1);
+                    paramMap.put("barThrowException", "false");
 
-                        String stateMachineName = "simpleCompensationStateMachine";
+                    String stateMachineName = "simpleCompensationStateMachine";
 
-                        try {
-                            stateMachineEngine.startAsync(stateMachineName, null, paramMap, asyncCallback);
-                        } catch (Exception e) {
-                            countDownLatch.countDown();
-                            exceptions.add(e);
-                        }
+                    try {
+                        stateMachineEngine.startAsync(stateMachineName, null, paramMap, asyncCallback);
+                    } catch (Exception e) {
+                        countDownLatch.countDown();
+                        exceptions.add(e);
                     }
                 }
             });
@@ -584,12 +586,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-21 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-21 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -610,12 +613,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-22 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-22 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -634,14 +638,15 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleStateMachineWithAsyncState";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-23 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-23 :" + cost);
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -649,22 +654,10 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
     }
 
-    private void waittingForFinish(StateMachineInstance inst) {
-        synchronized (lock) {
-            if (ExecutionStatus.RU.equals(inst.getStatus())) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     @Test
     public void testStateMachineTransTimeout() throws Exception {
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -717,7 +710,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testStateMachineTransTimeoutAsync() throws Exception {
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -792,12 +785,12 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-24 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-24 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
-        Thread.sleep(sleepTime);
+        Thread.sleep(1000);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(inst.getStateList().size(), 2);
     }
@@ -816,12 +809,12 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-25 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-25 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
-        Thread.sleep(sleepTime);
+        Thread.sleep(1000);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(inst.getStateList().size(), 3);
     }
@@ -839,11 +832,11 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-26 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-26 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
-        Thread.sleep(sleepTime);
+        Thread.sleep(1000);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
 
         Assertions.assertEquals(inst.getStateList().size(), 2);
@@ -862,11 +855,11 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-27 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-27 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
-        Thread.sleep(sleepTime);
+        Thread.sleep(1000);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
 
         Assertions.assertEquals(inst.getStateList().size(), 2);
@@ -890,7 +883,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-28 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-28 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
     }
@@ -914,11 +907,11 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-29 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-29 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
-        Thread.sleep(sleepTime);
+        Thread.sleep(1000);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
     }
@@ -942,7 +935,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-30 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-30 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
         Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.SU);
@@ -968,12 +961,12 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-31 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-31 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
         Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.UN);
 
-        Thread.sleep(sleepTime);
+        Thread.sleep(1000);
 
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.UN);
@@ -997,7 +990,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-32 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-32 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
     }
@@ -1021,11 +1014,11 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-33 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-33 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
-        Thread.sleep(sleepTime);
+        Thread.sleep(1000);
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
     }
@@ -1046,7 +1039,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-34 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-34 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -1055,7 +1048,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         // waiting for global transaction recover
         while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
@@ -1070,12 +1063,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-35 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-35 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -1084,7 +1078,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         // waiting for global transaction recover
         while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
@@ -1097,7 +1091,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeout() throws Exception {
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -1163,7 +1157,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-36 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-36 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -1174,7 +1168,7 @@ public class StateMachineDBTests extends AbstractServerTest {
                 && GlobalStatus.Finished.equals(globalTransaction.getStatus()))) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
             System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
@@ -1185,7 +1179,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeoutAsync() throws Exception {
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -1241,12 +1235,13 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         String stateMachineName = "simpleStateMachineWithRecoverStrategy";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost3-37 :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost3-37 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -1257,28 +1252,11 @@ public class StateMachineDBTests extends AbstractServerTest {
                 && GlobalStatus.Finished.equals(globalTransaction.getStatus()))) {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
             System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         Assertions.assertNull(inst.getCompensationStatus());
     }
-
-    private final Object        lock     = new Object();
-    private final AsyncCallback callback = new AsyncCallback() {
-        @Override
-        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-        }
-
-        @Override
-        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-        }
-    };
 }

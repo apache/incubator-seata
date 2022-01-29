@@ -96,7 +96,7 @@ public class DefaultCoreTest {
      * @throws TransactionException the transaction exception
      */
     @AfterEach
-    public void clean() throws TransactionException {
+    public synchronized void clean() throws TransactionException {
         if (globalSession != null) {
             globalSession.end();
             globalSession = null;
