@@ -35,7 +35,6 @@
                 <configuration>
                     <parallel>methods</parallel>
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <skip>false</skip>
                 </configuration>
             </plugin>
             <plugin>
