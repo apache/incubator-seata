@@ -59,7 +59,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-1 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -78,7 +78,7 @@ public class StateMachineAsyncTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-2 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
@@ -89,7 +89,7 @@ public class StateMachineAsyncTests {
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-3 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
@@ -99,7 +99,7 @@ public class StateMachineAsyncTests {
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-4 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
@@ -121,7 +121,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-5 :" + cost);
 
 
         Assertions.assertNotNull(inst.getException());
@@ -145,7 +145,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-6 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -168,7 +168,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-7 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -191,7 +191,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-8 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -213,7 +213,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-9 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -242,7 +242,7 @@ public class StateMachineAsyncTests {
         Assertions.assertNotNull(peopleResult);
         Assertions.assertEquals(people.getName(), peopleResult.getName());
 
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-10 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
@@ -263,7 +263,7 @@ public class StateMachineAsyncTests {
         waittingForFinish(inst, lockAndCallback);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost2-11 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 

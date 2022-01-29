@@ -109,14 +109,14 @@ public class StateMachineDBTests extends AbstractServerTest {
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-1 :" + cost);
 
         start = System.currentTimeMillis();
         paramMap.put("a", 2);
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-2 :" + cost);
     }
 
     @Test
@@ -136,7 +136,7 @@ public class StateMachineDBTests extends AbstractServerTest {
             e.printStackTrace(System.out);
         }
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-3 :" + cost);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-4 :" + cost);
 
         start = System.currentTimeMillis();
 
@@ -160,7 +160,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-5 :" + cost);
     }
 
     @Test
@@ -185,7 +185,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         System.out.println("====== context businessKey :" + businessKey);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-6 :" + cost);
     }
 
     @Test
@@ -202,7 +202,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-7 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -226,7 +226,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-8 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -246,7 +246,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-9 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -282,7 +282,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertEquals(people.getName(), peopleResult.getName());
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: " + instance.getId() + " cost :" + cost);
+        System.out.println("====== XID: " + instance.getId() + " cost3-10 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, instance.getStatus());
     }
@@ -301,7 +301,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-11 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -326,7 +326,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-12 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -349,7 +349,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-13 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -375,7 +375,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-14 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -409,7 +409,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-15 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
@@ -436,7 +436,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-16 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -458,7 +458,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-17 :" + cost);
 
 
         Assertions.assertNotNull(inst.getException());
@@ -481,7 +481,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-18 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -507,7 +507,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-19 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -569,7 +569,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-20 :" + cost);
     }
 
     @Test
@@ -589,7 +589,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-21 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -615,7 +615,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-22 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -641,7 +641,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-23 :" + cost);
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -792,7 +792,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-24 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
@@ -816,7 +816,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-25 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
@@ -839,7 +839,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-26 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
@@ -862,7 +862,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-27 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
@@ -890,7 +890,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-28 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
     }
@@ -914,7 +914,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-29 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
@@ -942,7 +942,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-30 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
         Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.SU);
@@ -968,7 +968,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-31 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
         Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.UN);
@@ -997,7 +997,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-32 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
     }
@@ -1021,7 +1021,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-33 :" + cost);
 
         Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
 
@@ -1046,7 +1046,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-34 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -1075,7 +1075,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-35 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -1163,7 +1163,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-36 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
@@ -1246,7 +1246,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost3-37 :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);

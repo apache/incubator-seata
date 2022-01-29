@@ -61,7 +61,7 @@ public class StateMachineAsyncDBMockServerTests {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-1 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -83,7 +83,7 @@ public class StateMachineAsyncDBMockServerTests {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-2 :" + cost);
 
 
         Assertions.assertNotNull(inst.getException());
@@ -106,7 +106,7 @@ public class StateMachineAsyncDBMockServerTests {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-3 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -128,7 +128,7 @@ public class StateMachineAsyncDBMockServerTests {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-4 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -150,7 +150,7 @@ public class StateMachineAsyncDBMockServerTests {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-5 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -171,7 +171,7 @@ public class StateMachineAsyncDBMockServerTests {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-6 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
@@ -199,7 +199,7 @@ public class StateMachineAsyncDBMockServerTests {
         Assertions.assertNotNull(peopleResult);
         Assertions.assertEquals(people.getName(), peopleResult.getName());
 
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-7 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
@@ -219,7 +219,7 @@ public class StateMachineAsyncDBMockServerTests {
         waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== cost4-8 :" + cost);
 
         Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
