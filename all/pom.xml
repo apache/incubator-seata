@@ -190,12 +190,13 @@
             <artifactId>seata-sqlparser-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- Slimming down for 'seata-all.jar'
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-sqlparser-antlr</artifactId>
             <version>${project.version}</version>
-        </dependency>-->
+            <!-- Slimming down for 'seata-all.jar' -->
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-sqlparser-druid</artifactId>
@@ -227,12 +228,13 @@
             <artifactId>seata-serializer-seata</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- Slimming down for 'seata-all.jar'
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-serializer-protobuf</artifactId>
             <version>${project.version}</version>
-        </dependency>-->
+            <!-- Slimming down for 'seata-all.jar' -->
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-grpc</artifactId>
