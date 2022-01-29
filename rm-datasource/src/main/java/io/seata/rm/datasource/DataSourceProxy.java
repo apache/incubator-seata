@@ -176,7 +176,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             } else {
                 initDefaultResourceId();
             }
-            
         }
         return resourceId;
     }
@@ -200,15 +199,18 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * it will cause the problem like
      * 1.rm client is not connected
      */
-    private void initMysqlResourceId(){
+    private void initMysqlResourceId() {
         String startsWith = "jdbc:mysql:loadbalance://";
         if (jdbcUrl.startsWith(startsWith)) {
+            String url;
             if (jdbcUrl.contains("?")) {
-                String url = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
-                resourceId = url.replace(",", "|");
+                url = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+            } else {
+                url = jdbcUrl;
             }
+            resourceId = url.replace(",", "|");
         } else {
-            resourceId = getResourceGroupId();
+            initDefaultResourceId();
         }
     }
     
