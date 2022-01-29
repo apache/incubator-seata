@@ -159,4 +159,9 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     public List<String> getDuplicateKeyUpdate() {
         return null;
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

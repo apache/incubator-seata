@@ -149,4 +149,9 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     public List<String> getDuplicateKeyUpdate() {
         return null;
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

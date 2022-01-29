@@ -167,4 +167,8 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
         return null;
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

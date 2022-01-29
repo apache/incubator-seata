@@ -169,4 +169,8 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
         return sb.toString();
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

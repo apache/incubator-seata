@@ -172,4 +172,8 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
         return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }
