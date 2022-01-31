@@ -15,7 +15,6 @@
  */
 package io.seata.server.console.controller;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.core.console.result.PageResult;

@@ -15,36 +15,28 @@
  */
 package io.seata.server.console.impl.file;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import io.seata.common.exception.InvalidParamException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.console.vo.BranchSessionVO;
-import io.seata.server.session.BranchSession;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.result.PageResult;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.seata.common.util.CollectionUtils;
-
-import static java.util.Objects.isNull;
-import static io.seata.common.util.CollectionUtils.isEmpty;
-import static io.seata.common.util.CollectionUtils.isNotEmpty;
-import static io.seata.common.util.StringUtils.isBlank;
+import io.seata.server.storage.SessionConverter;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+
+import static io.seata.common.util.CollectionUtils.isEmpty;
+import static io.seata.common.util.CollectionUtils.isNotEmpty;
+import static io.seata.common.util.StringUtils.isBlank;
+import static java.util.Objects.isNull;
 
 /**
  * Global Session File ServiceImpl
@@ -65,85 +57,15 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
 
-        final AtomicInteger total = new AtomicInteger();
-
         final List<GlobalSession> filteredSessions = allSessions
                 .parallelStream()
                 .filter(obtainPredicate(param))
-                .peek(globalSession -> total.incrementAndGet())
-                .skip((long) param.getPageSize() * (param.getPageNum() - 1))
-                .limit(param.getPageSize())
                 .collect(Collectors.toList());
 
-        // calculate pages
-        int pages = total.get() / param.getPageSize();
-        if (allSessions.size() % param.getPageSize() != 0) {
-            pages++;
-        }
-
-        return new PageResult<>(convert(filteredSessions), total.get(), pages, param.getPageNum(), param.getPageSize());
+        return PageResult.build(SessionConverter.convert(filteredSessions), param.getPageNum(), param.getPageSize());
     }
 
-    /**
-     * convert GlobalSession to GlobalSessionVO
-     *
-     * @param filteredSessions the GlobalSession list
-     * @return the GlobalSessionVO list
-     */
-    private List<GlobalSessionVO> convert(List<GlobalSession> filteredSessions) {
 
-        if (CollectionUtils.isEmpty(filteredSessions)) {
-            return Collections.emptyList();
-        }
-
-        final ArrayList<GlobalSessionVO> result = new ArrayList<>(filteredSessions.size());
-
-        for (GlobalSession session : filteredSessions) {
-            result.add(new GlobalSessionVO(
-                    session.getXid(),
-                    session.getTransactionId(),
-                    session.getStatus().getCode(),
-                    session.getApplicationId(),
-                    session.getTransactionServiceGroup(),
-                    session.getTransactionName(),
-                    (long) session.getTimeout(),
-                    session.getBeginTime(),
-                    session.getApplicationData(),
-                    convert(session.getBranchSessions())
-            ));
-        }
-        return result;
-    }
-
-    /**
-     * convert BranchSession to BranchSessionVO
-     *
-     * @param branchSessions the BranchSession list
-     * @return the BranchSessionVO list
-     */
-    private Set<BranchSessionVO> convert(ArrayList<BranchSession> branchSessions) {
-
-        if (CollectionUtils.isEmpty(branchSessions)) {
-            return Collections.emptySet();
-        }
-
-        final Set<BranchSessionVO> result = new HashSet<>(branchSessions.size());
-
-        for (BranchSession session : branchSessions) {
-            result.add(new BranchSessionVO(
-                    session.getXid(),
-                    session.getTransactionId(),
-                    session.getBranchId(),
-                    session.getResourceGroupId(),
-                    session.getResourceId(),
-                    session.getBranchType().name(),
-                    session.getStatus().getCode(),
-                    session.getClientId(),
-                    session.getApplicationData()
-            ));
-        }
-        return result;
-    }
 
     /**
      * obtain the condition
@@ -155,34 +77,32 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
         return session -> {
             return
-                    // xid
-                    (isBlank(param.getXid()) || StringUtils.equals(session.getXid(), param.getXid()))
+                // xid
+                (isBlank(param.getXid()) || session.getXid().contains(param.getXid()))
 
-                    &&
-                    // applicationId
-                    (isBlank(param.getApplicationId()) ||
-                            StringUtils.equals(session.getApplicationId(), param.getApplicationId()))
+                &&
+                // applicationId
+                (isBlank(param.getApplicationId()) || session.getApplicationId().contains(param.getApplicationId()))
 
-                    &&
-                    // status
-                    (isNull(param.getStatus()) || Objects.equals(session.getStatus().getCode(), param.getStatus()))
+                &&
+                // status
+                (isNull(param.getStatus()) || Objects.equals(session.getStatus().getCode(), param.getStatus()))
 
-                    &&
-                    // transactionName
-                    (isBlank(param.getTransactionName()) ||
-                            StringUtils.equals(session.getTransactionName(), param.getTransactionName()))
+                &&
+                // transactionName
+                (isBlank(param.getTransactionName()) || session.getTransactionName().contains(param.getTransactionName()))
 
-                    &&
-                    // withBranch
-                    (param.isWithBranch() ? isNotEmpty(session.getBranchSessions()) : isEmpty(session.getBranchSessions()))
+                &&
+                // withBranch
+                (param.isWithBranch() ? isNotEmpty(session.getBranchSessions()) : isEmpty(session.getBranchSessions()))
 
-                    &&
-                    // timeStart
-                    (isNull(param.getTimeStart()) || param.getTimeStart().getTime() <= session.getBeginTime())
+                &&
+                // timeStart
+                (isNull(param.getTimeStart()) || param.getTimeStart().getTime() <= session.getBeginTime())
 
-                    &&
-                    // timeEnd
-                    (isNull(param.getTimeEnd()) || param.getTimeEnd().getTime() >= session.getBeginTime());
+                &&
+                // timeEnd
+                (isNull(param.getTimeEnd()) || param.getTimeEnd().getTime() >= session.getBeginTime());
 
         };
     }
