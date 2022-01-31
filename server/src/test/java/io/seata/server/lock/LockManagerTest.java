@@ -24,27 +24,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.Resource;
 
-
 import io.seata.common.exception.InvalidParamException;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.result.PageResult;
 import io.seata.core.console.vo.GlobalLockVO;
-import io.seata.server.console.service.GlobalLockService;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHolder;
-import io.seata.server.session.SessionManager;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.lock.file.FileLockManagerForTest;
 import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
+import io.seata.server.session.SessionManager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
@@ -217,8 +215,9 @@ public class LockManagerTest {
     @ParameterizedTest
     @MethodSource("globalSessionForLockTestProvider")
     public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
+        SessionHolder.getRootSessionManager().destroy();
+        SessionHolder.init("file");
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
-
         try {
             sessionManager.addGlobalSession(globalSessions1);
             sessionManager.addGlobalSession(globalSessions2);
@@ -317,6 +316,7 @@ public class LockManagerTest {
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);
             sessionManager.removeGlobalSession(globalSessions2);
+            sessionManager.destroy();
         }
     }
 

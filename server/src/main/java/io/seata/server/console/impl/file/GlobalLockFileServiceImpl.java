@@ -15,7 +15,6 @@
  */
 package io.seata.server.console.impl.file;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,10 +26,11 @@ import io.seata.common.exception.InvalidParamException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.lock.RowLock;
 import io.seata.server.console.service.GlobalLockService;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -38,9 +38,9 @@ import io.seata.server.session.SessionHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
-import static io.seata.core.console.vo.GlobalLockVO.convert;
 import static io.seata.common.util.StringUtils.isBlank;
+import static io.seata.core.console.vo.GlobalLockVO.convert;
+import static java.util.Objects.isNull;
 
 /**
  * Global Lock File ServiceImpl
@@ -53,19 +53,11 @@ import static io.seata.common.util.StringUtils.isBlank;
 @ConditionalOnExpression("#{'file'.equals('${lockMode}')}")
 public class GlobalLockFileServiceImpl implements GlobalLockService {
 
-    /**
-     * The constant LOCK_SPLIT.
-     */
-    protected static final String LOCK_SPLIT = "^^^";
-
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         checkParam(param);
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
-        if (CollectionUtils.isEmpty(allSessions)) {
-            return PageResult.success();
-        }
 
         final AtomicInteger total = new AtomicInteger();
         List<RowLock> result = allSessions
@@ -75,124 +67,33 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
                 .filter(obtainBranchSessionPredicate(param))
                 .flatMap(branchSession -> filterAndMap(param, branchSession))
                 .peek(globalSession -> total.incrementAndGet())
-                .skip((long) param.getPageSize() * (param.getPageNum() - 1))
-                .limit(param.getPageSize())
                 .collect(Collectors.toList());
 
-        // calculate pages
-        int pages = total.get() / param.getPageSize();
-        if (total.get() % param.getPageSize() != 0) {
-            pages++;
-        }
-
-        return new PageResult<>(convert(result), total.get(), pages, param.getPageNum(), param.getPageSize());
+        return PageResult.build(convert(result), param.getPageNum(), param.getPageSize());
 
     }
 
     /**
      * filter with tableName and generate RowLock
      *
-     * @param param
+     * @param param the query param
      * @param branchSession the branch session
      * @return the RowLock list
      */
     private Stream<RowLock> filterAndMap(GlobalLockParam param, BranchSession branchSession) {
 
-        List<RowLock> locks = new ArrayList<>();
-        String[] tableGroupedLockKeys = branchSession.getLockKey().split(";");
-        for (String tableGroupedLockKey : tableGroupedLockKeys) {
-            int idx = tableGroupedLockKey.indexOf(":");
-            if (idx < 0) {
-                return Stream.empty();
-            }
-            String tableName = tableGroupedLockKey.substring(0, idx);
-            // filter by table name
-            if (StringUtils.isNotBlank(param.getTableName()) && !tableName.contains(param.getTableName())) {
-                continue;
-            }
-            String mergedPKs = tableGroupedLockKey.substring(idx + 1);
-            if (StringUtils.isBlank(mergedPKs)) {
-                return Stream.empty();
-            }
-            String[] pks = mergedPKs.split(",");
-            if (pks.length == 0) {
-                return Stream.empty();
-            }
-            for (String pk : pks) {
-                if (StringUtils.isNotBlank(pk)) {
-                    RowLock rowLock = new RowLock();
-                    rowLock.setXid(branchSession.getXid());
-                    rowLock.setTransactionId(branchSession.getTransactionId());
-                    rowLock.setBranchId(branchSession.getBranchId());
-                    rowLock.setTableName(tableName);
-                    rowLock.setPk(pk);
-                    rowLock.setResourceId(branchSession.getResourceId());
-                    rowLock.setRowKey(getRowKey(branchSession.getResourceId(), tableName, pk));
-                    locks.add(rowLock);
-                }
-            }
+        final String tableName = param.getTableName();
+
+        // get rowLock from branchSession
+        final List<RowLock> rowLocks = LockerManagerFactory.getLockManager().collectRowLocks(branchSession);
+
+        if (StringUtils.isNotBlank(tableName)) {
+            return rowLocks.parallelStream().filter(rowLock -> rowLock.getTableName().contains(param.getTableName()));
         }
-        return locks.stream();
+
+        return rowLocks.stream();
     }
 
-    /**
-     * Get row key string.
-     *
-     * @param resourceId the resource id
-     * @param tableName  the table name
-     * @param pk         the pk
-     * @return the string
-     */
-    protected String getRowKey(String resourceId, String tableName, String pk) {
-        return new StringBuilder().append(resourceId).append(LOCK_SPLIT).append(tableName).append(LOCK_SPLIT).append(pk)
-                .toString();
-    }
-
-
-    /**
-     * Collect row locks list.
-     *
-     * @param lockKey       the lock key
-     * @param resourceId    the resource id
-     * @param xid           the xid
-     * @param transactionId the transaction id
-     * @param branchID      the branch id
-     * @return the list
-     */
-    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId,
-                                            Long branchID) {
-        List<RowLock> locks = new ArrayList<>();
-
-        String[] tableGroupedLockKeys = lockKey.split(";");
-        for (String tableGroupedLockKey : tableGroupedLockKeys) {
-            int idx = tableGroupedLockKey.indexOf(":");
-            if (idx < 0) {
-                return locks;
-            }
-            String tableName = tableGroupedLockKey.substring(0, idx);
-            String mergedPKs = tableGroupedLockKey.substring(idx + 1);
-            if (StringUtils.isBlank(mergedPKs)) {
-                return locks;
-            }
-            String[] pks = mergedPKs.split(",");
-            if (pks.length == 0) {
-                return locks;
-            }
-            for (String pk : pks) {
-                if (StringUtils.isNotBlank(pk)) {
-                    RowLock rowLock = new RowLock();
-                    rowLock.setXid(xid);
-                    rowLock.setTransactionId(transactionId);
-                    rowLock.setBranchId(branchID);
-                    rowLock.setTableName(tableName);
-                    rowLock.setPk(pk);
-                    rowLock.setResourceId(resourceId);
-                    locks.add(rowLock);
-                }
-            }
-        }
-        return locks;
-    }
 
     /**
      * check the param
