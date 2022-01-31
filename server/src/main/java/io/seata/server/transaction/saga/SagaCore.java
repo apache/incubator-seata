@@ -233,18 +233,6 @@ public class SagaCore extends AbstractCore {
         }
     }
 
-    /**
-     * remove all branches
-     *
-     * @param globalSession the globalSession
-     * @throws TransactionException the TransactionException
-     */
-    private void removeAllBranches(GlobalSession globalSession) throws TransactionException {
-        ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
-        for (BranchSession branchSession : branchSessions) {
-            globalSession.removeBranch(branchSession);
-        }
-    }
 
     /**
      * get saga ResourceId
