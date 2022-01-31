@@ -43,7 +43,7 @@
   "bugs": {
     "url": "https://github.com/seata/seata/issues"
   },
-  "homepage": "http://seata.io/",
+  "homepage": "https://seata.io/",
   "peerDependencies": {
     "react": "^16.3.0"
   },
