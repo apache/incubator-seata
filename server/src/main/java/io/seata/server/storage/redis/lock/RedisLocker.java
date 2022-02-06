@@ -272,8 +272,13 @@ public class RedisLocker extends AbstractLocker {
         args.add(lockKeysString.toString());
         // reset args index 2
         args.set(1, String.valueOf(args.size()));
-        long result = (long)jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
-        return SUCCEED == result;
+        String xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
+        if (xIdOwnLock.equals(needLockXid)) {
+            return true;
+        } else {
+            LOGGER.info("tx:[{}] acquire Global lock failed. Global lock on [{}] is holding by xid {}", needLockXid, keys.get(0), xIdOwnLock);
+            return false;
+        }
     }
 
     @Override
