@@ -22,7 +22,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.seata.common.exception.InvalidParamException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.param.GlobalLockParam;
@@ -102,7 +101,7 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
      */
     private void checkParam(GlobalLockParam param) {
         if (param.getPageSize() <= 0 || param.getPageNum() <= 0) {
-            throw new InvalidParamException("wrong pageSize or pageNum");
+            throw new IllegalArgumentException("wrong pageSize or pageNum");
         }
 
         // verification data type

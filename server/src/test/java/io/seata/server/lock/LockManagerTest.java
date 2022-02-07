@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.Resource;
 
-import io.seata.common.exception.InvalidParamException;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.result.PageResult;
 import io.seata.core.console.vo.GlobalLockVO;
@@ -227,7 +226,7 @@ public class LockManagerTest {
 
             // wrong pageSize or pageNum
             Assertions.assertThrows(
-                    InvalidParamException.class,
+                    IllegalArgumentException.class,
                     () -> globalLockService.query(param)
             );
 
