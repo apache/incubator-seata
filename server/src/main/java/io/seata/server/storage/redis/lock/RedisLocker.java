@@ -48,6 +48,8 @@ import redis.clients.jedis.Pipeline;
 
 
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
@@ -63,10 +65,6 @@ public class RedisLocker extends AbstractLocker {
     private static final Integer SUCCEED = 1;
 
     private static final Integer FAILED = 0;
-
-    private static final String DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX = "SEATA_ROW_LOCK_";
-
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX = "SEATA_GLOBAL_LOCK";
 
     private static final String XID = "xid";
 

@@ -17,13 +17,13 @@ package io.seata.server.console.impl.redis;
 
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.seata.common.util.CollectionUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-import com.google.common.collect.Lists;
 import io.seata.common.util.BeanUtils;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.result.PageResult;
@@ -48,17 +48,12 @@ import static io.seata.core.constants.RedisKeyConstants.SPLIT;
 @ConditionalOnExpression("#{'redis'.equals('${lockMode}')}")
 public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
-    private Logger logger = LoggerFactory.getLogger(GlobalLockRedisServiceImpl.class);
-
-
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
 
         int total = 0;
         List<GlobalLockVO> globalLockVos;
-
         checkPage(param);
-
         if (isNotBlank(param.getXid())) {
             globalLockVos = queryGlobalByXid(param.getXid());
             total = globalLockVos.size();
@@ -69,14 +64,15 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             String pk = param.getPk();
             String resourceId = param.getResourceId();
             globalLockVos = queryGlobalLockByRowKey(buildRowKey(tableName,pk,resourceId));
+            total = globalLockVos.size();
             return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
         } else {
-            return PageResult.failure(ParameterRequired.getErrCode(),"not support request param");
+            return PageResult.failure(ParameterRequired.getErrCode(),"only three parameters of tableName,pk,resourceId or Xid are supported");
         }
     }
 
     private List<GlobalLockVO> queryGlobalLockByRowKey(String buildRowKey) {
-        return readGlobalLock(buildRowKey);
+        return readGlobalLockByRowKey(buildRowKey);
     }
 
     private String buildRowKey(String tableName, String pk,String resourceId) {
@@ -85,12 +81,33 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
 
 
     private List<GlobalLockVO> queryGlobalByXid(String xid) {
-        return readGlobalLock(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid);
+        return readGlobalLockByXid(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid);
+    }
+
+    private List<GlobalLockVO> readGlobalLockByXid(String key) {
+        List<GlobalLockVO> vos = new ArrayList<>();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            Map<String, String> mapGlobalKeys = jedis.hgetAll(key);
+            if (CollectionUtils.isNotEmpty(mapGlobalKeys)) {
+                List<String> rowLoclKeys = new ArrayList<>();
+                mapGlobalKeys.forEach((k,v) -> rowLoclKeys.addAll(Arrays.asList(v.split(";"))));
+
+                for (String rowLoclKey : rowLoclKeys) {
+                    Map<String, String> mapRowLockKeys = jedis.hgetAll(rowLoclKey);
+                    GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(mapRowLockKeys, GlobalLockVO.class);
+                    if (vo != null) {
+                        vos.add(vo);
+                    }
+                }
+            }
+        }
+
+        return vos;
     }
 
 
-    private List<GlobalLockVO> readGlobalLock(String key) {
-        List<GlobalLockVO> vos = Lists.newArrayList();
+    private List<GlobalLockVO> readGlobalLockByRowKey(String key) {
+        List<GlobalLockVO> vos = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Map<String, String> map = jedis.hgetAll(key);
             GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
@@ -99,6 +116,11 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             }
         }
         return vos;
+    }
+
+
+    public static void main(String[] args) {
+        String s = "123;456";
     }
 
 }

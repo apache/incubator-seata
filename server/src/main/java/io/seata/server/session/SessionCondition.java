@@ -33,7 +33,7 @@ public class SessionCondition {
     /**
      * Instantiates a new Session condition.
      */
-    public SessionCondition(){
+    public SessionCondition() {
     }
 
     /**

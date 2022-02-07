@@ -443,14 +443,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
-            GlobalSession globalSession = this.readSession(sessionCondition.getXid(),withBranchSessions);
+            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), withBranchSessions);
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }
             return globalSessions;
         } else if (sessionCondition.getTransactionId() != null) {
             GlobalSession globalSession = this
-                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(),withBranchSessions);
+                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), withBranchSessions);
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }

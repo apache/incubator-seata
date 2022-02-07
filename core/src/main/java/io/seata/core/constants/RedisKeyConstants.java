@@ -150,6 +150,7 @@ public class RedisKeyConstants {
      * The globalLock keys
      */
     public static final String DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX = "SEATA_ROW_LOCK_";
+
     /**
      * The split
      */

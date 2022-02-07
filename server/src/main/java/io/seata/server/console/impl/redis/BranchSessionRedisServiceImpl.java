@@ -15,8 +15,8 @@
  */
 package io.seata.server.console.impl.redis;
 
+import java.util.ArrayList;
 import java.util.List;
-import com.google.common.collect.Lists;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.result.PageResult;
@@ -45,7 +45,7 @@ public class BranchSessionRedisServiceImpl implements BranchSessionService {
             return PageResult.success();
         }
 
-        List<BranchSessionVO> branchSessionVos = Lists.newArrayList();
+        List<BranchSessionVO> branchSessionVos = new ArrayList<>();
 
         RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
 
