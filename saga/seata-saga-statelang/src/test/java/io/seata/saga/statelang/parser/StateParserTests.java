@@ -21,6 +21,7 @@ import java.util.Map;
 
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
+import io.seata.saga.statelang.parser.utils.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -58,7 +59,7 @@ public class StateParserTests {
     public void testDesignerJsonTransformer() throws IOException {
 
         ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_layout.json");
-        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
         JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
         Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(parsedObj);
@@ -68,7 +69,30 @@ public class StateParserTests {
 
 
         JsonParser fastjsonParser = JsonParserFactory.getJsonParser("fastjson");
-        Map<String, Object> fastjsonParsedObj = DesignerJsonTransformer.toStandardJson(fastjsonParser.parse(json, Map.class, true));
+        Map<String, Object> fastjsonParsedObj =
+            DesignerJsonTransformer.toStandardJson(fastjsonParser.parse(json, Map.class, true));
+        Assertions.assertNotNull(fastjsonParsedObj);
+
+        String fastjsonOutputJson = fastjsonParser.toJsonString(fastjsonParsedObj, true);
+        System.out.println(fastjsonOutputJson);
+    }
+
+    @Test
+    public void testDesignerJsonTransformerForParallel() throws IOException {
+
+        ClassPathResource resource = new ClassPathResource("statelang/simple_parallel_statemachine_with_layout.json");
+        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
+        Assertions.assertNotNull(parsedObj);
+
+        String outputJson = jsonParser.toJsonString(parsedObj, true);
+        System.out.println(outputJson);
+
+
+        JsonParser fastjsonParser = JsonParserFactory.getJsonParser("fastjson");
+        Map<String, Object> fastjsonParsedObj =
+            DesignerJsonTransformer.toStandardJson(fastjsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(fastjsonParsedObj);
 
         String fastjsonOutputJson = fastjsonParser.toJsonString(fastjsonParsedObj, true);

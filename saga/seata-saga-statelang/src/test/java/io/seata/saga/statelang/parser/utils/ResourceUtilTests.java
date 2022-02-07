@@ -28,11 +28,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ResourceUtilTests {
 
     @Test
-    public void getResources_test() {
+    public void testForGetResources() {
         Resource[] resources = ResourceUtil.getResources("classpath*:statelang/*.json");
-        assertThat(resources.length).isEqualTo(2);
+        assertThat(resources.length).isEqualTo(3);
 
         Resource[] resources2 = ResourceUtil.getResources(new String[]{"classpath*:statelang/*.json"});
-        assertThat(resources2.length).isEqualTo(2);
+        assertThat(resources2.length).isEqualTo(3);
     }
 }

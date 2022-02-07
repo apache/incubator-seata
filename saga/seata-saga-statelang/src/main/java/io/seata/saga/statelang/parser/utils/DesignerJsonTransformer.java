@@ -60,6 +60,13 @@ public class DesignerJsonTransformer {
                     Map<String, Object> edgeObj = (Map<String, Object>) edge;
                     transformEdge(machineJsonObject, nodes, nodeMap, edgeObj);
                 }
+                for (Object edge : edges) {
+                    Map<String, Object> edgeObj = (Map<String, Object>) edge;
+                    boolean hasTransformed = transformEdgeWithParallelEnd(machineJsonObject, nodeMap, edgeObj, edges);
+                    if (hasTransformed) {
+                        break;
+                    }
+                }
             }
         }
         return machineJsonObject;
@@ -122,11 +129,20 @@ public class DesignerJsonTransformer {
                     machineJsonObject.put("StartState", targetStateId);
                     //Make sure 'StartState' is before 'States'
                     machineJsonObject.put("States", machineJsonObject.remove("States"));
+                } else if ("ParallelStart".equals(sourceType)) {
+                    sourceState.put("Type", "Parallel");
+                    if (!sourceState.containsKey("Branches")) {
+                        sourceState.put("Branches", new ArrayList<>());
+                    }
+                    List<String> branches = (List<String>) sourceState.get("Branches");
+                    branches.add(targetStateId);
+                } else if ("ParallelEnd".equals(sourceType)) {
+                    return;
                 } else if ("ServiceTask".equals(sourceType)) {
-                    if (targetNode != null && "Compensation".equals(targetNode.get("stateType"))) {
+                    if ("Compensation".equals(targetNode.get("stateType"))) {
                         sourceState.put("CompensateState", targetStateId);
                     } else {
-                        sourceState.put("Next", targetStateId);
+                        sourceState.put("Next", getNextStateId(targetStateId, targetNode.get("stateType")));
                     }
                 } else if ("Catch".equals(sourceType)) {
                     Map<String, Object> catchAttachedNode = getCatchAttachedNode(sourceNode, nodes);
@@ -141,7 +157,7 @@ public class DesignerJsonTransformer {
                     if (edgeProps != null) {
                         Map<String, Object> catchObj = new LinkedHashMap<>();
                         catchObj.put("Exceptions", edgeProps.get("Exceptions"));
-                        catchObj.put("Next", targetStateId);
+                        catchObj.put("Next", getNextStateId(targetStateId, targetNode.get("stateType")));
                         catches.add(catchObj);
                     }
                 } else if ("Choice".equals(sourceType)) {
@@ -155,15 +171,60 @@ public class DesignerJsonTransformer {
                         } else {
                             Map<String, Object> choiceObj = new LinkedHashMap<>();
                             choiceObj.put("Expression", edgeProps.get("Expression"));
-                            choiceObj.put("Next", targetStateId);
+                            choiceObj.put("Next", getNextStateId(targetStateId, targetNode.get("stateType")));
                             choices.add(choiceObj);
                         }
                     }
                 } else {
-                    sourceState.put("Next", targetStateId);
+                    sourceState.put("Next", getNextStateId(targetStateId, targetNode.get("stateType")));
                 }
             }
         }
+    }
+
+    private static boolean transformEdgeWithParallelEnd(Map<String, Object> machineJsonObject, Map<String, Object> nodeMap,
+                                                     Map<String, Object> edgeObj, List<Object> edges) {
+        String sourceId = (String) edgeObj.get("source");
+        String targetId = (String) edgeObj.get("target");
+        if (StringUtils.hasLength(sourceId)) {
+            Map<String, Object> sourceNode = (Map<String, Object>) nodeMap.get(sourceId);
+            String sourceType = (String) sourceNode.get("stateType");
+            if ("ParallelEnd".equals(sourceType)) {
+                String parallelEndStateId = (String) sourceNode.get("stateId");
+                while (true) {
+                    String originalSourceId = findSourceState(sourceId, edges);
+                    if (originalSourceId != null) {
+                        sourceId = originalSourceId;
+                        sourceNode = (Map<String, Object>) nodeMap.get(sourceId);
+                        sourceType = (String) sourceNode.get("stateType");
+                    }
+                    // avoid infinite loop
+                    if ("ParallelStart".equals(sourceType) || originalSourceId == null) {
+                        break;
+                    }
+                }
+                Map<String, Object> targetNode = (Map<String, Object>) nodeMap.get(targetId);
+                String targetStateId = (String) targetNode.get("stateId");
+                Map<String, Object> parallelStartNode = (Map<String, Object>) nodeMap.get(sourceId);
+                Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
+                Map<String, Object> parallelStartState =
+                    (Map<String, Object>) states.get((String) parallelStartNode.get("stateId"));
+                parallelStartState.put("Next", targetStateId);
+                states.remove(parallelEndStateId);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private static String findSourceState(String sourceId, List<Object> edges) {
+        for (Object object : edges) {
+            Map<String, Object> t = (Map<String, Object>) object;
+            if (t.get("target").equals(sourceId)) {
+                return (String) t.get("source");
+            }
+        }
+        return null;
     }
 
     public static boolean isDesignerJson(Map<String, Object> jsonObject) {
@@ -282,5 +343,12 @@ public class DesignerJsonTransformer {
             return jsonParser.toJsonString(stateMachineJsonObj, true);
         }
         return "";
+    }
+
+    private static String getNextStateId(String targetStateId, Object targetStateType) {
+        if ("ParallelEnd".equals(targetStateType)) {
+            return null;
+        }
+        return targetStateId;
     }
 }

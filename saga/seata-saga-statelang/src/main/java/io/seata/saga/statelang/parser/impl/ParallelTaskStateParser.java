@@ -45,8 +45,15 @@ public class ParallelTaskStateParser extends AbstractTaskStateParser implements 
         }
 
         // parallel runtime threads
-        Integer parallel = (Integer) nodeMap.get("Parallel");
-        parallelState.setParallel(parallel == null ? 1 : parallel);
+        Object parallel = nodeMap.get("Parallel");
+        int threads = 1;
+        // Compatible with String and Integer type
+        if (parallel instanceof String) {
+            threads = Integer.parseInt((String) parallel);
+        } else if (parallel instanceof Integer) {
+            threads = (Integer) parallel;
+        }
+        parallelState.setParallel(threads > 0 ? threads : 1);
 
         // parallel state should not be configured with loop attribution
         parallelState.setLoop(null);

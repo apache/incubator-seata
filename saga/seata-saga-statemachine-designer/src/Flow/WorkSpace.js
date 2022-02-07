@@ -15,8 +15,14 @@ const nodeIndexes = {
   Fail: 1,
   Catch: 1,
   CompensationTrigger: 1,
-  SubStateMachine: 1
-}
+  SubStateMachine: 1,
+  ParallelStart: 1,
+  ParallelEnd: 1,
+};
+
+const lableMapFromState = [
+  'ServiceTask', 'Compensation', 'ScriptTask', 'SubStateMachine', 'ParallelStart', 'ParallelEnd',
+];
 
 class WorkSpaceBase extends React.Component {
 
@@ -87,10 +93,7 @@ class WorkSpaceBase extends React.Component {
 
     if (param.action == 'add' && param.item.type == 'node' && param.item.model) {
       param.item.model.stateId = param.item.model.stateId + nodeIndexes[param.item.model.stateType]++;
-      if (param.item.model.stateType == 'ServiceTask'
-        || param.item.model.stateType == 'Compensation'
-        || param.item.model.stateType == 'ScriptTask'
-        || param.item.model.stateType == 'SubStateMachine') {
+      if (lableMapFromState.find(e => e === param.item.model.stateType)) {
         param.item.model.label = param.item.model.stateId;
       }
       if (param.item.model.stateType == 'SubStateMachine') {
