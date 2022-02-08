@@ -23,6 +23,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 /**
  * The page result
  * @author: zhongxiang.wang
+ * @author miaoxueyu
  */
 public class PageResult<T> extends Result<T>  implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
