@@ -22,7 +22,8 @@ import java.io.Serializable;
 import java.util.List;
 /**
  * The page result
- * @author zhongxiang.wang
+ * @author: zhongxiang.wang
+ * @author miaoxueyu
  * @author doubleDimple
  */
 public class PageResult<T> extends Result<T>  implements Serializable {
