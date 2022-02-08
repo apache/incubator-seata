@@ -75,10 +75,10 @@ public class DataSourceProxyTest {
         resourceId.set(proxy, null);
         Field jdbUrl = proxy.getClass().getDeclaredField("jdbcUrl");
         jdbUrl.setAccessible(true);
-        jdbUrl.set(proxy, "jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.1:3306/seata");
+        jdbUrl.set(proxy, "jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.3:3306,192.168.100.1:3306/seata");
         resourceId.setAccessible(true);
         resourceId.set(proxy, null);
-        Assertions.assertEquals(proxy.getResourceId(), "jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.1:3306/seata");
+        Assertions.assertEquals(proxy.getResourceId(), "jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata");
 
     }
 }
