@@ -166,6 +166,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
+        if (resourceId == null) {
+            initResourceId();
+        }
         return resourceId;
     }
 
