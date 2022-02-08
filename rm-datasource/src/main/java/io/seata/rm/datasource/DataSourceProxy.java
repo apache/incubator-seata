@@ -182,7 +182,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     /**
      * init the default resource id
-     * @return resource id
      */
     private void initDefaultResourceId() {
         if (jdbcUrl.contains("?")) {
@@ -193,9 +192,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * prevent pg sql url like
+     * prevent mysql url like
      * jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.1:3306/seata
-     * cause the duplicated resourceId
      * it will cause the problem like
      * 1.rm client is not connected
      */
@@ -222,7 +220,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * it will cause the problem like
      * 1.get file lock fail
      * 2.error table meta cache
-     * @return resourceId
      */
     private void initPGResourceId() {
         if (jdbcUrl.contains("?")) {
