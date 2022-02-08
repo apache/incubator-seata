@@ -33,11 +33,9 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.Disposable;
-import io.seata.server.session.SessionHolder;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_CLUSTER;
@@ -49,6 +47,7 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_INI
  */
 public class RaftServer implements ConfigurationChangeListener, Disposable, Closeable {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private final RaftStateMachine raftStateMachine;
     private final RaftGroupService raftGroupService;
     private final Node node;
@@ -81,7 +80,7 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
         this.node = this.raftGroupService.start();
         if (reporterEnabled) {
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
-                .outputTo(LoggerFactory.getLogger(getClass())).convertRatesTo(TimeUnit.SECONDS)
+                .outputTo(logger).convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS).build();
             reporter.start(ConfigurationFactory.getInstance().getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY, 30),
                 TimeUnit.MINUTES);

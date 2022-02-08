@@ -70,6 +70,17 @@ public class Server {
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
                 new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
+        //127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+            XID.setIpAddress(parameterParser.getHost());
+        } else {
+            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERED_NETWORKS);
+            if (StringUtils.isNotBlank(preferredNetworks)) {
+                XID.setIpAddress(NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)));
+            } else {
+                XID.setIpAddress(NetUtil.getLocalIp());
+            }
+        }
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         UUIDGenerator.init(parameterParser.getServerNode());
         LockerManagerFactory.init(parameterParser.getLockStoreMode());

@@ -61,7 +61,6 @@ public interface DefaultValues {
     int DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT = 2;
     boolean DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = false;
 
-
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
