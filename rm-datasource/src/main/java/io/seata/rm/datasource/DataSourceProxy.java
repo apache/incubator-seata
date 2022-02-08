@@ -112,6 +112,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
+        initResourceId();
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExcutor.scheduleAtFixedRate(() -> {
@@ -165,19 +166,20 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
-        if (resourceId == null) {
-            if (JdbcConstants.POSTGRESQL.equals(dbType)) {
-                initPGResourceId();
-            } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
-                initDefaultResourceId();
-                resourceId = resourceId + "/" + userName;
-            } else if (JdbcConstants.MYSQL.equals(dbType)) {
-                initMysqlResourceId();
-            } else {
-                initDefaultResourceId();
-            }
-        }
         return resourceId;
+    }
+
+    private void initResourceId() {
+        if (JdbcConstants.POSTGRESQL.equals(dbType)) {
+            initPGResourceId();
+        } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
+            initDefaultResourceId();
+            resourceId = resourceId + "/" + userName;
+        } else if (JdbcConstants.MYSQL.equals(dbType)) {
+            initMysqlResourceId();
+        } else {
+            initDefaultResourceId();
+        }
     }
 
     /**
