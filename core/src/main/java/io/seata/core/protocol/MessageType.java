@@ -72,6 +72,11 @@ public interface MessageType {
     short TYPE_GLOBAL_LOCK_QUERY_RESULT = 22;
 
     /**
+     * the constant TYPE_NOTIFY_LEADER
+     */
+    short TYPE_NOTIFY_LEADER = 23;
+
+    /**
      * the constant TYPE_RAFT_METADATA
      */
     short TYPE_RAFT_METADATA = 24;
@@ -150,8 +155,8 @@ public interface MessageType {
     short TYPE_HEARTBEAT_MSG = 120;
 
     /**
-     * the constant TYPE_NOTIFY_LEADER
+     * the constant TYPE_BATCH_RESULT_MSG
      */
-    short TYPE_NOTIFY_LEADER = 23;
+    short TYPE_BATCH_RESULT_MSG = 121;
 
 }

@@ -71,9 +71,9 @@ public class RaftSessionManager extends FileSessionManager {
             } else {
                 try {
                     super.removeGlobalSession(globalSession);
-                    completableFuture
-                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                            " The current TC is not a leader node, interrupt processing !"));
+                    completableFuture.completeExceptionally(
+                        new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            "seata raft state machine exception: " + status.getErrorMsg()));
                 } catch (TransactionException e) {
                     completableFuture.completeExceptionally(e);
                 }
@@ -91,8 +91,9 @@ public class RaftSessionManager extends FileSessionManager {
             if (closureStatus.isOk()) {
                 completableFuture.complete(true);
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
+                completableFuture.completeExceptionally(
+                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(globalSession.getXid());
@@ -109,8 +110,9 @@ public class RaftSessionManager extends FileSessionManager {
             if (closureStatus.isOk()) {
                 completableFuture.complete(true);
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
+                completableFuture.completeExceptionally(
+                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
@@ -130,9 +132,9 @@ public class RaftSessionManager extends FileSessionManager {
             } else {
                 try {
                     globalSession.removeBranch(branchSession);
-                    completableFuture
-                        .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                            " The current TC is not a leader node, interrupt processing !"));
+                    completableFuture.completeExceptionally(
+                        new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            "seata raft state machine exception: " + status.getErrorMsg()));
                 } catch (TransactionException e) {
                     completableFuture.completeExceptionally(e);
                 }
@@ -150,8 +152,9 @@ public class RaftSessionManager extends FileSessionManager {
             if (closureStatus.isOk()) {
                 completableFuture.complete(globalSession.remove(branchSession));
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
+                completableFuture.completeExceptionally(
+                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
         BranchTransactionDO branchTransactionDO =
@@ -172,8 +175,9 @@ public class RaftSessionManager extends FileSessionManager {
                     completableFuture.completeExceptionally(e);
                 }
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
+                completableFuture.completeExceptionally(
+                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(globalSession.getXid());

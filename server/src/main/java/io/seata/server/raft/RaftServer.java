@@ -15,6 +15,7 @@
  */
 package io.seata.server.raft;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +32,7 @@ import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.rpc.Disposable;
 import io.seata.server.session.SessionHolder;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -45,14 +47,12 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_INI
 /**
  * @author funkye
  */
-public class RaftServer implements ConfigurationChangeListener, AutoCloseable {
+public class RaftServer implements ConfigurationChangeListener, Disposable, Closeable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RaftServer.class);
-
-    private RaftStateMachine raftStateMachine;
-    private RaftGroupService raftGroupService;
-    private Node node;
-    private CliService cliService;
+    private final RaftStateMachine raftStateMachine;
+    private final RaftGroupService raftGroupService;
+    private final Node node;
+    private final CliService cliService;
 
     public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions)
         throws IOException {
@@ -115,14 +115,18 @@ public class RaftServer implements ConfigurationChangeListener, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
-        if (this.raftGroupService != null) {
-            this.raftGroupService.shutdown();
+    public void close() {
+        destroy();
+    }
+
+    @Override
+    public void destroy() {
+        if (raftGroupService != null) {
+            raftGroupService.shutdown();
         }
         if (cliService != null) {
             cliService.shutdown();
         }
-        LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
     }
 
 }

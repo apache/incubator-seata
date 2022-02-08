@@ -54,9 +54,9 @@ public class RaftLockManager extends FileLockManager {
                     try {
                         // avoid data inconsistency after a new election
                         localReleaseLock(branchSession);
-                        completableFuture
-                                .completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                                        " The current TC is not a leader node, interrupt processing !"));
+                        completableFuture.completeExceptionally(
+                            new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                                "seata raft state machine exception: " + status.getErrorMsg()));
                     } catch (TransactionException e) {
                         completableFuture.completeExceptionally(e);
                     }
@@ -94,8 +94,9 @@ public class RaftLockManager extends FileLockManager {
                     completableFuture.completeExceptionally(e);
                 }
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
+                completableFuture.completeExceptionally(
+                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
         return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
@@ -113,8 +114,9 @@ public class RaftLockManager extends FileLockManager {
                     completableFuture.completeExceptionally(e);
                 }
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
+                completableFuture.completeExceptionally(
+                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
         return RaftTaskUtil.createTask(closure, completableFuture);
@@ -140,8 +142,9 @@ public class RaftLockManager extends FileLockManager {
                     completableFuture.completeExceptionally(e);
                 }
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    " The current TC is not a leader node, interrupt processing !"));
+                completableFuture.completeExceptionally(
+                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
         return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
