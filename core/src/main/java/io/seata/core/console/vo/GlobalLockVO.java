@@ -15,15 +15,21 @@
  */
 package io.seata.core.console.vo;
 
-import io.seata.core.constants.ServerTableColumnsName;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.lock.RowLock;
 
 /**
  * GlobalLockVO
  * @author: zhongxiang.wang
+ * @author miaoxueyu
  */
 public class GlobalLockVO {
 
@@ -44,6 +50,41 @@ public class GlobalLockVO {
     private Date gmtCreate;
 
     private Date gmtModified;
+
+    /**
+     * convert RowLock list to GlobalLockVO list
+     * @param rowLocks the RowLock list
+     * @return the GlobalLockVO list
+     */
+    public static List<GlobalLockVO> convert(List<RowLock> rowLocks) {
+        if (CollectionUtils.isEmpty(rowLocks)) {
+            return Collections.emptyList();
+        }
+        final List<GlobalLockVO> result = new ArrayList<>(rowLocks.size());
+        for (RowLock rowLock : rowLocks) {
+            result.add(convert(rowLock));
+        }
+
+        return result;
+    }
+
+
+    /**
+     * convert RowLock to GlobalLockVO
+     * @param rowLock the RowLock
+     * @return the GlobalLockVO
+     */
+    public static GlobalLockVO convert(RowLock rowLock) {
+        final GlobalLockVO globalLockVO = new GlobalLockVO();
+        globalLockVO.setXid(rowLock.getXid());
+        globalLockVO.setTransactionId(rowLock.getTransactionId());
+        globalLockVO.setBranchId(rowLock.getBranchId());
+        globalLockVO.setResourceId(rowLock.getResourceId());
+        globalLockVO.setTableName(rowLock.getTableName());
+        globalLockVO.setPk(rowLock.getPk());
+        globalLockVO.setRowKey(rowLock.getRowKey());
+        return globalLockVO;
+    }
 
 
     public String getXid() {
