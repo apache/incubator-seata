@@ -475,8 +475,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (param.getStatus() != null) {
             String statusKey = buildGlobalStatus(GlobalStatus.get(param.getStatus()).getCode());
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                Pipeline pipelined = jedis.pipelined();
+            try (Jedis jedis = JedisPooledFactory.getJedisInstance();
+                 Pipeline pipelined = jedis.pipelined()) {
                 List<String> xids = pipelined.lrange(statusKey, start, end).get();
 
                 xids.stream().forEach(xid -> {
@@ -636,8 +636,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         for (GlobalStatus status : values) {
             statusKeys.add(buildGlobalStatus(status.getCode()));
         }
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Pipeline pipelined = jedis.pipelined();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance();
+             Pipeline pipelined = jedis.pipelined()) {
             statusKeys.stream().forEach(statusKey -> pipelined.llen(statusKey));
             List<Long> list = (List<Long>)(List)pipelined.syncAndReturnAll();
             if (list.size() > 0) {

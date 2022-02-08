@@ -91,10 +91,9 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             if (CollectionUtils.isNotEmpty(mapGlobalKeys)) {
                 List<String> rowLoclKeys = new ArrayList<>();
                 mapGlobalKeys.forEach((k,v) -> rowLoclKeys.addAll(Arrays.asList(v.split(";"))));
-
                 for (String rowLoclKey : rowLoclKeys) {
-                    Map<String, String> mapRowLockKeys = jedis.hgetAll(rowLoclKey);
-                    GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(mapRowLockKeys, GlobalLockVO.class);
+                    Map<String, String> mapRowLockKey = jedis.hgetAll(rowLoclKey);
+                    GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(mapRowLockKey, GlobalLockVO.class);
                     if (vo != null) {
                         vos.add(vo);
                     }
@@ -116,11 +115,6 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             }
         }
         return vos;
-    }
-
-
-    public static void main(String[] args) {
-        String s = "123;456";
     }
 
 }
