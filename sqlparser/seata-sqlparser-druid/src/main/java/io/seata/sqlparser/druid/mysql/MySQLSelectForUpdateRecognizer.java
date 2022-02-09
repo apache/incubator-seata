@@ -133,4 +133,8 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
         return sb.toString();
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }
