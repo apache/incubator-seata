@@ -41,20 +41,20 @@ public class RedisQueryConsolTest {
      *
      *please update config information ths file: application.yml
      * store:
-     *     # support: file 、 db 、 redis
-     *     mode: redis
-     *     redis:
-     *       mode: single
-     *       database: 0
-     *       min-conn: 1
-     *       max-conn: 10
-     *       password:
-     *       max-total: 100
-     *       query-limit: 100
-     *       single:
-     *         host: real redis host
-     *         port: 6879
-     *
+          # support: file 、 db 、 redis
+          mode: redis
+          redis:
+            mode: single
+            database: 0
+            min-conn: 1
+            max-conn: 10
+            password:
+            max-total: 100
+            query-limit: 100
+            single:
+              host: real redis host
+              port: 6879
+
      *!!!!!!!when you test finish,please restore the modified configuration!!!!!!!!
      */
 

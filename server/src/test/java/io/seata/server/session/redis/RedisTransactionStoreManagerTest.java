@@ -56,7 +56,7 @@ public class RedisTransactionStoreManagerTest {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6879, 60000,"********"));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6879, 60000,"*********"));
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
 
 
@@ -107,8 +107,8 @@ public class RedisTransactionStoreManagerTest {
         String ROW_LOCK_KEY = "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188";
 
         Map<String, String> globallockMap = new HashMap<>();
-        globallockMap.put("137621367686103001","SEATA_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188;SEATA_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
-        globallockMap.put("237621367686103002","SEATA_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
+        globallockMap.put("137621367686103001","SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188;SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
+        globallockMap.put("237621367686103002","SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
 
 
         GlobalLockVO globalLockVO = new GlobalLockVO();
