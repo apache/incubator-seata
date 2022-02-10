@@ -20,12 +20,12 @@ import com.alibaba.fastjson.JSON;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.console.service.GlobalSessionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import javax.annotation.Resource;
 
 /**
@@ -71,6 +71,7 @@ public class RedisQueryConsolTest {
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageNum(1);
         param.setPageSize(4);
+        param.setXid("SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792");
         PageResult<GlobalSessionVO> query = globalSessionService.query(param);
         System.out.print(JSON.toJSON(query));
     }
@@ -79,10 +80,11 @@ public class RedisQueryConsolTest {
     @Test
     public void test_queryGlobalLock() {
         GlobalLockParam param = new GlobalLockParam();
-        param.setTableName("tableName");
-        param.setPk("123345435");
+        param.setPageSize(2);
+        param.setPageNum(1);
+        param.setXid("_192.168.158.80:8091:37621364385185792");
         try {
-            globalLockService.query(param);
+            PageResult<GlobalLockVO> query = globalLockService.query(param);
         } catch (Exception e) {
             System.out.print(e.getMessage());
         }

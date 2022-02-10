@@ -31,6 +31,7 @@ import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
+import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
 import static io.seata.common.util.StringUtils.isNotBlank;
 import static io.seata.core.console.result.PageResult.checkPage;
@@ -90,7 +91,7 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
             Map<String, String> mapGlobalKeys = jedis.hgetAll(key);
             if (CollectionUtils.isNotEmpty(mapGlobalKeys)) {
                 List<String> rowLoclKeys = new ArrayList<>();
-                mapGlobalKeys.forEach((k,v) -> rowLoclKeys.addAll(Arrays.asList(v.split(";"))));
+                mapGlobalKeys.forEach((k,v) -> rowLoclKeys.addAll(Arrays.asList(v.split(ROW_LOCK_KEY_SPLIT_CHAR))));
                 for (String rowLoclKey : rowLoclKeys) {
                     Map<String, String> mapRowLockKey = jedis.hgetAll(rowLoclKey);
                     GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(mapRowLockKey, GlobalLockVO.class);
