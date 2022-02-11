@@ -15,10 +15,10 @@
  */
 package io.seata.sqlparser;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 
 /**
  * The sql parser configuration factory
