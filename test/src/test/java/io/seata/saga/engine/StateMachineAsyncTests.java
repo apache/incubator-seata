@@ -76,8 +76,6 @@ public class StateMachineAsyncTests {
 
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        waittingForFinish(inst);
-
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
@@ -89,8 +87,6 @@ public class StateMachineAsyncTests {
 
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        waittingForFinish(inst);
-
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
@@ -100,8 +96,6 @@ public class StateMachineAsyncTests {
         start = System.currentTimeMillis();
         paramMap.put("scriptThrowException", true);
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
-
-        waittingForFinish(inst);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
