@@ -20,17 +20,17 @@
 # add config: http://{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items
 # publish config: http://{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/releases
 
-echo -e "Please enter the host of apollo.\n请输入apollo的host:"
+echo -e "Please enter the host of apollo.\n请输入apollo的host [localhost]:"
 read -p ">>> " host
-echo -e "Please enter the port of apollo.\n请输入apollo的port:"
+echo -e "Please enter the port of apollo.\n请输入apollo的port [8070]:"
 read -p ">>> " port
-echo -e "Please enter the env of apollo.\n请输入apollo的env:"
+echo -e "Please enter the env of apollo.\n请输入apollo的env [DEV]:"
 read -p ">>> " env
-echo -e "Please enter the appId of apollo.\n请输入apollo的appId:"
+echo -e "Please enter the appId of apollo.\n请输入apollo的appId [seata-server]:"
 read -p ">>> " appId
-echo -e "Please enter the clusterName of apollo.\n请输入apollo的clusterName:"
+echo -e "Please enter the clusterName of apollo.\n请输入apollo的clusterName [default]:"
 read -p ">>> " clusterName
-echo -e "Please enter the namespaceName of apollo.\n请输入apollo的namespaceName:"
+echo -e "Please enter the namespaceName of apollo.\n请输入apollo的namespaceName [application]:"
 read -p ">>> " namespaceName
 echo -e "Please enter the dataChangeCreatedBy of apollo.\n请输入apollo的dataChangeCreatedBy:"
 read -p ">>> " dataChangeCreatedBy

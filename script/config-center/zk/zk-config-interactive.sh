@@ -16,9 +16,9 @@
 
 # The purpose is to sync the local configuration(config.txt) to zk.
 # This script need to rely on zk.
-echo -e "Please enter the host of zookeeper.\n请输入zookeeper的host:"
+echo -e "Please enter the host of zookeeper.\n请输入zookeeper的host [localhost]:"
 read -p ">>> " host
-echo -e "Please enter the port of zookeeper.\n请输入zookeeper的port:"
+echo -e "Please enter the port of zookeeper.\n请输入zookeeper的port [2181]:"
 read -p ">>> " port
 echo -e "Please enter the zkHome of zookeeper.\n请输入zookeeper的zkHome:"
 read -p ">>> " zkHome

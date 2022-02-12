@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-echo -e "Please enter the host of consul.\n请输入consul的host:"
+echo -e "Please enter the host of consul.\n请输入consul的host [localhost]:"
 read -p ">>> " host
-echo -e "Please enter the port of consul.\n请输入consul的port:"
+echo -e "Please enter the port of consul.\n请输入consul的port [8500]:"
 read -p ">>> " port
 read -p "Are you sure to continue? [y/n]" input
 case $input in
