@@ -67,12 +67,6 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
             total = instance.countByClobalSesisons(GlobalStatus.values());
             globalSessions = instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(),param.isWithBranch());
         } else {
-            if (isBlank(param.getXid()) && param.getStatus() == null) {
-                //not support query applicationId or transactionName
-                logger.debug("not supported according to applicationId or transactionName query");
-                return PageResult.success(result,total.intValue(),param.getPageNum(),param.getPageSize());
-            }
-
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
             if (isNotBlank(param.getXid())) {
                 SessionCondition sessionCondition = new SessionCondition();
@@ -83,7 +77,6 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
             }
 
             if (param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null) {
-
                 if (CollectionUtils.isNotEmpty(globalSessions)) {
                     globalSessionsNew = globalSessions.stream().filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus())).collect(Collectors.toList());
                     total = (long)globalSessionsNew.size();
