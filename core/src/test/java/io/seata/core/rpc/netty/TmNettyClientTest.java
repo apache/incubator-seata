@@ -131,13 +131,14 @@ public class TmNettyClientTest {
      * @return declared field
      */
     public static Field getDeclaredField(Object object, String fieldName) {
-        Field field;
+        Field field = null;
         Class<?> clazz = object.getClass();
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             try {
                 field = clazz.getDeclaredField(fieldName);
                 return field;
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+
             }
         }
 

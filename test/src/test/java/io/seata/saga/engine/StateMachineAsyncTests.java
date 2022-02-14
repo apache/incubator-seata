@@ -21,7 +21,6 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -153,7 +152,7 @@ public class StateMachineAsyncTests {
     }
 
     @Test
-    @Disabled("FIXME")
+    //@Disabled("FIXME")
     public void testCompensationStateMachine() {
 
         long start = System.currentTimeMillis();
