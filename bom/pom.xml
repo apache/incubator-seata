@@ -175,6 +175,11 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-hsf</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -188,11 +193,13 @@
                 <artifactId>seata-rm-datasource</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- the 'seata-server' is an application, not a dependency
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-spring</artifactId>
@@ -305,6 +312,11 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-zstd</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-saga-processctrl</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -346,6 +358,11 @@
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-sqlparser-druid</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>apm-seata-skywalking-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
