@@ -27,17 +27,18 @@
     <packaging>pom</packaging>
     <name>seata-distribution ${project.version}</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.seata</groupId>
-            <artifactId>seata-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
     <profiles>
         <profile>
             <id>release-seata</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-server</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
             <build>
+                <finalName>seata</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -59,10 +60,10 @@
                         </executions>
                     </plugin>
                 </plugins>
-                <finalName>seata</finalName>
             </build>
         </profile>
     </profiles>
+
     <build>
         <plugins>
             <plugin>
