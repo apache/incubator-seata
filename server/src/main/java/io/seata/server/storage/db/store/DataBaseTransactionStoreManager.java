@@ -16,6 +16,7 @@
 package io.seata.server.storage.db.store;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +174,8 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * @param statuses the statuses
      * @return the list
      */
-    public List<GlobalSession> readSession(GlobalStatus[] statuses) {
+    @Override
+    public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
         int[] states = new int[statuses.length];
         for (int i = 0; i < statuses.length; i++) {
             states[i] = statuses[i].getCode();
@@ -184,11 +186,17 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             return null;
         }
         List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
-        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
-        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
-            .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
-        return globalTransactionDOs.stream().map(globalTransactionDO ->
-            getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))
+        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap;
+        if (withBranchSessions) {
+            List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
+            branchTransactionDOsMap = branchTransactionDOs.stream()
+                .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
+        } else {
+            branchTransactionDOsMap = Collections.emptyMap();
+        }
+        return globalTransactionDOs.stream()
+            .map(globalTransactionDO -> getGlobalSession(globalTransactionDO,
+                branchTransactionDOsMap.get(globalTransactionDO.getXid()), withBranchSessions))
             .collect(Collectors.toList());
     }
 
@@ -209,15 +217,20 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
                 return globalSessions;
             }
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            return readSession(sessionCondition.getStatuses());
+            return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
         }
         return null;
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
         List<BranchTransactionDO> branchTransactionDOs) {
-        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
-        //branch transactions
+        return getGlobalSession(globalTransactionDO, branchTransactionDOs, true);
+    }
+
+    private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
+        List<BranchTransactionDO> branchTransactionDOs, boolean withBranchSessions) {
+        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO, !withBranchSessions);
+        // branch transactions
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
             for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
                 globalSession.add(SessionConverter.convertBranchSession(branchTransactionDO));
@@ -225,7 +238,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         }
         return globalSession;
     }
-
 
     /**
      * Sets log store.
