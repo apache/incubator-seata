@@ -46,10 +46,8 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
-
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
-
 /**
  * The redis lock store operation
  *
@@ -149,9 +147,8 @@ public class RedisLocker extends AbstractLocker {
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needLockDOS = convertToLockDO(rowLocks);
         if (needLockDOS.size() > 1) {
-            needLockDOS = needLockDOS.stream().
-                filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
-                .collect(Collectors.toList());
+            needLockDOS =
+                needLockDOS.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
         }
         List<String> needLockKeys = new ArrayList<>();
         needLockDOS.forEach(lockDO -> needLockKeys.add(buildLockKey(lockDO.getRowKey())));
@@ -220,14 +217,14 @@ public class RedisLocker extends AbstractLocker {
         ArrayList<String> success = new ArrayList<>(partitions.size());
         Integer status = SUCCEED;
         for (int i = 0; i < partitions.size(); i++) {
-            if (Objects.equals(partitions.get(i).get(0),FAILED)) {
+            if (Objects.equals(partitions.get(i).get(0), FAILED)) {
                 status = FAILED;
             } else {
                 success.add(readyKeys.get(i));
             }
         }
 
-        //If someone has failed,all the lockkey which has been added need to be delete.
+        // If someone has failed,all the lockkey which has been added need to be delete.
         if (FAILED.equals(status)) {
             if (success.size() > 0) {
                 jedis.del(success.toArray(new String[0]));
@@ -289,8 +286,7 @@ public class RedisLocker extends AbstractLocker {
             needReleaseKeys[i] = buildLockKey(needReleaseLocks.get(i).getRowKey());
         }
 
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Pipeline pipelined = jedis.pipelined();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             pipelined.del(needReleaseKeys);
             pipelined.hdel(buildXidLockKey(currentXid), branchId.toString());
             pipelined.sync();
@@ -324,10 +320,11 @@ public class RedisLocker extends AbstractLocker {
             }
 
             String xid = rowLocks.get(0).getXid();
-            Pipeline pipeline = jedis.pipelined();
-            lockKeys.forEach(key -> pipeline.hget(key, XID));
-            List<String> existedXids = (List<String>) (List) pipeline.syncAndReturnAll();
-            return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
+            try (Pipeline pipeline = jedis.pipelined()) {
+                lockKeys.forEach(key -> pipeline.hget(key, XID));
+                List<String> existedXids = (List<String>)(List)pipeline.syncAndReturnAll();
+                return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
+            }
         }
     }
 
