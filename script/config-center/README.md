@@ -18,9 +18,9 @@ you only need to follow the instructions below and keep the corresponding config
 
 The Script has interactive and non-interactive configuration modes,different patterns are distinguished by different file names.
 
-interactive mode(*-config.sh or *-config.py):  the script starts the config program in interactive mode on the command line, prompting you for each option.
+interactive mode(*-config-interactive.sh or *-config-interactive.py):  the script starts the config program in interactive mode on the command line, prompting you for each option.
 
-non-interactive mode(*-config-interactive.sh or *-config-interactive.py):  the script use additional config options to specify values for the options you choose during interactive mode, thus scripting the config process.
+non-interactive mode(*-config.sh or *-config.py):  the script use additional config options to specify values for the options you choose during interactive mode, thus scripting the config process.
 
 ## Nacos
 
