@@ -28,7 +28,7 @@
     <name>seata-server ${project.version}</name>
 
     <properties>
-        <!-- The versions of the dependencies for seata-server. Don't inherit from 'spring-boot-dependencies' -->
+        <!-- The versions of the dependencies for seata-server. Do not inherit from 'spring-boot-dependencies' -->
         <!-- redis -->
         <jedis.version>3.2.0</jedis.version>
         <!-- db -->
@@ -126,15 +126,17 @@
             <version>${mysql.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.oracle.ojdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>${ojdbc.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
         </dependency>
+        <!-- Copyright restrictions, do not reference this dependency.
+             You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
+        <dependency>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>${ojdbc.version}</version>
+        </dependency>-->
 
         <dependency>
             <groupId>com.beust</groupId>
@@ -153,7 +155,6 @@
             <artifactId>jedis</artifactId>
             <version>${jedis.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.fppt</groupId>
             <artifactId>jedis-mock</artifactId>
