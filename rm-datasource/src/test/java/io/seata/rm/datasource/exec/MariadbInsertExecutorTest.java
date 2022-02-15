@@ -47,7 +47,7 @@ public class MariadbInsertExecutorTest extends MySQLInsertExecutorTest {
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MARIADB);
         DataSourceProxy dataSourceProxy = new DataSourceProxy(new MockMariadbDataSource());
         when(connectionProxy.getDataSourceProxy()).thenReturn(dataSourceProxy);
-        Assertions.assertTrue(JdbcConstants.MYSQL.equals(dataSourceProxy.getDbType()));
+        Assertions.assertEquals(JdbcConstants.MYSQL, dataSourceProxy.getDbType());
         statementProxy = mock(PreparedStatementProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(statementProxy.getTargetStatement()).thenReturn(statementProxy);
