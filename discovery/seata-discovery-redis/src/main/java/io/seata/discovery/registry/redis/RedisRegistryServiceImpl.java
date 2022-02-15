@@ -150,7 +150,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
+    public void register(InetSocketAddress address) {
         NetUtil.validAddress(address);
         doRegisterOrExpire(address, true);
         RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, KEY_REFRESH_PERIOD, this::doRegisterOrExpire);
@@ -160,7 +160,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         doRegisterOrExpire(address, false);
     }
 
-    private void doRegisterOrExpire(InetSocketAddress address, boolean publish) throws Exception {
+    private void doRegisterOrExpire(InetSocketAddress address, boolean publish) {
         String serverAddr = NetUtil.toStringAddress(address);
         String key = getRedisRegistryKey() + "_" + serverAddr;  // key = registry.redis.${cluster}_ip:port
         try (Jedis jedis = jedisPool.getResource(); Pipeline pipelined = jedis.pipelined()) {
@@ -173,7 +173,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
+    public void unregister(InetSocketAddress address) {
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource(); Pipeline pipelined = jedis.pipelined()) {

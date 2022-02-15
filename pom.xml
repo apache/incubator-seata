@@ -34,7 +34,6 @@
         <module>build</module>
         <module>all</module>
         <module>bom</module>
-        <module>build</module>
         <module>common</module>
         <module>config</module>
         <module>console</module>
@@ -67,21 +66,6 @@
         <module>ext/apm-seata-skywalking-plugin</module>
         <!--<module>seata-plugin</module>-->
     </modules>
-
-    <properties>
-        <!-- for test -->
-        <junit-jupiter.version>5.4.2</junit-jupiter.version>
-        <mockito.version>2.23.4</mockito.version>
-        <assertj-core.version>3.12.2</assertj-core.version>
-        <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
-
-        <!-- for jdbc driver when package  -->
-        <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
-        <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
-
-        <!-- for kotlin  -->
-        <kotlin.version>1.4.0</kotlin.version>
-    </properties>
 
     <!--test-->
     <dependencies>
