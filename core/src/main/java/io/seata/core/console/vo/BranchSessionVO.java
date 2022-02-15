@@ -15,12 +15,12 @@
  */
 package io.seata.core.console.vo;
 
-import io.seata.core.constants.ServerTableColumnsName;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Objects;
+
+import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * BranchSessionVO
