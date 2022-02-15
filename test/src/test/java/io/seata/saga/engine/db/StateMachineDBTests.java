@@ -799,7 +799,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    //@Disabled("FIXME")
+    @Disabled("FIXME")
     public void testSimpleCompensateStateAsUpdateMode() throws Exception {
         long start = System.currentTimeMillis();
 
