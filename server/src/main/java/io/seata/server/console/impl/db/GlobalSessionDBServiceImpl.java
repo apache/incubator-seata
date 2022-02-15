@@ -109,7 +109,7 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
         } finally {
             IOUtil.close(ps, rs, countPs, countRs);
         }
-        return PageResult.success(list, count, (count / param.getPageSize()) + 1, param.getPageNum(), param.getPageSize());
+        return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
     }
 
     private String getWhereConditionByParam(GlobalSessionParam param, List<Object> sqlParamList) {

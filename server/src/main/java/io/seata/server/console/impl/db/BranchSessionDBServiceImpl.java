@@ -58,7 +58,7 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
         if (StringUtils.isBlank(xid)) {
-            throw new IllegalArgumentException("xid is not blank");
+            throw new IllegalArgumentException("xid should not be blank");
         }
 
         String whereCondition = " where xid = ? ";

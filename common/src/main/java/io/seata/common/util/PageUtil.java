@@ -28,13 +28,24 @@ import io.seata.common.exception.NotSupportYetException;
  * @author: lvekee 734843455@qq.com
  */
 public class PageUtil {
-
+    /**
+     * The constant MIN_PAGE_NUM
+     */
     public static final int MIN_PAGE_NUM = 1;
+    /**
+     * The constant MAX_PAGE_NUM
+     */
     public static final int MAX_PAGE_NUM = 999;
+    /**
+     * The constant MIN_PAGE_SIZE
+     */
     public static final int MIN_PAGE_SIZE = 1;
+    /**
+     * The constant MAX_PAGE_SIZE
+     */
     public static final int MAX_PAGE_SIZE = 100;
     /**
-     * The constant OFFSET_PLACE_HOLD
+     * The constant SOURCE_SQL_PLACE_HOLD
      */
     private static final String SOURCE_SQL_PLACE_HOLD = " #sourcesql# ";
     /**

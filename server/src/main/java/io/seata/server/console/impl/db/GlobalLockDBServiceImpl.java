@@ -98,7 +98,7 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
         } finally {
             IOUtil.close(ps, rs, countPs, countRs);
         }
-        return PageResult.success(list, count, (count / param.getPageSize()) + 1, param.getPageNum(), param.getPageSize());
+        return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
     }
 
     private String getWhereConditionByParam(GlobalLockParam param, List<Object> sqlParamList) {
