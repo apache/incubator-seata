@@ -30,7 +30,6 @@
 
     <name>Seata BOM ${project.version}</name>
     <description>Seata BOM</description>
-
     <dependencyManagement>
         <dependencies>
             <!-- All -->
@@ -166,6 +165,11 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-brpc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-discovery-eureka</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -189,6 +193,11 @@
                 <artifactId>seata-discovery-zk</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-hsf</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- Integration -->
             <dependency>
                 <groupId>io.seata</groupId>
@@ -205,11 +214,13 @@
                 <artifactId>seata-grpc</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- the 'seata-server' is an application, not a dependency
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-hsf</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            -->
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-http</artifactId>
@@ -329,6 +340,11 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-compressor-zstd</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-serializer-kryo</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -374,6 +390,11 @@
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-tm</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>apm-seata-skywalking-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

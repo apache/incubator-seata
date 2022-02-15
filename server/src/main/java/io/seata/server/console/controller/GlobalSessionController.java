@@ -15,16 +15,16 @@
  */
 package io.seata.server.console.controller;
 
-import io.seata.common.exception.NotSupportYetException;
+import javax.annotation.Resource;
+
 import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * Global Session Controller
@@ -39,11 +39,11 @@ public class GlobalSessionController {
 
     /**
      * Query all globalSession
-     * @param param
+     * @param param param for query globalSession
      * @return  the list of GlobalSessionVO
      */
     @GetMapping("query")
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
-        throw new NotSupportYetException();
+        return globalSessionService.query(param);
     }
 }

@@ -147,6 +147,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-brpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-discovery-custom</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -190,6 +195,8 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-dubbo-alibaba</artifactId>
             <version>${project.version}</version>
+            <!-- Slimming down for 'seata-all.jar' -->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
@@ -221,6 +228,8 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-rm</artifactId>
             <version>${project.version}</version>
+            <!-- Slimming down for 'seata-all.jar' -->
+            <scope>provided</scope>
         </dependency>
         <!-- seata rm-datasource -->
         <dependency>
@@ -235,6 +244,11 @@
             </exclusions>
         </dependency>
         <!-- seata saga -->
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-hsf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-saga-engine</artifactId>
@@ -633,6 +647,13 @@
     </dependencies>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>${os-maven-plugin.version}</version>
+            </extension>
+        </extensions>
         <resources>
             <resource>
                 <directory>${user.dir}</directory>
@@ -646,7 +667,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -697,7 +717,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven-dependency-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -711,7 +730,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>${maven-javadoc-plugin.version}</version>
                         <configuration>
                             <charset>${project.build.sourceEncoding}</charset>
                             <encoding>${project.build.sourceEncoding}</encoding>

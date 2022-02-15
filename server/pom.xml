@@ -168,7 +168,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven-deploy-plugin.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -183,9 +182,7 @@
                     </from>
                     <to>
                         <image>docker.io/seataio/seata-server</image>
-                        <tags>
-                            ${image.tags}
-                        </tags>
+                        <tags>${image.tags}</tags>
                         <auth>
                             <username>${REGISTRY_USERNAME}</username>
                             <password>${REGISTRY_PASSWORD}</password>
@@ -257,11 +254,6 @@
             <build>
                 <finalName>seata-server</finalName>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>${maven-jar-plugin.version}</version>
-                    </plugin>
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
