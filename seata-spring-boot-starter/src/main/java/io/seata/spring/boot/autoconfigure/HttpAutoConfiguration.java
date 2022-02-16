@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author wangxb
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 public class HttpAutoConfiguration extends WebMvcConfigurerAdapter {
 
