@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `global_table`
     `gmt_create`                DATETIME,
     `gmt_modified`              DATETIME,
     PRIMARY KEY (`xid`),
-    KEY `idx_gmt_modified_status` (`gmt_modified`, `status`),
+    KEY `idx_status_gmt_modified` (`status` , `gmt_modified`),
     KEY `idx_transaction_id` (`transaction_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -66,7 +66,4 @@ CREATE TABLE IF NOT EXISTS `distributed_lock`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
-INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('AsyncCommitting', ' ', 0);
-INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
-INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
-INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('HandleAllSession', ' ', 0);
