@@ -61,17 +61,17 @@ public class StateMachineTests {
 
         String stateMachineName = "simpleChoiceTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-1 :" + cost);
 
         start = System.currentTimeMillis();
         paramMap.put("a", 2);
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-2 :" + cost);
     }
 
     @Test
@@ -84,18 +84,18 @@ public class StateMachineTests {
 
         String stateMachineName = "simpleChoiceAndEndTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-3 :" + cost);
 
         start = System.currentTimeMillis();
 
         paramMap.put("a", 3);
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-4 :" + cost);
     }
 
     @Test
@@ -108,19 +108,19 @@ public class StateMachineTests {
 
         String stateMachineName = "simpleInputAssignmentStateMachine";
 
-        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        String businessKey = instance.getStateList().get(0).getBusinessKey();
+        String businessKey = inst.getStateList().get(0).getBusinessKey();
         Assertions.assertNotNull(businessKey);
         System.out.println("====== businessKey :" + businessKey);
 
-        String contextBusinessKey = (String) instance.getEndParams().get(
-                instance.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
+        String contextBusinessKey = (String) inst.getEndParams().get(
+                inst.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
         Assertions.assertNotNull(contextBusinessKey);
         System.out.println("====== context businessKey :" + businessKey);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-5 :" + cost);
     }
 
     @Test
@@ -137,10 +137,10 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-6 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -156,9 +156,9 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-7 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
 
 
@@ -167,9 +167,9 @@ public class StateMachineTests {
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-8 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
 
         start = System.currentTimeMillis();
@@ -177,9 +177,9 @@ public class StateMachineTests {
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-9 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -196,10 +196,10 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-10 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -216,10 +216,10 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-11 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -236,10 +236,10 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-12 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -256,9 +256,9 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-13 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -275,9 +275,9 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-14 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -326,16 +326,16 @@ public class StateMachineTests {
         paramMap.put("career", engineer);
 
         String stateMachineName = "simpleStateMachineWithComplexParams";
-        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        People peopleResult = (People) instance.getEndParams().get("complexParameterMethodResult");
+        People peopleResult = (People) inst.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
-        Assertions.assertTrue(people.getName().equals(people.getName()));
+        Assertions.assertEquals(people.getName(), peopleResult.getName());
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-15 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -351,9 +351,9 @@ public class StateMachineTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost1-16 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         try {
             Thread.sleep(500);
