@@ -214,7 +214,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
     }
 
-        @Override
+    @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
         throws TransactionException {
         branchSession.setStatus(status);

@@ -72,7 +72,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session,GlobalStatus expectedStatus,GlobalStatus targetStatus) throws TransactionException {
+    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus expectedStatus, GlobalStatus targetStatus) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_UPDATE);
         }

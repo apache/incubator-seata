@@ -283,7 +283,7 @@ public class DefaultCore implements Core {
         boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
             if (globalSession.getStatus() == GlobalStatus.Begin) {
-                globalSession.changeStatusOptimistic(GlobalStatus.Begin,GlobalStatus.Rollbacking);
+                globalSession.changeStatusOptimistic(GlobalStatus.Begin, GlobalStatus.Rollbacking);
                 return true;
             }
             return false;
