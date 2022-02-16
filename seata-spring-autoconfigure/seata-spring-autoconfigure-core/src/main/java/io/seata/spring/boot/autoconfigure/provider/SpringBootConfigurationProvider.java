@@ -55,10 +55,13 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result = null;
                     String rawDataId = (String) args[0];
-                    if (args.length == 1) {
-                        result = get(convertDataId(rawDataId));
-                    } else {
-                        result = get(convertDataId(rawDataId), args[1]);
+                    result = originalConfiguration.getConfigFromSys(rawDataId);
+                    if (null == result) {
+                        if (args.length == 1) {
+                            result = get(convertDataId(rawDataId));
+                        } else {
+                            result = get(convertDataId(rawDataId), args[1]);
+                        }
                     }
                     if (result != null) {
                         //If the return type is String,need to convert the object to string

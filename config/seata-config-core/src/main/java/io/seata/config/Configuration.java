@@ -303,6 +303,11 @@ public interface Configuration {
         if (null != content) {
             return content;
         }
+        String envDataId = dataId.toUpperCase().replace(".", "_");
+        content = ENV_MAP.get(envDataId);
+        if (null != content) {
+            return content;
+        }
         return System.getProperty(dataId);
     }
 
