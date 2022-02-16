@@ -46,7 +46,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
  *
  * @author wang.liang
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty({StarterConstants.SEATA_PREFIX + ".enabled", StarterConstants.SAGA_PREFIX + ".enabled"})
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, SeataAutoConfiguration.class})
 public class SeataSagaAutoConfiguration {
@@ -95,7 +95,7 @@ public class SeataSagaAutoConfiguration {
     /**
      * The saga async thread pool executor configuration.
      */
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(name = StarterConstants.SAGA_STATE_MACHINE_PREFIX + ".enable-async", havingValue = "true")
     @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
     static class SagaAsyncThreadPoolExecutorConfiguration {

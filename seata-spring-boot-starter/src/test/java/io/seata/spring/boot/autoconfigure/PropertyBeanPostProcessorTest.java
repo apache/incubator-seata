@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author xingfudeshi@gmail.com
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class PropertyBeanPostProcessorTest {
     private static AnnotationConfigApplicationContext context;
 
