@@ -65,6 +65,8 @@
         <commons-compress.version>1.19</commons-compress.version>
         <ant.version>1.10.6</ant.version>
         <lz4.version>1.7.1</lz4.version>
+        <kotlin.version>1.4.0</kotlin.version>
+        <kotlin-coroutines.version>1.4.0</kotlin-coroutines.version>
 
         <protobuf.version>3.7.1</protobuf.version>
         <grpc.version>1.17.1</grpc.version>
@@ -480,6 +482,20 @@
                 <groupId>org.lz4</groupId>
                 <artifactId>lz4-java</artifactId>
                 <version>${lz4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-bom</artifactId>
+                <version>${kotlin-coroutines.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
