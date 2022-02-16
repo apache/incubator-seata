@@ -43,20 +43,24 @@ import org.springframework.beans.BeanUtils;
  */
 public class SessionConverter {
 
-    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO, boolean lazyLoadBranch) {
         if (globalTransactionDO == null) {
             return null;
         }
         GlobalSession session = new GlobalSession(globalTransactionDO.getApplicationId(),
                 globalTransactionDO.getTransactionServiceGroup(),
                 globalTransactionDO.getTransactionName(),
-                globalTransactionDO.getTimeout());
+                globalTransactionDO.getTimeout(), lazyLoadBranch);
         session.setXid(globalTransactionDO.getXid());
         session.setTransactionId(globalTransactionDO.getTransactionId());
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
         return session;
+    }
+
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+        return convertGlobalSession(globalTransactionDO, false);
     }
 
     public static BranchSession convertBranchSession(BranchTransactionDO branchTransactionDO) {
@@ -149,7 +153,7 @@ public class SessionConverter {
      * @param filteredSessions the GlobalSession list
      * @return the GlobalSessionVO list
      */
-    public static List<GlobalSessionVO> convert(List<GlobalSession> filteredSessions) {
+    public static List<GlobalSessionVO> convertGlobalSession(List<GlobalSession> filteredSessions) {
 
         if (CollectionUtils.isEmpty(filteredSessions)) {
             return Collections.emptyList();
@@ -168,7 +172,7 @@ public class SessionConverter {
                     (long) session.getTimeout(),
                     session.getBeginTime(),
                     session.getApplicationData(),
-                    convert(session.getBranchSessions())
+                    convertBranchSession(session.getBranchSessions())
             ));
         }
         return result;
@@ -180,7 +184,7 @@ public class SessionConverter {
      * @param branchSessions the BranchSession list
      * @return the BranchSessionVO list
      */
-    public static Set<BranchSessionVO> convert(ArrayList<BranchSession> branchSessions) {
+    public static Set<BranchSessionVO> convertBranchSession(List<BranchSession> branchSessions) {
 
         if (CollectionUtils.isEmpty(branchSessions)) {
             return Collections.emptySet();
