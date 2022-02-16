@@ -84,7 +84,7 @@ public class GlobalSessionTest {
     }
 
     /**
-     * Change status test.
+     * Change status expected test.
      *
      * @param globalSession the global session
      * @throws Exception the exception
