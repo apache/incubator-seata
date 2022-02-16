@@ -98,7 +98,8 @@ public class RedisSessionManager extends AbstractSessionManager
         session.setStatus(targetStatus);
         if (expectedStatus != null) {
             session.setOldStatus(expectedStatus);
-        }        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+        }
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
         }
