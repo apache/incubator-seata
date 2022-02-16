@@ -28,7 +28,6 @@ public class SessionCondition {
     private GlobalStatus status;
     private GlobalStatus[] statuses;
     private long overTimeAliveMills;
-    private Boolean withBranchSessions;
     private boolean lazyLoadBranch;
 
     /**
@@ -134,13 +133,6 @@ public class SessionCondition {
         this.statuses = statuses;
     }
 
-    public Boolean getWithBranchSessions() {
-        return withBranchSessions;
-    }
-
-    public void setWithBranchSessions(Boolean withBranchSessions) {
-        this.withBranchSessions = withBranchSessions;
-    }
 
     public boolean isLazyLoadBranch() {
         return lazyLoadBranch;

@@ -71,7 +71,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
             if (isNotBlank(param.getXid())) {
                 SessionCondition sessionCondition = new SessionCondition();
                 sessionCondition.setXid(param.getXid());
-                sessionCondition.setWithBranchSessions(param.isWithBranch());
+                sessionCondition.setLazyLoadBranch(!param.isWithBranch());
                 globalSessions = instance.readSession(sessionCondition);
                 total = (long)globalSessions.size();
             }

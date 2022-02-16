@@ -408,7 +408,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return readSession(statuses, true);
     }
 
-    public List<GlobalSession> readSession(GlobalStatus[] statuses,boolean withBranchSessions) {
     @Override
     public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
         List<String> statusKeys = new ArrayList<>();
@@ -441,20 +440,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
-        Boolean withBranchSessions = sessionCondition.getWithBranchSessions();
-        if (null == withBranchSessions) {
-            withBranchSessions = Boolean.TRUE;
-        }
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
-            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), withBranchSessions);
+            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), !sessionCondition.isLazyLoadBranch());
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }
             return globalSessions;
         } else if (sessionCondition.getTransactionId() != null) {
             GlobalSession globalSession = this
-                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), withBranchSessions);
+                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), !sessionCondition.isLazyLoadBranch());
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }
@@ -462,7 +457,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
         } else if (sessionCondition.getStatus() != null) {
-            return readSession(new GlobalStatus[]{sessionCondition.getStatus()},withBranchSessions);
             return readSession(new GlobalStatus[] {sessionCondition.getStatus()}, !sessionCondition.isLazyLoadBranch());
         }
         return null;
@@ -673,7 +667,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     if (withBranchSessions) {
                         branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
                     }
-                    globalSessions.add(getGlobalSession(globalTransactionDO,branchTransactionDOs));
+                    globalSessions.add(getGlobalSession(globalTransactionDO,branchTransactionDOs, withBranchSessions));
                 }
             }
             return globalSessions;

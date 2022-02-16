@@ -132,7 +132,7 @@ public class SessionConverter {
         }
     }
 
-    public static Set<BranchSessionVO> converToBranchSession(ArrayList<BranchSession> branchSessions) {
+    public static Set<BranchSessionVO> converToBranchSession(List<BranchSession> branchSessions) {
         Set<BranchSessionVO> branchSessionVOs = new HashSet<>(branchSessions.size());
         if (CollectionUtils.isNotEmpty(branchSessions)) {
             for (BranchSession branchSession : branchSessions) {
