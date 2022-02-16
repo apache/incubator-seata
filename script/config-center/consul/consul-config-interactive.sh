@@ -12,14 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# etcd REST API v3.
-# author:wangyuewen
-
-# shellcheck disable=SC2039,SC2162,SC2046,SC2013,SC2002
-echo -e "Please enter the host of etcd3.\n请输入etcd3的host [localhost]:"
+echo -e "Please enter the host of consul.\n请输入consul的host [localhost]:"
 read -p ">>> " host
-echo -e "Please enter the port of etcd3.\n请输入etcd3的port [2379]:"
+echo -e "Please enter the port of consul.\n请输入consul的port [8500]:"
 read -p ">>> " port
 read -p "Are you sure to continue? [y/n]" input
 case $input in
@@ -28,7 +23,7 @@ case $input in
             host=localhost
         fi
         if [[ -z ${port} ]]; then
-            port=2379
+            port=8500
         fi
         ;;
     [nN]*)
@@ -40,25 +35,23 @@ case $input in
         ;;
 esac
 
-etcd3Addr=$host:$port
+consulAddr=$host:$port
 contentType="content-type:application/json;charset=UTF-8"
-echo "Set etcd3Addr=$etcd3Addr"
+echo "Set consulAddr=$consulAddr"
 
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  keyBase64=$(printf "%s""$2" | base64)
-	valueBase64=$(printf "%s""$3" | base64)
-  curl -X POST -H "${1}" -d "{\"key\": \"$keyBase64\", \"value\": \"$valueBase64\"}" "http://$4/v3/kv/put" >"${tempLog}" 2>/dev/null
+  curl -X PUT -H "${1}" -d "${2}" "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat "${tempLog}") ]]; then
     echo " Please check the cluster status. "
     exit 1
   fi
-  if [[ $(cat "${tempLog}") =~ "error" || $(cat "${tempLog}") =~ "code" ]]; then
-    echo "Set $2=$3 failure "
-    (( failCount++ ))
+  if [[ $(cat "${tempLog}") =~ "true" ]]; then
+    echo "Set $4=$2 successfully "
   else
-    echo "Set $2=$3 successfully "
+    echo "Set $4=$2 failure "
+    (( failCount++ ))
  fi
 }
 
@@ -66,12 +59,12 @@ count=0
 COMMENT_START="#"
 for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
   if [[ "$line" =~ ^"${COMMENT_START}".*  ]]; then
-      continue
+        continue
   fi
   (( count++ ))
   key=${line%%=*}
-	value=${line#*=}
-	addConfig "${contentType}" "${key}" "${value}" "${etcd3Addr}"
+  value=${line#*=}
+  addConfig "${contentType}" "${value}" "${consulAddr}" "${key}"
 done
 
 echo "========================================================================="
@@ -79,7 +72,7 @@ echo " Complete initialization parameters,  total-count:$count ,  failure-count:
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-	echo " Init etcd3 config finished, please start seata-server. "
+  echo " Init consul config finished, please start seata-server. "
 else
-	echo " Init etcd3 config fail. "
+  echo " Init consul config fail. "
 fi
