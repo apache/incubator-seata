@@ -15,9 +15,9 @@ def get_params() -> dict:
         'username': '',
         'password': ''
     }
-    host = input("Please enter the host of nacos.\n请输入nacos的host\n>>> ")
-    port = input("Please enter the port of nacos.\n请输入nacos的port\n>>> ")
-    group = input("Please enter the group of nacos.\n请输入nacos的group\n>>> ")
+    host = input("Please enter the host of nacos.\n请输入nacos的host [localhost]\n>>> ")
+    port = input("Please enter the port of nacos.\n请输入nacos的port [8848]\n>>> ")
+    group = input("Please enter the group of nacos.\n请输入nacos的group [SEATA_GROUP]\n>>> ")
     tenant = input("Please enter the tenant of nacos.\n请输入nacos的tenant\n>>> ")
     username = input("Please enter the username of nacos.\n请输入nacos的username\n>>> ")
     password = input("Please enter the password of nacos.\n请输入nacos的password\n>>> ")
