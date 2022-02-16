@@ -72,11 +72,11 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
+    public void updateGlobalSessionStatus(GlobalSession session,GlobalStatus expectedStatus,GlobalStatus targetStatus) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_UPDATE);
         }
-        if (GlobalStatus.Rollbacking == status) {
+        if (GlobalStatus.Rollbacking == targetStatus) {
             session.getBranchSessions().forEach(i -> i.setLockStatus(LockStatus.Rollbacking));
         }
         writeSession(LogOperation.GLOBAL_UPDATE, session);
@@ -122,8 +122,8 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void onStatusChange(GlobalSession globalSession, GlobalStatus status) throws TransactionException {
-        updateGlobalSessionStatus(globalSession, status);
+    public void onStatusChange(GlobalSession globalSession, GlobalStatus expectedStatus, GlobalStatus targetStatus) throws TransactionException {
+        updateGlobalSessionStatus(globalSession, expectedStatus, targetStatus);
     }
 
     @Override

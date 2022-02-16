@@ -123,7 +123,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             globalSession.setStatus(GlobalStatus.Finished);
-            sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
+            sessionManager.updateGlobalSessionStatus(globalSession,null, GlobalStatus.Finished);
             GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
             Assertions.assertNotNull(expected);
             Assertions.assertEquals(GlobalStatus.Finished, expected.getStatus());
@@ -378,7 +378,7 @@ public class FileSessionManagerTest {
     public void onStatusChangeTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
+            sessionManager.onStatusChange(globalSession,null, GlobalStatus.Finished);
             sessionManager.onEnd(globalSession);
         }
     }

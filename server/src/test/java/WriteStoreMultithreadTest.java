@@ -66,7 +66,7 @@ public class WriteStoreMultithreadTest {
 
 
                     @Override
-                    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status)
+                    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus expectedStatus, GlobalStatus targetStatus)
                             throws TransactionException {
 
                     }
@@ -138,7 +138,7 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
-                    public void onStatusChange(GlobalSession globalSession, GlobalStatus status)
+                    public void onStatusChange(GlobalSession globalSession, GlobalStatus expectedStatus,GlobalStatus targetStatus)
                             throws TransactionException {
 
                     }

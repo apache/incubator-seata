@@ -161,7 +161,7 @@ public class DataBaseSessionManagerTest {
         sessionManager.addGlobalSession(session);
 
         session.setStatus(GlobalStatus.Committing);
-        sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
+        sessionManager.updateGlobalSessionStatus(session,null, GlobalStatus.Committing);
 
         String sql = "select * from global_table where xid= '"+xid+"'";
         String delSql = "delete from global_table where xid= '"+xid+"'";

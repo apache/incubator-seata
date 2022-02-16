@@ -91,7 +91,7 @@ public class RedisSessionManagerTest {
         session.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session);
         session.setStatus(GlobalStatus.Committing);
-        sessionManager.updateGlobalSessionStatus(session,GlobalStatus.Committing);
+        sessionManager.updateGlobalSessionStatus(session,null,GlobalStatus.Committing);
     }
 
     @Test

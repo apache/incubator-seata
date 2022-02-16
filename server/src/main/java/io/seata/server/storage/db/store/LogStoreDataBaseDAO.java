@@ -32,6 +32,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
@@ -237,6 +238,27 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
+    public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO, Integer expectedStatus) {
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusByStatusSQL(globalTable);
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            int index = 1;
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setInt(index++, globalTransactionDO.getStatus());
+            ps.setString(index++, globalTransactionDO.getXid());
+            ps.setInt(index++, expectedStatus.intValue());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+    }
+
+        @Override
     public boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteGlobalTransactionSQL(globalTable);
         Connection conn = null;

@@ -74,6 +74,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private volatile GlobalStatus status;
 
+    private volatile GlobalStatus oldStatus;
+
     private String applicationId;
 
     private String transactionServiceGroup;
@@ -191,11 +193,21 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onStatusChange(this, status);
+            lifecycleListener.onStatusChange(this, null ,status);
         }
     }
 
-    @Override
+    public void changeStatusOptimistic(GlobalStatus expectedStatus,GlobalStatus targetStatus) throws TransactionException {
+        if (GlobalStatus.Rollbacking == status) {
+            LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
+        }
+        this.status = targetStatus;
+        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+            lifecycleListener.onStatusChange(this, expectedStatus ,targetStatus);
+        }
+    }
+
+        @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
         throws TransactionException {
         branchSession.setStatus(status);
@@ -384,6 +396,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void setStatus(GlobalStatus status) {
         this.status = status;
+    }
+
+    /**
+     * Gets old status.
+     *
+     * @return the old status
+     */
+    public GlobalStatus getOldStatus() {
+        return oldStatus;
+    }
+
+    /**
+     * Sets status.
+     *
+     * @param oldStatus the old status
+     */
+    public void setOldStatus(GlobalStatus oldStatus) {
+        this.oldStatus = oldStatus;
     }
 
     /**
@@ -681,7 +711,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         this.setStatus(GlobalStatus.AsyncCommitting);
-        SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+
+        // update thread-safe
+        SessionHolder.getAsyncCommittingSessionManager().updateGlobalSessionStatus(this, GlobalStatus.Begin, GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {

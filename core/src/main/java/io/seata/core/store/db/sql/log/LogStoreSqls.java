@@ -47,6 +47,14 @@ public interface LogStoreSqls {
     String getUpdateGlobalTransactionStatusSQL(String globalTable);
 
     /**
+     * Get update global transaction status sql string.
+     *
+     * @param globalTable the global table
+     * @return the string
+     */
+    String getUpdateGlobalTransactionStatusByStatusSQL(String globalTable);
+
+    /**
      * Get delete global transaction sql string.
      *
      * @param globalTable the global table

@@ -157,7 +157,7 @@ public class DefaultCore implements Core {
                     globalSession.asyncCommit();
                     return false;
                 } else {
-                    globalSession.changeStatus(GlobalStatus.Committing);
+                    globalSession.changeStatusOptimistic(GlobalStatus.Begin,GlobalStatus.Committing);
                     return true;
                 }
             }
