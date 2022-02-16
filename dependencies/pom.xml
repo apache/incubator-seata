@@ -65,8 +65,6 @@
         <commons-compress.version>1.19</commons-compress.version>
         <ant.version>1.10.6</ant.version>
         <lz4.version>1.7.1</lz4.version>
-        <kotlin.version>1.4.0</kotlin.version>
-        <kotlin-coroutines.version>1.4.0</kotlin-coroutines.version>
 
         <protobuf.version>3.7.1</protobuf.version>
         <grpc.version>1.17.1</grpc.version>
@@ -101,6 +99,10 @@
         <!-- for jdbc driver when package -->
         <mysql5.version>${mysql.version}</mysql5.version>
         <mysql8.version>8.0.27</mysql8.version>
+
+        <!-- # for kotlin -->
+        <kotlin.version>1.4.32</kotlin.version>
+        <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 
         <!-- # for test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -485,17 +487,38 @@
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-bom</artifactId>
+                <artifactId>kotlin-stdlib-common</artifactId>
                 <version>${kotlin.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk7</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-test-common</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-test</artifactId>
+                <version>${kotlin.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kotlinx-coroutines-bom</artifactId>
+                <artifactId>kotlinx-coroutines-core</artifactId>
                 <version>${kotlin-coroutines.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
