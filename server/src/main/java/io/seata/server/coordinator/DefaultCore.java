@@ -252,15 +252,20 @@ public class DefaultCore implements Core {
                 LOGGER.info("Committing global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
+            if (!retrying) {
+                globalSession.setStatus(GlobalStatus.Committed);
+            }
         }
-        // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is executed to improve concurrency performance, and the global transaction ends..
+        // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
+        // executed to improve concurrency performance, and the global transaction ends..
         if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event
             eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
-                globalSession.getBeginTime(), System.currentTimeMillis(), globalSession.getStatus()));
+                globalSession.getTransactionName(), globalSession.getApplicationId(),
+                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                globalSession.getStatus()));
 
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
@@ -341,6 +346,9 @@ public class DefaultCore implements Core {
             // Return if the result is not null
             if (result != null) {
                 return result;
+            }
+            if (!retrying) {
+                globalSession.setStatus(GlobalStatus.Rollbacked);
             }
         }
         // In db mode, lock and branch data residual problems may occur.

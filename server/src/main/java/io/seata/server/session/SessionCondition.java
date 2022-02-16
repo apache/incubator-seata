@@ -28,6 +28,7 @@ public class SessionCondition {
     private GlobalStatus status;
     private GlobalStatus[] statuses;
     private long overTimeAliveMills;
+    private boolean lazyLoadBranch;
 
     /**
      * Instantiates a new Session condition.
@@ -51,7 +52,7 @@ public class SessionCondition {
      */
     public SessionCondition(GlobalStatus status) {
         this.status = status;
-        statuses = new GlobalStatus[] {status};
+        this.statuses = new GlobalStatus[] {status};
     }
 
     /**
@@ -131,4 +132,13 @@ public class SessionCondition {
     public void setStatuses(GlobalStatus[] statuses) {
         this.statuses = statuses;
     }
+
+    public boolean isLazyLoadBranch() {
+        return lazyLoadBranch;
+    }
+
+    public void setLazyLoadBranch(boolean lazyLoadBranch) {
+        this.lazyLoadBranch = lazyLoadBranch;
+    }
+
 }
