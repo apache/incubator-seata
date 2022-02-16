@@ -33,20 +33,6 @@
         <module>seata-jackson-parser-oracle</module>
     </modules>
 
-    <properties>
-        <ojdbc.version>19.3.0.0</ojdbc.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.oracle.ojdbc</groupId>
-                <artifactId>ojdbc8</artifactId>
-                <version>${ojdbc.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <repositories>
         <repository>
             <id>ICM</id>
