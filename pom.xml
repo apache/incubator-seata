@@ -67,51 +67,36 @@
         <!--<module>seata-plugin</module>-->
     </modules>
 
-    <properties>
-        <!-- for test -->
-        <junit-jupiter.version>5.4.2</junit-jupiter.version>
-        <mockito.version>2.23.4</mockito.version>
-        <assertj-core.version>3.12.2</assertj-core.version>
-        <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
-
-        <!-- for jdbc driver when package  -->
-        <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
-        <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
-
-        <!-- for kotlin  -->
-        <kotlin.version>1.4.0</kotlin.version>
-    </properties>
-
     <!--test-->
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>${junit-platform-launcher.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>${assertj-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
