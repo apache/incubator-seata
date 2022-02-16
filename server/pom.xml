@@ -27,20 +27,6 @@
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
 
-    <properties>
-        <!-- The versions of the dependencies for seata-server. Do not inherit from 'spring-boot-dependencies' -->
-        <!-- redis -->
-        <jedis.version>3.2.0</jedis.version>
-        <!-- db -->
-        <mysql.version>8.0.27</mysql.version>
-        <ojdbc.version>19.3.0.0</ojdbc.version>
-        <postgresql.version>42.1.4</postgresql.version>
-        <h2.version>1.4.181</h2.version>
-        <!-- db connection pool -->
-        <hikari.version>3.4.3</hikari.version>
-        <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
-    </properties>
-
     <dependencies>
         <!-- springboot web -->
         <dependency>
@@ -89,11 +75,13 @@
             <artifactId>seata-compressor-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-metrics-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-console</artifactId>
@@ -108,27 +96,22 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
-            <version>${commons-dbcp2.version}</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>${hikari.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
         </dependency>
         <!-- Copyright restrictions, do not reference this dependency.
              You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
@@ -153,8 +136,8 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>${jedis.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.fppt</groupId>
             <artifactId>jedis-mock</artifactId>
