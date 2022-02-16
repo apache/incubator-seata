@@ -400,6 +400,58 @@ public class LogStoreDataBaseDAOTest {
     }
 
     @Test
+    public void updateGlobalTransactionDOExpected() throws SQLException {
+        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
+        globalTransactionDO.setXid("abc-123:222");
+        globalTransactionDO.setApplicationData("abc=5454");
+        globalTransactionDO.setTransactionServiceGroup("abc");
+        globalTransactionDO.setTransactionName("test");
+        globalTransactionDO.setTransactionId(12345);
+        globalTransactionDO.setTimeout(20);
+        globalTransactionDO.setBeginTime(System.currentTimeMillis());
+        globalTransactionDO.setApplicationId("test");
+        globalTransactionDO.setStatus(1);
+
+        boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
+        Assertions.assertTrue(ret);
+
+        String sql = "select * from global_table where xid= 'abc-123:222'";
+        String delSql = "delete from global_table where xid= 'abc-123:222'";
+        Connection conn = null;
+        try{
+            conn = dataSource.getConnection();
+            ResultSet rs = conn.createStatement().executeQuery(sql);
+            if(rs.next()){
+                Assertions.assertTrue(true);
+                Assertions.assertEquals(1, rs.getInt("status"));
+            }else{
+                Assertions.assertTrue(false);
+            }
+            rs.close();
+
+            //update
+            globalTransactionDO.setStatus(2);
+            Assertions.assertTrue(logStoreDataBaseDAO.updateGlobalTransactionDO(globalTransactionDO,1));
+
+            rs = conn.createStatement().executeQuery(sql);
+            if(rs.next()){
+                Assertions.assertTrue(true);
+                Assertions.assertEquals(2, rs.getInt("status"));
+            }else{
+                Assertions.assertTrue(false);
+            }
+            rs.close();
+
+            //delete
+            conn.createStatement().execute(delSql);
+
+        }finally {
+            IOUtil.close(conn);
+        }
+
+    }
+
+    @Test
     public void deleteGlobalTransactionDO() throws SQLException {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid("abc-123:555");
