@@ -59,16 +59,12 @@
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
-        <antlr4.version>4.8</antlr4.version>
-        <druid.version>1.2.6</druid.version>
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.72</jcommander.version>
         <xz.version>1.8</xz.version>
         <commons-compress.version>1.19</commons-compress.version>
         <ant.version>1.10.6</ant.version>
         <lz4.version>1.7.1</lz4.version>
-        <kotlin.version>1.4.0</kotlin.version>
-        <kotlin-coroutines.version>1.4.0</kotlin-coroutines.version>
 
         <protobuf.version>3.7.1</protobuf.version>
         <grpc.version>1.17.1</grpc.version>
@@ -84,11 +80,27 @@
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
 
+        <!-- redis -->
+        <jedis.version>3.2.0</jedis.version>
+
+        <!-- # for database -->
+        <!-- db -->
+        <mysql.version>5.1.35</mysql.version>
+        <ojdbc.version>19.3.0.0</ojdbc.version>
+        <postgresql.version>42.1.4</postgresql.version>
+        <h2.version>1.4.181</h2.version>
+        <mariadb.version>2.7.2</mariadb.version>
+        <!-- db connection pool -->
+        <druid.version>1.2.6</druid.version>
+        <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
+        <hikari.version>3.4.3</hikari.version>
+        <!-- sql parser -->
+        <antlr4.version>4.8</antlr4.version>
         <!-- for jdbc driver when package -->
-        <mysql5.version>5.1.35</mysql5.version>
+        <mysql5.version>${mysql.version}</mysql5.version>
         <mysql8.version>8.0.27</mysql8.version>
 
-        <!-- for test -->
+        <!-- # for test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <junit-platform.version>1.8.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
@@ -121,6 +133,36 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
                 <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-dbcp2</artifactId>
+                <version>${commons-dbcp2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mariadb.jdbc</groupId>
+                <artifactId>mariadb-java-client</artifactId>
+                <version>${mariadb.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
@@ -272,6 +314,11 @@
                 <version>${apollo-client.version}</version>
             </dependency>
             <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${jedis.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.fppt</groupId>
                 <artifactId>jedis-mock</artifactId>
                 <version>${mock-jedis.version}</version>
@@ -343,11 +390,6 @@
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>${javax-inject.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql5.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>
