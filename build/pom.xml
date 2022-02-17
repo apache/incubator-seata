@@ -368,6 +368,7 @@
                     --add-opens java.base/java.util=ALL-UNNAMED
                     --add-opens java.base/java.util.regex=ALL-UNNAMED
                     --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+                    --add-opens java.sql.rowset/javax.sql.rowset.serial=ALL-UNNAMED
                     --illegal-access=permit
                     -Dillegal-access=permit
                 </maven.surefire.argLine>
