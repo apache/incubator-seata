@@ -114,6 +114,7 @@
         <checkstyle.skip>true</checkstyle.skip>
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
+        <maven.surefire.argLine></maven.surefire.argLine>
         <gpg.keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</gpg.keyname>
 
         <!-- For docker image-->
@@ -354,6 +355,19 @@
                     <url>https://oss.sonatype.org/content/repositories/snapshots</url>
                 </snapshotRepository>
             </distributionManagement>
+        </profile>
+
+        <profile>
+            <id>test-for-un-java8</id>
+            <properties>
+                <maven.surefire.argLine>
+                    --add-opens java.base/java.lang=ALL-UNNAMED
+                    --add-opens java.base/java.util=ALL-UNNAMED
+                    --add-opens java.base/java.util.regex=ALL-UNNAMED
+                    --illegal-access=permit
+                    -Dillegal-access=permit
+                </maven.surefire.argLine>
+            </properties>
         </profile>
     </profiles>
 </project>

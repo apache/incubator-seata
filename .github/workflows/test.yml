@@ -1,4 +1,4 @@
-name: test
+name: "test"
 
 on:
   push:
@@ -30,14 +30,18 @@ jobs:
             #1.0.2.RELEASE
         ]
     steps:
-      - name: Checkout
+      # Checkout
+      - name: "Checkout"
         uses: actions/checkout@v2.3.4
-      - name: Setup Java JDK
+
+      #
+      - name: "Setup Java JDK"
         uses: actions/setup-java@v2.1.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      - name: Set up ENV
+
+      - name: "Set up ENV"
         # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         run: if [ "${{ matrix.java }}" == "8" ]; then
                 echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
@@ -46,11 +50,17 @@ jobs:
              elif [ "${{ matrix.java }}" == "17" ]; then
                 echo "IMAGE_NAME=openjdk:17.0.1-slim" >> $GITHUB_ENV;
              fi
-      - name: Test with Maven
+
+      - name: "Test with Maven"
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-        run: ./mvnw -T 4C clean install -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-      - name: Codecov
+        run: if [ "${{ matrix.java }}" == "8" ]; then
+            ./mvnw -T 4C clean install                      -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+          else
+            ./mvnw -T 4C clean install -P test-for-un-java8 -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+          fi
+
+      - name: "Codecov"
         uses: codecov/codecov-action@v1.5.0
