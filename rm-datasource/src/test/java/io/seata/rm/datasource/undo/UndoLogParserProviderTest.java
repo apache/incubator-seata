@@ -45,6 +45,10 @@ class UndoLogParserProviderTest {
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof ProtostuffUndoLogParser);
         
+        parser = EnhancedServiceLoader.load(UndoLogParser.class, "fst");
+        Assertions.assertNotNull(parser);
+        Assertions.assertTrue(parser instanceof FstUndoLogParser);
+
         parser = EnhancedServiceLoader.load(UndoLogParser.class, "kryo");
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof KryoUndoLogParser);
@@ -55,13 +59,5 @@ class UndoLogParserProviderTest {
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof EnhancedServiceNotFoundException);
         }
-    }
-
-    @Test
-    //@DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
-    void testLoadFstUndoLogParser(){
-        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fst");
-        Assertions.assertNotNull(parser);
-        Assertions.assertTrue(parser instanceof FstUndoLogParser);
     }
 }

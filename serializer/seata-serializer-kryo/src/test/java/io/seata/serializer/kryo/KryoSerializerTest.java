@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author jsbxyyx
  */
-//@DisabledOnJre(JRE.JAVA_17) // `kryo` does not supported java17
 public class KryoSerializerTest {
 
     private static KryoSerializer kryoCodec;

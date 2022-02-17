@@ -307,7 +307,7 @@ public final class ReflectionUtil {
     /**
      * modify `static` or `static final` field value
      * <p>
-     * In Java 17, this method cannot be used for final fields
+     * In java17, this method cannot be used for final fields.
      *
      * @param staticField the static field
      * @param newValue    the new value
@@ -328,6 +328,7 @@ public final class ReflectionUtil {
 
         // remove the `final` keyword from the field
         if (Modifier.isFinal(staticField.getModifiers())) {
+            // In java17, can't get the field `modifiers` from class `java.lang.reflect.Field`.
             Field modifiers = staticField.getClass().getDeclaredField("modifiers");
             modifiers.setAccessible(true);
             modifiers.setInt(staticField, staticField.getModifiers() & ~Modifier.FINAL);

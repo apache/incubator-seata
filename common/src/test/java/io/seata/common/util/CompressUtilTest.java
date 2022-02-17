@@ -45,14 +45,15 @@ public class CompressUtilTest {
     @Test
     @EnabledOnJre(JRE.JAVA_17)
     public void testCompressForJava17() throws IOException {
-        byte[] compressedBytes = CompressUtil.compress(originBytes);
-        Assertions.assertArrayEquals(compressedBytes2, compressedBytes);
+        Assertions.assertArrayEquals(compressedBytes2,
+                CompressUtil.compress(originBytes));
     }
 
     @Test
     public void testUncompress() throws IOException {
         Assertions.assertArrayEquals(originBytes,
                 CompressUtil.uncompress(compressedBytes1));
+
         Assertions.assertArrayEquals(originBytes,
                 CompressUtil.uncompress(compressedBytes2));
     }

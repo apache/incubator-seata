@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author funkye
  */
-//@DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
 public class FstSerializerTest {
 
     private static FstSerializer fstSerializer;
