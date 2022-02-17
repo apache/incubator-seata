@@ -56,10 +56,10 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-        run: if [ "${{ matrix.java }}" == "8" ]; then
-            ./mvnw -T 4C clean install                       -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+        run: if [ "${{ matrix.java }}" == "17" ]; then
+            ./mvnw -T 4C clean install -e -P args-for-java-17 -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
-            ./mvnw -T 4C clean install -P test-for-java11-17 -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean install -e                     -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
 
       - name: "Codecov"

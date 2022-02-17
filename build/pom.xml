@@ -358,7 +358,7 @@
         </profile>
 
         <profile>
-            <id>test-for-java11-17</id>
+            <id>args-for-java-17</id>
             <properties>
                 <maven.surefire.argLine>
                     --add-opens java.base/java.lang=ALL-UNNAMED
