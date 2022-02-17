@@ -50,7 +50,7 @@ public class StateParserTests {
         String fastjsonOutputJson = fastjsonParser.toJsonString(stateMachine, true);
         System.out.println(fastjsonOutputJson);
 
-        Assertions.assertEquals(stateMachine.getName(), "simpleTestStateMachine");
+        Assertions.assertEquals("simpleTestStateMachine", stateMachine.getName());
         Assertions.assertTrue(stateMachine.getStates().size() > 0);
     }
 
