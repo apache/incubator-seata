@@ -2,10 +2,10 @@ name: build
 
 on:
   push:
-    branches: [ develop, master ]
+    branches: [ develop ]
   #暂时注释掉，使用test.yml
   #pull_request:
-  #  branches: [ develop, master ]
+  #  branches: [ develop ]
 
 jobs:
   build:
