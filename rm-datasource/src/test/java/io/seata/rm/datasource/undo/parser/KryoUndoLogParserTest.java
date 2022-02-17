@@ -18,13 +18,10 @@ package io.seata.rm.datasource.undo.parser;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
 
 /**
  * @author jsbxyyx
  */
-@DisabledOnJre(JRE.JAVA_17) // `kryo` does not supported java17
 public class KryoUndoLogParserTest extends BaseUndoLogParserTest {
 
     KryoUndoLogParser parser = (KryoUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, KryoUndoLogParser.NAME);
