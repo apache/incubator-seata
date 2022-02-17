@@ -15,6 +15,7 @@
  */
 package io.seata.server.store;
 
+import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 
@@ -34,6 +35,11 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
 
     @Override
     public GlobalSession readSession(String xid, boolean withBranchSessions) {
+        return null;
+    }
+
+    @Override
+    public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
         return null;
     }
 

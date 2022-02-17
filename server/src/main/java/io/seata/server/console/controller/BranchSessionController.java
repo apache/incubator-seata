@@ -15,11 +15,10 @@
  */
 package io.seata.server.console.controller;
 
+import javax.annotation.Resource;
 import io.seata.server.console.service.BranchSessionService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * Branch Session Controller
