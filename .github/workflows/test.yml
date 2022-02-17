@@ -1,18 +1,34 @@
-name: build
+name: test
 
 on:
   push:
-    branches: [ develop, master ]
-  #暂时注释掉，使用test.yml
-  #pull_request:
-  #  branches: [ develop, master ]
+    branches: [ master, test ]
+
+  #暂时放着，用于验证当前PR正确性
+  pull_request:
+    branches: [ develop ]
 
 jobs:
-  build:
-    runs-on: ubuntu-18.04
+  test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 8, 11 ]
+        java: [ 8, 11, 17 ]
+        springboot: [
+            2.6.3,
+            2.5.9,
+            2.4.13,
+            2.3.12.RELEASE,
+            2.2.13.RELEASE,
+            #2.1.18.RELEASE,
+            #2.0.9.RELEASE,
+            #1.5.22.RELEASE,
+            #1.4.7.RELEASE,
+            #1.3.8.RELEASE,
+            #1.2.8.RELEASE,
+            #1.1.12.RELEASE,
+            #1.0.2.RELEASE
+        ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -27,16 +43,14 @@ jobs:
                 echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
              elif [ "${{ matrix.java }}" == "11" ]; then
                 echo "IMAGE_NAME=openjdk:11-jre-stretch" >> $GITHUB_ENV;
+             elif [ "${{ matrix.java }}" == "17" ]; then
+                echo "IMAGE_NAME=openjdk:17.0.1-slim" >> $GITHUB_ENV;
              fi
-      - name: Build with Maven
+      - name: Test with Maven
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-        run: if [ "${{github.event_name}}" == "push" ] && [ "${{github.ref}}" == "refs/heads/develop" ]; then
-               ./mvnw -T 4C clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-             else
-               ./mvnw -T 4C clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-             fi
+        run: ./mvnw clean install -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
       - name: Codecov
         uses: codecov/codecov-action@v1.5.0
