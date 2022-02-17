@@ -224,6 +224,9 @@
                             <directory>./</directory>
                             <includes>
                                 <include>*-pom*.xml</include>
+                                <include>**/db_store/**</include>
+                                <include>**/sessionStore/**</include>
+                                <include>**/root.data</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
