@@ -25,8 +25,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
 
 public class ReflectionUtilTest {
 
@@ -100,7 +98,7 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+    //@DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
         Assertions.assertEquals("hello", testValue);
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");

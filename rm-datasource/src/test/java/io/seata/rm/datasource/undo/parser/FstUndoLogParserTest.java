@@ -18,13 +18,11 @@ package io.seata.rm.datasource.undo.parser;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
 
 /**
  * @author funkye
  */
-@DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
+//@DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
 public class FstUndoLogParserTest extends BaseUndoLogParserTest {
 
     FstUndoLogParser parser = (FstUndoLogParser)EnhancedServiceLoader.load(UndoLogParser.class, FstUndoLogParser.NAME);

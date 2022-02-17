@@ -25,8 +25,6 @@ import io.seata.rm.datasource.undo.parser.FstUndoLogParser;
 import io.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import io.seata.rm.datasource.undo.parser.KryoUndoLogParser;
 import io.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
 
 /**
  * @author Geng Zhang
@@ -60,7 +58,7 @@ class UndoLogParserProviderTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
+    //@DisabledOnJre(JRE.JAVA_17) // `fst` does not supported java17
     void testLoadFstUndoLogParser(){
         UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fst");
         Assertions.assertNotNull(parser);
