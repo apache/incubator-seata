@@ -27,10 +27,6 @@
     <artifactId>seata-metrics-exporter-prometheus</artifactId>
     <name>seata-metrics-exporter-prometheus ${project.version}</name>
 
-    <properties>
-        <prometheus.client.version>0.6.0</prometheus.client.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -47,7 +43,6 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_httpserver</artifactId>
-            <version>${prometheus.client.version}</version>
         </dependency>
     </dependencies>
 
