@@ -364,6 +364,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     // Prevent thread safety issues
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
+
+                    // rollback retry timeout event
+                    eventBus.post(new GlobalTransactionEvent(rollbackingSession.getTransactionId(),
+                            GlobalTransactionEvent.ROLE_TC, rollbackingSession.getTransactionName(),
+                            rollbackingSession.getApplicationId(),
+                            rollbackingSession.getTransactionServiceGroup(),
+                            rollbackingSession.getBeginTime(), System.currentTimeMillis(),
+                            GlobalStatus.RollbackRetryTimeout));
+
                     //The function of this 'return' is 'continue'.
                     return;
                 }
@@ -395,6 +404,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     // Prevent thread safety issues
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
+
+                    // commit retry timeout event
+                    eventBus.post(new GlobalTransactionEvent(committingSession.getTransactionId(),
+                            GlobalTransactionEvent.ROLE_TC, committingSession.getTransactionName(),
+                            committingSession.getApplicationId(),
+                            committingSession.getTransactionServiceGroup(),
+                            committingSession.getBeginTime(), System.currentTimeMillis(),
+                            GlobalStatus.CommitRetryTimeout));
+
                     //The function of this 'return' is 'continue'.
                     return;
                 }
