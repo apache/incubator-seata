@@ -569,6 +569,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
+        undoLogDelete.shutdown();
         branchRemoveExecutor.shutdown();
         try {
             handleAllSession.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
@@ -576,6 +577,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 
