@@ -149,48 +149,42 @@ public class SessionHolder {
 
     /**
      * Reload.
+     *
+     * @param storeMode the mode of store
      */
     protected static void reload(StoreMode storeMode) {
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
-        }
 
-        Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
-        if (CollectionUtils.isNotEmpty(allSessions)) {
-            List<GlobalSession> removeGlobalSessions = new ArrayList<>();
-            Iterator<GlobalSession> iterator = allSessions.iterator();
-            while (iterator.hasNext()) {
-                GlobalSession globalSession = iterator.next();
-                GlobalStatus globalStatus = globalSession.getStatus();
-                switch (globalStatus) {
-                    case UnKnown:
-                    case Committed:
-                    case CommitFailed:
-                    case Rollbacked:
-                    case RollbackFailed:
-                    case TimeoutRollbacked:
-                    case TimeoutRollbackFailed:
-                    case Finished:
-                        removeGlobalSessions.add(globalSession);
-                        break;
-                    case AsyncCommitting:
-                        if (storeMode == StoreMode.FILE) {
+
+            Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
+            if (CollectionUtils.isNotEmpty(allSessions)) {
+                for (GlobalSession globalSession : allSessions) {
+                    GlobalStatus globalStatus = globalSession.getStatus();
+                    switch (globalStatus) {
+                        case UnKnown:
+                        case Committed:
+                        case CommitFailed:
+                        case Rollbacked:
+                        case RollbackFailed:
+                        case TimeoutRollbacked:
+                        case TimeoutRollbackFailed:
+                        case Finished:
+                            // To do nothing
+                            break;
+                        case AsyncCommitting:
                             queueToAsyncCommitting(globalSession);
-                        }
-                        break;
-                    default: {
-                        if (storeMode == StoreMode.FILE) {
+                            break;
+                        case Committing:
+                        case CommitRetrying:
+                            queueToRetryCommit(globalSession);
+                            break;
+                        default: {
+                            // Firstly acquire global locks
                             lockBranchSessions(globalSession.getSortedBranches());
-                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())) {
-                                globalSession.getBranchSessions().parallelStream().forEach(branchSession -> {
-                                    branchSession.setLockStatus(LockStatus.Rollbacking);
-                                });
-                            }
+
+                            // Secondly redo the unfinished and unsuccessful status
                             switch (globalStatus) {
-                                case Committing:
-                                case CommitRetrying:
-                                    queueToRetryCommit(globalSession);
-                                    break;
                                 case Rollbacking:
                                 case RollbackRetrying:
                                 case TimeoutRollbacking:
@@ -201,15 +195,13 @@ public class SessionHolder {
                                     globalSession.setActive(true);
                                     break;
                                 default:
+                                    LOGGER.error("Could not handle the global session, xid: {}", globalSession.getXid());
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                             }
+                            break;
                         }
-                        break;
                     }
                 }
-            }
-            for (GlobalSession globalSession : removeGlobalSessions) {
-                removeInErrorState(globalSession);
             }
         }
     }
@@ -388,7 +380,7 @@ public class SessionHolder {
                 try {
                     SessionHolder.releaseDistributedLock(key);
                 } catch (Exception ex) {
-                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                    LOGGER.warn("release distribute lock failure, message = {}", ex.getMessage(), ex);
                 }
             }
         }
