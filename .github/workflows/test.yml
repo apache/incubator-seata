@@ -45,12 +45,12 @@ jobs:
       - name: "Test with Maven"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: if [ "${{ matrix.java }}" == "8" ]; then
-            ./mvnw -T 4C clean install -e                      -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw clean install -e                      -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
-            ./mvnw -T 4C clean install -e -P args-for-un-java8 -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw clean install -e -P args-for-un-java8 -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
 
       # 4. Codecov
       - name: "Codecov"
         uses: codecov/codecov-action@v1.5.0
-        if: matrix.java == '8'
+        if: matrix.java == '8' && matrix.springboot == '2.4.13'
