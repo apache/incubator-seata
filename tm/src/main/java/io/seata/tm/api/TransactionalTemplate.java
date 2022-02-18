@@ -192,6 +192,12 @@ public class TransactionalTemplate {
         try {
             triggerBeforeCommit();
             tx.commit();
+            
+            // Participant has no responsibility of committing and triggerAfterCommit
+            if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Participant) {
+                return;
+            }
+            
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
