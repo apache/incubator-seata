@@ -50,4 +50,4 @@ jobs:
       # 5. Codecov
       - name: "Codecov"
         uses: codecov/codecov-action@v1.5.0
-        if: matrix.java == "8"
+        if: matrix.java == '8'
