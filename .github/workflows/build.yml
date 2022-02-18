@@ -1,4 +1,4 @@
-name: build
+name: "build"
 
 on:
   push:
@@ -9,28 +9,34 @@ on:
 
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         java: [8, 11]
         os: [ ubuntu-18.04 ]
     steps:
-      - name: Checkout
+      # 1. Checkout
+      - name: "Checkout"
         uses: actions/checkout@v2.3.4
-      - name: Setup Java JDK
+
+      # 2. Setup Java
+      - name: "Setup Java JDK"
         uses: actions/setup-java@v2.1.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      - name: Set up ENV
+
+      # 3. Setup ENV
+      - name: "Setup ENV"
         # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
         run: if [ "${{ matrix.java }}" == "8" ]; then
                 echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
              elif [ "${{ matrix.java }}" == "11" ]; then
                 echo "IMAGE_NAME=openjdk:11-jre-stretch" >> $GITHUB_ENV;
              fi
-      - name: Build with Maven
+
+      # 4. Build
+      - name: "Build with Maven"
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
@@ -40,5 +46,8 @@ jobs:
              else
                ./mvnw -T 4C clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              fi
-      - name: Codecov
+
+      # 5. Codecov
+      - name: "Codecov"
         uses: codecov/codecov-action@v1.5.0
+        if: matrix.java == "8"
