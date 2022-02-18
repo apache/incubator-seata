@@ -3,7 +3,7 @@ name: build
 on:
   push:
     branches: [ develop ]
-  #暂时注释掉，使用test.yml
+  ## 暂时注释掉，使用test.yml；等当前PR通过后，放开此注释，并将test.yml应用于master和test分支。
   #pull_request:
   #  branches: [ develop ]
 
