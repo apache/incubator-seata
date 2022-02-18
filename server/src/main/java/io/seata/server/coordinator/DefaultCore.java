@@ -150,18 +150,20 @@ public class DefaultCore implements Core {
         // just lock changeStatus
 
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
+            boolean shouldCommitNow = false;
             if (globalSession.getStatus() == GlobalStatus.Begin) {
                 // Highlight: Firstly, close the session, then no more branch can be registered.
-                globalSession.closeAndClean();
+                globalSession.close();
                 if (globalSession.canBeCommittedAsync()) {
                     globalSession.asyncCommit();
-                    return false;
                 } else {
-                    globalSession.changeStatusOptimistic(GlobalStatus.Begin,GlobalStatus.Committing);
-                    return true;
+                    globalSession.changeStatusOptimistic(GlobalStatus.Begin, GlobalStatus.Committing);
+                    shouldCommitNow = true;
                 }
+                //clean session after changing status successfully.
+                globalSession.clean();
             }
-            return false;
+            return shouldCommitNow;
         });
 
         if (shouldCommit) {
