@@ -28,6 +28,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import org.apache.tools.ant.taskdefs.Sleep;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -96,17 +97,22 @@ public class DefaultCoreTest {
      * @throws TransactionException the transaction exception
      */
     @AfterEach
-    public synchronized void clean() throws TransactionException {
+    public synchronized void clean() throws TransactionException, InterruptedException {
         if (globalSession != null) {
-            try {
-                globalSession.end();
-            } catch (TransactionException e){
-                throw e;
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                globalSession = null;
+            int n = 10;
+            while (n-- > 0) {
+                try {
+                    globalSession.end();
+                    return;
+                } catch (TransactionException e) {
+                    throw e;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Thread.sleep(100);
+                    n--;
+                }
             }
+            globalSession = null;
         }
     }
 
