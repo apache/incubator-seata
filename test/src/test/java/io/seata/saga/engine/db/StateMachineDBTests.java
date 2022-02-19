@@ -575,6 +575,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    @Disabled
     public void testStateMachineTransTimeout() throws Exception {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 
@@ -627,6 +628,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    @Disabled
     public void testStateMachineTransTimeoutAsync() throws Exception {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 
@@ -972,7 +974,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         });
     }
 
-
+    @Test
     @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeout() throws Exception {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
@@ -1056,6 +1058,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         });
     }
 
+    @Test
     @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeoutAsync() throws Exception {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
