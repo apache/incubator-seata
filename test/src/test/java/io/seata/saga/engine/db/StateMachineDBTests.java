@@ -584,21 +584,21 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         //timeout rollback after state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTime);
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 1);
 
         //timeout rollback before state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTimeLong);
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 2);
 
         //timeout rollback after state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTime);
         paramMap.put("fooThrowException", "true");
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 3);
 
         //timeout rollback before state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTimeLong);
         paramMap.put("fooThrowException", "true");
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 4);
 
 
         //last state timeout
@@ -607,21 +607,21 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         //timeout rollback after state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTime);
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 5);
 
         //timeout rollback before state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTimeLong);
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 6);
 
         //timeout rollback after state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTime);
         paramMap.put("barThrowException", "true");
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 7);
 
         //timeout rollback before state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowException", "true");
-        doTestStateMachineTransTimeout(paramMap);
+        doTestStateMachineTransTimeout(paramMap, 8);
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
@@ -636,21 +636,21 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         //timeout rollback after state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTime);
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 1);
 
         //timeout rollback before state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTimeLong);
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 2);
 
         //timeout rollback after state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTime);
         paramMap.put("fooThrowException", "true");
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 3);
 
         //timeout rollback before state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTimeLong);
         paramMap.put("fooThrowException", "true");
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 4);
 
 
         //last state timeout
@@ -659,21 +659,21 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         //timeout rollback after state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTime);
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 5);
 
         //timeout rollback before state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTimeLong);
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 6);
 
         //timeout rollback after state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTime);
         paramMap.put("barThrowException", "true");
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 7);
 
         //timeout rollback before state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowException", "true");
-        doTestStateMachineTransTimeoutAsync(paramMap);
+        doTestStateMachineTransTimeoutAsync(paramMap, 8);
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
@@ -917,10 +917,10 @@ public class StateMachineDBTests extends AbstractServerTest {
         });
     }
 
-    private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {
+    private void doTestStateMachineTransTimeout(Map<String, Object> paramMap, int i) throws Exception {
         String stateMachineName = "simpleCompensationStateMachine";
 
-        SagaCostPrint.executeAndPrint("3-36", () -> {
+        SagaCostPrint.executeAndPrint("3-36-" + i, () -> {
             StateMachineInstance inst;
             try {
                 inst = stateMachineEngine.start(stateMachineName, null, paramMap);
@@ -947,10 +947,10 @@ public class StateMachineDBTests extends AbstractServerTest {
         });
     }
 
-    private void doTestStateMachineTransTimeoutAsync(Map<String, Object> paramMap) throws Exception {
+    private void doTestStateMachineTransTimeoutAsync(Map<String, Object> paramMap, int i) throws Exception {
         String stateMachineName = "simpleCompensationStateMachine";
 
-        SagaCostPrint.executeAndPrint("3-37", () -> {
+        SagaCostPrint.executeAndPrint("3-37-" + i, () -> {
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waittingForFinish(inst);
