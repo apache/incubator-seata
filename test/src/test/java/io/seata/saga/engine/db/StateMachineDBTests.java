@@ -576,7 +576,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @Test
     public void testStateMachineTransTimeout() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -628,7 +628,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @Test
     public void testStateMachineTransTimeoutAsync() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -975,7 +975,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeout() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -1058,7 +1058,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeoutAsync() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
