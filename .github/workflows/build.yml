@@ -3,9 +3,8 @@ name: "build"
 on:
   push:
     branches: [ develop ]
-  ## 暂时注释掉，使用test.yml；等当前PR通过后，放开此注释，并将test.yml应用于master和test分支。
-  #pull_request:
-  #  branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   build:
@@ -50,4 +49,3 @@ jobs:
       # 5. Codecov
       - name: "Codecov"
         uses: codecov/codecov-action@v1.5.0
-        if: matrix.java == '8'
