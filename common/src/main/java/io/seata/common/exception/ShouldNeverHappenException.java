@@ -24,13 +24,6 @@ public class ShouldNeverHappenException extends RuntimeException {
 
     /**
      * Instantiates a new Should never happen exception.
-     */
-    public ShouldNeverHappenException() {
-        super();
-    }
-
-    /**
-     * Instantiates a new Should never happen exception.
      *
      * @param message the message
      */

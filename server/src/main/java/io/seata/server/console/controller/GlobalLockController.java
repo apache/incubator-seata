@@ -15,16 +15,16 @@
  */
 package io.seata.server.console.controller;
 
-import io.seata.common.exception.NotSupportYetException;
+import javax.annotation.Resource;
+
 import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 
 /**
@@ -45,7 +45,7 @@ public class GlobalLockController {
      */
     @GetMapping("query")
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
-        throw new NotSupportYetException();
+        return globalLockService.query(param);
     }
 
 }

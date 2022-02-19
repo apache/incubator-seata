@@ -18,8 +18,6 @@ package io.seata.console.utils;
 import java.io.Serializable;
 
 import io.seata.console.constant.Code;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * the struct of response
@@ -27,8 +25,6 @@ import lombok.experimental.Accessors;
  * @param <T> the type parameter
  * @author jameslcj
  */
-@Data
-@Accessors(chain = true)
 public class Result<T> implements Serializable {
     private static final long serialVersionUID = 7154887528070131284L;
 
@@ -147,4 +143,45 @@ public class Result<T> implements Serializable {
         Result result = of(msg, code, data, success);
         return result;
     }
+
+
+    //region Getter && Setter
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Result<T> setMessage(String message) {
+        this.message = message;
+        return this;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public Result<T> setCode(Integer code) {
+        this.code = code;
+        return this;
+    }
+
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public Result<T> setSuccess(Boolean success) {
+        this.success = success;
+        return this;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public Result<T> setData(T data) {
+        this.data = data;
+        return this;
+    }
+
+    //endregion
 }

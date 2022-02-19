@@ -15,14 +15,15 @@
  */
 package io.seata.core.console.result;
 
-import io.seata.common.exception.FrameworkErrorCode;
-
 import java.io.Serializable;
 import java.util.List;
+
+import io.seata.common.exception.FrameworkErrorCode;
 
 /**
  * The page result
  * @author: zhongxiang.wang
+ * @author miaoxueyu
  */
 public class PageResult<T> extends Result<T>  implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
@@ -62,6 +63,25 @@ public class PageResult<T> extends Result<T>  implements Serializable {
         this.pageNum = pageNum;
         this.pageSize = pageSize;
         this.data = data;
+    }
+
+    public static <T> PageResult<T> build(List<T> list, Integer pageNum, Integer pageSize) {
+        // calculate pages
+        int pages = list.size() / pageSize;
+        if (list.size() % pageSize != 0) {
+            pages++;
+        }
+        final int offset = pageSize * (pageNum - 1);
+        return PageResult.success(
+                list.subList(
+                        Math.min(offset, list.size()),
+                        Math.min(offset + pageSize, list.size())
+                ),
+                list.size(),
+                pages,
+                pageNum,
+                pageSize
+        );
     }
 
     public static <T> PageResult<T> failure(String code, String msg) {

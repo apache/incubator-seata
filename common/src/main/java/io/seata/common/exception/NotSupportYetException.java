@@ -26,7 +26,7 @@ public class NotSupportYetException extends RuntimeException {
      * Instantiates a new Not support yet exception.
      */
     public NotSupportYetException() {
-        super();
+        this("currently not supported, may be supported in future");
     }
 
     /**

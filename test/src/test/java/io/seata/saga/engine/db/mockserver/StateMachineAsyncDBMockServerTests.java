@@ -15,10 +15,9 @@
  */
 package io.seata.saga.engine.db.mockserver;
 
-import io.seata.saga.engine.AsyncCallback;
+import io.seata.common.LockAndCallback;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.mock.DemoService.People;
-import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import org.junit.jupiter.api.Assertions;
@@ -56,15 +55,16 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleCachesStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-1 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -78,16 +78,17 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleRetryStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-2 :" + cost);
 
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
     }
 
     @Test
@@ -101,15 +102,16 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleStatusMatchingStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-3 :" + cost);
 
         Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -123,15 +125,16 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-4 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
     }
 
     @Test
@@ -145,14 +148,15 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-5 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -166,14 +170,15 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-6 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
     }
 
     @Test
@@ -189,19 +194,20 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithComplexParamsJackson";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
 
         People peopleResult = (People) inst.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
-        Assertions.assertTrue(people.getName().equals(people.getName()));
+        Assertions.assertEquals(people.getName(), peopleResult.getName());
 
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-7 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
     }
 
     @Test
@@ -214,14 +220,15 @@ public class StateMachineAsyncDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithAsyncState";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        LockAndCallback lockAndCallback = new LockAndCallback();
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
 
-        waittingForFinish(inst);
+        lockAndCallback.waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost4-8 :" + cost);
 
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
         try {
             Thread.sleep(500);
@@ -229,33 +236,4 @@ public class StateMachineAsyncDBMockServerTests {
             e.printStackTrace();
         }
     }
-
-    private void waittingForFinish(StateMachineInstance inst) {
-        synchronized (lock) {
-            if (ExecutionStatus.RU.equals(inst.getStatus())) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private volatile Object        lock     = new Object();
-    private          AsyncCallback callback = new AsyncCallback() {
-        @Override
-        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-        }
-
-        @Override
-        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-        }
-    };
 }
