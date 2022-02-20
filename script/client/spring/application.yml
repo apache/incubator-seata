@@ -19,6 +19,7 @@ seata:
       saga-retry-persist-mode-update: false
       saga-compensate-persist-mode-update: false
       tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
+      sql-parser-type: druid
       lock:
         retry-interval: 10
         retry-times: 30
@@ -70,9 +71,8 @@ seata:
     compressor: none
     enable-tm-client-batch-send-request: false
     enable-rm-client-batch-send-request: true
-    rpc-rm-request-timeout: 2000
-    rpc-tm-request-timeout: 10000
-    rpc-tc-request-timeout: 5000
+    rpc-rm-request-timeout: 30000
+    rpc-tm-request-timeout: 30000
   config:
     type: file
     consul:
