@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [8, 11]
+        java: [ 8, 11 ]
         os: [ ubuntu-18.04 ]
     steps:
       # 1. Checkout
@@ -31,7 +31,7 @@ jobs:
         run: if [ "${{ matrix.java }}" == "8" ]; then
                 echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
              elif [ "${{ matrix.java }}" == "11" ]; then
-                echo "IMAGE_NAME=openjdk:11-jre-stretch" >> $GITHUB_ENV;
+                echo "IMAGE_NAME=openjdk:11-jre-stretch"   >> $GITHUB_ENV;
              fi
 
       # 4. Build
