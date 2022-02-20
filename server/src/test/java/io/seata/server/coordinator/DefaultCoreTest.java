@@ -189,14 +189,14 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitUnretryableTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.TCC, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.TCC,
                 new MockCore(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitFailed);
     }
 
     /**
@@ -229,7 +229,7 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void rollBackTest(String xid) throws Exception {
         GlobalStatus globalStatus = core.rollback(xid);
-        Assertions.assertEquals(globalStatus, GlobalStatus.Rollbacking);
+        Assertions.assertEquals(globalStatus, GlobalStatus.Rollbacked);
     }
 
     /**
@@ -249,7 +249,7 @@ public class DefaultCoreTest {
         core.mockCore(BranchType.AT,
                 new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
     }
 
     /**
