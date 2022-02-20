@@ -15,7 +15,16 @@
  */
 package io.seata.server.storage;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.console.vo.BranchSessionVO;
+import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -32,20 +41,24 @@ import io.seata.server.store.SessionStorable;
  */
 public class SessionConverter {
 
-    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO, boolean lazyLoadBranch) {
         if (globalTransactionDO == null) {
             return null;
         }
         GlobalSession session = new GlobalSession(globalTransactionDO.getApplicationId(),
                 globalTransactionDO.getTransactionServiceGroup(),
                 globalTransactionDO.getTransactionName(),
-                globalTransactionDO.getTimeout());
+                globalTransactionDO.getTimeout(), lazyLoadBranch);
         session.setXid(globalTransactionDO.getXid());
         session.setTransactionId(globalTransactionDO.getTransactionId());
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
         return session;
+    }
+
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+        return convertGlobalSession(globalTransactionDO, false);
     }
 
     public static BranchSession convertBranchSession(BranchTransactionDO branchTransactionDO) {
@@ -102,6 +115,67 @@ public class SessionConverter {
         branchTransactionDO.setResourceId(branchSession.getResourceId());
         branchTransactionDO.setStatus(branchSession.getStatus().getCode());
         return branchTransactionDO;
+    }
+
+    /**
+     * convert GlobalSession to GlobalSessionVO
+     *
+     * @param filteredSessions the GlobalSession list
+     * @return the GlobalSessionVO list
+     */
+    public static List<GlobalSessionVO> convertGlobalSession(List<GlobalSession> filteredSessions) {
+
+        if (CollectionUtils.isEmpty(filteredSessions)) {
+            return Collections.emptyList();
+        }
+
+        final ArrayList<GlobalSessionVO> result = new ArrayList<>(filteredSessions.size());
+
+        for (GlobalSession session : filteredSessions) {
+            result.add(new GlobalSessionVO(
+                    session.getXid(),
+                    session.getTransactionId(),
+                    session.getStatus().getCode(),
+                    session.getApplicationId(),
+                    session.getTransactionServiceGroup(),
+                    session.getTransactionName(),
+                    (long) session.getTimeout(),
+                    session.getBeginTime(),
+                    session.getApplicationData(),
+                    convertBranchSession(session.getBranchSessions())
+            ));
+        }
+        return result;
+    }
+
+    /**
+     * convert BranchSession to BranchSessionVO
+     *
+     * @param branchSessions the BranchSession list
+     * @return the BranchSessionVO list
+     */
+    public static Set<BranchSessionVO> convertBranchSession(List<BranchSession> branchSessions) {
+
+        if (CollectionUtils.isEmpty(branchSessions)) {
+            return Collections.emptySet();
+        }
+
+        final Set<BranchSessionVO> result = new HashSet<>(branchSessions.size());
+
+        for (BranchSession session : branchSessions) {
+            result.add(new BranchSessionVO(
+                    session.getXid(),
+                    session.getTransactionId(),
+                    session.getBranchId(),
+                    session.getResourceGroupId(),
+                    session.getResourceId(),
+                    session.getBranchType().name(),
+                    session.getStatus().getCode(),
+                    session.getClientId(),
+                    session.getApplicationData()
+            ));
+        }
+        return result;
     }
 
 }

@@ -75,7 +75,7 @@ public class DefaultCoordinatorTest {
 
     private static final String applicationId = "demo-child-app";
 
-    private static final String txServiceGroup = "my_test_tx_group";
+    private static final String txServiceGroup = "default_tx_group";
 
     private static final String txName = "tx-1";
 
@@ -156,7 +156,7 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(branchId);
 
         Thread.sleep(100);
-        defaultCoordinator.timeoutCheck();
+        defaultCoordinator.handleAllSession();
         defaultCoordinator.handleRetryRollbacking();
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);

@@ -1,7 +1,7 @@
 seata:
   enabled: true
   application-id: applicationName
-  tx-service-group: my_test_tx_group
+  tx-service-group: default_tx_group
   enable-auto-data-source-proxy: true
   data-source-proxy-mode: AT
   use-jdk-proxy: false
@@ -19,6 +19,7 @@ seata:
       saga-retry-persist-mode-update: false
       saga-compensate-persist-mode-update: false
       tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
+      sql-parser-type: druid
       lock:
         retry-interval: 10
         retry-times: 30
@@ -45,7 +46,7 @@ seata:
       virtual-nodes: 10
   service:
     vgroup-mapping:
-      my_test_tx_group: default
+      default_tx_group: default
     grouplist:
       default: 127.0.0.1:8091
     enable-degrade: false
@@ -68,7 +69,10 @@ seata:
     heartbeat: true
     serialization: seata
     compressor: none
-    enable-client-batch-send-request: true
+    enable-tm-client-batch-send-request: false
+    enable-rm-client-batch-send-request: true
+    rpc-rm-request-timeout: 30000
+    rpc-tm-request-timeout: 30000
   config:
     type: file
     consul:
@@ -86,6 +90,9 @@ seata:
       group: SEATA_GROUP
       username: ""
       password: ""
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
       data-id: seata.properties
     zk:
       server-addr: 127.0.0.1:2181
@@ -115,6 +122,9 @@ seata:
       namespace: ""
       username: ""
       password: ""
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
     redis:
       server-addr: localhost:6379
       db: 0

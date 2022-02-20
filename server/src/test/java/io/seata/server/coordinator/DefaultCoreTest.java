@@ -52,7 +52,7 @@ public class DefaultCoreTest {
 
     private static final String applicationId = "demo-child-app";
 
-    private static final String txServiceGroup = "my_test_tx_group";
+    private static final String txServiceGroup = "default_tx_group";
 
     private static final String txName = "tx-1";
 
@@ -189,14 +189,14 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitUnretryableTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.TCC, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.TCC,
                 new MockCore(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitFailed);
     }
 
     /**

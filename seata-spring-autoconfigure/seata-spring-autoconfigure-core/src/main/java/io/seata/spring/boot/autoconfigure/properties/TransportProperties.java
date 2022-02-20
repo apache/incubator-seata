@@ -19,6 +19,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
@@ -53,6 +59,37 @@ public class TransportProperties {
      * enable client batch send request
      */
     private boolean enableClientBatchSendRequest = DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable TM client batch send request
+     */
+    private boolean enableTmClientBatchSendRequest = DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable RM client batch send request
+     */
+    private boolean enableRmClientBatchSendRequest = DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable TC server batch send response
+     */
+    private boolean enableTcServerBatchSendResponse = DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
+
+    /**
+     * rpcRmRequestTimeout
+     */
+    private long rpcRmRequestTimeout = DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+
+    /**
+     * rpcRmRequestTimeout
+     */
+    private long rpcTmRequestTimeout = DEFAULT_RPC_TM_REQUEST_TIMEOUT;
+
+    /**
+     * rpcTcRequestTimeout
+     */
+    private long rpcTcRequestTimeout = DEFAULT_RPC_TC_REQUEST_TIMEOUT;
+
 
     public String getType() {
         return type;
@@ -106,5 +143,55 @@ public class TransportProperties {
     public TransportProperties setEnableClientBatchSendRequest(boolean enableClientBatchSendRequest) {
         this.enableClientBatchSendRequest = enableClientBatchSendRequest;
         return this;
+    }
+
+    public boolean isEnableTmClientBatchSendRequest() {
+        return enableTmClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableTmClientBatchSendRequest(boolean enableTmClientBatchSendRequest) {
+        this.enableTmClientBatchSendRequest = enableTmClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableRmClientBatchSendRequest() {
+        return enableRmClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableRmClientBatchSendRequest(boolean enableRmClientBatchSendRequest) {
+        this.enableRmClientBatchSendRequest = enableRmClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableTcServerBatchSendResponse() {
+        return enableTcServerBatchSendResponse;
+    }
+
+    public void setEnableTcServerBatchSendResponse(boolean enableTcServerBatchSendResponse) {
+        this.enableTcServerBatchSendResponse = enableTcServerBatchSendResponse;
+    }
+
+    public long getRpcRmRequestTimeout() {
+        return rpcRmRequestTimeout;
+    }
+
+    public void setRpcRmRequestTimeout(long rpcRmRequestTimeout) {
+        this.rpcRmRequestTimeout = rpcRmRequestTimeout;
+    }
+
+    public long getRpcTmRequestTimeout() {
+        return rpcTmRequestTimeout;
+    }
+
+    public void setRpcTmRequestTimeout(long rpcTmRequestTimeout) {
+        this.rpcTmRequestTimeout = rpcTmRequestTimeout;
+    }
+
+    public long getRpcTcRequestTimeout() {
+        return rpcTcRequestTimeout;
+    }
+
+    public void setRpcTcRequestTimeout(long rpcTcRequestTimeout) {
+        this.rpcTcRequestTimeout = rpcTcRequestTimeout;
     }
 }

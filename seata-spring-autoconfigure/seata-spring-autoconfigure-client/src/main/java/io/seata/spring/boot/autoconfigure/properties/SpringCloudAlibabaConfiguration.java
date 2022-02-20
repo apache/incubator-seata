@@ -16,13 +16,13 @@
 package io.seata.spring.boot.autoconfigure.properties;
 
 import io.seata.spring.boot.autoconfigure.StarterConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Spring cloud alibaba configuration.
@@ -33,9 +33,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = StarterConstants.SEATA_SPRING_CLOUD_ALIBABA_PREFIX)
 public class SpringCloudAlibabaConfiguration implements ApplicationContextAware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudAlibabaConfiguration.class);
     private static final String SPRING_APPLICATION_NAME_KEY = "spring.application.name";
-    private static final String DEFAULT_SPRING_CLOUD_SERVICE_GROUP_POSTFIX = "-seata-service-group";
     private String applicationId;
     private String txServiceGroup;
     private ApplicationContext applicationContext;
@@ -59,11 +57,7 @@ public class SpringCloudAlibabaConfiguration implements ApplicationContextAware 
      */
     public String getTxServiceGroup() {
         if (txServiceGroup == null) {
-            String applicationId = getApplicationId();
-            if (applicationId == null) {
-                LOGGER.warn("{} is null, please set its value", SPRING_APPLICATION_NAME_KEY);
-            }
-            txServiceGroup = applicationId + DEFAULT_SPRING_CLOUD_SERVICE_GROUP_POSTFIX;
+            txServiceGroup = DEFAULT_TX_GROUP;
         }
         return txServiceGroup;
     }
