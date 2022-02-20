@@ -190,14 +190,13 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
-            triggerBeforeCommit();
-            tx.commit();
-            
-            // Participant has no responsibility of committing and triggerAfterCommit
+             // Participant has no responsibility of committing and triggerAfterCommit
             if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Participant) {
                 return;
             }
             
+            triggerBeforeCommit();
+            tx.commit();
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
