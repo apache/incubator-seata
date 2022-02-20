@@ -103,8 +103,11 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             beforeImage = TableRecords.empty(getTableMeta());
         }
         Object result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        TableRecords afterImage = afterImage(beforeImage);
-        prepareUndoLogAll(beforeImage, afterImage);
+        int updateCount = statementProxy.getUpdateCount();
+        if (updateCount > 0) {
+            TableRecords afterImage = afterImage(beforeImage);
+            prepareUndoLog(beforeImage, afterImage);
+        }
         return result;
     }
 
