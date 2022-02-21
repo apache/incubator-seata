@@ -390,12 +390,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
-                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                        GlobalTransactionEvent.ROLE_TC,
-                        globalSession.getTransactionName(),
-                        globalSession.getApplicationId(),
-                        globalSession.getTransactionServiceGroup(),
-                        globalSession.getBeginTime(), null, globalSession.getStatus()));
+                SessionHelper.postSessionEndEventTC(globalSession, GlobalStatus.TimeoutRollbacking);
 
                 return true;
             });
@@ -441,12 +436,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
                     // rollback retry timeout event
-                    eventBus.post(new GlobalTransactionEvent(rollbackingSession.getTransactionId(),
-                            GlobalTransactionEvent.ROLE_TC, rollbackingSession.getTransactionName(),
-                            rollbackingSession.getApplicationId(),
-                            rollbackingSession.getTransactionServiceGroup(),
-                            rollbackingSession.getBeginTime(), System.currentTimeMillis(),
-                            GlobalStatus.RollbackRetryTimeout));
+                    SessionHelper.postSessionEndEventTC(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
 
                     //The function of this 'return' is 'continue'.
                     return;
@@ -482,12 +472,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
-                    eventBus.post(new GlobalTransactionEvent(committingSession.getTransactionId(),
-                            GlobalTransactionEvent.ROLE_TC, committingSession.getTransactionName(),
-                            committingSession.getApplicationId(),
-                            committingSession.getTransactionServiceGroup(),
-                            committingSession.getBeginTime(), System.currentTimeMillis(),
-                            GlobalStatus.CommitRetryTimeout));
+                    SessionHelper.postSessionEndEventTC(committingSession, GlobalStatus.CommitRetryTimeout);
+
 
                     //The function of this 'return' is 'continue'.
                     return;

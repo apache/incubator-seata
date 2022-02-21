@@ -134,8 +134,7 @@ public class DefaultCore implements Core {
         session.begin();
 
         // transaction start event
-        eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            session.getTransactionName(), applicationId, transactionServiceGroup, session.getBeginTime(), null, session.getStatus()));
+        SessionHelper.postSessionBeginEventTC(session);
 
         return session.getXid();
     }
@@ -182,9 +181,7 @@ public class DefaultCore implements Core {
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start committing event
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
-            globalSession.getBeginTime(), null, globalSession.getStatus()));
+        SessionHelper.postSessionBeginEventTC(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
@@ -261,12 +258,6 @@ public class DefaultCore implements Core {
         if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
 
-            // committed event
-            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getApplicationId(),
-                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                globalSession.getStatus()));
-
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
         return success;
@@ -300,11 +291,7 @@ public class DefaultCore implements Core {
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start rollback event
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(),
-                globalSession.getApplicationId(),
-                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(),
-                null, globalSession.getStatus()));
+        SessionHelper.postSessionBeginEventTC(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
@@ -355,14 +342,6 @@ public class DefaultCore implements Core {
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
         if (success && retrying) {
             SessionHelper.endRollbacked(globalSession);
-
-            // rollbacked event
-            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                    GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(),
-                    globalSession.getApplicationId(),
-                    globalSession.getTransactionServiceGroup(),
-                    globalSession.getBeginTime(), System.currentTimeMillis(),
-                    globalSession.getStatus()));
 
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
         }
