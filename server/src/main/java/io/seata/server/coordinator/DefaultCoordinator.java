@@ -430,9 +430,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
-                    // Prevent thread safety issues
-                    SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
+                    // need to clean manually
 
                     // rollback retry timeout event
                     SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
@@ -466,13 +464,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
-                    // Prevent thread safety issues
-                    SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
-                    LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
+                    // need to clean manually
 
                     // commit retry timeout event
                     SessionHelper.postTcSessionEndEvent(committingSession, GlobalStatus.CommitRetryTimeout);
-
 
                     //The function of this 'return' is 'continue'.
                     return;
