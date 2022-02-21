@@ -119,7 +119,7 @@ public class SessionHelper {
         globalSession.changeStatus(GlobalStatus.Committed);
         globalSession.end();
 
-        postSessionEndEventTC(globalSession);
+        postTcSessccionEndEvent(globalSession);
     }
 
     /**
@@ -132,7 +132,7 @@ public class SessionHelper {
         globalSession.changeStatus(GlobalStatus.CommitFailed);
         globalSession.end();
 
-        postSessionEndEventTC(globalSession);
+        postTcSessccionEndEvent(globalSession);
     }
 
     /**
@@ -150,7 +150,7 @@ public class SessionHelper {
         }
         globalSession.end();
 
-        postSessionEndEventTC(globalSession);
+        postTcSessccionEndEvent(globalSession);
     }
 
     /**
@@ -168,7 +168,7 @@ public class SessionHelper {
         }
         globalSession.end();
 
-        postSessionEndEventTC(globalSession);
+        postTcSessccionEndEvent(globalSession);
     }
 
     /**
@@ -176,7 +176,7 @@ public class SessionHelper {
      *
      * @param globalSession the global session
      */
-    public static void postSessionEndEventTC(GlobalSession globalSession) {
+    public static void postTcSessccionEndEvent(GlobalSession globalSession) {
         EventBus eventBus = EventBusManager.get();
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
                 globalSession.getTransactionName(), globalSession.getApplicationId(),
@@ -190,7 +190,7 @@ public class SessionHelper {
      * @param globalSession the global session
      * @param status the global status
      */
-    public static void postSessionEndEventTC(GlobalSession globalSession,GlobalStatus status) {
+    public static void postTcSessionEndEvent(GlobalSession globalSession, GlobalStatus status) {
         EventBus eventBus = EventBusManager.get();
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
                 globalSession.getTransactionName(), globalSession.getApplicationId(),
@@ -203,7 +203,7 @@ public class SessionHelper {
      *
      * @param globalSession the global session
      */
-    public static void postSessionBeginEventTC(GlobalSession globalSession) {
+    public static void postTcSessionBeginEvent(GlobalSession globalSession) {
         EventBus eventBus = EventBusManager.get();
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
                 globalSession.getTransactionName(), globalSession.getApplicationId(),
@@ -216,7 +216,7 @@ public class SessionHelper {
      *
      * @param globalSession the global session
      */
-    public static void postSessionBeginEventTC(GlobalSession globalSession,GlobalStatus status) {
+    public static void postTcSessionBeginEvent(GlobalSession globalSession, GlobalStatus status) {
         EventBus eventBus = EventBusManager.get();
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
                 globalSession.getTransactionName(), globalSession.getApplicationId(),

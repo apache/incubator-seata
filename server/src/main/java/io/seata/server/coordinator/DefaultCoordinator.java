@@ -38,7 +38,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.event.EventBus;
-import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
@@ -390,7 +389,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
-                SessionHelper.postSessionBeginEventTC(globalSession, GlobalStatus.TimeoutRollbacking);
+                SessionHelper.postTcSessionBeginEvent(globalSession, GlobalStatus.TimeoutRollbacking);
 
                 return true;
             });
@@ -436,7 +435,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
                     // rollback retry timeout event
-                    SessionHelper.postSessionEndEventTC(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
+                    SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
 
                     //The function of this 'return' is 'continue'.
                     return;
@@ -472,7 +471,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
-                    SessionHelper.postSessionEndEventTC(committingSession, GlobalStatus.CommitRetryTimeout);
+                    SessionHelper.postTcSessionEndEvent(committingSession, GlobalStatus.CommitRetryTimeout);
 
 
                     //The function of this 'return' is 'continue'.

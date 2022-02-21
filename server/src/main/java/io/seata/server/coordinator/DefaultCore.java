@@ -24,7 +24,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.event.EventBus;
-import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
@@ -134,7 +133,7 @@ public class DefaultCore implements Core {
         session.begin();
 
         // transaction start event
-        SessionHelper.postSessionBeginEventTC(session);
+        SessionHelper.postTcSessionBeginEvent(session);
 
         return session.getXid();
     }
@@ -181,7 +180,7 @@ public class DefaultCore implements Core {
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start committing event
-        SessionHelper.postSessionBeginEventTC(globalSession);
+        SessionHelper.postTcSessionBeginEvent(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
@@ -291,7 +290,7 @@ public class DefaultCore implements Core {
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start rollback event
-        SessionHelper.postSessionBeginEventTC(globalSession);
+        SessionHelper.postTcSessionBeginEvent(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
