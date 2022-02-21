@@ -430,7 +430,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
-                    // need to clean manually
+                    // user can remove session manually
 
                     // rollback retry timeout event
                     SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
@@ -464,7 +464,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
-                    // need to clean manually
+                    // user can remove session manually
 
                     // commit retry timeout event
                     SessionHelper.postTcSessionEndEvent(committingSession, GlobalStatus.CommitRetryTimeout);
