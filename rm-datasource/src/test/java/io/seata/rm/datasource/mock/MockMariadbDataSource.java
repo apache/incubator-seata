@@ -13,27 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.rm.datasource.mock;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.compressor.Compressor;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * the Zstd Compressor
- *
- * @author chd
+ * @author funkye
  */
-@LoadLevel(name = "ZSTD")
-public class ZstdCompressor implements Compressor {
-
+public class MockMariadbDataSource extends MockDataSource {
     @Override
-    public byte[] compress(byte[] bytes) {
-        return ZstdUtil.compress(bytes);
+    public Connection getConnection() throws SQLException {
+        return new MockConnection(new MockDriver(), "jdbc:mariadb://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
     }
-
-    @Override
-    public byte[] decompress(byte[] bytes) {
-        return ZstdUtil.decompress(bytes);
-    }
-
 }

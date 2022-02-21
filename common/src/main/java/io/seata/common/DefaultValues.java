@@ -15,6 +15,8 @@
  */
 package io.seata.common;
 
+import java.time.Duration;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -45,7 +47,11 @@ public interface DefaultValues {
 
     String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
     String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
+    @Deprecated
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
+    boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
+    boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
+    boolean DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = false;
 
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
@@ -158,4 +164,19 @@ public interface DefaultValues {
      * the constant TCC_FENCE_BEAN_NAME
      */
     String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+
+    /**
+     * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
 }

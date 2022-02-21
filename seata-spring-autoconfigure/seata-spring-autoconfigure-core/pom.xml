@@ -11,6 +11,7 @@
 
     <artifactId>seata-spring-autoconfigure-core</artifactId>
     <name>seata-spring-autoconfigure-core ${project.version}</name>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

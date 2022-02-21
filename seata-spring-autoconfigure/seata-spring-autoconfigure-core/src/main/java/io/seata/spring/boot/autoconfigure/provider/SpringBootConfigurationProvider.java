@@ -55,12 +55,13 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result = null;
                     String rawDataId = (String) args[0];
-                    if (args.length == 1) {
-                        result = get(convertDataId(rawDataId));
-                    } else if (args.length == 2) {
-                        result = get(convertDataId(rawDataId), args[1]);
-                    } else if (args.length == 3) {
-                        result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
+                    result = originalConfiguration.getConfigFromSys(rawDataId);
+                    if (null == result) {
+                        if (args.length == 1) {
+                            result = get(convertDataId(rawDataId));
+                        } else {
+                            result = get(convertDataId(rawDataId), args[1]);
+                        }
                     }
                     if (result != null) {
                         //If the return type is String,need to convert the object to string
@@ -74,11 +75,6 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 return method.invoke(originalConfiguration, args);
             }
         });
-    }
-
-    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException, InstantiationException {
-        return get(dataId, defaultValue);
-
     }
 
     private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
