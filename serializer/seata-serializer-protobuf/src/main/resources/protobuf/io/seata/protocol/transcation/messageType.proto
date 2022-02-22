@@ -119,9 +119,4 @@ enum MessageTypeProto {
      */
     TYPE_UNDO_LOG_DELETE = 111;
 
-    /**
-    * the constant TYPE_BATCH_RESULT_MSG
-    */
-    TYPE_BATCH_RESULT_MSG = 121;
-
 }

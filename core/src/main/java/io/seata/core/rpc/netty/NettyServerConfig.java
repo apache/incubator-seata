@@ -18,7 +18,6 @@ package io.seata.core.rpc.netty;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.seata.common.DefaultValues;
 import io.seata.core.constants.ConfigurationKeys;
 
 import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
@@ -66,9 +65,6 @@ public class NettyServerConfig extends NettyBaseConfig {
             ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, "50"));
     private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, "500"));
-    private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
-        DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
-
     /**
      * The Server channel clazz.
      */
@@ -326,14 +322,5 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public static int getMaxBranchResultPoolSize() {
         return maxBranchResultPoolSize;
-    }
-
-    /**
-     * Get the tc server batch send response enable
-     *
-     * @return true or false
-     */
-    public static boolean isEnableTcServerBatchSendResponse() {
-        return ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
     }
 }

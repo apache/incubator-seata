@@ -26,12 +26,6 @@
       "defaultValue": true
     },
     {
-      "name": "seata.transport.enable-tc-server-batch-send-response",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
-      "defaultValue": false
-    },
-    {
       "name": "seata.transport.shutdown.wait",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.ShutdownProperties",
@@ -104,7 +98,7 @@
     {
       "name": "seata.transport.rpcRmRequestTimeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
       "deprecation": {
         "level": "error",
         "reason": "Please configure to 'seata.transport.rpcRmRequestTimeout'."
@@ -113,7 +107,7 @@
     {
       "name": "seata.transport.rpcTmRequestTimeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
       "deprecation": {
         "level": "error",
         "reason": "Please configure to 'seata.transport.rpcTmRequestTimeout'."
@@ -122,7 +116,7 @@
     {
       "name": "seata.transport.rpcTcRequestTimeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
       "deprecation": {
         "level": "error",
         "reason": "Please configure to 'seata.transport.rpcTcRequestTimeout'."

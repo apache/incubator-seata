@@ -42,7 +42,6 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
     public <T> void encode(T t, ByteBuf out) {
         MergedWarpMessage mergedWarpMessage = (MergedWarpMessage)t;
         List<AbstractMessage> msgs = mergedWarpMessage.msgs;
-        List<Integer> msgIds = mergedWarpMessage.msgIds;
 
         final ByteBuf buffer = Unpooled.buffer(1024);
         buffer.writeInt(0); // write placeholder for content length
@@ -55,10 +54,6 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
             messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(subBuffer);
-        }
-
-        for (final Integer msgId : msgIds) {
-            buffer.writeInt(msgId);
         }
 
         final int length = buffer.readableBytes();
@@ -101,15 +96,6 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
             messageCodec.decode(abstractMessage, byteBuffer);
             msgs.add(abstractMessage);
         }
-
-        if (byteBuffer.hasRemaining()) {
-            List<Integer> msgIds = new ArrayList<>();
-            for (int idx = 0; idx < msgNum; idx++) {
-                msgIds.add(byteBuffer.getInt());
-            }
-            mergedWarpMessage.msgIds = msgIds;
-        }
-
         mergedWarpMessage.msgs = msgs;
     }
 
