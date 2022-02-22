@@ -161,9 +161,9 @@ public interface ConfigurationKeys {
     String CLIENT_RM_PREFIX = CLIENT_PREFIX + "rm.";
 
     /**
-     * The constant CLIENT_ASYNC_COMMIT_BUFFER_LIMIT.
+     * The constant CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT.
      */
-    String CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = CLIENT_RM_PREFIX + "asyncCommitBufferLimit";
+    String CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT = CLIENT_RM_PREFIX + "asyncUndoLogCleanBufferLimit";
     /**
      * The constant CLIENT_RM_LOCK_PREFIX.
      */

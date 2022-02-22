@@ -71,7 +71,7 @@ public class ClientPropertiesTest {
 
     @Test
     public void testRmProperties() {
-        assertEquals(10000, context.getBean(RmProperties.class).getAsyncCommitBufferLimit());
+        assertEquals(10000, context.getBean(RmProperties.class).getAsyncUndoLogCleanBufferLimit());
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
         assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
         assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());

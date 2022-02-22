@@ -19,7 +19,7 @@ import io.seata.sqlparser.SqlParserType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
@@ -37,7 +37,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREF
 @Component
 @ConfigurationProperties(prefix = CLIENT_RM_PREFIX)
 public class RmProperties {
-    private int asyncCommitBufferLimit = DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+    private int asyncUndoLogCleanBufferLimit = DEFAULT_CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT;
     private int reportRetryCount = DEFAULT_CLIENT_REPORT_RETRY_COUNT;
     private boolean tableMetaCheckEnable = DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
     private long tableMetaCheckerInterval = DEFAULT_TABLE_META_CHECKER_INTERVAL;
@@ -49,12 +49,12 @@ public class RmProperties {
     private int tccActionInterceptorOrder = TCC_ACTION_INTERCEPTOR_ORDER;
     private String sqlParserType = SqlParserType.SQL_PARSER_TYPE_DRUID;
 
-    public int getAsyncCommitBufferLimit() {
-        return asyncCommitBufferLimit;
+    public int getAsyncUndoLogCleanBufferLimit() {
+        return asyncUndoLogCleanBufferLimit;
     }
 
-    public RmProperties setAsyncCommitBufferLimit(int asyncCommitBufferLimit) {
-        this.asyncCommitBufferLimit = asyncCommitBufferLimit;
+    public RmProperties setAsyncBufferLimit(int asyncUndoLogCleanBufferLimit) {
+        this.asyncUndoLogCleanBufferLimit = asyncUndoLogCleanBufferLimit;
         return this;
     }
 

@@ -50,6 +50,16 @@ public interface UndoLogManager {
     void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException;
 
     /**
+     * Async Delete undo log.
+     *
+     * @param xid      the xid
+     * @param branchId the branch id
+     * @param resourceId the resource id
+     * @throws SQLException the sql exception
+     */
+    public void asyncCleanUndoLog(String xid, long branchId, String resourceId);
+
+    /**
      * Delete undo log.
      *
      * @param xid      the xid

@@ -30,8 +30,11 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.core.model.BranchType;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceManager;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.Row;
@@ -98,6 +101,7 @@ public class MySQLUndoLogManagerTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
+        DefaultResourceManager.mockResourceManager(BranchType.AT,new DataSourceManager());
         dataSourceProxy = new DataSourceProxy(dataSource);
         connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         undoLogManager = new MySQLUndoLogManager();

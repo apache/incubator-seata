@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.core.model.BranchType;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
@@ -41,7 +43,7 @@ public class DataCompareUtilsTest {
         Field field2 = new Field("name", 0, "222");
         Field field3 = new Field("age", 0, "222");
         Field field4 = new Field("name", 0, null);
-
+        DefaultResourceManager.mockResourceManager(BranchType.AT, new DataSourceManager());
         Assertions.assertFalse(DataCompareUtils.isFieldEquals(field0, null).getResult());
         Assertions.assertFalse(DataCompareUtils.isFieldEquals(null, field0).getResult());
         Assertions.assertFalse(DataCompareUtils.isFieldEquals(field0, field1).getResult());

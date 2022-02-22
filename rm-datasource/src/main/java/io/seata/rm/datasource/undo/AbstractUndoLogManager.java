@@ -20,14 +20,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
+
 
 import io.seata.common.Constants;
+import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.SizeUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.compressor.CompressorFactory;
@@ -36,18 +49,26 @@ import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.ResourceManager;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceManager;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
+import com.google.common.collect.Lists;
+
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_TYPE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
+import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT;
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
 /**
@@ -80,27 +101,40 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     }
 
     protected static final String UNDO_LOG_TABLE_NAME = ConfigurationFactory.getInstance().getConfig(
-        ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+            ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
 
     private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL = "SELECT 1 FROM " + UNDO_LOG_TABLE_NAME + " LIMIT 1";
 
     protected static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
-        + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID
-        + " = ? FOR UPDATE";
+            + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID
+            + " = ? FOR UPDATE";
 
     protected static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
-        + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
+            + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
 
     protected static final boolean ROLLBACK_INFO_COMPRESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_UNDO_COMPRESS_ENABLE, DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE);
+            ConfigurationKeys.CLIENT_UNDO_COMPRESS_ENABLE, DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE);
 
     protected static final CompressorType ROLLBACK_INFO_COMPRESS_TYPE = CompressorType.getByName(ConfigurationFactory.getInstance().getConfig(
-        ConfigurationKeys.CLIENT_UNDO_COMPRESS_TYPE, DEFAULT_CLIENT_UNDO_COMPRESS_TYPE));
+            ConfigurationKeys.CLIENT_UNDO_COMPRESS_TYPE, DEFAULT_CLIENT_UNDO_COMPRESS_TYPE));
 
     protected static final long ROLLBACK_INFO_COMPRESS_THRESHOLD = SizeUtil.size2Long(ConfigurationFactory.getInstance().getConfig(
             ConfigurationKeys.CLIENT_UNDO_COMPRESS_THRESHOLD, DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD));
 
     private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
+
+    private static final int DEFAULT_RESOURCE_SIZE = 16;
+
+    private static final int UNDOLOG_DELETE_LIMIT_SIZE = 1000;
+
+    private static final int ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
+            CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT, DEFAULT_CLIENT_ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT);
+
+    private static final DataSourceManager DATA_SOURCE_MANAGER;
+
+    private static final BlockingQueue<Phase2Context> UNDO_LOG_QUEUE;
+
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR;
 
     public static String getCurrentSerializer() {
         return SERIALIZER_LOCAL.get();
@@ -112,6 +146,31 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     public static void removeCurrentSerializer() {
         SERIALIZER_LOCAL.remove();
+    }
+
+    static {
+        DATA_SOURCE_MANAGER = (DataSourceManager)getResourceManager();
+
+        LOGGER.info("Async undo log Clean Buffer Limit: {}", ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT);
+        UNDO_LOG_QUEUE = new LinkedBlockingQueue<>(ASYNC_UNDOLOG_CLEAN_BUFFER_LIMIT);
+
+        ThreadFactory threadFactory = new NamedThreadFactory("AsyncWorker", 2, true);
+        SCHEDULED_EXECUTOR = new ScheduledThreadPoolExecutor(2, threadFactory);
+        SCHEDULED_EXECUTOR.scheduleAtFixedRate(AbstractUndoLogManager::doUndoLogCleanSafely, 10, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Async Delete undo log.
+     *
+     * @param xid      the xid
+     * @param branchId the branch id
+     * @param resourceId the resource id
+     * @throws SQLException the sql exception
+     */
+    @Override
+    public void asyncCleanUndoLog(String xid, long branchId, String resourceId) {
+        Phase2Context context = new Phase2Context(xid, branchId, resourceId);
+        addToUndoLogQueue(context);
     }
 
     /**
@@ -174,7 +233,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder(64);
         sqlBuilder.append("DELETE FROM ").append(UNDO_LOG_TABLE_NAME).append(" WHERE  ").append(
-            ClientTableColumnsName.UNDO_LOG_BRANCH_XID).append(" IN ");
+                ClientTableColumnsName.UNDO_LOG_BRANCH_XID).append(" IN ");
         appendInParam(branchIdSize, sqlBuilder);
         sqlBuilder.append(" AND ").append(ClientTableColumnsName.UNDO_LOG_XID).append(" IN ");
         appendInParam(xidSize, sqlBuilder);
@@ -241,7 +300,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             undoLogContent = CompressorFactory.getCompressor(compressorType.getCode()).compress(undoLogContent);
         }
 
-        insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
+        try {
+            insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
+        } catch (SQLIntegrityConstraintViolationException sqle) {
+            LOGGER.error("Insert undo log duplicate key exception,maybe has been rollbacked by phase2",sqle);
+            asyncCleanUndoLog(xid,branchId,cp.getDataSourceProxy().getResourceId());
+            throw sqle;
+        }
     }
 
     /**
@@ -295,7 +360,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
                     String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
                     UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance()
-                        : UndoLogParserFactory.getInstance(serializer);
+                            : UndoLogParserFactory.getInstance(serializer);
                     BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);
 
                     try {
@@ -307,10 +372,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
                             TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(
-                                conn, sqlUndoLog.getTableName(), dataSourceProxy.getResourceId());
+                                    conn, sqlUndoLog.getTableName(), dataSourceProxy.getResourceId());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
-                                dataSourceProxy.getDbType(), sqlUndoLog);
+                                    dataSourceProxy.getDbType(), sqlUndoLog);
                             undoExecutor.executeOn(conn);
                         }
                     } finally {
@@ -333,14 +398,14 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                     conn.commit();
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("xid {} branch {}, undo_log deleted with {}", xid, branchId,
-                            State.GlobalFinished.name());
+                                State.GlobalFinished.name());
                     }
                 } else {
                     insertUndoLogWithGlobalFinished(xid, branchId, UndoLogParserFactory.getInstance(), conn);
                     conn.commit();
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("xid {} branch {}, undo_log added with {}", xid, branchId,
-                            State.GlobalFinished.name());
+                                State.GlobalFinished.name());
                     }
                 }
 
@@ -359,8 +424,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                     }
                 }
                 throw new BranchTransactionException(BranchRollbackFailed_Retriable, String
-                    .format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid,
-                        branchId, e.getMessage()), e);
+                        .format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid,
+                                branchId, e.getMessage()), e);
 
             } finally {
                 try {
@@ -447,5 +512,138 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     protected String getCheckUndoLogTableExistSql() {
         return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
+    }
+
+    private static ResourceManager getResourceManager() {
+        return DefaultResourceManager.get().getResourceManager(BranchType.AT);
+    }
+
+    /**
+     * try add context to undoLogQueue directly, if fail(which means the queue is full),
+     * then doUndoLogDelete urgently(so that the queue could be empty again) and retry this process.
+     */
+    private static void addToUndoLogQueue(Phase2Context context) {
+        if (UNDO_LOG_QUEUE.offer(context)) {
+            return;
+        }
+        CompletableFuture.runAsync(AbstractUndoLogManager::doUndoLogCleanSafely, SCHEDULED_EXECUTOR)
+                .thenRun(() -> addToUndoLogQueue(context));
+    }
+
+    private static void addAllToUndoLogQueue(List<Phase2Context> contexts) {
+        for (Phase2Context context : contexts) {
+            addToUndoLogQueue(context);
+        }
+    }
+
+    private static void doUndoLogCleanSafely() {
+        try {
+            doUndoLogClean();
+        } catch (Throwable e) {
+            LOGGER.error("Exception occur when doing clean undo log", e);
+        }
+    }
+
+    private static void doUndoLogClean() {
+        if (UNDO_LOG_QUEUE.isEmpty()) {
+            return;
+        }
+
+        // transfer all context currently received to this list
+        List<Phase2Context> allContexts = new LinkedList<>();
+        UNDO_LOG_QUEUE.drainTo(allContexts);
+
+        // group context by their resourceId
+        Map<String, List<Phase2Context>> groupedContexts = groupedByResourceId(allContexts);
+
+        groupedContexts.forEach(AbstractUndoLogManager::dealWithGroupedContexts);
+    }
+
+    private static Map<String, List<Phase2Context>> groupedByResourceId(List<Phase2Context> contexts) {
+        Map<String, List<Phase2Context>> groupedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
+        contexts.forEach(context -> {
+            List<Phase2Context> group = groupedContexts.computeIfAbsent(context.resourceId, key -> new LinkedList<>());
+            group.add(context);
+        });
+        return groupedContexts;
+    }
+
+    private static void dealWithGroupedContexts(String resourceId, List<Phase2Context> contexts) {
+        DataSourceProxy dataSourceProxy = DATA_SOURCE_MANAGER.get(resourceId);
+        if (dataSourceProxy == null) {
+            LOGGER.warn("failed to find resource for {} and requeue", resourceId);
+            addAllToUndoLogQueue(contexts);
+            return;
+        }
+
+        Connection conn = null;
+        try {
+            conn = dataSourceProxy.getPlainConnection();
+            UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
+
+            // split contexts into several lists, with each list contain no more element than limit size
+            List<List<Phase2Context>> splitByLimit = Lists.partition(contexts, UNDOLOG_DELETE_LIMIT_SIZE);
+            for (List<Phase2Context> partition : splitByLimit) {
+                deleteUndoLog(conn, undoLogManager, partition);
+            }
+        } catch (SQLException sqlExx) {
+            addAllToUndoLogQueue(contexts);
+            LOGGER.error("failed to get connection for async delete undo log on {} and requeue", resourceId, sqlExx);
+        } finally {
+            IOUtil.close(conn);
+        }
+
+    }
+
+    private static void deleteUndoLog(final Connection conn, UndoLogManager undoLogManager, List<Phase2Context> contexts) {
+        Set<String> xids = new LinkedHashSet<>(contexts.size());
+        Set<Long> branchIds = new LinkedHashSet<>(contexts.size());
+        contexts.forEach(context -> {
+            xids.add(context.xid);
+            branchIds.add(context.branchId);
+        });
+
+        try {
+            undoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Failed to batch delete undo log", e);
+            try {
+                conn.rollback();
+                addAllToUndoLogQueue(contexts);
+            } catch (SQLException rollbackEx) {
+                LOGGER.error("Failed to rollback JDBC resource after deleting undo log failed", rollbackEx);
+            }
+        }
+    }
+
+    static class Phase2Context {
+
+        /**
+         * AT Phase 2 context
+         * @param xid             the xid
+         * @param branchId        the branch id
+         * @param resourceId      the resource id
+         */
+        public Phase2Context(String xid, long branchId, String resourceId) {
+            this.xid = xid;
+            this.branchId = branchId;
+            this.resourceId = resourceId;
+        }
+
+        /**
+         * The Xid.
+         */
+        String xid;
+        /**
+         * The Branch id.
+         */
+        long branchId;
+        /**
+         * The Resource id.
+         */
+        String resourceId;
     }
 }
