@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+
+import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
 import static io.seata.common.util.StringUtils.isBlank;
 import static io.seata.common.util.StringUtils.isNotBlank;
 import static io.seata.core.console.result.PageResult.checkPage;
@@ -55,7 +57,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         if (param.getTimeStart() != null || param.getTimeEnd() != null) {
             //not support time range query
             logger.debug("not supported according to time range query");
-            return PageResult.success(result,0,param.getPageNum(),param.getPageSize());
+            return PageResult.failure(ParameterRequired.getErrCode(),"not supported according to time range query");
         }
         List<GlobalSession> globalSessions = new ArrayList<>();
 

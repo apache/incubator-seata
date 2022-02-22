@@ -90,9 +90,9 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Map<String, String> mapGlobalKeys = jedis.hgetAll(key);
             if (CollectionUtils.isNotEmpty(mapGlobalKeys)) {
-                List<String> rowLoclKeys = new ArrayList<>();
-                mapGlobalKeys.forEach((k,v) -> rowLoclKeys.addAll(Arrays.asList(v.split(ROW_LOCK_KEY_SPLIT_CHAR))));
-                for (String rowLoclKey : rowLoclKeys) {
+                List<String> rowLockKeys = new ArrayList<>();
+                mapGlobalKeys.forEach((k,v) -> rowLockKeys.addAll(Arrays.asList(v.split(ROW_LOCK_KEY_SPLIT_CHAR))));
+                for (String rowLoclKey : rowLockKeys) {
                     Map<String, String> mapRowLockKey = jedis.hgetAll(rowLoclKey);
                     GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(mapRowLockKey, GlobalLockVO.class);
                     if (vo != null) {
