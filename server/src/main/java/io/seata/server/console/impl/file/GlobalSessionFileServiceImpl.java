@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.seata.common.exception.InvalidParamException;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.result.PageResult;
 import io.seata.core.console.vo.GlobalSessionVO;
@@ -52,7 +51,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         if (param.getPageSize() <= 0 || param.getPageNum() <= 0) {
-            throw new InvalidParamException("wrong pageSize or pageNum");
+            throw new IllegalArgumentException("wrong pageSize or pageNum");
         }
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
@@ -62,7 +61,7 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
                 .filter(obtainPredicate(param))
                 .collect(Collectors.toList());
 
-        return PageResult.build(SessionConverter.convert(filteredSessions), param.getPageNum(), param.getPageSize());
+        return PageResult.build(SessionConverter.convertGlobalSession(filteredSessions), param.getPageNum(), param.getPageSize());
     }
 
 
