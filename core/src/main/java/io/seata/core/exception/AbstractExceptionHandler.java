@@ -15,6 +15,7 @@
  */
 package io.seata.core.exception;
 
+import java.util.Objects;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -25,7 +26,6 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
