@@ -576,9 +576,8 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    @Disabled("FIXME: Sometimes it takes a lot of time")
     public void testStateMachineTransTimeout() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -629,9 +628,8 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    @Disabled("FIXME: Sometimes it takes a lot of time")
     public void testStateMachineTransTimeoutAsync() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -940,7 +938,7 @@ public class StateMachineDBTests extends AbstractServerTest {
             // waiting for global transaction recover
             while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-                Thread.sleep(1000);
+                Thread.sleep(2500);
                 inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
             }
 
@@ -965,7 +963,7 @@ public class StateMachineDBTests extends AbstractServerTest {
             // waiting for global transaction recover
             while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
-                Thread.sleep(1000);
+                Thread.sleep(2500);
                 inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
             }
 
@@ -976,9 +974,9 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    @Disabled("FIXME: Sometimes it takes a lot of time")
+    @Disabled("FIXME")
     public void testStateMachineCustomRecoverStrategyOnTimeout() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -1050,7 +1048,7 @@ public class StateMachineDBTests extends AbstractServerTest {
                     && GlobalStatus.Finished.equals(globalTransaction.getStatus()))) {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
                 System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
-                Thread.sleep(1000);
+                Thread.sleep(2500);
                 inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
             }
 
@@ -1060,9 +1058,9 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    @Disabled("FIXME: Sometimes it takes a lot of time")
+    @Disabled("FIXME")
     public void testStateMachineCustomRecoverStrategyOnTimeoutAsync() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
         //first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
@@ -1129,7 +1127,7 @@ public class StateMachineDBTests extends AbstractServerTest {
                     && GlobalStatus.Finished.equals(globalTransaction.getStatus()))) {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
                 System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
-                Thread.sleep(1000);
+                Thread.sleep(2500);
                 inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
             }
 
