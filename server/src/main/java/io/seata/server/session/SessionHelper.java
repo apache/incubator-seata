@@ -175,7 +175,7 @@ public class SessionHelper {
      * @since 1.5.0
      */
     public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
-        for (GlobalSession globalSession : sessions) {
+        sessions.parallelStream().forEach(globalSession -> {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
                 handler.handle(globalSession);
@@ -184,7 +184,7 @@ public class SessionHelper {
             } finally {
                 MDC.remove(RootContext.MDC_KEY_XID);
             }
-        }
+        });
     }
 
     /**
