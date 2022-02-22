@@ -576,7 +576,6 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    @Disabled("FIXME: Sometimes it takes a lot of time")
     public void testStateMachineTransTimeout() throws Exception {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 
@@ -629,7 +628,6 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    @Disabled("FIXME: Sometimes it takes a lot of time")
     public void testStateMachineTransTimeoutAsync() throws Exception {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
 

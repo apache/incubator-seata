@@ -32,6 +32,7 @@
     <description>Seata dependencies</description>
 
     <properties>
+        <netty.version>4.1.30.Final</netty.version>
         <dubbo.version>2.7.4</dubbo.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
@@ -123,6 +124,18 @@
             </dependency>
 
             <!-- the 3rd part -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
@@ -249,8 +262,8 @@
                         <groupId>org.slf4j</groupId>
                     </exclusion>
                     <exclusion>
-                        <artifactId>io.netty</artifactId>
-                        <groupId>netty</groupId>
+                        <artifactId>netty</artifactId>
+                        <groupId>io.netty</groupId>
                     </exclusion>
                     <exclusion>
                         <artifactId>org.apache.zookeeper</artifactId>
@@ -264,8 +277,8 @@
                 <version>${apache-zookeeper.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>io.netty</artifactId>
-                        <groupId>netty</groupId>
+                        <artifactId>netty</artifactId>
+                        <groupId>io.netty</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
