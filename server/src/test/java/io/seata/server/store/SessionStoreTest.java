@@ -41,7 +41,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
-
 /**
  * The type Session store test.
  */

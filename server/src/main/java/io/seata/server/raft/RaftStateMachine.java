@@ -61,7 +61,6 @@ import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ACQUIRE_LOCK;

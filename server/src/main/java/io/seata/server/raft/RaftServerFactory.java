@@ -35,7 +35,6 @@ import io.seata.core.store.StoreMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
