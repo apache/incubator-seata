@@ -26,19 +26,20 @@ public class SagaCostPrint {
 		long start = System.nanoTime();
 
 		StateMachineInstance inst = null;
-		Throwable t = null;
+		Exception e = null;
 		try {
 			inst = execute.run();
-		} catch (Throwable e) {
-			t = e;
-			throw e;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			e = ex;
+			throw ex;
 		} finally {
 			long cost = (System.nanoTime() - start) / 1000_000;
 			System.out.printf("====== XID: %s , cost%s: %d ms , error: %s\r\n",
 					inst != null ? inst.getId() : null,
 					flag,
 					cost,
-					(t != null ? t.getMessage() : null));
+					(e != null ? e.getMessage() : null));
 		}
 		return inst;
 	}
