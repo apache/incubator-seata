@@ -32,6 +32,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * State machine async tests
+ *
  * @author lorne.cl
  */
 public class StateMachineAsyncTests {
