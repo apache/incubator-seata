@@ -45,7 +45,7 @@
         <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
-        <apache-zookeeper.version>3.4.14</apache-zookeeper.version>
+        <apache-zookeeper.version>3.5.9</apache-zookeeper.version>
         <curator-test.version>2.9.1</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <apollo-client.version>1.6.0</apollo-client.version>
