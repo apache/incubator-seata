@@ -195,7 +195,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeStatus(GlobalStatus status) throws TransactionException {
-        if (GlobalStatus.Rollbacking == status) {
+        if (GlobalStatus.Rollbacking == status || GlobalStatus.TimeoutRollbacking == status) {
             LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
         this.status = status;
@@ -204,13 +204,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
     }
 
+    /**
+     * thread-safed change, throw exception when expectedStatus not match
+     *
+     * @param expectedStatus
+     * @param targetStatus
+     * @throws TransactionException
+     */
     public void changeStatusOptimistic(GlobalStatus expectedStatus,GlobalStatus targetStatus) throws TransactionException {
-        if (GlobalStatus.Rollbacking == status) {
-            LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
-        }
-        this.status = targetStatus;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, expectedStatus ,targetStatus);
+        }
+        this.status = targetStatus;
+        if (GlobalStatus.Rollbacking == targetStatus || GlobalStatus.TimeoutRollbacking == targetStatus) {
+            LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
     }
 
