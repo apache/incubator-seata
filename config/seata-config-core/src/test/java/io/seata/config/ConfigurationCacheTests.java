@@ -43,7 +43,7 @@ public class ConfigurationCacheTests {
         configuration.getDuration("ccc", Duration.ZERO);
         ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent("ccc", "1s"));
         Duration ccc = configuration.getDuration("ccc", Duration.ZERO);
-        Assertions.assertEquals(ccc, DurationUtil.parse("1s"));
+        Assertions.assertEquals(DurationUtil.parse("1s"), ccc);
 
         configuration.getInt("ddd", 0);
         ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent("ddd", "1"));

@@ -16,11 +16,11 @@
 # author:wangyuewen
 
 # shellcheck disable=SC2039,SC2162,SC2046,SC2013,SC2002,SC2086
-echo -e "Please enter the host of nacos.\n请输入nacos的host:"
+echo -e "Please enter the host of nacos.\n请输入nacos的host [localhost]:"
 read -p ">>> " host
-echo -e "Please enter the port of nacos.\n请输入nacos的port:"
+echo -e "Please enter the port of nacos.\n请输入nacos的port [8848]:"
 read -p ">>> " port
-echo -e "Please enter the group of nacos.\n请输入nacos的group:"
+echo -e "Please enter the group of nacos.\n请输入nacos的group [SEATA_GROUP]:"
 read -p ">>> " group
 echo -e "Please enter the tenant of nacos.\n请输入nacos的tenant:"
 read -p ">>> " tenant

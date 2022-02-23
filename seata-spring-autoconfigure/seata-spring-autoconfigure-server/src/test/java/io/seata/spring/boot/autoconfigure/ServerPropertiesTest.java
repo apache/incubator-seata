@@ -52,7 +52,7 @@ public class ServerPropertiesTest {
 
     @Test
     public void testServerRecoveryProperties() {
-        assertEquals(context.getBean(ServerRecoveryProperties.class).getAsynCommittingRetryPeriod(), 1000);
+        assertEquals(context.getBean(ServerRecoveryProperties.class).getHandleAllSessionPeriod(), 1000);
     }
 
     @Test

@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -30,24 +34,21 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.raft.RaftServer;
-import io.seata.server.raft.RaftServerFactory;
+import io.seata.core.model.LockStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.StoreMode;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
+import io.seata.server.raft.RaftServer;
+import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.storage.file.lock.FileLockManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static java.io.File.separator;
-
 /**
  * The type Session holder.
  *
@@ -66,14 +67,17 @@ public class SessionHolder {
      * The constant ROOT_SESSION_MANAGER_NAME.
      */
     public static final String ROOT_SESSION_MANAGER_NAME = "root.data";
+
     /**
      * The constant ASYNC_COMMITTING_SESSION_MANAGER_NAME.
      */
     public static final String ASYNC_COMMITTING_SESSION_MANAGER_NAME = "async.commit.data";
+
     /**
      * The constant RETRY_COMMITTING_SESSION_MANAGER_NAME.
      */
     public static final String RETRY_COMMITTING_SESSION_MANAGER_NAME = "retry.commit.data";
+
     /**
      * The constant RETRY_ROLLBACKING_SESSION_MANAGER_NAME.
      */
@@ -195,9 +199,12 @@ public class SessionHolder {
                         }
                         break;
                     default: {
-                        if (storeMode == StoreMode.FILE || storeMode == StoreMode.RAFT) {
-                            if (acquireLock) {
-                                lockBranchSessions(globalSession.getSortedBranches());
+                        if (storeMode == StoreMode.FILE) {
+                            lockBranchSessions(globalSession.getSortedBranches());
+                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                                globalSession.getBranchSessions().parallelStream()
+                                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
                             }
                             switch (globalStatus) {
                                 case Committing:
@@ -253,9 +260,9 @@ public class SessionHolder {
         }
     }
 
-    private static void lockBranchSessions(ArrayList<BranchSession> branchSessions) {
+    private static void lockBranchSessions(List<BranchSession> branchSessions) {
         FileLockManager fileLockManager =
-            (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
+                (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
         branchSessions.forEach(branchSession -> {
             try {
                 if (StringUtils.isNotBlank(branchSession.getLockKey())) {
@@ -441,7 +448,7 @@ public class SessionHolder {
     }
 
     @FunctionalInterface
-    public static interface NoArgsFunc {
-        public void call();
+    public interface NoArgsFunc {
+        void call();
     }
 }

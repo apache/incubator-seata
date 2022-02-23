@@ -15,6 +15,12 @@
  */
 package io.seata.sqlparser.druid;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
@@ -23,12 +29,6 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +56,7 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
         String orderBy = mySQLDeleteRecognizer.getOrderByCondition();
-        Assertions.assertTrue(orderBy.equalsIgnoreCase("ORDER BY id ASC, name DESC"));
+        Assertions.assertEquals("ORDER BY id ASC, name DESC".toLowerCase(), orderBy.toLowerCase());
         Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
         Assertions.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
@@ -66,7 +66,7 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
         statement = getSQLStatement(sql);
         mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
         orderBy = mySQLDeleteRecognizer.getOrderByCondition();
-        Assertions.assertTrue(orderBy.equalsIgnoreCase("order by id, name DESC"));
+        Assertions.assertEquals("order by id, name DESC".toLowerCase(), orderBy.toLowerCase());
         Assertions.assertEquals("LIMIT 1", mySQLDeleteRecognizer.getLimitCondition());
         sql = "DELETE FROM t1 WHERE id > 1";
         statement = getSQLStatement(sql);
