@@ -108,7 +108,9 @@ public class DefaultCoreTest {
                 } catch (Exception e) {
                     e.printStackTrace();
                     Thread.sleep(100);
-                    n--;
+                    if (n == 0) {
+                       throw e;
+                    }
                 }
             }
             globalSession = null;

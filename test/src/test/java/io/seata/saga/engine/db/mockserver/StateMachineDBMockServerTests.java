@@ -15,9 +15,6 @@
  */
 package io.seata.saga.engine.db.mockserver;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.seata.common.SagaCostPrint;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.mock.DemoService.Engineer;
@@ -33,6 +30,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * State machine tests with db log store
