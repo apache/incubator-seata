@@ -97,6 +97,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
             }
             globalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
         }
+
         convertToGlobalSessionVo(result,globalSessions);
 
         return PageResult.success(result,total.intValue(),param.getPageNum(),param.getPageSize());

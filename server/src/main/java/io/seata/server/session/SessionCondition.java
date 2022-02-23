@@ -133,7 +133,6 @@ public class SessionCondition {
         this.statuses = statuses;
     }
 
-
     public boolean isLazyLoadBranch() {
         return lazyLoadBranch;
     }

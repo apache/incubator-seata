@@ -15,7 +15,6 @@
  */
 package io.seata.server.session.redis;
 
-
 import com.alibaba.fastjson.JSON;
 import io.seata.core.console.param.GlobalLockParam;
 import io.seata.core.console.param.GlobalSessionParam;
@@ -33,7 +32,6 @@ import javax.annotation.Resource;
  */
 @SpringBootTest
 public class RedisQueryConsolTest {
-
 
     /**
      *
@@ -54,17 +52,13 @@ public class RedisQueryConsolTest {
             single:
               host: real redis host
               port: 6879
-
      *!!!!!!!when you test finish,please restore the modified configuration!!!!!!!!
      */
-
-
     @Resource
     private GlobalSessionService globalSessionService;
 
     @Resource
     private GlobalLockService globalLockService;
-
 
     @Test
     public void test_globalRedisServiceQuery() {
@@ -75,7 +69,6 @@ public class RedisQueryConsolTest {
         PageResult<GlobalSessionVO> query = globalSessionService.query(param);
         System.out.print(JSON.toJSON(query));
     }
-
 
     @Test
     public void test_queryGlobalLock() {

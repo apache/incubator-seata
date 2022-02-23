@@ -48,7 +48,6 @@ public class RedisTransactionStoreManagerTest {
     private static RedisServer server = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
 
-
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
         server = RedisServer.newRedisServer(6789);
@@ -58,10 +57,7 @@ public class RedisTransactionStoreManagerTest {
         poolConfig.setMaxIdle(10);
         JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6879, 60000,"*********"));
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
-
-
     }
-
 
     @Test
     public void testInsertGlobalSessionData(){
@@ -81,9 +77,6 @@ public class RedisTransactionStoreManagerTest {
             globalTransactionDO.setGmtModified(new Date());
             globalTransactionDO.setTransactionId(12312342l);
             globalTransactionDO.setBeginTime(System.currentTimeMillis());
-
-
-
             String globalKey = "SEATA_GLOBAL_"+"test_"+i;
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                 Date now = new Date();
@@ -100,17 +93,13 @@ public class RedisTransactionStoreManagerTest {
 
     }
 
-
     @Test
     public void testInsertGlobalLockData() {
         String GLOBAL_LOCK_KEY = "SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792";
         String ROW_LOCK_KEY = "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188";
-
         Map<String, String> globallockMap = new HashMap<>();
         globallockMap.put("137621367686103001","SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188;SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
         globallockMap.put("237621367686103002","SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
-
-
         GlobalLockVO globalLockVO = new GlobalLockVO();
         globalLockVO.setXid("192.168.158.80:8091:37621364385185792");
         globalLockVO.setTransactionId(37621364385185792L);
@@ -121,24 +110,19 @@ public class RedisTransactionStoreManagerTest {
         globalLockVO.setRowKey("jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188");
         globalLockVO.setGmtCreate(new Date());
         globalLockVO.setGmtModified(new Date());
-
-
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.hmset(GLOBAL_LOCK_KEY,globallockMap);
             jedis.hmset(ROW_LOCK_KEY,BeanUtils.objectToMap(globalLockVO));
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
-
     }
 
     @Test
     public void testQueryGlobalslSession() {
-
-        Long aLong = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
-        System.out.print(aLong);
+        Long count = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
+        System.out.print(count);
     }
-
 
     @Test
     public void testreadisQuery() {
@@ -146,7 +130,6 @@ public class RedisTransactionStoreManagerTest {
         param.setPageNum(0);
         param.setPageSize(5);
         param.setWithBranch(false);
-
         List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
         System.out.print(globalSessionKeys.size());
         System.out.print(globalSessionKeys);

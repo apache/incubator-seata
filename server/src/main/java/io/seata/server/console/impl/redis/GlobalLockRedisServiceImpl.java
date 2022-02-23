@@ -15,8 +15,6 @@
  */
 package io.seata.server.console.impl.redis;
 
-
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

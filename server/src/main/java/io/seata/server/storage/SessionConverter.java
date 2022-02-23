@@ -34,7 +34,6 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.store.SessionStorable;
 import org.springframework.beans.BeanUtils;
 
-
 /**
  * The session converter
  *

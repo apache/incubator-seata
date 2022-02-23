@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.redis.store;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +58,6 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MOD
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
-
 
 /**
  * The redis transaction store manager
@@ -674,7 +672,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
 
     }
-
 
     private String buildBranchListKeyByXid(String xid) {
         return REDIS_SEATA_BRANCHES_PREFIX + xid;
