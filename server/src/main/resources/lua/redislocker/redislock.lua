@@ -16,7 +16,7 @@ for i= 1, keySize do
            if (result ~= ARGV[3])
            then
                -- return fail
-               return 0
+               return result
            else
                -- set 'yes' mean  There is not need to store lock information
                array[i]= 'yes'
@@ -49,4 +49,4 @@ end
 -- set SEATA_GLOBAL_LOCK
 redis.call('HSET',KEYS[(keySize+1)],KEYS[(keySize+2)],ARGV[(argSize+0)]);
 --  return success
-return 1
+return ARGV[3]
