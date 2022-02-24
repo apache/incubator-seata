@@ -119,7 +119,7 @@ public class SessionHelper {
         globalSession.changeStatus(GlobalStatus.Committed);
         globalSession.end();
 
-        postTcSessccionEndEvent(globalSession);
+        postTcSessionEndEvent(globalSession);
     }
 
     /**
@@ -132,7 +132,7 @@ public class SessionHelper {
         globalSession.changeStatus(GlobalStatus.CommitFailed);
         globalSession.end();
 
-        postTcSessccionEndEvent(globalSession);
+        postTcSessionEndEvent(globalSession);
     }
 
     /**
@@ -150,7 +150,7 @@ public class SessionHelper {
         }
         globalSession.end();
 
-        postTcSessccionEndEvent(globalSession);
+        postTcSessionEndEvent(globalSession);
     }
 
     /**
@@ -168,7 +168,7 @@ public class SessionHelper {
         }
         globalSession.end();
 
-        postTcSessccionEndEvent(globalSession);
+        postTcSessionEndEvent(globalSession);
     }
 
     /**
@@ -176,12 +176,8 @@ public class SessionHelper {
      *
      * @param globalSession the global session
      */
-    public static void postTcSessccionEndEvent(GlobalSession globalSession) {
-        EventBus eventBus = EventBusManager.get();
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getApplicationId(),
-                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                globalSession.getStatus()));
+    public static void postTcSessionEndEvent(GlobalSession globalSession) {
+        postTcSessionEndEvent(globalSession,globalSession.getStatus());
     }
 
     /**
@@ -204,11 +200,7 @@ public class SessionHelper {
      * @param globalSession the global session
      */
     public static void postTcSessionBeginEvent(GlobalSession globalSession) {
-        EventBus eventBus = EventBusManager.get();
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getApplicationId(),
-                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null,
-                globalSession.getStatus()));
+        postTcSessionBeginEvent(globalSession,globalSession.getStatus());
     }
 
     /**
