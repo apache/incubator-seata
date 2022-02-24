@@ -55,7 +55,7 @@ public class RedisTransactionStoreManagerTest {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6879, 60000,"*********"));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
     }
 
