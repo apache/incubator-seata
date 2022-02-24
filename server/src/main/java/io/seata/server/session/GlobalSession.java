@@ -76,8 +76,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private volatile GlobalStatus status;
 
-    private volatile GlobalStatus oldStatus;
-
     private String applicationId;
 
     private String transactionServiceGroup;
@@ -200,7 +198,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onStatusChange(this, null ,status);
+            lifecycleListener.onStatusChange(this, status);
         }
     }
 
@@ -424,24 +422,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void setStatus(GlobalStatus status) {
         this.status = status;
-    }
-
-    /**
-     * Gets old status.
-     *
-     * @return the old status
-     */
-    public GlobalStatus getOldStatus() {
-        return oldStatus;
-    }
-
-    /**
-     * Sets status.
-     *
-     * @param oldStatus the old status
-     */
-    public void setOldStatus(GlobalStatus oldStatus) {
-        this.oldStatus = oldStatus;
     }
 
     /**

@@ -122,7 +122,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void onStatusChange(GlobalSession globalSession, GlobalStatus expectedStatus, GlobalStatus targetStatus) throws TransactionException {
+    public void onStatusChange(GlobalSession globalSession, GlobalStatus targetStatus) throws TransactionException {
         updateGlobalSessionStatus(globalSession, targetStatus);
     }
 

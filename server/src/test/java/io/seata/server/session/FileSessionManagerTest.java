@@ -378,7 +378,7 @@ public class FileSessionManagerTest {
     public void onStatusChangeTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onStatusChange(globalSession,null, GlobalStatus.Finished);
+            sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
             sessionManager.onEnd(globalSession);
         }
     }

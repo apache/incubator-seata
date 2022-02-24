@@ -38,11 +38,10 @@ public interface SessionLifecycleListener {
      * On status change.
      *
      * @param globalSession the global session
-     * @param expectedStatus  the expected status
      * @param targetStatus   the target status
      * @throws TransactionException the transaction exception
      */
-    void onStatusChange(GlobalSession globalSession, GlobalStatus expectedStatus, GlobalStatus targetStatus) throws TransactionException;
+    void onStatusChange(GlobalSession globalSession, GlobalStatus targetStatus) throws TransactionException;
 
     /**
      * On branch status change.

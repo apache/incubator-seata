@@ -154,7 +154,7 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public void onStatusChange(GlobalSession globalSession, GlobalStatus expectedStatus,GlobalStatus targetStatus)
+                public void onStatusChange(GlobalSession globalSession, GlobalStatus targetStatus)
                     throws TransactionException {
 
                 }
