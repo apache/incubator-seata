@@ -117,7 +117,21 @@ public enum GlobalStatus {
      * The Finished.
      */
     // Not managed in session MAP any more
-    Finished(15);
+    Finished(15),
+
+    /**
+     * The commit retry Timeout .
+     */
+    // Finally: failed to commit since retry timeout
+    CommitRetryTimeout(16),
+
+    /**
+     * The rollback retry Timeout .
+     */
+    // Finally: failed to rollback since retry timeout
+    RollbackRetryTimeout(17)
+
+    ;
 
     private int code;
 
