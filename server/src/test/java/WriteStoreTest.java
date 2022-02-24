@@ -82,7 +82,7 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus expectedStatus,GlobalStatus targetStatus)
+                public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus targetStatus)
                     throws TransactionException {
 
                 }

@@ -157,7 +157,7 @@ public class DefaultCore implements Core {
                 if (globalSession.canBeCommittedAsync()) {
                     globalSession.asyncCommit();
                 } else {
-                    globalSession.changeStatusOptimistic(GlobalStatus.Begin, GlobalStatus.Committing);
+                    globalSession.changeStatus(GlobalStatus.Committing);
                     shouldCommitNow = true;
                 }
                 //clean session after changing status successfully.
@@ -285,7 +285,7 @@ public class DefaultCore implements Core {
         boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
             if (globalSession.getStatus() == GlobalStatus.Begin) {
-                globalSession.changeStatusOptimistic(GlobalStatus.Begin, GlobalStatus.Rollbacking);
+                globalSession.changeStatus(GlobalStatus.Rollbacking);
                 return true;
             }
             return false;

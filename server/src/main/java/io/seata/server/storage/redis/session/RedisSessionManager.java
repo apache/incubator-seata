@@ -91,18 +91,17 @@ public class RedisSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus expectedStatus, GlobalStatus targetStatus) throws TransactionException {
+    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus targetStatus) throws TransactionException {
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        session.setStatus(targetStatus);
-        if (expectedStatus != null) {
-            session.setOldStatus(expectedStatus);
-        }
+        // check if status match before update
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
         }
+        // set session status after update
+        session.setStatus(targetStatus);
     }
 
     /**

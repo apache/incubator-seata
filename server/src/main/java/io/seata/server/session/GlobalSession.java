@@ -204,23 +204,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
     }
 
-    /**
-     * thread-safed change, throw exception when expectedStatus not match
-     *
-     * @param expectedStatus
-     * @param targetStatus
-     * @throws TransactionException
-     */
-    public void changeStatusOptimistic(GlobalStatus expectedStatus,GlobalStatus targetStatus) throws TransactionException {
-        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onStatusChange(this, expectedStatus ,targetStatus);
-        }
-        this.status = targetStatus;
-        if (GlobalStatus.Rollbacking == targetStatus || GlobalStatus.TimeoutRollbacking == targetStatus) {
-            LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
-        }
-    }
-
     @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
         throws TransactionException {
@@ -761,10 +744,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
-        this.setStatus(GlobalStatus.AsyncCommitting);
 
         // update thread-safe
-        SessionHolder.getAsyncCommittingSessionManager().updateGlobalSessionStatus(this, GlobalStatus.Begin, GlobalStatus.AsyncCommitting);
+        SessionHolder.getAsyncCommittingSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {

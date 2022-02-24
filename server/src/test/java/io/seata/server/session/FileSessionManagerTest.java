@@ -123,7 +123,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             globalSession.setStatus(GlobalStatus.Finished);
-            sessionManager.updateGlobalSessionStatus(globalSession,null, GlobalStatus.Finished);
+            sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
             GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
             Assertions.assertNotNull(expected);
             Assertions.assertEquals(GlobalStatus.Finished, expected.getStatus());
