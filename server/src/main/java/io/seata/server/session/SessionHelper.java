@@ -208,7 +208,7 @@ public class SessionHelper {
         EventBus eventBus = EventBusManager.get();
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             globalSession.getTransactionName(), globalSession.getApplicationId(),
-            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null, status));
     }
 
     public static boolean isTimeoutGlobalStatus(GlobalStatus status) {
