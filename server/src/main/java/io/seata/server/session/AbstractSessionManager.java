@@ -76,7 +76,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_UPDATE);
         }
-        if (GlobalStatus.Rollbacking == targetStatus) {
+        if (GlobalStatus.Rollbacking == targetStatus || GlobalStatus.TimeoutRollbacking == targetStatus) {
             session.getBranchSessions().forEach(i -> i.setLockStatus(LockStatus.Rollbacking));
         }
         writeSession(LogOperation.GLOBAL_UPDATE, session);
