@@ -95,12 +95,12 @@ public class RedisSessionManager extends AbstractSessionManager
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        // check if status match before update
+        // session.getStatus() must equals status in store
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
         }
-        // set session status after update
+        // set session status after update successfully
         session.setStatus(targetStatus);
     }
 

@@ -196,10 +196,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         if (GlobalStatus.Rollbacking == status || GlobalStatus.TimeoutRollbacking == status) {
             LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
-        this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
+        // set session status after update successfully
+        this.status = status;
     }
 
     @Override

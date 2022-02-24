@@ -84,18 +84,6 @@ public class GlobalSessionTest {
     }
 
     /**
-     * Change status expected test .
-     *
-     * @param globalSession the global session
-     * @throws Exception the exception
-     */
-    @ParameterizedTest
-    @MethodSource("globalSessionProvider")
-    public void changeStatusOptimisticTest(GlobalSession globalSession) throws Exception {
-        globalSession.changeStatusOptimistic(GlobalStatus.Begin,GlobalStatus.Committed);
-    }
-
-    /**
      * Change branch status test.
      *
      * @param globalSession the global session
