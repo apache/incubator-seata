@@ -191,6 +191,7 @@ public class RedisLocker extends AbstractLocker {
                 } else {
                     if (!StringUtils.equals(existedLockXid, needLockXid)) {
                         // If not equals,means the rowkey is holding by another global transaction
+                        logGlobalLockConflictInfo(needLockXid, needLockKeys.get(i), existedLockXid);
                         return false;
                     }
                 }
@@ -269,8 +270,17 @@ public class RedisLocker extends AbstractLocker {
         args.add(lockKeysString.toString());
         // reset args index 2
         args.set(1, String.valueOf(args.size()));
-        long result = (long)jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
-        return SUCCEED == result;
+        String xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
+        if (xIdOwnLock.equals(needLockXid)) {
+            return true;
+        } else {
+            logGlobalLockConflictInfo(needLockXid, keys.get(0), xIdOwnLock);
+            return false;
+        }
+    }
+
+    private void logGlobalLockConflictInfo(String needLockXid, String lockKey, String xIdOwnLock) {
+        LOGGER.info("tx:[{}] acquire Global lock failed. Global lock on [{}] is holding by xid {}", needLockXid, lockKey, xIdOwnLock);
     }
 
     @Override
@@ -282,7 +292,7 @@ public class RedisLocker extends AbstractLocker {
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needReleaseLocks = convertToLockDO(rowLocks);
         String[] needReleaseKeys = new String[needReleaseLocks.size()];
-        for (int i = 0; i < needReleaseLocks.size(); i ++) {
+        for (int i = 0; i < needReleaseLocks.size(); i++) {
             needReleaseKeys[i] = buildLockKey(needReleaseLocks.get(i).getRowKey());
         }
 
