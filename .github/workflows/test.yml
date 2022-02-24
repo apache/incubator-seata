@@ -30,18 +30,18 @@ jobs:
             #1.0.2.RELEASE
         ]
     steps:
-      # 1. Checkout
+      # step 1
       - name: "Checkout"
         uses: actions/checkout@v2.3.4
 
-      # 2. Setup Java
-      - name: "Setup Java JDK"
+      # step 2
+      - name: "Set up Java JDK"
         uses: actions/setup-java@v2.1.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
 
-      # 3. Test
+      # step 3
       - name: "Test with Maven"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: if [ "${{ matrix.java }}" == "8" ]; then
