@@ -38,7 +38,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.event.EventBus;
-import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
@@ -390,12 +389,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
-                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                        GlobalTransactionEvent.ROLE_TC,
-                        globalSession.getTransactionName(),
-                        globalSession.getApplicationId(),
-                        globalSession.getTransactionServiceGroup(),
-                        globalSession.getBeginTime(), null, globalSession.getStatus()));
+                SessionHelper.postTcSessionBeginEvent(globalSession, GlobalStatus.TimeoutRollbacking);
 
                 return true;
             });
@@ -439,6 +433,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     // Prevent thread safety issues
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
+
+                    // rollback retry timeout event
+                    SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
+
                     //The function of this 'return' is 'continue'.
                     return;
                 }
@@ -471,6 +469,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     // Prevent thread safety issues
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
+
+                    // commit retry timeout event
+                    SessionHelper.postTcSessionEndEvent(committingSession, GlobalStatus.CommitRetryTimeout);
+
                     //The function of this 'return' is 'continue'.
                     return;
                 }
