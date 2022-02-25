@@ -20,7 +20,7 @@
     <parent>
         <groupId>io.seata</groupId>
         <artifactId>seata-build</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>${revision}</version>
         <relativePath>../build/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
