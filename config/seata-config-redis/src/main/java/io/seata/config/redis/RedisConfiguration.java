@@ -71,7 +71,7 @@ public class RedisConfiguration extends AbstractConfiguration {
     private String keyName;
 
     /**
-     * Get instance of NacosConfiguration
+     * Get instance of RedisConfiguration
      *
      * @return instance
      */
