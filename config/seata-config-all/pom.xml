@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-redis</artifactId>
+            <artifactId>seata-config-spring-cloud</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

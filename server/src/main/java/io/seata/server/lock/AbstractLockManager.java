@@ -117,13 +117,8 @@ public abstract class AbstractLockManager implements LockManager {
      */
     protected abstract Locker getLocker(BranchSession branchSession);
 
-    /**
-     * Collect row locks list.`
-     *
-     * @param branchSession the branch session
-     * @return the list
-     */
-    protected List<RowLock> collectRowLocks(BranchSession branchSession) {
+    @Override
+    public List<RowLock> collectRowLocks(BranchSession branchSession) {
         if (branchSession == null || StringUtils.isBlank(branchSession.getLockKey())) {
             return Collections.emptyList();
         }
