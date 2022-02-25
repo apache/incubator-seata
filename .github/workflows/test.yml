@@ -2,11 +2,7 @@ name: "test"
 
 on:
   push:
-    branches: [ develop, master, test ]
-
-  ## 暂时放着，用于验证当前PR正确性，等PR通过后，删除掉
-  pull_request:
-    branches: [ develop ]
+    branches: [ test*, 1.*.*, 2.*.* ]
 
 jobs:
   test:
