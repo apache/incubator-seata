@@ -15,8 +15,8 @@ jobs:
       matrix:
         java: [ 8, 11, 17 ]
         springboot: [
-            2.6.3,
-            2.5.9,
+            2.6.4,
+            2.5.10,
             2.4.13,
             2.3.12.RELEASE,
             2.2.13.RELEASE,
