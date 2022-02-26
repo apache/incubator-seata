@@ -67,11 +67,10 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
 
         List<BranchSessionVO> list = new ArrayList<>();
-        PreparedStatement ps = null;
         ResultSet rs = null;
 
-        try (Connection conn = dataSource.getConnection()) {
-            ps = conn.prepareStatement(branchSessionSQL);
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(branchSessionSQL)) {
             ps.setObject(1, xid);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -80,7 +79,7 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(ps, rs);
+            IOUtil.close(rs);
         }
         return PageResult.success(list, list.size(), 0, 0, 0);
     }

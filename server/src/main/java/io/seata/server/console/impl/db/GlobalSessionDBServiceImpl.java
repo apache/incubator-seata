@@ -80,19 +80,18 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
 
-        PreparedStatement ps = null;
         ResultSet rs = null;
-        PreparedStatement countPs = null;
         ResultSet countRs = null;
-        try (Connection conn = dataSource.getConnection()) {
-            ps = conn.prepareStatement(querySessionSql);
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(querySessionSql);
+             PreparedStatement countPs = conn.prepareStatement(sessionCountSql)) {
             PageUtil.setObject(ps, sqlParamList);
             rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(GlobalSessionVO.convert(rs));
             }
 
-            countPs = conn.prepareStatement(sessionCountSql);
             PageUtil.setObject(countPs, sqlParamList);
             countRs = countPs.executeQuery();
             if (countRs.next()) {
@@ -107,7 +106,7 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(ps, rs, countPs, countRs);
+            IOUtil.close(rs, countRs);
         }
         return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
     }
