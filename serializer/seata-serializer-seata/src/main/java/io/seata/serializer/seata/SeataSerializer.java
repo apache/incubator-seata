@@ -15,13 +15,14 @@
  */
 package io.seata.serializer.seata;
 
+import java.nio.ByteBuffer;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.JvmUtils;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.serializer.Serializer;
-
-import java.nio.ByteBuffer;
 
 /**
  * The Seata codec.
@@ -53,8 +54,8 @@ public class SeataSerializer implements Serializer {
         byteBuffer.putShort(typecode);
         byteBuffer.put(body);
 
-        byteBuffer.flip();
-        byte[] content = new byte[byteBuffer.limit()];
+        JvmUtils.upcast(byteBuffer).flip();
+        byte[] content = new byte[JvmUtils.upcast(byteBuffer).limit()];
         byteBuffer.get(content);
         return content;
     }

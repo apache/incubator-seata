@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
+import io.seata.common.util.JvmUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -44,6 +45,7 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import static io.seata.core.model.GlobalStatus.AsyncCommitting;
 import static io.seata.core.model.GlobalStatus.CommitRetrying;
@@ -563,7 +565,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
-        byteBuffer.clear();
+        JvmUtils.upcast(byteBuffer).clear();
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
@@ -600,7 +602,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
-        byteBuffer.flip();
+        JvmUtils.upcast(byteBuffer).flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;
