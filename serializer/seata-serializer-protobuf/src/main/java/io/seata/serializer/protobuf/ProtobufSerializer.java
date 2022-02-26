@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import com.google.protobuf.GeneratedMessageV3;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.JvmUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.protobuf.convertor.PbConvertor;
 import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
@@ -55,7 +55,7 @@ public class ProtobufSerializer implements Serializer {
         byteBuffer.putInt(nameBytes.length);
         byteBuffer.put(nameBytes);
         byteBuffer.put(body);
-        JvmUtils.upcast(byteBuffer).flip();
+        BufferUtils.flip(byteBuffer);
         byte[] content = new byte[byteBuffer.limit()];
         byteBuffer.get(content);
         return content;

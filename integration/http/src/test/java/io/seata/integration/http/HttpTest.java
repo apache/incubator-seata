@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.seata.common.util.JvmUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
 import org.junit.jupiter.api.Assertions;
@@ -206,7 +206,7 @@ class HttpTest {
         ByteBuffer bb = ByteBuffer.allocate(4096);
 
         while (src.read(bb) != -1) {
-            JvmUtils.upcast(bb).flip();
+            BufferUtils.flip(bb);
             dest.write(bb);
             bb.clear();
         }

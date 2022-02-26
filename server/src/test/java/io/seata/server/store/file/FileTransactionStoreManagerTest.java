@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import io.seata.common.util.JvmUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -169,7 +169,7 @@ public class FileTransactionStoreManagerTest {
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
-        JvmUtils.upcast(byteBuffer).flip();
+        BufferUtils.flip(byteBuffer);
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);
         return bytes;

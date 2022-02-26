@@ -39,7 +39,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.JvmUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.rm.datasource.undo.parser.spi.ProtostuffDelegate;
@@ -134,7 +134,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             ByteBuffer buffer = input.readByteBuffer();
             long time = buffer.getLong();
             int nanos = buffer.getInt();
-            JvmUtils.upcast(buffer).flip();
+            BufferUtils.flip(buffer);
             java.sql.Timestamp timestamp = new Timestamp(time);
             timestamp.setNanos(nanos);
             return timestamp;
@@ -145,7 +145,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             ByteBuffer buffer = ByteBuffer.allocate(12);
             buffer.putLong(value.getTime());
             buffer.putInt(value.getNanos());
-            JvmUtils.upcast(buffer).flip();
+            BufferUtils.flip(buffer);
             output.writeBytes(number, buffer, repeated);
         }
 

@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.JvmUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.serializer.Serializer;
 
@@ -54,8 +54,8 @@ public class SeataSerializer implements Serializer {
         byteBuffer.putShort(typecode);
         byteBuffer.put(body);
 
-        JvmUtils.upcast(byteBuffer).flip();
-        byte[] content = new byte[JvmUtils.upcast(byteBuffer).limit()];
+        BufferUtils.flip(byteBuffer);
+        byte[] content = new byte[byteBuffer.limit()];
         byteBuffer.get(content);
         return content;
     }
