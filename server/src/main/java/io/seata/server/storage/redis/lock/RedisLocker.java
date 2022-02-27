@@ -46,10 +46,10 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
-
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
-
 /**
  * The redis lock store operation
  *
@@ -63,10 +63,6 @@ public class RedisLocker extends AbstractLocker {
     private static final Integer SUCCEED = 1;
 
     private static final Integer FAILED = 0;
-
-    private static final String DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX = "SEATA_ROW_LOCK_";
-
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX = "SEATA_GLOBAL_LOCK";
 
     private static final String XID = "xid";
 
@@ -149,9 +145,8 @@ public class RedisLocker extends AbstractLocker {
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needLockDOS = convertToLockDO(rowLocks);
         if (needLockDOS.size() > 1) {
-            needLockDOS = needLockDOS.stream().
-                filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
-                .collect(Collectors.toList());
+            needLockDOS =
+                needLockDOS.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
         }
         List<String> needLockKeys = new ArrayList<>();
         needLockDOS.forEach(lockDO -> needLockKeys.add(buildLockKey(lockDO.getRowKey())));
@@ -194,6 +189,7 @@ public class RedisLocker extends AbstractLocker {
                 } else {
                     if (!StringUtils.equals(existedLockXid, needLockXid)) {
                         // If not equals,means the rowkey is holding by another global transaction
+                        logGlobalLockConflictInfo(needLockXid, needLockKeys.get(i), existedLockXid);
                         return false;
                     }
                 }
@@ -220,14 +216,14 @@ public class RedisLocker extends AbstractLocker {
         ArrayList<String> success = new ArrayList<>(partitions.size());
         Integer status = SUCCEED;
         for (int i = 0; i < partitions.size(); i++) {
-            if (Objects.equals(partitions.get(i).get(0),FAILED)) {
+            if (Objects.equals(partitions.get(i).get(0), FAILED)) {
                 status = FAILED;
             } else {
                 success.add(readyKeys.get(i));
             }
         }
 
-        //If someone has failed,all the lockkey which has been added need to be delete.
+        // If someone has failed,all the lockkey which has been added need to be delete.
         if (FAILED.equals(status)) {
             if (success.size() > 0) {
                 jedis.del(success.toArray(new String[0]));
@@ -272,8 +268,17 @@ public class RedisLocker extends AbstractLocker {
         args.add(lockKeysString.toString());
         // reset args index 2
         args.set(1, String.valueOf(args.size()));
-        long result = (long)jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
-        return SUCCEED == result;
+        String xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
+        if (xIdOwnLock.equals(needLockXid)) {
+            return true;
+        } else {
+            logGlobalLockConflictInfo(needLockXid, keys.get(0), xIdOwnLock);
+            return false;
+        }
+    }
+
+    private void logGlobalLockConflictInfo(String needLockXid, String lockKey, String xIdOwnLock) {
+        LOGGER.info("tx:[{}] acquire Global lock failed. Global lock on [{}] is holding by xid {}", needLockXid, lockKey, xIdOwnLock);
     }
 
     @Override
@@ -285,12 +290,11 @@ public class RedisLocker extends AbstractLocker {
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needReleaseLocks = convertToLockDO(rowLocks);
         String[] needReleaseKeys = new String[needReleaseLocks.size()];
-        for (int i = 0; i < needReleaseLocks.size(); i ++) {
+        for (int i = 0; i < needReleaseLocks.size(); i++) {
             needReleaseKeys[i] = buildLockKey(needReleaseLocks.get(i).getRowKey());
         }
 
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Pipeline pipelined = jedis.pipelined();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             pipelined.del(needReleaseKeys);
             pipelined.hdel(buildXidLockKey(currentXid), branchId.toString());
             pipelined.sync();
@@ -324,10 +328,11 @@ public class RedisLocker extends AbstractLocker {
             }
 
             String xid = rowLocks.get(0).getXid();
-            Pipeline pipeline = jedis.pipelined();
-            lockKeys.forEach(key -> pipeline.hget(key, XID));
-            List<String> existedXids = (List<String>) (List) pipeline.syncAndReturnAll();
-            return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
+            try (Pipeline pipeline = jedis.pipelined()) {
+                lockKeys.forEach(key -> pipeline.hget(key, XID));
+                List<String> existedXids = (List<String>)(List)pipeline.syncAndReturnAll();
+                return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
+            }
         }
     }
 

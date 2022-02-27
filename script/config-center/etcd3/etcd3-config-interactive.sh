@@ -17,9 +17,9 @@
 # author:wangyuewen
 
 # shellcheck disable=SC2039,SC2162,SC2046,SC2013,SC2002
-echo -e "Please enter the host of etcd3.\n请输入etcd3的host:"
+echo -e "Please enter the host of etcd3.\n请输入etcd3的host [localhost]:"
 read -p ">>> " host
-echo -e "Please enter the port of etcd3.\n请输入etcd3的port:"
+echo -e "Please enter the port of etcd3.\n请输入etcd3的port [2379]:"
 read -p ">>> " port
 read -p "Are you sure to continue? [y/n]" input
 case $input in
