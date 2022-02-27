@@ -34,7 +34,6 @@ import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -69,7 +68,6 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.core.store.StoreMode;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.BranchSession;
@@ -172,18 +170,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private static volatile DefaultCoordinator instance;
 
-    private final boolean lazyHandleSession;
-
     /**
      * Instantiates a new Default coordinator.
      *
      * @param remotingServer the remoting server
      */
     private DefaultCoordinator(RemotingServer remotingServer) {
-        String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        // file and raft not lazy handle
-        this.lazyHandleSession = !(StringUtils.equalsIgnoreCase(mode, StoreMode.RAFT.getName())
-            || StringUtils.equalsIgnoreCase(mode, StoreMode.FILE.getName()));
         if (remotingServer == null) {
             throw new IllegalArgumentException("RemotingServer not allowed be null.");
         }
@@ -436,9 +428,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
-                if (lazyHandleSession && rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking)
-                    && !rollbackingSession.isDeadSession()) {
-                    // The function of this 'return' is 'continue'.
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isDeadSession()) {
+                    //The function of this 'return' is 'continue'.
                     return;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
@@ -472,9 +463,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
-                if (lazyHandleSession && committingSession.getStatus().equals(GlobalStatus.Committing)
-                    && !committingSession.isDeadSession()) {
-                    // The function of this 'return' is 'continue'.
+                if (committingSession.getStatus().equals(GlobalStatus.Committing) && !committingSession.isDeadSession()) {
+                    //The function of this 'return' is 'continue'.
                     return;
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
