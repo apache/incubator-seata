@@ -1,6 +1,5 @@
-package io.seata.supportDataBaseDataType.oracle;
+package io.seata.at;
 
-import java.sql.SQLException;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.core.exception.TransactionException;
@@ -8,17 +7,21 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.DataSourceManager;
+import org.junit.jupiter.api.Test;
+
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
- * AT transaction mode tests to support database data types
+ * add AT transaction mode tests to support database data types (Oracle)
  *
  * author doubleDimple
  */
-public class SupportDataBaseDataTypeForOracleTest {
+public class ATModeSupportDataBaseDataTypeTest {
 
-    private static final String oracle_jdbcUrl = "****";
-    private static final String oracle_username = "****";
-    private static final String oracle_password = "****";
+    private static final String oracle_jdbcUrl = "jdbc:oracle:thin:@//localhost:49161/XE";
+    private static final String oracle_username = "system";
+    private static final String oracle_password = "oracle";
 
 
     public DruidDataSource getDruidDataSource() throws SQLException {
@@ -37,14 +40,21 @@ public class SupportDataBaseDataTypeForOracleTest {
         DefaultResourceManager.mockResourceManager(BranchType.AT,new DataSourceManager() {
             @Override
             public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-                return super.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
+
+                return null;
             }
 
             @Override
             public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
-                super.branchReport(branchType, xid, branchId, status, applicationData);
+
             }
         });
     }
 
+    @Test
+    public void testConnection() throws SQLException {
+        DruidDataSource druidDataSource = getDruidDataSource();
+        Statement statement = druidDataSource.getConnection().createStatement();
+        System.out.println(druidDataSource);
+    }
 }
