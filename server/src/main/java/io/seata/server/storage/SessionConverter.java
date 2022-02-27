@@ -16,11 +16,10 @@
 package io.seata.server.storage;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import java.util.Collections;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.console.vo.BranchSessionVO;
@@ -33,28 +32,34 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.store.SessionStorable;
+import org.springframework.beans.BeanUtils;
 
 /**
  * The session converter
  *
  * @author wangzhongxiang
+ * @author doubleDimple
  */
 public class SessionConverter {
 
-    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO, boolean lazyLoadBranch) {
         if (globalTransactionDO == null) {
             return null;
         }
         GlobalSession session = new GlobalSession(globalTransactionDO.getApplicationId(),
                 globalTransactionDO.getTransactionServiceGroup(),
                 globalTransactionDO.getTransactionName(),
-                globalTransactionDO.getTimeout());
+                globalTransactionDO.getTimeout(), lazyLoadBranch);
         session.setXid(globalTransactionDO.getXid());
         session.setTransactionId(globalTransactionDO.getTransactionId());
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
         return session;
+    }
+
+    public static GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
+        return convertGlobalSession(globalTransactionDO, false);
     }
 
     public static BranchSession convertBranchSession(BranchTransactionDO branchTransactionDO) {
@@ -113,13 +118,41 @@ public class SessionConverter {
         return branchTransactionDO;
     }
 
+    public static void convertToGlobalSessionVo(List<GlobalSessionVO> result, List<GlobalSession> globalSessions) {
+        if (CollectionUtils.isNotEmpty(globalSessions)) {
+            for (GlobalSession globalSession : globalSessions) {
+                GlobalSessionVO globalSessionVO = new GlobalSessionVO();
+                BeanUtils.copyProperties(globalSession,globalSessionVO);
+                globalSessionVO.setStatus(globalSession.getStatus().getCode());
+                globalSessionVO.setTimeout(Long.valueOf(globalSession.getTimeout()));
+                globalSessionVO.setBranchSessionVOs(converToBranchSession(globalSession.getBranchSessions()));
+                result.add(globalSessionVO);
+            }
+        }
+    }
+
+    public static Set<BranchSessionVO> converToBranchSession(List<BranchSession> branchSessions) {
+        Set<BranchSessionVO> branchSessionVOs = new HashSet<>(branchSessions.size());
+        if (CollectionUtils.isNotEmpty(branchSessions)) {
+            for (BranchSession branchSession : branchSessions) {
+                BranchSessionVO branchSessionVONew = new BranchSessionVO();
+                BeanUtils.copyProperties(branchSession,branchSessionVONew);
+
+                branchSessionVONew.setBranchType(branchSession.getBranchType().name());
+                branchSessionVONew.setStatus(branchSession.getStatus().getCode());
+                branchSessionVOs.add(branchSessionVONew);
+            }
+        }
+        return branchSessionVOs;
+    }
+
     /**
      * convert GlobalSession to GlobalSessionVO
      *
      * @param filteredSessions the GlobalSession list
      * @return the GlobalSessionVO list
      */
-    public static List<GlobalSessionVO> convert(List<GlobalSession> filteredSessions) {
+    public static List<GlobalSessionVO> convertGlobalSession(List<GlobalSession> filteredSessions) {
 
         if (CollectionUtils.isEmpty(filteredSessions)) {
             return Collections.emptyList();
@@ -138,7 +171,7 @@ public class SessionConverter {
                     (long) session.getTimeout(),
                     session.getBeginTime(),
                     session.getApplicationData(),
-                    convert(session.getBranchSessions())
+                    convertBranchSession(session.getBranchSessions())
             ));
         }
         return result;
@@ -150,7 +183,7 @@ public class SessionConverter {
      * @param branchSessions the BranchSession list
      * @return the BranchSessionVO list
      */
-    public static Set<BranchSessionVO> convert(ArrayList<BranchSession> branchSessions) {
+    public static Set<BranchSessionVO> convertBranchSession(List<BranchSession> branchSessions) {
 
         if (CollectionUtils.isEmpty(branchSessions)) {
             return Collections.emptySet();

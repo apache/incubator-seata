@@ -194,6 +194,8 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-sqlparser-antlr</artifactId>
             <version>${project.version}</version>
+            <!-- Slimming down for 'seata-all.jar' -->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
@@ -230,10 +232,17 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-serializer-protobuf</artifactId>
             <version>${project.version}</version>
+            <!-- Slimming down for 'seata-all.jar' -->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-grpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-hsf</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -530,6 +539,12 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
