@@ -119,14 +119,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
     private final NettyClientBootstrap clientBootstrap;
-    private NettyClientChannelManager clientChannelManager;
+    private final NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
 
-    private RaftMetadata raftMetadata;
+    private final RaftMetadata raftMetadata = new RaftMetadata();
 
-    private boolean raft;
+    private boolean raftCluster;
 
     @Override
     public void init() {
@@ -156,7 +156,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
         Object result = null;
-        if (raft) {
+        if (raftCluster) {
             for (int i = 0; i < acquireClusterRetryCount; i++) {
                 result = sendSyncRequest(msg, i > 0);
                 if (result instanceof AbstractTransactionResponse) {
@@ -549,9 +549,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     protected void initClusterMetaData() {
-        raftMetadata = new RaftMetadata();
-        raft = acquireClusterMetaData();
-        if (raft) {
+        raftCluster = acquireClusterMetaData();
+        if (raftCluster) {
             findLeaderExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("findLeader", 1, true));
             // The leader election takes 5 second
             findLeaderExecutor.scheduleAtFixedRate(() -> {
@@ -622,9 +621,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                                     break;
                                 }
                             }
-                        } catch (TimeoutException e) {
-                            LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
-                        } catch (FrameworkException e) {
+                        } catch (TimeoutException | FrameworkException e) {
                             LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
                         }
                     }
