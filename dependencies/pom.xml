@@ -245,8 +245,8 @@
                         <groupId>org.slf4j</groupId>
                     </exclusion>
                     <exclusion>
-                        <artifactId>io.netty</artifactId>
-                        <groupId>netty</groupId>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty</artifactId>
                     </exclusion>
                     <exclusion>
                         <artifactId>org.apache.zookeeper</artifactId>
@@ -260,8 +260,8 @@
                 <version>${apache-zookeeper.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>io.netty</artifactId>
-                        <groupId>netty</groupId>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

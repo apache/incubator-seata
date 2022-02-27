@@ -96,9 +96,23 @@ public class DefaultCoreTest {
      * @throws TransactionException the transaction exception
      */
     @AfterEach
-    public void clean() throws TransactionException {
+    public synchronized void clean() throws TransactionException, InterruptedException {
         if (globalSession != null) {
-            globalSession.end();
+            int n = 10;
+            while (n-- > 0) {
+                try {
+                    globalSession.end();
+                    return;
+                } catch (TransactionException e) {
+                    throw e;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Thread.sleep(100);
+                    if (n == 0) {
+                       throw e;
+                    }
+                }
+            }
             globalSession = null;
         }
     }
