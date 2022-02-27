@@ -9,14 +9,14 @@ A visual graph Seata Saga StateMachine Designer based on [GGEditor](https://gith
 ```sh
 $ git clone https://github.com/seata/seata.git
 $ cd saga/seata-saga-statemachine-designer
-$ npm install
+$ npm install --legacy-peer-deps
 $ npm start
 ```
 
 ## build a package
 ```sh
 $ cd saga/saga-statemachine-designer
-$ npm build
+$ npm run build
 ```
 
 copy 'index.html' and 'dist' directory to static html directory of web server
