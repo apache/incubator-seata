@@ -639,5 +639,4 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         }
     }
 
-
 }
