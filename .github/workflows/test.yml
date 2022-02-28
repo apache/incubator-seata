@@ -1,0 +1,47 @@
+name: "test"
+
+on:
+  push:
+    branches: [ test*, 1.*.*, 2.*.* ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 8, 11, 17 ]
+        springboot: [
+            2.6.4,
+            2.5.10,
+            2.4.13,
+            2.3.12.RELEASE,
+            2.2.13.RELEASE,
+            #2.1.18.RELEASE,
+            #2.0.9.RELEASE,
+            #1.5.22.RELEASE,
+            #1.4.7.RELEASE,
+            #1.3.8.RELEASE,
+            #1.2.8.RELEASE,
+            #1.1.12.RELEASE,
+            #1.0.2.RELEASE
+        ]
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v2.3.4
+
+      # step 2
+      - name: "Set up Java JDK"
+        uses: actions/setup-java@v2.1.0
+        with:
+          distribution: 'zulu'
+          java-version: ${{ matrix.java }}
+
+      # step 3
+      - name: "Test with Maven"
+        # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
+        run: if [ "${{ matrix.java }}" == "8" ]; then
+            ./mvnw -T 4C clean install -e                      -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean install -e -P args-for-un-java8 -Dspring-boot.version=${{ matrix.springboot }} -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
