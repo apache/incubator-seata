@@ -49,9 +49,20 @@ public class ATModeSupportDataBaseDataTypeTest {
     private static final String MOCK_XID = "127.0.0.1:8091:" + TEST_ID;
     private static final long MOCK_BRANCH_ID = TEST_ID + 1;
 
-    private static final String ORACLE_JDBC_URL = "jdbc:oracle:thin:@localhost:1521:helowin";
+    /**
+     * test1:
+     * url:jdbc:oracle:thin:@localhost:49161:xe
+     * name:system
+     * password:oracle
+     *
+     * test2:
+     * jdbc:oracle:thin:@localhost:1521:helowin
+     * name:system
+     * password:helowin
+     */
+    private static final String ORACLE_JDBC_URL = "jdbc:oracle:thin:@localhost:49161:xe";
     private static final String ORACLE_USERNAME = "system";
-    private static final String ORACLE_PASSWORD = "helowin";
+    private static final String ORACLE_PASSWORD = "oracle";
     private static final String ORACLE_DRIVER_CLASSNAME = JdbcUtils.ORACLE_DRIVER;
 
     /**
