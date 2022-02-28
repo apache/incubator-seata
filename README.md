@@ -292,7 +292,15 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='正泰中自控制' height='40' src='https://img.alicdn.com/imgextra/i2/O1CN01i8iiCk29QuAitxiJq_!!6000000008063-0-tps-378-123.jpg' /img>
     <img alt='中国电子科技网络' height='40' src='https://img.alicdn.com/imgextra/i2/O1CN01LBYXi6288krJ6Axq8_!!6000000007888-2-tps-1206-158.png' /img>
     <img alt='卓源软件' height='40' src='https://img.alicdn.com/imgextra/i2/O1CN01FN4K3I1Sq4SQVsDxo_!!6000000002297-2-tps-414-95.png' /img>
+    <img alt='重庆直通物流有限公司' height='40' src='https://img.alicdn.com/imgextra/i2/O1CN0130Bp8H1STd65Fnxn0_!!6000000002248-2-tps-677-172.png' /img>
+    <img alt='海澜集团' height='40' src='https://img.alicdn.com/imgextra/i1/O1CN0186ESVW1hhZO7Otx4X_!!6000000004309-2-tps-376-108.png' /img>
+    <img alt='南宁微服信息技术有限公司' height='40' src='https://img.alicdn.com/imgextra/i2/O1CN011hLbRH1fTiAi6Lq5Z_!!6000000004008-0-tps-283-283.jpg' /img>
+    <img alt='日事清' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN01cJQsV91Fz9LeJEaL1_!!6000000000557-0-tps-339-189.jpg' /img>
+    <img alt='小鹏汽车' height='40' src='https://img.alicdn.com/imgextra/i4/O1CN01KvsEOP21a3CUzDllu_!!6000000007000-2-tps-1920-750.png' /img>
+    <img alt='平安人寿' height='40' src='https://img.alicdn.com/imgextra/i1/O1CN01Erdiwd1RrcDt2bqKl_!!6000000002165-0-tps-1080-1080.jpg' /img>
+    <img alt='光大银行' height='40' src='https://img.alicdn.com/imgextra/i4/O1CN01Rc0vU61sSQ3jvR0rw_!!6000000005765-2-tps-1076-228.png' /img>
 </div>
+
 
 
 
