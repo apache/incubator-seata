@@ -39,6 +39,7 @@ import io.seata.server.UUIDGenerator;
  *
  * author doubleDimple
  */
+@Disabled
 public class ATModeSupportDataBaseDataTypeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ATModeSupportDataBaseDataTypeTest.class);
