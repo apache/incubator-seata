@@ -128,6 +128,12 @@
             <artifactId>seata-serializer-seata</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.4.0-atlassian-hosted</version>
+        </dependency>
     </dependencies>
 
 
