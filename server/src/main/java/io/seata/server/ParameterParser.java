@@ -100,8 +100,8 @@ public class ParameterParser {
     }
 
     private void getEnvParameters() {
-        if (StringUtils.isBlank(this.seataEnv)) {
-            this.seataEnv = ContainerHelper.getEnv();
+        if (StringUtils.isBlank(seataEnv)) {
+            seataEnv = ContainerHelper.getEnv();
         }
         if (StringUtils.isBlank(host)) {
             host = ContainerHelper.getHost();
