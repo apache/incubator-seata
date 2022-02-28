@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `seata_state_machine_def`
     `recover_strategy` VARCHAR(16) COMMENT 'transaction recover strategy(compensate|retry)',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+  DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `seata_state_machine_inst`
 (
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `seata_state_machine_inst`
     PRIMARY KEY (`id`),
     UNIQUE KEY `unikey_buz_tenant` (`business_key`, `tenant_id`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+  DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `seata_state_inst`
 (
@@ -61,4 +61,4 @@ CREATE TABLE IF NOT EXISTS `seata_state_inst`
     `gmt_end`                  DATETIME(3) COMMENT 'end time',
     PRIMARY KEY (`id`, `machine_inst_id`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+  DEFAULT CHARSET = utf8mb4;
