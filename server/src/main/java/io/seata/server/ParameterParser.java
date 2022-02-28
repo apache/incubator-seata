@@ -69,23 +69,8 @@ public class ParameterParser {
 
     private void init(String[] args) {
         try {
-            if (ContainerHelper.isRunningInContainer()) {
-                this.seataEnv = ContainerHelper.getEnv();
-                this.host = ContainerHelper.getHost();
-                this.port = ContainerHelper.getPort();
-                this.serverNode = ContainerHelper.getServerNode();
-                this.storeMode = ContainerHelper.getStoreMode();
-                this.sessionStoreMode = ContainerHelper.getSessionStoreMode();
-                this.lockStoreMode = ContainerHelper.getLockStoreMode();
-            } else {
-                JCommander jCommander = JCommander.newBuilder().addObject(this).build();
-                jCommander.parse(args);
-                if (help) {
-                    jCommander.setProgramName(PROGRAM_NAME);
-                    jCommander.usage();
-                    System.exit(0);
-                }
-            }
+            getCommandParameters(args);
+            getEnvParameters();
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
@@ -102,6 +87,40 @@ public class ParameterParser {
             printError(e);
         }
 
+    }
+
+    private void getCommandParameters(String[] args) {
+        JCommander jCommander = JCommander.newBuilder().addObject(this).build();
+        jCommander.parse(args);
+        if (help) {
+            jCommander.setProgramName(PROGRAM_NAME);
+            jCommander.usage();
+            System.exit(0);
+        }
+    }
+
+    private void getEnvParameters() {
+        if (StringUtils.isBlank(seataEnv)) {
+            seataEnv = ContainerHelper.getEnv();
+        }
+        if (StringUtils.isBlank(host)) {
+            host = ContainerHelper.getHost();
+        }
+        if (port == 0) {
+            port = ContainerHelper.getPort();
+        }
+        if (serverNode == null) {
+            serverNode = ContainerHelper.getServerNode();
+        }
+        if (StringUtils.isBlank(storeMode)) {
+            storeMode = ContainerHelper.getStoreMode();
+        }
+        if (StringUtils.isBlank(sessionStoreMode)) {
+            sessionStoreMode = ContainerHelper.getSessionStoreMode();
+        }
+        if (StringUtils.isBlank(lockStoreMode)) {
+            lockStoreMode = ContainerHelper.getLockStoreMode();
+        }
     }
 
     private void printError(ParameterException e) {
