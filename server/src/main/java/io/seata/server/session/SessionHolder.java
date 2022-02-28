@@ -173,7 +173,6 @@ public class SessionHolder {
                             removeInErrorState(globalSession);
                             break;
                         case AsyncCommitting:
-                            lockBranchSessions(globalSession.getSortedBranches());
                             queueToAsyncCommitting(globalSession);
                             break;
                         case Committing:
