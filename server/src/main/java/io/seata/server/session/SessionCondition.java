@@ -60,7 +60,7 @@ public class SessionCondition {
      *
      * @param statuses the statuses
      */
-    public SessionCondition(GlobalStatus[] statuses) {
+    public SessionCondition(GlobalStatus... statuses) {
         this.statuses = statuses;
     }
 

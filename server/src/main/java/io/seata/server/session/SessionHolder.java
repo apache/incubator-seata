@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,6 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.core.store.StoreMode;
-import io.seata.core.model.LockStatus;
 
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
@@ -153,10 +153,12 @@ public class SessionHolder {
      * @param storeMode the mode of store
      */
     protected static void reload(StoreMode storeMode) {
+
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
+        }
 
-
+        if (storeMode == StoreMode.FILE) {
             Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
             if (CollectionUtils.isNotEmpty(allSessions)) {
                 for (GlobalSession globalSession : allSessions) {
@@ -170,20 +172,20 @@ public class SessionHolder {
                         case TimeoutRollbacked:
                         case TimeoutRollbackFailed:
                         case Finished:
-                            // To do nothing
+                            removeInErrorState(globalSession);
                             break;
                         case AsyncCommitting:
+                            lockBranchSessions(globalSession.getSortedBranches());
                             queueToAsyncCommitting(globalSession);
                             break;
                         case Committing:
                         case CommitRetrying:
+                            lockBranchSessions(globalSession.getSortedBranches());
                             queueToRetryCommit(globalSession);
                             break;
                         default: {
-                            // Firstly acquire global locks
                             lockBranchSessions(globalSession.getSortedBranches());
 
-                            // Secondly redo the unfinished and unsuccessful status
                             switch (globalStatus) {
                                 case Rollbacking:
                                 case RollbackRetrying:
@@ -203,6 +205,30 @@ public class SessionHolder {
                     }
                 }
             }
+        } else {
+            // Redis, db and so on
+            CompletableFuture.runAsync(() -> {
+                SessionCondition searchCondition = new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Committed,
+                        GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.RollbackFailed,
+                        GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished);
+                searchCondition.setLazyLoadBranch(true);
+
+                long now = System.currentTimeMillis();
+                List<GlobalSession> removeGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                while (!CollectionUtils.isEmpty(removeGlobalSessions)) {
+                    for (GlobalSession removeGlobalSession : removeGlobalSessions) {
+                        if (removeGlobalSession.getBeginTime() >= now) {
+                            // Exit when the global transaction begin after the instance started
+                            return;
+                        }
+
+                        removeInErrorState(removeGlobalSession);
+                    }
+
+                    // Load the next part
+                    ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                }
+            });
         }
     }
 
