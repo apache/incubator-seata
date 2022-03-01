@@ -27,13 +27,13 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 @ConfigurationProperties(prefix = CONFIG_PREFIX)
 public class ConfigProperties {
     /**
-     * file, nacos, apollo, zk, consul, etcd3, springCloudConfig
+     * file, nacos, apollo, zk, consul, etcd3, springCloudConfig, redis
      */
     private String type = "file";
     /**
      * properties,yaml(only type in nacos, zk, consul, etcd3)
      */
-    private String dataType ;
+    private String dataType;
 
     public String getType() {
         return type;
