@@ -72,6 +72,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
+        <spring-boot.version>2.4.13</spring-boot.version>
 
         <!-- Maven plugin versions -->
         <!-- Build -->
@@ -112,6 +114,7 @@
         <checkstyle.skip>true</checkstyle.skip>
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
+        <maven.surefire.argLine></maven.surefire.argLine>
         <gpg.keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</gpg.keyname>
 
         <!-- For docker image-->
@@ -222,6 +225,9 @@
                             <directory>./</directory>
                             <includes>
                                 <include>*-pom*.xml</include>
+                                <include>**/db_store/**</include>
+                                <include>**/sessionStore/**</include>
+                                <include>**/root.data</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
@@ -349,6 +355,27 @@
                     <url>https://oss.sonatype.org/content/repositories/snapshots</url>
                 </snapshotRepository>
             </distributionManagement>
+        </profile>
+
+        <profile>
+            <id>args-for-un-java8</id>
+            <properties>
+                <maven.surefire.argLine>
+                    --add-opens java.base/java.lang=ALL-UNNAMED
+                    --add-opens java.base/java.net=ALL-UNNAMED
+                    --add-opens java.base/java.math=ALL-UNNAMED
+                    --add-opens java.base/java.text=ALL-UNNAMED
+                    --add-opens java.base/java.util=ALL-UNNAMED
+                    --add-opens java.base/java.util.regex=ALL-UNNAMED
+                    --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+
+                    --add-opens java.sql/java.sql=ALL-UNNAMED
+                    --add-opens java.sql.rowset/javax.sql.rowset.serial=ALL-UNNAMED
+
+                    --illegal-access=permit
+                    -Dillegal-access=permit
+                </maven.surefire.argLine>
+            </properties>
         </profile>
     </profiles>
 </project>

@@ -16,7 +16,7 @@ CREATE TABLE global_table
     PRIMARY KEY (xid)
 );
 
-CREATE INDEX idx_gmt_modified_status ON global_table (gmt_modified, status);
+CREATE INDEX idx_status_gmt_modified ON global_table (status, gmt_modified);
 CREATE INDEX idx_transaction_id ON global_table (transaction_id);
 
 -- the table to store BranchSession data
@@ -65,8 +65,5 @@ CREATE TABLE distributed_lock (
     PRIMARY KEY (lock_key)
 );
 
-INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('AsyncCommitting', ' ', 0);
-INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
-INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
-INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('HandleAllSession', ' ', 0);
 
