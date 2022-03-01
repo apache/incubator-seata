@@ -808,4 +808,19 @@ public interface ConfigurationKeys {
      * The constant ENABLE_BRANCH_ASYNC_REMOVE
      */
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
+
+    /**
+     * The constant XAER_NOTA_RETRY_TIMEOUT
+     */
+    String XAER_NOTA_RETRY_TIMEOUT = SERVER_PREFIX + "xaerNotaRetryTimeout";
+
+    /**
+     * The constant XA_BRANCH_EXECUTION_TIMEOUT
+     */
+    String XA_BRANCH_EXECUTION_TIMEOUT = CLIENT_RM_PREFIX + "branchExecutionTimeoutXA";
+
+    /**
+     * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
+     */
+    String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
 }
