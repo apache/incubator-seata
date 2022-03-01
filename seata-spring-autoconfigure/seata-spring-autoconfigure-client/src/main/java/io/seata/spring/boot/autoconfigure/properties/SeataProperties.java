@@ -103,7 +103,7 @@ public class SeataProperties {
 
     public String getTxServiceGroup() {
         if (txServiceGroup == null) {
-            txServiceGroup = springCloudAlibabaConfiguration.getTxServiceGroup();
+            txServiceGroup = DefaultValues.DEFAULT_TX_GROUP;
         }
         return txServiceGroup;
     }

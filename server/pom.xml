@@ -27,26 +27,6 @@
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
 
-    <properties>
-        <spring-boot.version>2.3.10.RELEASE</spring-boot.version>
-
-        <!-- logback-appenders -->
-        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
-        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-parent</artifactId>
-                <version>${spring-boot.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <!-- springboot web -->
         <dependency>
@@ -84,12 +64,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-all</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -105,6 +79,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-metrics-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-console</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -133,6 +113,14 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+        <!-- Copyright restrictions, do not reference this dependency.
+             You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
+        <dependency>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>${ojdbc.version}</version>
+        </dependency>-->
+
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
@@ -170,12 +158,10 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>${logstash-logback-encoder.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.danielwegener</groupId>
             <artifactId>logback-kafka-appender</artifactId>
-            <version>${kafka-appender.version}</version>
         </dependency>
     </dependencies>
 
@@ -184,7 +170,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -192,16 +177,14 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>2.3.0</version>
+                <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
                         <image>${IMAGE_NAME}</image>
                     </from>
                     <to>
                         <image>docker.io/seataio/seata-server</image>
-                        <tags>
-                            ${image.tags}
-                        </tags>
+                        <tags>${image.tags}</tags>
                         <auth>
                             <username>${REGISTRY_USERNAME}</username>
                             <password>${REGISTRY_PASSWORD}</password>
@@ -273,11 +256,6 @@
             <build>
                 <finalName>seata-server</finalName>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.2.0</version>
-                    </plugin>
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
