@@ -176,8 +176,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     private DefaultCoordinator(RemotingServer remotingServer) {
         String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        // file mode requires no delay in processing
-        this.delayHandleSession = !StringUtils.equalsIgnoreCase(mode, StoreMode.FILE.getName());
+        // file and raft mode requires no delay in processing
+        this.delayHandleSession = !(StringUtils.equalsIgnoreCase(mode, StoreMode.FILE.getName())
+            || StringUtils.equals(mode, StoreMode.RAFT.getName()));
         if (remotingServer == null) {
             throw new IllegalArgumentException("RemotingServer not allowed be null.");
         }

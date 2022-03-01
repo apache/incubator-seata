@@ -27,7 +27,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.env.ContainerHelper;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
@@ -51,9 +50,6 @@ public class Server {
     public static void start(String[] args) {
         // create logger
         final Logger logger = LoggerFactory.getLogger(Server.class);
-        if (ContainerHelper.isRunningInContainer()) {
-            logger.info("The server is running in container.");
-        }
 
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
