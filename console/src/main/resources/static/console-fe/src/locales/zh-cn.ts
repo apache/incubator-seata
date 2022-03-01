@@ -18,7 +18,8 @@ import { ILocale } from './index.d';
 
 const zhCn: ILocale = {
   MenuRouter: {
-    overview: '概览'
+    overview: '概览',
+    globalSession: '全局事务',
   },
   Header: {
     home: '首页',
@@ -42,7 +43,12 @@ const zhCn: ILocale = {
     title: '概览',
     subTitle: '基础列表页',
     search: '搜索',
-  }
+  },
+  GlobalSession: {
+    title: '全局事务',
+    subTitle: '基础列表页',
+    createTime: '创建时间',
+  },
 };
 
 export default zhCn;

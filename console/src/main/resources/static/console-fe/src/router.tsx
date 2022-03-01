@@ -15,8 +15,10 @@
  */
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import Overview from '@/pages/Overview';
+import GlobalSession from '@/pages/GlobalSession';
 
 export default [
   // { path: '/', exact: true, render: () => <Redirect to="/Overview" /> },
   { path: '/Overview', component: Overview },
+  { path: '/GlobalSession', component: GlobalSession },
 ];

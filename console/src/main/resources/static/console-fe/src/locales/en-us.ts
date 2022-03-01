@@ -19,6 +19,7 @@ import { ILocale } from './index.d';
 const enUs: ILocale = {
   MenuRouter: {
     overview: 'Overview',
+    globalSession: 'GlobalSession',
   },
   Header: {
     home: 'HOME',
@@ -36,13 +37,18 @@ const enUs: ILocale = {
     pleaseInputUsername: 'Please input username',
     pleaseInputPassword: 'Please input password',
     invalidUsernameOrPassword: 'invalid username or password',
-    desc: 'Seata is an open source distributed transaction solution that delivers high performance and easy to use distributed transaction services under a microservices architecture.'
+    desc: 'Seata is an open source distributed transaction solution that delivers high performance and easy to use distributed transaction services under a microservices architecture.',
   },
   Overview: {
     title: 'Overview',
     subTitle: 'list',
     search: 'search',
-  }
+  },
+  GlobalSession: {
+    title: 'GlobalSession',
+    subTitle: 'list',
+    createTime: 'CreateTime',
+  },
 };
 
 export default enUs;
