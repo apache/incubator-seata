@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import io.seata.common.XID;
-import io.seata.common.exception.InvalidParamException;
 import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.result.PageResult;
 import io.seata.core.console.vo.GlobalSessionVO;
@@ -271,7 +270,7 @@ public class FileSessionManagerTest {
 
             // wrong pageSize or pageNum
             Assertions.assertThrows(
-                    InvalidParamException.class,
+                    IllegalArgumentException.class,
                     () -> globalSessionService.query(globalSessionParam)
             );
 

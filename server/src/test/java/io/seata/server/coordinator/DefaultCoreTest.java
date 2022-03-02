@@ -23,7 +23,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.server.ServerApplication;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -44,7 +43,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author zhimo.xiao @gmail.com
  */
-@SpringBootTest(classes = ServerApplication.class)
+@SpringBootTest
 public class DefaultCoreTest {
 
     private static DefaultCore core;
@@ -96,9 +95,23 @@ public class DefaultCoreTest {
      * @throws TransactionException the transaction exception
      */
     @AfterEach
-    public void clean() throws TransactionException {
+    public synchronized void clean() throws TransactionException, InterruptedException {
         if (globalSession != null) {
-            globalSession.end();
+            int n = 10;
+            while (n-- > 0) {
+                try {
+                    globalSession.end();
+                    return;
+                } catch (TransactionException e) {
+                    throw e;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Thread.sleep(100);
+                    if (n == 0) {
+                       throw e;
+                    }
+                }
+            }
             globalSession = null;
         }
     }
@@ -189,14 +202,14 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitUnretryableTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.TCC, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.TCC,
                 new MockCore(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitFailed);
     }
 
     /**
@@ -229,7 +242,7 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void rollBackTest(String xid) throws Exception {
         GlobalStatus globalStatus = core.rollback(xid);
-        Assertions.assertEquals(globalStatus, GlobalStatus.Rollbacking);
+        Assertions.assertEquals(globalStatus, GlobalStatus.Rollbacked);
     }
 
     /**
@@ -249,7 +262,7 @@ public class DefaultCoreTest {
         core.mockCore(BranchType.AT,
                 new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
     }
 
     /**
