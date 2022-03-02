@@ -92,7 +92,8 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus targetStatus) throws TransactionException {
+    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus targetStatus)
+        throws TransactionException {
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }

@@ -91,7 +91,8 @@ public class RedisSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus targetStatus) throws TransactionException {
+    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus targetStatus)
+        throws TransactionException {
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }

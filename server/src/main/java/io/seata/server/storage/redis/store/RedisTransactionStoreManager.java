@@ -153,8 +153,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         if (globalMap.containsKey(logOperation)) {
             GlobalSession globalSession = (GlobalSession)session;
             RedisGlobalTransactionVO vo = new RedisGlobalTransactionVO();
-            GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(session);
-            vo.setGlobalTransactionDO(globalTransactionDO);
+            vo.setGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
             vo.setExpectedStatus(globalSession.getStatus());
             return globalMap.get(logOperation).apply(vo);
         } else if (branchMap.containsKey(logOperation)) {
