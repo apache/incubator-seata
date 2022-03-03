@@ -16,7 +16,6 @@
 package io.seata.config.etcd3;
 
 import java.io.IOException;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.List;
@@ -31,7 +30,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KeyValue;
@@ -50,7 +48,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -59,6 +56,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import static io.netty.util.CharsetUtil.UTF_8;
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
@@ -69,7 +67,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  *
  * @author xingfudeshi @gmail.com
  */
-public class EtcdConfiguration extends AbstractConfiguration {
+public class EtcdConfiguration implements Configuration {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdConfiguration.class);
     private static volatile EtcdConfiguration instance;
     private static volatile Client client;
