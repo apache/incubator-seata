@@ -16,6 +16,9 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -23,10 +26,13 @@ import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.core.env.ConfigurableEnvironment;
+
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.util.StringFormatUtils.DOT;
@@ -41,7 +47,12 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VG
  * @author funkye
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringBootConfigurationProvider.class);
+
     private static final String INTERCEPT_METHOD_PREFIX = "get";
+
+    private static final Map<String, Object> PROPERTY_BEAN_INSTANCE_MAP = new HashMap<>(64);
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
@@ -79,14 +90,23 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException, InstantiationException {
+    private Object get(String dataId) throws IllegalAccessException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
         Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         Object valueObject = null;
         if (propertyClass != null) {
             try {
-                valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
+                valueObject = getFieldValue(
+                        Objects.requireNonNull(PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
+                            try {
+                            return propertyClass.newInstance();
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            LOGGER.error("PropertyClass for prefix: [" + propertyPrefix
+                                + "] should not be null. error :" + e.getMessage(), e);
+                        }
+                        return null;
+                        })), propertySuffix, dataId);
             } catch (NoSuchBeanDefinitionException ignore) {
 
             }
@@ -113,7 +133,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
-            return environment.getProperty(dataId, field.getType());
+            Object value = environment.getProperty(dataId, field.getType());
+            if (value == null) {
+                field.setAccessible(true);
+                value = field.get(object);
+            }
+            return value;
         }
         return null;
     }
