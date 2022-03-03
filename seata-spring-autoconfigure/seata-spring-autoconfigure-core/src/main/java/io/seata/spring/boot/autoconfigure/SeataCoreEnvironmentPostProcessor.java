@@ -68,6 +68,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
 /**
  * @author xingfudeshi@gmail.com
  * @author wang.liang
+ * @author funkye
  */
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
