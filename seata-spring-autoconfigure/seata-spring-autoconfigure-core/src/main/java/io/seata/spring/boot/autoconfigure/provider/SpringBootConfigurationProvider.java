@@ -16,11 +16,8 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
@@ -29,10 +26,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.util.StringFormatUtils.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
@@ -42,39 +38,37 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VG
 
 /**
  * @author xingfudeshi@gmail.com
+ * @author funkye
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
     private static final String INTERCEPT_METHOD_PREFIX = "get";
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration) Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
-            @Override
-            public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)
-                throws Throwable {
-                if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
-                    Object result = null;
-                    String rawDataId = (String) args[0];
-                    result = originalConfiguration.getConfigFromSys(rawDataId);
-                    if (null == result) {
-                        if (args.length == 1) {
-                            result = get(convertDataId(rawDataId));
-                        } else {
-                            result = get(convertDataId(rawDataId), args[1]);
+        return (Configuration) Enhancer.create(originalConfiguration.getClass(),
+                (MethodInterceptor) (proxy, method, args, methodProxy) -> {
+                    if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
+                        Object result;
+                        String rawDataId = (String) args[0];
+                        result = originalConfiguration.getConfigFromSys(rawDataId);
+                        if (null == result) {
+                            if (args.length == 1) {
+                                result = get(convertDataId(rawDataId));
+                            } else {
+                                result = get(convertDataId(rawDataId), args[1]);
+                            }
+                        }
+                        if (result != null) {
+                            //If the return type is String,need to convert the object to string
+                            if (method.getReturnType().equals(String.class)) {
+                                return String.valueOf(result);
+                            }
+                            return result;
                         }
                     }
-                    if (result != null) {
-                        //If the return type is String,need to convert the object to string
-                        if (method.getReturnType().equals(String.class)) {
-                            return String.valueOf(result);
-                        }
-                        return result;
-                    }
-                }
 
-                return method.invoke(originalConfiguration, args);
-            }
-        });
+                    return method.invoke(originalConfiguration, args);
+                });
     }
 
     private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
@@ -88,21 +82,16 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     private Object get(String dataId) throws IllegalAccessException, InstantiationException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
-        ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
         Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         Object valueObject = null;
         if (propertyClass != null) {
             try {
-                Object propertyBean = applicationContext.getBean(propertyClass);
-                valueObject = getFieldValue(propertyBean, propertySuffix, dataId);
+                valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
             } catch (NoSuchBeanDefinitionException ignore) {
 
             }
         } else {
             throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
-        }
-        if (valueObject == null) {
-            valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
         }
 
         return valueObject;
@@ -118,19 +107,15 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @author xingfudeshi@gmail.com
      */
     private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
-        Object value = null;
-        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields()).filter(
-            f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
+        ConfigurableEnvironment environment =
+            (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
+            .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
-            field.setAccessible(true);
-            value = field.get(object);
-            if (value instanceof Map) {
-                String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
-                value = ((Map) value).get(key);
-            }
+            return environment.getProperty(dataId, field.getType());
         }
-        return value;
+        return null;
     }
 
     /**
