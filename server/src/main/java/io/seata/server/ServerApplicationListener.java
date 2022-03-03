@@ -41,10 +41,9 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONF
 
 /**
  * @author slievrly
+ * @author funkye
  */
 public class ServerApplicationListener implements GenericApplicationListener {
-
-    private Configuration config;
 
     @Override
     public boolean supportsEventType(ResolvableType eventType) {
@@ -62,7 +61,7 @@ public class ServerApplicationListener implements GenericApplicationListener {
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
         SeataCoreEnvironmentPostProcessor.init();
         SeataServerEnvironmentPostProcessor.init();
-        config  = ConfigurationFactory.getInstance();
+        Configuration config  = ConfigurationFactory.getInstance();
         // Load by priority
         System.setProperty("sessionMode",
                 config.getConfig(STORE_SESSION_MODE, config.getConfig(STORE_MODE, "file")));
