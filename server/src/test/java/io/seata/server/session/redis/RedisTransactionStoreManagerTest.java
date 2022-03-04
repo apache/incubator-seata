@@ -33,6 +33,8 @@ import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
@@ -45,6 +47,9 @@ import redis.clients.jedis.Pipeline;
  */
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
+
+    private Logger logger = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
+
     private static RedisServer server = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
 
@@ -121,7 +126,7 @@ public class RedisTransactionStoreManagerTest {
     @Test
     public void testQueryGlobalslSession() {
         Long count = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
-        System.out.print(count);
+        logger.info("the count is:[{}]",count);
     }
 
     @Test
@@ -131,8 +136,15 @@ public class RedisTransactionStoreManagerTest {
         param.setPageSize(5);
         param.setWithBranch(false);
         List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
-        System.out.print(globalSessionKeys.size());
-        System.out.print(globalSessionKeys);
+        logger.info("the result size is:[{}]",globalSessionKeys.size());
+        logger.info("the globalSessionKeys is:[{}]",globalSessionKeys);
+    }
+
+    @Test
+    public void testLimitAllSessions() {
+        redisTransactionStoreManager.setLogQueryLimit(20);
+        List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
+        logger.info("the limit All Sessions result is:[{}]",globalSessions);
     }
 
     @AfterAll

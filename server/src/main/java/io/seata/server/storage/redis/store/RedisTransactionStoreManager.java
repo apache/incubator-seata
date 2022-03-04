@@ -63,7 +63,6 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MOD
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
 
-
 /**
  * The redis transaction store manager
  *
@@ -423,9 +422,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         for (int i = 0; i < statuses.length; i++) {
             statusKeys.add(buildGlobalStatus(statuses[i].getCode()));
         }
-
         logQueryLimit =  resetLogQueryLimit(statusKeys);
-
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
             statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, logQueryLimit));
