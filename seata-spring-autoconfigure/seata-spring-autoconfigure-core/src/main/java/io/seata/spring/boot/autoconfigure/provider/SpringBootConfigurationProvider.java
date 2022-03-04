@@ -133,10 +133,20 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
-            Object value = environment.getProperty(dataId, field.getType());
-            if (value == null) {
-                field.setAccessible(true);
-                value = field.get(object);
+            Object value;
+            field.setAccessible(true);
+            value = field.get(object);
+            if (value instanceof Map) {
+                value = environment.getProperty(dataId);
+            } else {
+                value = environment.getProperty(dataId, field.getType());
+                if (value == null) {
+                    value =
+                        environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), field.getType());
+                    if (value == null) {
+                        value = field.get(object);
+                    }
+                }
             }
             return value;
         }
