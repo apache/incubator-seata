@@ -327,18 +327,19 @@ public class StringUtils {
 
     /**
      * hump to Line or line to hump
+     * 
      * @param str str
      * @return string string
      */
     public static String hump2Line(String str) {
         Matcher matcher = HUMP_PATTERN.matcher(str);
         StringBuffer sb = new StringBuffer();
-        if(matcher.find()) {
+        if (matcher.find()) {
             matcher.appendReplacement(sb, "-" + matcher.group(0).toLowerCase());
             while (matcher.find()) {
                 matcher.appendReplacement(sb, "-" + matcher.group(0).toLowerCase());
             }
-        }else {
+        } else {
             matcher = LINE_PATTERN.matcher(str);
             while (matcher.find()) {
                 matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
