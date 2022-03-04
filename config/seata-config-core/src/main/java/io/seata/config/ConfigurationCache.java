@@ -99,8 +99,14 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public Configuration proxy(Configuration originalConfiguration) {
-        return (Configuration) Proxy.newProxyInstance(originalConfiguration.getClass().getClassLoader(), originalConfiguration.getClass().getInterfaces(),
-                (proxy, method, args) -> {
+        Class<?> clazz;
+        if (originalConfiguration.getClass().getName().contains("$$")) {
+            clazz = originalConfiguration.getClass().getSuperclass();
+        } else {
+            clazz = originalConfiguration.getClass();
+        }
+        return (Configuration)Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
+            (proxy, method, args) -> {
                     if (method.getName().startsWith(METHOD_PREFIX)
                         && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                         String rawDataId = (String)args[0];
