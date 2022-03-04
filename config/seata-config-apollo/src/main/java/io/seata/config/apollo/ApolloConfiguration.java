@@ -38,7 +38,6 @@ import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
 
-
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 

@@ -33,7 +33,6 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -56,7 +55,7 @@ import static io.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
  *
  * @author crazier.huang
  */
-public class ZookeeperConfiguration extends AbstractConfiguration {
+public class ZookeeperConfiguration implements Configuration {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
 
     private static final String CONFIG_TYPE = "zk";
