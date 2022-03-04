@@ -40,6 +40,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_SERVICE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
@@ -135,17 +136,17 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             Field field = fieldOptional.get();
             Object value;
             field.setAccessible(true);
-            value = field.get(object);
-            if (value instanceof Map) {
-                value = environment.getProperty(dataId);
+            Object defaultValue = field.get(object);
+            if (defaultValue instanceof Map) {
+                value = environment.getProperty(dataId, environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId)));
             } else {
                 value = environment.getProperty(dataId, field.getType());
                 if (value == null) {
                     value =
                         environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), field.getType());
-                    if (value == null) {
-                        value = field.get(object);
-                    }
+                }
+                if (value == null) {
+                    value = defaultValue;
                 }
             }
             return value;
@@ -161,8 +162,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      */
     private String convertDataId(String rawDataId) {
         if (rawDataId.endsWith(SPECIAL_KEY_GROUPLIST)) {
-            String suffix = StringUtils.removeEnd(rawDataId, DOT + SPECIAL_KEY_GROUPLIST);
-            //change the format of default.grouplist to grouplist.default
+            String suffix = StringUtils.removeStart(StringUtils.removeEnd(rawDataId, DOT + SPECIAL_KEY_GROUPLIST),
+                SPECIAL_KEY_SERVICE + DOT);
+            // change the format of default.grouplist to grouplist.default
             return SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT + suffix;
         }
         return SEATA_PREFIX + DOT + rawDataId;
