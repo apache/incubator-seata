@@ -98,15 +98,15 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (propertyClass != null) {
             try {
                 valueObject = getFieldValue(
-                        Objects.requireNonNull(PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
-                            try {
+                    Objects.requireNonNull(PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
+                        try {
                             return propertyClass.newInstance();
                         } catch (InstantiationException | IllegalAccessException e) {
                             LOGGER.error("PropertyClass for prefix: [" + propertyPrefix
                                 + "] should not be null. error :" + e.getMessage(), e);
                         }
                         return null;
-                        })), propertySuffix, dataId);
+                    })), propertySuffix, dataId);
             } catch (NoSuchBeanDefinitionException ignore) {
 
             }
