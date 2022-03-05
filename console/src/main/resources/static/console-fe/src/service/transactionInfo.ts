@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import request from '@/utils/request';
 
-export interface ILocaleMap {
-    [key: string]: string
-}
-export interface ILocale {
-  MenuRouter: ILocaleMap;
-  Header: ILocaleMap;
-  Login: ILocaleMap;
-  Overview: ILocaleMap;
-  TransactionInfo: ILocaleMap;
+export default async function fetchData():Promise<any> {
+  let result = await request('/console/globalSession/query', {
+    baseURL: '/',
+    method: 'get',
+    data: {
+      pageSize: 10,
+      pageNum: 1,
+    },
+  });
+
+  return result;
 }

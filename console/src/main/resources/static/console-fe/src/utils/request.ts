@@ -58,7 +58,7 @@ const request = () => {
   instance.interceptors.response.use(
     (response: AxiosResponse): Promise<any> => {
       const code = get(response, 'data.code');
-      if (response.status === 200 && code === 200) {
+      if (response.status === 200 && (code === '200' || code === 200)) {
         return Promise.resolve(get(response, 'data.data'));
       } else {
         const errorText =
