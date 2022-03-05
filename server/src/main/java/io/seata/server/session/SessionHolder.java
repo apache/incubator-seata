@@ -16,6 +16,7 @@
 package io.seata.server.session;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -209,21 +210,28 @@ public class SessionHolder {
                         GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.RollbackFailed,
                         GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished);
                 searchCondition.setLazyLoadBranch(true);
+                List<GlobalStatus> failedStatus = Arrays.asList(GlobalStatus.CommitFailed,
+                        GlobalStatus.RollbackFailed,
+                        GlobalStatus.TimeoutRollbackFailed);
 
                 long now = System.currentTimeMillis();
-                List<GlobalSession> removeGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
-                while (!CollectionUtils.isEmpty(removeGlobalSessions)) {
-                    for (GlobalSession removeGlobalSession : removeGlobalSessions) {
-                        if (removeGlobalSession.getBeginTime() >= now) {
+                List<GlobalSession> errorStatusGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                while (!CollectionUtils.isEmpty(errorStatusGlobalSessions)) {
+                    for (GlobalSession errorStatusGlobalSession : errorStatusGlobalSessions) {
+                        if (errorStatusGlobalSession.getBeginTime() >= now) {
                             // Exit when the global transaction begin after the instance started
                             return;
                         }
 
-                        removeInErrorState(removeGlobalSession);
+                        if (failedStatus.contains(errorStatusGlobalSession.getStatus())) {
+                            LOGGER.error("Thr Global session {} is in failed status, please handle it manually.", errorStatusGlobalSession.getXid());
+                        } else {
+                            removeInErrorState(errorStatusGlobalSession);
+                        }
                     }
 
                     // Load the next part
-                    ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                    errorStatusGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
                 }
             });
         }
