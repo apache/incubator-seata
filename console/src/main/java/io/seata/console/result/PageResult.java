@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.result;
+package io.seata.console.result;
 
 package io.seata.console.result;
 
