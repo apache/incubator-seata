@@ -422,10 +422,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         for (int i = 0; i < statuses.length; i++) {
             statusKeys.add(buildGlobalStatus(statuses[i].getCode()));
         }
-        logQueryLimit =  resetLogQueryLimit(statusKeys);
+        int limit = resetLogQueryLimit(statusKeys);
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, logQueryLimit));
+            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, limit));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
             pipelined.close();
             List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
