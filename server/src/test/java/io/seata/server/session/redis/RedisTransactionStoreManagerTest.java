@@ -48,7 +48,7 @@ import redis.clients.jedis.Pipeline;
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
 
-    private static final  Logger logger = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
     private static RedisServer server = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
@@ -126,7 +126,7 @@ public class RedisTransactionStoreManagerTest {
     @Test
     public void testQueryGlobalslSession() {
         Long count = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
-        logger.info("the count is:[{}]",count);
+        LOGGER.info("the count is:[{}]",count);
     }
 
     @Test
@@ -136,15 +136,15 @@ public class RedisTransactionStoreManagerTest {
         param.setPageSize(5);
         param.setWithBranch(false);
         List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
-        logger.info("the result size is:[{}]",globalSessionKeys.size());
-        logger.info("the globalSessionKeys is:[{}]",globalSessionKeys);
+        LOGGER.info("the result size is:[{}]",globalSessionKeys.size());
+        LOGGER.info("the globalSessionKeys is:[{}]",globalSessionKeys);
     }
 
     @Test
     public void testLimitAllSessions() {
         redisTransactionStoreManager.setLogQueryLimit(20);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
-        logger.info("the limit All Sessions result is:[{}]",globalSessions);
+        LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
     }
 
     @AfterAll
