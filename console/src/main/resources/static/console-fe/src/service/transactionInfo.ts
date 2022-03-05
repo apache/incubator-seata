@@ -21,6 +21,7 @@ export default async function fetchData():Promise<any> {
     params: {
       pageSize: 10,
       pageNum: 1,
+      withBranch: true,
     },
   });
 

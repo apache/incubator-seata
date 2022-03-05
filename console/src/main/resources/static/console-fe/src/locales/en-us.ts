@@ -53,6 +53,10 @@ const enUs: ILocale = {
     branchSessionSwitchLabel: 'Whether to include branch sessions',
     resetButtonLabel: 'Reset',
     searchButtonLabel: 'Search',
+    operateTitle: 'operate',
+    showBranchSessionTitle: 'View branch session',
+    showGlobalLockTitle: 'View global lock',
+    branchSessionDialogTitle: 'Branch session info',
   },
 };
 
