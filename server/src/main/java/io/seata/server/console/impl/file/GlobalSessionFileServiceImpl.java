@@ -28,12 +28,9 @@ import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.SessionConverter;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.util.CollectionUtils.isEmpty;
-import static io.seata.common.util.CollectionUtils.isNotEmpty;
 import static io.seata.common.util.StringUtils.isBlank;
 import static java.util.Objects.isNull;
 
@@ -90,10 +87,6 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
                 &&
                 // transactionName
                 (isBlank(param.getTransactionName()) || session.getTransactionName().contains(param.getTransactionName()))
-
-                &&
-                // withBranch
-                (param.isWithBranch() ? isNotEmpty(session.getBranchSessions()) : isEmpty(session.getBranchSessions()))
 
                 &&
                 // timeStart
