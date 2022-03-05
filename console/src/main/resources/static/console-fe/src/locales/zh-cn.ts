@@ -19,7 +19,7 @@ import { ILocale } from './index.d';
 const zhCn: ILocale = {
   MenuRouter: {
     overview: '概览',
-    globalSession: '全局事务',
+    transactionInfo: '事务信息',
   },
   Header: {
     home: '首页',
@@ -44,10 +44,15 @@ const zhCn: ILocale = {
     subTitle: '基础列表页',
     search: '搜索',
   },
-  GlobalSession: {
-    title: '全局事务',
+  TransactionInfo: {
+    title: '事务信息',
     subTitle: '基础列表页',
-    createTime: '创建时间',
+    createTimeLabel: '创建时间',
+    searchFilerPlaceholder: '请选择筛选条件',
+    searchPlaceholder: '请输入筛选条件',
+    branchSessionSwitchLabel: '是否包含分支事务',
+    resetButtonLabel: '重置',
+    searchButtonLabel: '搜索',
   },
 };
 

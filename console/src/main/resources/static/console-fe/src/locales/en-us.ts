@@ -19,7 +19,7 @@ import { ILocale } from './index.d';
 const enUs: ILocale = {
   MenuRouter: {
     overview: 'Overview',
-    globalSession: 'GlobalSession',
+    transactionInfo: 'TransactionInfo',
   },
   Header: {
     home: 'HOME',
@@ -44,10 +44,15 @@ const enUs: ILocale = {
     subTitle: 'list',
     search: 'search',
   },
-  GlobalSession: {
-    title: 'GlobalSession',
+  TransactionInfo: {
+    title: 'TransactionInfo',
     subTitle: 'list',
-    createTime: 'CreateTime',
+    createTimeLabel: 'CreateTime',
+    searchFilerPlaceholder: 'Please select filter criteria',
+    searchPlaceholder: 'Please enter filter criteria',
+    branchSessionSwitchLabel: 'Whether to include branch sessions',
+    resetButtonLabel: 'Reset',
+    searchButtonLabel: 'Search',
   },
 };
 
