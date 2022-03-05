@@ -42,6 +42,8 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.storage.SessionConverter;
 
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_LOG_QUERY_LIMIT;
+
 /**
  * The type Database transaction store manager.
  *
@@ -56,11 +58,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    /**
-     * The constant DEFAULT_LOG_QUERY_LIMIT.
-     */
-    protected static final int DEFAULT_LOG_QUERY_LIMIT = 100;
 
     /**
      * The Log store.
