@@ -17,12 +17,12 @@ package io.seata.server.console.impl.db;
 
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.console.param.GlobalLockParam;
+import io.seata.server.console.param.GlobalLockParam;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
-import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
-import io.seata.core.console.result.PageResult;
+import io.seata.console.result.PageResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;

@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.vo;
-
-import io.seata.core.constants.ServerTableColumnsName;
+package io.seata.server.console.vo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
+
+import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * GlobalSessionVO

@@ -17,9 +17,9 @@ package io.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalSessionVO;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author: zhongxiang.wang
  */
 @RestController
-@RequestMapping("console/globalSession")
+@RequestMapping("/api/v1/console/globalSession")
 public class GlobalSessionController {
 
     @Resource(type = GlobalSessionService.class)
