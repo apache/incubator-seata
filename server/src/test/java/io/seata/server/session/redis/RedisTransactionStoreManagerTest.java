@@ -48,7 +48,7 @@ import redis.clients.jedis.Pipeline;
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
 
-    private Logger logger = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
+    private static final  Logger logger = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
     private static RedisServer server = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
