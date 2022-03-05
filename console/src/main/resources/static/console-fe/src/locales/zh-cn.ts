@@ -53,6 +53,10 @@ const zhCn: ILocale = {
     branchSessionSwitchLabel: '是否包含分支事务',
     resetButtonLabel: '重置',
     searchButtonLabel: '搜索',
+    operateTitle: '操作',
+    showBranchSessionTitle: '查看分支信息',
+    showGlobalLockTitle: '查看全局锁',
+    branchSessionDialogTitle: '分支事务信息',
   },
 };
 

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import React from 'react';
-import { ConfigProvider, Table, Button, DatePicker, Form, Search, Icon, Switch } from '@alicloud/console-components';
+import { ConfigProvider, Table, Button, DatePicker, Form, Search, Icon, Switch, Pagination, Dialog } from '@alicloud/console-components';
+import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
@@ -34,8 +35,11 @@ const dataSource = [
 ];
 
 type TransactionInfoState = {
-  list:Array<any>;
-  searchFilter:Array<any>;
+  list: Array<any>;
+  loading: boolean;
+  branchSessionDialogVisible: boolean;
+  currentBranchSession: Array<any>;
+  searchFilter: Array<any>;
 }
 
 class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState> {
@@ -47,6 +51,9 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
 
   state: TransactionInfoState = {
     list: [],
+    loading: false,
+    branchSessionDialogVisible: false,
+    currentBranchSession: [],
     searchFilter: [
       {
         label: 'Products',
@@ -68,6 +75,20 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
 
   }
 
+  showBranchSessionDialog = (val: string, index: number, record: any) => () => {
+      this.setState({
+        branchSessionDialogVisible: true,
+        currentBranchSession: record.branchSessionVOs,
+      });
+  }
+
+  closeBranchSessionDialog = () => {
+    this.setState({
+      branchSessionDialogVisible: false,
+      currentBranchSession: [],
+    });
+  }
+
   render() {
     const { locale = {} } = this.props;
     const { title, subTitle, createTimeLabel,
@@ -76,6 +97,10 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       branchSessionSwitchLabel,
       resetButtonLabel,
       searchButtonLabel,
+      operateTitle,
+      showBranchSessionTitle,
+      showGlobalLockTitle,
+      branchSessionDialogTitle,
     } = locale;
     return (
       <Page
@@ -90,12 +115,12 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
         },
       ]}
       >
-        <div>
-          <Form inline labelAlign="left">
-            <FormItem label={createTimeLabel}>
-              <RangePicker onChange={this.onChange} showTime />
-            </FormItem>
-            <FormItem >
+        {/* search form */}
+        <Form inline labelAlign="left">
+          <FormItem label={createTimeLabel}>
+            <RangePicker onChange={this.onChange} showTime />
+          </FormItem>
+          <FormItem >
             <Search
               style={{ width: '400px' }}
               shape="simple"
@@ -107,16 +132,23 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
               filter={this.state.searchFilter}
               // onFilterChange={this.onFilterChange.bind(this)}
             />
-            </FormItem>
-            <FormItem><Button><Icon type="add" /></Button></FormItem>
-            <FormItem label={branchSessionSwitchLabel}>
-              <Switch />
-            </FormItem>
-            <FormItem><Button><Icon type="redo" />{resetButtonLabel}</Button></FormItem>
-            <FormItem><Button><Icon type="search" />{searchButtonLabel}</Button></FormItem>
-          </Form>
-        </div>
-        <Table className="mt-16" dataSource={this.state.list}>
+          </FormItem>
+          <FormItem>
+            <Button><Icon type="add" /></Button>
+          </FormItem>
+          <FormItem label={branchSessionSwitchLabel}>
+            <Switch />
+          </FormItem>
+          <FormItem>
+            <Button><Icon type="redo" />{resetButtonLabel}</Button>
+          </FormItem>
+          <FormItem>
+            <Button><Icon type="search" />{searchButtonLabel}</Button>
+          </FormItem>
+        </Form>
+        {/* global session table */}
+        <div>
+        <Table dataSource={this.state.list} loading={this.state.loading}>
           <Table.Column title="xid" dataIndex="xid" />
           <Table.Column title="transactionId" dataIndex="transactionId" />
           <Table.Column title="applicationId" dataIndex="applicationId" />
@@ -126,7 +158,57 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           <Table.Column title="timeout" dataIndex="timeout" />
           <Table.Column title="beginTime" dataIndex="beginTime" />
           <Table.Column title="applicationData" dataIndex="applicationData" />
+          <Table.Column
+            title={operateTitle}
+            align="center"
+            cell={(val: string, index: number, record: any) => (
+              <Actions style={{ width: '200px' }}>
+                <LinkButton
+                  onClick={this.showBranchSessionDialog(val, index, record)}
+                >
+                  {showBranchSessionTitle}
+                </LinkButton>
+                <LinkButton
+                  onClick={() => {
+                    alert('todo');
+                  }}
+                >
+                  {showGlobalLockTitle}
+                </LinkButton>
+              </Actions>)
+            }
+          />
         </Table>
+        <Pagination defaultCurrent={1} hideOnlyOnePage total={100} />
+        </div>
+
+        {/* branch session dialog */}
+        <Dialog visible={this.state.branchSessionDialogVisible} title={branchSessionDialogTitle} footer={false} onClose={this.closeBranchSessionDialog} style={{ overflowX: 'auto' }}>
+          <Table dataSource={this.state.currentBranchSession}>
+            <Table.Column title="transactionId" dataIndex="transactionId" />
+            <Table.Column title="branchId" dataIndex="branchId" />
+            <Table.Column title="resourceGroupId" dataIndex="resourceGroupId" />
+            <Table.Column title="branchType" dataIndex="branchType" />
+            <Table.Column title="status" dataIndex="status" />
+            <Table.Column title="resourceId" dataIndex="resourceId" />
+            <Table.Column title="clientId" dataIndex="clientId" />
+            <Table.Column title="applicationData" dataIndex="applicationData" />
+            <Table.Column
+              title={operateTitle}
+              cell={(val: string, index: number, record: any) => (
+              <Actions style={{ width: '80px' }}>
+                <LinkButton
+                  onClick={() => {
+                    alert('todo');
+                  }}
+                >
+                  {showGlobalLockTitle}
+                </LinkButton>
+              </Actions>)
+            }
+            />
+          </Table>
+        </Dialog>
       </Page>
     );
   }
