@@ -17,9 +17,8 @@ import request from '@/utils/request';
 
 export default async function fetchData():Promise<any> {
   let result = await request('/console/globalSession/query', {
-    baseURL: '/',
     method: 'get',
-    data: {
+    params: {
       pageSize: 10,
       pageNum: 1,
     },
