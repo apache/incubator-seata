@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.vo;
+package io.seata.server.console.vo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -24,9 +24,9 @@ import java.util.stream.Stream;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.server.console.param.GlobalLockParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.lock.RowLock;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.lock.LockerManagerFactory;
@@ -38,7 +38,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import static io.seata.common.util.StringUtils.isBlank;
-import static io.seata.core.console.vo.GlobalLockVO.convert;
+import static io.seata.server.console.vo.GlobalLockVO.convert;
 import static java.util.Objects.isNull;
 
 /**

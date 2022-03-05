@@ -24,9 +24,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.Resource;
 
-import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.server.console.param.GlobalLockParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;

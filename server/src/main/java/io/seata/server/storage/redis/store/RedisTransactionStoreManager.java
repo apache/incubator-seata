@@ -35,7 +35,7 @@ import io.seata.common.exception.StoreException;
 import io.seata.common.util.BeanUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.console.param.GlobalSessionParam;
+import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
