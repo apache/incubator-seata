@@ -207,12 +207,8 @@ public class SessionHolder {
             // Redis, db and so on
             CompletableFuture.runAsync(() -> {
                 SessionCondition searchCondition = new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Committed,
-                        GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.RollbackFailed,
-                        GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished);
+                        GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Finished);
                 searchCondition.setLazyLoadBranch(true);
-                List<GlobalStatus> failedStatus = Arrays.asList(GlobalStatus.CommitFailed,
-                        GlobalStatus.RollbackFailed,
-                        GlobalStatus.TimeoutRollbackFailed);
 
                 long now = System.currentTimeMillis();
                 List<GlobalSession> errorStatusGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
@@ -223,11 +219,7 @@ public class SessionHolder {
                             return;
                         }
 
-                        if (failedStatus.contains(errorStatusGlobalSession.getStatus())) {
-                            LOGGER.error("Thr Global session {} is in failed status, please handle it manually.", errorStatusGlobalSession.getXid());
-                        } else {
-                            removeInErrorState(errorStatusGlobalSession);
-                        }
+                        removeInErrorState(errorStatusGlobalSession);
                     }
 
                     // Load the next part
