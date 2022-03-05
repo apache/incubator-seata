@@ -128,6 +128,8 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endCommitFailed(GlobalSession globalSession) throws TransactionException {
+        LOGGER.error("Thr Global session {} is in failed status, please handle it manually.", globalSession.getXid());
+
         globalSession.changeStatus(GlobalStatus.CommitFailed);
         globalSession.end();
         postTcSessionEndEvent(globalSession);
@@ -158,6 +160,8 @@ public class SessionHelper {
      */
     public static void endRollbackFailed(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
+        LOGGER.error("Thr Global session {} is in failed status, please handle it manually.", globalSession.getXid());
+
         if (isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
