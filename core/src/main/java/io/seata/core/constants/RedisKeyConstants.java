@@ -156,4 +156,9 @@ public class RedisKeyConstants {
      */
     public static final String SPLIT = "^^^";
 
+    /**
+     * The constant DEFAULT_LOG_QUERY_LIMIT.
+     */
+    public static final int DEFAULT_LOG_QUERY_LIMIT = 100;
+
 }
