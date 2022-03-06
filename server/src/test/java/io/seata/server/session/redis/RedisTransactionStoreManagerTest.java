@@ -113,8 +113,8 @@ public class RedisTransactionStoreManagerTest {
         globalLockVO.setTableName("order");
         globalLockVO.setPk("2188");
         globalLockVO.setRowKey("jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188");
-        globalLockVO.setGmtCreate(new Date());
-        globalLockVO.setGmtModified(new Date());
+        globalLockVO.setGmtCreate(new Date().getTime());
+        globalLockVO.setGmtModified(new Date().getTime());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.hmset(GLOBAL_LOCK_KEY,globallockMap);
             jedis.hmset(ROW_LOCK_KEY,BeanUtils.objectToMap(globalLockVO));

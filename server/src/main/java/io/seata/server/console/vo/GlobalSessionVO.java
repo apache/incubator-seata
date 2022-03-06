@@ -17,7 +17,7 @@ package io.seata.server.console.vo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.Set;
 
 import io.seata.core.constants.ServerTableColumnsName;
@@ -46,9 +46,9 @@ public class GlobalSessionVO {
 
     private String applicationData;
 
-    private Date gmtCreate;
+    private Long gmtCreate;
 
-    private Date gmtModified;
+    private Long gmtModified;
 
     private Set<BranchSessionVO> branchSessionVOs;
 
@@ -151,19 +151,19 @@ public class GlobalSessionVO {
         this.applicationData = applicationData;
     }
 
-    public Date getGmtCreate() {
+    public Long getGmtCreate() {
         return gmtCreate;
     }
 
-    public void setGmtCreate(Date gmtCreate) {
+    public void setGmtCreate(Long gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
-    public Date getGmtModified() {
+    public Long getGmtModified() {
         return gmtModified;
     }
 
-    public void setGmtModified(Date gmtModified) {
+    public void setGmtModified(Long gmtModified) {
         this.gmtModified = gmtModified;
     }
 
@@ -186,8 +186,14 @@ public class GlobalSessionVO {
         globalSessionVO.setTimeout(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
         globalSessionVO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
         globalSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
-        globalSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
-        globalSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
+        Timestamp gmtCreateTimestamp = rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE);
+        if (gmtCreateTimestamp != null) {
+            globalSessionVO.setGmtCreate(gmtCreateTimestamp.getTime());
+        }
+        Timestamp gmtModifiedTimestamp = rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED);
+        if (gmtModifiedTimestamp != null) {
+            globalSessionVO.setGmtModified(gmtModifiedTimestamp.getTime());
+        }
         return globalSessionVO;
     }
 
