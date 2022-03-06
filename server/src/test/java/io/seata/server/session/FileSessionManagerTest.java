@@ -330,18 +330,18 @@ public class FileSessionManagerTest {
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             globalSessionParam.setWithBranch(false);
-            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), 1));
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), 1).getTime());
             Assertions.assertEquals(0, globalSessionService.query(globalSessionParam).getData().size());
 
-            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1));
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1).getTime());
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
 
             globalSessionParam.setTimeStart(null);
-            globalSessionParam.setTimeEnd(DateUtils.addHours(new Date(), 1));
+            globalSessionParam.setTimeEnd(DateUtils.addHours(new Date(), 1).getTime());
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
-            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1));
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1).getTime());
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
         } finally {
             for (GlobalSession globalSession : globalSessions) {

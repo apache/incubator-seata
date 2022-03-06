@@ -16,7 +16,6 @@
 package io.seata.console.param;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * @description: The base param
@@ -30,9 +29,9 @@ public class BaseParam implements Serializable {
 
     private int pageSize;
 
-    private Date timeStart;
+    private Long timeStart;
 
-    private Date timeEnd;
+    private Long timeEnd;
 
     public int getPageNum() {
         return pageNum;
@@ -50,19 +49,19 @@ public class BaseParam implements Serializable {
         this.pageSize = pageSize;
     }
 
-    public Date getTimeStart() {
+    public Long getTimeStart() {
         return timeStart;
     }
 
-    public void setTimeStart(Date timeStart) {
+    public void setTimeStart(Long timeStart) {
         this.timeStart = timeStart;
     }
 
-    public Date getTimeEnd() {
+    public Long getTimeEnd() {
         return timeEnd;
     }
 
-    public void setTimeEnd(Date timeEnd) {
+    public void setTimeEnd(Long timeEnd) {
         this.timeEnd = timeEnd;
     }
 
