@@ -21,8 +21,8 @@ import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.result.PageResult;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
-
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,8 +42,8 @@ public class GlobalSessionController {
      * @param param param for query globalSession
      * @return  the list of GlobalSessionVO
      */
-    @GetMapping("query")
-    public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
+    @PostMapping("query")
+    public PageResult<GlobalSessionVO> query(@RequestBody GlobalSessionParam param) {
         return globalSessionService.query(param);
     }
 }
