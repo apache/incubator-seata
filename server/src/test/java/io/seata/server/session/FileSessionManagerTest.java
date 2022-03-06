@@ -26,9 +26,9 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import io.seata.common.XID;
-import io.seata.server.console.param.GlobalSessionParam;
-import io.seata.console.result.PageResult;
-import io.seata.server.console.vo.GlobalSessionVO;
+import io.seata.core.console.param.GlobalSessionParam;
+import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -330,18 +330,18 @@ public class FileSessionManagerTest {
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             globalSessionParam.setWithBranch(false);
-            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), 1).getTime());
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), 1));
             Assertions.assertEquals(0, globalSessionService.query(globalSessionParam).getData().size());
 
-            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1).getTime());
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1));
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
 
             globalSessionParam.setTimeStart(null);
-            globalSessionParam.setTimeEnd(DateUtils.addHours(new Date(), 1).getTime());
+            globalSessionParam.setTimeEnd(DateUtils.addHours(new Date(), 1));
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
-            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1).getTime());
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1));
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
         } finally {
             for (GlobalSession globalSession : globalSessions) {
