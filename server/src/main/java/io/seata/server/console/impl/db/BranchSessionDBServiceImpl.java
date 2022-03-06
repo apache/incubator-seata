@@ -15,8 +15,19 @@
  */
 package io.seata.server.console.impl.db;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.IOUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.server.console.vo.BranchSessionVO;
@@ -26,18 +37,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Branch Session DataBase ServiceImpl
  *
  * @author: zhongxiang.wang
+ * @author: lvekee 734843455@qq.com
  */
 @Component
 @org.springframework.context.annotation.Configuration
@@ -53,17 +57,29 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
-        List<BranchSessionVO> list = new ArrayList<>();
+        if (StringUtils.isBlank(xid)) {
+            throw new IllegalArgumentException("xid should not be blank");
+        }
+
+        String whereCondition = " where xid = ? ";
+        String branchSessionSQL = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllBranchSessionSQL(branchTable, whereCondition);
+
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
-        String queryAllBranchSessionSQL = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllBranchSessionSQL(branchTable, xid);
+
+        List<BranchSessionVO> list = new ArrayList<>();
+        ResultSet rs = null;
+
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(queryAllBranchSessionSQL);
-             ResultSet resultSet = ps.executeQuery()) {
-            while (resultSet.next()) {
-                list.add(BranchSessionVO.convert(resultSet));
+             PreparedStatement ps = conn.prepareStatement(branchSessionSQL)) {
+            ps.setObject(1, xid);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(BranchSessionVO.convert(rs));
             }
         } catch (SQLException e) {
             throw new StoreException(e);
+        } finally {
+            IOUtil.close(rs);
         }
         return PageResult.success(list, list.size(), 0, 0, 0);
     }

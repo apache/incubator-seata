@@ -21,8 +21,8 @@ import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
-
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,8 +43,8 @@ public class GlobalLockController {
      * @param param the param
      * @return the list of GlobalLockVO
      */
-    @GetMapping("query")
-    public PageResult<GlobalLockVO> query(GlobalLockParam param) {
+    @PostMapping("query")
+    public PageResult<GlobalLockVO> query(@RequestBody GlobalLockParam param) {
         return globalLockService.query(param);
     }
 

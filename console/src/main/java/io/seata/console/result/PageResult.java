@@ -13,6 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package io.seata.core.console.result;
+
 package io.seata.console.result;
 
 import java.io.Serializable;
@@ -21,11 +23,12 @@ import java.util.List;
 import io.seata.console.param.BaseParam;
 /**
  * The page result
+ *
  * @author: zhongxiang.wang
  * @author miaoxueyu
  * @author doubleDimple
  */
-public class PageResult<T> extends Result<T>  implements Serializable {
+public class PageResult<T> extends Result<T> implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
 
     /**
