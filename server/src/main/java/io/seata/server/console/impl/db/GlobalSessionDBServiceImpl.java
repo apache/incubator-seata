@@ -15,25 +15,28 @@
  */
 package io.seata.server.console.impl.db;
 
-import io.seata.server.console.param.GlobalSessionParam;
-import io.seata.server.console.vo.BranchSessionVO;
-import io.seata.server.console.vo.GlobalSessionVO;
-import io.seata.console.result.PageResult;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.PageUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.vo.BranchSessionVO;
+import io.seata.server.console.vo.GlobalSessionVO;
+import io.seata.console.result.PageResult;
+import java.util.Date;
+import javax.ws.rs.HEAD;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.server.console.service.BranchSessionService;
