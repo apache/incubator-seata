@@ -496,8 +496,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             try (Jedis jedis = JedisPooledFactory.getJedisInstance();
                  Pipeline pipelined = jedis.pipelined()) {
                 Response<List<String>> result = pipelined.lrange(statusKey, start, end);
-                List<String> xids = result.get();
                 pipelined.close();
+                List<String> xids = result.get();
                 xids.forEach(xid -> {
                     GlobalSession globalSession = this.readSession(xid, param.isWithBranch());
                     if (globalSession != null) {
