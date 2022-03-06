@@ -15,14 +15,22 @@
  */
 import request from '@/utils/request';
 
-export default async function fetchData():Promise<any> {
+export type GlobalSessionParam = {
+  xid?: string,
+  applicationId?: string,
+  status?: number,
+  transactionName?: string,
+  withBranch: boolean,
+  pageSize: number,
+  pageNum: number,
+  timeStart?: number,
+  timeEnd?: number
+};
+
+export default async function fetchData(params:GlobalSessionParam):Promise<any> {
   let result = await request('/console/globalSession/query', {
     method: 'get',
-    params: {
-      pageSize: 10,
-      pageNum: 1,
-      withBranch: true,
-    },
+    params,
   });
 
   return result;
