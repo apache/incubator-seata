@@ -47,9 +47,9 @@ public class GlobalLockVO {
 
     private String rowKey;
 
-    private Date gmtCreate;
+    private Long gmtCreate;
 
-    private Date gmtModified;
+    private Long gmtModified;
 
     /**
      * convert RowLock list to GlobalLockVO list
@@ -143,19 +143,19 @@ public class GlobalLockVO {
         this.rowKey = rowKey;
     }
 
-    public Date getGmtCreate() {
+    public Long getGmtCreate() {
         return gmtCreate;
     }
 
-    public void setGmtCreate(Date gmtCreate) {
+    public void setGmtCreate(Long gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
-    public Date getGmtModified() {
+    public Long getGmtModified() {
         return gmtModified;
     }
 
-    public void setGmtModified(Date gmtModified) {
+    public void setGmtModified(Long gmtModified) {
         this.gmtModified = gmtModified;
     }
 
@@ -168,8 +168,8 @@ public class GlobalLockVO {
         globalLockVO.setResourceId(rs.getString(ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID));
         globalLockVO.setTableName(rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME));
         globalLockVO.setPk(rs.getString(ServerTableColumnsName.LOCK_TABLE_PK));
-        globalLockVO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE));
-        globalLockVO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED));
+        globalLockVO.setGmtCreate(rs.getLong(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE));
+        globalLockVO.setGmtModified(rs.getLong(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED));
         return globalLockVO;
     }
 
