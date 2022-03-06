@@ -291,20 +291,20 @@ public class LockManagerTest {
             // timeStart and timeEnd
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             param.setTableName(null);
-            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:01"));
+            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:01").getTime());
             final PageResult<GlobalLockVO> timeTestResult1 = globalLockService.query(param);
             Assertions.assertEquals(timeTestResult1.getTotal(), 0);
 
-            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:00"));
+            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult2 = globalLockService.query(param);
             Assertions.assertEquals(timeTestResult2.getTotal(), 4);
 
             param.setTimeStart(null);
-            param.setTimeEnd(dateFormat.parse("2022-1-1 02:59:59"));
+            param.setTimeEnd(dateFormat.parse("2022-1-1 02:59:59").getTime());
             final PageResult<GlobalLockVO> timeTestResult3 = globalLockService.query(param);
             Assertions.assertEquals(timeTestResult3.getTotal(), 0);
 
-            param.setTimeEnd(dateFormat.parse("2022-1-1 03:00:00"));
+            param.setTimeEnd(dateFormat.parse("2022-1-1 03:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult4 = globalLockService.query(param);
             Assertions.assertEquals(timeTestResult4.getTotal(), 4);
 //            param.setTimeEnd();

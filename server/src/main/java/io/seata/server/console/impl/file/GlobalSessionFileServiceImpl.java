@@ -90,11 +90,11 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
                 &&
                 // timeStart
-                (isNull(param.getTimeStart()) || param.getTimeStart().getTime() <= session.getBeginTime())
+                (isNull(param.getTimeStart()) || param.getTimeStart() <= session.getBeginTime())
 
                 &&
                 // timeEnd
-                (isNull(param.getTimeEnd()) || param.getTimeEnd().getTime() >= session.getBeginTime());
+                (isNull(param.getTimeEnd()) || param.getTimeEnd() >= session.getBeginTime());
 
         };
     }
