@@ -55,6 +55,7 @@ type GlobalLockInfoState = {
   }
 
   componentDidMount = () => {
+    // @ts-ignore
     const { query } = this.props.history.location;
     if (query !== undefined) {
       const { xid } = query;
