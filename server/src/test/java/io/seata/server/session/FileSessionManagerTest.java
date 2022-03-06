@@ -26,6 +26,9 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 import io.seata.common.XID;
 import io.seata.console.result.PageResult;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -34,6 +37,7 @@ import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.storage.file.session.FileSessionManager;
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -326,18 +330,22 @@ public class FileSessionManagerTest {
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             globalSessionParam.setWithBranch(false);
-            globalSessionParam.setTimeStart(System.currentTimeMillis());
             Assertions.assertEquals(0, globalSessionService.query(globalSessionParam).getData().size());
 
-            globalSessionParam.setTimeStart(System.currentTimeMillis());
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), 1).getTime());
+            Assertions.assertEquals(0, globalSessionService.query(globalSessionParam).getData().size());
+
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1).getTime());
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
 
             globalSessionParam.setTimeStart(null);
-            globalSessionParam.setTimeEnd(System.currentTimeMillis());
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
-            globalSessionParam.setTimeStart(System.currentTimeMillis());
+            globalSessionParam.setTimeEnd(DateUtils.addHours(new Date(), 1).getTime());
+            Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
+
+            globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1).getTime());
             Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
         } finally {
             for (GlobalSession globalSession : globalSessions) {

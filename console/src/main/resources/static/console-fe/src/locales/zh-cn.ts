@@ -20,6 +20,7 @@ const zhCn: ILocale = {
   MenuRouter: {
     overview: '概览',
     transactionInfo: '事务信息',
+    globalLockInfo: '全局锁信息',
   },
   Header: {
     home: '首页',
@@ -57,6 +58,14 @@ const zhCn: ILocale = {
     showBranchSessionTitle: '查看分支信息',
     showGlobalLockTitle: '查看全局锁',
     branchSessionDialogTitle: '分支事务信息',
+  },
+  GlobalLockInfo: {
+    title: '全局锁信息',
+    subTitle: '基础列表页',
+    createTimeLabel: '创建时间',
+    inputFilterPlaceholder: '请输入筛选条件',
+    resetButtonLabel: '重置',
+    searchButtonLabel: '搜索',
   },
 };
 

@@ -230,6 +230,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
 
   static propTypes = {
     locale: PropTypes.object,
+    history: PropTypes.object,
   };
 
   state: TransactionInfoState = {
@@ -335,7 +336,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 
   operateCell = (val: string, index: number, record: any) => {
-    const { locale = {} } = this.props;
+    const { locale = {}, history } = this.props;
     const {
       showBranchSessionTitle,
       showGlobalLockTitle,
@@ -353,7 +354,10 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
 
         <LinkButton
           onClick={() => {
-            alert('todo');
+            history.push({
+              pathname: '/GlobalLockInfo',
+              query: { xid: record.xid },
+            });
           }}
         >
           {showGlobalLockTitle}
@@ -362,7 +366,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 
   branchSessionDialogOperateCell = (val: string, index: number, record: any) => {
-    const { locale = {} } = this.props;
+    const { locale = {}, history } = this.props;
     const {
       showGlobalLockTitle,
     } = locale;
@@ -370,7 +374,10 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       <Actions style={{ width: '80px' }}>
         <LinkButton
           onClick={() => {
-            alert('todo');
+            history.push({
+              pathname: '/GlobalLockInfo',
+              query: { xid: record.xid },
+            });
           }}
         >
           {showGlobalLockTitle}

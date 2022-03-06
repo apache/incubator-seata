@@ -67,7 +67,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
     get menu() {
         const { locale }: AppPropsType = this.props;
         const { MenuRouter = {} } = locale;
-        const { overview,transactionInfo } = MenuRouter;
+        const { overview,transactionInfo,globalLockInfo } = MenuRouter;
         return {
             items: [
                 {
@@ -78,6 +78,10 @@ class App extends React.Component<AppPropsType, AppStateType> {
                     key: '/TransactionInfo',
                     label: transactionInfo,
                 },
+                {
+                    key:'/GlobalLockInfo',
+                    label: globalLockInfo,
+                }
             ],
             header: 'Seata',
             onItemClick: (key: string) => history.push(key)

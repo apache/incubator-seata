@@ -13,14 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
-import Overview from '@/pages/Overview';
-import TransactionInfo from '@/pages/TransactionInfo';
-import GlobalLockInfo from './pages/GlobalLockInfo';
+import request from '@/utils/request';
 
-export default [
-  // { path: '/', exact: true, render: () => <Redirect to="/Overview" /> },
-  { path: '/Overview', component: Overview },
-  { path: '/TransactionInfo', component: TransactionInfo },
-  { path: '/GlobalLockInfo', component: GlobalLockInfo },
-];
+export type GlobalLockParam = {
+  xid?: string,
+  tableName?: string,
+  transactionId?: string,
+  branchId?: string,
+  pk?: string,
+  resourceId?: string,
+  pageSize: number,
+  pageNum: number,
+  timeStart?: number,
+  timeEnd?: number
+};
+
+ export default async function fetchData(params:GlobalLockParam):Promise<any> {
+  let result = await request('/console/globalLock/query', {
+    method: 'get',
+    params,
+  });
+
+  return result;
+}
