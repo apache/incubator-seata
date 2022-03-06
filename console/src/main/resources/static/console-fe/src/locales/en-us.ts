@@ -20,6 +20,7 @@ const enUs: ILocale = {
   MenuRouter: {
     overview: 'Overview',
     transactionInfo: 'TransactionInfo',
+    globalLockInfo: 'GlobalLockInfo',
   },
   Header: {
     home: 'HOME',
@@ -57,6 +58,14 @@ const enUs: ILocale = {
     showBranchSessionTitle: 'View branch session',
     showGlobalLockTitle: 'View global lock',
     branchSessionDialogTitle: 'Branch session info',
+  },
+  GlobalLockInfo: {
+    title: 'GlobalLockInfo',
+    subTitle: 'list',
+    createTimeLabel: 'CreateTime',
+    inputFilterPlaceholder: 'Please enter filter criteria',
+    resetButtonLabel: 'Reset',
+    searchButtonLabel: 'Search',
   },
 };
 
