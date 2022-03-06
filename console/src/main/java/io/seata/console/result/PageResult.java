@@ -15,8 +15,6 @@
  */
 package io.seata.console.result;
 
-package io.seata.console.result;
-
 import java.io.Serializable;
 import java.util.List;
 
