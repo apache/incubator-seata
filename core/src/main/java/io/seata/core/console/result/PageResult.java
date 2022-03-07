@@ -15,18 +15,19 @@
  */
 package io.seata.core.console.result;
 
-import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.core.console.param.BaseParam;
-
 import java.io.Serializable;
 import java.util.List;
+
+import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.core.console.param.BaseParam;
 /**
  * The page result
+ *
  * @author: zhongxiang.wang
  * @author miaoxueyu
  * @author doubleDimple
  */
-public class PageResult<T> extends Result<T>  implements Serializable {
+public class PageResult<T> extends Result<T> implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
 
     /**
