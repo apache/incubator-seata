@@ -90,6 +90,8 @@ type GlobalLockInfoState = {
       // if the result set is empty, set the page number to go back to the first page
       if (data.total === 0) {
         this.setState({
+          list: [],
+          total: 0,
           loading: false,
           globalLockParam: Object.assign(this.state.globalLockParam,
             { pageNum: 1 }),
