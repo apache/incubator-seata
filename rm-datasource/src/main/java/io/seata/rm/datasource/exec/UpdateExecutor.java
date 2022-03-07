@@ -97,6 +97,13 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             for (String columnName : updateColumns) {
                 selectSQLJoin.add(columnName);
             }
+
+            // The on update xxx columns will be auto update by db, so it's also the actually updated columns
+            List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
+            onUpdateColumns.removeAll(updateColumns);
+            for (String onUpdateColumn : onUpdateColumns) {
+                selectSQLJoin.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
+            }
         } else {
             for (String columnName : tableMeta.getAllColumns().keySet()) {
                 selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));
@@ -135,6 +142,13 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
             for (String columnName : updateColumns) {
                 selectSQLJoiner.add(columnName);
+            }
+
+            // The on update xxx columns will be auto update by db, so it's also the actually updated columns
+            List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
+            onUpdateColumns.removeAll(updateColumns);
+            for (String onUpdateColumn : onUpdateColumns) {
+                selectSQLJoiner.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
             }
         } else {
             for (String columnName : tableMeta.getAllColumns().keySet()) {
