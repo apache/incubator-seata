@@ -67,9 +67,10 @@ type GlobalLockInfoState = {
             pageNum: 1,
           },
         });
-        this.search();
       }
     }
+    // search once by default anyway
+    this.search();
   }
 
   resetSearchFilter = () => {
@@ -85,6 +86,15 @@ type GlobalLockInfoState = {
   search = () => {
     this.setState({ loading: true });
     getData(this.state.globalLockParam).then(data => {
+      // if the result set is empty, set the page number to go back to the first page
+      if (data.total === 0) {
+        this.setState({
+          loading: false,
+          globalLockParam: Object.assign(this.state.globalLockParam,
+            { pageNum: 1 }),
+        });
+        return;
+      }
       // format time
       data.data.forEach((element: any) => {
         element.gmtCreate = element.gmtCreate == null ? null : moment(element.gmtCreate).format('YYYY-MM-DD HH:mm:ss');

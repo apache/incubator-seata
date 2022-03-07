@@ -47,10 +47,10 @@ type TransactionInfoState = {
 
 const statusList:Array<StatusType> = [
   {
-    label: 'UnKnown',
-    value: 0,
-    iconType: 'warning',
-    iconColor: '#FFA003',
+    label: 'AsyncCommitting',
+    value: 8,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
   },
   {
     label: 'Begin',
@@ -71,36 +71,6 @@ const statusList:Array<StatusType> = [
     iconColor: 'rgb(3, 193, 253)',
   },
   {
-    label: 'Rollbacking',
-    value: 4,
-    iconType: 'ellipsis',
-    iconColor: 'rgb(3, 193, 253)',
-  },
-  {
-    label: 'RollbackRetrying',
-    value: 5,
-    iconType: 'ellipsis',
-    iconColor: 'rgb(3, 193, 253)',
-  },
-  {
-    label: 'TimeoutRollbacking',
-    value: 6,
-    iconType: 'ellipsis',
-    iconColor: 'rgb(3, 193, 253)',
-  },
-  {
-    label: 'TimeoutRollbackRetrying',
-    value: 7,
-    iconType: 'ellipsis',
-    iconColor: 'rgb(3, 193, 253)',
-  },
-  {
-    label: 'AsyncCommitting',
-    value: 8,
-    iconType: 'ellipsis',
-    iconColor: 'rgb(3, 193, 253)',
-  },
-  {
     label: 'Committed',
     value: 9,
     iconType: 'success',
@@ -111,6 +81,30 @@ const statusList:Array<StatusType> = [
     value: 10,
     iconType: 'error',
     iconColor: '#FF3333',
+  },
+  {
+    label: 'CommitRetryTimeout',
+    value: 16,
+    iconType: 'error',
+    iconColor: '#FF3333',
+  },
+  {
+    label: 'Finished',
+    value: 15,
+    iconType: 'success',
+    iconColor: '#1DC11D',
+  },
+  {
+    label: 'Rollbacking',
+    value: 4,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
+  },
+  {
+    label: 'RollbackRetrying',
+    value: 5,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
   },
   {
     label: 'Rollbacked',
@@ -125,6 +119,24 @@ const statusList:Array<StatusType> = [
     iconColor: '#FF3333',
   },
   {
+    label: 'RollbackRetryTimeout',
+    value: 17,
+    iconType: 'error',
+    iconColor: '#FF3333',
+  },
+  {
+    label: 'TimeoutRollbacking',
+    value: 6,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
+  },
+  {
+    label: 'TimeoutRollbackRetrying',
+    value: 7,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
+  },
+  {
     label: 'TimeoutRollbacked',
     value: 13,
     iconType: 'error',
@@ -137,22 +149,10 @@ const statusList:Array<StatusType> = [
     iconColor: '#FF3333',
   },
   {
-    label: 'Finished',
-    value: 15,
-    iconType: 'success',
-    iconColor: '#1DC11D',
-  },
-  {
-    label: 'CommitRetryTimeout',
-    value: 16,
-    iconType: 'error',
-    iconColor: '#FF3333',
-  },
-  {
-    label: 'RollbackRetryTimeout',
-    value: 17,
-    iconType: 'error',
-    iconColor: '#FF3333',
+    label: 'UnKnown',
+    value: 0,
+    iconType: 'warning',
+    iconColor: '#FFA003',
   },
 ];
 
@@ -246,6 +246,11 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     },
   };
 
+  componentDidMount = () => {
+    // search once by default
+    this.search();
+  }
+
   resetSearchFilter = () => {
     this.setState({
       globalSessionParam: {
@@ -260,6 +265,15 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   search = () => {
     this.setState({ loading: true });
     getData(this.state.globalSessionParam).then(data => {
+      // if the result set is empty, set the page number to go back to the first page
+      if (data.total === 0) {
+        this.setState({
+          loading: false,
+          globalSessionParam: Object.assign(this.state.globalSessionParam,
+            { pageNum: 1 }),
+        });
+        return;
+      }
       // format time
       data.data.forEach((element: any) => {
         element.beginTime = moment(element.beginTime).format('YYYY-MM-DD HH:mm:ss');
@@ -356,6 +370,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           onClick={() => {
             history.push({
               pathname: '/GlobalLockInfo',
+              // @ts-ignore
               query: { xid: record.xid },
             });
           }}
@@ -376,6 +391,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           onClick={() => {
             history.push({
               pathname: '/GlobalLockInfo',
+              // @ts-ignore
               query: { xid: record.xid },
             });
           }}
@@ -465,6 +481,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           </FormItem>
           <FormItem name="status" label="status">
             <Select
+              hasClear
               placeholder={selectFilerPlaceholder}
               onChange={(value: string) => { this.searchFilterOnChange('status', value); }}
               dataSource={statusList}
