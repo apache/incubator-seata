@@ -35,9 +35,9 @@ public class GlobalLockVO {
 
     private String xid;
 
-    private Long transactionId;
+    private String transactionId;
 
-    private Long branchId;
+    private String branchId;
 
     private String resourceId;
 
@@ -95,20 +95,20 @@ public class GlobalLockVO {
         this.xid = xid;
     }
 
-    public Long getTransactionId() {
+    public String getTransactionId() {
         return transactionId;
     }
 
     public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
+        this.transactionId = String.valueOf(transactionId);
     }
 
-    public Long getBranchId() {
+    public String getBranchId() {
         return branchId;
     }
 
     public void setBranchId(Long branchId) {
-        this.branchId = branchId;
+        this.branchId = String.valueOf(branchId);
     }
 
     public String getResourceId() {

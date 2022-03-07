@@ -30,7 +30,7 @@ public class GlobalSessionVO {
 
     private String xid;
 
-    private Long transactionId;
+    private String transactionId;
 
     private Integer status;
 
@@ -68,7 +68,7 @@ public class GlobalSessionVO {
                            String applicationData,
                            Set<BranchSessionVO> branchSessionVOs) {
         this.xid = xid;
-        this.transactionId = transactionId;
+        this.transactionId = String.valueOf(transactionId);
         this.status = status;
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
@@ -87,12 +87,12 @@ public class GlobalSessionVO {
         this.xid = xid;
     }
 
-    public Long getTransactionId() {
+    public String getTransactionId() {
         return transactionId;
     }
 
     public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
+        this.transactionId = String.valueOf(transactionId);
     }
 
     public Integer getStatus() {

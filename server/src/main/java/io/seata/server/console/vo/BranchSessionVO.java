@@ -30,9 +30,9 @@ public class BranchSessionVO {
 
     private String xid;
 
-    private Long transactionId;
+    private String transactionId;
 
-    private Long branchId;
+    private String branchId;
 
     private String resourceGroupId;
 
@@ -65,8 +65,8 @@ public class BranchSessionVO {
                            String clientId,
                            String applicationData) {
         this.xid = xid;
-        this.transactionId = transactionId;
-        this.branchId = branchId;
+        this.transactionId = String.valueOf(transactionId);
+        this.branchId = String.valueOf(branchId);
         this.resourceGroupId = resourceGroupId;
         this.resourceId = resourceId;
         this.branchType = branchType;
@@ -83,20 +83,20 @@ public class BranchSessionVO {
         this.xid = xid;
     }
 
-    public Long getTransactionId() {
+    public String getTransactionId() {
         return transactionId;
     }
 
     public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
+        this.transactionId = String.valueOf(transactionId);
     }
 
-    public Long getBranchId() {
+    public String getBranchId() {
         return branchId;
     }
 
     public void setBranchId(Long branchId) {
-        this.branchId = branchId;
+        this.branchId = String.valueOf(branchId);
     }
 
     public String getResourceGroupId() {
