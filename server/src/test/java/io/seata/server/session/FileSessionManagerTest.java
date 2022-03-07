@@ -23,12 +23,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
+
 import javax.annotation.Resource;
+
 import io.seata.common.XID;
 import io.seata.console.result.PageResult;
-import io.seata.server.console.param.GlobalSessionParam;
-import io.seata.console.result.PageResult;
-import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -330,7 +329,7 @@ public class FileSessionManagerTest {
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             globalSessionParam.setWithBranch(false);
-            Assertions.assertEquals(0, globalSessionService.query(globalSessionParam).getData().size());
+            Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
             globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), 1).getTime());
             Assertions.assertEquals(0, globalSessionService.query(globalSessionParam).getData().size());
