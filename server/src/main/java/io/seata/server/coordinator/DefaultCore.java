@@ -15,13 +15,17 @@
  */
 package io.seata.server.coordinator;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.DurationUtil;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.event.EventBus;
 import io.seata.core.exception.TransactionException;
@@ -35,6 +39,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -53,6 +58,11 @@ public class DefaultCore implements Core {
     private EventBus eventBus = EventBusManager.get();
 
     private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
+
+    private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
+            ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
+
+    private static final Long LOSS_TIME = ConfigurationFactory.getInstance().getLong(ConfigurationKeys.LOSS_TIME, 3);
 
     /**
      * get the Default core.
@@ -138,10 +148,22 @@ public class DefaultCore implements Core {
         return session.getXid();
     }
 
+    /**
+     * Judge whether timeout occurs in case of IO delay and network communication delay
+     * @param timeout the timeout
+     * @param beginTime the beginTime
+     * @return is timeout
+     */
+    private boolean isTimeoutWithLoss(long timeout, long beginTime) {
+
+        return (System.currentTimeMillis() + LOSS_TIME) - beginTime > timeout;
+    }
+
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        if (globalSession == null) {
+        if (globalSession == null ||
+                isTimeoutWithLoss(MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), globalSession.getBeginTime())) {
             return GlobalStatus.Finished;
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());

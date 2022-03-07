@@ -16,6 +16,7 @@
 package io.seata.tm.api;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
@@ -120,11 +121,14 @@ public class TransactionalTemplate {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
                 //    else do nothing. Of course, the hooks will still be triggered.
                 beginTransaction(txInfo, tx);
-
+                final long beginTime = System.currentTimeMillis();
                 Object rs;
                 try {
                     // Do Your Business
                     rs = business.execute();
+                    if (isTimeout(txInfo.getTimeOut(), beginTime)) {
+                        throw new TimeoutException();
+                    }
                 } catch (Throwable ex) {
                     // 3. The needed business exception to rollback.
                     completeTransactionAfterThrowing(txInfo, tx, ex);
@@ -147,6 +151,17 @@ public class TransactionalTemplate {
                 tx.resume(suspendedResourcesHolder);
             }
         }
+    }
+
+    /**
+     * Judge whether the execution of business logic has timed out
+     * @param timeout the timeout
+     * @param beginTime the beginTime
+     * @return is timeout
+     */
+    private boolean isTimeout(long timeout, long beginTime) {
+
+        return System.currentTimeMillis() - beginTime > timeout;
     }
 
     private boolean existingTransaction(GlobalTransaction tx) {
