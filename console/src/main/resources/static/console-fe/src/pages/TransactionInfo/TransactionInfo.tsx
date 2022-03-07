@@ -278,7 +278,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       }
       // format time
       data.data.forEach((element: any) => {
-        element.beginTime = moment(element.beginTime).format('YYYY-MM-DD HH:mm:ss');
+        element.beginTime = (element.beginTime == null || element.beginTime === '') ? null : moment(Number(element.beginTime)).format('YYYY-MM-DD HH:mm:ss');
       });
 
       this.setState({

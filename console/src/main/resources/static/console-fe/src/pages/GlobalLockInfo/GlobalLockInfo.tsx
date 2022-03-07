@@ -100,8 +100,8 @@ type GlobalLockInfoState = {
       }
       // format time
       data.data.forEach((element: any) => {
-        element.gmtCreate = element.gmtCreate == null ? null : moment(element.gmtCreate).format('YYYY-MM-DD HH:mm:ss');
-        element.gmtModified = element.gmtModified == null ? null : moment(element.gmtModified).format('YYYY-MM-DD HH:mm:ss');
+        element.gmtCreate = (element.gmtCreate == null || element.gmtCreate === '') ? null : moment(Number(element.gmtCreate)).format('YYYY-MM-DD HH:mm:ss');
+        element.gmtModified = (element.gmtModified == null || element.gmtModified === '') ? null : moment(Number(element.gmtModified)).format('YYYY-MM-DD HH:mm:ss');
       });
 
       this.setState({
