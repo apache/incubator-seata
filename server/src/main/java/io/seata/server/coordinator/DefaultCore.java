@@ -282,8 +282,8 @@ public class DefaultCore implements Core {
             return globalSession.getStatus();
         }
 
-        doGlobalRollback(globalSession, false);
-        return globalSession.getStatus();
+        boolean rollbackSuccess = doGlobalRollback(globalSession, false);
+        return rollbackSuccess ? GlobalStatus.Rollbacked : globalSession.getStatus();
     }
 
     @Override
@@ -332,9 +332,6 @@ public class DefaultCore implements Core {
             // Return if the result is not null
             if (result != null) {
                 return result;
-            }
-            if (!retrying) {
-                globalSession.setStatus(GlobalStatus.Rollbacked);
             }
         }
         // In db mode, lock and branch data residual problems may occur.
