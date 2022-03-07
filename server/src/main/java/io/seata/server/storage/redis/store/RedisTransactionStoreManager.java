@@ -50,9 +50,10 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.Transaction;
+import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.Response;
 import static io.seata.common.ConfigurationKeys.STORE_REDIS_QUERY_LIMIT;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
@@ -494,9 +495,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             String statusKey = buildGlobalStatus(GlobalStatus.get(param.getStatus()).getCode());
             try (Jedis jedis = JedisPooledFactory.getJedisInstance();
                  Pipeline pipelined = jedis.pipelined()) {
-                List<String> xids = pipelined.lrange(statusKey, start, end).get();
-
-                xids.stream().forEach(xid -> {
+                Response<List<String>> result = pipelined.lrange(statusKey, start, end);
+                pipelined.close();
+                List<String> xids = result.get();
+                xids.forEach(xid -> {
                     GlobalSession globalSession = this.readSession(xid, param.isWithBranch());
                     if (globalSession != null) {
                         globalSessions.add(globalSession);
