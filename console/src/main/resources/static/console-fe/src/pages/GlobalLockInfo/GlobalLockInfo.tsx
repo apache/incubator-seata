@@ -66,7 +66,8 @@ type GlobalLockInfoState = {
             pageSize: 10,
             pageNum: 1,
           },
-        });
+        }, () => this.search());
+        return;
       }
     }
     // search once by default anyway
