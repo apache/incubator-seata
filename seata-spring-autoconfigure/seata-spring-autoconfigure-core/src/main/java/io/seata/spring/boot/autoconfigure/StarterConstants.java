@@ -92,5 +92,6 @@ public interface StarterConstants {
      * The following special keys need to be normalized.
      */
     String SPECIAL_KEY_GROUPLIST = "grouplist";
+    String SPECIAL_KEY_SERVICE = "service";
     String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
 }

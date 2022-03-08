@@ -24,6 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -35,6 +37,9 @@ import io.seata.common.exception.ShouldNeverHappenException;
  * @author Geng Zhang
  */
 public class StringUtils {
+
+    private static final Pattern CAMEL_PATTERN = Pattern.compile("[A-Z]");
+    private static final Pattern LINE_PATTERN = Pattern.compile("-(\\w)");
 
     private StringUtils() {
     }
@@ -319,4 +324,29 @@ public class StringUtils {
     public static boolean isNotEmpty(final CharSequence cs) {
         return !isEmpty(cs);
     }
+
+    /**
+     * hump to Line or line to hump, only spring environment use
+     * 
+     * @param str str
+     * @return string string
+     */
+    public static String hump2Line(String str) {
+        Matcher matcher = CAMEL_PATTERN.matcher(str);
+        StringBuffer sb = new StringBuffer();
+        if (matcher.find()) {
+            matcher.appendReplacement(sb, "-" + matcher.group(0).toLowerCase());
+            while (matcher.find()) {
+                matcher.appendReplacement(sb, "-" + matcher.group(0).toLowerCase());
+            }
+        } else {
+            matcher = LINE_PATTERN.matcher(str);
+            while (matcher.find()) {
+                matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
 }
