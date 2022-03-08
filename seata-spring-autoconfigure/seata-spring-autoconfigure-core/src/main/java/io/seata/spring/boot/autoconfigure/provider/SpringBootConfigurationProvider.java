@@ -127,28 +127,16 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @author xingfudeshi@gmail.com
      */
     private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
-        ConfigurableEnvironment environment =
-            (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
         Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
             .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
-            Object value;
+            if (Objects.equals(field.getType(), Map.class)) {
+                return getConfig(dataId, null, String.class);
+            }
             field.setAccessible(true);
             Object defaultValue = field.get(object);
-            if (defaultValue instanceof Map) {
-                value = environment.getProperty(dataId, environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId)));
-            } else {
-                value = environment.getProperty(dataId, field.getType());
-                if (value == null) {
-                    value =
-                        environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), field.getType());
-                }
-                if (value == null) {
-                    value = defaultValue;
-                }
-            }
-            return value;
+            return getConfig(dataId, defaultValue, field.getType());
         }
         return null;
     }
@@ -200,4 +188,22 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         }
         return StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
     }
+
+    /**
+     * get spring config
+     * @param dataId data id
+     * @param defaultValue default value
+     * @param type type
+     * @return object
+     */
+    private Object getConfig(String dataId, Object defaultValue, Class<?> type) {
+        ConfigurableEnvironment environment =
+            (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        Object value = environment.getProperty(dataId, type);
+        if (value == null) {
+            value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), type);
+        }
+        return value != null ? value : defaultValue;
+    }
+
 }
