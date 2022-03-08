@@ -343,18 +343,18 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                   one    more
         null       O      O
         value      O      O
-        method     O      O
+        function   O      O
         sequence   O      O
         default    O      O
         -----------------------------------------------
         ps = false
         -----------------------------------------------
                   one    more
-        null       O      X
+        null       O      O
         value      O      O
-        method     X      X
+        function   X      X
         sequence   O      X
-        default    O      X
+        default    O      O
         -----------------------------------------------
         */
         int n = 0, v = 0, m = 0, s = 0, d = 0;
