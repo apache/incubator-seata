@@ -22,12 +22,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.seata.core.model.CommitType;
-import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.core.model.LockStatus;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.storage.file.lock.FileLocker;
@@ -35,7 +34,6 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import static io.seata.core.model.LockStatus.Locked;
 
