@@ -16,6 +16,7 @@
 package io.seata.tm.api;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
@@ -27,6 +28,7 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +134,7 @@ public class TransactionalTemplate {
                 }
 
                 // 4. everything is fine, commit.
-                commitTransaction(tx);
+                commitTransaction(tx, txInfo);
 
                 return rs;
             } finally {
@@ -148,6 +150,18 @@ public class TransactionalTemplate {
             }
         }
     }
+
+    /**
+     * Judge whether timeout occurs in case of IO delay and network communication delay
+     * @param beginTime the beginTime
+     * @param txInfo the transaction info
+     * @return is timeout
+     */
+    private boolean isTimeoutWithLoss(long beginTime, TransactionInfo txInfo) {
+
+        return (System.currentTimeMillis() + txInfo.getLossTime()) - beginTime > txInfo.getTimeOut();
+    }
+
 
     private boolean existingTransaction(GlobalTransaction tx) {
         return tx != null;
@@ -184,11 +198,17 @@ public class TransactionalTemplate {
             }
         } else {
             // not roll back on this exception, so commit
-            commitTransaction(tx);
+            commitTransaction(tx, txInfo);
         }
     }
 
-    private void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+    private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException {
+        if (isTimeoutWithLoss(tx.getCreateTime(), txInfo)) {
+            // business execution timeout
+            throw new TransactionalExecutor.ExecutionException(tx, new TimeoutException(),
+                    TransactionalExecutor.Code.TimeoutRollback);
+        }
+
         try {
             triggerBeforeCommit();
             tx.commit();

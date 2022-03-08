@@ -127,4 +127,13 @@ public @interface GlobalTransactional {
      * @return int
      */
     int lockRetryTimes() default -1;
+
+
+    /**
+     * customized loss time.
+     * time consumed by network IO or disk IO or other
+     *
+     * @return int
+     */
+    int lossTime() default  0;
 }

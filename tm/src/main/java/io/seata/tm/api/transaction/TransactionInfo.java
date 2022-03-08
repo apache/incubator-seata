@@ -37,6 +37,8 @@ public final class TransactionInfo implements Serializable {
 
     private int lockRetryTimes;
 
+    private int lossTime;
+
     public int getTimeOut() {
         return timeOut;
     }
@@ -106,5 +108,13 @@ public final class TransactionInfo implements Serializable {
 
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
+    }
+
+    public int getLossTime() {
+        return lossTime;
+    }
+
+    public void setLossTime(int lossTime) {
+        this.lossTime = lossTime;
     }
 }

@@ -90,11 +90,19 @@ public class AspectTransactional {
      */
     int lockRetryTimes = -1;
 
+    /**
+     * customized loss time.
+     * time consumed by network IO or disk IO or other
+     *
+     * @return int
+     */
+    int lossTime = 0;
+
     public AspectTransactional() {}
 
     public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
         String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
-        Propagation propagation, int lockRetryInterval, int lockRetryTimes) {
+        Propagation propagation, int lockRetryInterval, int lockRetryTimes, int lossTime) {
         this.timeoutMills = timeoutMills;
         this.name = name;
         this.rollbackFor = rollbackFor;
@@ -104,6 +112,7 @@ public class AspectTransactional {
         this.propagation = propagation;
         this.lockRetryInterval = lockRetryInterval;
         this.lockRetryTimes = lockRetryTimes;
+        this.lossTime = lossTime;
     }
 
     public int getTimeoutMills() {
@@ -176,6 +185,14 @@ public class AspectTransactional {
 
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
+    }
+
+    public int getLossTime() {
+        return lossTime;
+    }
+
+    public void setLossTime(int lossTime) {
+        this.lossTime = lossTime;
     }
 
     @Override

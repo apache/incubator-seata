@@ -50,6 +50,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
+    private long createTime;
+
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
@@ -75,6 +77,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         this.xid = xid;
         this.status = status;
         this.role = role;
+        this.createTime = System.currentTimeMillis();
     }
 
     @Override
@@ -248,6 +251,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public GlobalTransactionRole getGlobalTransactionRole() {
         return role;
+    }
+
+    @Override
+    public long getCreateTime() {
+        return createTime;
     }
 
     private void assertXIDNotNull() {
