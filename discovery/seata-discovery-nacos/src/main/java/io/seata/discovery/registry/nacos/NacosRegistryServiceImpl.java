@@ -107,7 +107,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         List<String> clusters = new ArrayList<>();
         clusters.add(cluster);
         LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
-                .add(listener);
+            .add(listener);
         getNamingInstance().subscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 
@@ -118,8 +118,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         List<EventListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
         if (subscribeList != null) {
             List<EventListener> newSubscribeList = subscribeList.stream()
-                    .filter(eventListener -> !eventListener.equals(listener))
-                    .collect(Collectors.toList());
+                .filter(eventListener -> !eventListener.equals(listener))
+                .collect(Collectors.toList());
             LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
         }
         getNamingInstance().unsubscribe(getServiceName(), getServiceGroup(), clusters, listener);
@@ -139,9 +139,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     List<Instance> firstAllInstances = getNamingInstance().getAllInstances(getServiceName(), getServiceGroup(), clusters);
                     if (null != firstAllInstances) {
                         List<InetSocketAddress> newAddressList = firstAllInstances.stream()
-                                .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
-                                .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
-                                .collect(Collectors.toList());
+                            .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
+                            .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
+                            .collect(Collectors.toList());
                         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                     }
                     subscribe(clusterName, event -> {
@@ -150,9 +150,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                             CLUSTER_ADDRESS_MAP.remove(clusterName);
                         } else if (!CollectionUtils.isEmpty(instances)) {
                             List<InetSocketAddress> newAddressList = instances.stream()
-                                    .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
-                                    .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
-                                    .collect(Collectors.toList());
+                                .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
+                                .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
+                                .collect(Collectors.toList());
                             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                         }
                     });
@@ -223,11 +223,11 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                 }
             }
         }
-        // nacos  subscribe application name is null
-        if(Objects.isNull(System.getProperty("project.name"))){
+        // nacos client subscribe application name is unknown
+        if (Objects.isNull(System.getProperty("project.name"))) {
             String applicationId = FILE_CONFIG.getConfig(getApplicationId());
-            if(Objects.nonNull(applicationId)){
-                System.setProperty("project.name",applicationId);
+            if (Objects.nonNull(applicationId)) {
+                System.setProperty("project.name", applicationId);
             }
         }
         return properties;
