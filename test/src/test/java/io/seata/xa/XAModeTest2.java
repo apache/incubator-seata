@@ -378,7 +378,7 @@ public class XAModeTest2 {
         helperStat.close();
         helperConn.close();
 
-        if (JdbcUtils.MYSQL.equals(dbType)) {
+        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
             XAXid xaXid = XAXidBuilder.build(mockXid, mockBranchId);
             dataSourceProxyXA.forceClosePhysicalConnection(xaXid);
         }

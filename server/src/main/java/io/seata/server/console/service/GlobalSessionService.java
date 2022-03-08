@@ -15,9 +15,9 @@
  */
 package io.seata.server.console.service;
 
-import io.seata.core.store.db.vo.GlobalSessionVO;
-import io.seata.server.console.result.PageResult;
-import io.seata.server.console.result.SingleResult;
+import io.seata.core.console.param.GlobalSessionParam;
+import io.seata.core.console.vo.GlobalSessionVO;
+import io.seata.core.console.result.PageResult;
 
 /**
  * Global session service
@@ -27,27 +27,9 @@ public interface GlobalSessionService {
 
     /**
      * Query global session
-     * @param applicationId the applicationId
-     * @param withBranch if with branch session
+     * @param param the param
      * @return the GlobalSessionVO list
      */
-    PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch);
-
-    /**
-     * Query global session by status
-     * @param applicationId the applicationId
-     * @param status the session status
-     * @param withBranch if with branch session
-     * @return the GlobalSessionVO list
-     */
-    PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch);
-
-    /**
-     * Query by xid
-     * @param xid the xid
-     * @param withBranch if with branch session
-     * @return the GlobalSessionVO
-     */
-    SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch);
+    PageResult<GlobalSessionVO> query(GlobalSessionParam param);
 
 }

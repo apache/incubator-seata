@@ -18,13 +18,13 @@ package io.seata.server.lock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import io.seata.common.XID;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
+import io.seata.core.model.LockStatus;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +43,11 @@ public abstract class AbstractLockManager implements LockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
+        return acquireLock(branchSession, true, false);
+    }
+
+    @Override
+    public boolean acquireLock(BranchSession branchSession, boolean autoCommit, boolean skipCheckLock) throws TransactionException {
         if (branchSession == null) {
             throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
         }
@@ -57,7 +62,7 @@ public abstract class AbstractLockManager implements LockManager {
             // no lock
             return true;
         }
-        return getLocker(branchSession).acquireLock(locks);
+        return getLocker(branchSession).acquireLock(locks, autoCommit, skipCheckLock);
     }
 
     @Override
@@ -112,13 +117,8 @@ public abstract class AbstractLockManager implements LockManager {
      */
     protected abstract Locker getLocker(BranchSession branchSession);
 
-    /**
-     * Collect row locks list.`
-     *
-     * @param branchSession the branch session
-     * @return the list
-     */
-    protected List<RowLock> collectRowLocks(BranchSession branchSession) {
+    @Override
+    public List<RowLock> collectRowLocks(BranchSession branchSession) {
         if (branchSession == null || StringUtils.isBlank(branchSession.getLockKey())) {
             return Collections.emptyList();
         }
@@ -155,8 +155,8 @@ public abstract class AbstractLockManager implements LockManager {
      * @return the list
      */
     protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId,
-                                            Long branchID) {
-        List<RowLock> locks = new ArrayList<RowLock>();
+        Long branchID) {
+        List<RowLock> locks = new ArrayList<>();
 
         String[] tableGroupedLockKeys = lockKey.split(";");
         for (String tableGroupedLockKey : tableGroupedLockKeys) {
@@ -187,6 +187,11 @@ public abstract class AbstractLockManager implements LockManager {
             }
         }
         return locks;
+    }
+    
+    @Override
+    public void updateLockStatus(String xid, LockStatus lockStatus) {
+        this.getLocker().updateLockStatus(xid, lockStatus);
     }
 
 }

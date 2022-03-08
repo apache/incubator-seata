@@ -191,6 +191,11 @@ public interface ServerTableColumnsName {
     String LOCK_TABLE_PK = "pk";
 
     /**
+     * The constant lock_table column name status
+     */
+    String LOCK_TABLE_STATUS = "status";
+
+    /**
      * The constant lock_table column name gmt_create
      */
     String LOCK_TABLE_GMT_CREATE = "gmt_create";

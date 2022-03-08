@@ -15,15 +15,16 @@
  */
 package io.seata.server.console.controller;
 
-import io.seata.core.store.db.vo.GlobalSessionVO;
-import io.seata.server.console.result.PageResult;
-import io.seata.server.console.result.SingleResult;
+import javax.annotation.Resource;
+
+import io.seata.core.console.param.GlobalSessionParam;
+import io.seata.core.console.result.PageResult;
+import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * Global Session Controller
@@ -38,27 +39,11 @@ public class GlobalSessionController {
 
     /**
      * Query all globalSession
-     * @return
+     * @param param param for query globalSession
+     * @return  the list of GlobalSessionVO
      */
-    @GetMapping("queryAll")
-    public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
-        return globalSessionService.queryAll(applicationId, withBranch);
-    }
-
-    /**
-     * Query all globalSession by status
-     * @param applicationId
-     * @param status
-     * @param withBranch
-     * @return
-     */
-    @GetMapping("queryByStatus")
-    public PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch) {
-        return globalSessionService.queryByStatus(applicationId, status, withBranch);
-    }
-
-    @GetMapping("queryByXid")
-    SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch) {
-        return globalSessionService.queryByXid(xid, withBranch);
+    @PostMapping("query")
+    public PageResult<GlobalSessionVO> query(@RequestBody GlobalSessionParam param) {
+        return globalSessionService.query(param);
     }
 }

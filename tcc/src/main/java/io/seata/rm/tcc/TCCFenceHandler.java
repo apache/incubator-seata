@@ -18,12 +18,16 @@ package io.seata.rm.tcc;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
-import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.common.thread.NamedThreadFactory;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
@@ -41,6 +45,11 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @author kaka2code
  */
 public class TCCFenceHandler {
+
+    private TCCFenceHandler() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceHandler.class);
 
     private static final TCCFenceStore TCC_FENCE_DAO = TCCFenceStoreDataBaseDAO.getInstance();
@@ -48,6 +57,24 @@ public class TCCFenceHandler {
     private static DataSource dataSource;
 
     private static TransactionTemplate transactionTemplate;
+
+    private static final int MAX_THREAD_CLEAN = 1;
+
+    private static final int MAX_QUEUE_SIZE = 500;
+
+    private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
+
+    private static FenceLogCleanRunnable fenceLogCleanRunnable;
+
+    private static ExecutorService logCleanExecutor;
+
+    static {
+        try {
+            initLogCleanExecutor();
+        } catch (Exception e) {
+            LOGGER.error("init fence log clean executor error", e);
+        }
+    }
 
     public static void setDataSource(DataSource dataSource) {
         TCCFenceHandler.dataSource = dataSource;
@@ -78,6 +105,13 @@ public class TCCFenceHandler {
                     throw new TCCFenceException(String.format("Insert tcc fence record error, prepare fence failed. xid= %s, branchId= %s", xid, branchId),
                             FrameworkErrorCode.InsertRecordError);
                 }
+            } catch (TCCFenceException e) {
+                if (e.getErrcode() == FrameworkErrorCode.DuplicateKeyException) {
+                    LOGGER.error("Branch transaction has already rollbacked before,prepare fence failed. xid= {},branchId = {}", xid, branchId);
+                    addToLogCleanQueue(xid, branchId);
+                }
+                status.setRollbackOnly();
+                throw new SkipCallbackWrapperException(e);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -90,13 +124,12 @@ public class TCCFenceHandler {
      *
      * @param commitMethod          commit method
      * @param targetTCCBean         target tcc bean
-     * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
      * @param args                  commit method's parameters
      * @return the boolean
      */
-    public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
+    public static boolean commitFence(Method commitMethod, Object targetTCCBean,
                                       String xid, Long branchId, Object[] args) {
         return transactionTemplate.execute(status -> {
             try {
@@ -116,7 +149,7 @@ public class TCCFenceHandler {
                     }
                     return false;
                 }
-                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status, args);
+                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -129,14 +162,13 @@ public class TCCFenceHandler {
      *
      * @param rollbackMethod        rollback method
      * @param targetTCCBean         target tcc bean
-     * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
      * @param args                  rollback method's parameters
      * @param actionName            the action name
      * @return the boolean
      */
-    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext,
+    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
                                         String xid, Long branchId, Object[] args, String actionName) {
         return transactionTemplate.execute(status -> {
             try {
@@ -163,7 +195,7 @@ public class TCCFenceHandler {
                         return false;
                     }
                 }
-                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status, args);
+                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status, args);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -194,15 +226,13 @@ public class TCCFenceHandler {
      *
      * @param method                target method
      * @param targetTCCBean         target bean
-     * @param businessActionContext businessActionContext
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
      * @param status                the tcc fence status
      * @return the boolean
      */
     private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean,
-                                                             BusinessActionContext businessActionContext, String xid,
-                                                             Long branchId, int status,
+                                                             String xid, Long branchId, int status,
                                                              TransactionStatus transactionStatus,
                                                              Object[] args) throws Exception {
         boolean result = TCC_FENCE_DAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
@@ -261,5 +291,78 @@ public class TCCFenceHandler {
                 throw e;
             }
         });
+    }
+
+    private static void initLogCleanExecutor() {
+        logCleanExecutor = new ThreadPoolExecutor(MAX_THREAD_CLEAN, MAX_THREAD_CLEAN, Integer.MAX_VALUE,
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("fenceLogCleanThread", MAX_THREAD_CLEAN, true)
+        );
+        fenceLogCleanRunnable = new FenceLogCleanRunnable();
+        logCleanExecutor.submit(fenceLogCleanRunnable);
+    }
+
+    private static void addToLogCleanQueue(final String xid, final long branchId) {
+        FenceLogIdentity logIdentity = new FenceLogIdentity();
+        logIdentity.setXid(xid);
+        logIdentity.setBranchId(branchId);
+        try {
+            LOG_QUEUE.add(logIdentity);
+        } catch (Exception e) {
+            LOGGER.warn("Insert tcc fence record into queue for async delete error,xid:{},branchId:{}", xid, branchId, e);
+        }
+    }
+
+    /**
+     * clean fence log that has the final status runnable.
+     *
+     * @see TCCFenceConstant
+     */
+    private static class FenceLogCleanRunnable implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+
+                try {
+                    FenceLogIdentity logIdentity = LOG_QUEUE.take();
+                    boolean ret = TCCFenceHandler.deleteFence(logIdentity.getXid(), logIdentity.getBranchId());
+                    if (!ret) {
+                        LOGGER.error("delete fence log failed, xid: {}, branchId: {}", logIdentity.getXid(), logIdentity.getBranchId());
+                    }
+                } catch (InterruptedException e) {
+                    LOGGER.error("take fence log from queue for clean be interrupted", e);
+                } catch (Exception e) {
+                    LOGGER.error("exception occur when clean fence log", e);
+                }
+            }
+        }
+    }
+
+    private static class FenceLogIdentity {
+        /**
+         * the global transaction id
+         */
+        private String xid;
+
+        /**
+         * the branch transaction id
+         */
+        private Long branchId;
+
+        public String getXid() {
+            return xid;
+        }
+
+        public Long getBranchId() {
+            return branchId;
+        }
+
+        public void setXid(String xid) {
+            this.xid = xid;
+        }
+
+        public void setBranchId(Long branchId) {
+            this.branchId = branchId;
+        }
     }
 }

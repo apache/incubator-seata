@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
+import io.seata.sqlparser.SqlParserType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +47,7 @@ public class RmProperties {
     private boolean sagaRetryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
     private boolean sagaCompensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
     private int tccActionInterceptorOrder = TCC_ACTION_INTERCEPTOR_ORDER;
+    private String sqlParserType = SqlParserType.SQL_PARSER_TYPE_DRUID;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -130,6 +132,15 @@ public class RmProperties {
 
     public RmProperties setTccActionInterceptorOrder(int tccActionInterceptorOrder) {
         this.tccActionInterceptorOrder = tccActionInterceptorOrder;
+        return this;
+    }
+
+    public String getSqlParserType() {
+        return sqlParserType;
+    }
+
+    public RmProperties setSqlParserType(String sqlParserType) {
+        this.sqlParserType = sqlParserType;
         return this;
     }
 }

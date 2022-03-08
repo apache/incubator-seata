@@ -141,6 +141,7 @@ public class FileTransactionStoreManagerTest {
                 + 4 // applicationDataBytes.length
                 + 4 // xidBytes.size
                 + 1 // statusCode
+                + 1 // lockstatus
                 + 1 // branchType
                 + 1;// commitType
         String xid = global.getXid();
