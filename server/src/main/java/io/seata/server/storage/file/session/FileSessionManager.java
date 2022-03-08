@@ -135,14 +135,18 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
             }
 
             if (!StringUtils.isEmpty(condition.getXid())) {
-                if (!Objects.equals(condition.getXid(), globalSession.getXid())) {
-                    continue;
+                if (Objects.equals(condition.getXid(), globalSession.getXid())) {
+                    // Only one will be found, just add and return
+                    found.add(globalSession);
+                    return found;
                 }
             }
 
             if (null != condition.getTransactionId() && condition.getTransactionId() > 0) {
-                if (!Objects.equals(condition.getTransactionId(), globalSession.getTransactionId())) {
-                    continue;
+                if (Objects.equals(condition.getTransactionId(), globalSession.getTransactionId())) {
+                    // Only one will be found, just add and return
+                    found.add(globalSession);
+                    return found;
                 }
             }
 

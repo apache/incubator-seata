@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import io.seata.common.ConfigurationKeys;
+import io.seata.core.model.LockStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,7 @@ public class SessionHolder {
     /**
      * The redis distributed lock expire time
      */
-    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME,10000);
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, 10000);
 
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
@@ -98,43 +99,43 @@ public class SessionHolder {
     public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-                CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
+                    CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+                    new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+                    new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+                    new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.DB.getName());
         } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-                DEFAULT_SESSION_STORE_FILE_DIR);
+                    DEFAULT_SESSION_STORE_FILE_DIR);
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
+                    new Class[]{String.class, String.class}, new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
+                    new Class[]{String.class, String.class}, new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
+                    new Class[]{String.class, String.class}, new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+                    StoreMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+                    StoreMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+                    StoreMode.REDIS.getName(), new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         } else {
@@ -178,12 +179,15 @@ public class SessionHolder {
                             break;
                         case Committing:
                         case CommitRetrying:
-                            lockBranchSessions(globalSession.getSortedBranches());
                             queueToRetryCommit(globalSession);
                             break;
                         default: {
                             lockBranchSessions(globalSession.getSortedBranches());
-
+                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())) {
+                                globalSession.getBranchSessions().parallelStream().forEach(branchSession -> {
+                                    branchSession.setLockStatus(LockStatus.Rollbacking);
+                                });
+                            }
                             switch (globalStatus) {
                                 case Rollbacking:
                                 case RollbackRetrying:
@@ -357,7 +361,7 @@ public class SessionHolder {
      * lock and execute
      *
      * @param globalSession the global session
-     * @param lockCallable the lock Callable
+     * @param lockCallable  the lock Callable
      * @return the value
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
@@ -386,8 +390,9 @@ public class SessionHolder {
 
     /**
      * Execute the function after get the distribute lock
-     * @param key   the distribute lock key
-     * @param func  the function to be call
+     *
+     * @param key  the distribute lock key
+     * @param func the function to be call
      * @return whether the func be call
      */
     public static boolean distributedLockAndExecute(String key, NoArgsFunc func) {
