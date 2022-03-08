@@ -471,11 +471,6 @@ public interface ConfigurationKeys {
     String MAX_ROLLBACK_RETRY_TIMEOUT = SERVER_PREFIX + "maxRollbackRetryTimeout";
 
     /**
-     * The constant MAX_ROLLBACK_RETRY_TIMEOUT.
-     */
-    String LOSS_TIME = SERVER_PREFIX + "lossTime";
-
-    /**
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
      */
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
