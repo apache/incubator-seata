@@ -525,7 +525,6 @@ public class DataBaseSessionManagerTest {
             branchSession.setBranchId(branchId);
             branchSession.setXid(xid);
             branchSession.setTransactionId(globalSession.getTransactionId());
-            branchSession.setBranchId(1L);
             branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
@@ -554,7 +553,6 @@ public class DataBaseSessionManagerTest {
             branchSession.setBranchId(branchId2);
             branchSession.setXid(xid2);
             branchSession.setTransactionId(globalSession.getTransactionId());
-            branchSession.setBranchId(1L);
             branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
