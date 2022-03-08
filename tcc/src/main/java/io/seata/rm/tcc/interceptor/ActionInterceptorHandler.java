@@ -124,7 +124,7 @@ public class ActionInterceptorHandler {
      *
      * @param arguments the arguments
      * @return the action context
-     * @since above 1.4.2
+     * @since 1.5.0
      */
     @Nonnull
     protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Class<?>[] parameterTypes, Object[] arguments) {

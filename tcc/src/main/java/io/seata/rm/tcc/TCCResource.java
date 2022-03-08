@@ -43,6 +43,9 @@ public class TCCResource implements Resource {
 
     private Method commitMethod;
 
+    /**
+     * @since 2.0.0
+     */
     private CommitType commitType;
 
     private String rollbackMethodName;

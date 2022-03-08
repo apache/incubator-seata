@@ -68,7 +68,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private BranchType branchType;
 
     /**
-     * @since above 1.4.2
+     * @since 2.0.0
      */
     private CommitType commitType = CommitType.SyncCommit;
 
@@ -423,9 +423,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byteBuffer.put((byte)status.getCode());
         byteBuffer.put((byte)lockStatus.getCode());
-
         byteBuffer.put(commitTypeByte);
-
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);

@@ -21,6 +21,7 @@ import io.seata.core.model.CommitType;
  * The enum of tcc two phase commit type.
  *
  * @author wang.liang
+ * @since 2.0.0
  */
 public enum TCCCommitType {
 

@@ -40,6 +40,9 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
 
     private String branchType;
 
+    /**
+     * @since 2.0.0
+     */
     private Integer commitType = CommitType.SyncCommit.value();
 
     private Integer status = BranchStatus.Unknown.getCode();

@@ -19,6 +19,7 @@ package io.seata.core.model;
  * The enum of two phase commit type.
  *
  * @author wang.liang
+ * @since 2.0.0
  */
 public enum CommitType {
 

@@ -31,6 +31,9 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
 
     private BranchType branchType = BranchType.AT;
 
+    /**
+     * @since 2.0.0
+     */
     private CommitType commitType = CommitType.SyncCommit;
 
     private String resourceId;

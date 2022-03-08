@@ -82,8 +82,8 @@ public class DataBaseLockManagerImplTest {
                     "  resource_id    varchar(32)," +
                     "  table_name     varchar(32)," +
                     "  pk             varchar(32)," +
-                    "  status         integer," +
                     "  row_key        varchar(128) primary key not null," +
+                    "  status         integer," +
                     "  gmt_create     timestamp(6)," +
                     "  gmt_modified   timestamp(6)" +
                     ")");

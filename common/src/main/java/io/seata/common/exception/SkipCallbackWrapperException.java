@@ -20,7 +20,7 @@ package io.seata.common.exception;
  * This exception class will make the semantics clearer.
  *
  * @author wang.liang
- * @since above 1.4.2
+ * @since 1.5.0
  */
 public class SkipCallbackWrapperException extends RuntimeException {
 
