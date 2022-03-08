@@ -31,6 +31,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
 
     private String xid;
     private GlobalStatus status;
+    private long createTime;
 
     private static SpringJvmUUIDSeqGenerator uuidSeqGenerator = new SpringJvmUUIDSeqGenerator();
 
@@ -43,6 +44,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     public MockGlobalTransaction(String xid, GlobalStatus status) {
         this.xid = xid;
         this.status = status;
+        this.createTime = System.currentTimeMillis();
     }
 
     @Override
@@ -107,6 +109,11 @@ public class MockGlobalTransaction implements GlobalTransaction {
     @Override
     public GlobalTransactionRole getGlobalTransactionRole() {
         return null;
+    }
+
+    @Override
+    public long getCreateTime() {
+        return createTime;
     }
 
 }
