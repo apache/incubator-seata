@@ -294,9 +294,9 @@ public class FileSessionManagerTest {
             globalSessionParam.setPageNum(1);
             final PageResult<GlobalSessionVO> sizeAndNumTestResult = globalSessionService.query(globalSessionParam);
             Assertions.assertEquals(1, sizeAndNumTestResult.getCurrPage());
-            Assertions.assertEquals(2, sizeAndNumTestResult.getPages());
+            Assertions.assertEquals(3, sizeAndNumTestResult.getPages());
             Assertions.assertEquals(1, sizeAndNumTestResult.getData().size());
-            Assertions.assertEquals(2, sizeAndNumTestResult.getTotal());
+            Assertions.assertEquals(3, sizeAndNumTestResult.getTotal());
 
             // xid
             final GlobalSession firstGlobalSession = globalSessions.get(0);
@@ -338,8 +338,8 @@ public class FileSessionManagerTest {
             // with branch
             globalSessionParam.setStatus(null);
             final PageResult<GlobalSessionVO> withBranchTestResult = globalSessionService.query(globalSessionParam);
-            Assertions.assertEquals(1, withBranchTestResult.getData().size());
-            Assertions.assertEquals(1, withBranchTestResult.getData().size());
+            Assertions.assertEquals(3, withBranchTestResult.getData().size());
+            Assertions.assertEquals(3, withBranchTestResult.getData().size());
 
             // timeStart and timeEnd
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -349,15 +349,15 @@ public class FileSessionManagerTest {
             Assertions.assertEquals(0, globalSessionService.query(globalSessionParam).getData().size());
 
             globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1));
-            Assertions.assertEquals(2, globalSessionService.query(globalSessionParam).getData().size());
+            Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
 
             globalSessionParam.setTimeStart(null);
             globalSessionParam.setTimeEnd(DateUtils.addHours(new Date(), 1));
-            Assertions.assertEquals(2, globalSessionService.query(globalSessionParam).getData().size());
+            Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
 
             globalSessionParam.setTimeStart(DateUtils.addHours(new Date(), -1));
-            Assertions.assertEquals(2, globalSessionService.query(globalSessionParam).getData().size());
+            Assertions.assertEquals(3, globalSessionService.query(globalSessionParam).getData().size());
         } finally {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.end();
