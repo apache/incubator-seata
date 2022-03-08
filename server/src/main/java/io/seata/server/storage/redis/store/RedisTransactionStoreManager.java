@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -48,15 +50,18 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.Transaction;
+import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
+import redis.clients.jedis.Response;
+import static io.seata.common.ConfigurationKeys.STORE_REDIS_QUERY_LIMIT;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
+import static io.seata.core.constants.RedisKeyConstants.DEFAULT_LOG_QUERY_LIMIT;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
 
 /**
@@ -90,6 +95,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private static final String OK = "OK";
 
     /**
+     * The constant CONFIG.
+     */
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    /**
+     * The Log query limit.
+     */
+    private int logQueryLimit;
+
+    /**
      * Get the instance.
      */
     public static RedisTransactionStoreManager getInstance() {
@@ -103,22 +118,23 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return instance;
     }
 
-    /*
-    init map to constructor
+    /**
+     * init map to constructor
      */
     public RedisTransactionStoreManager() {
         super();
         initGlobalMap();
         initBranchMap();
+        logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
     }
 
-    /*
-   Map for LogOperation Global Operation
-   */
+    /**
+     * Map for LogOperation Global Operation
+     */
     public static volatile ImmutableMap<LogOperation, Function<GlobalTransactionDO, Boolean>> globalMap;
 
-    /*
-    Map for LogOperation Branch Operation
+    /**
+     * Map for LogOperation Branch Operation
      */
     public static volatile ImmutableMap<LogOperation, Function<BranchTransactionDO, Boolean>> branchMap;
 
@@ -401,20 +417,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param statuses the statuses
      * @return the list
      */
-    public List<GlobalSession> readSession(GlobalStatus[] statuses) {
-
-        return readSession(statuses, true);
-    }
-
     @Override
     public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
         List<String> statusKeys = new ArrayList<>();
         for (int i = 0; i < statuses.length; i++) {
             statusKeys.add(buildGlobalStatus(statuses[i].getCode()));
         }
+        int limit = resetLogQueryLimit(statusKeys);
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, -1));
+            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, limit));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
             pipelined.close();
             List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
@@ -429,6 +441,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             return globalSessions;
         }
+    }
+
+    private int resetLogQueryLimit(List<String> statusKeys) {
+        int resetLimitQuery = logQueryLimit;
+        if (statusKeys.size() > 1) {
+            int size = statusKeys.size();
+            resetLimitQuery = (logQueryLimit / size) == 0 ? logQueryLimit : (logQueryLimit / size);
+        }
+        return resetLimitQuery;
     }
 
     /**
@@ -474,9 +495,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             String statusKey = buildGlobalStatus(GlobalStatus.get(param.getStatus()).getCode());
             try (Jedis jedis = JedisPooledFactory.getJedisInstance();
                  Pipeline pipelined = jedis.pipelined()) {
-                List<String> xids = pipelined.lrange(statusKey, start, end).get();
-
-                xids.stream().forEach(xid -> {
+                Response<List<String>> result = pipelined.lrange(statusKey, start, end);
+                pipelined.close();
+                List<String> xids = result.get();
+                xids.forEach(xid -> {
                     GlobalSession globalSession = this.readSession(xid, param.isWithBranch());
                     if (globalSession != null) {
                         globalSessions.add(globalSession);
@@ -687,6 +709,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private String buildGlobalStatus(Integer status) {
         return REDIS_SEATA_STATUS_PREFIX + status;
+    }
+
+    /**
+     * Sets log query limit.
+     *
+     * @param logQueryLimit the log query limit
+     */
+    public void setLogQueryLimit(int logQueryLimit) {
+        this.logQueryLimit = logQueryLimit;
     }
 
 }
