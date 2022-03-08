@@ -243,9 +243,6 @@ public class FileSessionManagerTest {
             Collection<GlobalSession> expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition);
             Assertions.assertNotNull(expectedGlobalSessions);
             Assertions.assertEquals(2, expectedGlobalSessions.size());
-            for (GlobalSession globalSession : globalSessions) {
-                sessionManager.removeGlobalSession(globalSession);
-            }
 
             SessionCondition sessionCondition1 = new SessionCondition(globalSessions.get(0).getXid());
             expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition1);
@@ -261,6 +258,11 @@ public class FileSessionManagerTest {
             expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition1);
             Assertions.assertNotNull(expectedGlobalSessions);
             Assertions.assertEquals(1, expectedGlobalSessions.size());
+
+            for (GlobalSession globalSession : globalSessions) {
+                sessionManager.removeGlobalSession(globalSession);
+            }
+
         }
     }
 

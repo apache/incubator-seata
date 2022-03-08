@@ -139,6 +139,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     // Only one will be found, just add and return
                     found.add(globalSession);
                     return found;
+                } else {
+                    continue;
                 }
             }
 
@@ -147,6 +149,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     // Only one will be found, just add and return
                     found.add(globalSession);
                     return found;
+                } else {
+                    continue;
                 }
             }
 
