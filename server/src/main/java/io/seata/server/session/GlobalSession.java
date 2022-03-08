@@ -104,7 +104,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean add(BranchSession branchSession) {
-        return branchSessions.add(branchSession);
+        if (null != branchSessions) {
+            return branchSessions.add(branchSession);
+        } else {
+            // db and redis no need to deal with
+            return true;
+        }
     }
 
     /**
