@@ -49,6 +49,7 @@ public class RedisAutoInjectionTypeConvertTest {
     @Bean
     RegistryRedisProperties registryRedisProperties() {
         RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+
         PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
         return registryRedisProperties;
     }
@@ -58,8 +59,11 @@ public class RedisAutoInjectionTypeConvertTest {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration =
             EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        System.setProperty("seata.registry.redis.db","1");
         assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
+        System.setProperty("seata.registry.redis.password","123456");
         assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
+        System.setProperty("seata.registry.redis.serverAddr","localhost:123456");
         assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
     }
 
