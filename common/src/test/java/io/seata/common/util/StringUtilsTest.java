@@ -59,6 +59,12 @@ public class StringUtilsTest {
     }
 
     @Test
+    public void testHump2Line(){
+        assertThat(StringUtils.hump2Line("abc-d").equals("abcD")).isTrue();
+        assertThat(StringUtils.hump2Line("aBc").equals("a-bc")).isTrue();
+    }
+
+    @Test
     public void testInputStream2String() throws IOException {
         assertNull(StringUtils.inputStream2String(null));
         String data = "abc\n"

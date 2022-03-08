@@ -38,7 +38,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
  */
 public class StringUtils {
 
-    private static final Pattern HUMP_PATTERN = Pattern.compile("[A-Z]");
+    private static final Pattern CAMEL_PATTERN = Pattern.compile("[A-Z]");
     private static final Pattern LINE_PATTERN = Pattern.compile("-(\\w)");
 
     private StringUtils() {
@@ -326,13 +326,13 @@ public class StringUtils {
     }
 
     /**
-     * hump to Line or line to hump
+     * hump to Line or line to hump, only spring environment use
      * 
      * @param str str
      * @return string string
      */
     public static String hump2Line(String str) {
-        Matcher matcher = HUMP_PATTERN.matcher(str);
+        Matcher matcher = CAMEL_PATTERN.matcher(str);
         StringBuffer sb = new StringBuffer();
         if (matcher.find()) {
             matcher.appendReplacement(sb, "-" + matcher.group(0).toLowerCase());
