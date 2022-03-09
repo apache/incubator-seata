@@ -124,32 +124,41 @@ public class RedisTransactionStoreManagerTest {
         session.setStatus(GlobalStatus.Finished);
         sessionManager.addGlobalSession(session4);
 
-        redisTransactionStoreManager.setLogQueryLimit(0);
+        //first:  setLogQueryLimit > totalCount
+        //second: setLogQueryLimit = totalCount
+        //third:  setLogQueryLimit < totalCount
+        redisTransactionStoreManager.setLogQueryLimit(5);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
         LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
+        LOGGER.info("the limit All Sessions result size is:[{}]",globalSessions.size());
 
         //first page
         final List<GlobalSession> globalSessions1 = redisTransactionStoreManager.findGlobalSessionByPage(1, 2, true);
         List<GlobalSessionVO> result = new ArrayList<>();
         convertToGlobalSessionVo(result,globalSessions1);
         LOGGER.info("the first page result is:[{}]",result);
+        LOGGER.info("the first page result size is:[{}]",result.size());
 
         //second page
         final List<GlobalSession> globalSessions2 = redisTransactionStoreManager.findGlobalSessionByPage(2, 2, true);
         List<GlobalSessionVO> result1 = new ArrayList<>();
         convertToGlobalSessionVo(result1,globalSessions2);
         LOGGER.info("the second page result is:[{}]",result1);
+        LOGGER.info("the second page result size is:[{}]",result1.size());
 
         //third page
         final List<GlobalSession> globalSessions3 = redisTransactionStoreManager.findGlobalSessionByPage(3, 2, true);
         List<GlobalSessionVO> result2 = new ArrayList<>();
         convertToGlobalSessionVo(result2,globalSessions3);
         LOGGER.info("the third page result is:[{}]",result2);
+        LOGGER.info("the third page result size is:[{}]",result2.size());
 
-        final List<GlobalSession> globalSessions4 = redisTransactionStoreManager.findGlobalSessionByPage(1, 2, true);
+
+        final List<GlobalSession> globalSessions4 = redisTransactionStoreManager.findGlobalSessionByPage(1, 5, true);
         List<GlobalSessionVO> result3 = new ArrayList<>();
         convertToGlobalSessionVo(result3,globalSessions4);
-        LOGGER.info("the third page result is:[{}]",result3);
+        LOGGER.info("the All page result is:[{}]",result3);
+        LOGGER.info("the All page result size is:[{}]",result3.size());
 
     }
 
