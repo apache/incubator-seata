@@ -57,7 +57,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String REGISTRY_TYPE = "nacos";
     private static final String REGISTRY_CLUSTER = "cluster";
     private static final String PRO_APPLICATION_KEY = "application";
-    private static final String PRO_APPLICATION_ID = "applicationId";
+    private static final String PRO_CLIENT_APPLICATION = "clientApplication";
     private static final String PRO_GROUP_KEY = "group";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
@@ -225,7 +225,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         }
         // nacos client subscribe application name is unknown
         if (Objects.isNull(System.getProperty("project.name"))) {
-            String applicationId = FILE_CONFIG.getConfig(getApplicationId());
+            String applicationId = FILE_CONFIG.getConfig(getClientApplication());
             if (Objects.nonNull(applicationId)) {
                 System.setProperty("project.name", applicationId);
             }
@@ -281,8 +281,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
     }
 
-    public static String getApplicationId() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, PRO_APPLICATION_ID);
+    public static String getClientApplication() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_CLIENT_APPLICATION);
     }
 
 }
