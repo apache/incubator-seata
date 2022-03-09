@@ -70,8 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.RETRY_COMMITTING;
+import static io.seata.common.Constants.ASYNC_OR_RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
@@ -143,11 +142,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor retryRollbacking =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("RetryRollbacking", 1));
 
-    private final ScheduledThreadPoolExecutor retryCommitting =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("RetryCommitting", 1));
-
-    private final ScheduledThreadPoolExecutor asyncCommitting =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncCommitting", 1));
+    private final ScheduledThreadPoolExecutor asyncOrRetryCommitting =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncOrRetryCommitting", 1));
 
     private final ScheduledThreadPoolExecutor timeoutCheck =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("TxTimeoutCheck", 1));
@@ -159,7 +155,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
             GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking};
 
-    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[]{GlobalStatus.Committing, GlobalStatus.CommitRetrying};
+    private final GlobalStatus[] retryCommittingStatuses =
+        new GlobalStatus[] {GlobalStatus.AsyncCommitting, GlobalStatus.Committing, GlobalStatus.CommitRetrying};
 
     private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
@@ -335,7 +332,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
-                SessionHelper.postTcSessionBeginEvent(globalSession, GlobalStatus.TimeoutRollbacking);
+                SessionHelper.postTcSessionEvent(globalSession, GlobalStatus.TimeoutRollbacking);
 
                 return true;
             });
@@ -358,7 +355,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
-                if (delayHandleSession && rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking)
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking)
                     && !rollbackingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
@@ -399,7 +396,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
-                if (delayHandleSession && committingSession.getStatus().equals(GlobalStatus.Committing)
+                if (committingSession.getStatus().equals(GlobalStatus.Committing)
                     && !committingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
@@ -425,26 +422,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private boolean isRetryTimeout(long now, long timeout, long beginTime) {
         return timeout >= ALWAYS_RETRY_BOUNDARY && now - beginTime > timeout;
-    }
-
-    /**
-     * Handle async committing.
-     */
-    protected void handleAsyncCommitting() {
-        SessionCondition asyncCommittingSessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting);
-        Collection<GlobalSession> asyncCommittingSessions =
-            SessionHolder.getRootSessionManager().findGlobalSessions(asyncCommittingSessionCondition);
-        if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
-            return;
-        }
-        SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
-            try {
-                asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-                core.doGlobalCommit(asyncCommittingSession, true);
-            } catch (TransactionException ex) {
-                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
-            }
-        });
     }
 
     /**
@@ -481,13 +458,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             () -> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking), 0,
             ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        retryCommitting.scheduleAtFixedRate(
-            () -> SessionHolder.distributedLockAndExecute(RETRY_COMMITTING, this::handleRetryCommitting), 0,
+        asyncOrRetryCommitting.scheduleAtFixedRate(
+            () -> SessionHolder.distributedLockAndExecute(ASYNC_OR_RETRY_COMMITTING, this::handleRetryCommitting), 0,
             COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
-
-        asyncCommitting.scheduleAtFixedRate(
-            () -> SessionHolder.distributedLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting), 0,
-            ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(
             () -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck), 0,
@@ -521,14 +494,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     public void destroy() {
         // 1. first shutdown timed task
         retryRollbacking.shutdown();
-        retryCommitting.shutdown();
-        asyncCommitting.shutdown();
+        asyncOrRetryCommitting.shutdown();
         timeoutCheck.shutdown();
         branchRemoveExecutor.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            asyncOrRetryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {

@@ -195,8 +195,9 @@ public class SessionHelper {
      *
      * @param globalSession the global session
      */
-    public static void postTcSessionBeginEvent(GlobalSession globalSession) {
-        postTcSessionBeginEvent(globalSession, globalSession.getStatus());
+    public static void postTcSessionEvent(GlobalSession globalSession) {
+        LOGGER.info("globalsession status: {},xid: {}",globalSession.getStatus(),globalSession.getXid());
+        postTcSessionEvent(globalSession, globalSession.getStatus());
     }
 
     /**
@@ -204,7 +205,7 @@ public class SessionHelper {
      *
      * @param globalSession the global session
      */
-    public static void postTcSessionBeginEvent(GlobalSession globalSession, GlobalStatus status) {
+    public static void postTcSessionEvent(GlobalSession globalSession, GlobalStatus status) {
         EventBus eventBus = EventBusManager.get();
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             globalSession.getTransactionName(), globalSession.getApplicationId(),
@@ -228,12 +229,16 @@ public class SessionHelper {
     public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
         sessions.parallelStream().forEach(globalSession -> {
             try {
-                MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
-                handler.handle(globalSession);
+                globalSession.lock();
+                try {
+                    MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
+                    handler.handle(globalSession);
+                } finally {
+                    globalSession.unlock();
+                    MDC.remove(RootContext.MDC_KEY_XID);
+                }
             } catch (Throwable th) {
                 LOGGER.error("handle global session failed: {}", globalSession.getXid(), th);
-            } finally {
-                MDC.remove(RootContext.MDC_KEY_XID);
             }
         });
     }

@@ -133,7 +133,7 @@ public class DefaultCore implements Core {
         session.begin();
 
         // transaction start event
-        SessionHelper.postTcSessionBeginEvent(session);
+        SessionHelper.postTcSessionEvent(session);
 
         return session.getXid();
     }
@@ -180,7 +180,7 @@ public class DefaultCore implements Core {
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start committing event
-        SessionHelper.postTcSessionBeginEvent(globalSession);
+        SessionHelper.postTcSessionEvent(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
@@ -289,8 +289,8 @@ public class DefaultCore implements Core {
     @Override
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
-        // start rollback event
-        SessionHelper.postTcSessionBeginEvent(globalSession);
+        // start rollbacking or retryRollbacking event
+        SessionHelper.postTcSessionEvent(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);

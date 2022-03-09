@@ -137,9 +137,9 @@ public interface Constants {
     String HANDLE_ALL_SESSION = "HandleAllSession";
 
     /**
-     * The constant RETRY_COMMITTING
+     * The constant ASYNC_OR_RETRY_COMMITTING
      */
-    String RETRY_COMMITTING = "RetryCommitting";
+    String ASYNC_OR_RETRY_COMMITTING = "AsyncOrRetryCommitting";
 
     /**
      * The constant ASYNC_COMMITTING
