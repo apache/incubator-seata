@@ -233,16 +233,12 @@ public class SessionHelper {
     public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
         sessions.parallelStream().forEach(globalSession -> {
             try {
-                globalSession.lock();
-                try {
-                    MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
-                    handler.handle(globalSession);
-                } finally {
-                    globalSession.unlock();
-                    MDC.remove(RootContext.MDC_KEY_XID);
-                }
+                MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
+                handler.handle(globalSession);
             } catch (Throwable th) {
                 LOGGER.error("handle global session failed: {}", globalSession.getXid(), th);
+            } finally {
+                MDC.remove(RootContext.MDC_KEY_XID);
             }
         });
     }

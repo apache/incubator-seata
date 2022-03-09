@@ -30,7 +30,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.RETRY_COMMITTING;
+import static io.seata.common.Constants.ASYNC_OR_RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
@@ -95,13 +95,13 @@ public class SessionHolderTest {
 //    @Test
     @Order(4)
     public void test_retryCommittingLock() {
-        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(RETRY_COMMITTING));
+        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(ASYNC_OR_RETRY_COMMITTING));
     }
 
 //    @Test
     @Order(5)
     public void test_unRetryCommittingLock() {
-        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(RETRY_COMMITTING));
+        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(ASYNC_OR_RETRY_COMMITTING));
     }
 
 //    @Test

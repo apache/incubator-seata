@@ -388,7 +388,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void handleRetryCommitting() {
         SessionCondition retryCommittingSessionCondition = new SessionCondition(retryCommittingStatuses);
         Collection<GlobalSession> committingSessions =
-            SessionHolder.getRootSessionManager().findGlobalSessions(retryCommittingSessionCondition);
+            SessionHolder.getRetryCommittingSessionManager().findGlobalSessions(retryCommittingSessionCondition);
         if (CollectionUtils.isEmpty(committingSessions)) {
             return;
         }

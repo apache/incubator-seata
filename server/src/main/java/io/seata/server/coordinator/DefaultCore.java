@@ -35,6 +35,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -281,7 +282,8 @@ public class DefaultCore implements Core {
         if (!shouldRollBack) {
             return globalSession.getStatus();
         }
-
+        globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
         boolean rollbackSuccess = doGlobalRollback(globalSession, false);
         return rollbackSuccess ? GlobalStatus.Rollbacked : globalSession.getStatus();
     }
