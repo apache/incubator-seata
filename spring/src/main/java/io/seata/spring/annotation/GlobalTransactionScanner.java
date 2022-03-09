@@ -526,6 +526,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 LOGGER.info("{} config changed, old value:true, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                         event.getNewValue());
                 initClient();
+                ConfigurationCache.removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
             }
         }
     }
