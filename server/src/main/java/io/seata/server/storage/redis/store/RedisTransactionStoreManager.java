@@ -689,12 +689,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         if (total >= logQueryLimit) {
             return;
         }
-
         if (total >= totalCount) {
             return;
         }
-
-        //when start greater  than offset
+        //when start greater than offset(totalCount)
         if (start >= totalCount) {
             return;
         }
@@ -708,10 +706,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 }
             });
         }
-
         int startNew = end + 1;
         int endNew   = startNew + end;
-
         dogetXidsForTargetMap(targetMap,startNew,endNew,logQueryLimit,totalCount,listList);
     }
 
