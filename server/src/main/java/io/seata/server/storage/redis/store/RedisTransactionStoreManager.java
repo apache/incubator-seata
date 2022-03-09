@@ -50,7 +50,6 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 import static io.seata.common.ConfigurationKeys.STORE_REDIS_QUERY_LIMIT;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
@@ -426,8 +425,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         final Long totalCount = countByClobalSesisons(statuses);
 
         List<List<String>> list = new ArrayList<>();
-        dogetXidsForTargetMap(targetMap,0,(limit - 1),logQueryLimit,totalCount,list);
-
+        dogetXidsForTargetMap(targetMap,0,limit - 1,logQueryLimit,totalCount,list);
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
             xids.parallelStream().forEach(xid -> {
@@ -634,13 +632,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     public List<GlobalSession> findGlobalSessionByPage(int pageNum,int pageSize,boolean withBranchSessions) {
         List<GlobalSession> globalSessions = new ArrayList<>();
         int start = Math.max((pageNum - 1) * pageSize, 0);
+        int end = pageNum * pageSize - 1;
 
         List<String> statusKeys = convertStatusKeys(GlobalStatus.values());
         final Long totalCount  = countByClobalSesisons(GlobalStatus.values());
         Map<String, Long> stringLongMap = calculateStatuskeysHasData(statusKeys);
 
         List<List<String>> list = new ArrayList<>();
-        dogetXidsForTargetMap(stringLongMap,start,resetLogQueryLimit(stringLongMap),pageSize,totalCount,list);
+        dogetXidsForTargetMap(stringLongMap,start,end,pageSize,totalCount,list);
 
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
