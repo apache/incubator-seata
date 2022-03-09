@@ -675,32 +675,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    private List<GlobalSession> readGlobalSession(Set<String> keys,boolean withBranchSessions) {
-        ArrayList<GlobalSession> globalSessions = new ArrayList<>();
-        String xid = null;
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            if (CollectionUtils.isNotEmpty(keys)) {
-                for (String key : keys) {
-                    Map<String, String> map = jedis.hgetAll(key);
-                    if (CollectionUtils.isEmpty(map)) {
-                        return null;
-                    }
-                    GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
-                    if (globalTransactionDO != null) {
-                        xid = globalTransactionDO.getXid();
-                    }
-                    List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
-                    if (withBranchSessions) {
-                        branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
-                    }
-                    globalSessions.add(getGlobalSession(globalTransactionDO,branchTransactionDOs, withBranchSessions));
-                }
-            }
-            return globalSessions;
-        }
-
-    }
-
     private List<String> convertStatusKeys(GlobalStatus[] statuses) {
         List<String> statusKeys = new ArrayList<>();
         for (int i = 0; i < statuses.length; i++) {
