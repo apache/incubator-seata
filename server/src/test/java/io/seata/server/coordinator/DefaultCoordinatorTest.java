@@ -158,7 +158,7 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(branchId);
 
         Thread.sleep(100);
-        defaultCoordinator.handleAllSession();
+        defaultCoordinator.timeoutCheck();
         defaultCoordinator.handleRetryRollbacking();
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
