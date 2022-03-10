@@ -22,15 +22,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
-import io.seata.core.event.EventBus;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.server.event.EventBusManager;
+import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -50,9 +52,9 @@ public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
 
-    private EventBus eventBus = EventBusManager.get();
-
     private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
+
+    private final boolean delayHandleSession;
 
     /**
      * get the Default core.
@@ -60,8 +62,11 @@ public class DefaultCore implements Core {
      * @param remotingServer the remoting server
      */
     public DefaultCore(RemotingServer remotingServer) {
+        String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        // file mode requires no delay in processing
+        this.delayHandleSession = !StringUtils.equalsIgnoreCase(mode, StoreMode.FILE.getName());
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
-            new Class[]{RemotingServer.class}, new Object[]{remotingServer});
+            new Class[] {RemotingServer.class}, new Object[] {remotingServer});
         if (CollectionUtils.isNotEmpty(allCore)) {
             for (AbstractCore core : allCore) {
                 coreMap.put(core.getHandleBranchType(), core);
@@ -254,7 +259,7 @@ public class DefaultCore implements Core {
         }
         // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
         // executed to improve concurrency performance, and the global transaction ends..
-        if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
+        if (success && globalSession.getBranchSessions().isEmpty() && (!delayHandleSession || retrying)) {
             SessionHelper.endCommitted(globalSession);
 
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
@@ -281,8 +286,7 @@ public class DefaultCore implements Core {
         if (!shouldRollBack) {
             return globalSession.getStatus();
         }
-        globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
+        
         boolean rollbackSuccess = doGlobalRollback(globalSession, false);
         return rollbackSuccess ? GlobalStatus.Rollbacked : globalSession.getStatus();
     }
@@ -337,7 +341,7 @@ public class DefaultCore implements Core {
         }
         // In db mode, lock and branch data residual problems may occur.
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
-        if (success && retrying) {
+        if (success && (!delayHandleSession || retrying)) {
             SessionHelper.endRollbacked(globalSession);
 
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
