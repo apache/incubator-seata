@@ -28,6 +28,8 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
@@ -41,6 +43,7 @@ import java.util.Collections;
  *
  * @author ggndnn
  */
+@DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
 public class AbstractDMLBaseExecutorTest {
     private ConnectionProxy connectionProxy;
 
