@@ -129,8 +129,8 @@ public class RedisTransactionStoreManagerTest {
         //third:  setLogQueryLimit < totalCount
         redisTransactionStoreManager.setLogQueryLimit(3);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
-        LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
-        LOGGER.info("the limit All Sessions result size is:[{}]",globalSessions.size());
+        LOGGER.info("the limit  Sessions result is:[{}]",globalSessions);
+        LOGGER.info("the limit  Sessions result size is:[{}]",globalSessions.size());
 
         //first page
         final List<GlobalSession> globalSessions1 = redisTransactionStoreManager.findGlobalSessionByPage(1, 2, true);
@@ -159,6 +159,12 @@ public class RedisTransactionStoreManagerTest {
         convertToGlobalSessionVo(result3,globalSessions4);
         LOGGER.info("the All page result is:[{}]",result3);
         LOGGER.info("the All page result size is:[{}]",result3.size());
+
+        final List<GlobalSession> globalSessions5 = redisTransactionStoreManager.findGlobalSessionByPage(4, 2, true);
+        List<GlobalSessionVO> result4 = new ArrayList<>();
+        convertToGlobalSessionVo(result3,globalSessions5);
+        LOGGER.info("the four page result is:[{}]",result4);
+        LOGGER.info("the four page result size is:[{}]",result4.size());
 
     }
 
