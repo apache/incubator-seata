@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Base Insert Executor.
+ *
  * @author jsbxyyx
  */
 public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> implements InsertExecutor<T> {
@@ -93,6 +95,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * judge sql specify column
+     *
      * @return true: contains column. false: not contains column.
      */
     protected boolean containsColumns() {
@@ -101,6 +104,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * get pk index
+     *
      * @return the key is pk column name and the value is index of the pk column
      */
     protected Map<String, Integer> getPkIndex() {
@@ -131,6 +135,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * parse primary key value from statement.
+     *
      * @return
      */
     protected Map<String, List<Object>> parsePkValuesFromStatement() {
@@ -220,15 +225,17 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * default get generated keys.
+     *
+     * @param pkKey the pk key
      * @return
      * @throws SQLException
      */
-    public List<Object> getGeneratedKeys() throws SQLException {
+    public List<Object> getGeneratedKeys(String pkKey) throws SQLException {
         // PK is just auto generated
         ResultSet genKeys = statementProxy.getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
-            Object v = genKeys.getObject(1);
+            Object v = StringUtils.isEmpty(pkKey) ? genKeys.getObject(1) : genKeys.getObject(pkKey);
             pkValues.add(v);
         }
         if (pkValues.isEmpty()) {
@@ -245,14 +252,15 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     /**
      * the modify for test
      *
-     * @param expr the expr
+     * @param expr  the expr
+     * @param pkKey the pk key
      * @return the pk values by sequence
      * @throws SQLException the sql exception
      */
-    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
+    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr, String pkKey) throws SQLException {
         List<Object> pkValues = null;
         try {
-            pkValues = getGeneratedKeys();
+            pkValues = getGeneratedKeys(pkKey);
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
@@ -331,6 +339,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * check pk values for single pk
+     *
      * @param pkValues pkValues
      * @param ps       true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
