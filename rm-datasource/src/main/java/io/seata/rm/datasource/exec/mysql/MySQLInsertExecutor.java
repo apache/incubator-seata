@@ -201,7 +201,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
 
     @SuppressWarnings("lgtm[java/database-resource-leak]")
     @Override
-    public List<Object> getPkValuesByDefault() throws SQLException {
+    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
         // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
         throw new NotSupportYetException();
     }

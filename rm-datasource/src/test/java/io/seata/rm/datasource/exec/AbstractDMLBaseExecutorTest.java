@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.exec;
 
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -107,7 +106,7 @@ public class AbstractDMLBaseExecutorTest {
     }
 
     @Test
-    public void testOnlySupportMysqlWhenUseMultiPk(){
+    public void testOnlySupportMysqlWhenUseMultiPk() throws Exception {
         Mockito.when(connectionProxy.getContext())
                 .thenReturn(new ConnectionContext());
         PreparedStatementProxy statementProxy = Mockito.mock(PreparedStatementProxy.class);
@@ -120,7 +119,7 @@ public class AbstractDMLBaseExecutorTest {
         Mockito.when(executor.getDbType()).thenReturn(JdbcConstants.ORACLE);
         Mockito.doReturn(tableMeta).when(executor).getTableMeta();
         Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList("id","userCode"));
-        Assertions.assertThrows(NotSupportYetException.class,()-> executor.executeAutoCommitFalse(null));
+        executor.executeAutoCommitFalse(null);
     }
 
 
