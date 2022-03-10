@@ -16,8 +16,11 @@
 package io.seata.server.session.redis;
 
 import java.io.IOException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Date;
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
@@ -26,11 +29,7 @@ import io.seata.core.console.param.GlobalSessionParam;
 import io.seata.core.console.vo.GlobalLockVO;
 import io.seata.core.console.vo.GlobalSessionVO;
 import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
@@ -46,9 +45,6 @@ import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Pipeline;
-
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
