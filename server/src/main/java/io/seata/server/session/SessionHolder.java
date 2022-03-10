@@ -119,13 +119,9 @@ public class SessionHolder {
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[]{String.class, String.class}, new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[]{String.class, String.class}, new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[]{String.class, String.class}, new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
-
+            ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
+            RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
+            RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
@@ -268,7 +264,7 @@ public class SessionHolder {
             throw new ShouldNeverHappenException(e);
         }
     }
-
+    
     private static void queueToRetryRollback(GlobalSession globalSession) {
         try {
             globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
@@ -323,6 +319,7 @@ public class SessionHolder {
      *
      * @return the retry rollbacking session manager
      */
+    @Deprecated
     public static SessionManager getRetryRollbackingSessionManager() {
         if (RETRY_ROLLBACKING_SESSION_MANAGER == null) {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
@@ -414,15 +411,6 @@ public class SessionHolder {
     public static void destroy() {
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
-        }
-        if (ASYNC_COMMITTING_SESSION_MANAGER != null) {
-            ASYNC_COMMITTING_SESSION_MANAGER.destroy();
-        }
-        if (RETRY_COMMITTING_SESSION_MANAGER != null) {
-            RETRY_COMMITTING_SESSION_MANAGER.destroy();
-        }
-        if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
-            RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
         }
     }
 
