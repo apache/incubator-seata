@@ -118,7 +118,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
                 getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
-                throw new LockConflictException();
+                throw new LockConflictException(String.format("get lock failed, lockKey: %s",lockKeys));
             }
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, lockKeys);
@@ -269,6 +269,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
+        
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), context.getApplicationData(), context.buildLockKeys());
         context.setBranchId(branchId);

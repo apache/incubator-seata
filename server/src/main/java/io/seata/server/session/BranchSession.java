@@ -279,12 +279,12 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean lock() throws TransactionException {
-        return this.lock(true);
+        return this.lock(true, false);
     }
 
-    public boolean lock(boolean autoCommit) throws TransactionException {
+    public boolean lock(boolean autoCommit, boolean skipCheckLock) throws TransactionException {
         if (this.getBranchType().equals(BranchType.AT)) {
-            return LockerManagerFactory.getLockManager().acquireLock(this, autoCommit);
+            return LockerManagerFactory.getLockManager().acquireLock(this, autoCommit, skipCheckLock);
         }
         return true;
     }
@@ -406,7 +406,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + 4 // applicationDataBytes.length
             + 4 // xidBytes.size
             + 1 // statusCode
-            + 1 // lockStatus
             + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
             + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
             + (clientIdBytes == null ? 0 : clientIdBytes.length)
@@ -465,7 +464,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             this.branchType = BranchType.values()[branchTypeId];
         }
         this.status = BranchStatus.get(byteBuffer.get());
-        this.lockStatus = LockStatus.get(byteBuffer.get());
     }
 
 }

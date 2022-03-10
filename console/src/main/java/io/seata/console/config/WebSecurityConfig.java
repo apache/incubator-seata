@@ -40,7 +40,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  *
  * @author jameslcj
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 

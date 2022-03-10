@@ -121,13 +121,15 @@ public class DefaultCoreForEventBusTest {
             subscriber.setDownLatch(new CountDownLatch(3));
             xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
             core.rollback(xid);
-
+            //sleep for retryRollback
+            Thread.sleep(1500);
             //check
-            subscriber.getDownLatch().await(1000, TimeUnit.MILLISECONDS);
+            subscriber.getDownLatch().await(1500, TimeUnit.MILLISECONDS);
             Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacked).get());
-
+            //Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
+            //the 'doGlobalRollback' method will actually be triggered twice.
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
+            Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked));
 
             //start more one new transaction for test timeout and let this transaction immediately timeout
             subscriber.setDownLatch(new CountDownLatch(1));

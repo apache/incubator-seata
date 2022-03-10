@@ -16,6 +16,7 @@
 package io.seata.core.context;
 
 import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -240,7 +241,8 @@ public class RootContext {
      */
     public static void assertNotInGlobalTransaction() {
         if (inGlobalTransaction()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException(String.format("expect has not xid, but was:%s",
+                CONTEXT_HOLDER.get(KEY_XID)));
         }
     }
 

@@ -15,7 +15,10 @@
  */
 package io.seata.server.lock;
 
+import java.util.List;
+
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -41,10 +44,11 @@ public interface LockManager {
      *
      * @param branchSession the branch session
      * @param autoCommit the auto commit
+     * @param skipCheckLock whether skip check lock or not
      * @return the boolean
      * @throws TransactionException the transaction exception
      */
-    boolean acquireLock(BranchSession branchSession, boolean autoCommit) throws TransactionException;
+    boolean acquireLock(BranchSession branchSession, boolean autoCommit, boolean skipCheckLock) throws TransactionException;
 
     /**
      * Un lock boolean.
@@ -81,6 +85,14 @@ public interface LockManager {
      * @throws TransactionException the transaction exception
      */
     void cleanAllLocks() throws TransactionException;
+
+    /**
+     * Collect row locks list.`
+     *
+     * @param branchSession the branch session
+     * @return the list
+     */
+    List<RowLock> collectRowLocks(BranchSession branchSession);
 
     /**
      * update lock status.

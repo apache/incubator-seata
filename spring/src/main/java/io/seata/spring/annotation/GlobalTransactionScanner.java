@@ -523,9 +523,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
             disableGlobalTransaction = Boolean.parseBoolean(event.getNewValue().trim());
             if (!disableGlobalTransaction && initialized.compareAndSet(false, true)) {
-                LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                        disableGlobalTransaction, event.getNewValue());
+                LOGGER.info("{} config changed, old value:true, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                        event.getNewValue());
                 initClient();
+                ConfigurationCache.removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
             }
         }
     }
