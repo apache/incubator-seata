@@ -74,6 +74,7 @@
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
+        <xstream.version>1.4.19</xstream.version>
 
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
@@ -641,6 +642,17 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.thoughtworks.xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>${xstream.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>org.glassfish.jersey</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
