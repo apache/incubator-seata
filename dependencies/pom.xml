@@ -50,7 +50,7 @@
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <apollo-client.version>1.6.0</apollo-client.version>
         <mock-jedis.version>0.1.16</mock-jedis.version>
-        <eureka-clients.version>1.10.16</eureka-clients.version>
+        <eureka-clients.version>1.10.17</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>1.4.2</nacos-client.version>
         <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
