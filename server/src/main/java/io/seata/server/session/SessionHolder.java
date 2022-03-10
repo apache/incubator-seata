@@ -264,7 +264,7 @@ public class SessionHolder {
             throw new ShouldNeverHappenException(e);
         }
     }
-    
+
     private static void queueToRetryRollback(GlobalSession globalSession) {
         try {
             globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
@@ -295,6 +295,7 @@ public class SessionHolder {
      *
      * @return the async committing session manager
      */
+    @Deprecated
     public static SessionManager getAsyncCommittingSessionManager() {
         if (ASYNC_COMMITTING_SESSION_MANAGER == null) {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
@@ -307,6 +308,7 @@ public class SessionHolder {
      *
      * @return the retry committing session manager
      */
+    @Deprecated
     public static SessionManager getRetryCommittingSessionManager() {
         if (RETRY_COMMITTING_SESSION_MANAGER == null) {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
