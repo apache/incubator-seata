@@ -23,7 +23,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.server.ServerApplication;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -44,7 +43,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author zhimo.xiao @gmail.com
  */
-@SpringBootTest(classes = ServerApplication.class)
+@SpringBootTest
 public class DefaultCoreTest {
 
     private static DefaultCore core;
@@ -263,7 +262,7 @@ public class DefaultCoreTest {
         core.mockCore(BranchType.AT,
                 new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
     }
 
     /**
