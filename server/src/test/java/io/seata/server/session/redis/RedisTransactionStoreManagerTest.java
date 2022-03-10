@@ -127,7 +127,7 @@ public class RedisTransactionStoreManagerTest {
         //first:  setLogQueryLimit > totalCount
         //second: setLogQueryLimit = totalCount
         //third:  setLogQueryLimit < totalCount
-        redisTransactionStoreManager.setLogQueryLimit(5);
+        redisTransactionStoreManager.setLogQueryLimit(3);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
         LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
         LOGGER.info("the limit All Sessions result size is:[{}]",globalSessions.size());

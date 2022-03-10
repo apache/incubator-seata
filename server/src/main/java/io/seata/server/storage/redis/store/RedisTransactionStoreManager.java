@@ -424,7 +424,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         final Long totalCount = countByClobalSesisons(statuses);
 
         List<List<String>> list = new ArrayList<>();
-        dogetXidsForTargetMap(targetMap,0,limit - 1,logQueryLimit,totalCount,list,limit - 1);
+        dogetXidsForTargetMap(targetMap,0,limit - 1,logQueryLimit,totalCount,list);
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
             xids.parallelStream().forEach(xid -> {
@@ -634,11 +634,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         int end = pageNum * pageSize - 1;
 
         List<String> statusKeys = convertStatusKeys(GlobalStatus.values());
-        final Long totalCount  = countByClobalSesisons(GlobalStatus.values());
         Map<String, Long> stringLongMap = calculateStatuskeysHasData(statusKeys);
 
         List<List<String>> list = new ArrayList<>();
-        dogetXidsForTargetMap(stringLongMap,start,end,pageSize,totalCount,list,end);
+        dogetXidsForTargetMap(stringLongMap,start,end,pageSize,list);
 
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
@@ -682,7 +681,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return statusKeys;
     }
 
-    private void dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end, int logQueryLimit,long totalCount,List<List<String>> listList,int tempEnd) {
+    private void dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end, int logQueryLimit,long totalCount,List<List<String>> listList) {
 
         long total = listList.stream().mapToLong(value -> value.size()).sum();
 
@@ -703,15 +702,27 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 final long sum = listList.stream().mapToLong(value -> value.size()).sum();
                 if (list.size() > 0 && sum < logQueryLimit) {
                     listList.add(list);
+                }
+            }
+        }
+        int startNew = end + 1;
+        int endNew   = startNew + end;
+        dogetXidsForTargetMap(targetMap,startNew,endNew,logQueryLimit,totalCount,listList);
+    }
+
+    private void dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end, int logQueryLimit,List<List<String>> listList) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            for (String key : targetMap.keySet()) {
+                final List<String> list = jedis.lrange(key, start, end);
+                final long sum = listList.stream().mapToLong(value -> value.size()).sum();
+                if (list.size() > 0 && sum < logQueryLimit) {
+                    listList.add(list);
                 } else {
                     start = 0;
                     end = logQueryLimit - 1;
                 }
             }
         }
-        int startNew = tempEnd + 1;
-        int endNew   = startNew + tempEnd;
-        dogetXidsForTargetMap(targetMap,startNew,endNew,logQueryLimit,totalCount,listList,tempEnd);
     }
 
     private String buildBranchListKeyByXid(String xid) {
