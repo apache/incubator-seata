@@ -100,8 +100,8 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             return logStore.insertGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
             GlobalSession globalSession = (GlobalSession)session;
-            if (globalSession.getOldStatus() != null) {
-                return logStore.updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session), globalSession.getOldStatus().getCode());
+            if (globalSession.getExpectedStatus() != null) {
+                return logStore.updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session), globalSession.getExpectedStatus().getCode());
             } else {
                 return logStore.updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
             }

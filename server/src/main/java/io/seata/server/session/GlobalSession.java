@@ -76,6 +76,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private volatile GlobalStatus status;
 
+    private volatile GlobalStatus expectedStatus;
+
     private String applicationId;
 
     private String transactionServiceGroup;
@@ -437,6 +439,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public String getXid() {
         return xid;
+    }
+
+    /**
+     * Gets old status.
+     *
+     * @return the expected status
+     */
+    public GlobalStatus getExpectedStatus() {
+        return expectedStatus;
+    }
+
+    /**
+     * Sets status.
+     *
+     * @param expectedStatus the expected status
+     */
+    public void setExpectedStatus(GlobalStatus expectedStatus) {
+        this.expectedStatus = expectedStatus;
     }
 
     /**

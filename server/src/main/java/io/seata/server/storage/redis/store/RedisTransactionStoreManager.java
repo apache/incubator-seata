@@ -330,6 +330,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 jedis.unwatch();
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
             }
+            if (redisGlobalTransactionVO.getExpectedStatus() != null && !previousStatus.equals(String.valueOf(redisGlobalTransactionVO.getExpectedStatus()))) {
+                jedis.unwatch();
+                throw new StoreException("Global transaction status is unexpected.");
+            }
             if (previousStatus.equals(String.valueOf(globalTransactionDO.getStatus()))) {
                 jedis.unwatch();
                 return true;
