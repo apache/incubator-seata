@@ -109,6 +109,7 @@ public class PageUtil {
                         .replace(LIMIT_PLACE_HOLD, String.valueOf(pageSize))
                         .replace(OFFSET_PLACE_HOLD, String.valueOf((pageNum - 1) * pageSize));
             case "oracle":
+            case "dm":
                 return ORACLE_PAGE_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(START_PLACE_HOLD, String.valueOf(pageSize * (pageNum - 1) + 1))
                         .replace(END_PLACE_HOLD, String.valueOf(pageSize * pageNum));
@@ -131,6 +132,7 @@ public class PageUtil {
             case "postgresql":
             case "oceanbase":
             case "oracle":
+            case "dm":
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             default:
                 throw new NotSupportYetException("PageUtil not support this dbType:" + dbType);

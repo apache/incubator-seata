@@ -13,21 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.sql.distributed.lock;
+package io.seata.core.store.db.sql.lock;
+
+import io.seata.common.loader.LoadLevel;
 
 /**
- * @author chd
+ * the database lock store dm sql
+ *
+ * @author Jefferlau
+ * @since 1.2.0
  */
-public class DistributedLockSqlFactory {
-    private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
+@LoadLevel(name = "dm")
+public class DmLockStoreSql extends AbstractLockStoreSql {
 
     /**
-     * get the lock store sql
-     *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dameng, it's useless now, but maybe useful later
-     * @return lock store sql
+     * The constant INSERT_LOCK_SQL_DM.
      */
-    public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
-        return DISTRIBUTED_LOCK_SQL;
+    private static final String INSERT_LOCK_SQL_DM = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")"
+        + " values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate, ?)";
+
+    @Override
+    public String getInsertLockSQL(String lockTable) {
+        return INSERT_LOCK_SQL_DM.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
     }
+
 }

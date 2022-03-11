@@ -120,6 +120,12 @@
             <artifactId>ojdbc8</artifactId>
             <version>${ojdbc.version}</version>
         </dependency>-->
+        <!-- Copyright restrictions, do not reference this dependency.
+             You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver18</artifactId>
+        </dependency>-->
 
         <dependency>
             <groupId>com.beust</groupId>

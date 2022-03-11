@@ -40,6 +40,11 @@ public enum DBType {
     DB2,
 
     /**
+     * Dm db type.
+     */
+    DM,
+
+    /**
      * Sqlserver db type.
      */
     SQLSERVER,

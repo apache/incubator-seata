@@ -27,6 +27,8 @@ public class LogStoreSqlsFactoryTest {
 
     private static LogStoreSqls oracleLog = LogStoreSqlsFactory.getLogStoreSqls("oracle");
 
+    private static LogStoreSqls dmLog = LogStoreSqlsFactory.getLogStoreSqls("dm");
+
     private static LogStoreSqls pgLog = LogStoreSqlsFactory.getLogStoreSqls("postgresql");
 
     private static LogStoreSqls h2Log = LogStoreSqlsFactory.getLogStoreSqls("h2");
@@ -104,6 +106,41 @@ public class LogStoreSqlsFactoryTest {
         sql = oracleLog.getQueryGlobalMax(globalTable);
         Assertions.assertNotNull(sql);
         sql = oracleLog.getQueryBranchMax(branchTable);
+        Assertions.assertNotNull(sql);
+    }
+
+    @Test
+    public void dmLogTest() {
+
+        String sql = dmLog.getInsertGlobalTransactionSQL(globalTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getUpdateGlobalTransactionStatusSQL(globalTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getDeleteGlobalTransactionSQL(globalTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryGlobalTransactionSQL(globalTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryGlobalTransactionSQLByTransactionId(globalTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryGlobalTransactionSQLByStatus(globalTable, "1");
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryGlobalTransactionForRecoverySQL(globalTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getInsertBranchTransactionSQL(branchTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getUpdateBranchTransactionStatusSQL(branchTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getDeleteBranchTransactionByBranchIdSQL(branchTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getDeleteBranchTransactionByXId(branchTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryBranchTransaction(branchTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryBranchTransaction(branchTable, "1");
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryGlobalMax(globalTable);
+        Assertions.assertNotNull(sql);
+        sql = dmLog.getQueryBranchMax(branchTable);
         Assertions.assertNotNull(sql);
     }
 

@@ -18,6 +18,10 @@ package io.seata.rm.datasource.sql;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.dm.DmDeleteRecognizer;
+import io.seata.sqlparser.druid.dm.DmInsertRecognizer;
+import io.seata.sqlparser.druid.dm.DmSelectForUpdateRecognizer;
+import io.seata.sqlparser.druid.dm.DmUpdateRecognizer;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
@@ -94,6 +98,31 @@ public class SQLVisitorFactoryTest {
         sql = "select * from t for update";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
+
+        //test for dm insert
+        sql = "insert into t(id) values (1)";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.DM);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), DmInsertRecognizer.class.getName());
+
+        //test for dm delete
+        sql = "delete from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.DM);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), DmDeleteRecognizer.class.getName());
+
+        //test for dm update
+        sql = "update t set a = a";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.DM);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), DmUpdateRecognizer.class.getName());
+
+        //test for dm select
+        sql = "select * from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.DM);
+        Assertions.assertNull(recognizer);
+
+        //test for dm select for update
+        sql = "select * from t for update";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.DM);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), DmSelectForUpdateRecognizer.class.getName());
 
         //test for do not support db
         Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
@@ -179,6 +208,44 @@ public class SQLVisitorFactoryTest {
         //test for oracle insert and deleted
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE);
+        });
+
+        //test for dm insert
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.DM);
+        });
+
+        //test for dm delete and deleted
+        sql = "delete from t where id =1 ; delete from t where id = 2";
+        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.DM);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertEquals(sqlRecognizer.getClass().getName(), DmDeleteRecognizer.class.getName());
+        }
+
+        //test for dm update
+        sql = "update t set a = b where id =1 ;update t set a = c where id = 1;";
+        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.DM);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertEquals(sqlRecognizer.getClass().getName(), DmUpdateRecognizer.class.getName());
+        }
+
+        //test for dm select
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from b ; select * from t where id = 2", JdbcConstants.DM);
+        });
+
+        //test for dm select for update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.DM);
+        });
+
+        //test for dm insert and update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.DM);
+        });
+        //test for dm insert and deleted
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.DM);
         });
     }
 

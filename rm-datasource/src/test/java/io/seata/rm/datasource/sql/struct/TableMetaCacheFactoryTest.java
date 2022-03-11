@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import io.seata.rm.datasource.sql.struct.cache.DmTableMetaCache;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +35,9 @@ public class TableMetaCacheFactoryTest {
     public void getTableMetaCache() {
         Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL) instanceof MysqlTableMetaCache);
         Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE) instanceof OracleTableMetaCache);
+        Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.DM) instanceof DmTableMetaCache);
         Assertions.assertEquals(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE), TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE));
+        Assertions.assertEquals(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.DM), TableMetaCacheFactory.getTableMetaCache(JdbcConstants.DM));
         Assertions.assertEquals(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL), TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL));
         Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
             TableMetaCacheFactory.getTableMetaCache(NOT_EXIST_SQL_TYPE);

@@ -100,6 +100,7 @@
         <!-- for jdbc driver when package -->
         <mysql5.version>${mysql.version}</mysql5.version>
         <mysql8.version>8.0.27</mysql8.version>
+        <dm8.version>8.1.2.79</dm8.version>
 
         <!-- # for kotlin -->
         <kotlin.version>1.4.32</kotlin.version>
@@ -168,6 +169,11 @@
                 <groupId>org.mariadb.jdbc</groupId>
                 <artifactId>mariadb-java-client</artifactId>
                 <version>${mariadb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dameng</groupId>
+                <artifactId>DmJdbcDriver18</artifactId>
+                <version>${dm8.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>

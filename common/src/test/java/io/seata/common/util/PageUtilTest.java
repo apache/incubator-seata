@@ -43,6 +43,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.pageSql(sourceSql, "postgresql", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oceanbase", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oracle", 1, 5), oracleTargetSql);
+        assertEquals(PageUtil.pageSql(sourceSql, "dm", 1, 5), oracleTargetSql);
 
         assertThrows(NotSupportYetException.class, () -> PageUtil.pageSql(sourceSql, "xxx", 1, 5));
     }
@@ -58,6 +59,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.countSql(sourceSql, "postgresql"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "oceanbase"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "oracle"), targetSql);
+        assertEquals(PageUtil.countSql(sourceSql, "dm"), targetSql);
 
         assertThrows(NotSupportYetException.class, () -> PageUtil.countSql(sourceSql, "xxx"));
     }

@@ -13,23 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.util;
+package io.seata.rm.datasource.undo.dm.keyword;
+
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * @author ggndnn
+ * @author Jefferlau
  */
-public interface JdbcConstants {
-    String ORACLE = "oracle";
+public class DmKeywordCheckerTest {
 
-    String MYSQL = "mysql";
+    @Test
+    public void testOracleKeywordChecker() {
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.DM);
+        Assertions.assertNotNull(keywordChecker);
+    }
 
-    String DB2 = "db2";
-
-    String H2 = "h2";
-
-    String MARIADB = "mariadb";
-
-    String POSTGRESQL = "postgresql";
-
-    String DM = "dm";
 }
