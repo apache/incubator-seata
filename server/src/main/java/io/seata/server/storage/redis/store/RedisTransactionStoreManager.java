@@ -624,7 +624,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
             xids.forEach(xid -> {
-                if (globalSessions.size() <= pageSize) {
+                if (globalSessions.size() < pageSize) {
                     GlobalSession globalSession = this.readSession(xid, withBranchSessions);
                     if (globalSession != null) {
                         globalSessions.add(globalSession);
