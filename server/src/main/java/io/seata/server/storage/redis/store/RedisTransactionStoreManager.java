@@ -20,10 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
-import java.util.Set;
 import java.util.Optional;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import io.seata.config.Configuration;
@@ -51,9 +49,6 @@ import io.seata.server.store.TransactionStoreManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
-import redis.clients.jedis.Response;
 import static io.seata.common.ConfigurationKeys.STORE_REDIS_QUERY_LIMIT;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
@@ -419,28 +414,30 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     @Override
     public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
-        List<String> statusKeys = new ArrayList<>();
-        for (int i = 0; i < statuses.length; i++) {
-            statusKeys.add(buildGlobalStatus(statuses[i].getCode()));
-        }
-        int limit = resetLogQueryLimit(statusKeys);
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Pipeline pipelined = jedis.pipelined();
-            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, limit));
-            List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
-            pipelined.close();
-            List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
-            if (CollectionUtils.isNotEmpty(list)) {
-                List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
-                xids.parallelStream().forEach(xid -> {
-                    GlobalSession globalSession = this.readSession(xid, withBranchSessions);
-                    if (globalSession != null) {
-                        globalSessions.add(globalSession);
-                    }
-                });
-            }
+
+        List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
+        List<String> statusKeys = convertStatusKeys(statuses);
+
+        Map<String, Long> targetMap = calculateStatuskeysHasData(statusKeys);
+        int limit = resetLogQueryLimit(targetMap);
+        if (targetMap.size() == 0 || logQueryLimit <= 0) {
             return globalSessions;
         }
+        // totalCount
+        final Long totalCount = countByClobalSesisons(statuses);
+
+        List<List<String>> list = new ArrayList<>();
+        dogetXidsForTargetMap(targetMap, 0, limit - 1, logQueryLimit, totalCount, list);
+        if (CollectionUtils.isNotEmpty(list)) {
+            List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
+            xids.parallelStream().forEach(xid -> {
+                GlobalSession globalSession = this.readSession(xid, withBranchSessions);
+                if (globalSession != null) {
+                    globalSessions.add(globalSession);
+                }
+            });
+        }
+        return globalSessions;
     }
 
     private int resetLogQueryLimit(Map<String, Long> targetMap) {
@@ -637,6 +634,26 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             });
         }
         return globalSessions;
+    }
+
+    /**
+     * query and sort existing values
+     *
+     * @param statusKeys
+     * @return
+     */
+    private Map<String, Long> calculateStatuskeysHasData(List<String> statusKeys) {
+        Map<String, Long> keysMap = new HashMap<>(statusKeys.size());
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
+            statusKeys.forEach(key -> pipelined.llen(key));
+            List<Long> counts = (List)pipelined.syncAndReturnAll();
+            for (int i = 0; i < counts.size(); i++) {
+                if (counts.get(i) > 0) {
+                    keysMap.put(statusKeys.get(i), counts.get(i));
+                }
+            }
+        }
+        return keysMap;
     }
 
     /**
