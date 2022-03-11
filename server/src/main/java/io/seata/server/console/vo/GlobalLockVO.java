@@ -13,13 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.vo;
+package io.seata.server.console.vo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import io.seata.common.util.CollectionUtils;
@@ -35,9 +35,9 @@ public class GlobalLockVO {
 
     private String xid;
 
-    private Long transactionId;
+    private String transactionId;
 
-    private Long branchId;
+    private String branchId;
 
     private String resourceId;
 
@@ -47,9 +47,9 @@ public class GlobalLockVO {
 
     private String rowKey;
 
-    private Date gmtCreate;
+    private Long gmtCreate;
 
-    private Date gmtModified;
+    private Long gmtModified;
 
     /**
      * convert RowLock list to GlobalLockVO list
@@ -95,20 +95,20 @@ public class GlobalLockVO {
         this.xid = xid;
     }
 
-    public Long getTransactionId() {
+    public String getTransactionId() {
         return transactionId;
     }
 
     public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
+        this.transactionId = String.valueOf(transactionId);
     }
 
-    public Long getBranchId() {
+    public String getBranchId() {
         return branchId;
     }
 
     public void setBranchId(Long branchId) {
-        this.branchId = branchId;
+        this.branchId = String.valueOf(branchId);
     }
 
     public String getResourceId() {
@@ -143,19 +143,19 @@ public class GlobalLockVO {
         this.rowKey = rowKey;
     }
 
-    public Date getGmtCreate() {
+    public Long getGmtCreate() {
         return gmtCreate;
     }
 
-    public void setGmtCreate(Date gmtCreate) {
+    public void setGmtCreate(Long gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
-    public Date getGmtModified() {
+    public Long getGmtModified() {
         return gmtModified;
     }
 
-    public void setGmtModified(Date gmtModified) {
+    public void setGmtModified(Long gmtModified) {
         this.gmtModified = gmtModified;
     }
 
@@ -168,8 +168,14 @@ public class GlobalLockVO {
         globalLockVO.setResourceId(rs.getString(ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID));
         globalLockVO.setTableName(rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME));
         globalLockVO.setPk(rs.getString(ServerTableColumnsName.LOCK_TABLE_PK));
-        globalLockVO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE));
-        globalLockVO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED));
+        Timestamp gmtCreateTimestamp = rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE);
+        if (gmtCreateTimestamp != null) {
+            globalLockVO.setGmtCreate(gmtCreateTimestamp.getTime());
+        }
+        Timestamp gmtModifiedTimestamp = rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED);
+        if (gmtModifiedTimestamp != null) {
+            globalLockVO.setGmtModified(gmtModifiedTimestamp.getTime());
+        }
         return globalLockVO;
     }
 

@@ -15,8 +15,12 @@
  */
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import Overview from '@/pages/Overview';
+import TransactionInfo from '@/pages/TransactionInfo';
+import GlobalLockInfo from './pages/GlobalLockInfo';
 
 export default [
   // { path: '/', exact: true, render: () => <Redirect to="/Overview" /> },
-  { path: '/Overview', component: Overview },
+  // { path: '/Overview', component: Overview },
+  { path: '/TransactionInfo', component: TransactionInfo },
+  { path: '/GlobalLockInfo', component: GlobalLockInfo },
 ];

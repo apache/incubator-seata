@@ -31,10 +31,11 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.PageUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.BranchSessionVO;
-import io.seata.core.console.vo.GlobalSessionVO;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.vo.BranchSessionVO;
+import io.seata.server.console.vo.GlobalSessionVO;
+import io.seata.console.result.PageResult;
+import java.util.Date;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.server.console.service.BranchSessionService;
@@ -131,11 +132,11 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
         }
         if (param.getTimeStart() != null) {
             whereConditionBuilder.append(" and gmt_create >= ? ");
-            sqlParamList.add(param.getTimeStart());
+            sqlParamList.add(new Date(param.getTimeStart()));
         }
         if (param.getTimeEnd() != null) {
             whereConditionBuilder.append(" and gmt_create <= ? ");
-            sqlParamList.add(param.getTimeEnd());
+            sqlParamList.add(new Date(param.getTimeEnd()));
         }
         String whereCondition = whereConditionBuilder.toString();
         return whereCondition.replaceFirst("and", "where");

@@ -13,11 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.result;
-
-import io.seata.common.exception.FrameworkErrorCode;
+package io.seata.console.result;
 
 import java.io.Serializable;
+
+import io.seata.console.constant.Code;
 
 /**
  * The single result
@@ -44,8 +44,8 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
         return new SingleResult<>(code, msg);
     }
 
-    public static <T> SingleResult<T> failure(FrameworkErrorCode errorCode) {
-        return new SingleResult(errorCode.getErrCode(), errorCode.getErrMessage());
+    public static <T> SingleResult<T> failure(Code errorCode) {
+        return new SingleResult(errorCode.getCode(), errorCode.getMsg());
     }
 
     public static <T> SingleResult<T> success(T data) {

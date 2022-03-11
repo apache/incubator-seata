@@ -18,8 +18,8 @@ logging:
 
 console:
   user:
-    username: admin
-    password: admin
+    username: seata
+    password: seata
 
 seata:
   config:

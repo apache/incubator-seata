@@ -13,9 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.param;
+package io.seata.server.console.param;
 
 import java.io.Serializable;
+
+import io.seata.console.param.BaseParam;
 
 /**
  * @description: Global session param

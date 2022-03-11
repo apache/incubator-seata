@@ -15,9 +15,9 @@
  */
 package io.seata.server.console.service;
 
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.GlobalSessionVO;
-import io.seata.core.console.result.PageResult;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.vo.GlobalSessionVO;
+import io.seata.console.result.PageResult;
 
 /**
  * Global session service

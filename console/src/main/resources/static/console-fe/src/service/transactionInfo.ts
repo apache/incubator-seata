@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 import request from '@/utils/request';
-import { OverviewData } from '@/reducers/overview';
 
-export async function fetchData():Promise<any> {
-  let result = await request('/overview/getData', {
+export type GlobalSessionParam = {
+  xid?: string,
+  applicationId?: string,
+  status?: number,
+  transactionName?: string,
+  withBranch: boolean,
+  pageSize: number,
+  pageNum: number,
+  timeStart?: number,
+  timeEnd?: number
+};
+
+export default async function fetchData(params:GlobalSessionParam):Promise<any> {
+  let result = await request('/console/globalSession/query', {
     method: 'get',
+    params,
   });
 
-  return result.data;
+  return result;
 }
