@@ -163,6 +163,15 @@ public class RedisTransactionStoreManagerTest {
         LOGGER.info("the four page result is:[{}]",result4);
         LOGGER.info("the four page result size is:[{}]",result4.size());
 
+        // test statusByPage
+        GlobalSessionParam param = new GlobalSessionParam();
+        // param.setPageNum(1);
+        // param.setPageSize(1);
+        // param.setStatus(1);
+        final List<GlobalSession> globalSessionStatus = redisTransactionStoreManager.readSessionStatusByPage(param);
+        LOGGER.info("the  globalSessionStatus result is:[{}]", globalSessionStatus);
+        LOGGER.info("the  globalSessionStatus result size is:[{}]", globalSessionStatus);
+
     }
 
     @Test

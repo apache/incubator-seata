@@ -482,10 +482,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return List<GlobalSession>
      */
     public List<GlobalSession> readSessionStatusByPage(GlobalSessionParam param) {
-        int start = param.getPageNum() * param.getPageSize() - param.getPageSize();
-        int end = param.getPageNum() * param.getPageSize() - 1;
-
         List<GlobalSession> globalSessions = new ArrayList<>();
+
+        int pageNum = param.getPageNum();
+        int pageSize = param.getPageSize();
+        int start = Math.max((pageNum - 1) * pageSize, 0);
+        int end = pageNum * pageSize - 1;
+
         if (param.getStatus() != null) {
             String statusKey = buildGlobalStatus(GlobalStatus.get(param.getStatus()).getCode());
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
@@ -496,9 +499,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         globalSessions.add(globalSession);
                     }
                 });
-
             }
-
         }
         return globalSessions;
     }
