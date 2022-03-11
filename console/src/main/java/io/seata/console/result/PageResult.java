@@ -13,13 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.result;
+package io.seata.console.result;
 
 import java.io.Serializable;
 import java.util.List;
 
-import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.core.console.param.BaseParam;
+import io.seata.console.param.BaseParam;
 /**
  * The page result
  *
@@ -102,10 +101,6 @@ public class PageResult<T> extends Result<T> implements Serializable {
 
     public static <T> PageResult<T> failure(String code, String msg) {
         return new PageResult<>(code, msg);
-    }
-
-    public static <T> PageResult<T> failure(FrameworkErrorCode errorCode) {
-        return new PageResult<>(errorCode.getErrCode(), errorCode.getErrMessage());
     }
 
     public static <T> PageResult<T> success() {

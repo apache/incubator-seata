@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.seata.console.utils.Result;
+import io.seata.console.result.SingleResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,7 +40,7 @@ public class OverviewController {
      * @return the data
      */
     @GetMapping(value = "/getData")
-    public Result<List> getData() {
+    public SingleResult<List> getData() {
         List<Map<String, Object>> result = new ArrayList<>();
         int count = 10;
         while (count-- > 0) {
@@ -50,6 +50,6 @@ public class OverviewController {
             result.add(hashMap);
         }
 
-        return Result.ofSuccess(result);
+        return SingleResult.success(result);
     }
 }

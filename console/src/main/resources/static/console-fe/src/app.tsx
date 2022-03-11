@@ -67,13 +67,21 @@ class App extends React.Component<AppPropsType, AppStateType> {
     get menu() {
         const { locale }: AppPropsType = this.props;
         const { MenuRouter = {} } = locale;
-        const { overview } = MenuRouter;
+        const { overview,transactionInfo,globalLockInfo } = MenuRouter;
         return {
             items: [
+                // {
+                //     key: '/Overview',
+                //     label: overview,
+                // },
                 {
-                    key: '/Overview',
-                    label: overview,
+                    key: '/TransactionInfo',
+                    label: transactionInfo,
                 },
+                {
+                    key:'/GlobalLockInfo',
+                    label: globalLockInfo,
+                }
             ],
             header: 'Seata',
             onItemClick: (key: string) => history.push(key)
@@ -86,7 +94,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
                 <Switch>
                     <Route path="/login" component={Login} />
                     <Layout nav={({ location }: any) => <CCConsoleMenu  {...this.menu} activeKey={location.pathname} />}>
-                        <Route path={'/'} exact render={() => <Redirect to="/Overview" />} />
+                        <Route path={'/'} exact render={() => <Redirect to="/TransactionInfo" />} />
                         {router.map(item => (
                             <Route key={item.path} {...item} />
                         ))}

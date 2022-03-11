@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 import request from '@/utils/request';
-import { OverviewData } from '@/reducers/overview';
 
-export async function fetchData():Promise<any> {
-  let result = await request('/overview/getData', {
+export type GlobalLockParam = {
+  xid?: string,
+  tableName?: string,
+  transactionId?: string,
+  branchId?: string,
+  pk?: string,
+  resourceId?: string,
+  pageSize: number,
+  pageNum: number,
+  timeStart?: number,
+  timeEnd?: number
+};
+
+ export default async function fetchData(params:GlobalLockParam):Promise<any> {
+  let result = await request('/console/globalLock/query', {
     method: 'get',
+    params,
   });
 
-  return result.data;
+  return result;
 }
