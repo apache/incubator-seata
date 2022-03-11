@@ -16,15 +16,14 @@
 package io.seata.server.storage;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+import java.util.Collections;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.console.vo.BranchSessionVO;
-import io.seata.core.console.vo.GlobalSessionVO;
+import io.seata.server.console.vo.BranchSessionVO;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -33,11 +32,13 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.store.SessionStorable;
+import org.springframework.beans.BeanUtils;
 
 /**
  * The session converter
  *
  * @author wangzhongxiang
+ * @author doubleDimple
  */
 public class SessionConverter {
 
@@ -115,6 +116,34 @@ public class SessionConverter {
         branchTransactionDO.setResourceId(branchSession.getResourceId());
         branchTransactionDO.setStatus(branchSession.getStatus().getCode());
         return branchTransactionDO;
+    }
+
+    public static void convertToGlobalSessionVo(List<GlobalSessionVO> result, List<GlobalSession> globalSessions) {
+        if (CollectionUtils.isNotEmpty(globalSessions)) {
+            for (GlobalSession globalSession : globalSessions) {
+                GlobalSessionVO globalSessionVO = new GlobalSessionVO();
+                BeanUtils.copyProperties(globalSession,globalSessionVO);
+                globalSessionVO.setStatus(globalSession.getStatus().getCode());
+                globalSessionVO.setTimeout(Long.valueOf(globalSession.getTimeout()));
+                globalSessionVO.setBranchSessionVOs(converToBranchSession(globalSession.getBranchSessions()));
+                result.add(globalSessionVO);
+            }
+        }
+    }
+
+    public static Set<BranchSessionVO> converToBranchSession(List<BranchSession> branchSessions) {
+        Set<BranchSessionVO> branchSessionVOs = new HashSet<>(branchSessions.size());
+        if (CollectionUtils.isNotEmpty(branchSessions)) {
+            for (BranchSession branchSession : branchSessions) {
+                BranchSessionVO branchSessionVONew = new BranchSessionVO();
+                BeanUtils.copyProperties(branchSession,branchSessionVONew);
+
+                branchSessionVONew.setBranchType(branchSession.getBranchType().name());
+                branchSessionVONew.setStatus(branchSession.getStatus().getCode());
+                branchSessionVOs.add(branchSessionVONew);
+            }
+        }
+        return branchSessionVOs;
     }
 
     /**
