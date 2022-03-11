@@ -445,6 +445,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return globalSessions;
     }
 
+    /**
+     * get everyone keys limit
+     * 
+     * @param targetMap
+     * @return
+     */
     private int resetLogQueryLimit(Map<String, Long> targetMap) {
         int resetLimitQuery = logQueryLimit;
         if (targetMap.size() > 1) {
