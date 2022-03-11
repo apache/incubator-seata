@@ -16,6 +16,7 @@
 package io.seata.server.storage.redis.store;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +119,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         initGlobalMap();
         initBranchMap();
         logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
+        /**
+         * redis mode: if DEFAULT_LOG_QUERY_LIMIT < STORE_REDIS_QUERY_LIMIT get DEFAULT_LOG_QUERY_LIMIT if
+         * DEFAULT_LOG_QUERY_LIMIT >= STORE_REDIS_QUERY_LIMIT get STORE_REDIS_QUERY_LIMIT
+         */
+        if (logQueryLimit > DEFAULT_LOG_QUERY_LIMIT) {
+            logQueryLimit = DEFAULT_LOG_QUERY_LIMIT;
+        }
     }
 
     /**
@@ -426,7 +434,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<List<String>> list = new ArrayList<>();
         dogetXidsForTargetMap(targetMap, 0, limit - 1, logQueryLimit, totalCount, list);
         if (CollectionUtils.isNotEmpty(list)) {
-            List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
+            List<String> xids = list.stream().flatMap(Collection::stream).collect(Collectors.toList());
             xids.parallelStream().forEach(xid -> {
                 GlobalSession globalSession = this.readSession(xid, withBranchSessions);
                 if (globalSession != null) {
