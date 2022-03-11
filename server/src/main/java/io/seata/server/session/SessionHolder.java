@@ -182,16 +182,13 @@ public class SessionHolder {
                             break;
                         default: {
                             lockBranchSessions(globalSession.getSortedBranches());
-                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())) {
-                                globalSession.getBranchSessions().parallelStream().forEach(branchSession -> {
-                                    branchSession.setLockStatus(LockStatus.Rollbacking);
-                                });
-                            }
                             switch (globalStatus) {
                                 case Rollbacking:
                                 case RollbackRetrying:
                                 case TimeoutRollbacking:
                                 case TimeoutRollbackRetrying:
+                                    globalSession.getBranchSessions().parallelStream()
+                                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
                                     queueToRetryRollback(globalSession);
                                     break;
                                 case Begin:
