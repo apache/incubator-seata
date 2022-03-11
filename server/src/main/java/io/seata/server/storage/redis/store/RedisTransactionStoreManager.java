@@ -82,9 +82,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**the prefix of the global transaction status*/
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
-    /**the prefix of the global transaction all keys */
-    private static final String REDIS_SEATA_GLOBAL_PREFIX_KEYS = REDIS_SEATA_GLOBAL_PREFIX + "*";
-
     private static volatile RedisTransactionStoreManager instance;
 
     private static final String OK = "OK";
