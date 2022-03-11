@@ -170,4 +170,9 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
         }
         return list;
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

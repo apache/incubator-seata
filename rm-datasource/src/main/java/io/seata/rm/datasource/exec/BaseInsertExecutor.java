@@ -209,7 +209,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         }
         if (pkValuesMap.isEmpty()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("pkValuesMap is empty");
         }
         boolean b = this.checkPkValues(pkValuesMap, ps);
         if (!b) {
@@ -288,7 +288,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     protected boolean checkPkValuesForMultiPk(Map<String, List<Object>> pkValues) {
         Set<String> pkNames = pkValues.keySet();
         if (pkNames.isEmpty()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("pkNames is empty");
         }
         int rowSize = pkValues.get(pkNames.iterator().next()).size();
         for (int i = 0; i < rowSize; i++) {
@@ -343,18 +343,18 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                   one    more
         null       O      O
         value      O      O
-        method     O      O
+        function   O      O
         sequence   O      O
         default    O      O
         -----------------------------------------------
         ps = false
         -----------------------------------------------
                   one    more
-        null       O      X
+        null       O      O
         value      O      O
-        method     X      X
+        function   X      X
         sequence   O      X
-        default    O      X
+        default    O      O
         -----------------------------------------------
         */
         int n = 0, v = 0, f = 0, s = 0, d = 0;

@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.seata.console.config.WebSecurityConfig;
 import io.seata.console.utils.JwtTokenUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -35,7 +34,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * @author jameslcj wfnuser
  */
-@Slf4j
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private JwtTokenUtils tokenProvider;
@@ -76,7 +74,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(WebSecurityConfig.AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(WebSecurityConfig.TOKEN_PREFIX)) {
-            return bearerToken.substring(WebSecurityConfig.TOKEN_PREFIX.length(), bearerToken.length());
+            return bearerToken.substring(WebSecurityConfig.TOKEN_PREFIX.length());
         }
         String jwt = request.getParameter(WebSecurityConfig.AUTHORIZATION_TOKEN);
         if (StringUtils.hasText(jwt)) {

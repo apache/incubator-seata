@@ -43,11 +43,11 @@ public abstract class AbstractLockManager implements LockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
-        return acquireLock(branchSession, true);
+        return acquireLock(branchSession, true, false);
     }
 
     @Override
-    public boolean acquireLock(BranchSession branchSession, boolean autoCommit) throws TransactionException {
+    public boolean acquireLock(BranchSession branchSession, boolean autoCommit, boolean skipCheckLock) throws TransactionException {
         if (branchSession == null) {
             throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
         }
@@ -62,7 +62,7 @@ public abstract class AbstractLockManager implements LockManager {
             // no lock
             return true;
         }
-        return getLocker(branchSession).acquireLock(locks, autoCommit);
+        return getLocker(branchSession).acquireLock(locks, autoCommit, skipCheckLock);
     }
 
     @Override
@@ -117,13 +117,8 @@ public abstract class AbstractLockManager implements LockManager {
      */
     protected abstract Locker getLocker(BranchSession branchSession);
 
-    /**
-     * Collect row locks list.`
-     *
-     * @param branchSession the branch session
-     * @return the list
-     */
-    protected List<RowLock> collectRowLocks(BranchSession branchSession) {
+    @Override
+    public List<RowLock> collectRowLocks(BranchSession branchSession) {
         if (branchSession == null || StringUtils.isBlank(branchSession.getLockKey())) {
             return Collections.emptyList();
         }

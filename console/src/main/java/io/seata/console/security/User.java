@@ -15,14 +15,11 @@
  */
 package io.seata.console.security;
 
-import lombok.Data;
-
 /**
  * mock user info
  *
  * @author jameslcj
  */
-@Data
 public class User {
     /**
      * The Username.
@@ -32,4 +29,25 @@ public class User {
      * The Password.
      */
     String password;
+
+
+    //region Getter && Setter
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    //endregion
 }
