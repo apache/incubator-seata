@@ -619,15 +619,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<String> statusKeys = convertStatusKeys(GlobalStatus.values());
         Map<String, Long> stringLongMap = calculateStatuskeysHasData(statusKeys);
 
-        List<List<String>> list = new ArrayList<>();
-        dogetXidsForTargetMap(stringLongMap, start, end, pageSize, list);
+        List<List<String>> list = dogetXidsForTargetMap(stringLongMap, start, end, pageSize);
 
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
             xids.parallelStream().forEach(xid -> {
-                GlobalSession globalSession = this.readSession(xid, withBranchSessions);
-                if (globalSession != null) {
-                    globalSessions.add(globalSession);
+                if (globalSessions.size() <= pageSize) {
+                    GlobalSession globalSession = this.readSession(xid, withBranchSessions);
+                    if (globalSession != null) {
+                        globalSessions.add(globalSession);
+                    }
                 }
             });
         }
@@ -714,8 +715,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         dogetXidsForTargetMap(targetMap, startNew, endNew, logQueryLimit, totalCount, listList);
     }
 
-    private void dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end, int logQueryLimit,
-        List<List<String>> listList) {
+    private List<List<String>> dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end,
+        int logQueryLimit) {
+        List<List<String>> listList = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (String key : targetMap.keySet()) {
                 final List<String> list = jedis.lrange(key, start, end);
@@ -728,6 +730,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 }
             }
         }
+        return listList;
     }
 
     private String buildBranchListKeyByXid(String xid) {
