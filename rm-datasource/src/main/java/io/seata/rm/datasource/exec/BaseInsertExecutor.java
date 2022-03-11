@@ -357,14 +357,14 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         default    O      X
         -----------------------------------------------
         */
-        int n = 0, v = 0, m = 0, s = 0, d = 0;
+        int n = 0, v = 0, f = 0, s = 0, d = 0;
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
                 n++;
                 continue;
             }
             if (pkValue instanceof SqlMethodExpr) {
-                m++;
+                f++;
                 continue;
             }
             if (pkValue instanceof SqlSequenceExpr) {
@@ -379,37 +379,37 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         }
 
         if (!ps) {
-            if (m > 0) {
+            if (f > 0) {
                 return false;
             }
-            if (n > 0 && v == 0 && m == 0 && s == 0 && d == 0) {
+            if (n > 0 && v == 0 && f == 0 && s == 0 && d == 0) {
                 return true;
             }
-            if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
+            if (n == 0 && v > 0 && f == 0 && s == 0 && d == 0) {
                 return true;
             }
-            if (n == 0 && v == 0 && m == 0 && s == 1 && d == 0) {
+            if (n == 0 && v == 0 && f == 0 && s == 1 && d == 0) {
                 return true;
             }
-            if (n == 0 && v == 0 && m == 0 && s == 0 && d > 0) {
+            if (n == 0 && v == 0 && f == 0 && s == 0 && d > 0) {
                 return true;
             }
             return false;
         }
 
-        if (n > 0 && v == 0 && m == 0 && s == 0 && d == 0) {
+        if (n > 0 && v == 0 && f == 0 && s == 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
+        if (n == 0 && v > 0 && f == 0 && s == 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v == 0 && m > 0 && s == 0 && d == 0) {
+        if (n == 0 && v == 0 && f > 0 && s == 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v == 0 && m == 0 && s > 0 && d == 0) {
+        if (n == 0 && v == 0 && f == 0 && s > 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v == 0 && m == 0 && s == 0 && d > 0) {
+        if (n == 0 && v == 0 && f == 0 && s == 0 && d > 0) {
             return true;
         }
         return false;
