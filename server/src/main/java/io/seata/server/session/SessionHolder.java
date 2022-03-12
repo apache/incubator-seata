@@ -122,6 +122,7 @@ public class SessionHolder {
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
+
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());

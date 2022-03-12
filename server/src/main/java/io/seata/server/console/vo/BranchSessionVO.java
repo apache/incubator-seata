@@ -13,11 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.vo;
+package io.seata.server.console.vo;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.Objects;
 
 import io.seata.core.constants.ServerTableColumnsName;
@@ -30,9 +30,9 @@ public class BranchSessionVO {
 
     private String xid;
 
-    private Long transactionId;
+    private String transactionId;
 
-    private Long branchId;
+    private String branchId;
 
     private String resourceGroupId;
 
@@ -46,9 +46,9 @@ public class BranchSessionVO {
 
     private String applicationData;
 
-    private Date gmtCreate;
+    private Long gmtCreate;
 
-    private Date gmtModified;
+    private Long gmtModified;
 
 
     public BranchSessionVO(){
@@ -65,8 +65,8 @@ public class BranchSessionVO {
                            String clientId,
                            String applicationData) {
         this.xid = xid;
-        this.transactionId = transactionId;
-        this.branchId = branchId;
+        this.transactionId = String.valueOf(transactionId);
+        this.branchId = String.valueOf(branchId);
         this.resourceGroupId = resourceGroupId;
         this.resourceId = resourceId;
         this.branchType = branchType;
@@ -83,20 +83,20 @@ public class BranchSessionVO {
         this.xid = xid;
     }
 
-    public Long getTransactionId() {
+    public String getTransactionId() {
         return transactionId;
     }
 
     public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
+        this.transactionId = String.valueOf(transactionId);
     }
 
-    public Long getBranchId() {
+    public String getBranchId() {
         return branchId;
     }
 
     public void setBranchId(Long branchId) {
-        this.branchId = branchId;
+        this.branchId = String.valueOf(branchId);
     }
 
     public String getResourceGroupId() {
@@ -147,19 +147,19 @@ public class BranchSessionVO {
         this.applicationData = applicationData;
     }
 
-    public Date getGmtCreate() {
+    public Long getGmtCreate() {
         return gmtCreate;
     }
 
-    public void setGmtCreate(Date gmtCreate) {
+    public void setGmtCreate(Long gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
-    public Date getGmtModified() {
+    public Long getGmtModified() {
         return gmtModified;
     }
 
-    public void setGmtModified(Date gmtModified) {
+    public void setGmtModified(Long gmtModified) {
         this.gmtModified = gmtModified;
     }
 
@@ -174,8 +174,14 @@ public class BranchSessionVO {
         branchSessionVO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
         branchSessionVO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
         branchSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
-        branchSessionVO.setGmtCreate(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
-        branchSessionVO.setGmtModified(rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
+        Date gmtCreateTimestamp = rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE);
+        if (gmtCreateTimestamp != null) {
+            branchSessionVO.setGmtCreate(gmtCreateTimestamp.getTime());
+        }
+        Date gmtModifiedTimestamp = rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED);
+        if (gmtModifiedTimestamp != null) {
+            branchSessionVO.setGmtModified(gmtModifiedTimestamp.getTime());
+        }
         return branchSessionVO;
     }
 

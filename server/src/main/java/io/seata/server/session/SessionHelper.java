@@ -131,6 +131,8 @@ public class SessionHelper {
         LOGGER.error("The Global session {} is in failed status, please handle it manually.", globalSession.getXid());
 
         globalSession.changeStatus(GlobalStatus.CommitFailed);
+        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
+
         globalSession.end();
         postTcSessionEndEvent(globalSession);
     }
@@ -167,6 +169,8 @@ public class SessionHelper {
         } else {
             globalSession.changeStatus(GlobalStatus.RollbackFailed);
         }
+        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
+
         globalSession.end();
         postTcSessionEndEvent(globalSession);
     }
