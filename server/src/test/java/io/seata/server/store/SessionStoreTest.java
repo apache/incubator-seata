@@ -372,7 +372,7 @@ public class SessionStoreTest {
             SessionHelper.endRollbackFailed(globalSession);
 
             // Lock is released.
-            Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+            Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
             lockManager.cleanAllLocks();
 
