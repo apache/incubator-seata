@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.StringJoiner;
+import java.util.Map;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.IOUtil;
@@ -35,6 +36,7 @@ import io.seata.common.DefaultValues;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
@@ -52,7 +54,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static final boolean ONLY_CARE_UPDATE_COLUMNS = CONFIG.getBoolean(
-        ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
+            ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
 
     /**
      * Instantiates a new Multi update executor.
@@ -121,8 +123,9 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
                 selectSQLAppender.add(updateCol);
             }
         } else {
-            for (String columnName : tmeta.getAllColumns().keySet()) {
-                selectSQLAppender.add(ColumnUtils.addEscape(columnName, getDbType()));
+            Map<String, ColumnMeta> allColumns = tmeta.getAllColumns();
+            for (String columnName : allColumns.keySet()) {
+                selectSQLAppender.add(ColumnUtils.parseColumn(allColumns, columnName, getDbType()));
             }
         }
         return buildTableRecords(tmeta, selectSQLAppender.toString(), paramAppenderList);
@@ -168,8 +171,9 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
                 selectSQLJoiner.add(updateCol);
             }
         } else {
-            for (String columnName : tableMeta.getAllColumns().keySet()) {
-                selectSQLJoiner.add(ColumnUtils.addEscape(columnName, getDbType()));
+            Map<String, ColumnMeta> allColumns = tableMeta.getAllColumns();
+            for (String columnName : allColumns.keySet()) {
+                selectSQLJoiner.add(ColumnUtils.parseColumn(allColumns, columnName, getDbType()));
             }
         }
         return selectSQLJoiner.toString();

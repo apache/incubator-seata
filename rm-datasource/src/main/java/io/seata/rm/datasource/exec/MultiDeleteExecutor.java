@@ -21,6 +21,7 @@ import io.seata.common.util.StringUtils;
 
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
@@ -30,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 /**
@@ -81,8 +83,9 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
         }
         suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
-        for (String column : tmeta.getAllColumns().keySet()) {
-            selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
+        Map<String, ColumnMeta> allColumns = tmeta.getAllColumns();
+        for (String column : allColumns.keySet()) {
+            selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.parseColumn(allColumns, column, getDbType())));
         }
         return buildTableRecords(tmeta, selectSQLAppender.toString(), paramAppenderList);
     }

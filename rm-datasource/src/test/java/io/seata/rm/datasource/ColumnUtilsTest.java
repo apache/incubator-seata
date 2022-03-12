@@ -15,12 +15,15 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.common.util.LowerCaseLinkHashMap;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author jsbxyyx
@@ -226,6 +229,109 @@ public class ColumnUtilsTest {
         cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
         Assertions.assertEquals("\"schEme\".\"id\"", cols.get(0));
 
+    }
+
+    @Test
+    public void test_parseColumn_byDbType() throws Exception {
+        Map<String, ColumnMeta> allColumns = new LowerCaseLinkHashMap<>();
+        String column = null;
+        allColumns.put("ID", null);
+        column = ColumnUtils.parseColumn(allColumns, "id", JdbcConstants.MYSQL);
+        Assertions.assertEquals("id", column);
+
+        allColumns.put("`ID`", null);
+        column = ColumnUtils.parseColumn(allColumns, "`id`", JdbcConstants.MYSQL);
+        Assertions.assertEquals("`id`", column);
+
+        allColumns.put("FROM", null);
+        column = ColumnUtils.parseColumn(allColumns, "from", JdbcConstants.MYSQL);
+        Assertions.assertEquals("`from`", column);
+
+        allColumns.put("SCHEME.ID", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.id", JdbcConstants.MYSQL);
+        Assertions.assertEquals("scheme.id", column);
+
+        allColumns.put("`scheme`.id", null);
+        column = ColumnUtils.parseColumn(allColumns, "`scheme`.id", JdbcConstants.MYSQL);
+        Assertions.assertEquals("`scheme`.id", column);
+
+        allColumns.put("scheme.`id`", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.`id`", JdbcConstants.MYSQL);
+        Assertions.assertEquals("scheme.`id`", column);
+
+        allColumns.clear();
+        allColumns.put("ID", null);
+        column = ColumnUtils.parseColumn(allColumns, "id", JdbcConstants.ORACLE);
+        Assertions.assertEquals("ID", column);
+
+        allColumns.put("\"ID\"", null);
+        column = ColumnUtils.parseColumn(allColumns, "\"id\"", JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"ID\"", column);
+
+        allColumns.put("FROM", null);
+        column = ColumnUtils.parseColumn(allColumns, "from", JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"FROM\"", column);
+
+        allColumns.put("from", null);
+        column = ColumnUtils.parseColumn(allColumns, "from", JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"from\"", column);
+
+        allColumns.put("id", null);
+        column = ColumnUtils.parseColumn(allColumns, "id", JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"id\"", column);
+
+        allColumns.put("\"SCHEME\".ID", null);
+        column = ColumnUtils.parseColumn(allColumns, "\"scheme\".id", JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"SCHEME\".ID", column);
+
+        allColumns.put("\"scheme\".id", null);
+        column = ColumnUtils.parseColumn(allColumns, "\"scheme\".id", JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"scheme\".\"id\"", column);
+
+        allColumns.put("SCHEME.\"ID\"", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.\"id\"", JdbcConstants.ORACLE);
+        Assertions.assertEquals("SCHEME.\"ID\"", column);
+
+        allColumns.put("scheme.id", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.id", JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"scheme\".\"id\"", column);
+
+        allColumns.clear();
+        allColumns.put("id", null);
+        column = ColumnUtils.parseColumn(allColumns, "id", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("id", column);
+
+        allColumns.put("Id", null);
+        column = ColumnUtils.parseColumn(allColumns, "id", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"Id\"", column);
+
+        allColumns.put("from", null);
+        column = ColumnUtils.parseColumn(allColumns, "from", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"from\"", column);
+
+        allColumns.put("FROM", null);
+        column = ColumnUtils.parseColumn(allColumns, "from", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"FROM\"", column);
+
+        allColumns.put("scheme.Id", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.id", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"scheme\".\"Id\"", column);
+
+        allColumns.put("SCHEME.\"ID\"", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.\"id\"", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"SCHEME\".\"ID\"", column);
+
+        allColumns.put("\"SCHEME\".ID", null);
+        column = ColumnUtils.parseColumn(allColumns, "\"scheme\".id", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"SCHEME\".\"ID\"", column);
+
+        allColumns.put("scheme.id", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.id", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("scheme.id", column);
+
+        allColumns.put("schEme.id", null);
+        column = ColumnUtils.parseColumn(allColumns, "scheme.id", JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"schEme\".\"id\"", column);
     }
 
 }

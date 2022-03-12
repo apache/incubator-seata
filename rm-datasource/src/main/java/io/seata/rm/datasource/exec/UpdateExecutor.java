@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import io.seata.common.util.IOUtil;
@@ -32,6 +33,7 @@ import io.seata.common.DefaultValues;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
@@ -105,8 +107,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 selectSQLJoin.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
             }
         } else {
-            for (String columnName : tableMeta.getAllColumns().keySet()) {
-                selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));
+            Map<String, ColumnMeta> allColumns = tableMeta.getAllColumns();
+            for (String columnName : allColumns.keySet()) {
+                selectSQLJoin.add(ColumnUtils.parseColumn(allColumns, columnName, getDbType()));
             }
         }
         return selectSQLJoin.toString();
@@ -151,8 +154,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 selectSQLJoiner.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
             }
         } else {
-            for (String columnName : tableMeta.getAllColumns().keySet()) {
-                selectSQLJoiner.add(ColumnUtils.addEscape(columnName, getDbType()));
+            Map<String, ColumnMeta> allColumns = tableMeta.getAllColumns();
+            for (String columnName : allColumns.keySet()) {
+                selectSQLJoiner.add(ColumnUtils.parseColumn(allColumns, columnName, getDbType()));
             }
         }
         return selectSQLJoiner.toString();

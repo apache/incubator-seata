@@ -16,13 +16,16 @@
 package io.seata.rm.datasource;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * column utils
@@ -32,6 +35,7 @@ import java.util.List;
 public final class ColumnUtils {
 
     private static final String DOT = ".";
+
 
     /**
      * The escape
@@ -261,6 +265,17 @@ public final class ColumnUtils {
         return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
+    }
+
+    public static String parseColumn(Map<String, ColumnMeta> allColumns, String column, String dbType) {
+        if (isMysqlSeries(dbType)) {
+            return addEscape(column, dbType, ColumnUtils.Escape.MYSQL);
+        }
+        if (allColumns instanceof LowerCaseLinkHashMap) {
+            Map<String, String> originMap = ((LowerCaseLinkHashMap<ColumnMeta>) allColumns).getOriginMap();
+            return addEscape(originMap.get(column), dbType, Escape.STANDARD);
+        }
+        return column;
     }
 
 }
