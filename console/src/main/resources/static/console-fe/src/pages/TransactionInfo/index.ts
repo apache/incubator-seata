@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import request from '@/utils/request';
-import { OverviewData } from '@/reducers/overview';
+import TransactionInfo from './TransactionInfo';
 
-export async function fetchData():Promise<any> {
-  let result = await request('/overview/getData', {
-    method: 'get',
-  });
+export * from './TransactionInfo';
 
-  return result.data;
-}
+export default TransactionInfo;
