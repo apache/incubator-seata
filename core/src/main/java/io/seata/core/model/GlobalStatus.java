@@ -133,7 +133,7 @@ public enum GlobalStatus {
 
     ;
 
-    private int code;
+    private final int code;
 
     GlobalStatus(int code) {
         this.code = code;
