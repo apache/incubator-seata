@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.exception.NotSupportYetException;
 
 /**
  * The type Undo executor factory.
@@ -45,7 +45,7 @@ public class UndoExecutorFactory {
                 result = holder.getDeleteExecutor(sqlUndoLog);
                 break;
             default:
-                throw new ShouldNeverHappenException();
+                throw new NotSupportYetException(String.format("sql type: %s not support",sqlUndoLog.getSqlType()));
         }
         return result;
     }

@@ -23,6 +23,7 @@ import { ConfigProvider, Dropdown, Menu } from '@alicloud/console-components';
 import siteConfig from '../../config';
 import { changeLanguage, IChangeLanguage, LocaleStateModel, getCurrentLanguage, zhCnKey, enUsKey } from '@/reducers/locale';
 import { GlobalStateModel } from '@/reducers';
+import { AUTHORIZATION_HEADER } from '@/contants';
 
 import './index.scss';
 
@@ -63,7 +64,7 @@ class Header extends React.Component<PropsType, StateType> {
   };
 
   getUsername = () => {
-    const token = window.localStorage.getItem('token');
+    const token = window.localStorage.getItem(AUTHORIZATION_HEADER);
     if (token) {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace('-', '+').replace('_', '/');
@@ -105,9 +106,9 @@ class Header extends React.Component<PropsType, StateType> {
           </a>
           {/* if is login page, we will show logout */}
           {pathname !== '/login' && (
-            <Dropdown trigger={<div className="logout">{this.getUsername()}</div>}>
+            <Dropdown align='tc bc' trigger={<div className="logout">{this.getUsername()}</div>}>
               <Menu>
-                <Menu.Item onClick={this.logout}>{locale.logout}</Menu.Item>
+                <Menu.Item style={{textAlign:'center'}} onClick={this.logout}>{locale.logout}</Menu.Item>
               </Menu>
             </Dropdown>
           )}

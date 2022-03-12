@@ -24,7 +24,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.event.EventBus;
-import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
@@ -134,8 +133,7 @@ public class DefaultCore implements Core {
         session.begin();
 
         // transaction start event
-        eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            session.getTransactionName(), applicationId, transactionServiceGroup, session.getBeginTime(), null, session.getStatus()));
+        SessionHelper.postTcSessionBeginEvent(session);
 
         return session.getXid();
     }
@@ -182,9 +180,7 @@ public class DefaultCore implements Core {
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start committing event
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
-            globalSession.getBeginTime(), null, globalSession.getStatus()));
+        SessionHelper.postTcSessionBeginEvent(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
@@ -248,15 +244,14 @@ public class DefaultCore implements Core {
                 LOGGER.info("Committing global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
+            if (!retrying) {
+                globalSession.setStatus(GlobalStatus.Committed);
+            }
         }
-        // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is executed to improve concurrency performance, and the global transaction ends..
+        // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
+        // executed to improve concurrency performance, and the global transaction ends..
         if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
-
-            // committed event
-            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
-                globalSession.getBeginTime(), System.currentTimeMillis(), globalSession.getStatus()));
 
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
@@ -283,19 +278,15 @@ public class DefaultCore implements Core {
             return globalSession.getStatus();
         }
 
-        doGlobalRollback(globalSession, false);
-        return globalSession.getStatus();
+        boolean rollbackSuccess = doGlobalRollback(globalSession, false);
+        return rollbackSuccess ? GlobalStatus.Rollbacked : globalSession.getStatus();
     }
 
     @Override
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start rollback event
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(),
-                globalSession.getApplicationId(),
-                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(),
-                null, globalSession.getStatus()));
+        SessionHelper.postTcSessionBeginEvent(globalSession);
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
@@ -343,14 +334,6 @@ public class DefaultCore implements Core {
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
         if (success && retrying) {
             SessionHelper.endRollbacked(globalSession);
-
-            // rollbacked event
-            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                    GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(),
-                    globalSession.getApplicationId(),
-                    globalSession.getTransactionServiceGroup(),
-                    globalSession.getBeginTime(), System.currentTimeMillis(),
-                    globalSession.getStatus()));
 
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
         }

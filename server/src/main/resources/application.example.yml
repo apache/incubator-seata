@@ -107,10 +107,7 @@ seata:
     enableCheckAuth: true
     retryDeadThreshold: 130000
     recovery:
-      committing-retry-period: 1000
-      asyn-committing-retry-period: 1000
-      rollbacking-retry-period: 1000
-      timeout-retry-period: 1000
+      handle-all-session-period: 1000
     undo:
       log-save-days: 7
       log-delete-period: 86400000
@@ -165,3 +162,12 @@ seata:
     registry-type: compact
     exporter-list: prometheus
     exporter-prometheus-port: 9898
+  transport:
+    rpc-tc-request-timeout: 30000
+    enable-tc-server-batch-send-response: false
+    shutdown:
+      wait: 3
+    thread-factory:
+      boss-thread-prefix: NettyBoss
+      worker-thread-prefix: NettyServerNIOWorker
+      boss-thread-size: 1

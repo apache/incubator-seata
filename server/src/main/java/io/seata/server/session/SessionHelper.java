@@ -23,11 +23,14 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
+import io.seata.core.event.EventBus;
+import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.event.EventBusManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -115,6 +118,7 @@ public class SessionHelper {
     public static void endCommitted(GlobalSession globalSession) throws TransactionException {
         globalSession.changeGlobalStatus(GlobalStatus.Committed);
         globalSession.end();
+        postTcSessionEndEvent(globalSession);
     }
 
     /**
@@ -125,7 +129,10 @@ public class SessionHelper {
      */
     public static void endCommitFailed(GlobalSession globalSession) throws TransactionException {
         globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
+
         globalSession.end();
+        postTcSessionEndEvent(globalSession);
     }
 
     /**
@@ -142,6 +149,7 @@ public class SessionHelper {
             globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
         }
         globalSession.end();
+        postTcSessionEndEvent(globalSession);
     }
 
     /**
@@ -157,7 +165,54 @@ public class SessionHelper {
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
         }
+        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
+
         globalSession.end();
+        postTcSessionEndEvent(globalSession);
+    }
+
+    /**
+     * post end event
+     *
+     * @param globalSession the global session
+     */
+    public static void postTcSessionEndEvent(GlobalSession globalSession) {
+        postTcSessionEndEvent(globalSession, globalSession.getStatus());
+    }
+
+    /**
+     * post end event (force specified state)
+     *
+     * @param globalSession the global session
+     * @param status the global status
+     */
+    public static void postTcSessionEndEvent(GlobalSession globalSession, GlobalStatus status) {
+        EventBus eventBus = EventBusManager.get();
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getApplicationId(),
+            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), System.currentTimeMillis(),
+            status));
+    }
+
+    /**
+     * post begin event
+     *
+     * @param globalSession the global session
+     */
+    public static void postTcSessionBeginEvent(GlobalSession globalSession) {
+        postTcSessionBeginEvent(globalSession, globalSession.getStatus());
+    }
+
+    /**
+     * post begin event(force specified state)
+     *
+     * @param globalSession the global session
+     */
+    public static void postTcSessionBeginEvent(GlobalSession globalSession, GlobalStatus status) {
+        EventBus eventBus = EventBusManager.get();
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getApplicationId(),
+            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null, status));
     }
 
     public static boolean isTimeoutGlobalStatus(GlobalStatus status) {
@@ -175,7 +230,7 @@ public class SessionHelper {
      * @since 1.5.0
      */
     public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
-        for (GlobalSession globalSession : sessions) {
+        sessions.parallelStream().forEach(globalSession -> {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
                 handler.handle(globalSession);
@@ -184,7 +239,7 @@ public class SessionHelper {
             } finally {
                 MDC.remove(RootContext.MDC_KEY_XID);
             }
-        }
+        });
     }
 
     /**

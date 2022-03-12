@@ -19,6 +19,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -87,9 +89,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
+    private final boolean lazyLoadBranch;
+
     private volatile boolean active = true;
 
-    private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
+    private List<BranchSession> branchSessions;
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
@@ -101,7 +105,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean add(BranchSession branchSession) {
-        return branchSessions.add(branchSession);
+        if (null != branchSessions) {
+            return branchSessions.add(branchSession);
+        } else {
+            // db and redis no need to deal with
+            return true;
+        }
     }
 
     /**
@@ -122,6 +131,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean canBeCommittedAsync() {
+        List<BranchSession> branchSessions = getBranchSessions();
         for (BranchSession branchSession : branchSessions) {
             if (!branchSession.canBeCommittedAsync()) {
                 return false;
@@ -136,6 +146,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean hasATBranch() {
+        List<BranchSession> branchSessions = getBranchSessions();
         for (BranchSession branchSession : branchSessions) {
             if (branchSession.getBranchType() == BranchType.AT) {
                 return true;
@@ -150,6 +161,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return is saga
      */
     public boolean isSaga() {
+        List<BranchSession> branchSessions = getBranchSessions();
         if (branchSessions.size() > 0) {
             return BranchType.SAGA == branchSessions.get(0).getBranchType();
         } else {
@@ -242,12 +254,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return false;
     }
 
-
     public void clean() throws TransactionException {
-        if (this.hasATBranch()) {
-            if (!LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this)) {
-                throw new TransactionException("UnLock globalSession error, xid = " + this.xid);
-            }
+        if (!LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this)) {
+            throw new TransactionException("UnLock globalSession error, xid = " + this.xid);
         }
     }
 
@@ -258,7 +267,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void closeAndClean() throws TransactionException {
         close();
-        clean();
+        if (this.hasATBranch()) {
+            clean();
+        }
     }
 
     /**
@@ -288,6 +299,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         add(branchSession);
     }
 
+    public void loadBranchs() {
+        if (branchSessions == null && isLazyLoadBranch()) {
+            synchronized (this) {
+                if (branchSessions == null && isLazyLoadBranch()) {
+                    branchSessions = new ArrayList<>();
+                    Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
+                        .ifPresent(globalSession -> branchSessions.addAll(globalSession.getBranchSessions()));
+                }
+            }
+        }
+    }
+
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
         // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
@@ -310,7 +333,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the branch
      */
     public BranchSession getBranch(long branchId) {
-        synchronized (branchSessions) {
+        synchronized (this) {
+            List<BranchSession> branchSessions = getBranchSessions();
             for (BranchSession branchSession : branchSessions) {
                 if (branchSession.getBranchId() == branchId) {
                     return branchSession;
@@ -326,8 +350,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the sorted branches
      */
-    public ArrayList<BranchSession> getSortedBranches() {
-        return new ArrayList<>(branchSessions);
+    public List<BranchSession> getSortedBranches() {
+        return new ArrayList<>(getBranchSessions());
     }
 
     /**
@@ -335,8 +359,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the reverse sorted branches
      */
-    public ArrayList<BranchSession> getReverseSortedBranches() {
-        ArrayList<BranchSession> reversed = new ArrayList<>(branchSessions);
+    public List<BranchSession> getReverseSortedBranches() {
+        List<BranchSession> reversed = new ArrayList<>(getBranchSessions());
         Collections.reverse(reversed);
         return reversed;
     }
@@ -344,7 +368,32 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     /**
      * Instantiates a new Global session.
      */
-    public GlobalSession() {}
+    public GlobalSession() {
+        this.lazyLoadBranch = false;
+    }
+
+    /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     * @param lazyLoadBranch          the lazy load branch
+     */
+    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout, boolean lazyLoadBranch) {
+        this.transactionId = UUIDGenerator.generateUUID();
+        this.status = GlobalStatus.Begin;
+        this.lazyLoadBranch = lazyLoadBranch;
+        if (!lazyLoadBranch) {
+            this.branchSessions = new ArrayList<>();
+        }
+        this.applicationId = applicationId;
+        this.transactionServiceGroup = transactionServiceGroup;
+        this.transactionName = transactionName;
+        this.timeout = timeout;
+        this.xid = XID.generateXID(transactionId);
+    }
 
     /**
      * Instantiates a new Global session.
@@ -355,14 +404,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @param timeout                 the timeout
      */
     public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
-        this.transactionId = UUIDGenerator.generateUUID();
-        this.status = GlobalStatus.Begin;
-
-        this.applicationId = applicationId;
-        this.transactionServiceGroup = transactionServiceGroup;
-        this.transactionName = transactionName;
-        this.timeout = timeout;
-        this.xid = XID.generateXID(transactionId);
+        this(applicationId, transactionServiceGroup, transactionName, timeout, false);
     }
 
     /**
@@ -491,6 +533,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.applicationData = applicationData;
     }
 
+    public boolean isLazyLoadBranch() {
+        return lazyLoadBranch;
+    }
+
     /**
      * Create global session global session.
      *
@@ -502,7 +548,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
         int timeout) {
-        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
+        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout, false);
         return session;
     }
 
@@ -600,6 +646,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void decode(byte[] a) {
+        this.branchSessions = new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(a);
         this.transactionId = byteBuffer.getLong();
         this.timeout = byteBuffer.getInt();
@@ -644,7 +691,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean hasBranch() {
-        return branchSessions.size() > 0;
+        return getBranchSessions().size() > 0;
     }
 
     public void lock() throws TransactionException {
@@ -689,7 +736,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         V call() throws TransactionException;
     }
 
-    public ArrayList<BranchSession> getBranchSessions() {
+    public List<BranchSession> getBranchSessions() {
+        loadBranchs();
         return branchSessions;
     }
 
@@ -721,6 +769,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return "GlobalSession{" + "xid='" + xid + '\'' + ", transactionId=" + transactionId + ", status=" + status
             + ", applicationId='" + applicationId + '\'' + ", transactionServiceGroup='" + transactionServiceGroup
             + '\'' + ", transactionName='" + transactionName + '\'' + ", timeout=" + timeout + ", beginTime="
-            + beginTime + ", applicationData='" + applicationData + '\'' + ", branchSessions=" + branchSessions + '}';
+            + beginTime + ", applicationData='" + applicationData + '\'' + ", lazyLoadBranch=" + lazyLoadBranch
+            + ", active=" + active + ", branchSessions=" + branchSessions + ", globalSessionLock=" + globalSessionLock
+            + ", lifecycleListeners=" + lifecycleListeners + '}';
     }
 }

@@ -15,18 +15,30 @@
  */
 package io.seata.server.console.impl.file;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.GlobalSessionVO;
-import io.seata.core.console.result.PageResult;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
+import io.seata.server.storage.SessionConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+
+import static io.seata.common.util.StringUtils.isBlank;
+import static java.util.Objects.isNull;
 
 /**
  * Global Session File ServiceImpl
  *
- * @author: zhongxiang.wang
+ * @author zhongxiang.wang
+ * @author miaoxueyu
  */
 @Component
 @org.springframework.context.annotation.Configuration
@@ -35,7 +47,56 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
-        throw new NotSupportYetException();
+        if (param.getPageSize() <= 0 || param.getPageNum() <= 0) {
+            throw new IllegalArgumentException("wrong pageSize or pageNum");
+        }
+
+        final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
+
+        final List<GlobalSession> filteredSessions = allSessions
+                .parallelStream()
+                .filter(obtainPredicate(param))
+                .collect(Collectors.toList());
+
+        return PageResult.build(SessionConverter.convertGlobalSession(filteredSessions), param.getPageNum(), param.getPageSize());
+    }
+
+
+
+    /**
+     * obtain the condition
+     *
+     * @param param condition for query global session
+     * @return the filter condition
+     */
+    private Predicate<? super GlobalSession> obtainPredicate(GlobalSessionParam param) {
+
+        return session -> {
+            return
+                // xid
+                (isBlank(param.getXid()) || session.getXid().contains(param.getXid()))
+
+                &&
+                // applicationId
+                (isBlank(param.getApplicationId()) || session.getApplicationId().contains(param.getApplicationId()))
+
+                &&
+                // status
+                (isNull(param.getStatus()) || Objects.equals(session.getStatus().getCode(), param.getStatus()))
+
+                &&
+                // transactionName
+                (isBlank(param.getTransactionName()) || session.getTransactionName().contains(param.getTransactionName()))
+
+                &&
+                // timeStart
+                (isNull(param.getTimeStart()) || param.getTimeStart() <= session.getBeginTime())
+
+                &&
+                // timeEnd
+                (isNull(param.getTimeEnd()) || param.getTimeEnd() >= session.getBeginTime());
+
+        };
     }
 
 }
