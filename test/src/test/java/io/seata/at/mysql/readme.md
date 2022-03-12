@@ -1,6 +1,7 @@
 ###测试场景
 数据库版本：mysql5、mysql8; 
 序列化类型：jackson、fastjson
+测试数据类型：
 ###INT TYPE
 CREATE TABLE if not exists `t_test_numeric_type` (
 `id` int(32) NOT NULL,

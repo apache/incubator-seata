@@ -33,14 +33,14 @@ public class DataBaseDataTypeForMysqlTest {
 
     private static final boolean mySQL8 = true;
 
-    private static final String mysql_jdbcUrl = "jdbc:mysql://10.82.30.93:3306/demo";
-    private static final String mysql_username = "root";
-    private static final String mysql_password = "f2edfsfeKJHdssku";
+    private static final String mysql_jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
+    private static final String mysql_username = "demo";
+    private static final String mysql_password = "demo";
     private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER;
 
-    private static final String mysql8_jdbcUrl = "jdbc:mysql://10.82.12.118:3306/brms_xrule_uata?useUnicode=true&characterEncoding=utf-8&useSSL=false";
-    private static final String mysql8_username = "code_xrule";
-    private static final String mysql8_password = "Xrule@1234";
+    private static final String mysql8_jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=utf-8&useSSL=false";
+    private static final String mysql8_username = "demo";
+    private static final String mysql8_password = "demo";
     private static final String mysql8_driverClassName = JdbcUtils.MYSQL_DRIVER_6;
 
     private static final Integer INTEGER_TYPE = 1;
