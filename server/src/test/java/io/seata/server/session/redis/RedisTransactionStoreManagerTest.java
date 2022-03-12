@@ -23,8 +23,8 @@ import java.util.Map;
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.GlobalSession;
@@ -113,8 +113,8 @@ public class RedisTransactionStoreManagerTest {
         globalLockVO.setTableName("order");
         globalLockVO.setPk("2188");
         globalLockVO.setRowKey("jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188");
-        globalLockVO.setGmtCreate(new Date());
-        globalLockVO.setGmtModified(new Date());
+        globalLockVO.setGmtCreate(System.currentTimeMillis());
+        globalLockVO.setGmtModified(System.currentTimeMillis());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.hmset(GLOBAL_LOCK_KEY,globallockMap);
             jedis.hmset(ROW_LOCK_KEY,BeanUtils.objectToMap(globalLockVO));
