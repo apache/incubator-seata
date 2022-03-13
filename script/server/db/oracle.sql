@@ -65,5 +65,6 @@ CREATE TABLE distributed_lock (
     PRIMARY KEY (lock_key)
 );
 
-INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('HandleAllSession', ' ', 0);
-
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('AsyncOrRetryCommitting', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
