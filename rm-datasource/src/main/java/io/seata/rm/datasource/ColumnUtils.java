@@ -36,7 +36,6 @@ public final class ColumnUtils {
 
     private static final String DOT = ".";
 
-
     /**
      * The escape
      */
@@ -271,11 +270,8 @@ public final class ColumnUtils {
         if (isMysqlSeries(dbType)) {
             return addEscape(column, dbType, ColumnUtils.Escape.MYSQL);
         }
-        if (allColumns instanceof LowerCaseLinkHashMap) {
             Map<String, String> originMap = ((LowerCaseLinkHashMap<ColumnMeta>) allColumns).getOriginMap();
             return addEscape(originMap.get(column), dbType, Escape.STANDARD);
-        }
-        return column;
     }
 
 }

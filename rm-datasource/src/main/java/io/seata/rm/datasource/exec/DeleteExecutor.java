@@ -34,9 +34,10 @@ import io.seata.sqlparser.SQLRecognizer;
 /**
  * The type Delete executor.
  *
+ * @author sharajava
+ *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author sharajava
  */
 public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
