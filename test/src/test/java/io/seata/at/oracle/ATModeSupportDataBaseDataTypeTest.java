@@ -13,11 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.at;
+package io.seata.at.oracle;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import com.alibaba.druid.util.JdbcConstants;
+import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,7 +37,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.DataSourceManager;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.server.UUIDGenerator;
 
 /**
@@ -65,30 +70,25 @@ public class ATModeSupportDataBaseDataTypeTest {
     private static final String ORACLE_PASSWORD = "oracle";
     private static final String ORACLE_DRIVER_CLASSNAME = JdbcUtils.ORACLE_DRIVER;
 
+    private static final int NUMBER_TYPE = 1;
+
     /**
-     * test char type
+     * test number type tableName
      */
-    private static final String TEST_CHAR_TYPE_SQL = "";
+    private static final String NUMBER_TABLE_NAME = "T_DATA_TYPE_NUMBER_TEST";
     /**
-     * test varchar type
+     * test number type insert sql
      */
-    private static final String TEST_VARCHAR_TYPE_SQL = "";
+    private static final String TEST_NUMBER_TYPE_INSERT_SQL = "INSERT INTO T_DATA_TYPE_NUMBER_TEST\n"
+        + "    (id,TINYINT_TEST,MEDUIMINT_TEST,INT_TEST,BIGINT_TEST,SMALLINT_TEST,INTEGER_TEST,DECIMAL_TEST,NUMERIC_TEST,DEC_TEST)\n"
+        + "    VALUES (1,123,456,55,234,56,22423,45645.22,897.333,999)";
     /**
-     * test varchar2 type
+     * test number type update sql
      */
-    private static final String TEST_VARCHAR2_TYPE_SQL = "";
-    /**
-     * test number type
-     */
-    private static final String TEST_NUMBER_TYPE_SQL = "";
-    /**
-     * test clob type
-     */
-    private static final String TEST_CLOB_TYPE_SQL = "";
-    /**
-     * test blob type
-     */
-    private static final String TEST_BLOB_TYPE_SQL = "";
+    private static final String TEST_NUMBER_TYPE_UPDATE_SQL = "UPDATE T_DATA_TYPE_NUMBER_TEST\n"
+        + "set TINYINT_TEST = 312,MEDUIMINT_TEST = 654,INT_TEST = 55,BIGINT_TEST = 432,\n"
+        + "    SMALLINT_TEST = 65,INTEGER_TEST = 32422,DECIMAL_TEST = 54654.22,NUMERIC_TEST = 798.333,\n"
+        + "    DEC_TEST = 888 WHERE id =" + TEST_RECORD_ID;
 
     @Test
     @Disabled
@@ -102,10 +102,40 @@ public class ATModeSupportDataBaseDataTypeTest {
     }
 
     @Test
+    public void doHandlerTest() throws Throwable {
+        doType(1, false);
+        // doType(2,false);
+        // doType(3,false);
+        // doType(4,false);
+    }
+
+    public void doType(int type, boolean globalCommit) throws Throwable {
+        String tableName = "";
+        String updateSql = "";
+        String insertSql = "";
+        switch (type) {
+            case 1:
+                LOGGER.info("current type is:[{}]", type);
+                insertSql = TEST_NUMBER_TYPE_INSERT_SQL;
+                tableName = NUMBER_TABLE_NAME;
+                updateSql = TEST_NUMBER_TYPE_UPDATE_SQL;
+                break;
+            case 2:
+
+                break;
+            default:
+
+        }
+
+        testTypeSql(globalCommit, insertSql, tableName, updateSql);
+    }
+
+    @Test
     @Disabled
-    public void testCharTypeSql() throws Throwable {
-        doExecute(TEST_CHAR_TYPE_SQL);
-        doTestCharTypePhase(true,MOCK_XID,MOCK_BRANCH_ID);
+    public void testTypeSql(boolean globalCommit, String insertSql, String tableName, String updateSql)
+        throws Throwable {
+        doExecute(insertSql);
+        doTestOracleTypePhase(globalCommit, tableName, updateSql);
     }
 
 
@@ -116,9 +146,10 @@ public class ATModeSupportDataBaseDataTypeTest {
         helperStat.execute(prepareSql);
         helperStat.close();
         helperConn.close();
+        LOGGER.info("insert sql success sql:[{}]", prepareSql);
     }
 
-    private void doTestCharTypePhase(Boolean globalCommit,String mockXid, Long mockBranchId) throws Throwable {
+    private void doTestOracleTypePhase(boolean globalCommit, String tableName, String updateSql) throws Throwable {
         // init DataSource: helper
         DruidDataSource helperDS = createOracleDruidDataSource();
 
@@ -126,54 +157,52 @@ public class ATModeSupportDataBaseDataTypeTest {
         Statement helperStat = null;
         ResultSet helperRes = null;
 
-        // init RM
         initRM();
 
-        DataSourceProxy dataSourceProxy = null;
-        // init DataSource: runner
-        DruidDataSource runnerDS = createOracleDruidDataSource();
-        dataSourceProxy = new DataSourceProxy(runnerDS);
-
-        // Global Tx Phase 1:
-        RootContext.bind(mockXid);
+        final DataSourceProxy dataSourceProxy = new DataSourceProxy(helperDS);
+        LOGGER.info("the dataSourceProxy is:[{}]", dataSourceProxy);
+        RootContext.bind(MOCK_XID);
         Connection testConn = dataSourceProxy.getConnection();
+        LOGGER.info("the testConn is:[{}]", testConn);
         Statement testStat = testConn.createStatement();
-        // >>> update the test record with AT mode
-        testStat.execute("update test set name = '123' where id = " + TEST_RECORD_ID);
-        // >>> close the statement and connection
+        LOGGER.info("the testStat is:[{}]", testStat);
+
+        // get before image
+        helperConn = helperDS.getConnection();
+        helperStat = helperConn.createStatement();
+        helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
+        LOGGER.info("the helperRes is:[{}]", helperRes);
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE.name())
+            .getTableMeta(dataSourceProxy.getPlainConnection(), tableName, dataSourceProxy.getResourceId());
+        TableRecords beforeImage = TableRecords.buildRecords(tableMeta, helperRes);
+
+        // if not throw exception update record
+        Assertions.assertDoesNotThrow(() -> testStat.execute(updateSql));
+
+        // close
         testStat.close();
         testConn.close();
         RootContext.unbind();
 
-        // Global Tx Phase 2: run phase 2 with the same runner DS
-        if(globalCommit) {
-            DefaultResourceManager.get().branchCommit(dataSourceProxy.getBranchType(), mockXid, mockBranchId,
-                    dataSourceProxy.getResourceId(), null);
-            // have a check
+        if (globalCommit) {
+            Assertions
+                .assertDoesNotThrow(() -> DefaultResourceManager.get().branchCommit(dataSourceProxy.getBranchType(),
+                    MOCK_XID, MOCK_BRANCH_ID, dataSourceProxy.getResourceId(), null));
+        } else {
+            DefaultResourceManager.get().branchRollback(dataSourceProxy.getBranchType(), MOCK_XID, MOCK_BRANCH_ID,
+                dataSourceProxy.getResourceId(), null);
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
-            helperRes = helperStat.executeQuery("select * from test where id = " + TEST_RECORD_ID);
-            // should see the test record now
-            Assertions.assertTrue(helperRes.next());
-            helperRes.close();
-            helperStat.close();
-            helperConn.close();
-        }else {
-            DefaultResourceManager.get().branchRollback(dataSourceProxy.getBranchType(), mockXid, mockBranchId, dataSourceProxy.getResourceId(), null);
-            //have a check
-            helperConn = helperDS.getConnection();
-            helperStat = helperConn.createStatement();
-            helperRes = helperStat.executeQuery("select * from test where id = " + TEST_RECORD_ID);
-            // should see the rollbacked test record now
-            Assertions.assertTrue(helperRes.next());
+            helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
+            TableRecords currentImage = TableRecords.buildRecords(tableMeta, helperRes);
+            Assertions.assertTrue(DataCompareUtils.isRecordsEquals(beforeImage, currentImage).getResult());
             helperRes.close();
             helperStat.close();
             helperConn.close();
         }
-        System.out.println("Phase2 looks good!!");
     }
 
-    private void initRM() throws Throwable {
+    private void initRM() {
         // init RM
         DefaultResourceManager.get();
         // mock the RM of AT
