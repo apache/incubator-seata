@@ -17,6 +17,7 @@ package io.seata.server.lock;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.console.result.PageResult;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
@@ -216,6 +218,14 @@ public class LockManagerTest {
         SessionHolder.getRootSessionManager().destroy();
         SessionHolder.init("file");
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        //make sure sessionMaanager is empty
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            //FileSessionManager use ConcurrentHashMap is thread safe
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
         try {
             sessionManager.addGlobalSession(globalSessions1);
             sessionManager.addGlobalSession(globalSessions2);
