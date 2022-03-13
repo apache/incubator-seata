@@ -2,13 +2,15 @@
 create table T_DATA_TYPE_STRING_TEST
 (
     id             NUMBER,
-    CHAR_TEST      CHAR(20)    default '',
+    CHAR_TEST      CHAR(10)    default '',
     NCHAR_TEST     NCHAR(20)   default '',
-    VARCHAR_TEST   VARCHAR(20) default '',
-    VARCHAR2_TEST  VARCHAR2(20) default '',
-    NVARCHAR2_TEST NVARCHAR2(20) default '',
-    CLOB_TEST      CLOB        default ''
+    VARCHAR_TEST   VARCHAR(30) default '',
+    VARCHAR2_TEST  VARCHAR2(40) default '',
+    NVARCHAR2_TEST NVARCHAR2(50) default ''
 );
+--主键
+ALTER TABLE T_DATA_TYPE_STRING_TEST
+    ADD CONSTRAINT PK_T_DATA_TYPE_STRING_TEST PRIMARY KEY (id);
 
 -- number
 create table T_DATA_TYPE_NUMBER_TEST
@@ -24,6 +26,10 @@ create table T_DATA_TYPE_NUMBER_TEST
     NUMERIC_TEST   NUMERIC(38, 0),
     DEC_TEST       DEC(38, 0)
 );
+--主键
+ALTER TABLE T_DATA_TYPE_NUMBER_TEST
+    ADD CONSTRAINT PK_T_DATA_TYPE_NUMBER_TEST PRIMARY KEY (id);
+
 -- date
 create table T_DATA_TYPE_DATE_TEST
 (
@@ -43,11 +49,5 @@ create table T_DATA_TYPE_BINARY_TEST
     RAW_TEST   RAW
 );
 --主键
-ALTER TABLE T_DATA_TYPE_TEST
-    ADD CONSTRAINT PK_T_DATA_TYPE_TEST PRIMARY KEY (ID);
-
-create sequence SEQ_T_DATA_TYPE_TEST
-    minvalue 1
-    maxvalue 9999999999999999999
-    start with 1
-    increment by 1 cache 20;
+ALTER TABLE T_DATA_TYPE_NUMBER_TEST
+    ADD CONSTRAINT PK_T_DATA_TYPE_NUMBER_TEST PRIMARY KEY (id);
