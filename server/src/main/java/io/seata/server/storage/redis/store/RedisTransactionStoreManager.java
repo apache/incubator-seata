@@ -424,15 +424,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<String> statusKeys = convertStatusKeys(statuses);
 
         Map<String, Long> targetMap = calculateStatuskeysHasData(statusKeys);
-        int limit = resetLogQueryLimit(targetMap);
+        long limit = resetLogQueryLimit(targetMap);
         if (targetMap.size() == 0 || logQueryLimit <= 0) {
             return globalSessions;
         }
         // totalCount
-        final Long totalCount = countByClobalSesisons(statuses);
-
+        final long totalCount = Math.min(logQueryLimit, countByClobalSesisons(statuses));
         List<List<String>> list = new ArrayList<>();
-        dogetXidsForTargetMap(targetMap, 0, limit - 1, logQueryLimit, totalCount, list);
+        dogetXidsForTargetMapRecursive(targetMap, 0L, limit - 1, totalCount, list);
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(Collection::stream).collect(Collectors.toList());
             xids.parallelStream().forEach(xid -> {
@@ -451,10 +450,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param targetMap
      * @return
      */
-    private int resetLogQueryLimit(Map<String, Long> targetMap) {
-        int resetLimitQuery = logQueryLimit;
+    private long resetLogQueryLimit(Map<String, Long> targetMap) {
+        long resetLimitQuery = logQueryLimit;
         if (targetMap.size() > 1) {
-            int size = targetMap.size();
+            long size = targetMap.size();
             resetLimitQuery = (logQueryLimit / size) == 0 ? 1 : (logQueryLimit / size);
         }
         return resetLimitQuery;
@@ -699,14 +698,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return statusKeys;
     }
 
-    private void dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end, int logQueryLimit,
+    private void dogetXidsForTargetMapRecursive(Map<String, Long> targetMap, long start, long end,
         long totalCount, List<List<String>> listList) {
 
         long total = listList.stream().mapToLong(value -> value.size()).sum();
 
-        if (total >= logQueryLimit) {
-            return;
-        }
         if (total >= totalCount) {
             return;
         }
@@ -717,30 +713,37 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (String key : targetMap.keySet()) {
-                final List<String> list = jedis.lrange(key, start, end);
                 final long sum = listList.stream().mapToLong(value -> value.size()).sum();
-                if (list.size() > 0 && sum < logQueryLimit) {
+                final long diffCount = totalCount - sum;
+                List<String> list;
+                if (end - start >= diffCount) {
+                    long endNew = end - diffCount;
+                    list = jedis.lrange(key, start, endNew);
+                } else {
+                    list = jedis.lrange(key, start, end);
+                }
+                if (list.size() > 0 && sum < totalCount) {
                     listList.add(list);
                 }
             }
         }
-        int startNew = end + 1;
-        int endNew = startNew + end;
-        dogetXidsForTargetMap(targetMap, startNew, endNew, logQueryLimit, totalCount, listList);
+        long startNew = end + 1;
+        long endNew = startNew + end - start;
+        dogetXidsForTargetMapRecursive(targetMap, startNew, endNew, totalCount, listList);
     }
 
     private List<List<String>> dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end,
-        int logQueryLimit) {
+        int pageSize) {
         List<List<String>> listList = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (String key : targetMap.keySet()) {
                 final List<String> list = jedis.lrange(key, start, end);
                 final long sum = listList.stream().mapToLong(value -> value.size()).sum();
-                if (list.size() > 0 && sum < logQueryLimit) {
+                if (list.size() > 0 && sum < pageSize) {
                     listList.add(list);
                 } else {
                     start = 0;
-                    end = logQueryLimit - 1;
+                    end = pageSize - 1;
                 }
             }
         }
