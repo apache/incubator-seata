@@ -13,9 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.param;
+package io.seata.server.console.param;
 
 import java.io.Serializable;
+
+import io.seata.console.param.BaseParam;
 
 /**
  * @description: Global lock param
@@ -41,6 +43,14 @@ public class GlobalLockParam extends BaseParam implements Serializable {
      * the branch id
      */
     private String branchId;
+    /**
+     * the primary Key
+     */
+    private String pk;
+    /**
+     * the resourceId
+     */
+    private String resourceId;
 
     public String getTransactionId() {
         return transactionId;
@@ -74,6 +84,22 @@ public class GlobalLockParam extends BaseParam implements Serializable {
         this.tableName = tableName;
     }
 
+    public String getPk() {
+        return pk;
+    }
+
+    public void setPk(String pk) {
+        this.pk = pk;
+    }
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
     @Override
     public String toString() {
         return "GlobalLockParam{" +
@@ -81,6 +107,8 @@ public class GlobalLockParam extends BaseParam implements Serializable {
                 ", tableName='" + tableName + '\'' +
                 ", transactionId='" + transactionId + '\'' +
                 ", branchId='" + branchId + '\'' +
+                ", pk='" + pk + '\'' +
+                ", resourceId='" + resourceId + '\'' +
                 '}';
     }
 }

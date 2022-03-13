@@ -13,19 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.result;
+package io.seata.console.result;
 
 import java.io.Serializable;
 import java.util.List;
 
-import io.seata.common.exception.FrameworkErrorCode;
-
+import io.seata.console.param.BaseParam;
 /**
  * The page result
+ *
  * @author: zhongxiang.wang
  * @author miaoxueyu
+ * @author doubleDimple
  */
-public class PageResult<T> extends Result<T>  implements Serializable {
+public class PageResult<T> extends Result<T> implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
 
     /**
@@ -84,12 +85,22 @@ public class PageResult<T> extends Result<T>  implements Serializable {
         );
     }
 
-    public static <T> PageResult<T> failure(String code, String msg) {
-        return new PageResult<>(code, msg);
+    public PageResult(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
+        super(SUCCESS_CODE, SUCCESS_MSG);
+        this.total = total;
+        this.pageNum = pageNum;
+        this.pageSize = pageSize;
+        this.data = data;
+
+        if (total % pageSize == 0) {
+            this.pages = total / pageSize;
+        } else {
+            this.pages = total / pageSize + 1;
+        }
     }
 
-    public static <T> PageResult<T> failure(FrameworkErrorCode errorCode) {
-        return new PageResult<>(errorCode.getErrCode(), errorCode.getErrMessage());
+    public static <T> PageResult<T> failure(String code, String msg) {
+        return new PageResult<>(code, msg);
     }
 
     public static <T> PageResult<T> success() {
@@ -98,6 +109,19 @@ public class PageResult<T> extends Result<T>  implements Serializable {
 
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pages, pageNum, pageSize);
+    }
+    public static <T> PageResult<T> success(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
+        return new PageResult<>(data, total, pageNum, pageSize);
+    }
+
+    public static void checkPage(BaseParam param) {
+        if (param.getPageNum() <= 0) {
+            param.setPageNum(1);
+        }
+
+        if (param.getPageSize() <= 0) {
+            param.setPageSize(20);
+        }
     }
 
     public Integer getTotal() {
