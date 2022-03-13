@@ -266,8 +266,8 @@ public class SessionStoreTest {
             BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
             Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
 
-            // Lock is held by session in CommitRetrying status
-            Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+            // CommitRetrying status will never hold the lock
+            Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
             //clear
             reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
