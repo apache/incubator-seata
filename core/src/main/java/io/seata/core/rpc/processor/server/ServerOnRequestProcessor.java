@@ -34,7 +34,6 @@ import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.constants.RpcMessageConstants.HeapMapKey;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
