@@ -193,7 +193,7 @@ public class SessionHelper {
     }
 
     /**
-     * post begin event
+     * post session event
      *
      * @param globalSession the global session
      */
