@@ -42,7 +42,6 @@ import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.console.service.GlobalSessionService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 

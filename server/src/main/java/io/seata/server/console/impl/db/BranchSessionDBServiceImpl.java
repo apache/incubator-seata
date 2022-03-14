@@ -35,9 +35,7 @@ import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.server.console.service.BranchSessionService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
