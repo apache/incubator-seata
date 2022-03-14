@@ -438,6 +438,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
+                    SessionHelper.endRollbackFailed(rollbackingSession);
+
                     // rollback retry timeout event
                     SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
 
@@ -495,7 +497,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     /**
      * Handle async committing.
-     * 
+     *
      * @param asyncCommittingSessions
      */
     protected void handleAsyncCommitting(Collection<GlobalSession> asyncCommittingSessions) {
