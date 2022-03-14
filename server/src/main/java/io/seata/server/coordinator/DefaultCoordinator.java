@@ -68,7 +68,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.common.Constants.ASYNC_OR_RETRY_COMMITTING;
+import static io.seata.common.Constants.ASYNC_COMMITTING;
+import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
@@ -138,23 +139,25 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
     private final ScheduledThreadPoolExecutor retryRollbacking =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("RetryRollbacking", 1));
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_ROLLBACKING, 1));
 
-    private final ScheduledThreadPoolExecutor asyncOrRetryCommitting =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncOrRetryCommitting", 1));
+    private final ScheduledThreadPoolExecutor retryCommitting =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_COMMITTING, 1));
+
+    private final ScheduledThreadPoolExecutor asyncCommitting =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(ASYNC_COMMITTING, 1));
 
     private final ScheduledThreadPoolExecutor timeoutCheck =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("TxTimeoutCheck", 1));
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(TX_TIMEOUT_CHECK, 1));
 
     private final ScheduledThreadPoolExecutor undoLogDelete =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("UndoLogDelete", 1));
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(UNDOLOG_DELETE, 1));
 
-    private final GlobalStatus[] rollbackingStatuses =
-        new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
-            GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking};
+    private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
+        GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking};
 
     private final GlobalStatus[] retryCommittingStatuses =
-        new GlobalStatus[] {GlobalStatus.AsyncCommitting, GlobalStatus.Committing, GlobalStatus.CommitRetrying};
+        new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying};
 
     private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
@@ -361,6 +364,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
+                    SessionHelper.endRollbackFailed(rollbackingSession);
+
                     // rollback retry timeout event
                     SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
 
@@ -413,8 +418,24 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         });
     }
 
-    private boolean isRetryTimeout(long now, long timeout, long beginTime) {
-        return timeout >= ALWAYS_RETRY_BOUNDARY && now - beginTime > timeout;
+    /**
+     * Handle async committing.
+     */
+    protected void handleAsyncCommitting() {
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting);
+        Collection<GlobalSession> asyncCommittingSessions =
+                SessionHolder.getAsyncCommittingSessionManager().findGlobalSessions(sessionCondition);
+        if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
+            return;
+        }
+        SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
+            try {
+                asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+                core.doGlobalCommit(asyncCommittingSession, true);
+            } catch (TransactionException ex) {
+                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
+            }
+        });
     }
 
     /**
@@ -443,6 +464,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
     }
 
+    private boolean isRetryTimeout(long now, long timeout, long beginTime) {
+        return timeout >= ALWAYS_RETRY_BOUNDARY && now - beginTime > timeout;
+    }
+
     /**
      * Init.
      */
@@ -451,9 +476,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             () -> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking), 0,
             ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        asyncOrRetryCommitting.scheduleAtFixedRate(
-            () -> SessionHolder.distributedLockAndExecute(ASYNC_OR_RETRY_COMMITTING, this::handleRetryCommitting), 0,
+        retryCommitting.scheduleAtFixedRate(
+            () -> SessionHolder.distributedLockAndExecute(RETRY_COMMITTING, this::handleRetryCommitting), 0,
             COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+
+        asyncCommitting.scheduleAtFixedRate(
+            () -> SessionHolder.distributedLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting), 0,
+            ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(
             () -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck), 0,
@@ -487,13 +516,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     public void destroy() {
         // 1. first shutdown timed task
         retryRollbacking.shutdown();
-        asyncOrRetryCommitting.shutdown();
+        retryCommitting.shutdown();
         timeoutCheck.shutdown();
         undoLogDelete.shutdown();
         branchRemoveExecutor.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            asyncOrRetryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);

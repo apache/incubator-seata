@@ -94,8 +94,14 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void addGlobalSession(GlobalSession session) throws TransactionException {
-        super.addGlobalSession(session);
-        CollectionUtils.computeIfAbsent(sessionMap, session.getXid(), k -> session);
+        CollectionUtils.computeIfAbsent(sessionMap, session.getXid(), k -> {
+            try {
+                super.addGlobalSession(session);
+            } catch (TransactionException e) {
+                LOGGER.error("addGlobalSession fail, msg: {}", e.getMessage());
+            }
+            return session;
+        });
     }
 
     @Override

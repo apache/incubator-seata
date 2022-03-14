@@ -132,14 +132,9 @@ public interface Constants {
     String RETRY_ROLLBACKING = "RetryRollbacking";
 
     /**
-     * The constant HANDLE_ALL_SESSION
+     * The constant RETRY_COMMITTING
      */
-    String HANDLE_ALL_SESSION = "HandleAllSession";
-
-    /**
-     * The constant ASYNC_OR_RETRY_COMMITTING
-     */
-    String ASYNC_OR_RETRY_COMMITTING = "AsyncOrRetryCommitting";
+    String RETRY_COMMITTING = "RetryCommitting";
 
     /**
      * The constant ASYNC_COMMITTING

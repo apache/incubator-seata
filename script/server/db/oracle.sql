@@ -56,6 +56,7 @@ CREATE TABLE lock_table
 
 comment on column lock_table.status is '0:locked ,1:rollbacking';
 CREATE INDEX idx_branch_id ON lock_table (branch_id);
+CREATE INDEX idx_xid_and_branch_id ON lock_table (xid, branch_id);
 CREATE INDEX idx_status ON lock_table (status);
 
 CREATE TABLE distributed_lock (
@@ -65,6 +66,7 @@ CREATE TABLE distributed_lock (
     PRIMARY KEY (lock_key)
 );
 
-INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('AsyncOrRetryCommitting', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('AsyncCommitting', ' ', 0);
+INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
 INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
 INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
