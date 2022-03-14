@@ -383,7 +383,7 @@ public class FileSessionManagerTest {
     public void onBeginTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -399,7 +399,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -417,7 +417,7 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
             sessionManager.onBranchStatusChange(globalSession, branchSession, BranchStatus.PhaseTwo_Committed);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -434,7 +434,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -452,7 +452,7 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
             sessionManager.onRemoveBranch(globalSession, branchSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -468,7 +468,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onClose(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -483,7 +483,7 @@ public class FileSessionManagerTest {
     public void onEndTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 

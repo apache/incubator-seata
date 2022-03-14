@@ -121,7 +121,7 @@ public class SagaCore extends AbstractCore {
                 case PhaseOne_Failed:
                     LOGGER.error("By [{}], finish SAGA global [{}]", branchStatus, globalSession.getXid());
                     SessionHelper.removeAllBranch(globalSession, !retrying);
-                    globalSession.changeStatus(GlobalStatus.Finished);
+                    globalSession.changeGlobalStatus(GlobalStatus.Finished);
                     globalSession.end();
                     return false;
                 case PhaseTwo_CommitFailed_Unretryable:
@@ -137,11 +137,10 @@ public class SagaCore extends AbstractCore {
                 default:
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
-                        return false;
                     } else {
                         LOGGER.error("Failed to commit SAGA global[{}], will retry later.", globalSession.getXid());
-                        return false;
                     }
+                    return false;
             }
         } catch (Exception ex) {
             LOGGER.error("Failed to commit global[" + globalSession.getXid() + "]", ex);
@@ -203,7 +202,7 @@ public class SagaCore extends AbstractCore {
             SessionHelper.endRollbacked(globalSession);
             LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
         } else {
-            globalSession.changeStatus(globalStatus);
+            globalSession.changeGlobalStatus(globalStatus);
             LOGGER.info("Global[{}] reporting is successfully done. status[{}]", globalSession.getXid(), globalSession.getStatus());
 
             if (GlobalStatus.RollbackRetrying.equals(globalStatus)

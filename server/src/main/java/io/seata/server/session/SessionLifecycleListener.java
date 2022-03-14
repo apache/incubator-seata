@@ -86,5 +86,13 @@ public interface SessionLifecycleListener {
      * @param globalSession the global session
      * @throws TransactionException the transaction exception
      */
-    void onEnd(GlobalSession globalSession) throws TransactionException;
+    void onSuccessEnd(GlobalSession globalSession) throws TransactionException;
+
+    /**
+     * On fail end.
+     *
+     * @param globalSession the global session
+     * @throws TransactionException the transaction exception
+     */
+    void onFailEnd(GlobalSession globalSession) throws TransactionException;
 }
