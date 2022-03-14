@@ -26,11 +26,13 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.PageUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.server.console.vo.GlobalSessionVO;
@@ -55,12 +57,14 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
-    @Value("#{environment.getProperty('seata.store.db.global-table')}")
-    private String globalTable;
-    @Value("#{environment.getProperty('seata.store.db.db-type')}")
-    private String dbType;
-    @Value("#{environment.getProperty('seata.store.db.datasource')}")
-    private String dbDataSource;
+    private String globalTable = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_GLOBAL_TABLE, null);
+
+    private final String dbType = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_TYPE, null);
+
+    private final String dbDataSource = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_DATASOURCE_TYPE, null);
 
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;

@@ -24,10 +24,12 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
@@ -35,6 +37,7 @@ import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.server.console.service.BranchSessionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,12 +51,14 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 public class BranchSessionDBServiceImpl implements BranchSessionService {
 
-    @Value("#{environment.getProperty('seata.store.db.branch-table')}")
-    private String branchTable;
-    @Value("#{environment.getProperty('seata.store.db.db-type')}")
-    private String dbType;
-    @Value("#{environment.getProperty('seata.store.db.datasource')}")
-    private String dbDataSource;
+    private final String branchTable = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_BRANCH_TABLE, null);
+
+    private final String dbType = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_TYPE, null);
+
+    private final String dbDataSource = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_DATASOURCE_TYPE, null);
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {

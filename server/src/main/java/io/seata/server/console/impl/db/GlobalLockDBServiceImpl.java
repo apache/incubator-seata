@@ -24,8 +24,10 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.common.util.IOUtil;
@@ -51,12 +53,14 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("#{'db'.equals('${lockMode}')}")
 public class GlobalLockDBServiceImpl implements GlobalLockService {
 
-    @Value("#{environment.getProperty('seata.store.db.lock-table')}")
-    private String lockTable;
-    @Value("#{environment.getProperty('seata.store.db.db-type')}")
-    private String dbType;
-    @Value("#{environment.getProperty('seata.store.db.datasource')}")
-    private String dbDataSource;
+    private final String lockTable = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.LOCK_DB_TABLE, null);
+
+    private final String dbType = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_TYPE, null);
+
+    private final String dbDataSource = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.STORE_DB_DATASOURCE_TYPE, null);
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
