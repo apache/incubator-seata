@@ -16,16 +16,13 @@
 package io.seata.rm.datasource;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * column utils
@@ -265,4 +262,5 @@ public final class ColumnUtils {
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
     }
+
 }
