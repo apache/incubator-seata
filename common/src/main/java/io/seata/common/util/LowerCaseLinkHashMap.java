@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
@@ -109,7 +110,7 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
     @Override
     public Set<String> keySet() {
-        return lowerKeyToOriginMap.keySet();
+        return lowerKeyToOriginMap.values().stream().collect(Collectors.toSet());
     }
 
     @Override
@@ -202,14 +203,5 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
     @Override
     public int hashCode() {
         return Objects.hash(targetMap);
-    }
-
-    /**
-     * Get the lowerKeyToOriginMap
-     *
-     * @return the lowerKeyToOriginMap
-     */
-    public Map getOriginMap() {
-        return lowerKeyToOriginMap;
     }
 }

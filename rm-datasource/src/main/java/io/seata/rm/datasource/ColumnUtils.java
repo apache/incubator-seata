@@ -265,13 +265,4 @@ public final class ColumnUtils {
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
                 StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
     }
-
-    public static String parseColumn(Map<String, ColumnMeta> allColumns, String column, String dbType) {
-        if (isMysqlSeries(dbType)) {
-            return addEscape(column, dbType, ColumnUtils.Escape.MYSQL);
-        }
-            Map<String, String> originMap = ((LowerCaseLinkHashMap<ColumnMeta>) allColumns).getOriginMap();
-            return addEscape(originMap.get(column), dbType, Escape.STANDARD);
-    }
-
 }

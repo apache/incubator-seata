@@ -19,13 +19,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
@@ -78,9 +76,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
-        Map<String, ColumnMeta> allColumns = tableMeta.getAllColumns();
-        for (String column : allColumns.keySet()) {
-            selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.parseColumn(allColumns, column, getDbType())));
+        for (String column : tableMeta.getAllColumns().keySet()) {
+            selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
         }
         return selectSQLAppender.toString();
     }
