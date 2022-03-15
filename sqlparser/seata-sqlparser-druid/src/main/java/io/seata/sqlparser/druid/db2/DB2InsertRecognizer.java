@@ -147,4 +147,9 @@ public class DB2InsertRecognizer extends BaseDB2Recognizer implements SQLInsertR
     public List<String> getDuplicateKeyUpdate() {
         return null;
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

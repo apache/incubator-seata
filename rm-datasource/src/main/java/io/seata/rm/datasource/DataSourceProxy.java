@@ -256,7 +256,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
     }
 
-    private String initDB2ResourceId() {
+    private void initDB2ResourceId() {
         String schema = "";
         try {
             schema = targetDataSource.getConnection().getSchema();

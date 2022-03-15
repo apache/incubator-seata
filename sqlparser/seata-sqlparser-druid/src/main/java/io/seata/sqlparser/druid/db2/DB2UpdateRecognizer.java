@@ -143,4 +143,9 @@ public class DB2UpdateRecognizer extends BaseDB2Recognizer implements SQLUpdateR
         }
         return sb.toString();
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

@@ -108,7 +108,7 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
             }
         }
         if (StringUtils.isBlank(autoColumnName)) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("Auto-increment column should not be blank");
         }
 
         ResultSet genKeys = statementProxy.getGeneratedKeys();

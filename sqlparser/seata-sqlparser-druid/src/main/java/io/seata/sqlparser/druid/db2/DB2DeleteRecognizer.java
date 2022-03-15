@@ -105,4 +105,8 @@ public class DB2DeleteRecognizer extends BaseDB2Recognizer implements SQLDeleteR
     }
 
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

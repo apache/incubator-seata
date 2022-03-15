@@ -104,4 +104,9 @@ public class DB2SelectForUpdateRecognizer extends BaseDB2Recognizer implements S
         visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }
