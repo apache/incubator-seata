@@ -167,4 +167,9 @@ public class SqlServerInsertRecognizer extends BaseSqlServerRecognizer implement
         visitor.visit(ast.getTableSource());
         return sb.toString();
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

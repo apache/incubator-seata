@@ -92,6 +92,9 @@ public class DataSourceProxyTest {
         Field dbTypeFieldForSqlServer = proxyForSqlServer.getClass().getDeclaredField("dbType");
         dbTypeFieldForSqlServer.setAccessible(true);
         dbTypeFieldForSqlServer.set(proxyForSqlServer, JdbcConstants.SQLSERVER);
+        Field resourceIdForSqlServer = proxyForSqlServer.getClass().getDeclaredField("resourceId");
+        resourceIdForSqlServer.setAccessible(true);
+        resourceIdForSqlServer.set(proxyForSqlServer, null);
         Assertions.assertEquals("jdbc:mock:xxx;database=test", proxyForSqlServer.getResourceId());
     }
 }

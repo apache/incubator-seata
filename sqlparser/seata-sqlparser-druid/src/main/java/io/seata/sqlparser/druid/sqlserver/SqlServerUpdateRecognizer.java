@@ -188,4 +188,9 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         return null;
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }
