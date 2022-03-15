@@ -50,9 +50,9 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected String targetSQL;
 
     /**
-     * The Cache for ResultSet
+     * The cache of scrollable generatedKeys
      */
-    protected CachedRowSet generatedKeysRowSet;
+    protected CachedRowSet scrollableGeneratedKeysCache;
 
     /**
      * Instantiates a new Abstract statement proxy.
@@ -255,7 +255,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
         if (JdbcConstants.DB2.equalsIgnoreCase(connectionProxy.getDbType())) {
             boolean refreshCacheIfNeed;
             try {
-                refreshCacheIfNeed = null == generatedKeysRowSet || !rs.isAfterLast();
+                refreshCacheIfNeed = null == scrollableGeneratedKeysCache || !rs.isAfterLast();
             } catch (SQLException e) {
                 /**
                  * error code when result set has been closed
@@ -269,14 +269,14 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
             }
 
             if (refreshCacheIfNeed) {
-                generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
-                generatedKeysRowSet.populate(rs);
+                scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
+                scrollableGeneratedKeysCache.populate(rs);
             }
         } else {
-            generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
-            generatedKeysRowSet.populate(rs);
+            scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
+            scrollableGeneratedKeysCache.populate(rs);
         }
-        return generatedKeysRowSet;
+        return scrollableGeneratedKeysCache;
     }
 
     @Override

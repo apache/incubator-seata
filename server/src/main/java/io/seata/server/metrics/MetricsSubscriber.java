@@ -54,6 +54,9 @@ public class MetricsSubscriber {
         consumers.put(GlobalStatus.RollbackFailed, this::processGlobalStatusRollbackFailed);
         consumers.put(GlobalStatus.TimeoutRollbacked, this::processGlobalStatusTimeoutRollbacked);
         consumers.put(GlobalStatus.TimeoutRollbackFailed, this::processGlobalStatusTimeoutRollbackFailed);
+
+        consumers.put(GlobalStatus.CommitRetryTimeout, this::processGlobalStatusCommitRetryTimeout);
+        consumers.put(GlobalStatus.RollbackRetryTimeout, this::processGlobalStatusTimeoutRollbackRetryTimeout);
     }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
@@ -122,6 +125,20 @@ public class MetricsSubscriber {
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
+
+
+    private void processGlobalStatusCommitRetryTimeout(GlobalTransactionEvent event) {
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+    }
+
+    private void processGlobalStatusTimeoutRollbackRetryTimeout(GlobalTransactionEvent event) {
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+    }
+
 
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {

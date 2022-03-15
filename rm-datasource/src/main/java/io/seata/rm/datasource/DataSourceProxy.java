@@ -55,6 +55,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String jdbcUrl;
 
+    private String resourceId;
+
     private String dbType;
 
     private String userName;
@@ -105,10 +107,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcUtils.getDbType(jdbcUrl);
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
+            } else if (JdbcConstants.MARIADB.equals(dbType)) {
+                dbType = JdbcConstants.MYSQL;
             }
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
+        initResourceId();
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExcutor.scheduleAtFixedRate(() -> {
@@ -162,26 +167,56 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
+        if (resourceId == null) {
+            initResourceId();
+        }
+        return resourceId;
+    }
+
+    private void initResourceId() {
         if (JdbcConstants.POSTGRESQL.equals(dbType)) {
-            return getPGResourceId();
+            initPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
-            return getDefaultResourceId() + "/" + userName;
+            initDefaultResourceId();
+            resourceId = resourceId + "/" + userName;
+        } else if (JdbcConstants.MYSQL.equals(dbType)) {
+            initMysqlResourceId();
         } else if (JdbcConstants.DB2.equalsIgnoreCase(dbType)) {
-            return getDB2ResourceId();
+            initDB2ResourceId();
         } else {
-            return getDefaultResourceId();
+            initDefaultResourceId();
         }
     }
 
     /**
-     * get the default resource id
-     * @return resource id
+     * init the default resource id
      */
-    private String getDefaultResourceId() {
+    private void initDefaultResourceId() {
         if (jdbcUrl.contains("?")) {
-            return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
         } else {
-            return jdbcUrl;
+            resourceId = jdbcUrl;
+        }
+    }
+
+    /**
+     * prevent mysql url like
+     * jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.1:3306/seata
+     * it will cause the problem like
+     * 1.rm client is not connected
+     */
+    private void initMysqlResourceId() {
+        String startsWith = "jdbc:mysql:loadbalance://";
+        if (jdbcUrl.startsWith(startsWith)) {
+            String url;
+            if (jdbcUrl.contains("?")) {
+                url = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+            } else {
+                url = jdbcUrl;
+            }
+            resourceId = url.replace(",", "|");
+        } else {
+            initDefaultResourceId();
         }
     }
 
@@ -193,14 +228,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * it will cause the problem like
      * 1.get file lock fail
      * 2.error table meta cache
-     * @return resourceId
      */
-    private String getPGResourceId() {
+    private void initPGResourceId() {
         if (jdbcUrl.contains("?")) {
             StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
             StringBuilder paramsBuilder = new StringBuilder();
-            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
             String[] urlParams = paramUrl.split("&");
             for (String urlParam : urlParams) {
                 if (urlParam.contains("currentSchema")) {
@@ -216,20 +250,20 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 jdbcUrlBuilder.append("?");
                 jdbcUrlBuilder.append(paramsBuilder);
             }
-            return jdbcUrlBuilder.toString();
+            resourceId = jdbcUrlBuilder.toString();
         } else {
-            return jdbcUrl;
+            resourceId = jdbcUrl;
         }
     }
 
-    private String getDB2ResourceId() {
+    private String initDB2ResourceId() {
         String schema = "";
         try {
             schema = targetDataSource.getConnection().getSchema();
         } catch (SQLException e) {
             LOGGER.error(e.getMessage());
         }
-        return StringUtils.isBlank(schema) ? jdbcUrl : jdbcUrl + ":" + schema;
+        resourceId = StringUtils.isBlank(schema) ? jdbcUrl : jdbcUrl + ":" + schema;
     }
 
     @Override

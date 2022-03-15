@@ -180,7 +180,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             lastModifiedTime = System.currentTimeMillis();
             curFileTrxNum = FILE_TRX_NUM.incrementAndGet();
             if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0
-                    && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
+                && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
                 return saveHistory();
             }
         } catch (Exception exx) {
@@ -337,7 +337,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         try {
             currFileChannel.force(true);
         } catch (IOException e) {
-            LOGGER.error("fileChannel force error{}", e.getMessage(), e);
+            LOGGER.error("fileChannel force error: {}", e.getMessage(), e);
         }
         closeFile(currRaf);
     }
