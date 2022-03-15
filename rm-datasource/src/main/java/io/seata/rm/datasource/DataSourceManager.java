@@ -116,7 +116,7 @@ public class DataSourceManager extends AbstractResourceManager {
                                        String applicationData) throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException(String.format("resource: %s not found",resourceId));
         }
         try {
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);

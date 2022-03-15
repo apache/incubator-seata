@@ -88,10 +88,10 @@ public class TmNettyClientTest {
         Field optionsField = getDeclaredField(bootstrap, "options");
         optionsField.setAccessible(true);
         Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>)optionsField.get(bootstrap);
-        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.TCP_NODELAY)));
-        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
+        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.TCP_NODELAY));
+        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
         Assertions.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
-        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
+        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
         Assertions.assertEquals(153600, options.get(ChannelOption.SO_RCVBUF));
 
         Field channelFactoryField = getDeclaredField(bootstrap, "channelFactory");

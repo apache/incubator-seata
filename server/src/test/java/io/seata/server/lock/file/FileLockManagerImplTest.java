@@ -30,6 +30,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 
 /**
  * The type Default lock manager impl test.
@@ -91,7 +93,7 @@ public class FileLockManagerImplTest {
         branchSession.setBranchId(1L);
         branchSession.setTransactionId(transactionId);
         branchSession.setClientId("c1");
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKey);
         branchSession.setBranchType(BranchType.AT);

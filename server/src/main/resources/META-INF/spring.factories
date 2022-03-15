@@ -1,2 +1,2 @@
-org.springframework.boot.SpringApplicationRunListener=\
-io.seata.server.ServerApplicationRunListener
+org.springframework.context.ApplicationListener=\
+io.seata.server.ServerApplicationListener

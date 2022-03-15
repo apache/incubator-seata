@@ -377,7 +377,7 @@ public class XAModeTest2 {
         helperStat.close();
         helperConn.close();
 
-        if (JdbcUtils.MYSQL.equals(dbType)) {
+        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
             XAXid xaXid = XAXidBuilder.build(mockXid, mockBranchId);
             dataSourceProxyXA.forceClosePhysicalConnection(xaXid);
         }
@@ -610,7 +610,7 @@ public class XAModeTest2 {
     }
 
     private GlobalTransaction createGlobalTransaction() {
-        String vgroup = "my_test_tx_group";
+        String vgroup = "default_tx_group";
         GlobalTransactionScanner scanner = new GlobalTransactionScanner(vgroup);
         scanner.afterPropertiesSet();
 

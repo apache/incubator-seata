@@ -50,9 +50,9 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected String targetSQL;
 
     /**
-     * The Cache for ResultSet
+     * The cache of scrollable generatedKeys
      */
-    protected CachedRowSet generatedKeysRowSet;
+    protected CachedRowSet scrollableGeneratedKeysCache;
 
     /**
      * Instantiates a new Abstract statement proxy.
@@ -110,8 +110,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void close() throws SQLException {
         targetStatement.close();
-        //clean cache
-        clearCache();
+
     }
 
     @Override
@@ -253,16 +252,14 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
-        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(connectionProxy.getDbType())) {
-            if (null == generatedKeysRowSet || !rs.isAfterLast()) {
-                generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
-                generatedKeysRowSet.populate(rs);
-            }
-        } else {
-            generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
-            generatedKeysRowSet.populate(rs);
+        if (null == scrollableGeneratedKeysCache || !rs.isAfterLast()) {
+            //Conditions for flushing the cache:
+            //1.originally not cached
+            //2.the original ResultSet was not traversed, including executed repeatedly
+            scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
+            scrollableGeneratedKeysCache.populate(rs);
         }
-        return generatedKeysRowSet;
+        return scrollableGeneratedKeysCache;
     }
 
     @Override
@@ -304,12 +301,5 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return targetStatement.isWrapperFor(iface);
-    }
-
-    /**
-     * clean the resultSet cache
-     */
-    private void clearCache() {
-        generatedKeysRowSet = null;
     }
 }
