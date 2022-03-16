@@ -21,9 +21,9 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalSessionVO;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -90,11 +90,11 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
                 &&
                 // timeStart
-                (isNull(param.getTimeStart()) || param.getTimeStart().getTime() <= session.getBeginTime())
+                (isNull(param.getTimeStart()) || param.getTimeStart() <= session.getBeginTime())
 
                 &&
                 // timeEnd
-                (isNull(param.getTimeEnd()) || param.getTimeEnd().getTime() >= session.getBeginTime());
+                (isNull(param.getTimeEnd()) || param.getTimeEnd() >= session.getBeginTime());
 
         };
     }

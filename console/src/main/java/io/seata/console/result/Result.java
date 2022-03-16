@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.console.result;
+package io.seata.console.result;
 
 import java.io.Serializable;
 
@@ -39,7 +39,7 @@ public class Result<T>  implements Serializable {
     }
 
     public boolean isSuccess() {
-        return SUCCESS_CODE == this.code;
+        return SUCCESS_CODE.equals(this.code);
     }
 
     public String getCode() {
