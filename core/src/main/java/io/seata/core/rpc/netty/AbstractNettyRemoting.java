@@ -23,13 +23,11 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
-import io.seata.core.constants.RpcMessageConstants.HeapMapKey;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.Version;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.hook.RpcHook;
 import io.seata.core.rpc.processor.Pair;
@@ -241,7 +239,6 @@ public abstract class AbstractNettyRemoting implements Disposable {
         rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
-        rpcMessage.getHeadMap().put(HeapMapKey.VERSION_KEY, Version.getCurrent());
         return rpcMessage;
     }
 
