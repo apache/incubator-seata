@@ -37,6 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type Session store test.
  */
@@ -86,7 +88,7 @@ public class SessionStoreTest {
     public void testRestoredFromFile() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
 
@@ -147,7 +149,7 @@ public class SessionStoreTest {
     public void testRestoredFromFile2() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
@@ -168,7 +170,7 @@ public class SessionStoreTest {
     public void testRestoredFromFileAsyncCommitting() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
@@ -187,7 +189,7 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.AsyncCommitting);
+            globalSession.changeGlobalStatus(GlobalStatus.AsyncCommitting);
 
             lockManager.cleanAllLocks();
 
@@ -224,7 +226,7 @@ public class SessionStoreTest {
     public void testRestoredFromFileCommitRetry() throws Exception {
         try {
             SessionHolder.init("file");
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
@@ -243,9 +245,9 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.Committing);
+            globalSession.changeGlobalStatus(GlobalStatus.Committing);
             globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Retryable);
-            globalSession.changeStatus(GlobalStatus.CommitRetrying);
+            globalSession.changeGlobalStatus(GlobalStatus.CommitRetrying);
 
             lockManager.cleanAllLocks();
 
@@ -264,8 +266,8 @@ public class SessionStoreTest {
             BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
             Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
 
-            // Lock is held by session in CommitRetrying status
-            Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+            // CommitRetrying status will never hold the lock
+            Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
             //clear
             reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -285,7 +287,7 @@ public class SessionStoreTest {
         try {
             SessionHolder.init("file");
 
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
@@ -304,9 +306,9 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.Rollbacking);
+            globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
             globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_RollbackFailed_Retryable);
-            globalSession.changeStatus(GlobalStatus.RollbackRetrying);
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
 
             lockManager.cleanAllLocks();
 
@@ -346,7 +348,7 @@ public class SessionStoreTest {
         try {
             SessionHolder.init("file");
 
-            GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+            GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
@@ -365,12 +367,12 @@ public class SessionStoreTest {
 
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            globalSession.changeStatus(GlobalStatus.Rollbacking);
+            globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
             globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Unretryable);
             SessionHelper.endRollbackFailed(globalSession);
 
             // Lock is released.
-            Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+            Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
             lockManager.cleanAllLocks();
 

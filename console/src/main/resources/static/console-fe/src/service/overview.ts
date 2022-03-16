@@ -21,5 +21,5 @@ export async function fetchData():Promise<any> {
     method: 'get',
   });
 
-  return result;
+  return result.data;
 }

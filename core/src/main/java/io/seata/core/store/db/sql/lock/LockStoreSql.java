@@ -24,6 +24,15 @@ package io.seata.core.store.db.sql.lock;
 public interface LockStoreSql {
 
     /**
+     * Get all lock sql string.
+     *
+     * @param lockTable the lock table
+     * @param whereCondition where condition
+     * @return the string
+     */
+    String getAllLockSql(String lockTable, String whereCondition);
+
+    /**
      * Get insert lock sql string.
      *
      * @param lockTable the lock table
@@ -43,10 +52,10 @@ public interface LockStoreSql {
      * Get batch delete lock sql string.
      *
      * @param lockTable      the lock table
-     * @param paramPlaceHold the param place hold
+     * @param rowSize the size of rowkey
      * @return the string
      */
-    String getBatchDeleteLockSql(String lockTable, String paramPlaceHold);
+    String getBatchDeleteLockSql(String lockTable, int rowSize);
 
     /**
      * Get batch delete lock sql string.
@@ -60,10 +69,9 @@ public interface LockStoreSql {
      * Get batch delete lock sql string.
      *
      * @param lockTable      the lock table
-     * @param paramPlaceHold the param place hold
      * @return the string
      */
-    String getBatchDeleteLockSqlByBranchs(String lockTable, String paramPlaceHold);
+    String getBatchDeleteLockSqlByXid(String lockTable);
 
     /**
      * Get query lock sql string.
@@ -77,9 +85,17 @@ public interface LockStoreSql {
      * Get check lock sql string.
      *
      * @param lockTable      the lock table
-     * @param paramPlaceHold the param place hold
+     * @param rowSize the size of rowkey
      * @return the string
      */
-    String getCheckLockableSql(String lockTable, String paramPlaceHold);
+    String getCheckLockableSql(String lockTable, int rowSize);
+
+    /**
+     * get batch update status lock by global sql
+     *
+     * @param lockTable      the lock table
+     * @return the string
+     */
+    String getBatchUpdateStatusLockByGlobalSql(String lockTable) ;
 
 }

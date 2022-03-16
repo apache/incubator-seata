@@ -81,6 +81,8 @@ public interface StarterConstants {
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
 
+    String SESSION_PREFIX = SERVER_PREFIX + ".session";
+
     String REGEX_SPLIT_CHAR = ";";
 
 
@@ -90,5 +92,6 @@ public interface StarterConstants {
      * The following special keys need to be normalized.
      */
     String SPECIAL_KEY_GROUPLIST = "grouplist";
+    String SPECIAL_KEY_SERVICE = "service";
     String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
 }

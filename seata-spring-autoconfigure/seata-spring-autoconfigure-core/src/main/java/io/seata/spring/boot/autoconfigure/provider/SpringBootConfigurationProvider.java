@@ -16,54 +16,61 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
 
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.util.StringFormatUtils.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_SERVICE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
  * @author xingfudeshi@gmail.com
+ * @author funkye
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringBootConfigurationProvider.class);
+
     private static final String INTERCEPT_METHOD_PREFIX = "get";
+
+    private static final Map<String, Object> PROPERTY_BEAN_INSTANCE_MAP = new HashMap<>(64);
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration) Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
-            @Override
-            public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)
-                throws Throwable {
+        return (Configuration)Enhancer.create(originalConfiguration.getClass(),
+            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
-                    Object result = null;
-                    String rawDataId = (String) args[0];
-                    if (args.length == 1) {
-                        result = get(convertDataId(rawDataId));
-                    } else if (args.length == 2) {
-                        result = get(convertDataId(rawDataId), args[1]);
-                    } else if (args.length == 3) {
-                        result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
+                    Object result;
+                    String rawDataId = (String)args[0];
+                    result = originalConfiguration.getConfigFromSys(rawDataId);
+                    if (null == result) {
+                        if (args.length == 1) {
+                            result = get(convertDataId(rawDataId));
+                        } else {
+                            result = get(convertDataId(rawDataId), args[1]);
+                        }
                     }
                     if (result != null) {
-                        //If the return type is String,need to convert the object to string
+                        // If the return type is String,need to convert the object to string
                         if (method.getReturnType().equals(String.class)) {
                             return String.valueOf(result);
                         }
@@ -72,13 +79,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 }
 
                 return method.invoke(originalConfiguration, args);
-            }
-        });
-    }
-
-    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException, InstantiationException {
-        return get(dataId, defaultValue);
-
+            });
     }
 
     private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
@@ -89,24 +90,28 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException, InstantiationException {
+    private Object get(String dataId) throws IllegalAccessException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
-        ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
         Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         Object valueObject = null;
         if (propertyClass != null) {
             try {
-                Object propertyBean = applicationContext.getBean(propertyClass);
-                valueObject = getFieldValue(propertyBean, propertySuffix, dataId);
+                valueObject = getFieldValue(
+                    Objects.requireNonNull(PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
+                        try {
+                            return propertyClass.newInstance();
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            LOGGER.error("PropertyClass for prefix: [" + propertyPrefix
+                                + "] should not be null. error :" + e.getMessage(), e);
+                        }
+                        return null;
+                    })), propertySuffix, dataId);
             } catch (NoSuchBeanDefinitionException ignore) {
 
             }
         } else {
             throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
-        }
-        if (valueObject == null) {
-            valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
         }
 
         return valueObject;
@@ -122,19 +127,18 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @author xingfudeshi@gmail.com
      */
     private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
-        Object value = null;
-        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields()).filter(
-            f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
+        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
+            .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
-            field.setAccessible(true);
-            value = field.get(object);
-            if (value instanceof Map) {
-                String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
-                value = ((Map) value).get(key);
+            if (Objects.equals(field.getType(), Map.class)) {
+                return getConfig(dataId, null, String.class);
             }
+            field.setAccessible(true);
+            Object defaultValue = field.get(object);
+            return getConfig(dataId, defaultValue, field.getType());
         }
-        return value;
+        return null;
     }
 
     /**
@@ -145,8 +149,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      */
     private String convertDataId(String rawDataId) {
         if (rawDataId.endsWith(SPECIAL_KEY_GROUPLIST)) {
-            String suffix = StringUtils.removeEnd(rawDataId, DOT + SPECIAL_KEY_GROUPLIST);
-            //change the format of default.grouplist to grouplist.default
+            String suffix = StringUtils.removeStart(StringUtils.removeEnd(rawDataId, DOT + SPECIAL_KEY_GROUPLIST),
+                SPECIAL_KEY_SERVICE + DOT);
+            // change the format of default.grouplist to grouplist.default
             return SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT + suffix;
         }
         return SEATA_PREFIX + DOT + rawDataId;
@@ -183,4 +188,22 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         }
         return StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
     }
+
+    /**
+     * get spring config
+     * @param dataId data id
+     * @param defaultValue default value
+     * @param type type
+     * @return object
+     */
+    private Object getConfig(String dataId, Object defaultValue, Class<?> type) {
+        ConfigurableEnvironment environment =
+            (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        Object value = environment.getProperty(dataId, type);
+        if (value == null) {
+            value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), type);
+        }
+        return value != null ? value : defaultValue;
+    }
+
 }
