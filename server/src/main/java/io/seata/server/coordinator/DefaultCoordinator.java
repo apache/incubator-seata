@@ -231,8 +231,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext)
             throws TransactionException {
-        response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
-                request.getTransactionName(), request.getTimeout()));
+        String xid = core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
+                request.getTransactionName(), request.getTimeout());
+        response.setXid(xid);
+        rpcContext.setXid(xid);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction applicationId: {},transactionServiceGroup: {}, transactionName: {},timeout:{},xid:{}",
                     rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout(), response.getXid());
@@ -271,6 +273,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
                                     RpcContext rpcContext) throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
+        rpcContext.setXid(request.getXid());
         response.setBranchId(
                 core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
                         request.getXid(), request.getApplicationData(), request.getLockKey()));

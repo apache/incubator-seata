@@ -52,6 +52,9 @@ public class RpcContext {
 
     private Set<String> resourceSets;
 
+    //xid设置在这里是不是不太好？？，和channel的生命周期不是强绑定的
+    private String xid;
+
     /**
      * id
      */
@@ -318,6 +321,22 @@ public class RpcContext {
      */
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    /**
+     * Gets the xid,the value will be null before transaction begin for tm channel or branch register for rm channel
+     * @return the get xid
+     */
+    public String getXid() {
+        return xid;
+    }
+
+    /**
+     * Sets xid after global transaction begin for tm channel or branch register for rm channel
+     * @param xid the transaction xid
+     */
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
     @Override

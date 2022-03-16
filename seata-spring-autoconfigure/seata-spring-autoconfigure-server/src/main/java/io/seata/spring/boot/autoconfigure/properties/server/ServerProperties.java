@@ -35,6 +35,7 @@ public class ServerProperties {
     private Boolean enableCheckAuth = true;
     private Integer retryDeadThreshold = 130000;
     private Integer servicePort;
+    private Boolean enableRollbackWhenDisconnect = false;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -87,6 +88,15 @@ public class ServerProperties {
 
     public ServerProperties setServicePort(Integer servicePort) {
         this.servicePort = servicePort;
+        return this;
+    }
+
+    public Boolean getEnableRollbackWhenDisconnect() {
+        return enableRollbackWhenDisconnect;
+    }
+
+    public ServerProperties setEnableRollbackWhenDisconnect(Boolean enableRollbackWhenDisconnect) {
+        this.enableRollbackWhenDisconnect = enableRollbackWhenDisconnect;
         return this;
     }
 }
