@@ -438,6 +438,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
+                    SessionHelper.endRollbackFailed(rollbackingSession);
+
                     // rollback retry timeout event
                     SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
 
@@ -495,7 +497,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     /**
      * Handle async committing.
-     * 
+     *
      * @param asyncCommittingSessions
      */
     protected void handleAsyncCommitting(Collection<GlobalSession> asyncCommittingSessions) {
@@ -576,6 +578,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
+        undoLogDelete.shutdown();
         branchRemoveExecutor.shutdown();
         try {
             handleAllSession.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
@@ -583,6 +586,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 

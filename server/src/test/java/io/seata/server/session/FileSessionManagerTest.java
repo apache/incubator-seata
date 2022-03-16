@@ -242,9 +242,26 @@ public class FileSessionManagerTest {
             Collection<GlobalSession> expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition);
             Assertions.assertNotNull(expectedGlobalSessions);
             Assertions.assertEquals(2, expectedGlobalSessions.size());
+
+            SessionCondition sessionCondition1 = new SessionCondition(globalSessions.get(0).getXid());
+            expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition1);
+            Assertions.assertNotNull(expectedGlobalSessions);
+            Assertions.assertEquals(1, expectedGlobalSessions.size());
+
+            sessionCondition1.setTransactionId(globalSessions.get(0).getTransactionId());
+            expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition1);
+            Assertions.assertNotNull(expectedGlobalSessions);
+            Assertions.assertEquals(1, expectedGlobalSessions.size());
+
+            sessionCondition1.setStatuses(globalSessions.get(0).getStatus());
+            expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition1);
+            Assertions.assertNotNull(expectedGlobalSessions);
+            Assertions.assertEquals(1, expectedGlobalSessions.size());
+
             for (GlobalSession globalSession : globalSessions) {
                 sessionManager.removeGlobalSession(globalSession);
             }
+
         }
     }
 
@@ -366,7 +383,7 @@ public class FileSessionManagerTest {
     public void onBeginTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -382,7 +399,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -400,7 +417,7 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
             sessionManager.onBranchStatusChange(globalSession, branchSession, BranchStatus.PhaseTwo_Committed);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -417,7 +434,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -435,7 +452,7 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
             sessionManager.onRemoveBranch(globalSession, branchSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -451,7 +468,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onClose(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -466,7 +483,7 @@ public class FileSessionManagerTest {
     public void onEndTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
