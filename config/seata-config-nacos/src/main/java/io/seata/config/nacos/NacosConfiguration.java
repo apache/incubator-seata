@@ -203,9 +203,9 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static Properties getConfigProperties() {
         Properties properties = new Properties();
-        if (System.getProperty(ENDPOINT_KEY) != null) {
-            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
-        } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+        System.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, "false");
+        System.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, "false");
+        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());

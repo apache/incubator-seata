@@ -144,9 +144,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     }
                     subscribe(clusterName, event -> {
                         List<Instance> instances = ((NamingEvent) event).getInstances();
-                        if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                            CLUSTER_ADDRESS_MAP.remove(clusterName);
-                        } else if (!CollectionUtils.isEmpty(instances)) {
+                        if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
+                            LOGGER.info("receive empty server list,cluster:{}",clusterName);
+                        } else {
                             List<InetSocketAddress> newAddressList = instances.stream()
                                     .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
                                     .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
@@ -184,9 +184,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     private static Properties getNamingProperties() {
         Properties properties = new Properties();
-        if (System.getProperty(ENDPOINT_KEY) != null) {
-            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
-        } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+        System.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, "false");
+        System.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, "false");
+        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
