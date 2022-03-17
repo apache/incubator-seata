@@ -170,9 +170,16 @@ public class DefaultRemotingParser {
         }
         remotingServiceMap.put(beanName, remotingBeanDesc);
 
-        Class<?> interfaceClass = remotingBeanDesc.getInterfaceClass();
-        Method[] methods = interfaceClass.getMethods();
         if (remotingParser.isService(bean, beanName)) {
+            Class<?> interfaceClass;
+            if (remotingBeanDesc.getInterfaceClass() == null) {
+                // LocalTCC annotation is marked on the impl class
+                interfaceClass = remotingBeanDesc.getTargetBean().getClass();
+            } else {
+                // LocalTCC annotation is marked on the interface class
+                interfaceClass = remotingBeanDesc.getInterfaceClass();
+            }
+            Method[] methods = interfaceClass.getMethods();
             try {
                 //service bean, registry resource
                 Object targetBean = remotingBeanDesc.getTargetBean();

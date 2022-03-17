@@ -125,7 +125,13 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
             if (remotingDesc == null) {
                 interfaceType = getProxyInterface(invocation.getThis());
             } else {
-                interfaceType = remotingDesc.getInterfaceClass();
+                if (remotingDesc.getInterfaceClass() == null) {
+                    // LocalTCC annotation is marked on the impl class
+                    interfaceType = remotingDesc.getTargetBean().getClass();
+                } else {
+                    // LocalTCC annotation is marked on the interface class
+                    interfaceType = remotingDesc.getInterfaceClass();
+                }
             }
             if (interfaceType == null && remotingDesc != null && remotingDesc.getInterfaceClassName() != null) {
                 interfaceType = Class.forName(remotingDesc.getInterfaceClassName(), true,

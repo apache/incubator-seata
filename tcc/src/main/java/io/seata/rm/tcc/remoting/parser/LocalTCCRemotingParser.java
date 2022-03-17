@@ -49,6 +49,12 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         remotingDesc.setReference(true);
         remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
+        // check if LocalTCC annotation is marked on the implementation class
+        if (classType.isAnnotationPresent(LocalTCC.class)) {
+            remotingDesc.setTargetBean(bean);
+            return remotingDesc;
+        }
+        // check if LocalTCC annotation is marked on the interface
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
         for (Class<?> interClass : interfaceClasses) {
             if (interClass.isAnnotationPresent(LocalTCC.class)) {
@@ -67,7 +73,7 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
     }
 
     /**
-     * Determine whether there is an annotation {@link LocalTCC}
+     * Determine whether there is an annotation on interface or impl {@link LocalTCC}
      * @param bean the bean
      * @return boolean
      */
@@ -79,6 +85,6 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
                 return true;
             }
         }
-        return false;
+        return classType.isAnnotationPresent(LocalTCC.class);
     }
 }
