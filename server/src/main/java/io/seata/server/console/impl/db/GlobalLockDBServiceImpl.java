@@ -27,18 +27,21 @@ import javax.sql.DataSource;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.ConfigurationFactory;
-import io.seata.console.result.PageResult;
-import io.seata.server.console.param.GlobalLockParam;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.PageUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.console.result.PageResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
-import io.seata.server.console.vo.GlobalLockVO;
+import io.seata.server.console.param.GlobalLockParam;
 import io.seata.server.console.service.GlobalLockService;
+import io.seata.server.console.vo.GlobalLockVO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+
+import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 
 
 /**
@@ -52,14 +55,25 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("#{'db'.equals('${lockMode}')}")
 public class GlobalLockDBServiceImpl implements GlobalLockService {
 
-    private final String lockTable = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.LOCK_DB_TABLE, null);
+    private String lockTable;
 
-    private final String dbType = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.STORE_DB_TYPE, null);
+    private String dbType;
 
-    private final String dbDataSource = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.STORE_DB_DATASOURCE_TYPE, null);
+    private DataSource dataSource;
+
+    public GlobalLockDBServiceImpl() {
+        Configuration configuration = ConfigurationFactory.getInstance();
+        lockTable = configuration.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
+        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        if (StringUtils.isBlank(dbType)) {
+            throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_TYPE + " should not be blank");
+        }
+        String dbDataSource = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        if (StringUtils.isBlank(dbDataSource)) {
+            throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE + " should not be blank");
+        }
+        dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
+    }
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -74,8 +88,6 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
 
         List<GlobalLockVO> list = new ArrayList<>();
         int count = 0;
-
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
 
         ResultSet rs = null;
         ResultSet countRs = null;

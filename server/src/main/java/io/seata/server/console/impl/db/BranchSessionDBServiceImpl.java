@@ -29,14 +29,17 @@ import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
-import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.server.console.service.BranchSessionService;
+import io.seata.server.console.vo.BranchSessionVO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+
+import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
 
 /**
  * Branch Session DataBase ServiceImpl
@@ -49,14 +52,25 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 public class BranchSessionDBServiceImpl implements BranchSessionService {
 
-    private final String branchTable = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.STORE_DB_BRANCH_TABLE, null);
+    private String branchTable;
 
-    private final String dbType = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.STORE_DB_TYPE, null);
+    private String dbType;
 
-    private final String dbDataSource = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.STORE_DB_DATASOURCE_TYPE, null);
+    private DataSource dataSource;
+
+    public BranchSessionDBServiceImpl() {
+        Configuration configuration = ConfigurationFactory.getInstance();
+        branchTable = configuration.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
+        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        if (StringUtils.isBlank(dbType)) {
+            throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_TYPE + " should not be blank");
+        }
+        String dbDataSource = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        if (StringUtils.isBlank(dbDataSource)) {
+            throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE + " should not be blank");
+        }
+        dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
+    }
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
@@ -66,8 +80,6 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
 
         String whereCondition = " where xid = ? ";
         String branchSessionSQL = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllBranchSessionSQL(branchTable, whereCondition);
-
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
 
         List<BranchSessionVO> list = new ArrayList<>();
         ResultSet rs = null;
