@@ -150,7 +150,6 @@ public class RedisTransactionStoreManagerTest {
         LOGGER.info("the third page result is:[{}]",result2);
         LOGGER.info("the third page result size is:[{}]",result2.size());
 
-
         final List<GlobalSession> globalSessions4 = redisTransactionStoreManager.findGlobalSessionByPage(1, 5, true);
         List<GlobalSessionVO> result3 = new ArrayList<>();
         convertToGlobalSessionVo(result3,globalSessions4);
