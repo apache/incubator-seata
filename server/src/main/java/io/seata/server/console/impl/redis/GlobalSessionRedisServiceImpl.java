@@ -47,7 +47,7 @@ import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 @ConditionalOnExpression("#{'redis'.equals('${sessionMode}')}")
 public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
-    private Logger logger = LoggerFactory.getLogger(GlobalSessionRedisServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionRedisServiceImpl.class);
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
@@ -55,7 +55,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         Long total = 0L;
         if (param.getTimeStart() != null || param.getTimeEnd() != null) {
             //not support time range query
-            logger.debug("not supported according to time range query");
+            LOGGER.debug("not supported according to time range query");
             return PageResult.failure(ParameterRequired.getErrCode(),"not supported according to time range query");
         }
         List<GlobalSession> globalSessions = new ArrayList<>();
@@ -87,14 +87,14 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
                 }
             }
 
-            if (logger.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled()) {
                 if (isNotBlank(param.getApplicationId())) {
                     //not support
-                    logger.debug("not supported according to applicationId query");
+                    LOGGER.debug("not supported according to applicationId query");
                 }
                 if (isNotBlank(param.getTransactionName())) {
                     //not support
-                    logger.debug("not supported according to transactionName query");
+                    LOGGER.debug("not supported according to transactionName query");
                 }
             }
             globalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
