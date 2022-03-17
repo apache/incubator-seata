@@ -165,6 +165,7 @@ public class RedisTransactionStoreManagerTest {
 
         // test statusByPage
         GlobalSessionParam param = new GlobalSessionParam();
+
         // param.setPageNum(1);
         // param.setPageSize(1);
         // param.setStatus(1);
