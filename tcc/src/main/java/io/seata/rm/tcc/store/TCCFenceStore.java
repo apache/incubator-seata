@@ -60,9 +60,10 @@ public interface TCCFenceStore {
     /**
      * Delete tcc fence by datetime.
      * @param datetime datetime
+     * @param limit limit
      * @return the deleted row count
      */
-    int deleteTCCFenceDOByDate(Connection conn, Date datetime);
+    int deleteTCCFenceDOByDate(Connection conn, Date datetime, int limit);
 
     /**
      * Set LogTable Name

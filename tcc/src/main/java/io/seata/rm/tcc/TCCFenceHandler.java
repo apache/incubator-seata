@@ -62,6 +62,8 @@ public class TCCFenceHandler {
 
     private static final int MAX_QUEUE_SIZE = 500;
 
+    private static final int LIMIT_DELETE_BY_DATE = 500;
+
     private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
 
     private static FenceLogCleanRunnable fenceLogCleanRunnable;
@@ -282,10 +284,20 @@ public class TCCFenceHandler {
      * @return the deleted row count
      */
     public static int deleteFenceByDate(Date datetime) {
+        int total = 0;
+        int del = 0;
+        do {
+            del = doDeleteFenceByDate(datetime, LIMIT_DELETE_BY_DATE);
+            total += del;
+        } while (del < LIMIT_DELETE_BY_DATE);
+        return total;
+    }
+
+    private static int doDeleteFenceByDate(Date datetime, int limit) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
+                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime, limit);
             } catch (RuntimeException e) {
                 status.setRollbackOnly();
                 throw e;
