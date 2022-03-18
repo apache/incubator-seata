@@ -87,13 +87,15 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
                 }
             }
 
-            if (isNotBlank(param.getApplicationId())) {
-                //not support
-                logger.debug("not supported according to applicationId query");
-            }
-            if (isNotBlank(param.getTransactionName())) {
-                //not support
-                logger.debug("not supported according to transactionName query");
+            if (logger.isDebugEnabled()) {
+                if (isNotBlank(param.getApplicationId())) {
+                    //not support
+                    logger.debug("not supported according to applicationId query");
+                }
+                if (isNotBlank(param.getTransactionName())) {
+                    //not support
+                    logger.debug("not supported according to transactionName query");
+                }
             }
             globalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
         }

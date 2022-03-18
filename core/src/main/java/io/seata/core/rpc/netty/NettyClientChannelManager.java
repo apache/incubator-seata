@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -188,17 +189,18 @@ class NettyClientChannelManager {
             }
             return;
         }
+        Set<String> channelAddress = new HashSet<>(availList.size());
         try {
             for (String serverAddress : availList) {
                 try {
                     acquireChannel(serverAddress);
+                    channelAddress.add(serverAddress);
                 } catch (Exception e) {
                     LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
                         serverAddress, e.getMessage(), e);
                 }
             }
         } finally {
-            Set<String> channelAddress = channels.keySet();
             if (CollectionUtils.isNotEmpty(channelAddress)) {
                 List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
                 for (String address : channelAddress) {
