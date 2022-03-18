@@ -46,7 +46,6 @@ public interface ConfigurationKeys {
      */
     String DATA_TYPE = "dataType";
 
-
     /**
      * The constant SEATA_PREFIX.
      */
@@ -824,4 +823,14 @@ public interface ConfigurationKeys {
      * The constant ENABLE_BRANCH_ASYNC_REMOVE
      */
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
+
+    /**
+     * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
+     */
+    String IS_USE_CLOUD_NAMESPACE_PARSING = "nacos.use.cloud.namespace.parsing";
+
+    /**
+     * The constant IS_USE_ENDPOINT_PARSING_RULE.
+     */
+    String IS_USE_ENDPOINT_PARSING_RULE = "nacos.use.endpoint.parsing.rule";
 }
