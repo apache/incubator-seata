@@ -808,4 +808,14 @@ public interface ConfigurationKeys {
      * The constant ENABLE_BRANCH_ASYNC_REMOVE
      */
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
+
+    /**
+     * The constant ENABLE_ROLLBACK_WHEN_DISCONNECT
+     */
+    String ENABLE_ROLLBACK_WHEN_DISCONNECT = SERVER_PREFIX + "enableRollbackWhenDisconnect";
+
+    /**
+     * The constant MAX_ROLLBACK_WHEN_DISCONNECT
+     */
+    String MAX_ROLLBACK_WHEN_DISCONNECT = SERVER_PREFIX + "enableRollbackWhenDisconnect";
 }

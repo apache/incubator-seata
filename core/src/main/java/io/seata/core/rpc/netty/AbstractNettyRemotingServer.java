@@ -15,6 +15,7 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
@@ -27,10 +28,14 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.NetUtil;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.processor.Pair;
@@ -49,6 +54,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingServer.class);
 
     private final NettyServerBootstrap serverBootstrap;
+
+    private static final Boolean ENABLE_ROLLBACK_WHEN_DISCONNECT = ConfigurationFactory.getInstance().getBoolean(
+            ConfigurationKeys.ENABLE_ROLLBACK_WHEN_DISCONNECT, false);
 
     @Override
     public void init() {
@@ -197,6 +205,11 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         private void handleDisconnect(ChannelHandlerContext ctx) {
             final String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
             RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+            NettyPoolKey.TransactionRole channelRole = ChannelManager.getRoleFromChannel(ctx.channel());
+            if (ENABLE_ROLLBACK_WHEN_DISCONNECT && NettyPoolKey.TransactionRole.TMROLE == channelRole) {
+                Set<String> needRollBackXids = rpcContext.getBeginXidCache().asMap().keySet();
+                needRollBackXids.forEach(xid->doGlobalRollBack(ctx,xid));
+            }
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(ipAndPort + " to server channel inactive.");
             }
@@ -210,6 +223,27 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
                     LOGGER.info("remove unused channel:" + ctx.channel());
                 }
             }
+        }
+
+        private void doGlobalRollBack(ChannelHandlerContext ctx, String xid) {
+            RpcMessage globalRollBackMessage = buildGlobalRollBackMessage(xid);
+            try {
+                processMessage(ctx,globalRollBackMessage);
+            } catch (Exception e) {
+               LOGGER.error("do global rollback for xid:{} error when tm disconnect",xid,e);
+            }
+        }
+
+        private RpcMessage buildGlobalRollBackMessage(String xid) {
+            RpcMessage globalRollBackMessage = new RpcMessage();
+            globalRollBackMessage.setId(-1);
+            globalRollBackMessage.setMessageType((byte) MessageType.TYPE_GLOBAL_ROLLBACK);
+            globalRollBackMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
+            globalRollBackMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
+            GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
+            globalRollbackRequest.setXid(xid);
+            globalRollBackMessage.setBody(globalRollbackRequest);
+            return globalRollBackMessage;
         }
 
         /**

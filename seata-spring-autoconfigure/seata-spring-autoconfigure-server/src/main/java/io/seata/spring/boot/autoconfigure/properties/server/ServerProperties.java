@@ -17,6 +17,7 @@ package io.seata.spring.boot.autoconfigure.properties.server;
 
 import java.time.Duration;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.util.DurationUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,8 @@ public class ServerProperties {
     private Boolean enableCheckAuth = true;
     private Integer retryDeadThreshold = 130000;
     private Integer servicePort;
+    private Boolean enableRollbackWhenDisconnect = false;
+    private Integer maxRollbackWhenDisconnect = DefaultValues.DEFAULT_MAX_ROLLBACK_WHEN_DISCONNECT;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -87,6 +90,24 @@ public class ServerProperties {
 
     public ServerProperties setServicePort(Integer servicePort) {
         this.servicePort = servicePort;
+        return this;
+    }
+
+    public Boolean getEnableRollbackWhenDisconnect() {
+        return enableRollbackWhenDisconnect;
+    }
+
+    public ServerProperties setEnableRollbackWhenDisconnect(Boolean enableRollbackWhenDisconnect) {
+        this.enableRollbackWhenDisconnect = enableRollbackWhenDisconnect;
+        return this;
+    }
+
+    public Integer getMaxRollbackWhenDisconnect() {
+        return maxRollbackWhenDisconnect;
+    }
+
+    public ServerProperties setMaxRollbackWhenDisconnect(Integer maxRollbackWhenDisconnect) {
+        this.maxRollbackWhenDisconnect = maxRollbackWhenDisconnect;
         return this;
     }
 }

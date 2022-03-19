@@ -179,4 +179,9 @@ public interface DefaultValues {
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
     long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+
+    /**
+     * the constant DEFAULT_MAX_ROLLBACK_WHEN_DISCONNECT
+     */
+    int DEFAULT_MAX_ROLLBACK_WHEN_DISCONNECT = 128;
 }

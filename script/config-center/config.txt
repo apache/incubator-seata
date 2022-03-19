@@ -119,6 +119,8 @@ server.maxCommitRetryTimeout=-1
 server.maxRollbackRetryTimeout=-1
 server.rollbackRetryTimeoutUnlockEnable=false
 server.distributedLockExpireTime=10000
+server.enableRollbackWhenDisconnect=false
+server.maxRollbackWhenDisconnect=128
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=true
 

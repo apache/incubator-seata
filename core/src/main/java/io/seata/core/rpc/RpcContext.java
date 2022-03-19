@@ -15,9 +15,14 @@
  */
 package io.seata.core.rpc;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.netty.channel.Channel;
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.netty.ChannelUtil;
 import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
@@ -28,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type rpc context.
@@ -37,6 +43,12 @@ import java.util.concurrent.ConcurrentMap;
 public class RpcContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcContext.class);
+
+    private static final Integer MAX_ROLLBACK_WHEN_DISCONNECT = ConfigurationFactory.getInstance().getInt(
+            ConfigurationKeys.MAX_ROLLBACK_WHEN_DISCONNECT, DefaultValues.DEFAULT_MAX_ROLLBACK_WHEN_DISCONNECT);
+
+    private static final Integer DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(
+            ConfigurationKeys.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
 
     private NettyPoolKey.TransactionRole clientRole;
 
@@ -51,6 +63,11 @@ public class RpcContext {
     private Channel channel;
 
     private Set<String> resourceSets;
+
+    private final Cache<String, String> beginXidCache = Caffeine.newBuilder().maximumSize(MAX_ROLLBACK_WHEN_DISCONNECT)
+            .expireAfterWrite(DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, TimeUnit.MILLISECONDS).softValues().build();
+
+
 
     /**
      * id
@@ -88,6 +105,7 @@ public class RpcContext {
         if (resourceSets != null) {
             resourceSets.clear();
         }
+        beginXidCache.cleanUp();
     }
 
     /**
@@ -320,6 +338,10 @@ public class RpcContext {
         this.clientId = clientId;
     }
 
+    public Cache<String, String> getBeginXidCache() {
+        return beginXidCache;
+    }
+
     @Override
     public String toString() {
         return "RpcContext{" +
@@ -328,6 +350,7 @@ public class RpcContext {
             ", clientId='" + clientId + '\'' +
             ", channel=" + channel +
             ", resourceSets=" + resourceSets +
+            ", beginXidCache=" + beginXidCache.asMap() +
             '}';
     }
 }
