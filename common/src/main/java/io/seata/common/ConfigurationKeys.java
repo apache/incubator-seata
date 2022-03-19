@@ -809,6 +809,7 @@ public interface ConfigurationKeys {
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
 
     /**
+<<<<<<< HEAD
      * The constant SERVER_RAFT.
      */
     String SERVER_RAFT = SERVER_PREFIX + "raft.";
@@ -887,5 +888,15 @@ public interface ConfigurationKeys {
      * The constant CLIENT_REPORT_ACQUIRE_CLUSTER_RETRY_COUNT.
      */
     String CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT = CLIENT_RM_PREFIX + "acquireClusterRetryCount";
+
+    /**
+     * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
+     */
+    String IS_USE_CLOUD_NAMESPACE_PARSING = "nacos.use.cloud.namespace.parsing";
+
+    /**
+     * The constant IS_USE_ENDPOINT_PARSING_RULE.
+     */
+    String IS_USE_ENDPOINT_PARSING_RULE = "nacos.use.endpoint.parsing.rule";
 
 }

@@ -51,7 +51,7 @@
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <apollo-client.version>1.6.0</apollo-client.version>
         <mock-jedis.version>0.1.16</mock-jedis.version>
-        <eureka-clients.version>1.10.16</eureka-clients.version>
+        <eureka-clients.version>1.10.17</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>1.4.2</nacos-client.version>
         <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
@@ -76,6 +76,7 @@
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
+        <xstream.version>1.4.19</xstream.version>
 
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
@@ -653,6 +654,17 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.thoughtworks.xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>${xstream.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>org.glassfish.jersey</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

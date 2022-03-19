@@ -155,7 +155,7 @@ public class DefaultCore implements Core {
                     globalSession.asyncCommit();
                     return false;
                 } else {
-                    globalSession.changeStatus(GlobalStatus.Committing);
+                    globalSession.changeGlobalStatus(GlobalStatus.Committing);
                     return true;
                 }
             }
@@ -204,15 +204,11 @@ public class DefaultCore implements Core {
                             SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                             return CONTINUE;
                         case PhaseTwo_CommitFailed_Unretryable:
-                            if (globalSession.canBeCommittedAsync()) {
-                                LOGGER.error(
-                                    "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
-                                return CONTINUE;
-                            } else {
-                                SessionHelper.endCommitFailed(globalSession);
-                                LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
-                                return false;
-                            }
+                            //not at branch
+                            SessionHelper.endCommitFailed(globalSession);
+                            LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
+                            return false;
+
                         default:
                             if (!retrying) {
                                 globalSession.queueToRetryCommit();
@@ -273,7 +269,7 @@ public class DefaultCore implements Core {
         boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
             if (globalSession.getStatus() == GlobalStatus.Begin) {
-                globalSession.changeStatus(GlobalStatus.Rollbacking);
+                globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
                 return true;
             }
             return false;
@@ -282,8 +278,8 @@ public class DefaultCore implements Core {
             return globalSession.getStatus();
         }
 
-        doGlobalRollback(globalSession, false);
-        return globalSession.getStatus();
+        boolean rollbackSuccess = doGlobalRollback(globalSession, false);
+        return rollbackSuccess ? GlobalStatus.Rollbacked : globalSession.getStatus();
     }
 
     @Override
@@ -332,9 +328,6 @@ public class DefaultCore implements Core {
             // Return if the result is not null
             if (result != null) {
                 return result;
-            }
-            if (!retrying) {
-                globalSession.setStatus(GlobalStatus.Rollbacked);
             }
         }
         // In db mode, lock and branch data residual problems may occur.

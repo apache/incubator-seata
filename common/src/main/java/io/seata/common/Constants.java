@@ -110,6 +110,10 @@ public interface Constants {
      */
     String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
     /**
+     * The constant OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT
+     */
+    String OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT = "springConfigurableEnvironment";
+    /**
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
     String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";

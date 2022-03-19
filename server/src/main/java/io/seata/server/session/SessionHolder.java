@@ -20,7 +20,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
+import javax.ws.rs.HEAD;
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.exception.StoreException;
+import io.seata.core.model.LockStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +36,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
@@ -86,7 +90,7 @@ public class SessionHolder {
     /**
      * The redis distributed lock expire time
      */
-    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME,10000);
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, 10000);
 
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
@@ -104,21 +108,23 @@ public class SessionHolder {
     public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-                CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
+                    CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+                new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+                new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-
+                new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
+            if (StringUtils.isBlank(sessionStorePath)) {
+                throw new StoreException("the {store.file.dir} is empty.");
+            }
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.FILE.getName(), new Class[] {String.class, String.class},
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
@@ -136,14 +142,17 @@ public class SessionHolder {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             }
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.DB.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+                StoreMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+                StoreMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
@@ -163,24 +172,26 @@ public class SessionHolder {
 
     /**
      * Reload.
+     *
+     * @param storeMode the mode of store
      */
     protected static void reload(StoreMode storeMode) {
+
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable)ROOT_SESSION_MANAGER).reload();
         }
-        reload(ROOT_SESSION_MANAGER.allSessions(), storeMode);
+        if (StoreMode.FILE == storeMode) {
+            reload(ROOT_SESSION_MANAGER.allSessions(), storeMode);
+        }
     }
 
     public static void reload(Collection<GlobalSession> allSessions, StoreMode storeMode) {
         reload(allSessions, storeMode, true);
     }
 
-    public static void reload(Collection<GlobalSession> allSessions, StoreMode storeMode, boolean acquireLock) {
+    public static void reload(Collection<GlobalSession> allSessions,StoreMode storeMode, boolean acquireLock) {
         if (CollectionUtils.isNotEmpty(allSessions)) {
-            List<GlobalSession> removeGlobalSessions = new ArrayList<>();
-            Iterator<GlobalSession> iterator = allSessions.iterator();
-            while (iterator.hasNext()) {
-                GlobalSession globalSession = iterator.next();
+            for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
                     case UnKnown:
@@ -191,51 +202,70 @@ public class SessionHolder {
                     case TimeoutRollbacked:
                     case TimeoutRollbackFailed:
                     case Finished:
-                        removeGlobalSessions.add(globalSession);
+                        removeInErrorState(globalSession);
                         break;
                     case AsyncCommitting:
-                        if (storeMode == StoreMode.FILE || storeMode == StoreMode.RAFT) {
-                            queueToAsyncCommitting(globalSession);
-                        }
+                        queueToAsyncCommitting(globalSession);
+                        break;
+                    case Committing:
+                    case CommitRetrying:
+                        queueToRetryCommit(globalSession);
                         break;
                     default: {
-                        if (storeMode == StoreMode.FILE) {
-                            lockBranchSessions(globalSession.getSortedBranches());
-                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
-                                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                        lockBranchSessions(globalSession.getSortedBranches());
+                        if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                            || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                            globalSession.getBranchSessions().parallelStream()
+                                .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                        }
+                        switch (globalStatus) {
+                            case Rollbacking:
+                            case RollbackRetrying:
+                            case TimeoutRollbacking:
+                            case TimeoutRollbackRetrying:
                                 globalSession.getBranchSessions().parallelStream()
                                     .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
-                            }
-                            switch (globalStatus) {
-                                case Committing:
-                                case CommitRetrying:
-                                    queueToRetryCommit(globalSession);
-                                    break;
-                                case Rollbacking:
-                                case RollbackRetrying:
-                                case TimeoutRollbacking:
-                                case TimeoutRollbackRetrying:
+                                queueToRetryRollback(globalSession);
+                                break;
+                            case Begin:
+                                if (storeMode == StoreMode.RAFT) {
+                                    globalSession.setStatus(GlobalStatus.RollbackRetrying);
                                     queueToRetryRollback(globalSession);
-                                    break;
-                                case Begin:
-                                    if (storeMode == StoreMode.RAFT) {
-                                        globalSession.setStatus(GlobalStatus.RollbackRetrying);
-                                        queueToRetryRollback(globalSession);
-                                    } else {
-                                        globalSession.setActive(true);
-                                    }
-                                    break; 
-                                default:
-                                    throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
-                            }
+                                } else {
+                                    globalSession.setActive(true);
+                                }
+                                break;
+                            default:
+                                LOGGER.error("Could not handle the global session, xid: {}", globalSession.getXid());
+                                throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                         }
                         break;
                     }
                 }
             }
-            for (GlobalSession globalSession : removeGlobalSessions) {
-                removeInErrorState(globalSession);
-            }
+        } else {
+            // Redis, db and so on
+            CompletableFuture.runAsync(() -> {
+                SessionCondition searchCondition = new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Committed,
+                        GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Finished);
+                searchCondition.setLazyLoadBranch(true);
+
+                long now = System.currentTimeMillis();
+                List<GlobalSession> errorStatusGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                while (!CollectionUtils.isEmpty(errorStatusGlobalSessions)) {
+                    for (GlobalSession errorStatusGlobalSession : errorStatusGlobalSessions) {
+                        if (errorStatusGlobalSession.getBeginTime() >= now) {
+                            // Exit when the global transaction begin after the instance started
+                            return;
+                        }
+
+                        removeInErrorState(errorStatusGlobalSession);
+                    }
+
+                    // Load the next part
+                    errorStatusGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                }
+            });
         }
     }
 
@@ -371,7 +401,7 @@ public class SessionHolder {
      * lock and execute
      *
      * @param globalSession the global session
-     * @param lockCallable the lock Callable
+     * @param lockCallable  the lock Callable
      * @return the value
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
@@ -400,8 +430,9 @@ public class SessionHolder {
 
     /**
      * Execute the function after get the distribute lock
-     * @param key   the distribute lock key
-     * @param func  the function to be call
+     *
+     * @param key  the distribute lock key
+     * @param func the function to be call
      * @return whether the func be call
      */
     public static boolean distributedLockAndExecute(String key, NoArgsFunc func) {
@@ -417,7 +448,7 @@ public class SessionHolder {
                 try {
                     SessionHolder.releaseDistributedLock(key);
                 } catch (Exception ex) {
-                    LOGGER.warn("release distibute lock failure, message = {}", ex.getMessage(), ex);
+                    LOGGER.warn("release distribute lock failure, message = {}", ex.getMessage(), ex);
                 }
             }
         }

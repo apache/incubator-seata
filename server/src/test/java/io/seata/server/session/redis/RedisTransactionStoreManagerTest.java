@@ -23,8 +23,8 @@ import java.util.Map;
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.GlobalSession;
@@ -33,6 +33,8 @@ import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
@@ -45,6 +47,9 @@ import redis.clients.jedis.Pipeline;
  */
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
+
     private static RedisServer server = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
 
@@ -108,8 +113,8 @@ public class RedisTransactionStoreManagerTest {
         globalLockVO.setTableName("order");
         globalLockVO.setPk("2188");
         globalLockVO.setRowKey("jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188");
-        globalLockVO.setGmtCreate(new Date());
-        globalLockVO.setGmtModified(new Date());
+        globalLockVO.setGmtCreate(System.currentTimeMillis());
+        globalLockVO.setGmtModified(System.currentTimeMillis());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.hmset(GLOBAL_LOCK_KEY,globallockMap);
             jedis.hmset(ROW_LOCK_KEY,BeanUtils.objectToMap(globalLockVO));
@@ -121,7 +126,7 @@ public class RedisTransactionStoreManagerTest {
     @Test
     public void testQueryGlobalslSession() {
         Long count = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
-        System.out.print(count);
+        LOGGER.info("the count is:[{}]",count);
     }
 
     @Test
@@ -131,8 +136,15 @@ public class RedisTransactionStoreManagerTest {
         param.setPageSize(5);
         param.setWithBranch(false);
         List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
-        System.out.print(globalSessionKeys.size());
-        System.out.print(globalSessionKeys);
+        LOGGER.info("the result size is:[{}]",globalSessionKeys.size());
+        LOGGER.info("the globalSessionKeys is:[{}]",globalSessionKeys);
+    }
+
+    @Test
+    public void testLimitAllSessions() {
+        redisTransactionStoreManager.setLogQueryLimit(20);
+        List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
+        LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
     }
 
     @AfterAll

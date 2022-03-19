@@ -164,7 +164,7 @@ public class RaftSessionManager extends FileSessionManager {
     }
 
     @Override
-    public void onEnd(GlobalSession globalSession) throws TransactionException {
+    public void onSuccessEnd(GlobalSession globalSession) throws TransactionException {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = status -> {
             if (status.isOk()) {
@@ -183,6 +183,11 @@ public class RaftSessionManager extends FileSessionManager {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(globalSession.getXid());
         RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
+    }
+
+    @Override
+    public void onFailEnd(GlobalSession globalSession) throws TransactionException {
+        super.onFailEnd(globalSession);
     }
 
     public String getName() {
