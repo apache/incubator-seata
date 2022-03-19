@@ -67,8 +67,6 @@ public class RpcContext {
     private final Cache<String, String> beginXidCache = Caffeine.newBuilder().maximumSize(MAX_ROLLBACK_WHEN_DISCONNECT)
             .expireAfterWrite(DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, TimeUnit.MILLISECONDS).softValues().build();
 
-
-
     /**
      * id
      */

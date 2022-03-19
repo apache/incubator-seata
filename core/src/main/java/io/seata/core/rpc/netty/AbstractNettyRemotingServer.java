@@ -245,7 +245,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             globalRollBackMessage.setBody(globalRollbackRequest);
             return globalRollBackMessage;
         }
-
         /**
          * Exception caught.
          *
