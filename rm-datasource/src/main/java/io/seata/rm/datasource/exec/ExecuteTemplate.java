@@ -26,6 +26,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
+import io.seata.rm.datasource.exec.mysql.MySQLReplaceIntoExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -108,6 +109,16 @@ public class ExecuteTemplate {
                             case JdbcConstants.MARIADB:
                                 executor =
                                     new MySQLInsertOrUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                break;
+                            default:
+                                throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
+                        }
+                        break;
+                    case REPLACE:
+                        switch (dbType) {
+                            case JdbcConstants.MYSQL:
+                                executor =
+                                        new MySQLReplaceIntoExecutor(statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             default:
                                 throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
