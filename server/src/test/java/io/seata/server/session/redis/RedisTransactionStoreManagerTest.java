@@ -17,7 +17,6 @@ package io.seata.server.session.redis;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionManager;
@@ -67,7 +65,7 @@ public class RedisTransactionStoreManagerTest {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
@@ -106,7 +104,7 @@ public class RedisTransactionStoreManagerTest {
         GlobalSession session3 = GlobalSession.createGlobalSession("test5", "test6", "test003", 100);
         String xid3 = XID.generateXID(session3.getTransactionId());
         session3.setXid(xid3);
-        session3.setTransactionId(session.getTransactionId());
+        session3.setTransactionId(session3.getTransactionId());
         session3.setBeginTime(System.currentTimeMillis());
         session3.setApplicationData("abc2=878s3");
         session3.setStatus(GlobalStatus.Begin);
@@ -115,7 +113,7 @@ public class RedisTransactionStoreManagerTest {
         GlobalSession session4 = GlobalSession.createGlobalSession("test7", "test8", "test004", 100);
         String xid4 = XID.generateXID(session4.getTransactionId());
         session4.setXid(xid4);
-        session4.setTransactionId(session.getTransactionId());
+        session4.setTransactionId(session4.getTransactionId());
         session4.setBeginTime(System.currentTimeMillis());
         session4.setApplicationData("abc3=878s1");
         session4.setStatus(GlobalStatus.Begin);
@@ -125,7 +123,7 @@ public class RedisTransactionStoreManagerTest {
         GlobalSession session5 = GlobalSession.createGlobalSession("test9", "test10", "test005", 100);
         String xid5 = XID.generateXID(session5.getTransactionId());
         session5.setXid(xid5);
-        session5.setTransactionId(session.getTransactionId());
+        session5.setTransactionId(session5.getTransactionId());
         session5.setBeginTime(System.currentTimeMillis());
         session5.setApplicationData("abc3=878s1");
         session5.setStatus(GlobalStatus.Begin);
@@ -134,7 +132,7 @@ public class RedisTransactionStoreManagerTest {
         //first:  setLogQueryLimit > totalCount
         //second: setLogQueryLimit = totalCount
         //third:  setLogQueryLimit < totalCount
-        redisTransactionStoreManager.setLogQueryLimit(20);
+        redisTransactionStoreManager.setLogQueryLimit(4);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), false);
         LOGGER.info("the limit  Sessions result is:[{}]",globalSessions);
         LOGGER.info("the limit  Sessions result size is:[{}]",globalSessions.size());
