@@ -424,14 +424,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<String> statusKeys = convertStatusKeys(statuses);
 
         Map<String, Long> targetMap = calculateStatuskeysHasData(statusKeys);
-        long limit = resetLogQueryLimit(targetMap);
         if (targetMap.size() == 0 || logQueryLimit <= 0) {
             return globalSessions;
         }
-        // totalCount
-        final long totalCount = Math.min(logQueryLimit, countByClobalSesisons(statuses));
+        int perStatusLimit = resetLogQueryLimit(targetMap);
+        final long countGlobalSessions = targetMap.values().stream().collect(Collectors.summarizingInt(Long::intValue)).getSum();
+        // queryCount
+        final long queryCount = Math.min(logQueryLimit, countGlobalSessions);
         List<List<String>> list = new ArrayList<>();
-        dogetXidsForTargetMapRecursive(targetMap, 0L, limit - 1, totalCount, list);
+        dogetXidsForTargetMapRecursive(targetMap, 0L, perStatusLimit - 1, queryCount, list);
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> xids = list.stream().flatMap(Collection::stream).collect(Collectors.toList());
             xids.parallelStream().forEach(xid -> {
@@ -450,10 +451,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param targetMap
      * @return
      */
-    private long resetLogQueryLimit(Map<String, Long> targetMap) {
-        long resetLimitQuery = logQueryLimit;
+    private int resetLogQueryLimit(Map<String, Long> targetMap) {
+        int resetLimitQuery = logQueryLimit;
         if (targetMap.size() > 1) {
-            long size = targetMap.size();
+            int size = targetMap.size();
             resetLimitQuery = (logQueryLimit / size) == 0 ? 1 : (logQueryLimit / size);
         }
         return resetLimitQuery;
@@ -699,51 +700,54 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private void dogetXidsForTargetMapRecursive(Map<String, Long> targetMap, long start, long end,
-        long totalCount, List<List<String>> listList) {
+        long queryCount, List<List<String>> listList) {
 
-        long total = listList.stream().mapToLong(value -> value.size()).sum();
+        long total = listList.stream().mapToLong(List::size).sum();
 
-        if (total >= totalCount) {
+        if (total >= queryCount) {
             return;
         }
         // when start greater than offset(totalCount)
-        if (start >= totalCount) {
+        if (start >= queryCount) {
             return;
         }
 
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (String key : targetMap.keySet()) {
-                final long sum = listList.stream().mapToLong(value -> value.size()).sum();
-                final long diffCount = totalCount - sum;
+                final long sum = listList.stream().mapToLong(List::size).sum();
+                final long diffCount = queryCount - sum;
+                if (diffCount <= 0) {
+                    return;
+                }
                 List<String> list;
                 if (end - start >= diffCount) {
-                    long endNew = end - diffCount;
+                    long endNew = start + diffCount - 1;
                     list = jedis.lrange(key, start, endNew);
                 } else {
                     list = jedis.lrange(key, start, end);
                 }
-                if (list.size() > 0 && sum < totalCount) {
+                if (list.size() > 0 && sum < queryCount) {
                     listList.add(list);
                 }
             }
         }
         long startNew = end + 1;
         long endNew = startNew + end - start;
-        dogetXidsForTargetMapRecursive(targetMap, startNew, endNew, totalCount, listList);
+        dogetXidsForTargetMapRecursive(targetMap, startNew, endNew, queryCount, listList);
     }
 
     private List<List<String>> dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end,
-        int pageSize) {
+        int totalCount) {
         List<List<String>> listList = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (String key : targetMap.keySet()) {
                 final List<String> list = jedis.lrange(key, start, end);
-                final long sum = listList.stream().mapToLong(value -> value.size()).sum();
-                if (list.size() > 0 && sum < pageSize) {
+                final long sum = listList.stream().mapToLong(List::size).sum();
+                if (list.size() > 0 && sum < totalCount) {
                     listList.add(list);
                 } else {
                     start = 0;
-                    end = pageSize - 1;
+                    end = totalCount - 1;
                 }
             }
         }
