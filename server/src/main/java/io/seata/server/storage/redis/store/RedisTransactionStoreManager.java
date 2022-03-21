@@ -25,6 +25,8 @@ import java.util.Optional;
 import java.util.Collections;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Maps;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
@@ -656,6 +658,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return
      */
     private Map<String, Long> calculateStatuskeysHasData(List<String> statusKeys) {
+        Map<String, Long> resultMap = Maps.newLinkedHashMap();
         Map<String, Long> keysMap = new HashMap<>(statusKeys.size());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             statusKeys.forEach(key -> pipelined.llen(key));
@@ -666,7 +669,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 }
             }
         }
-        return keysMap;
+
+        //sort
+        if (CollectionUtils.isNotEmpty(keysMap)) {
+            keysMap.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                    .forEach(e -> resultMap.put(e.getKey(), e.getValue()));
+        }
+        return resultMap;
     }
 
     /**

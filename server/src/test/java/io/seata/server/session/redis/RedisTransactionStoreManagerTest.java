@@ -116,7 +116,7 @@ public class RedisTransactionStoreManagerTest {
         session4.setTransactionId(session4.getTransactionId());
         session4.setBeginTime(System.currentTimeMillis());
         session4.setApplicationData("abc3=878s1");
-        session4.setStatus(GlobalStatus.Begin);
+        session4.setStatus(GlobalStatus.Finished);
         sessionManager.addGlobalSession(session4);
 
 
@@ -126,7 +126,7 @@ public class RedisTransactionStoreManagerTest {
         session5.setTransactionId(session5.getTransactionId());
         session5.setBeginTime(System.currentTimeMillis());
         session5.setApplicationData("abc3=878s1");
-        session5.setStatus(GlobalStatus.Begin);
+        session5.setStatus(GlobalStatus.Finished);
         sessionManager.addGlobalSession(session5);
 
         //first:  setLogQueryLimit > totalCount
