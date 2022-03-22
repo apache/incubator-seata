@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import io.seata.common.util.CollectionUtils;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.GlobalSessionVO;
-import io.seata.core.console.result.PageResult;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
 import static io.seata.common.util.StringUtils.isBlank;
 import static io.seata.common.util.StringUtils.isNotBlank;
-import static io.seata.core.console.result.PageResult.checkPage;
+import static io.seata.console.result.PageResult.checkPage;
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
@@ -87,13 +87,15 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
                 }
             }
 
-            if (isNotBlank(param.getApplicationId())) {
-                //not support
-                logger.debug("not supported according to applicationId query");
-            }
-            if (isNotBlank(param.getTransactionName())) {
-                //not support
-                logger.debug("not supported according to transactionName query");
+            if (logger.isDebugEnabled()) {
+                if (isNotBlank(param.getApplicationId())) {
+                    //not support
+                    logger.debug("not supported according to applicationId query");
+                }
+                if (isNotBlank(param.getTransactionName())) {
+                    //not support
+                    logger.debug("not supported according to transactionName query");
+                }
             }
             globalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
         }
