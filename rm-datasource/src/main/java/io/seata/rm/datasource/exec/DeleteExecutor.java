@@ -46,7 +46,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
+    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
