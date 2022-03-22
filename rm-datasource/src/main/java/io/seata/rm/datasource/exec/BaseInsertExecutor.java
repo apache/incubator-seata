@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Base Insert Executor.
- *
  * @author jsbxyyx
  */
 public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> implements InsertExecutor<T> {
@@ -95,7 +94,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * judge sql specify column
-     *
      * @return true: contains column. false: not contains column.
      */
     protected boolean containsColumns() {
@@ -104,7 +102,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * get pk index
-     *
      * @return the key is pk column name and the value is index of the pk column
      */
     protected Map<String, Integer> getPkIndex() {
@@ -135,7 +132,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * parse primary key value from statement.
-     *
      * @return
      */
     protected Map<String, List<Object>> parsePkValuesFromStatement() {
@@ -339,7 +335,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * check pk values for single pk
-     *
      * @param pkValues pkValues
      * @param ps       true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
