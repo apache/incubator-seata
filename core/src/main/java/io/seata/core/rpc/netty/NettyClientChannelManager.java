@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.seata.core.protocol.RegisterTMRequest;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -233,10 +234,14 @@ class NettyClientChannelManager {
         Channel channelFromPool;
         try {
             NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
-            NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-            if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
-                RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
-                ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
+            if (currentPoolKey.getMessage() instanceof RegisterTMRequest) {
+                poolKeyMap.put(serverAddress, currentPoolKey);
+            } else {
+                NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
+                if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
+                    RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
+                    ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
+                }
             }
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
             channels.put(serverAddress, channelFromPool);
