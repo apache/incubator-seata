@@ -70,9 +70,9 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
             for (int i = 0; i < pkValues.size(); i++) {
                 if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlSequenceExpr) {
                     pkValues.set(i, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(i), pkKey).get(0));
-                } else if (pkValues.get(i) instanceof SqlMethodExpr) {
+                } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlMethodExpr) {
                     pkValues.set(i, getGeneratedKeys(pkKey).get(0));
-                } else if (pkValues.get(i) instanceof Null) {
+                } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof Null) {
                     pkValues.set(i, getGeneratedKeys(pkKey).get(0));
                 }
             }
