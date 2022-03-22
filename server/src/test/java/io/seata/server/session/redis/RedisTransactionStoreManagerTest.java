@@ -119,7 +119,6 @@ public class RedisTransactionStoreManagerTest {
         session4.setStatus(GlobalStatus.Finished);
         sessionManager.addGlobalSession(session4);
 
-
         GlobalSession session5 = GlobalSession.createGlobalSession("test9", "test10", "test005", 100);
         String xid5 = XID.generateXID(session5.getTransactionId());
         session5.setXid(xid5);
