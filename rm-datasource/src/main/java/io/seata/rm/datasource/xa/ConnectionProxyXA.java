@@ -161,7 +161,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
                 Integer transactionTimeout = RootContext.getTimeout();
-                if(transactionTimeout == null){
+                if (transactionTimeout == null) {
                     transactionTimeout = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
                 }
                 this.timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, transactionTimeout);
