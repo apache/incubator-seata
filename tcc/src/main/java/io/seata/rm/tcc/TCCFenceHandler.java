@@ -15,6 +15,7 @@
  */
 package io.seata.rm.tcc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.Date;
@@ -166,10 +167,11 @@ public class TCCFenceHandler {
      * @param branchId              the branch transaction id
      * @param args                  rollback method's parameters
      * @param actionName            the action name
+     * @param enableEmptyRollback
      * @return the boolean
      */
     public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
-                                        String xid, Long branchId, Object[] args, String actionName) {
+                                        String xid, Long branchId, Object[] args, String actionName, boolean enableEmptyRollback) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
@@ -182,7 +184,7 @@ public class TCCFenceHandler {
                         throw new TCCFenceException(String.format("Insert tcc fence record error, rollback fence method failed. xid= %s, branchId= %s", xid, branchId),
                                 FrameworkErrorCode.InsertRecordError);
                     }
-                    return true;
+                    return enableEmptyRollback ? invokeTwoPhaseRollback(rollbackMethod, targetTCCBean, status, args) : true;
                 } else {
                     if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
                         LOGGER.info("Branch transaction had already rollbacked before, idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
@@ -238,17 +240,33 @@ public class TCCFenceHandler {
         boolean result = TCC_FENCE_DAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
         if (result) {
             // invoke two phase method
-            Object ret = method.invoke(targetTCCBean, args);
-            if (null != ret) {
-                if (ret instanceof TwoPhaseResult) {
-                    result = ((TwoPhaseResult) ret).isSuccess();
-                } else {
-                    result = (boolean) ret;
-                }
-                // If the business execution result is false, the transaction will be rolled back
-                if (!result) {
-                    transactionStatus.setRollbackOnly();
-                }
+            result = invokeTwoPhaseRollback(method, targetTCCBean, transactionStatus, args);
+        }
+        return result;
+    }
+
+    /**
+     * invoke two phase method
+     * @param method the method
+     * @param targetTCCBean the targetTCCBean
+     * @param transactionStatus the transactionStatus
+     * @param args the args
+     * @return the boolean
+     * @throws IllegalAccessException the IllegalAccessException
+     * @throws InvocationTargetException the InvocationTargetException
+     */
+    private static boolean invokeTwoPhaseRollback(Method method, Object targetTCCBean, TransactionStatus transactionStatus, Object[] args) throws IllegalAccessException, InvocationTargetException {
+        boolean result = true;
+        Object ret = method.invoke(targetTCCBean, args);
+        if (null != ret) {
+            if (ret instanceof TwoPhaseResult) {
+                result = ((TwoPhaseResult) ret).isSuccess();
+            } else {
+                result = (boolean) ret;
+            }
+            // If the business execution result is false, the transaction will be rolled back
+            if (!result) {
+                transactionStatus.setRollbackOnly();
             }
         }
         return result;
