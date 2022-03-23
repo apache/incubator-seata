@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
@@ -105,12 +104,6 @@ public class DefaultCore implements Core {
                                String applicationData, String lockKeys) throws TransactionException {
         return getCore(branchType).branchRegister(branchType, resourceId, clientId, xid,
             applicationData, lockKeys);
-    }
-
-    @Override
-    public BranchRegisterResult branchRegisterAndGetResult(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-        return getCore(branchType).branchRegisterAndGetResult(branchType, resourceId, clientId, xid,
-                applicationData, lockKeys);
     }
 
     @Override

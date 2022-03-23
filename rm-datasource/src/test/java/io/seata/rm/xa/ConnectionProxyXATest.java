@@ -15,7 +15,6 @@
  */
 package io.seata.rm.xa;
 
-import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -78,11 +77,6 @@ public class ConnectionProxyXATest {
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
         connectionProxyXA.init();
 
-        BranchRegisterResult result = new BranchRegisterResult();
-        result.setBranchId(1L);
-        result.setTimeout(60000);
-        Mockito.when(resourceManager.branchRegisterAndGetResult(BranchType.XA, baseDataSourceResource.getResourceId(),
-                null,xid,null,null)).thenReturn(result);
         connectionProxyXA.setAutoCommit(false);
 
         // Assert setAutoCommit = false was NEVER invoked on the wrapped connection
@@ -114,11 +108,6 @@ public class ConnectionProxyXATest {
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
         connectionProxyXA.init();
 
-        BranchRegisterResult result = new BranchRegisterResult();
-        result.setBranchId(1L);
-        result.setTimeout(60000);
-        Mockito.when(resourceManager.branchRegisterAndGetResult(BranchType.XA, baseDataSourceResource.getResourceId(),
-                null,xid,null,null)).thenReturn(result);
         connectionProxyXA.setAutoCommit(false);
 
         // Assert setAutoCommit = false was NEVER invoked on the wrapped connection

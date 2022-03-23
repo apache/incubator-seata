@@ -22,9 +22,9 @@ import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import io.seata.common.DefaultValues;
-import io.seata.common.rpc.BranchRegisterResult;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -34,7 +34,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.ConfigurationKeys.XA_BRANCH_EXECUTION_TIMEOUT;
+import static io.seata.common.ConfigurationKeys.XA_BRANCH_EXECUTION_TIMEOUT;
 
 /**
  * Connection proxy for XA mode.
@@ -158,10 +158,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             try {
                 // 1. register branch to TC then get the branch message
                 branchRegisterTime = System.currentTimeMillis();
-                BranchRegisterResult result = DefaultResourceManager.get().branchRegisterAndGetResult(BranchType.XA, resource.getResourceId(), null, xid, null,
+                branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
-                branchId = result.getBranchId();
-                timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, result.getTimeout());
+                Integer transactionTimeout = RootContext.getTimeout();
+                if(transactionTimeout == null){
+                    transactionTimeout = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+                }
+                this.timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, transactionTimeout);
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);

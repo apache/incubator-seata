@@ -28,7 +28,6 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
 
     private long branchId;
 
-    private int timeout;
 
     /**
      * Gets branch id.
@@ -48,14 +47,6 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
         this.branchId = branchId;
     }
 
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-
     @Override
     public short getTypeCode() {
         return MessageType.TYPE_BRANCH_REGISTER_RESULT;
@@ -66,9 +57,6 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
         StringBuilder result = new StringBuilder();
         result.append("BranchRegisterResponse: branchId=");
         result.append(branchId);
-        result.append(",");
-        result.append("timeout =");
-        result.append(getTimeout());
         result.append(",");
         result.append("result code =");
         result.append(getResultCode());

@@ -39,7 +39,6 @@ public class BranchRegisterResponseCodec extends AbstractTransactionResponseCode
 
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)t;
         out.writeLong(branchRegisterResponse.getBranchId());
-        out.writeInt(branchRegisterResponse.getTimeout());
     }
 
     @Override
@@ -48,7 +47,6 @@ public class BranchRegisterResponseCodec extends AbstractTransactionResponseCode
 
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)t;
         branchRegisterResponse.setBranchId(in.getLong());
-        branchRegisterResponse.setTimeout(in.getInt());
     }
 
 }
