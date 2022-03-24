@@ -73,7 +73,7 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
-    public void testInsertGlobalSessionData() throws TransactionException {
+    public void testInsertGlobalSessionDataAndQuery() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
@@ -131,7 +131,7 @@ public class RedisTransactionStoreManagerTest {
         //first:  setLogQueryLimit > totalCount
         //second: setLogQueryLimit = totalCount
         //third:  setLogQueryLimit < totalCount
-        redisTransactionStoreManager.setLogQueryLimit(4);
+        redisTransactionStoreManager.setLogQueryLimit(3);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), false);
         LOGGER.info("the limit  Sessions result is:[{}]",globalSessions);
         LOGGER.info("the limit  Sessions result size is:[{}]",globalSessions.size());
