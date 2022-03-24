@@ -637,7 +637,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<List<String>> list = dogetXidsForTargetMap(stringLongMap, start, end, pageSize);
 
         if (CollectionUtils.isNotEmpty(list)) {
-            List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
+            List<String> xids = list.stream().flatMap(Collection::stream).collect(Collectors.toList());
             xids.forEach(xid -> {
                 if (globalSessions.size() < pageSize) {
                     GlobalSession globalSession = this.readSession(xid, withBranchSessions);
