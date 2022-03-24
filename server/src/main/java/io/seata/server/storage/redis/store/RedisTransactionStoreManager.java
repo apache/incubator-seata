@@ -18,6 +18,7 @@ package io.seata.server.storage.redis.store;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
@@ -25,8 +26,6 @@ import java.util.Optional;
 import java.util.Collections;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.Maps;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
@@ -425,12 +424,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
         List<String> statusKeys = convertStatusKeys(statuses);
 
-        Map<String, Long> targetMap = calculateStatuskeysHasData(statusKeys);
+        Map<String, Integer> targetMap = calculateStatuskeysHasData(statusKeys);
         if (targetMap.size() == 0 || logQueryLimit <= 0) {
             return globalSessions;
         }
         int perStatusLimit = resetLogQueryLimit(targetMap);
-        final long countGlobalSessions = targetMap.values().stream().collect(Collectors.summarizingInt(Long::intValue)).getSum();
+        final long countGlobalSessions = targetMap.values().stream().collect(Collectors.summarizingInt(Integer::intValue)).getSum();
         // queryCount
         final long queryCount = Math.min(logQueryLimit, countGlobalSessions);
         List<List<String>> list = new ArrayList<>();
@@ -449,11 +448,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * get everyone keys limit
-     * 
+     *
      * @param targetMap
      * @return
      */
-    private int resetLogQueryLimit(Map<String, Long> targetMap) {
+    private int resetLogQueryLimit(Map<String, Integer> targetMap) {
         int resetLimitQuery = logQueryLimit;
         if (targetMap.size() > 1) {
             int size = targetMap.size();
@@ -633,7 +632,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         int end = pageNum * pageSize - 1;
 
         List<String> statusKeys = convertStatusKeys(GlobalStatus.values());
-        Map<String, Long> stringLongMap = calculateStatuskeysHasData(statusKeys);
+        Map<String, Integer> stringLongMap = calculateStatuskeysHasData(statusKeys);
 
         List<List<String>> list = dogetXidsForTargetMap(stringLongMap, start, end, pageSize);
 
@@ -657,24 +656,24 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param statusKeys
      * @return
      */
-    private Map<String, Long> calculateStatuskeysHasData(List<String> statusKeys) {
-        Map<String, Long> resultMap = Maps.newLinkedHashMap();
-        Map<String, Long> keysMap = new HashMap<>(statusKeys.size());
+    private Map<String, Integer> calculateStatuskeysHasData(List<String> statusKeys) {
+        Map<String, Integer> resultMap = Collections.synchronizedMap(new LinkedHashMap<>());
+        Map<String, Integer> keysMap = new HashMap<>(statusKeys.size());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             statusKeys.forEach(key -> pipelined.llen(key));
-            List<Long> counts = (List)pipelined.syncAndReturnAll();
+            List<Long> counts = (List) pipelined.syncAndReturnAll();
             for (int i = 0; i < counts.size(); i++) {
                 if (counts.get(i) > 0) {
-                    keysMap.put(statusKeys.get(i), counts.get(i));
+                    keysMap.put(statusKeys.get(i), counts.get(i).intValue());
                 }
             }
         }
 
         //sort
-        if (CollectionUtils.isNotEmpty(keysMap)) {
-            keysMap.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                    .forEach(e -> resultMap.put(e.getKey(), e.getValue()));
-        }
+        List<Map.Entry<String, Integer>> list = new ArrayList<>(keysMap.entrySet());
+        list.sort((o1, o2) -> o2.getValue() - o1.getValue());
+        list.forEach(e -> resultMap.put(e.getKey(), e.getValue()));
+
         return resultMap;
     }
 
@@ -708,8 +707,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return statusKeys;
     }
 
-    private void dogetXidsForTargetMapRecursive(Map<String, Long> targetMap, long start, long end,
-        long queryCount, List<List<String>> listList) {
+    private void dogetXidsForTargetMapRecursive(Map<String, Integer> targetMap, long start, long end,
+                                                long queryCount, List<List<String>> listList) {
 
         long total = listList.stream().mapToLong(List::size).sum();
 
@@ -718,6 +717,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         // when start greater than offset(totalCount)
         if (start >= queryCount) {
+            return;
+        }
+
+        if (targetMap.size() == 0) {
             return;
         }
 
@@ -735,8 +738,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 } else {
                     list = jedis.lrange(key, start, end);
                 }
+
                 if (list.size() > 0 && sum < queryCount) {
                     listList.add(list);
+                } else {
+                    if (list.size() == 0) {
+                        targetMap.remove(key);
+                    }
                 }
             }
         }
@@ -745,8 +753,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         dogetXidsForTargetMapRecursive(targetMap, startNew, endNew, queryCount, listList);
     }
 
-    private List<List<String>> dogetXidsForTargetMap(Map<String, Long> targetMap, int start, int end,
-        int totalCount) {
+    private List<List<String>> dogetXidsForTargetMap(Map<String, Integer> targetMap, int start, int end,
+                                                     int totalCount) {
         List<List<String>> listList = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (String key : targetMap.keySet()) {
