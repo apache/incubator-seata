@@ -71,6 +71,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static volatile CustomEurekaInstanceConfig instanceConfig;
     private static volatile EurekaRegistryServiceImpl instance;
     private static volatile EurekaClient eurekaClient;
+    private static volatile String clusterUpperName;
 
     private EurekaRegistryServiceImpl() {
     }
@@ -125,7 +126,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         if (clusterName == null) {
             return null;
         }
-        String clusterUpperName = clusterName.toUpperCase();
+        clusterUpperName = clusterName.toUpperCase();
         if (!subscribeListener) {
             refreshCluster(clusterUpperName);
             subscribe(null, event -> {
