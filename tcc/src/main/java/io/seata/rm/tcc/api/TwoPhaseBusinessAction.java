@@ -15,6 +15,8 @@
  */
 package io.seata.rm.tcc.api;
 
+import io.seata.rm.tcc.constant.ContextStoreConstant;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -73,6 +75,15 @@ public @interface TwoPhaseBusinessAction {
      * @return the boolean
      */
     boolean useTCCFence() default false;
+
+    /**
+     * The businessActionContext store type
+     * ContextStoreConstant.STORE_TYPE_TC : Save it in TC server
+     * ContextStoreConstant.STORE_TYPE_FENCE : Save it in fence_log table in local database
+     * We can support more storage by extending SPI
+     * @return the string of storeType
+     */
+    String contextStore() default ContextStoreConstant.STORE_TYPE_TC;
 
     /**
      * commit method's args
