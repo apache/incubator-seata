@@ -59,7 +59,6 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final long LISTENER_CONFIG_INTERVAL = 1 * 1000;
 
-    private static final String REGISTRY_TYPE = "file";
 
     public static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
@@ -86,6 +85,7 @@ public class FileConfiguration extends AbstractConfiguration {
         this.name = null;
         this.targetFilePath = null;
         this.allowDynamicRefresh = false;
+        CONFIG_TYPE = "file";
     }
 
     /**
@@ -277,10 +277,6 @@ public class FileConfiguration extends AbstractConfiguration {
         return configListenersMap.get(dataId);
     }
 
-    @Override
-    public String getTypeName() {
-        return REGISTRY_TYPE;
-    }
 
     /**
      * The type Config operate runnable.

@@ -59,7 +59,6 @@ import static io.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
 public class ZookeeperConfiguration extends AbstractConfiguration {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
 
-    private static final String CONFIG_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + SEATA_FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
@@ -90,6 +89,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
      */
     @SuppressWarnings("lgtm[java/unsafe-double-checked-locking-init-order]")
     public ZookeeperConfiguration() {
+        CONFIG_TYPE = "zk";
         if (zkClient == null) {
             synchronized (ZookeeperConfiguration.class) {
                 if (zkClient == null) {
@@ -113,10 +113,6 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         }
     }
 
-    @Override
-    public String getTypeName() {
-        return CONFIG_TYPE;
-    }
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {

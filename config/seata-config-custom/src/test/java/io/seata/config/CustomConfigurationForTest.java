@@ -30,11 +30,7 @@ public class CustomConfigurationForTest extends AbstractConfiguration {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String getTypeName() {
-        return "forTest";
+        CONFIG_TYPE = "forTest";
     }
 
     @Override

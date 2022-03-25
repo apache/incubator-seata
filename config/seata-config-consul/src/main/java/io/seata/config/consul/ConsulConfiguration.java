@@ -64,7 +64,6 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONSUL_CONFIG_KEY = "key";
-    private static final String CONFIG_TYPE = "consul";
     private static final String ACL_TOKEN = "aclToken";
     private static final String DEFAULT_CONSUL_CONFIG_KEY_VALUE = "seata.properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
@@ -82,11 +81,13 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private static final int DEFAULT_WATCH_TIMEOUT = 60;
     private static final long CAS = 0L;
 
+
     private ConsulConfiguration() {
         consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE,
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
                 new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
         initSeataConfig();
+        CONFIG_TYPE = "consul";
     }
 
     /**
@@ -205,10 +206,6 @@ public class ConsulConfiguration extends AbstractConfiguration {
         return CONFIG_LISTENERS_MAP.get(dataId);
     }
 
-    @Override
-    public String getTypeName() {
-        return CONFIG_TYPE;
-    }
 
     /**
      * get consul client
