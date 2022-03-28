@@ -170,7 +170,7 @@ public class DefaultRemotingParser {
         }
         remotingServiceMap.put(beanName, remotingBeanDesc);
 
-        Class<?> serviceClass = remotingBeanDesc.getInterfaceClass();
+        Class<?> serviceClass = remotingBeanDesc.getServiceClass();
         Method[] methods = serviceClass.getMethods();
         if (remotingParser.isService(bean, beanName)) {
             try {

@@ -52,8 +52,8 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         Class<?> classType = bean.getClass();
         // check if LocalTCC annotation is marked on the implementation class
         if (classType.isAnnotationPresent(LocalTCC.class)) {
-            remotingDesc.setInterfaceClass(AopProxyUtils.ultimateTargetClass(bean));
-            remotingDesc.setInterfaceClassName(remotingDesc.getInterfaceClass().getName());
+            remotingDesc.setServiceClass(AopProxyUtils.ultimateTargetClass(bean));
+            remotingDesc.setServiceClassName(remotingDesc.getServiceClass().getName());
             remotingDesc.setTargetBean(bean);
             return remotingDesc;
         }
@@ -61,8 +61,8 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
         for (Class<?> interClass : interfaceClasses) {
             if (interClass.isAnnotationPresent(LocalTCC.class)) {
-                remotingDesc.setInterfaceClassName(interClass.getName());
-                remotingDesc.setInterfaceClass(interClass);
+                remotingDesc.setServiceClassName(interClass.getName());
+                remotingDesc.setServiceClass(interClass);
                 remotingDesc.setTargetBean(bean);
                 return remotingDesc;
             }
