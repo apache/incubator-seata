@@ -236,7 +236,6 @@ type GlobalLockInfoState = {
           defaultCurrent={1}
           current={this.state.globalLockParam.pageNum}
           onChange={this.paginationOnChange}
-          hideOnlyOnePage
           pageSize={this.state.globalLockParam.pageSize}
           pageSizeSelector="dropdown"
           pageSizeList={[10, 20, 30, 40, 50]}
