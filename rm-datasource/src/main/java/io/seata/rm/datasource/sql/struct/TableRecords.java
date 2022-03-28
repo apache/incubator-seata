@@ -138,7 +138,7 @@ public class TableRecords implements java.io.Serializable {
      * Add row list
      * @param rows the row list
      */
-    public void addRows(List<Row> rows){
+    public void addRows(List<Row> rows) {
         rows.addAll(rows);
     }
 

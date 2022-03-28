@@ -74,9 +74,9 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
                 case INSERT:
-                    if(JdbcConstants.ORACLE.equals(statementProxy.getConnectionProxy().getDbType())){
+                    if (JdbcConstants.ORACLE.equals(statementProxy.getConnectionProxy().getDbType())) {
                         executor = new OracleMultiInsertExecutor<>(statementProxy,statementCallback,value);
-                    }else {
+                    } else {
                         throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
                     }
                     break;
@@ -102,9 +102,9 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
             switch (value.get(0).getSQLType()) {
                 case INSERT:
                     String dbType = statementProxy.getConnectionProxy().getDbType();
-                    if(JdbcConstants.ORACLE.equals(dbType)){
+                    if (JdbcConstants.ORACLE.equals(dbType)) {
                         executor = new OracleMultiInsertExecutor<>(statementProxy,statementCallback,value);
-                    }else {
+                    } else {
                         throw new UnsupportedOperationException("not support db type:" + dbType + " sql" + value.get(0).getOriginalSQL());
                     }
                     break;

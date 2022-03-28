@@ -19,8 +19,22 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.*;
-import com.alibaba.druid.sql.ast.statement.*;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
+import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
+import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
+import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
+import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
 
@@ -90,12 +104,12 @@ public abstract class BaseRecognizer implements SQLRecognizer {
     }
 
     protected void getInsertSelectColumns(SQLSelectQuery selectQuery, List<String> columns) {
-        if(selectQuery instanceof SQLUnionQuery) {
+        if (selectQuery instanceof SQLUnionQuery) {
             //a: get left(SQLSelectQueryBlock)
             List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) ((SQLUnionQuery)selectQuery).getLeft()).getSelectList();
             this.getColumnNames(selectItems,columns);
             //b:  get right(SQLUnionQuery)
-            if(((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
+            if (((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
                 this.getInsertSelectColumns(((SQLUnionQuery)selectQuery).getRight(),columns);
             }
             //b:  get right(SQLSelectQueryBlock)
@@ -107,7 +121,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         //SQLSelectQueryBlock
         else {
             //select * from (select * from dual union select * from dual)
-            if(((SQLSelectQueryBlock) selectQuery).getFrom() instanceof SQLSubqueryTableSource) {
+            if (((SQLSelectQueryBlock) selectQuery).getFrom() instanceof SQLSubqueryTableSource) {
                 this.getInsertSelectColumns(((SQLSubqueryTableSource)((SQLSelectQueryBlock) selectQuery).getFrom()).getSelect().getQuery(),columns);
             }
             //select * from dual
@@ -125,7 +139,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
                 columns.add(((SQLPropertyExpr) expr).getName());
             } else if (expr instanceof SQLIdentifierExpr) {
                 columns.add(((SQLIdentifierExpr) expr).getName());
-            }else {
+            } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
             }
         }

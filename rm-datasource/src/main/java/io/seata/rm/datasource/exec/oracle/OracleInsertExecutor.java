@@ -83,7 +83,7 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     @Override
     public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
         Map<String,List<Object>> pkValuesMap  = parsePkValuesFromStatement();
-        if(CollectionUtils.isEmpty(pkValuesMap)){
+        if (CollectionUtils.isEmpty(pkValuesMap)) {
             return pkValuesMap;
         }
         String pkKey = pkValuesMap.keySet().iterator().next();

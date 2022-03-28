@@ -112,7 +112,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     @Override
     public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
-        if(valuesClauses.isEmpty()) {
+        if (valuesClauses.isEmpty()) {
             return Collections.emptyList();
         }
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());

@@ -110,7 +110,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     @Override
     public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
-        if(valuesClauses.isEmpty()) {
+        if (valuesClauses.isEmpty()) {
             return Collections.emptyList();
         }
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
@@ -170,6 +170,11 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
             }
         }
         return list;
+    }
+
+    @Override
+    protected SQLStatement getAst() {
+        return this.ast;
     }
 
     @Override
