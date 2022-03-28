@@ -18,9 +18,11 @@ package io.seata.rm.datasource.exec.oracle;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.Sequenceable;
@@ -58,6 +60,11 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     }
 
     @Override
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        return super.afterImage(beforeImage);
+    }
+
+    @Override
     public Map<String,List<Object>> getPkValues() throws SQLException {
         Map<String,List<Object>> pkValuesMap = null;
         boolean isContainsPk = containsPK();
@@ -76,9 +83,11 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     @Override
     public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
         Map<String,List<Object>> pkValuesMap  = parsePkValuesFromStatement();
+        if(CollectionUtils.isEmpty(pkValuesMap)){
+            return pkValuesMap;
+        }
         String pkKey = pkValuesMap.keySet().iterator().next();
         List<Object> pkValues = pkValuesMap.get(pkKey);
-
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValuesMap.put(pkKey, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
         } else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {

@@ -59,4 +59,7 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @return the duplicateKey columns
      */
     List<String> getDuplicateKeyUpdate();
+
+    String getSubQuerySql();
+
 }

@@ -17,6 +17,7 @@ package io.seata.sqlparser.druid.oracle;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -26,8 +27,7 @@ import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.util.CollectionUtils;
@@ -92,8 +92,9 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     public List<String> getInsertColumns() {
         List<SQLExpr> columnSQLExprs = ast.getColumns();
         if (columnSQLExprs.isEmpty()) {
-            // INSERT INTO ta VALUES (...), without fields clarified
-            return null;
+            List<String> columns = new ArrayList<>();
+            this.getInsertSelectColumns(ast.getQuery().getQuery(),columns);
+            return columns;
         }
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
@@ -109,6 +110,9 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     @Override
     public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
+        if(valuesClauses.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
@@ -153,5 +157,10 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     @Override
     protected SQLStatement getAst() {
         return ast;
+    }
+
+    @Override
+    public String getSubQuerySql() {
+        return this.ast.getQuery().toString();
     }
 }

@@ -135,6 +135,14 @@ public class TableRecords implements java.io.Serializable {
     }
 
     /**
+     * Add row list
+     * @param rows the row list
+     */
+    public void addRows(List<Row> rows){
+        rows.addAll(rows);
+    }
+
+    /**
      * Pk rows list.
      *
      * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value

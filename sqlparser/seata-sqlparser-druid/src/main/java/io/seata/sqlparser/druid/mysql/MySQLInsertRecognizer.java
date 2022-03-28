@@ -17,6 +17,7 @@ package io.seata.sqlparser.druid.mysql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -91,8 +92,9 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     public List<String> getInsertColumns() {
         List<SQLExpr> columnSQLExprs = ast.getColumns();
         if (columnSQLExprs.isEmpty()) {
-            // INSERT INTO ta VALUES (...), without fields clarified
-            return null;
+            List<String> columns = new ArrayList<>();
+            this.getInsertSelectColumns(ast.getQuery().getQuery(),columns);
+            return columns;
         }
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
@@ -108,6 +110,9 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     @Override
     public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
+        if(valuesClauses.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
@@ -168,7 +173,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     }
 
     @Override
-    protected SQLStatement getAst() {
-        return ast;
+    public String getSubQuerySql() {
+        return this.ast.getQuery().toString();
     }
 }

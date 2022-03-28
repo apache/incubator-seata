@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.TreeSet;
-
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -421,6 +419,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
+        if(pkValuesMap.isEmpty()){
+            //1.insert into table select * from table1
+            //2.insert all into table select * from table1 (oracle)
+            return buildTableRecordsForValueEmpty(recognizer);
+        }
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
@@ -455,6 +458,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(getTableMeta(), rs);
         } finally {
+            IOUtil.close(rs);
+        }
+    }
+
+    private TableRecords buildTableRecordsForValueEmpty(SQLInsertRecognizer recognizer) throws SQLException {
+        String querySql = recognizer.getSubQuerySql();
+        ResultSet rs = null;
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(querySql)) {
+            rs = ps.executeQuery();
+            return TableRecords.buildRecords(getTableMeta(recognizer.getTableName()), rs);
+        }finally {
             IOUtil.close(rs);
         }
     }

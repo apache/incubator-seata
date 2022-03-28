@@ -19,21 +19,16 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
-import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.ast.expr.*;
+import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLRecognizer;
+
+import java.util.List;
 
 /**
  * The type Base recognizer.
@@ -92,6 +87,48 @@ public abstract class BaseRecognizer implements SQLRecognizer {
             throw new SQLParsingException("Unknown SQLExpr: " + e.getMessage(), e);
         }
         throw new SQLParsingException(errorMsg);
+    }
+
+    protected void getInsertSelectColumns(SQLSelectQuery selectQuery, List<String> columns) {
+        if(selectQuery instanceof SQLUnionQuery) {
+            //a: get left(SQLSelectQueryBlock)
+            List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) ((SQLUnionQuery)selectQuery).getLeft()).getSelectList();
+            this.getColumnNames(selectItems,columns);
+            //b:  get right(SQLUnionQuery)
+            if(((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
+                this.getInsertSelectColumns(((SQLUnionQuery)selectQuery).getRight(),columns);
+            }
+            //b:  get right(SQLSelectQueryBlock)
+            else {
+                selectItems = ((SQLSelectQueryBlock)((SQLUnionQuery)selectQuery).getRight()).getSelectList();
+                this.getColumnNames(selectItems,columns);
+            }
+        }
+        //SQLSelectQueryBlock
+        else {
+            //select * from (select * from dual union select * from dual)
+            if(((SQLSelectQueryBlock) selectQuery).getFrom() instanceof SQLSubqueryTableSource) {
+                this.getInsertSelectColumns(((SQLSubqueryTableSource)((SQLSelectQueryBlock) selectQuery).getFrom()).getSelect().getQuery(),columns);
+            }
+            //select * from dual
+            else {
+                List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) selectQuery).getSelectList();
+                this.getColumnNames(selectItems, columns);
+            }
+        }
+    }
+
+    protected void getColumnNames(List<SQLSelectItem> selectItems, List<String> columns) {
+        for (SQLSelectItem columnClause : selectItems) {
+            SQLExpr expr = columnClause.getExpr();
+            if (expr instanceof SQLPropertyExpr) {
+                columns.add(((SQLPropertyExpr) expr).getName());
+            } else if (expr instanceof SQLIdentifierExpr) {
+                columns.add(((SQLIdentifierExpr) expr).getName());
+            }else {
+                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+            }
+        }
     }
 
     public void executeLimit(SQLLimit sqlLimit, SQLASTVisitor visitor) {

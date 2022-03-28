@@ -142,10 +142,9 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         }
         Map<String, List<Object>> pkValuesMap = new HashMap<>();
         boolean ps = true;
+        List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
-
-            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             if (insertRows != null && !insertRows.isEmpty()) {
                 Map<Integer, ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
@@ -196,7 +195,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         } else {
             ps = false;
-            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             for (List<Object> row : insertRows) {
                 pkIndexMap.forEach((pkKey, pkIndex) -> {
                     List<Object> pkValues = pkValuesMap.get(pkKey);
@@ -209,7 +207,9 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         }
         if (pkValuesMap.isEmpty()) {
-            throw new ShouldNeverHappenException("pkValuesMap is empty");
+            //1.insert into table select * from table1
+            //2.insert all into table select * from table1 (oracle)
+            return pkValuesMap;
         }
         boolean b = this.checkPkValues(pkValuesMap, ps);
         if (!b) {

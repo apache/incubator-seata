@@ -17,10 +17,14 @@ package io.seata.sqlparser.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Type OracleOperateRecognizerHolder
@@ -51,5 +55,24 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
             return new OracleSelectForUpdateRecognizer(sql, ast);
         }
         return null;
+    }
+
+    @Override
+    public List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast) {
+        List<SQLRecognizer> sqlRecognizers = new ArrayList<>();
+        OracleMultiInsertStatement oracleAst = (OracleMultiInsertStatement)ast;
+        OracleMultiInsertStatement.Entry entry = (oracleAst).getEntries().get(0);
+        if (entry instanceof OracleMultiInsertStatement.ConditionalInsertClause) {
+            List<OracleMultiInsertStatement.ConditionalInsertClauseItem> clauseItems = ((OracleMultiInsertStatement.ConditionalInsertClause) oracleAst.getEntries().get(0)).getItems();
+            for(OracleMultiInsertStatement.ConditionalInsertClauseItem clauseItem : clauseItems){
+                sqlRecognizers.add(new OracleMultiInsertItemRecognizer(sql,ast,clauseItem));
+            }
+        } else if (entry instanceof OracleMultiInsertStatement.InsertIntoClause) {
+            List<OracleMultiInsertStatement.Entry> entries = oracleAst.getEntries();
+            for(OracleMultiInsertStatement.Entry entryItem : entries){
+                sqlRecognizers.add(new OracleMultiInsertItemRecognizer(sql,ast,entryItem));
+            }
+        }
+        return sqlRecognizers;
     }
 }

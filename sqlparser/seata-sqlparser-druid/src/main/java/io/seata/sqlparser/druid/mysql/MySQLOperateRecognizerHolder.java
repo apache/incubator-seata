@@ -22,6 +22,9 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * The class MySqlOperateRecognizerHolder
  *
@@ -51,5 +54,10 @@ public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder 
             return new MySQLSelectForUpdateRecognizer(sql, ast);
         }
         return null;
+    }
+
+    @Override
+    public List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast) {
+        return Collections.emptyList();
     }
 }

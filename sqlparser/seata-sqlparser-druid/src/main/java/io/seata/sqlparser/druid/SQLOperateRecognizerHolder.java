@@ -18,6 +18,8 @@ package io.seata.sqlparser.druid;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.SQLRecognizer;
 
+import java.util.List;
+
 /**
  * The interface SQLOperateRecognizerHolder
  *
@@ -60,5 +62,13 @@ public interface SQLOperateRecognizerHolder {
      * @return the SelectForUpdate recognizer
      */
     SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
+
+    /**
+     * Get MultiInsert recognizer
+     * @param sql the sql
+     * @param ast the ast
+     * @return the MultiInsert recognizer list
+     */
+    List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast);
 
 }
