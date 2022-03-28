@@ -22,6 +22,7 @@ import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
+import org.springframework.aop.framework.AopProxyUtils;
 
 /**
  * local tcc bean parsing
@@ -51,6 +52,8 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         Class<?> classType = bean.getClass();
         // check if LocalTCC annotation is marked on the implementation class
         if (classType.isAnnotationPresent(LocalTCC.class)) {
+            remotingDesc.setInterfaceClass(AopProxyUtils.ultimateTargetClass(bean));
+            remotingDesc.setInterfaceClassName(remotingDesc.getInterfaceClass().getName());
             remotingDesc.setTargetBean(bean);
             return remotingDesc;
         }

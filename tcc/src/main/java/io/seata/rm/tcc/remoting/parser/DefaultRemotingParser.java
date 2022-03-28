@@ -170,16 +170,9 @@ public class DefaultRemotingParser {
         }
         remotingServiceMap.put(beanName, remotingBeanDesc);
 
+        Class<?> serviceClass = remotingBeanDesc.getInterfaceClass();
+        Method[] methods = serviceClass.getMethods();
         if (remotingParser.isService(bean, beanName)) {
-            Class<?> interfaceClass;
-            if (remotingBeanDesc.getInterfaceClass() == null) {
-                // LocalTCC annotation is marked on the impl class
-                interfaceClass = remotingBeanDesc.getTargetBean().getClass();
-            } else {
-                // LocalTCC annotation is marked on the interface class
-                interfaceClass = remotingBeanDesc.getInterfaceClass();
-            }
-            Method[] methods = interfaceClass.getMethods();
             try {
                 //service bean, registry resource
                 Object targetBean = remotingBeanDesc.getTargetBean();
@@ -191,10 +184,10 @@ public class DefaultRemotingParser {
                         tccResource.setTargetBean(targetBean);
                         tccResource.setPrepareMethod(m);
                         tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                        tccResource.setCommitMethod(interfaceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                        tccResource.setCommitMethod(serviceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
                                 twoPhaseBusinessAction.commitArgsClasses()));
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                        tccResource.setRollbackMethod(interfaceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                        tccResource.setRollbackMethod(serviceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
                                 twoPhaseBusinessAction.rollbackArgsClasses()));
                         // set argsClasses
                         tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
