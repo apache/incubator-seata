@@ -683,7 +683,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param values
      * @return Long
      */
-    public Long countByClobalSesisons(GlobalStatus[] values) {
+    public Long countByGlobalSessions(GlobalStatus[] values) {
         List<String> statusKeys = new ArrayList<>();
         Long total = 0L;
         for (GlobalStatus status : values) {

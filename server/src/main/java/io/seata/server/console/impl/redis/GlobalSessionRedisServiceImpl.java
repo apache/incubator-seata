@@ -65,7 +65,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         checkPage(param);
 
         if (isBlank(param.getXid()) && param.getStatus() == null) {
-            total = instance.countByClobalSesisons(GlobalStatus.values());
+            total = instance.countByGlobalSessions(GlobalStatus.values());
             globalSessions = instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(),param.isWithBranch());
         } else {
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
@@ -82,7 +82,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
                     globalSessionsNew = globalSessions.stream().filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus())).collect(Collectors.toList());
                     total = (long)globalSessionsNew.size();
                 } else {
-                    total = instance.countByClobalSesisons(new GlobalStatus[]{GlobalStatus.get(param.getStatus())});
+                    total = instance.countByGlobalSessions(new GlobalStatus[] {GlobalStatus.get(param.getStatus())});
                     globalSessionsNew = instance.readSessionStatusByPage(param);
                 }
             }

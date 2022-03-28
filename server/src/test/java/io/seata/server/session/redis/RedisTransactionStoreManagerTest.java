@@ -207,7 +207,7 @@ public class RedisTransactionStoreManagerTest {
 
     @Test
     public void testQueryGlobalslSession() {
-        Long count = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
+        Long count = redisTransactionStoreManager.countByGlobalSessions(GlobalStatus.values());
         LOGGER.info("the count is:[{}]",count);
     }
 
