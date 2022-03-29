@@ -39,6 +39,11 @@ public interface MeterIdConstants {
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
 
+    Id COUNTER_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+        .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+        .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+        .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_FAILED);
+
     Id SUMMARY_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
