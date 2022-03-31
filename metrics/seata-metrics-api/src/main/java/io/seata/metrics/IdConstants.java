@@ -69,4 +69,6 @@ public interface IdConstants {
 
     String STATUS_VALUE_FAILED = "failed";
 
+    String STATUS_VALUE_2PHASE_TIMEOUT = "2phase.timeout";
+
 }

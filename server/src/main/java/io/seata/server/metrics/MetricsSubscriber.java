@@ -114,12 +114,12 @@ public class MetricsSubscriber {
 
     private void processGlobalStatusTimeoutRollbackFailed(GlobalTransactionEvent event) {
         decreaseActive(event);
-        increaseFail(event);
+        increaseTimeout(event);
     }
 
     private void processGlobalStatusCommitRetryTimeout(GlobalTransactionEvent event) {
         decreaseActive(event);
-        increaseFail(event);
+        increaseTimeout(event);
     }
 
     private void processGlobalStatusTimeoutRollbackRetryTimeout(GlobalTransactionEvent event) {
@@ -128,6 +128,12 @@ public class MetricsSubscriber {
 
     private void increaseFail(GlobalTransactionEvent event) {
         registry.getCounter(MeterIdConstants.COUNTER_FAILED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void increaseTimeout(GlobalTransactionEvent event) {
+        registry.getCounter(MeterIdConstants.COUNTER_2PHASE_TIMEOUT
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
