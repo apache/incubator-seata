@@ -16,13 +16,10 @@
 package io.seata.server.session;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import javax.ws.rs.HEAD;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
 import io.seata.core.model.LockStatus;
@@ -38,7 +35,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.LockStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.StoreMode;

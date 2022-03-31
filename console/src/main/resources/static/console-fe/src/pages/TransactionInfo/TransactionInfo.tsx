@@ -536,7 +536,6 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           defaultCurrent={1}
           current={this.state.globalSessionParam.pageNum}
           onChange={this.paginationOnChange}
-          hideOnlyOnePage
           pageSize={this.state.globalSessionParam.pageSize}
           pageSizeSelector="dropdown"
           pageSizeList={[10, 20, 30, 40, 50]}
