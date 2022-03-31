@@ -90,7 +90,7 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
      * @param bean           the bean
      * @param beanName       the bean name
      * @param field          the field
-     * @param serviceClass the serviceClass
+     * @param serviceClass   the serviceClass
      * @throws IllegalAccessException the illegal access exception
      */
     public void addTccAdvise(Object bean, String beanName, Field field, Class serviceClass) throws IllegalAccessException {
