@@ -66,5 +66,10 @@
             <artifactId>seata-discovery-sofa</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-discovery-servicecomb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -18,43 +18,32 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
-        <artifactId>seata-config</artifactId>
+        <artifactId>seata-discovery</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-config-all</artifactId>
-    <name>seata-config-all ${project.version}</name>
+    <artifactId>seata-discovery-servicecomb</artifactId>
+    <name>seata-discovery-servicecomb ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-apollo</artifactId>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-discovery-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-zk</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-nacos</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.servicecomb</groupId>
+            <artifactId>service-center-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-etcd3</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-consul</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-spring-cloud</artifactId>
-            <version>${project.version}</version>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -62,5 +51,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
 </project>

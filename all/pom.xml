@@ -146,6 +146,16 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-discovery-servicecomb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-config-servicecomb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-brpc</artifactId>
             <version>${project.version}</version>
         </dependency>

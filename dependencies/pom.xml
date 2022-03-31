@@ -110,6 +110,7 @@
         <junit-platform.version>1.8.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
+        <servicecomb.version>2.6.0</servicecomb.version>
     </properties>
 
     <dependencyManagement>
@@ -653,6 +654,13 @@
                         <groupId>org.glassfish.jersey</groupId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicecomb</groupId>
+                <artifactId>java-chassis-bom</artifactId>
+                <version>${servicecomb.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

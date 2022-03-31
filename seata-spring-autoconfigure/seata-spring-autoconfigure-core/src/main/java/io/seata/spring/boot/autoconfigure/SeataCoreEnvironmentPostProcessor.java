@@ -27,6 +27,7 @@ import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Propertie
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigServicecombProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
@@ -35,6 +36,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProp
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryServicecombProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
 import org.springframework.boot.SpringApplication;
@@ -49,6 +51,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_P
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_SERVICECOMB_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
@@ -59,6 +62,11 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREK
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SERVICECOMB_ACCOUNT_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SERVICECOMB_HEALTHCHECK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SERVICECOMB_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SERVICECOMB_PULL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SERVICECOMB_SSL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
@@ -96,6 +104,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(CONFIG_APOLLO_PREFIX, ConfigApolloProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_CUSTOM_PREFIX, ConfigCustomProperties.class);
+            PROPERTY_BEAN_MAP.put(CONFIG_SERVICECOMB_PREFIX, ConfigServicecombProperties.class);
 
             PROPERTY_BEAN_MAP.put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);
@@ -105,6 +114,11 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_CUSTOM_PREFIX, RegistryCustomProperties.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_SERVICECOMB_PREFIX, RegistryServicecombProperties.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_SERVICECOMB_HEALTHCHECK_PREFIX, RegistryServicecombProperties.HealthCheck.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_SERVICECOMB_SSL_PREFIX, RegistryServicecombProperties.Ssl.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_SERVICECOMB_PULL_PREFIX, RegistryServicecombProperties.Pull.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_SERVICECOMB_ACCOUNT_PREFIX, RegistryServicecombProperties.Account.class);
 
             PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);

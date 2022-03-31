@@ -50,6 +50,10 @@ public enum ConfigType {
      */
     SpringCloudConfig,
     /**
+     * Servicecomb config type
+     */
+    Servicecomb,
+    /**
      * Custom config type
      */
     Custom;
