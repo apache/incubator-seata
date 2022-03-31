@@ -16,7 +16,10 @@
 package io.seata.sqlparser.druid.mysql;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
@@ -30,8 +33,7 @@ import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
-import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-import io.seata.common.exception.NotSupportYetException;
+import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -44,6 +46,8 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
 public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpdateRecognizer {
 
     private MySqlUpdateStatement ast;
+
+    private Map<String, String> tableName2AliasMap = new HashMap<>(4);
 
     /**
      * Instantiates a new My sql update recognizer.
@@ -122,30 +126,21 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
 
     @Override
     public String getTableName() {
-        StringBuilder sb = new StringBuilder();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLExprTableSource x) {
-                printTableSourceExpr(x.getExpr());
-                return false;
-            }
-
-            @Override
-            public boolean visit(SQLJoinTableSource x) {
-                throw new NotSupportYetException("not support the syntax of update with join table");
-            }
-        };
-
-        SQLTableSource tableSource = ast.getTableSource();
+        SQLTableSource tableSource = this.ast.getTableSource();
         if (tableSource instanceof SQLExprTableSource) {
-            visitor.visit((SQLExprTableSource) tableSource);
-        } else if (tableSource instanceof SQLJoinTableSource) {
-            visitor.visit((SQLJoinTableSource) tableSource);
+            return visitTableName((SQLExprTableSource) tableSource);
         } else {
-            throw new NotSupportYetException("not support the syntax of update with unknow");
+            StringBuilder joinTables = new StringBuilder();
+            joinTables.append(tableSource.toString());
+            tableName2AliasMap.put(tableSource.toString(), tableSource.getAlias());
+            this.getTableNames(tableSource, joinTables);
+            return joinTables.toString();
         }
-        return sb.toString();
+    }
+
+    @Override
+    public String getTableAlias(String tableName) {
+        return tableName2AliasMap.get(tableName);
     }
 
     @Override
@@ -175,5 +170,49 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     @Override
     protected SQLStatement getAst() {
         return ast;
+    }
+
+    private void getTableNames(SQLTableSource tableSource, StringBuilder tableNames) {
+        if (tableSource instanceof SQLJoinTableSource) {
+            //a:get left
+            SQLTableSource left = ((SQLJoinTableSource) tableSource).getLeft();
+            if (left instanceof SQLJoinTableSource) {
+                this.getTableNames(left, tableNames);
+            } else {
+                tableNames.append(MULTI_TABLE_NAME_SEPERATOR);
+                String tableName = visitTableName((SQLExprTableSource) left);
+                tableNames.append(tableName);
+                tableName2AliasMap.put(tableName, left.getAlias());
+            }
+            //b:get right
+            SQLTableSource right = ((SQLJoinTableSource) tableSource).getRight();
+            if (right instanceof SQLJoinTableSource) {
+                this.getTableNames(right, tableNames);
+            } else {
+                tableNames.append(MULTI_TABLE_NAME_SEPERATOR);
+                String tableName = visitTableName((SQLExprTableSource) right);
+                tableNames.append(tableName);
+                tableName2AliasMap.put(tableName, left.getAlias());
+            }
+        } else {
+            tableNames.append(MULTI_TABLE_NAME_SEPERATOR);
+            String tableName = visitTableName((SQLExprTableSource) tableSource);
+            tableNames.append(tableName);
+            tableName2AliasMap.put(tableName, tableSource.getAlias());
+        }
+    }
+
+    private String visitTableName(SQLExprTableSource tableSource) {
+        StringBuilder tableName = new StringBuilder();
+        OracleOutputVisitor visitor = new OracleOutputVisitor(tableName) {
+
+            @Override
+            public boolean visit(SQLExprTableSource x) {
+                printTableSourceExpr(x.getExpr());
+                return false;
+            }
+        };
+        visitor.visit(tableSource);
+        return tableName.toString();
     }
 }

@@ -19,13 +19,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.StringJoiner;
-import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.TreeSet;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -206,6 +206,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
+     * Gets column name in sql.
+     *
+     * @param tableAlias the tableAlias
+     * @param columnName the column name
+     * @return the column name in sql
+     */
+    protected String getColumnNameInSQL(String tableAlias,String columnName) {
+        return tableAlias == null ? columnName : tableAlias + "." + columnName;
+    }
+
+    /**
      * Gets several column name in sql.
      *
      * @param columnNameList the column name
@@ -221,6 +232,27 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 columnNamesStr.append(" , ");
             }
             columnNamesStr.append(getColumnNameInSQL(columnNameList.get(i)));
+        }
+        return columnNamesStr.toString();
+    }
+
+    /**
+     * Gets several column name in sql.
+     *
+     * @param tableAlias the table alias
+     * @param columnNameList the column name
+     * @return the column name in sql
+     */
+    protected String getColumnNamesInSQL(String tableAlias,List<String> columnNameList) {
+        if (Objects.isNull(columnNameList) || columnNameList.isEmpty()) {
+            return null;
+        }
+        StringBuilder columnNamesStr = new StringBuilder();
+        for (int i = 0; i < columnNameList.size(); i++) {
+            if (i > 0) {
+                columnNamesStr.append(" , ");
+            }
+            columnNamesStr.append(getColumnNameInSQL(tableAlias,columnNameList.get(i)));
         }
         return columnNamesStr.toString();
     }
@@ -273,6 +305,21 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
         return getTableMeta().containsPK(newColumns);
+    }
+
+    /**
+     * the columns contains table meta pk
+     *
+     * @param tableName the tableName
+     * @param columns the column name list
+     * @return true: contains pk false: not contains pk
+     */
+    protected boolean containsPK(String tableName,List<String> columns){
+        if (columns == null || columns.isEmpty()) {
+            return false;
+        }
+        List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
+        return getTableMeta(tableName).containsPK(newColumns);
     }
 
 
@@ -421,11 +468,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
-        if (pkValuesMap.isEmpty()) {
-            //1.insert into table select * from table1
-            //2.insert all into table select * from table1 (oracle)
-            return buildTableRecordsForValueEmpty(recognizer);
-        }
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
@@ -459,17 +501,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
             rs = ps.executeQuery();
             return TableRecords.buildRecords(getTableMeta(), rs);
-        } finally {
-            IOUtil.close(rs);
-        }
-    }
-
-    private TableRecords buildTableRecordsForValueEmpty(SQLInsertRecognizer recognizer) throws SQLException {
-        String querySql = recognizer.getSubQuerySql();
-        ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(querySql)) {
-            rs = ps.executeQuery();
-            return TableRecords.buildRecords(getTableMeta(recognizer.getTableName()), rs);
         } finally {
             IOUtil.close(rs);
         }

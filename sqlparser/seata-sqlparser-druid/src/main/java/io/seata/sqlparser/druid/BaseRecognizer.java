@@ -19,30 +19,29 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
-import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
-import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
-import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
-import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
-import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
+import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLUpdateRecognizer;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The type Base recognizer.
@@ -66,6 +65,8 @@ public abstract class BaseRecognizer implements SQLRecognizer {
      * The Original sql.
      */
     protected String originalSQL;
+
+    private Map<String, String> updateTableName2AliasMap = new HashMap<>(4);
 
     /**
      * Instantiates a new Base recognizer.
@@ -101,48 +102,6 @@ public abstract class BaseRecognizer implements SQLRecognizer {
             throw new SQLParsingException("Unknown SQLExpr: " + e.getMessage(), e);
         }
         throw new SQLParsingException(errorMsg);
-    }
-
-    protected void getInsertSelectColumns(SQLSelectQuery selectQuery, List<String> columns) {
-        if (selectQuery instanceof SQLUnionQuery) {
-            //a: get left(SQLSelectQueryBlock)
-            List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) ((SQLUnionQuery)selectQuery).getLeft()).getSelectList();
-            this.getColumnNames(selectItems,columns);
-            //b:  get right(SQLUnionQuery)
-            if (((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
-                this.getInsertSelectColumns(((SQLUnionQuery)selectQuery).getRight(),columns);
-            }
-            //b:  get right(SQLSelectQueryBlock)
-            else {
-                selectItems = ((SQLSelectQueryBlock)((SQLUnionQuery)selectQuery).getRight()).getSelectList();
-                this.getColumnNames(selectItems,columns);
-            }
-        }
-        //SQLSelectQueryBlock
-        else {
-            //select * from (select * from dual union select * from dual)
-            if (((SQLSelectQueryBlock) selectQuery).getFrom() instanceof SQLSubqueryTableSource) {
-                this.getInsertSelectColumns(((SQLSubqueryTableSource)((SQLSelectQueryBlock) selectQuery).getFrom()).getSelect().getQuery(),columns);
-            }
-            //select * from dual
-            else {
-                List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) selectQuery).getSelectList();
-                this.getColumnNames(selectItems, columns);
-            }
-        }
-    }
-
-    protected void getColumnNames(List<SQLSelectItem> selectItems, List<String> columns) {
-        for (SQLSelectItem columnClause : selectItems) {
-            SQLExpr expr = columnClause.getExpr();
-            if (expr instanceof SQLPropertyExpr) {
-                columns.add(((SQLPropertyExpr) expr).getName());
-            } else if (expr instanceof SQLIdentifierExpr) {
-                columns.add(((SQLIdentifierExpr) expr).getName());
-            } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
-            }
-        }
     }
 
     public void executeLimit(SQLLimit sqlLimit, SQLASTVisitor visitor) {
@@ -210,5 +169,62 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         };
         getAst().accept(visitor);
         return true;
+    }
+
+    protected String getUpdateTableName(SQLUpdateStatement ast){
+        SQLTableSource tableSource = ast.getTableSource();
+        if (tableSource instanceof SQLExprTableSource) {
+            return visitTableName((SQLExprTableSource) tableSource);
+        } else {
+            StringBuilder joinTables = new StringBuilder();
+            joinTables.append(tableSource.toString());
+            updateTableName2AliasMap.put(tableSource.toString(), tableSource.getAlias());
+            this.getTableNames(tableSource, joinTables);
+            return joinTables.toString();
+        }
+    }
+
+    private void getTableNames(SQLTableSource tableSource, StringBuilder tableNames) {
+        if (tableSource instanceof SQLJoinTableSource) {
+            //a:get left
+            SQLTableSource left = ((SQLJoinTableSource) tableSource).getLeft();
+            if (left instanceof SQLJoinTableSource) {
+                this.getTableNames(left, tableNames);
+            } else {
+                tableNames.append(SQLUpdateRecognizer.MULTI_TABLE_NAME_SEPERATOR);
+                String tableName = visitTableName((SQLExprTableSource) left);
+                tableNames.append(tableName);
+                updateTableName2AliasMap.put(tableName, left.getAlias());
+            }
+            //b:get right
+            SQLTableSource right = ((SQLJoinTableSource) tableSource).getRight();
+            if (right instanceof SQLJoinTableSource) {
+                this.getTableNames(right, tableNames);
+            } else {
+                tableNames.append(SQLUpdateRecognizer.MULTI_TABLE_NAME_SEPERATOR);
+                String tableName = visitTableName((SQLExprTableSource) right);
+                tableNames.append(tableName);
+                updateTableName2AliasMap.put(tableName, left.getAlias());
+            }
+        } else {
+            tableNames.append(SQLUpdateRecognizer.MULTI_TABLE_NAME_SEPERATOR);
+            String tableName = visitTableName((SQLExprTableSource) tableSource);
+            tableNames.append(tableName);
+            updateTableName2AliasMap.put(tableName, tableSource.getAlias());
+        }
+    }
+
+    private String visitTableName(SQLExprTableSource tableSource) {
+        StringBuilder tableName = new StringBuilder();
+        OracleOutputVisitor visitor = new OracleOutputVisitor(tableName) {
+
+            @Override
+            public boolean visit(SQLExprTableSource x) {
+                printTableSourceExpr(x.getExpr());
+                return false;
+            }
+        };
+        visitor.visit(tableSource);
+        return tableName.toString();
     }
 }
