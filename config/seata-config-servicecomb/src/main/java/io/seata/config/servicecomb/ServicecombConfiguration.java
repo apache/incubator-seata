@@ -64,19 +64,7 @@ public class ServicecombConfiguration extends AbstractConfiguration {
         ConcurrentMap<ConfigurationChangeListener, ConfigurationChangeListener>> CONFIG_LISTENERS_MAP =
             new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile ServicecombConfiguration instance;
-
-    volatile ConfigCenterManager configCenterManager;
-
-    volatile KieConfigManager kieConfigManager;
-
-    HttpTransport httpTransport;
-
-    private boolean isKie = false;
-
-    private KieConfiguration kieConfiguration;
-
     private ConfigConverter configConverter;
-
     private Configuration properties = ConfigurationFactory.CURRENT_FILE_INSTANCE;
 
     /**
@@ -196,19 +184,27 @@ public class ServicecombConfiguration extends AbstractConfiguration {
     }
 
     private void initClient(Configuration properties) {
-        isKie = SeataServicecombKeys.KIE
+        boolean isKie = SeataServicecombKeys.KIE
             .equals(properties.getConfig(SeataServicecombKeys.KEY_CONFIG_ADDRESSTYPE, SeataServicecombKeys.KIE));
         RequestConfig.Builder config = HttpTransportFactory.defaultRequestConfig();
-
-        this.setTimeOut(config);
-
-        httpTransport = HttpTransportFactory.createHttpTransport(AuthHeaderProviders.createSslProperties(properties),
-            AuthHeaderProviders.getRequestAuthHeaderProvider(), config.build());
+        if (isKie) {
+            String test =
+                properties.getConfig(SeataServicecombKeys.KEY_SERVICE_ENABLELONGPOLLING, SeataServicecombKeys.TRUE);
+            if (Boolean.parseBoolean(test)) {
+                int pollingWaitInSeconds =
+                    Integer.valueOf(properties.getConfig(SeataServicecombKeys.KEY_SERVICE_POLLINGWAITSEC,
+                        SeataServicecombKeys.DEFAULT_SERVICE_POLLINGWAITSEC));
+                config.setSocketTimeout(pollingWaitInSeconds * 1000 + 5000);
+            }
+        }
+        HttpTransport httpTransport =
+            HttpTransportFactory.createHttpTransport(AuthHeaderProviders.createSslProperties(properties),
+                AuthHeaderProviders.getRequestAuthHeaderProvider(), config.build());
 
         if (isKie) {
-            configKieClient(properties);
+            configKieClient(properties, httpTransport);
         } else {
-            configCenterClient(properties);
+            configCenterClient(properties, httpTransport);
         }
     }
 
@@ -223,7 +219,7 @@ public class ServicecombConfiguration extends AbstractConfiguration {
         return configConverter;
     }
 
-    private void configCenterClient(Configuration properties) {
+    private void configCenterClient(Configuration properties, HttpTransport httpTransport) {
         QueryConfigurationsRequest queryConfigurationsRequest = createQueryConfigurationsRequest();
         AddressManager addressManager = createAddressManager();
         if (addressManager == null) {
@@ -241,14 +237,15 @@ public class ServicecombConfiguration extends AbstractConfiguration {
         } catch (Exception e) {
             LOGGER.warn("set up Servicesomb configuration failed at startup.", e);
         }
-        configCenterManager = new ConfigCenterManager(configCenterClient, EventManager.getEventBus(), configConverter);
+        ConfigCenterManager configCenterManager =
+            new ConfigCenterManager(configCenterClient, EventManager.getEventBus(), configConverter);
         configCenterManager.setQueryConfigurationsRequest(queryConfigurationsRequest);
         configCenterManager.startConfigCenterManager();
     }
 
-    private void configKieClient(Configuration properties) {
+    private void configKieClient(Configuration properties, HttpTransport httpTransport) {
 
-        kieConfiguration = createKieConfiguration();
+        KieConfiguration kieConfiguration = createKieConfiguration();
 
         KieAddressManager kieAddressManager = createKieAddressManager();
         if (kieAddressManager == null) {
@@ -258,24 +255,10 @@ public class ServicecombConfiguration extends AbstractConfiguration {
 
         KieClient kieClient = new KieClient(kieAddressManager, httpTransport, kieConfiguration);
 
-        kieConfigManager =
+        KieConfigManager kieConfigManager =
             new KieConfigManager(kieClient, EventManager.getEventBus(), kieConfiguration, configConverter);
         kieConfigManager.firstPull();
         kieConfigManager.startConfigKieManager();
-    }
-
-    private void setTimeOut(RequestConfig.Builder config) {
-        if (!isKie) {
-            return;
-        }
-        String test =
-            properties.getConfig(SeataServicecombKeys.KEY_SERVICE_ENABLELONGPOLLING, SeataServicecombKeys.TRUE);
-        if (Boolean.parseBoolean(test)) {
-            int pollingWaitInSeconds =
-                Integer.valueOf(properties.getConfig(SeataServicecombKeys.KEY_SERVICE_POLLINGWAITSEC,
-                    SeataServicecombKeys.DEFAULT_SERVICE_POLLINGWAITSEC));
-            config.setSocketTimeout(pollingWaitInSeconds * 1000 + 5000);
-        }
     }
 
     private AddressManager createAddressManager() {
