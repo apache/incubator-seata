@@ -37,7 +37,8 @@ import javax.sql.DataSource;
  * @author kaka2code
  */
 @ConditionalOnExpression("${seata.enabled:true}")
-@ConditionalOnClass(name = {"org.springframework.transaction.PlatformTransactionManager"})
+@ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})
+@ConditionalOnMissingBean(TCCFenceConfig.class)
 @AutoConfigureAfter({SeataCoreAutoConfiguration.class, DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 public class SeataTCCFenceAutoConfiguration {
 
@@ -45,8 +46,6 @@ public class SeataTCCFenceAutoConfiguration {
     public static final String TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataTCCFenceTransactionManager";
 
     @Bean
-    @ConditionalOnMissingBean(TCCFenceConfig.class)
-    @ConditionalOnBean({DataSource.class, PlatformTransactionManager.class})
     @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
     public TCCFenceConfig tccFenceConfig(
             DataSource dataSource,
