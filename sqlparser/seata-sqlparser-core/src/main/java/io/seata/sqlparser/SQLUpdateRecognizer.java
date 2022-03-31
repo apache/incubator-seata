@@ -44,7 +44,7 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
      * @param tableName the update join item table source name
      * @return the update join item table alias name
      */
-    default String getTableAlias(String tableName){
+    default String getTableAlias(String tableName) {
         return null;
     }
 

@@ -171,7 +171,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         return true;
     }
 
-    protected String getUpdateTableName(SQLUpdateStatement ast){
+    protected String getUpdateTableName(SQLUpdateStatement ast) {
         SQLTableSource tableSource = ast.getTableSource();
         if (tableSource instanceof SQLExprTableSource) {
             return visitTableName((SQLExprTableSource) tableSource);
