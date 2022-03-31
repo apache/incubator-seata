@@ -16,19 +16,23 @@
 package io.seata.server.session.redis;
 
 import java.io.IOException;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.github.fppt.jedismock.RedisServer;
+import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
+import io.seata.core.exception.TransactionException;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,7 +44,7 @@ import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Pipeline;
+import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
  * @author doubleDimple
@@ -52,6 +56,7 @@ public class RedisTransactionStoreManagerTest {
 
     private static RedisServer server = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
+    private static SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
@@ -62,39 +67,116 @@ public class RedisTransactionStoreManagerTest {
         poolConfig.setMaxIdle(10);
         JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
+        RedisSessionManager redisSessionManager = new RedisSessionManager();
+        redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
+        sessionManager = redisSessionManager;
     }
 
     @Test
-    public void testInsertGlobalSessionData(){
-        GlobalStatus[] values = GlobalStatus.values();
-        for (int i = 0;i<15;i++) {
-            GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-            globalTransactionDO.setXid("123123123123"+i);
-            globalTransactionDO.setStatus(values[i].getCode());
-            globalTransactionDO.setApplicationId("test_"+i);
-            globalTransactionDO.setTransactionServiceGroup("redis-group");
-            globalTransactionDO.setTransactionName("test-redis");
-            globalTransactionDO.setTimeout(30);
-            globalTransactionDO.setBeginTime(System.currentTimeMillis());
-            globalTransactionDO.setTransactionId(i);
-            globalTransactionDO.setApplicationData("123");
-            globalTransactionDO.setGmtCreate(new Date());
-            globalTransactionDO.setGmtModified(new Date());
-            globalTransactionDO.setTransactionId(12312342l);
-            globalTransactionDO.setBeginTime(System.currentTimeMillis());
-            String globalKey = "SEATA_GLOBAL_"+"test_"+i;
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                Date now = new Date();
-                globalTransactionDO.setGmtCreate(now);
-                globalTransactionDO.setGmtModified(now);
-                Pipeline pipelined = jedis.pipelined();
-                pipelined.hmset(globalKey, BeanUtils.objectToMap(globalTransactionDO));
-                pipelined.rpush("SEATA_STATUS_"+(globalTransactionDO.getStatus()), globalTransactionDO.getXid());
-                pipelined.sync();
-            } catch (Exception ex) {
-                throw new RedisException(ex);
-            }
-        }
+    public void testInsertGlobalSessionDataAndQuery() throws TransactionException {
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
+        String xid = XID.generateXID(session.getTransactionId());
+        session.setXid(xid);
+        session.setTransactionId(session.getTransactionId());
+        session.setBeginTime(System.currentTimeMillis());
+        session.setApplicationData("abc=878s");
+        session.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session);
+
+        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 100);
+        String xid1 = XID.generateXID(session1.getTransactionId());
+        session1.setXid(xid1);
+        session1.setTransactionId(session1.getTransactionId());
+        session1.setBeginTime(System.currentTimeMillis());
+        session1.setApplicationData("abc=878s1");
+        session1.setStatus(GlobalStatus.UnKnown);
+        sessionManager.addGlobalSession(session1);
+
+        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 100);
+        String xid2 = XID.generateXID(session2.getTransactionId());
+        session2.setXid(xid2);
+        session2.setTransactionId(session2.getTransactionId());
+        session2.setBeginTime(System.currentTimeMillis());
+        session2.setApplicationData("abc1=878s2");
+        session2.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session2);
+
+        GlobalSession session3 = GlobalSession.createGlobalSession("test5", "test6", "test003", 100);
+        String xid3 = XID.generateXID(session3.getTransactionId());
+        session3.setXid(xid3);
+        session3.setTransactionId(session3.getTransactionId());
+        session3.setBeginTime(System.currentTimeMillis());
+        session3.setApplicationData("abc2=878s3");
+        session3.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session3);
+
+        GlobalSession session4 = GlobalSession.createGlobalSession("test7", "test8", "test004", 100);
+        String xid4 = XID.generateXID(session4.getTransactionId());
+        session4.setXid(xid4);
+        session4.setTransactionId(session4.getTransactionId());
+        session4.setBeginTime(System.currentTimeMillis());
+        session4.setApplicationData("abc3=878s1");
+        session4.setStatus(GlobalStatus.Finished);
+        sessionManager.addGlobalSession(session4);
+
+        GlobalSession session5 = GlobalSession.createGlobalSession("test9", "test10", "test005", 100);
+        String xid5 = XID.generateXID(session5.getTransactionId());
+        session5.setXid(xid5);
+        session5.setTransactionId(session5.getTransactionId());
+        session5.setBeginTime(System.currentTimeMillis());
+        session5.setApplicationData("abc3=878s1");
+        session5.setStatus(GlobalStatus.Finished);
+        sessionManager.addGlobalSession(session5);
+
+        //first:  setLogQueryLimit > totalCount
+        //second: setLogQueryLimit = totalCount
+        //third:  setLogQueryLimit < totalCount
+        redisTransactionStoreManager.setLogQueryLimit(3);
+        List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), false);
+        LOGGER.info("the limit  Sessions result is:[{}]",globalSessions);
+        LOGGER.info("the limit  Sessions result size is:[{}]",globalSessions.size());
+
+        //first page
+        final List<GlobalSession> globalSessions1 = redisTransactionStoreManager.findGlobalSessionByPage(1, 2, true);
+        List<GlobalSessionVO> result = new ArrayList<>();
+        convertToGlobalSessionVo(result,globalSessions1);
+        LOGGER.info("the first page result is:[{}]",result);
+        LOGGER.info("the first page result size is:[{}]",result.size());
+
+        //second page
+        final List<GlobalSession> globalSessions2 = redisTransactionStoreManager.findGlobalSessionByPage(2, 2, true);
+        List<GlobalSessionVO> result1 = new ArrayList<>();
+        convertToGlobalSessionVo(result1,globalSessions2);
+        LOGGER.info("the second page result is:[{}]",result1);
+        LOGGER.info("the second page result size is:[{}]",result1.size());
+
+        //third page
+        final List<GlobalSession> globalSessions3 = redisTransactionStoreManager.findGlobalSessionByPage(3, 2, true);
+        List<GlobalSessionVO> result2 = new ArrayList<>();
+        convertToGlobalSessionVo(result2,globalSessions3);
+        LOGGER.info("the third page result is:[{}]",result2);
+        LOGGER.info("the third page result size is:[{}]",result2.size());
+
+        final List<GlobalSession> globalSessions4 = redisTransactionStoreManager.findGlobalSessionByPage(1, 5, true);
+        List<GlobalSessionVO> result3 = new ArrayList<>();
+        convertToGlobalSessionVo(result3,globalSessions4);
+        LOGGER.info("the All page result is:[{}]",result3);
+        LOGGER.info("the All page result size is:[{}]",result3.size());
+
+        final List<GlobalSession> globalSessions5 = redisTransactionStoreManager.findGlobalSessionByPage(4, 2, true);
+        List<GlobalSessionVO> result4 = new ArrayList<>();
+        convertToGlobalSessionVo(result3,globalSessions5);
+        LOGGER.info("the four page result is:[{}]",result4);
+        LOGGER.info("the four page result size is:[{}]",result4.size());
+
+        // test statusByPage
+        GlobalSessionParam param = new GlobalSessionParam();
+        // param.setPageNum(1);
+        // param.setPageSize(1);
+        // param.setStatus(1);
+        final List<GlobalSession> globalSessionStatus = redisTransactionStoreManager.readSessionStatusByPage(param);
+        LOGGER.info("the  globalSessionStatus result is:[{}]", globalSessionStatus);
+        LOGGER.info("the  globalSessionStatus result size is:[{}]", globalSessionStatus);
 
     }
 
@@ -125,7 +207,7 @@ public class RedisTransactionStoreManagerTest {
 
     @Test
     public void testQueryGlobalslSession() {
-        Long count = redisTransactionStoreManager.countByClobalSesisons(GlobalStatus.values());
+        Long count = redisTransactionStoreManager.countByGlobalSessions(GlobalStatus.values());
         LOGGER.info("the count is:[{}]",count);
     }
 
