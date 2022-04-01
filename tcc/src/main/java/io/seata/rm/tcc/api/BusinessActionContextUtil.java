@@ -21,11 +21,13 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.context.store.ContextStoreManager;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,29 +99,8 @@ public final class BusinessActionContextUtil {
      * @return branch report succeed
      */
     public static boolean reportContext(BusinessActionContext actionContext) {
-        // check is updated
-        if (!Boolean.TRUE.equals(actionContext.getUpdated())) {
-            return false;
-        }
-
-        try {
-            // branch report
-            DefaultResourceManager.get().branchReport(
-                    BranchType.TCC,
-                    actionContext.getXid(),
-                    actionContext.getBranchId(),
-                    BranchStatus.Registered,
-                    JSON.toJSONString(Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, actionContext.getActionContext()))
-            );
-
-            // reset to un_updated
-            actionContext.setUpdated(null);
-            return true;
-        } catch (TransactionException e) {
-            String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
-            LOGGER.error("{}, error: {}", msg, e.getMessage());
-            throw new FrameworkException(e, msg);
-        }
+        ContextStoreManager contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, "tc");
+        return contextStoreManager.storeContext(actionContext);
     }
 
     public static BusinessActionContext getContext() {
