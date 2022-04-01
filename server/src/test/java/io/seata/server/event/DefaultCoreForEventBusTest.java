@@ -32,6 +32,7 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.metrics.MetricsManager;
+import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,6 +57,7 @@ public class DefaultCoreForEventBusTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         class GlobalTransactionEventSubscriber {
+
             private final Map<GlobalStatus, AtomicInteger> eventCounters;
             private CountDownLatch downLatch;
 
@@ -112,7 +114,7 @@ public class DefaultCoreForEventBusTest {
 
 
             //we need sleep for a short while because default canBeCommittedAsync() is true
-            subscriber.getDownLatch().await(5000, TimeUnit.MILLISECONDS);
+            subscriber.getDownLatch().await();
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed).get());
