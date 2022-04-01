@@ -91,6 +91,15 @@ public class TCCFenceHandler {
         TCCFenceHandler.dataSource = dataSource;
     }
 
+    /**
+     * get the tcc DataSource
+     * @param dataSource the dataSource
+     * @return the DataSource
+     */
+    public static DataSource getDataSource() {
+        return TCCFenceHandler.dataSource;
+    }
+
     public static void setTransactionTemplate(TransactionTemplate transactionTemplate) {
         TCCFenceHandler.transactionTemplate = transactionTemplate;
     }

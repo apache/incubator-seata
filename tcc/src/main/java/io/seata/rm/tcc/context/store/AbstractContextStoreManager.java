@@ -15,6 +15,9 @@
  */
 package io.seata.rm.tcc.context.store;
 
+import io.seata.common.exception.FrameworkException;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContext;
 
 /**
@@ -30,12 +33,46 @@ public abstract class AbstractContextStoreManager implements ContextStoreManager
         if (!Boolean.TRUE.equals(context.getUpdated())) {
             return false;
         }
+
+        // if not supported, call the next store
+        if (!isSupport(context)) {
+            String nextStore = getNextStore();
+            if (StringUtils.isBlank(nextStore)) {
+                throw new FrameworkException("action context is not supported!");
+            }
+            ContextStoreManager nextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, nextStore);
+            if (nextStoreManager == null) {
+                throw new FrameworkException("action context is not supported!");
+            }
+            return nextStoreManager.storeContext(context);
+        }
+
+        // do store
         if (doStore(context)) {
             // reset to un_updated
             context.setUpdated(null);
             return true;
         }
         return false;
+    }
+
+    /**
+     * the next ContextStoreManager load level
+     *
+     * @return the load level
+     */
+    protected String getNextStore() {
+        return "tc";
+    }
+
+    /**
+     * check if it is supported
+     *
+     * @param context the BusinessActionContext
+     * @return the boolean
+     */
+    protected boolean isSupport(BusinessActionContext context) {
+        return true;
     }
 
     /**

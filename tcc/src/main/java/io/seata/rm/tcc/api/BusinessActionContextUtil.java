@@ -99,7 +99,7 @@ public final class BusinessActionContextUtil {
      * @return branch report succeed
      */
     public static boolean reportContext(BusinessActionContext actionContext) {
-        ContextStoreManager contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, "tc");
+        ContextStoreManager contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, "fence");
         return contextStoreManager.storeContext(actionContext);
     }
 

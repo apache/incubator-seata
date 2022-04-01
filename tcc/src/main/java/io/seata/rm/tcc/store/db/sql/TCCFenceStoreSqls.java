@@ -87,6 +87,12 @@ public class TCCFenceStoreSqls {
             + " and status in (" + TCCFenceConstant.STATUS_COMMITTED + " , " + TCCFenceConstant.STATUS_ROLLBACKED + " , " + TCCFenceConstant.STATUS_SUSPENDED + ")"
             + " limit ?";
 
+    /**
+     * The constant UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.
+     */
+    protected static final String UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID = "update " + LOCAL_TCC_LOG_PLACEHOLD + " set application_data = ?"
+            + " where xid = ? and  branch_id = ?";
+
     public static String getInsertLocalTCCLogSQL(String localTccTable) {
         return INSERT_LOCAL_TCC_LOG.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
@@ -116,4 +122,7 @@ public class TCCFenceStoreSqls {
         return DELETE_BY_DATE_AND_STATUS.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
+    public static String getUpdateApplicationDataByBranchIdAndXid(String localTccTable){
+        return UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
+    }
 }
