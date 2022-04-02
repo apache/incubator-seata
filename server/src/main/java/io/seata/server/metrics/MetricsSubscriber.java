@@ -100,12 +100,12 @@ public class MetricsSubscriber {
 
     private void processGlobalStatusCommitFailed(GlobalTransactionEvent event) {
         decreaseActive(event);
-        increaseFail(event);
+        reportFailed(event);
     }
 
     private void processGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
         decreaseActive(event);
-        increaseFail(event);
+        reportFailed(event);
     }
 
     private void processGlobalStatusTimeoutRollbacked(GlobalTransactionEvent event) {
@@ -114,28 +114,16 @@ public class MetricsSubscriber {
 
     private void processGlobalStatusTimeoutRollbackFailed(GlobalTransactionEvent event) {
         decreaseActive(event);
-        increaseTimeout(event);
+        reportTwoPhaseTimeout(event);
     }
 
     private void processGlobalStatusCommitRetryTimeout(GlobalTransactionEvent event) {
         decreaseActive(event);
-        increaseTimeout(event);
+        reportTwoPhaseTimeout(event);
     }
 
     private void processGlobalStatusTimeoutRollbackRetryTimeout(GlobalTransactionEvent event) {
         decreaseActive(event);
-    }
-
-    private void increaseFail(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_FAILED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-    }
-
-    private void increaseTimeout(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_2PHASE_TIMEOUT
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void decreaseActive(GlobalTransactionEvent event) {
@@ -143,6 +131,28 @@ public class MetricsSubscriber {
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
+
+    private void reportFailed(GlobalTransactionEvent event) {
+        registry.getSummary(MeterIdConstants.SUMMARY_FAILED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(MeterIdConstants.TIMER_FAILED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
+    }
+
+    private void reportTwoPhaseTimeout(GlobalTransactionEvent event) {
+        registry.getSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(MeterIdConstants.TIMER_TWO_PHASE_TIMEOUT
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
+    }
+
+
 
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
