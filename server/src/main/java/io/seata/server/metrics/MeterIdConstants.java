@@ -75,8 +75,4 @@ public interface MeterIdConstants {
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_FAILED);
 
-    Id TIMER_TWO_PHASE_TIMEOUT = new Id(IdConstants.SEATA_TRANSACTION)
-        .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
-        .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
-        .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_TWO_PHASE_TIMEOUT);
 }

@@ -146,10 +146,6 @@ public class MetricsSubscriber {
         registry.getSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_TWO_PHASE_TIMEOUT
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup()))
-                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
 
