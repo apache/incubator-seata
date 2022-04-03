@@ -42,7 +42,6 @@ client.rm.reportSuccessEnable=false
 client.rm.sagaBranchRegisterEnable=false
 client.rm.sagaJsonParser=fastjson
 client.rm.tccActionInterceptorOrder=-2147482648
-client.rm.sqlParserType=druid
 client.tm.commitRetryCount=5
 client.tm.rollbackRetryCount=5
 client.tm.defaultGlobalTransactionTimeout=60000
