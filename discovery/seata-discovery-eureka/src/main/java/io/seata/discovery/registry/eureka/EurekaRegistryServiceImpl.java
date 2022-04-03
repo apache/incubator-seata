@@ -165,8 +165,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             LOGGER.info("refresh cluster success,but cluster empty! cluster name:{}", clusterName);
         } else {
             List<InetSocketAddress> newAddressList = application.getInstances().stream()
-                    .filter(instance -> InstanceInfo.InstanceStatus.UP.equals(instance.getStatus())
-                            && instance.getIPAddr() != null && instance.getPort() > 0 && instance.getPort() < 0xFFFF)
+                    .filter(instance -> InstanceInfo.InstanceStatus.UP.equals(instance.getStatus()) && instance.getIPAddr() != null && instance.getPort() > 0 && instance.getPort() < 0xFFFF)
                     .map(instance -> new InetSocketAddress(instance.getIPAddr(), instance.getPort()))
                     .collect(Collectors.toList());
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
