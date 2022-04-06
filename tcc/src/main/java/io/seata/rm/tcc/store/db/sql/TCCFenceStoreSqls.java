@@ -128,7 +128,7 @@ public class TCCFenceStoreSqls {
         return DELETE_BY_DATE_AND_STATUS.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
-    public static String getUpdateApplicationDataByBranchIdAndXid(String localTccTable){
+    public static String getUpdateApplicationDataByBranchIdAndXid(String localTccTable) {
         return UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 

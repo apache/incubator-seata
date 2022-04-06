@@ -208,7 +208,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public boolean updateApplicationData(Connection conn, String xid, Long branchId, String applicationData){
+    public boolean updateApplicationData(Connection conn, String xid, Long branchId, String applicationData) {
         PreparedStatement ps = null;
         try {
             String sql = TCCFenceStoreSqls.getUpdateApplicationDataByBranchIdAndXid(logTableName);
