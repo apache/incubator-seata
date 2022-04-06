@@ -827,10 +827,10 @@ public interface ConfigurationKeys {
     /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
-    String IS_USE_CLOUD_NAMESPACE_PARSING = "nacos.use.cloud.namespace.parsing";
+    String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
 
     /**
      * The constant IS_USE_ENDPOINT_PARSING_RULE.
      */
-    String IS_USE_ENDPOINT_PARSING_RULE = "nacos.use.endpoint.parsing.rule";
+    String IS_USE_ENDPOINT_PARSING_RULE = "isUseEndpointParsingRule";
 }
