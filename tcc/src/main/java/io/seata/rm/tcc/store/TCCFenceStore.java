@@ -106,4 +106,11 @@ public interface TCCFenceStore {
      */
     void setLogTableName(String logTableName);
 
+    /**
+     * query the application_data
+     * @param connection the Connection
+     * @param xid the global transaction id
+     * @param branchId the branch transaction id
+     */
+    String queryApplicationData(Connection connection, String xid, long branchId);
 }

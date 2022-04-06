@@ -17,9 +17,12 @@ package io.seata.rm.tcc.context.store;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.constant.ContextStoreConstant;
 import io.seata.rm.tcc.store.TCCFenceStore;
 import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -27,6 +30,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * store actionContext in tcc_fence_log
@@ -39,15 +43,50 @@ public class FenceLogContextStoreManager extends AbstractContextStoreManager {
     private static final TCCFenceStore TCC_FENCE_DAO = TCCFenceStoreDataBaseDAO.getInstance();
 
     @Override
-    protected boolean isSupport(BusinessActionContext context) {
-        return Boolean.TRUE.equals(context.getActionContext(Constants.USE_TCC_FENCE));
+    protected boolean doStore(BusinessActionContext context) {
+        if (!isSupport(context)) {
+            ContextStoreManager tcStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, ContextStoreConstant.STORE_TYPE_TC);
+            return tcStoreManager.storeContext(context);
+        }
+        DataSource dataSource = TCCFenceHandler.getDataSource();
+        Connection connection = null;
+        try {
+            connection = DataSourceUtils.getConnection(dataSource);
+            return TCC_FENCE_DAO.updateApplicationData(connection, context.getXid(), context.getBranchId()
+                    , JSON.toJSONString(Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context.getActionContext())));
+        } finally {
+            if (connection != null) {
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
+        }
     }
 
     @Override
-    protected boolean doStore(BusinessActionContext context) {
+    protected BusinessActionContext doSearch(BusinessActionContext context) {
+        // return if context exist in tc
+        if (context.getActionContext(Constants.USE_TCC_FENCE) != null) {
+            return context;
+        }
+
         DataSource dataSource = TCCFenceHandler.getDataSource();
-        Connection connection = DataSourceUtils.getConnection(dataSource);
-        return TCC_FENCE_DAO.updateApplicationData(connection, context.getXid(), context.getBranchId()
-                , JSON.toJSONString(Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context.getActionContext())));
+        Connection connection = null;
+        try {
+            connection = DataSourceUtils.getConnection(dataSource);
+            String applicationData = TCC_FENCE_DAO.queryApplicationData(connection, context.getXid(), context.getBranchId());
+            if (StringUtils.isNotBlank(applicationData)) {
+                Map tccContext = JSON.parseObject(applicationData, Map.class);
+                Map actionContextMap = (Map) tccContext.get(Constants.TCC_ACTION_CONTEXT);
+                context.getActionContext().putAll(actionContextMap);
+            }
+            return context;
+        } finally {
+            if (connection != null) {
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
+        }
+    }
+
+    protected boolean isSupport(BusinessActionContext context) {
+        return Boolean.TRUE.equals(context.getActionContext(Constants.USE_TCC_FENCE));
     }
 }

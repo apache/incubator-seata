@@ -30,6 +30,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
@@ -135,6 +136,8 @@ public class TCCFenceHandler {
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
+            } finally {
+                BusinessActionContextUtil.reportContext();
             }
         });
     }

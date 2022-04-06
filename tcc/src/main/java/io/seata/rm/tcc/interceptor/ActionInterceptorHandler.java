@@ -30,6 +30,7 @@ import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
@@ -39,9 +40,13 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.api.ParamType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.constant.ContextStoreConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import static io.seata.common.ConfigurationKeys.TCC_CONTEXT_STORE;
+import static io.seata.common.DefaultValues.DEFAULT_TCC_CONTEXT_STORE;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -52,6 +57,7 @@ public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
 
+    private static final String CONTEXT_STORE_TYPE = ConfigurationFactory.getInstance().getConfig(TCC_CONTEXT_STORE, DEFAULT_TCC_CONTEXT_STORE);
     /**
      * Handler the TCC Aspect
      *
@@ -74,11 +80,14 @@ public class ActionInterceptorHandler {
         String actionName = businessAction.name();
         actionContext.setActionName(actionName);
         //Set the delay report
-        actionContext.setDelayReport(businessAction.isDelayReport());
+        boolean isDelayReport = CONTEXT_STORE_TYPE.equals(ContextStoreConstant.STORE_TYPE_FENCE) && businessAction.useTCCFence()
+                || businessAction.isDelayReport();
+        actionContext.setDelayReport(isDelayReport);
 
         //Creating Branch Record
         String branchId = doTccActionLogStore(method, arguments, businessAction, actionContext);
         actionContext.setBranchId(branchId);
+        actionContext.setUpdated(true);
         //MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
@@ -87,6 +96,11 @@ public class ActionInterceptorHandler {
         try {
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
+            //first report Context
+            if (Boolean.FALSE.equals(actionContext.getDelayReport())) {
+                BusinessActionContextUtil.reportContext();
+            }
+
 
             if (businessAction.useTCCFence()) {
                 try {
@@ -106,7 +120,7 @@ public class ActionInterceptorHandler {
         } finally {
             try {
                 //to report business action context finally if the actionContext.getUpdated() is true
-                BusinessActionContextUtil.reportContext(actionContext);
+                BusinessActionContextUtil.reportContext();
             } finally {
                 if (previousActionContext != null) {
                     // recovery the previous action context
@@ -191,10 +205,12 @@ public class ActionInterceptorHandler {
         }
 
         //endregion
-
-        //Init applicationData
-        Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
-        String applicationContextStr = JSON.toJSONString(applicationContext);
+        String applicationContextStr = null;
+        if (ContextStoreConstant.STORE_TYPE_TC.equals(CONTEXT_STORE_TYPE)) {
+            //Init applicationData
+            Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
+            applicationContextStr = JSON.toJSONString(applicationContext);
+        }
         try {
             //registry branch record
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, xid,

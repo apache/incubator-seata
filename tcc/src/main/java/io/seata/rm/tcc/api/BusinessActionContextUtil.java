@@ -18,19 +18,16 @@ package io.seata.rm.tcc.api;
 import java.util.Collections;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
-import io.seata.common.Constants;
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.rm.DefaultResourceManager;
+import io.seata.config.ConfigurationFactory;
 import io.seata.rm.tcc.context.store.ContextStoreManager;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.ConfigurationKeys.TCC_CONTEXT_STORE;
+import static io.seata.common.DefaultValues.DEFAULT_TCC_CONTEXT_STORE;
 
 /**
  * the api of sharing business action context to tcc phase 2
@@ -45,6 +42,9 @@ public final class BusinessActionContextUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessActionContextUtil.class);
 
     private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
+
+    private static final ContextStoreManager CONTEXT_STORE_MANAGER = EnhancedServiceLoader.load(ContextStoreManager.class
+            , ConfigurationFactory.getInstance().getConfig(TCC_CONTEXT_STORE, DEFAULT_TCC_CONTEXT_STORE));
 
     /**
      * add business action context and share it to tcc phase2
@@ -89,7 +89,7 @@ public final class BusinessActionContextUtil {
         }
 
         // do branch report
-        return reportContext(actionContext);
+        return reportContext();
     }
 
     /**
@@ -98,9 +98,8 @@ public final class BusinessActionContextUtil {
      * @param actionContext the context
      * @return branch report succeed
      */
-    public static boolean reportContext(BusinessActionContext actionContext) {
-        ContextStoreManager contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, "fence");
-        return contextStoreManager.storeContext(actionContext);
+    public static boolean reportContext() {
+        return CONTEXT_STORE_MANAGER.storeContext(getContext());
     }
 
     public static BusinessActionContext getContext() {

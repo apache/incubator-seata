@@ -25,4 +25,11 @@ public interface ContextStoreManager {
      * @return the boolean
      */
     boolean storeContext(BusinessActionContext context);
+
+    /**
+     * search context
+     * @param context the BusinessActionContext in TC
+     * @return the boolean
+     */
+    BusinessActionContext searchContext(BusinessActionContext context);
 }

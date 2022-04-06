@@ -23,10 +23,10 @@ public interface ContextStoreConstant {
     /**
      * the constant STORE_TYPE_TC
      */
-    String STORE_TYPE_TC = "TC";
+    String STORE_TYPE_TC = "tc";
 
     /**
      * the constant STORE_TYPE_FENCE
      */
-    String STORE_TYPE_FENCE = "FENCE";
+    String STORE_TYPE_FENCE = "fence";
 }

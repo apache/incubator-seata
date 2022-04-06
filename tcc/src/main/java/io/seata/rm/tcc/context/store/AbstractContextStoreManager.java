@@ -33,20 +33,6 @@ public abstract class AbstractContextStoreManager implements ContextStoreManager
         if (!Boolean.TRUE.equals(context.getUpdated())) {
             return false;
         }
-
-        // if not supported, call the next store
-        if (!isSupport(context)) {
-            String nextStore = getNextStore();
-            if (StringUtils.isBlank(nextStore)) {
-                throw new FrameworkException("action context is not supported!");
-            }
-            ContextStoreManager nextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, nextStore);
-            if (nextStoreManager == null) {
-                throw new FrameworkException("action context is not supported!");
-            }
-            return nextStoreManager.storeContext(context);
-        }
-
         // do store
         if (doStore(context)) {
             // reset to un_updated
@@ -56,23 +42,10 @@ public abstract class AbstractContextStoreManager implements ContextStoreManager
         return false;
     }
 
-    /**
-     * the next ContextStoreManager load level
-     *
-     * @return the load level
-     */
-    protected String getNextStore() {
-        return "tc";
-    }
-
-    /**
-     * check if it is supported
-     *
-     * @param context the BusinessActionContext
-     * @return the boolean
-     */
-    protected boolean isSupport(BusinessActionContext context) {
-        return true;
+    @Override
+    public BusinessActionContext searchContext(BusinessActionContext context) {
+        // do search
+        return doSearch(context);
     }
 
     /**
@@ -82,4 +55,12 @@ public abstract class AbstractContextStoreManager implements ContextStoreManager
      * @return the boolean
      */
     protected abstract boolean doStore(BusinessActionContext context);
+
+    /**
+     * do search context
+     *
+     * @param context the sample BusinessActionContext in TC
+     * @return the final BusinessActionContext
+     */
+    protected abstract BusinessActionContext doSearch(BusinessActionContext context);
 }

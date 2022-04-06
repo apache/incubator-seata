@@ -57,4 +57,9 @@ public class ReportContextStoreManager extends AbstractContextStoreManager {
             throw new FrameworkException(e, msg);
         }
     }
+
+    @Override
+    protected BusinessActionContext doSearch(BusinessActionContext context) {
+        return context;
+    }
 }

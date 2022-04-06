@@ -228,4 +228,26 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     public void setLogTableName(String logTableName) {
         this.logTableName = logTableName;
     }
+
+    @Override
+    public String queryApplicationData(Connection conn, String xid, long branchId) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String sql = TCCFenceStoreSqls.getQueryApplicationDataSql(logTableName);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, xid);
+            ps.setLong(2, branchId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("application_data");
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps);
+        }
+    }
 }

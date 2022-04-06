@@ -93,6 +93,12 @@ public class TCCFenceStoreSqls {
     protected static final String UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID = "update " + LOCAL_TCC_LOG_PLACEHOLD + " set application_data = ?"
             + " where xid = ? and  branch_id = ?";
 
+    /**
+     * The constant QUERY_APPLICATION_DATA_BY_BRANCH_ID_AND_XID
+     */
+    protected static final String QUERY_APPLICATION_DATA_BY_BRANCH_ID_AND_XID = "select application_data from " + LOCAL_TCC_LOG_PLACEHOLD
+            + " where xid = ? and  branch_id = ?";
+
     public static String getInsertLocalTCCLogSQL(String localTccTable) {
         return INSERT_LOCAL_TCC_LOG.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
@@ -124,5 +130,9 @@ public class TCCFenceStoreSqls {
 
     public static String getUpdateApplicationDataByBranchIdAndXid(String localTccTable){
         return UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
+    }
+
+    public static String getQueryApplicationDataSql(String localTccTable) {
+        return QUERY_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 }

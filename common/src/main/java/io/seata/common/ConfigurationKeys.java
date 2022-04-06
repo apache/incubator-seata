@@ -142,7 +142,7 @@ public interface ConfigurationKeys {
     /**
      * The constant CLIENT_PREFIX.
      */
-    String CLIENT_PREFIX = "client.";
+    String  CLIENT_PREFIX = "client.";
 
     /**
      * The constant SERVER_PREFIX.
@@ -798,6 +798,11 @@ public interface ConfigurationKeys {
      * The constant TCC_FENCE_LOG_TABLE_NAME
      */
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant TCC_CONTEXT_STORE
+     */
+    String TCC_CONTEXT_STORE = CLIENT_RM_PREFIX + "tccContextStore";
 
     /**
      * The constant rpcRmRequestTimeout

@@ -25,13 +25,19 @@ import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.SkipCallbackWrapperException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.context.store.ContextStoreManager;
+
+import static io.seata.common.ConfigurationKeys.TCC_CONTEXT_STORE;
+import static io.seata.common.DefaultValues.DEFAULT_TCC_CONTEXT_STORE;
 
 /**
  * TCC resource manager
@@ -46,11 +52,14 @@ public class TCCResourceManager extends AbstractResourceManager {
      */
     private Map<String, Resource> tccResourceCache = new ConcurrentHashMap<>();
 
+    private ContextStoreManager contextStoreManager;
+
     /**
      * Instantiates a new Tcc resource manager.
      */
     public TCCResourceManager() {
-        // not do anything
+        contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class
+                , ConfigurationFactory.getInstance().getConfig(TCC_CONTEXT_STORE, DEFAULT_TCC_CONTEXT_STORE));
     }
 
     /**
@@ -211,6 +220,9 @@ public class TCCResourceManager extends AbstractResourceManager {
         BusinessActionContext businessActionContext = new BusinessActionContext(
             xid, String.valueOf(branchId), actionContextMap);
         businessActionContext.setActionName(resourceId);
+
+        //search by storeManager
+        businessActionContext = contextStoreManager.searchContext(businessActionContext);
         return businessActionContext;
     }
 
