@@ -117,9 +117,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        if (sessionMap.containsKey(session.getXid())) {
+        if (sessionMap.remove(session.getXid())!=null) {
             super.removeGlobalSession(session);
-            sessionMap.remove(session.getXid());
         }
     }
 
@@ -152,7 +151,6 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     continue;
                 }
             }
-
 
             if (null != condition.getTransactionId() && condition.getTransactionId() > 0) {
                 if (Objects.equals(condition.getTransactionId(), globalSession.getTransactionId())) {
@@ -377,4 +375,5 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     public void destroy() {
         transactionStoreManager.shutdown();
     }
+
 }
