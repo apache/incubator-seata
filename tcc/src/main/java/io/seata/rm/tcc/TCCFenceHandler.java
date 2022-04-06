@@ -62,7 +62,7 @@ public class TCCFenceHandler {
 
     private static final int MAX_QUEUE_SIZE = 500;
 
-    private static final int LIMIT_DELETE_BY_DATE = 20000;
+    private static final int LIMIT_DELETE_BY_DATE = 10000;
 
     private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
 
