@@ -49,7 +49,7 @@ public class SessionHelper {
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
-            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, true);
+            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, false);
 
     /**
      * The instance of DefaultCoordinator
