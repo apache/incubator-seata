@@ -71,9 +71,7 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusCommitted(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseActive(event);
         registry.getCounter(MeterIdConstants.COUNTER_COMMITTED
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
@@ -87,9 +85,7 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseActive(event);
         registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
@@ -103,41 +99,55 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusCommitFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseActive(event);
+        reportFailed(event);
     }
 
     private void processGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseActive(event);
+        reportFailed(event);
     }
 
     private void processGlobalStatusTimeoutRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseActive(event);
     }
 
     private void processGlobalStatusTimeoutRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseActive(event);
+        reportTwoPhaseTimeout(event);
     }
 
-
     private void processGlobalStatusCommitRetryTimeout(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseActive(event);
+        reportTwoPhaseTimeout(event);
     }
 
     private void processGlobalStatusTimeoutRollbackRetryTimeout(GlobalTransactionEvent event) {
+        decreaseActive(event);
+    }
+
+    private void decreaseActive(GlobalTransactionEvent event) {
         registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
+
+    private void reportFailed(GlobalTransactionEvent event) {
+        registry.getSummary(MeterIdConstants.SUMMARY_FAILED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(MeterIdConstants.TIMER_FAILED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
+    }
+
+    private void reportTwoPhaseTimeout(GlobalTransactionEvent event) {
+        registry.getSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
 
 
     @Subscribe
