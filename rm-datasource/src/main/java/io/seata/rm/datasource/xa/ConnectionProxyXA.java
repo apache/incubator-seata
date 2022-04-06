@@ -202,14 +202,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT commit on an inactive session", SQLSTATE_XA_NOT_END);
         }
         try {
-            end(XAResource.TMSUCCESS);
-            xaResource.prepare(xaBranchXid);
             long now = System.currentTimeMillis();
             if (now - branchRegisterTime > timeout) {
                 xaRollback(xaBranchXid);
-                throw new XAException(" XA branch timeout error");
+                throw new XAException("XA branch timeout error");
             }
             setPrepareTime(now);
+            end(XAResource.TMSUCCESS);
+            xaResource.prepare(xaBranchXid);
         } catch (XAException xe) {
             try {
                 // Branch Report to TC: Failed
