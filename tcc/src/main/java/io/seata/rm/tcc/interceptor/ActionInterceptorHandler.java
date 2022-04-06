@@ -79,7 +79,7 @@ public class ActionInterceptorHandler {
         //Set the action name
         String actionName = businessAction.name();
         actionContext.setActionName(actionName);
-        //Set the delay report
+        //Set the delay report, always be true if useTCCFence is true and contextStoreType is 'fence'
         boolean isDelayReport = CONTEXT_STORE_TYPE.equals(ContextStoreConstant.STORE_TYPE_FENCE) && businessAction.useTCCFence()
                 || businessAction.isDelayReport();
         actionContext.setDelayReport(isDelayReport);
@@ -96,11 +96,12 @@ public class ActionInterceptorHandler {
         try {
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
-            //first report Context
-            if (Boolean.FALSE.equals(actionContext.getDelayReport())) {
+
+            //if not store in TC, init report Context
+            if (Boolean.FALSE.equals(actionContext.getDelayReport())
+                    && !CONTEXT_STORE_TYPE.equals(ContextStoreConstant.STORE_TYPE_TC)) {
                 BusinessActionContextUtil.reportContext();
             }
-
 
             if (businessAction.useTCCFence()) {
                 try {
@@ -207,7 +208,7 @@ public class ActionInterceptorHandler {
         //endregion
         String applicationContextStr = null;
         if (ContextStoreConstant.STORE_TYPE_TC.equals(CONTEXT_STORE_TYPE)) {
-            //Init applicationData
+            //Init applicationData when contextStoreType is 'tc'
             Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
             applicationContextStr = JSON.toJSONString(applicationContext);
         }

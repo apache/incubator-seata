@@ -32,6 +32,7 @@ import static io.seata.common.DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER;
 import static io.seata.common.DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TCC_CONTEXT_STORE;
+import static io.seata.common.DefaultValues.DEFAULT_TCC_CONTEXT_STORE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**

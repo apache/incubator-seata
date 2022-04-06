@@ -44,10 +44,13 @@ public class FenceLogContextStoreManager extends AbstractContextStoreManager {
 
     @Override
     protected boolean doStore(BusinessActionContext context) {
+        // if not support, save context to TC
         if (!isSupport(context)) {
             ContextStoreManager tcStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, ContextStoreConstant.STORE_TYPE_TC);
             return tcStoreManager.storeContext(context);
         }
+
+        // save context to fenceLog
         DataSource dataSource = TCCFenceHandler.getDataSource();
         Connection connection = null;
         try {
@@ -63,11 +66,12 @@ public class FenceLogContextStoreManager extends AbstractContextStoreManager {
 
     @Override
     protected BusinessActionContext doSearch(BusinessActionContext context) {
-        // return if context exist in tc
+        // return if tcc context exist in tc
         if (context.getActionContext(Constants.USE_TCC_FENCE) != null) {
             return context;
         }
 
+        // search tcc context from fenceLog
         DataSource dataSource = TCCFenceHandler.getDataSource();
         Connection connection = null;
         try {

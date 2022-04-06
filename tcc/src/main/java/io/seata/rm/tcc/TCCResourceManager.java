@@ -221,7 +221,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             xid, String.valueOf(branchId), actionContextMap);
         businessActionContext.setActionName(resourceId);
 
-        //search by storeManager
+        //use the context that in TC to search from storeManager
         businessActionContext = contextStoreManager.searchContext(businessActionContext);
         return businessActionContext;
     }

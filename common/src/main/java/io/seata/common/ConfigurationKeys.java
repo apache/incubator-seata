@@ -142,7 +142,7 @@ public interface ConfigurationKeys {
     /**
      * The constant CLIENT_PREFIX.
      */
-    String  CLIENT_PREFIX = "client.";
+    String CLIENT_PREFIX = "client.";
 
     /**
      * The constant SERVER_PREFIX.

@@ -137,6 +137,7 @@ public class TCCFenceHandler {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
             } finally {
+                // save context in the same transaction
                 BusinessActionContextUtil.reportContext();
             }
         });
