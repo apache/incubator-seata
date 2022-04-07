@@ -121,14 +121,23 @@ public class SessionHelper {
         postTcSessionEndEvent(globalSession);
     }
 
-    /**
-     * End commit failed.
-     *
-     * @param globalSession the global session
-     * @throws TransactionException the transaction exception
-     */
+
     public static void endCommitFailed(GlobalSession globalSession) throws TransactionException {
-        globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+        endCommitFailed(globalSession, false);
+    }
+
+        /**
+         * End commit failed.
+         *
+         * @param globalSession the global session
+         * @throws TransactionException the transaction exception
+         */
+    public static void endCommitFailed(GlobalSession globalSession, boolean isRetryTimeout) throws TransactionException {
+        if (isRetryTimeout){
+            globalSession.changeGlobalStatus(GlobalStatus.CommitRetryTimeout);
+        }else{
+            globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+        }
         LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
 
         globalSession.end();
@@ -152,15 +161,23 @@ public class SessionHelper {
         postTcSessionEndEvent(globalSession);
     }
 
+
+    public static void endRollbackFailed(GlobalSession globalSession) throws TransactionException {
+        endRollbackFailed(globalSession, false);
+    }
+
     /**
      * End rollback failed.
      *
      * @param globalSession the global session
      * @throws TransactionException the transaction exception
      */
-    public static void endRollbackFailed(GlobalSession globalSession) throws TransactionException {
+    public static void endRollbackFailed(GlobalSession globalSession, boolean isRetryTimeout)
+        throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (isTimeoutGlobalStatus(currentStatus)) {
+        if (isRetryTimeout){
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetryTimeout);
+        }else if (isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
@@ -172,12 +189,16 @@ public class SessionHelper {
     }
 
 
-    /**
-     * End retry(commit/rollback) timeout.
-     *
-     * @param globalSession the global session
-     * @throws TransactionException the transaction exception
-     */
+
+
+
+
+        /**
+         * End retry(commit/rollback) timeout.
+         *
+         * @param globalSession the global session
+         * @throws TransactionException the transaction exception
+         */
     public static void endRetryTimeout(GlobalSession globalSession,GlobalStatus globalStatus) throws TransactionException {
         globalSession.changeGlobalStatus(globalStatus);
         LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalStatus);
