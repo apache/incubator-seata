@@ -171,6 +171,23 @@ public class SessionHelper {
         postTcSessionEndEvent(globalSession);
     }
 
+
+    /**
+     * End retry(commit/rollback) timeout.
+     *
+     * @param globalSession the global session
+     * @throws TransactionException the transaction exception
+     */
+    public static void endRetryTimeout(GlobalSession globalSession,GlobalStatus globalStatus) throws TransactionException {
+        globalSession.changeGlobalStatus(globalStatus);
+        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalStatus);
+
+        globalSession.end();
+        postTcSessionEndEvent(globalSession);
+    }
+
+
+
     /**
      * post end event
      *
