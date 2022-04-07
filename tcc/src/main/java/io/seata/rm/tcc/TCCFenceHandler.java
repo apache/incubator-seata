@@ -167,7 +167,7 @@ public class TCCFenceHandler {
      * @param branchId              the branch transaction id
      * @param args                  rollback method's parameters
      * @param actionName            the action name
-     * @param enableEmptyRollback
+     * @param enableEmptyRollback   if enable empty rollback
      * @return the boolean
      */
     public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
