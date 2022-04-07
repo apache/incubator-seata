@@ -83,6 +83,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             if (!currentAutoCommitStatus) {
                 throw new IllegalStateException("Connection[autocommit=false] as default is NOT supported");
             }
+            Integer transactionTimeout = RootContext.getTimeout();
+            if (transactionTimeout == null) {
+                transactionTimeout = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+            }
+            timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, transactionTimeout);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -160,11 +165,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 branchRegisterTime = System.currentTimeMillis();
                 branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
-                Integer transactionTimeout = RootContext.getTimeout();
-                if (transactionTimeout == null) {
-                    transactionTimeout = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
-                }
-                this.timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, transactionTimeout);
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
@@ -202,13 +202,10 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT commit on an inactive session", SQLSTATE_XA_NOT_END);
         }
         try {
-            long now = System.currentTimeMillis();
-            if (now - branchRegisterTime > timeout) {
-                xaRollback(xaBranchXid);
-                throw new XAException("XA branch timeout error");
-            }
-            setPrepareTime(now);
             end(XAResource.TMSUCCESS);
+            long now = System.currentTimeMillis();
+            checkTimeout(now);
+            setPrepareTime(now);
             xaResource.prepare(xaBranchXid);
         } catch (XAException xe) {
             try {
@@ -282,6 +279,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         xaActive = false;
         if (!isHeld()) {
             xaBranchXid = null;
+        }
+    }
+
+    private void checkTimeout(Long now) throws XAException {
+        if (now - branchRegisterTime > timeout) {
+            xaRollback(xaBranchXid);
+            throw new XAException("XA branch timeout error");
         }
     }
 

@@ -204,8 +204,7 @@ public class DefaultCore implements Core {
                 }
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
-                    if (BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable.equals(branchStatus) &&
-                            System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() + Math.max(RETRY_XAER_NOTA_TIMEOUT, globalSession.getTimeout())) {
+                    if (isXaerNotaTimeout(globalSession,branchStatus)) {
                         LOGGER.info("Commit branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                         branchStatus = BranchStatus.PhaseTwo_Committed;
                     }
@@ -309,8 +308,7 @@ public class DefaultCore implements Core {
                 }
                 try {
                     BranchStatus branchStatus = branchRollback(globalSession, branchSession);
-                    if (BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable.equals(branchStatus) &&
-                            System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() + Math.max(RETRY_XAER_NOTA_TIMEOUT, globalSession.getTimeout())) {
+                    if (isXaerNotaTimeout(globalSession, branchStatus)) {
                         LOGGER.info("Rollback branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                         branchStatus = BranchStatus.PhaseTwo_Rollbacked;
                     }
@@ -382,4 +380,15 @@ public class DefaultCore implements Core {
             getCore(BranchType.SAGA).doGlobalReport(globalSession, xid, globalStatus);
         }
     }
+
+    private boolean isXaerNotaTimeout(GlobalSession globalSession, BranchStatus branchStatus) {
+        if (BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable.equals(branchStatus) ||
+                BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable.equals(branchStatus)) {
+            return System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() +
+                    Math.max(RETRY_XAER_NOTA_TIMEOUT, globalSession.getTimeout());
+        } else {
+            return false;
+        }
+    }
+
 }
