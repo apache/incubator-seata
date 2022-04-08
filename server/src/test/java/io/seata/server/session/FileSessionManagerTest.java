@@ -65,7 +65,6 @@ public class FileSessionManagerTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
-        EnhancedServiceLoader.unloadAll();
         try {
             sessionManagerList = Arrays.asList(new FileSessionManager("root.data", "."),
                     new FileSessionManager("test", null));
@@ -277,6 +276,7 @@ public class FileSessionManagerTest {
     @MethodSource("globalSessionsWithPageResultProvider")
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
         SessionHolder.getRootSessionManager().destroy();
+        EnhancedServiceLoader.unloadAll();
         SessionHolder.init("file");
 
         try {
