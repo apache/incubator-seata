@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import io.seata.common.XID;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.console.result.PageResult;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -64,6 +65,7 @@ public class FileSessionManagerTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
+        EnhancedServiceLoader.unloadAll();
         try {
             sessionManagerList = Arrays.asList(new FileSessionManager("root.data", "."),
                     new FileSessionManager("test", null));
