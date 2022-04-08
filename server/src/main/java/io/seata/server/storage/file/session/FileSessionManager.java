@@ -117,7 +117,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        if (sessionMap.remove(session.getXid())!=null) {
+        if (sessionMap.remove(session.getXid()) != null) {
             super.removeGlobalSession(session);
         }
     }
