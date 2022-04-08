@@ -17,11 +17,14 @@ package io.seata.rm.datasource.xa;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
-
+import io.seata.common.DefaultValues;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -30,6 +33,8 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.ConfigurationKeys.XA_BRANCH_EXECUTION_TIMEOUT;
 
 /**
  * Connection proxy for XA mode.
@@ -40,6 +45,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxyXA.class);
 
+    private static final int BRANCH_EXECUTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(XA_BRANCH_EXECUTION_TIMEOUT,
+            DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT);
+
     private volatile boolean currentAutoCommitStatus = true;
 
     private volatile XAXid xaBranchXid;
@@ -49,7 +57,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private volatile boolean kept = false;
 
     private volatile boolean rollBacked = false;
-    
+
+    private volatile Long branchRegisterTime = null;
+
+    private volatile Long prepareTime = null;
+
+    private volatile Integer timeout = null;
+
     /**
      * Constructor of Connection Proxy for XA mode.
      *
@@ -69,6 +83,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             if (!currentAutoCommitStatus) {
                 throw new IllegalStateException("Connection[autocommit=false] as default is NOT supported");
             }
+            Integer transactionTimeout = RootContext.getTimeout();
+            if (transactionTimeout == null) {
+                transactionTimeout = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+            }
+            timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, transactionTimeout);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -85,7 +104,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             if (isHeld()) {
                 resource.release(xaBranchXid, this);
             }
-            BaseDataSourceResource.remove(xaBranchXid);
         }
     }
 
@@ -143,9 +161,10 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             // Start a XA branch
             long branchId;
             try {
-                // 1. register branch to TC then get the branchId
+                // 1. register branch to TC then get the branch message
+                branchRegisterTime = System.currentTimeMillis();
                 branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
-                    null);
+                        null);
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
@@ -184,6 +203,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         try {
             end(XAResource.TMSUCCESS);
+            long now = System.currentTimeMillis();
+            checkTimeout(now);
+            setPrepareTime(now);
             xaResource.prepare(xaBranchXid);
         } catch (XAException xe) {
             try {
@@ -254,9 +276,19 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void cleanXABranchContext() {
+        branchRegisterTime = null;
+        prepareTime = null;
+        timeout = null;
         xaActive = false;
         if (!isHeld()) {
             xaBranchXid = null;
+        }
+    }
+
+    private void checkTimeout(Long now) throws XAException {
+        if (now - branchRegisterTime > timeout) {
+            xaRollback(xaBranchXid);
+            throw new XAException("XA branch timeout error");
         }
     }
 
@@ -269,6 +301,19 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         cleanXABranchContext();
         originalConnection.close();
+    }
+
+    protected synchronized void closeForce() throws SQLException {
+        Connection physicalConn = getWrappedConnection();
+        if (physicalConn instanceof PooledConnection) {
+            physicalConn = ((PooledConnection) physicalConn).getConnection();
+        }
+        // Force close the physical connection
+        physicalConn.close();
+        rollBacked = false;
+        cleanXABranchContext();
+        originalConnection.close();
+        releaseIfNecessary();
     }
 
     @Override
@@ -287,6 +332,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                || StringUtils.isBlank(resource.getDbType());
     }
 
+    public Long getPrepareTime() {
+        return prepareTime;
+    }
+
+    private void setPrepareTime(Long prepareTime) {
+        this.prepareTime = prepareTime;
+    }
+
     private void termination() throws SQLException {
         termination(this.xaBranchXid.toString());
     }
@@ -297,7 +350,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         if (branchStatus != null) {
             releaseIfNecessary();
             throw new SQLException("failed xa branch " + xid
-                + " the global transaction has finish, branch status: " + branchStatus.getCode());
+                    + " the global transaction has finish, branch status: " + branchStatus.getCode());
         }
     }
 
