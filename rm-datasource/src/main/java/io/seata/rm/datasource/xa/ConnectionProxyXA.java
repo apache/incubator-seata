@@ -276,6 +276,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void cleanXABranchContext() {
+        branchRegisterTime = null;
+        prepareTime = null;
+        timeout = null;
         xaActive = false;
         if (!isHeld()) {
             xaBranchXid = null;
