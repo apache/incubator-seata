@@ -35,6 +35,7 @@ public class ServerProperties {
     private Boolean enableCheckAuth = true;
     private Integer retryDeadThreshold = 130000;
     private Integer servicePort;
+    private Integer xaerNotaRetryTimeout = 60000;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -88,5 +89,13 @@ public class ServerProperties {
     public ServerProperties setServicePort(Integer servicePort) {
         this.servicePort = servicePort;
         return this;
+    }
+
+    public Integer getXaerNotaRetryTimeout() {
+        return xaerNotaRetryTimeout;
+    }
+
+    public void setXaerNotaRetryTimeout(Integer xaerNotaRetryTimeout) {
+        this.xaerNotaRetryTimeout = xaerNotaRetryTimeout;
     }
 }

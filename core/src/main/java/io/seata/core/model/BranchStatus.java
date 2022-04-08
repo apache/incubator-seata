@@ -89,7 +89,19 @@ public enum BranchStatus {
      * The Phase two rollback failed unretryable.
      * description:Rollback logic is failed but NOT retryable.
      */
-    PhaseTwo_RollbackFailed_Unretryable(10);
+    PhaseTwo_RollbackFailed_Unretryable(10),
+
+    /**
+     * The Phase two commit failed retryable because of XAException.XAER_NOTA.
+     * description:Commit logic is failed because of XAException.XAER_NOTA but retryable.
+     */
+    PhaseTwo_CommitFailed_XAER_NOTA_Retryable(11),
+
+    /**
+     * The Phase two rollback failed retryable because of XAException.XAER_NOTA.
+     * description:rollback logic is failed because of XAException.XAER_NOTA but retryable.
+     */
+    PhaseTwo_RollbackFailed_XAER_NOTA_Retryable(12);
 
     private int code;
 
