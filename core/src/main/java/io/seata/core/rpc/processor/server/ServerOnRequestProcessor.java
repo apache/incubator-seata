@@ -34,7 +34,6 @@ import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.constants.RpcMessageConstants.HeapMapKey;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
@@ -157,11 +156,10 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         if (!(message instanceof AbstractMessage)) {
             return;
         }
-        String version = rpcMessage.getHead(HeapMapKey.VERSION_KEY);
         // the batch send request message
         if (message instanceof MergedWarpMessage) {
             if (NettyServerConfig.isEnableTcServerBatchSendResponse() &&
-                StringUtils.isNotBlank(version) && Version.isAboveOrEqualVersion150(version)) {
+                StringUtils.isNotBlank(rpcContext.getVersion()) && Version.isAboveOrEqualVersion150(rpcContext.getVersion())) {
                 List<AbstractMessage> msgs = ((MergedWarpMessage) message).msgs;
                 List<Integer> msgIds = ((MergedWarpMessage) message).msgIds;
                 for (int i = 0; i < msgs.size(); i++) {
