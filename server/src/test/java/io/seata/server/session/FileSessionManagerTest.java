@@ -15,7 +15,10 @@
  */
 package io.seata.server.session;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -29,6 +32,7 @@ import javax.annotation.Resource;
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.console.result.PageResult;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -47,6 +51,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static io.seata.server.session.SessionHolder.CONFIG;
+import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
  * The type File based session manager test.
@@ -63,11 +69,16 @@ public class FileSessionManagerTest {
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
 
+    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+            DEFAULT_SESSION_STORE_FILE_DIR);
+
     @BeforeAll
     public static void setUp(ApplicationContext context) {
         try {
-            sessionManagerList = Arrays.asList(new FileSessionManager("root.data", "."),
-                    new FileSessionManager("test", null));
+            deleteDataFile();
+            EnhancedServiceLoader.unloadAll();
+            sessionManagerList =
+                Arrays.asList(new FileSessionManager("root.data", "."), new FileSessionManager("test", null));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -276,7 +287,6 @@ public class FileSessionManagerTest {
     @MethodSource("globalSessionsWithPageResultProvider")
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
         SessionHolder.getRootSessionManager().destroy();
-        EnhancedServiceLoader.unloadAll();
         SessionHolder.init("file");
 
         try {
@@ -577,4 +587,15 @@ public class FileSessionManagerTest {
                 Arguments.of(globalSession, branchSession)
         );
     }
+
+    private static void deleteDataFile() throws IOException {
+        File directory = new File(sessionStorePath);
+        File[] files = directory.listFiles();
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                Files.delete(Paths.get(file.getPath()));
+            }
+        }
+    }
+
 }
