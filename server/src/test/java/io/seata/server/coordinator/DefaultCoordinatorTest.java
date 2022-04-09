@@ -15,10 +15,7 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +46,7 @@ import io.seata.core.store.StoreMode;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -63,9 +61,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-
-import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
-
 /**
  * The type DefaultCoordinator test.
  *
@@ -96,9 +91,6 @@ public class DefaultCoordinatorTest {
     private static DefaultCore core;
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-        DEFAULT_SESSION_STORE_FILE_DIR);
 
     @BeforeAll
     public static void beforeClass(ApplicationContext context) throws Exception {
@@ -237,21 +229,11 @@ public class DefaultCoordinatorTest {
     @AfterEach
     public void tearDown() throws IOException {
         MetricsManager.get().getRegistry().clearUp();
-        deleteDataFile();
-    }
-
-    private static void deleteDataFile() throws IOException {
-        File directory = new File(sessionStorePath);
-        File[] files = directory.listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
-                Files.delete(Paths.get(file.getPath()));
-            }
-        }
+        StoreUtil.deleteDataFile();
     }
 
     private static void deleteAndCreateDataFile() throws IOException {
-        deleteDataFile();
+        StoreUtil.deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }
 
