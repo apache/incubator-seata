@@ -15,10 +15,7 @@
  */
 package io.seata.server.session;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -30,7 +27,6 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import io.seata.common.XID;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.console.result.PageResult;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
@@ -75,8 +71,6 @@ public class FileSessionManagerTest {
     @BeforeAll
     public static void setUp(ApplicationContext context) {
         try {
-            deleteDataFile();
-            EnhancedServiceLoader.unloadAll();
             sessionManagerList =
                 Arrays.asList(new FileSessionManager("root.data", "."), new FileSessionManager("test", null));
         } catch (IOException e) {
@@ -586,16 +580,6 @@ public class FileSessionManagerTest {
         return Stream.of(
                 Arguments.of(globalSession, branchSession)
         );
-    }
-
-    private static void deleteDataFile() throws IOException {
-        File directory = new File(sessionStorePath);
-        File[] files = directory.listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
-                Files.delete(Paths.get(file.getPath()));
-            }
-        }
     }
 
 }
