@@ -15,6 +15,7 @@
  */
 package io.seata.server.raft.snapshot;
 
+import java.io.Serializable;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.compressor.CompressorType;
@@ -28,7 +29,7 @@ import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
 /**
  * @author funkye
  */
-public class RaftSnapshot {
+public class RaftSnapshot implements Serializable {
 
     private byte codec = SerializerType
             .getByName(

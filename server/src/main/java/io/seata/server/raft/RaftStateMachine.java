@@ -17,6 +17,7 @@ package io.seata.server.raft;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,7 +149,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         Map<Long, byte[]> branchSessionByteMap = new HashMap<>(initialCapacity * 2);
         sessionMap.forEach((k, v) -> {
             globalSessionByteMap.put(v.getXid(), v.encode());
-            List<BranchSession> branchSessions = v.getBranchSessions();
+            List<BranchSession> branchSessions = Collections.unmodifiableList(v.getBranchSessions());
             branchSessions.forEach(
                 branchSession -> branchSessionByteMap.put(branchSession.getBranchId(), branchSession.encode()));
         });

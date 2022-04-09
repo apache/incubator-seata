@@ -32,14 +32,12 @@ public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         BranchTransactionDO branchTransactionDO = sessionSyncMsg.getBranchSession();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(branchTransactionDO.getXid());
-        // in AT mode, a branch session is added after the lock contention succeeds
-        if (StringUtils.isBlank(branchTransactionDO.getLockKey())) {
-            BranchSession branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
-            globalSession.add(branchSession);
-            if (logger.isDebugEnabled()) {
-                logger.debug("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
-                    branchTransactionDO.getBranchId());
-            }
+        BranchSession branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
+        branchSession.lock();
+        globalSession.add(branchSession);
+        if (logger.isDebugEnabled()) {
+            logger.debug("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
+                branchTransactionDO.getBranchId());
         }
         return true;
     }

@@ -208,11 +208,13 @@ public class SessionHolder {
                         queueToRetryCommit(globalSession);
                         break;
                     default: {
-                        lockBranchSessions(globalSession.getSortedBranches());
-                        if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
-                            || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
-                            globalSession.getBranchSessions().parallelStream()
-                                .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                        if (acquireLock) {
+                            lockBranchSessions(globalSession.getSortedBranches());
+                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                                globalSession.getBranchSessions().parallelStream()
+                                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                            }
                         }
                         switch (globalStatus) {
                             case Rollbacking:
