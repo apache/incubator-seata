@@ -1,0 +1,4 @@
+test oracle bfile type in AT mode is success
+1110101012121201210210210210210210201201201
+Seata is an open source distributed transaction solution
+that delivers high performance and easy to use distributed transaction services under a microservices architecture.

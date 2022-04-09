@@ -36,6 +36,23 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import static io.seata.at.oracle.OracleSqlConstant.BINARY_TABLE_NAME;
+import static io.seata.at.oracle.OracleSqlConstant.BINARY_TYPE;
+import static io.seata.at.oracle.OracleSqlConstant.DATE_TABLE_NAME;
+import static io.seata.at.oracle.OracleSqlConstant.DATE_TYPE;
+import static io.seata.at.oracle.OracleSqlConstant.NUMBER_TABLE_NAME;
+import static io.seata.at.oracle.OracleSqlConstant.NUMBER_TYPE;
+import static io.seata.at.oracle.OracleSqlConstant.STRING_TABLE_NAME;
+import static io.seata.at.oracle.OracleSqlConstant.STRING_TYPE;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_BINARY_TYPE_INSERT_SQL;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_BINARY_TYPE_UPDATE_SQL;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_DATE_TYPE_INSERT_SQL;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_DATE_TYPE_UPDATE_SQL;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_NUMBER_TYPE_INSERT_SQL;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_NUMBER_TYPE_UPDATE_SQL;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_RECORD_ID;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_STRING_TYPE_INSERT_SQL;
+import static io.seata.at.oracle.OracleSqlConstant.TEST_STRING_TYPE_UPDATE_SQL;
 
 /**
  * add AT transaction mode tests to support database data types (Oracle)
@@ -47,7 +64,6 @@ public class ATModeSupportDataBaseDataTypeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ATModeSupportDataBaseDataTypeTest.class);
 
-    private static final int TEST_RECORD_ID = 1;
     private static final long TEST_ID = 923123123123123132L;
     private static final String MOCK_XID = "127.0.0.1:8091:" + TEST_ID;
     private static final long MOCK_BRANCH_ID = TEST_ID + 1;
@@ -62,34 +78,6 @@ public class ATModeSupportDataBaseDataTypeTest {
     private static final String ORACLE_PASSWORD = "oracle";
     private static final String ORACLE_DRIVER_CLASSNAME = JdbcUtils.ORACLE_DRIVER;
 
-    private static final int NUMBER_TYPE = 1;
-    private static final int STRING_TYPE = 2;
-
-    /******************************** NUMBER **********************************************/
-    private static final String NUMBER_TABLE_NAME = "T_DATA_TYPE_NUMBER_TEST";
-
-    private static final String TEST_NUMBER_TYPE_INSERT_SQL = "INSERT INTO T_DATA_TYPE_NUMBER_TEST\n"
-        + "    (id,TINYINT_TEST,MEDUIMINT_TEST,INT_TEST,BIGINT_TEST,SMALLINT_TEST,INTEGER_TEST,DECIMAL_TEST,NUMERIC_TEST,DEC_TEST)\n"
-        + "    VALUES (1,123,456,55,234,56,22423,45645.22,897.333,999)";
-
-    private static final String TEST_NUMBER_TYPE_UPDATE_SQL = "UPDATE T_DATA_TYPE_NUMBER_TEST\n"
-        + "set TINYINT_TEST = 312,MEDUIMINT_TEST = 654,INT_TEST = 55,BIGINT_TEST = 432,\n"
-        + "    SMALLINT_TEST = 65,INTEGER_TEST = 32422,DECIMAL_TEST = 54654.22,NUMERIC_TEST = 798.333,\n"
-        + "    DEC_TEST = 888 WHERE id =" + TEST_RECORD_ID;
-    /******************************** NUMBER **********************************************/
-
-    /******************************** STRING **********************************************/
-    private static final String STRING_TABLE_NAME = "T_DATA_TYPE_STRING_TEST";
-
-    private static final String TEST_STRING_TYPE_INSERT_SQL =
-        "INSERT INTO T_DATA_TYPE_STRING_TEST(id,CHAR_TEST,NCHAR_TEST,VARCHAR_TEST,VARCHAR2_TEST,NVARCHAR2_TEST)\n"
-            + "    VALUES (1,'1231测试','678123123测试','623234测试','90eq9wer9测试','我测试')";
-
-    private static final String TEST_STRING_TYPE_UPDATE_SQL = "UPDATE T_DATA_TYPE_STRING_TEST\n" + "    SET\n"
-        + "        CHAR_TEST = '33333',NCHAR_TEST = '55555',VARCHAR_TEST = '测试汇总',VARCHAR2_TEST = '测试varchar2',\n"
-        + "        NVARCHAR2_TEST = '最后一列' WHERE id = " + TEST_RECORD_ID;
-
-    /******************************** STRING **********************************************/
     @Test
     @Disabled
     public void testDruidDataSource() {
@@ -110,14 +98,15 @@ public class ATModeSupportDataBaseDataTypeTest {
     public void doHandlerTest() throws Throwable {
         doType(NUMBER_TYPE, false);
         doType(STRING_TYPE, false);
-        // doType(3,false);
-        // doType(4,false);
+        doType(DATE_TYPE, false);
+        doType(BINARY_TYPE, false);
     }
 
     public void doType(int type, boolean globalCommit) throws Throwable {
         String tableName = "";
         String updateSql = "";
         String insertSql = "";
+
         switch (type) {
             case 1:
                 insertSql = TEST_NUMBER_TYPE_INSERT_SQL;
@@ -129,6 +118,14 @@ public class ATModeSupportDataBaseDataTypeTest {
                 tableName = STRING_TABLE_NAME;
                 updateSql = TEST_STRING_TYPE_UPDATE_SQL;
                 break;
+            case 3:
+                insertSql = TEST_DATE_TYPE_INSERT_SQL;
+                tableName = DATE_TABLE_NAME;
+                updateSql = TEST_DATE_TYPE_UPDATE_SQL;
+            case 4:
+                insertSql = TEST_BINARY_TYPE_INSERT_SQL;
+                tableName = BINARY_TABLE_NAME;
+                updateSql = TEST_BINARY_TYPE_UPDATE_SQL;
             default:
 
         }
