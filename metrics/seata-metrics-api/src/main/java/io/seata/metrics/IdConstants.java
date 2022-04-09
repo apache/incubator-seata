@@ -66,4 +66,9 @@ public interface IdConstants {
     String STATUS_VALUE_COMMITTED = "committed";
 
     String STATUS_VALUE_ROLLBACKED = "rollbacked";
+
+    String STATUS_VALUE_FAILED = "failed";
+
+    String STATUS_VALUE_TWO_PHASE_TIMEOUT = "2phaseTimeout";
+
 }
