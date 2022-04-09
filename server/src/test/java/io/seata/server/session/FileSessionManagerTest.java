@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import io.seata.common.XID;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.console.result.PageResult;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
@@ -37,6 +38,7 @@ import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.storage.file.session.FileSessionManager;
+import io.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,7 +51,6 @@ import org.springframework.context.ApplicationContext;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.server.session.SessionHolder.CONFIG;
 import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
-
 /**
  * The type File based session manager test.
  *
@@ -60,7 +61,7 @@ import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_D
 public class FileSessionManagerTest {
 
 
-    private static List<SessionManager> sessionManagerList;
+    private static volatile List<SessionManager> sessionManagerList;
 
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
@@ -70,7 +71,9 @@ public class FileSessionManagerTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
+        StoreUtil.deleteDataFile();
         try {
+            EnhancedServiceLoader.unloadAll();
             sessionManagerList =
                 Arrays.asList(new FileSessionManager("root.data", "."), new FileSessionManager("test", null));
         } catch (IOException e) {

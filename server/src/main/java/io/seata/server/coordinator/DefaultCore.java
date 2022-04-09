@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import static io.seata.core.constants.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
 import static io.seata.server.session.BranchSessionHandler.CONTINUE;
 
 /**
@@ -51,6 +53,9 @@ import static io.seata.server.session.BranchSessionHandler.CONTINUE;
 public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
+
+    private static final int RETRY_XAER_NOTA_TIMEOUT = ConfigurationFactory.getInstance().getInt(XAER_NOTA_RETRY_TIMEOUT,
+            DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT);
 
     private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
@@ -203,7 +208,10 @@ public class DefaultCore implements Core {
                 }
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
-
+                    if (isXaerNotaTimeout(globalSession,branchStatus)) {
+                        LOGGER.info("Commit branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                        branchStatus = BranchStatus.PhaseTwo_Committed;
+                    }
                     switch (branchStatus) {
                         case PhaseTwo_Committed:
                             SessionHelper.removeBranch(globalSession, branchSession, !retrying);
@@ -304,6 +312,10 @@ public class DefaultCore implements Core {
                 }
                 try {
                     BranchStatus branchStatus = branchRollback(globalSession, branchSession);
+                    if (isXaerNotaTimeout(globalSession, branchStatus)) {
+                        LOGGER.info("Rollback branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                        branchStatus = BranchStatus.PhaseTwo_Rollbacked;
+                    }
                     switch (branchStatus) {
                         case PhaseTwo_Rollbacked:
                             SessionHelper.removeBranch(globalSession, branchSession, !retrying);
@@ -372,4 +384,15 @@ public class DefaultCore implements Core {
             getCore(BranchType.SAGA).doGlobalReport(globalSession, xid, globalStatus);
         }
     }
+
+    private boolean isXaerNotaTimeout(GlobalSession globalSession, BranchStatus branchStatus) {
+        if (BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable.equals(branchStatus) ||
+                BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable.equals(branchStatus)) {
+            return System.currentTimeMillis() > globalSession.getBeginTime() + globalSession.getTimeout() +
+                    Math.max(RETRY_XAER_NOTA_TIMEOUT, globalSession.getTimeout());
+        } else {
+            return false;
+        }
+    }
+
 }
