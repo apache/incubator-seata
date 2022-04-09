@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import io.seata.server.raft.RaftSyncMsgSerializer;
-import io.seata.server.raft.execute.RaftSyncMsg;
+import io.seata.server.raft.msg.RaftSyncMsgSerializer;
+import io.seata.server.raft.msg.RaftSyncMsg;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;

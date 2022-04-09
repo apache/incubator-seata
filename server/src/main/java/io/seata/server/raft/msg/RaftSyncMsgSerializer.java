@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft;
+package io.seata.server.raft.msg;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,7 +25,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerType;
-import io.seata.server.raft.execute.RaftSyncMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public class RaftSyncMsgSerializer {
         }
     }
 
-    public static RaftSyncMsg decode(byte[] raftSyncMsgByte) throws IOException {
+    public static RaftSyncMsg decode(byte[] raftSyncMsgByte) {
         try (ByteArrayInputStream bin = new ByteArrayInputStream(raftSyncMsgByte);
             ObjectInputStream ois = new ObjectInputStream(bin)) {
             RaftSyncMsg raftSyncMsg = (RaftSyncMsg)ois.readObject();
@@ -58,9 +57,9 @@ public class RaftSyncMsgSerializer {
                 .ifPresent(value -> raftSyncMsg.setBody(serializer.deserialize(CompressorFactory
                     .getCompressor(raftSyncMsg.getCompressor()).decompress((byte[])raftSyncMsg.getBody()))));
             return raftSyncMsg;
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | IOException e) {
             LOGGER.info("Failed to read raft synchronization log: {}", e.getMessage(), e);
-            throw new IOException(e);
+            throw new RuntimeException(e);
         }
     }
 

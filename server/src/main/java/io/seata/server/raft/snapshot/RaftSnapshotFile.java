@@ -13,13 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft;
+package io.seata.server.raft.snapshot;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import io.seata.serializer.kryo.KryoInnerSerializer;
-import io.seata.serializer.kryo.KryoSerializerFactory;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,31 +32,23 @@ public class RaftSnapshotFile {
     /**
      * Save value to snapshot file.
      */
-    public static boolean save(final Map<String, Object> value, String path) {
-        KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
+    public static boolean save(final RaftSnapshot value, String path) {
         try {
-            FileUtils.writeByteArrayToFile(new File(path), kryoInnerSerializer.serialize(value));
+            FileUtils.writeByteArrayToFile(new File(path), RaftSnapshotSerializer.encode(value));
             return true;
         } catch (IOException e) {
             LOGGER.error("Fail to save snapshot", e);
             return false;
-        } finally {
-            KryoSerializerFactory.getInstance().returnKryo(kryoInnerSerializer);
         }
     }
 
     public static Map<String, Object> load(String path) throws IOException {
-        KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
-        try {
-            final Map<String, Object> map =
-                kryoInnerSerializer.deserialize(FileUtils.readFileToByteArray(new File(path)));
-            if (!map.isEmpty()) {
-                return map;
-            }
-            throw new IOException("Fail to load snapshot from " + path);
-        } finally {
-            KryoSerializerFactory.getInstance().returnKryo(kryoInnerSerializer);
+        RaftSnapshot raftSnapshot = RaftSnapshotSerializer.decode(FileUtils.readFileToByteArray(new File(path)));
+        final Map<String, Object> map = (Map<String, Object>)raftSnapshot.getBody();
+        if (!map.isEmpty()) {
+            return map;
         }
+        throw new IOException("Fail to load snapshot from " + path);
     }
 
 }

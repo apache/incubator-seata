@@ -25,8 +25,8 @@ import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.server.raft.RaftServerFactory;
-import io.seata.server.raft.RaftSyncMsgSerializer;
-import io.seata.server.raft.execute.RaftSyncMsg;
+import io.seata.server.raft.msg.RaftSyncMsgSerializer;
+import io.seata.server.raft.msg.RaftSyncMsg;
 
 /**
  * @author funkye

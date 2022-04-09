@@ -22,8 +22,10 @@ import java.nio.file.Paths;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
-import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
-
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+/**
+ * @author funkye
+ */
 public class StoreUtil {
 
     private static String sessionStorePath =

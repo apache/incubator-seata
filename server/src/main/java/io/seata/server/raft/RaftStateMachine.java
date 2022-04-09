@@ -52,6 +52,9 @@ import io.seata.server.raft.execute.global.UpdateGlobalSessionExecute;
 import io.seata.server.raft.execute.lock.AcquireLockExecute;
 import io.seata.server.raft.execute.lock.BranchReleaseLockExecute;
 import io.seata.server.raft.execute.lock.GlobalReleaseLockExecute;
+import io.seata.server.raft.msg.RaftSyncMsgSerializer;
+import io.seata.server.raft.snapshot.RaftSnapshot;
+import io.seata.server.raft.snapshot.RaftSnapshotFile;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -117,17 +120,13 @@ public class RaftStateMachine extends StateMachineAdapter {
                 // leader does not need to be serialized, just execute the task directly
                 Optional.ofNullable(iterator.done()).ifPresent(done -> done.run(Status.OK()));
             } else {
-                try {
-                    ByteBuffer byteBuffer = iterator.getData();
-                    // if data is empty, it is only a heartbeat event and can be ignored
-                    if (byteBuffer != null && byteBuffer.hasRemaining()) {
-                        RaftSessionSyncMsg msg =
-                            (RaftSessionSyncMsg)RaftSyncMsgSerializer.decode(byteBuffer.array()).getBody();
-                        // follower executes the corresponding task
-                        onExecuteRaft(msg);
-                    }
-                } catch (Throwable e) {
-                    LOGGER.error("Message synchronization failure: {}", e.getMessage(), e);
+                ByteBuffer byteBuffer = iterator.getData();
+                // if data is empty, it is only a heartbeat event and can be ignored
+                if (byteBuffer != null && byteBuffer.hasRemaining()) {
+                    RaftSessionSyncMsg msg =
+                        (RaftSessionSyncMsg)RaftSyncMsgSerializer.decode(byteBuffer.array()).getBody();
+                    // follower executes the corresponding task
+                    onExecuteRaft(msg);
                 }
             }
             iterator.next();
@@ -155,10 +154,12 @@ public class RaftStateMachine extends StateMachineAdapter {
         });
         maps.put(ROOT_SESSION_MANAGER_NAME, globalSessionByteMap);
         maps.put(BRANCH_SESSION_MAP, branchSessionByteMap);
+        RaftSnapshot raftSnapshot = new RaftSnapshot();
+        raftSnapshot.setBody(maps);
         LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
             branchSessionByteMap.size());
         String path = new StringBuilder(writer.getPath()).append(File.separator).append("data").toString();
-        if (RaftSnapshotFile.save(maps, path)) {
+        if (RaftSnapshotFile.save(raftSnapshot, path)) {
             if (writer.addFile("data")) {
                 done.run(Status.OK());
             } else {
@@ -276,6 +277,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             execute.execute(msg);
         } catch (Throwable e) {
             LOGGER.error("Message synchronization failure: {}, msgType: {}", e.getMessage(), msg.getMsgType(), e);
+            throw new RuntimeException(e);
         }
     }
 }

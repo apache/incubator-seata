@@ -13,30 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute;
+package io.seata.server.raft.snapshot;
 
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.serializer.SerializerType;
 
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SERIALIZATION;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SERIALIZATION;
 
 /**
  * @author funkye
  */
-public class RaftSyncMsg implements java.io.Serializable {
+public class RaftSnapshot {
 
-    private static final long serialVersionUID = 8225279734319945365L;
     private byte codec = SerializerType
-        .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SERIALIZATION, DEFAULT_RAFT_SERIALIZATION))
-        .getCode();
+            .getByName(
+                    ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SERIALIZATION, DEFAULT_RAFT_SERIALIZATION))
+            .getCode();
     private byte compressor = CompressorType
-        .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
-        .getCode();
+            .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
+            .getCode();
     private Object body;
 
     /**
@@ -72,7 +72,7 @@ public class RaftSyncMsg implements java.io.Serializable {
      * @param codec the codec
      * @return the codec
      */
-    public RaftSyncMsg setCodec(byte codec) {
+    public RaftSnapshot setCodec(byte codec) {
         this.codec = codec;
         return this;
     }
@@ -92,7 +92,7 @@ public class RaftSyncMsg implements java.io.Serializable {
      * @param compressor the compressor
      * @return the compressor
      */
-    public RaftSyncMsg setCompressor(byte compressor) {
+    public RaftSnapshot setCompressor(byte compressor) {
         this.compressor = compressor;
         return this;
     }
