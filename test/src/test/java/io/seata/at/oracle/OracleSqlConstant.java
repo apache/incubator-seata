@@ -53,12 +53,12 @@ public class OracleSqlConstant {
         + "TO_BLOB('111110000111111111111111111111111110000000010101001001010'),\n"
         + "TO_CLOB('01010101111110101111111111111111111111111111111111'),\n"
         + "TO_NCLOB('1111111111111111111000000000000000011110010101001'),\n"
-        + "BFILENAME('BFILEDIR', 'seata/rm-datasource/src/test/java/io/seata/rm/at/oracle/bfile.txt')\n" + ")";
+        + "BFILENAME('BFILEDIR', 'seata/src/test/java/io/seata/at/oracle/bfile.txt')\n" + ")";
 
     public static final String TEST_BINARY_TYPE_UPDATE_SQL = "UPDATE T_DATA_TYPE_BINARY_TEST\n"
         + "SET BLOB_TEST = TO_BLOB('111111111000111111111111111'),\n"
         + "CLOB_TEST = TO_CLOB('111111111111000111111111111111'),\n"
-        + "BFILE_TEST = BFILENAME('BFILEDIR', 'seata/rm-datasource/src/test/java/io/seata/rm/at/oracle/bfileUpdate.txt'),\n"
+        + "BFILE_TEST = BFILENAME('BFILEDIR', 'seata/src/test/java/io/seata/at/oracle/bfile.txt'),\n"
         + "NCLOB_TEST = TO_NCLOB('11111111111110000000111111111111111')\n" + "WHERE ID = " + TEST_RECORD_ID;
 
     /******************************** BINARY END **********************************************/

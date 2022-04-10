@@ -122,6 +122,7 @@ public class ATModeSupportDataBaseDataTypeTest {
                 insertSql = TEST_DATE_TYPE_INSERT_SQL;
                 tableName = DATE_TABLE_NAME;
                 updateSql = TEST_DATE_TYPE_UPDATE_SQL;
+                break;
             case 4:
                 insertSql = TEST_BINARY_TYPE_INSERT_SQL;
                 tableName = BINARY_TABLE_NAME;
