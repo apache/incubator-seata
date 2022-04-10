@@ -37,10 +37,20 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
         AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
         boolean identified = abstractIdentifyResponse.isIdentified();
         String version = abstractIdentifyResponse.getVersion();
+        String errMsg = abstractIdentifyResponse.getMsg();
 
         out.writeByte(identified ? (byte)1 : (byte)0);
         if (version != null) {
             byte[] bs = version.getBytes(UTF8);
+            out.writeShort((short)bs.length);
+            if (bs.length > 0) {
+                out.writeBytes(bs);
+            }
+        } else {
+            out.writeShort((short)0);
+        }
+        if (errMsg != null) {
+            byte[] bs = errMsg.getBytes(UTF8);
             out.writeShort((short)bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
@@ -56,15 +66,19 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
 
         abstractIdentifyResponse.setIdentified(in.get() == 1);
         short len = in.getShort();
-        if (len <= 0) {
-            return;
-        }
-        if (in.remaining() < len) {
+        if (len <= 0 || in.remaining() < len) {
             return;
         }
         byte[] bs = new byte[len];
         in.get(bs);
         abstractIdentifyResponse.setVersion(new String(bs, UTF8));
+        len = in.getShort();
+        if (len <= 0 || in.remaining() < len) {
+            return;
+        }
+        bs = new byte[len];
+        in.get(bs);
+        abstractIdentifyResponse.setMsg(new String(bs, UTF8));
     }
 
 }
