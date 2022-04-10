@@ -175,7 +175,7 @@ public class RaftServerFactory {
         Integer snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         nodeOptions.setRaftOptions(initRaftOptions());
-        // set the election timeout to 1 second
+        // set the election timeout to 2 second
         nodeOptions
             .setElectionTimeoutMs(CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, nodeOptions.getElectionTimeoutMs()));
         // set up the initial cluster configuration

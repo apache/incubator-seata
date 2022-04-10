@@ -107,7 +107,7 @@ seata:
       maxAppendBufferSize: 262144
       maxReplicatorInflightMsgs: 256
       disruptorBufferSize: 16384
-      electionTimeoutMs: 1000
+      electionTimeoutMs: 2000
       reporterEnabled: false
       reporterInitialDelay: 30
       serialization: fst

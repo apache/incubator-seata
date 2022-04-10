@@ -37,6 +37,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.LockStatus;
 import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.store.StoreMode;
@@ -50,7 +52,6 @@ import io.seata.server.raft.execute.branch.UpdateBranchSessionExecute;
 import io.seata.server.raft.execute.global.AddGlobalSessionExecute;
 import io.seata.server.raft.execute.global.RemoveGlobalSessionExecute;
 import io.seata.server.raft.execute.global.UpdateGlobalSessionExecute;
-import io.seata.server.raft.execute.lock.AcquireLockExecute;
 import io.seata.server.raft.execute.lock.BranchReleaseLockExecute;
 import io.seata.server.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.raft.msg.RaftSyncMsgSerializer;
@@ -67,7 +68,6 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
@@ -104,7 +104,6 @@ public class RaftStateMachine extends StateMachineAdapter {
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
         EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
-        EXECUTES.put(ACQUIRE_LOCK, new AcquireLockExecute());
         EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
         EXECUTES.put(REMOVE_BRANCH_SESSION, new RemoveBranchSessionExecute());
         EXECUTES.put(UPDATE_GLOBAL_SESSION_STATUS, new UpdateGlobalSessionExecute());
@@ -208,15 +207,21 @@ public class RaftStateMachine extends StateMachineAdapter {
                 });
                 rootSessionMap.putAll(sessionMap);
                 if (CollectionUtils.isNotEmpty(branchSessionByteMap)) {
-                    RaftLockManager fileLockManager = (RaftLockManager) LockerManagerFactory.getLockManager();
                     branchSessionByteMap.forEach((k, v) -> {
                         BranchSession branchSession = new BranchSession();
                         branchSession.decode(v);
                         try {
-                            fileLockManager.localAcquireLock(branchSession);
+                            branchSession.lock();
                             rootSessionMap.get(branchSession.getXid()).add(branchSession);
                         } catch (TransactionException e) {
                             LOGGER.error(e.getMessage());
+                        }
+                    });
+                    rootSessionMap.values().parallelStream().forEach(globalSession -> {
+                        if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                            || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                            globalSession.getBranchSessions().parallelStream()
+                                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
                         }
                     });
                 }

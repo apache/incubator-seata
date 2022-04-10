@@ -32,7 +32,6 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.metrics.MetricsManager;
-import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;

@@ -133,10 +133,6 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
          */
         UPDATE_BRANCH_SESSION_STATUS,
         /**
-         * acquireLock
-         */
-        ACQUIRE_LOCK,
-        /**
          * releaseGlobalSessionLock
          */
         RELEASE_GLOBAL_SESSION_LOCK,

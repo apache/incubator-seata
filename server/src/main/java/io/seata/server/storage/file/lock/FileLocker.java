@@ -107,12 +107,7 @@ public class FileLocker extends AbstractLocker {
                 LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockBranchSession.getBranchId());
                 try {
                     // Release all acquired locks.
-                    LockManager lockManager = LockerManagerFactory.getLockManager();
-                    if (RaftServerFactory.getInstance().isRaftMode()) {
-                        ((RaftLockManager)lockManager).localReleaseLock(branchSession);
-                    } else {
-                        branchSession.unlock();
-                    }
+                    branchSession.unlock();
                 } catch (TransactionException e) {
                     throw new FrameworkException(e);
                 }

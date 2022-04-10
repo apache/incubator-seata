@@ -35,7 +35,7 @@ public class BranchReleaseLockExecute extends AbstractRaftMsgExecute {
             if (logger.isDebugEnabled()) {
                 logger.debug("releaseBranchSessionLock xid: {}", globalSession.getXid());
             }
-            return raftLockManager.localReleaseLock(branchSession);
+            return raftLockManager.releaseLock(branchSession);
         }
         return false;
     }
