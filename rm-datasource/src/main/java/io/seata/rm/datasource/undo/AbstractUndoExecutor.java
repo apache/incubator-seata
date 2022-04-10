@@ -196,6 +196,8 @@ public abstract class AbstractUndoExecutor {
                 }
             } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
                 undoPST.setObject(undoIndex, value);
+            } else if (undoValue.getType() == JDBCType.BIT.getVendorTypeNumber()) {
+                undoPST.setObject(undoIndex, value);
             } else {
                 // JDBCType.REF, JDBCType.JAVA_OBJECT etc...
                 undoPST.setObject(undoIndex, value, type);

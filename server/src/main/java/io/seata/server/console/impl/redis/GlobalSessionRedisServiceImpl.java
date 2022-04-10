@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import io.seata.common.util.CollectionUtils;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.vo.GlobalSessionVO;
-import io.seata.core.console.result.PageResult;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
 import static io.seata.common.util.StringUtils.isBlank;
 import static io.seata.common.util.StringUtils.isNotBlank;
-import static io.seata.core.console.result.PageResult.checkPage;
+import static io.seata.console.result.PageResult.checkPage;
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
@@ -47,7 +47,7 @@ import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 @ConditionalOnExpression("#{'redis'.equals('${sessionMode}')}")
 public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
 
-    private Logger logger = LoggerFactory.getLogger(GlobalSessionRedisServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionRedisServiceImpl.class);
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
@@ -55,7 +55,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         Long total = 0L;
         if (param.getTimeStart() != null || param.getTimeEnd() != null) {
             //not support time range query
-            logger.debug("not supported according to time range query");
+            LOGGER.debug("not supported according to time range query");
             return PageResult.failure(ParameterRequired.getErrCode(),"not supported according to time range query");
         }
         List<GlobalSession> globalSessions = new ArrayList<>();
@@ -65,7 +65,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         checkPage(param);
 
         if (isBlank(param.getXid()) && param.getStatus() == null) {
-            total = instance.countByClobalSesisons(GlobalStatus.values());
+            total = instance.countByGlobalSessions(GlobalStatus.values());
             globalSessions = instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(),param.isWithBranch());
         } else {
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
@@ -82,18 +82,20 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
                     globalSessionsNew = globalSessions.stream().filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus())).collect(Collectors.toList());
                     total = (long)globalSessionsNew.size();
                 } else {
-                    total = instance.countByClobalSesisons(new GlobalStatus[]{GlobalStatus.get(param.getStatus())});
+                    total = instance.countByGlobalSessions(new GlobalStatus[] {GlobalStatus.get(param.getStatus())});
                     globalSessionsNew = instance.readSessionStatusByPage(param);
                 }
             }
 
-            if (isNotBlank(param.getApplicationId())) {
-                //not support
-                logger.debug("not supported according to applicationId query");
-            }
-            if (isNotBlank(param.getTransactionName())) {
-                //not support
-                logger.debug("not supported according to transactionName query");
+            if (LOGGER.isDebugEnabled()) {
+                if (isNotBlank(param.getApplicationId())) {
+                    //not support
+                    LOGGER.debug("not supported according to applicationId query");
+                }
+                if (isNotBlank(param.getTransactionName())) {
+                    //not support
+                    LOGGER.debug("not supported according to transactionName query");
+                }
             }
             globalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
         }
