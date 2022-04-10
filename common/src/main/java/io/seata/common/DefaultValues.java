@@ -179,4 +179,20 @@ public interface DefaultValues {
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
     long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+
+    /**
+     * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
+     */
+    int DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
+
+    /**
+     * the constant DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT
+     */
+    int DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT = 60000;
+
+    /**
+     * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
+     */
+    int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
+
 }
