@@ -10,21 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package io.seata.at.oracle;
+package io.seata.at;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-
+import io.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.util.JdbcUtils;
-
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -36,6 +33,9 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import static io.seata.at.DruidDataSourceUtils.ORACLE;
+import static io.seata.at.DruidDataSourceUtils.POSTGRESQL;
+import static io.seata.at.DruidDataSourceUtils.createNewDruidDataSource;
 import static io.seata.at.oracle.OracleSqlConstant.BINARY_TABLE_NAME;
 import static io.seata.at.oracle.OracleSqlConstant.BINARY_TYPE;
 import static io.seata.at.oracle.OracleSqlConstant.DATE_TABLE_NAME;
@@ -68,82 +68,34 @@ public class ATModeSupportDataBaseDataTypeTest {
     private static final String MOCK_XID = "127.0.0.1:8091:" + TEST_ID;
     private static final long MOCK_BRANCH_ID = TEST_ID + 1;
 
-    /**
-     * test1: url:jdbc:oracle:thin:@localhost:49161:xe name:system password:oracle
-     *
-     * test2: jdbc:oracle:thin:@localhost:1521:helowin name:system password:helowin
-     */
-    private static final String ORACLE_JDBC_URL = "jdbc:oracle:thin:@localhost:49161:xe";
-    private static final String ORACLE_USERNAME = "system";
-    private static final String ORACLE_PASSWORD = "oracle";
-    private static final String ORACLE_DRIVER_CLASSNAME = JdbcUtils.ORACLE_DRIVER;
-
     @Test
-    @Disabled
-    public void testDruidDataSource() {
-        try {
-            DruidDataSource oracleDruidDataSource = createNewDruidDataSource();
-            LOGGER.info("get datasource success,the dataSource is:[{}]", oracleDruidDataSource.toString());
-        } catch (Throwable throwable) {
-            LOGGER.error("the reason: [{}]", throwable.getMessage());
-        }
+    public void doSqlTest() throws Throwable {
+        doHandlerTest(ORACLE);
     }
 
-    @Test
-    public void testProxy() throws Throwable {
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(createNewDruidDataSource());
+    public void doHandlerTest(int sqlType) throws Throwable {
+        doType(sqlType, NUMBER_TYPE, false);
+        doType(sqlType, STRING_TYPE, false);
+        doType(sqlType, DATE_TYPE, false);
+        doType(sqlType, BINARY_TYPE, false);
     }
 
-    @Test
-    public void doHandlerTest() throws Throwable {
-        doType(NUMBER_TYPE, false);
-        doType(STRING_TYPE, false);
-        doType(DATE_TYPE, false);
-        doType(BINARY_TYPE, false);
-    }
-
-    public void doType(int type, boolean globalCommit) throws Throwable {
-        String tableName = "";
-        String updateSql = "";
-        String insertSql = "";
-
-        switch (type) {
-            case 1:
-                insertSql = TEST_NUMBER_TYPE_INSERT_SQL;
-                tableName = NUMBER_TABLE_NAME;
-                updateSql = TEST_NUMBER_TYPE_UPDATE_SQL;
-                break;
-            case 2:
-                insertSql = TEST_STRING_TYPE_INSERT_SQL;
-                tableName = STRING_TABLE_NAME;
-                updateSql = TEST_STRING_TYPE_UPDATE_SQL;
-                break;
-            case 3:
-                insertSql = TEST_DATE_TYPE_INSERT_SQL;
-                tableName = DATE_TABLE_NAME;
-                updateSql = TEST_DATE_TYPE_UPDATE_SQL;
-                break;
-            case 4:
-                insertSql = TEST_BINARY_TYPE_INSERT_SQL;
-                tableName = BINARY_TABLE_NAME;
-                updateSql = TEST_BINARY_TYPE_UPDATE_SQL;
-            default:
-
-        }
+    public void doType(int sqlType, int type, boolean globalCommit) throws Throwable {
+        final SqlClass sqlClass = dogetType(sqlType, type);
         LOGGER.info("current type is:[{}]", type);
-        testTypeSql(globalCommit, insertSql, tableName, updateSql);
+        testTypeSql(sqlType, globalCommit, sqlClass.getInsertSql(), sqlClass.getTableName(), sqlClass.getUpdateSql());
     }
 
     @Test
     @Disabled
-    public void testTypeSql(boolean globalCommit, String insertSql, String tableName, String updateSql)
+    public void testTypeSql(int sqlType, boolean globalCommit, String insertSql, String tableName, String updateSql)
         throws Throwable {
-        doExecute(insertSql);
-        doTestOracleTypePhase(globalCommit, tableName, updateSql);
+        doExecute(sqlType, insertSql);
+        doTestOracleTypePhase(sqlType, globalCommit, tableName, updateSql);
     }
 
-    private void doExecute(String prepareSql) throws Throwable {
-        DruidDataSource oracleDruidDataSource = createNewDruidDataSource();
+    private void doExecute(int sqlType, String prepareSql) throws Throwable {
+        DruidDataSource oracleDruidDataSource = createNewDruidDataSource(sqlType);
         Connection helperConn = oracleDruidDataSource.getConnection();
         Statement helperStat = helperConn.createStatement();
         helperStat.execute(prepareSql);
@@ -152,9 +104,10 @@ public class ATModeSupportDataBaseDataTypeTest {
         LOGGER.info("insert sql success sql:[{}]", prepareSql);
     }
 
-    private void doTestOracleTypePhase(boolean globalCommit, String tableName, String updateSql) throws Throwable {
+    private void doTestOracleTypePhase(int sqlType, boolean globalCommit, String tableName, String updateSql)
+        throws Throwable {
         // init DataSource: helper
-        DruidDataSource helperDS = createNewDruidDataSource();
+        DruidDataSource helperDS = createNewDruidDataSource(sqlType);
 
         Connection helperConn = null;
         Statement helperStat = null;
@@ -162,7 +115,7 @@ public class ATModeSupportDataBaseDataTypeTest {
 
         initRM();
 
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(createNewDruidDataSource());
+        DataSourceProxy dataSourceProxy = new DataSourceProxy(createNewDruidDataSource(sqlType));
         LOGGER.info("the dataSourceProxy is:[{}]", dataSourceProxy);
         RootContext.bind(MOCK_XID);
         Connection testConn = dataSourceProxy.getConnection();
@@ -224,19 +177,72 @@ public class ATModeSupportDataBaseDataTypeTest {
 
     }
 
-    private static DruidDataSource createNewDruidDataSource() throws Throwable {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        initDruidDataSource(druidDataSource);
-        return druidDataSource;
+    private static class SqlClass {
+
+        private String tableName = "";
+        private String updateSql = "";
+        private String insertSql = "";
+
+        public SqlClass() {}
+
+        public String getTableName() {
+            return tableName;
+        }
+
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
+        }
+
+        public String getUpdateSql() {
+            return updateSql;
+        }
+
+        public void setUpdateSql(String updateSql) {
+            this.updateSql = updateSql;
+        }
+
+        public String getInsertSql() {
+            return insertSql;
+        }
+
+        public void setInsertSql(String insertSql) {
+            this.insertSql = insertSql;
+        }
     }
 
-    private static void initDruidDataSource(DruidDataSource druidDataSource) throws Throwable {
-        druidDataSource.setDbType(io.seata.sqlparser.util.JdbcConstants.ORACLE);
-        druidDataSource.setUrl(ORACLE_JDBC_URL);
-        druidDataSource.setUsername(ORACLE_USERNAME);
-        druidDataSource.setPassword(ORACLE_PASSWORD);
-        druidDataSource.setDriverClassName(ORACLE_DRIVER_CLASSNAME);
-        druidDataSource.init();
-        LOGGER.info("datasource init success");
+    private SqlClass dogetType(int sqlType, int type) {
+        SqlClass sqlClass = new SqlClass();
+        switch (sqlType) {
+            case ORACLE:
+                switch (type) {
+                    case 1:
+                        sqlClass.setInsertSql(TEST_NUMBER_TYPE_INSERT_SQL);
+                        sqlClass.setTableName(NUMBER_TABLE_NAME);
+                        sqlClass.setUpdateSql(TEST_NUMBER_TYPE_UPDATE_SQL);
+                        break;
+                    case 2:
+                        sqlClass.setInsertSql(TEST_STRING_TYPE_INSERT_SQL);
+                        sqlClass.setTableName(STRING_TABLE_NAME);
+                        sqlClass.setUpdateSql(TEST_STRING_TYPE_UPDATE_SQL);
+                        break;
+                    case 3:
+                        sqlClass.setInsertSql(TEST_DATE_TYPE_INSERT_SQL);
+                        sqlClass.setTableName(DATE_TABLE_NAME);
+                        sqlClass.setTableName(TEST_DATE_TYPE_UPDATE_SQL);
+                        break;
+                    case 4:
+                        sqlClass.setInsertSql(TEST_BINARY_TYPE_INSERT_SQL);
+                        sqlClass.setTableName(BINARY_TABLE_NAME);
+                        sqlClass.setTableName(TEST_BINARY_TYPE_UPDATE_SQL);
+                    default:
+                }
+                break;
+            case POSTGRESQL:
+
+                break;
+            default:
+                throw new NotSupportYetException("not support");
+        }
+        return sqlClass;
     }
 }
