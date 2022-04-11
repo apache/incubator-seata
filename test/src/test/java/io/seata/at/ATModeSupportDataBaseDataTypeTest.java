@@ -87,7 +87,6 @@ public class ATModeSupportDataBaseDataTypeTest {
     }
 
     @Test
-    @Disabled
     public void testTypeSql(int sqlType, boolean globalCommit, String insertSql, String tableName, String updateSql)
         throws Throwable {
         doExecute(sqlType, insertSql);
