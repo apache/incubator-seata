@@ -115,7 +115,8 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
          */
 
         try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
-             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
+             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
+             ResultSet onUpdateColumns = dbmd.getVersionColumns(catalogName, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -141,6 +142,10 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
                 }
                 tm.getAllColumns().put(col.getColumnName(), col);
+            }
+
+            while (onUpdateColumns.next()) {
+                tm.getAllColumns().get(onUpdateColumns.getString("COLUMN_NAME")).setOnUpdate(true);
             }
 
             while (rsIndex.next()) {
