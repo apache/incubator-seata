@@ -65,21 +65,21 @@ public class DruidDataSourceUtils {
     }
 
     private static void initDruidDataSourcePostGreSql(DruidDataSource druidDataSource) throws SQLException {
-        druidDataSource.setDbType(JdbcConstants.ORACLE);
-        druidDataSource.setUrl(ORACLE_JDBC_URL);
-        druidDataSource.setUsername(ORACLE_USERNAME);
-        druidDataSource.setPassword(ORACLE_PASSWORD);
-        druidDataSource.setDriverClassName(ORACLE_DRIVER_CLASSNAME);
-        druidDataSource.init();
-        LOGGER.info("datasource init success");
-    }
-
-    private static void initDruidDataSourceOracle(DruidDataSource druidDataSource) throws Throwable {
         druidDataSource.setDbType(JdbcConstants.POSTGRESQL);
         druidDataSource.setUrl(POSTGRESQL_JDBC_URL);
         druidDataSource.setUsername(POSTGRESQL_USERNAME);
         druidDataSource.setPassword(POSTGRESQL_PASSWORD);
         druidDataSource.setDriverClassName(POSTGRESQL_DRIVER_CLASSNAME);
+        druidDataSource.init();
+        LOGGER.info("datasource init success");
+    }
+
+    private static void initDruidDataSourceOracle(DruidDataSource druidDataSource) throws Throwable {
+        druidDataSource.setDbType(JdbcConstants.ORACLE);
+        druidDataSource.setUrl(ORACLE_JDBC_URL);
+        druidDataSource.setUsername(ORACLE_USERNAME);
+        druidDataSource.setPassword(ORACLE_PASSWORD);
+        druidDataSource.setDriverClassName(ORACLE_DRIVER_CLASSNAME);
         druidDataSource.init();
         LOGGER.info("datasource init success");
     }
