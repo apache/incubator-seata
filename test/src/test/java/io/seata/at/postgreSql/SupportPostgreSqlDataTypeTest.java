@@ -10,17 +10,8 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package io.seata.at;
+package io.seata.at.postgreSql;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import io.seata.common.exception.NotSupportYetException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
@@ -33,26 +24,23 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import static io.seata.at.DruidDataSourceUtils.ORACLE;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import static io.seata.at.DruidDataSourceUtils.POSTGRESQL;
 import static io.seata.at.DruidDataSourceUtils.createNewDruidDataSource;
-import static io.seata.at.oracle.OracleSqlConstant.BINARY_TABLE_NAME;
-import static io.seata.at.oracle.OracleSqlConstant.BINARY_TYPE;
-import static io.seata.at.oracle.OracleSqlConstant.DATE_TABLE_NAME;
-import static io.seata.at.oracle.OracleSqlConstant.DATE_TYPE;
-import static io.seata.at.oracle.OracleSqlConstant.NUMBER_TABLE_NAME;
-import static io.seata.at.oracle.OracleSqlConstant.NUMBER_TYPE;
-import static io.seata.at.oracle.OracleSqlConstant.STRING_TABLE_NAME;
-import static io.seata.at.oracle.OracleSqlConstant.STRING_TYPE;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_BINARY_TYPE_INSERT_SQL;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_BINARY_TYPE_UPDATE_SQL;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_DATE_TYPE_INSERT_SQL;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_DATE_TYPE_UPDATE_SQL;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_NUMBER_TYPE_INSERT_SQL;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_NUMBER_TYPE_UPDATE_SQL;
 import static io.seata.at.oracle.OracleSqlConstant.TEST_RECORD_ID;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_STRING_TYPE_INSERT_SQL;
-import static io.seata.at.oracle.OracleSqlConstant.TEST_STRING_TYPE_UPDATE_SQL;
+import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TABLE_NAME;
+import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TYPE;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_INSERT_SQL;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_UPDATE_SQL;
 
 /**
  * add AT transaction mode tests to support database data types (Oracle)
@@ -60,30 +48,33 @@ import static io.seata.at.oracle.OracleSqlConstant.TEST_STRING_TYPE_UPDATE_SQL;
  * author doubleDimple
  */
 @Disabled
-public class ATModeSupportDataBaseDataTypeTest {
+public class SupportPostgreSqlDataTypeTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ATModeSupportDataBaseDataTypeTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SupportPostgreSqlDataTypeTest.class);
 
     private static final long TEST_ID = 923123123123123132L;
     private static final String MOCK_XID = "127.0.0.1:8091:" + TEST_ID;
     private static final long MOCK_BRANCH_ID = TEST_ID + 1;
 
     @Test
-    public void doSqlTest() throws Throwable {
-        doHandlerTest(ORACLE);
+    public void doHandlerTest() throws Throwable {
+        doType(CURRENCY_TYPE, false);
     }
 
-    public void doHandlerTest(int sqlType) throws Throwable {
-        doType(sqlType, NUMBER_TYPE, false);
-        doType(sqlType, STRING_TYPE, false);
-        doType(sqlType, DATE_TYPE, false);
-        doType(sqlType, BINARY_TYPE, false);
-    }
-
-    public void doType(int sqlType, int type, boolean globalCommit) throws Throwable {
-        final SqlClass sqlClass = dogetType(sqlType, type);
+    public void doType(int type, boolean globalCommit) throws Throwable {
+        String insertSql = "";
+        String tableName = "";
+        String updateSql = "";
+        switch (type) {
+            case 1:
+                insertSql = TEST_CURRENCY_TYPE_INSERT_SQL;
+                tableName = CURRENCY_TABLE_NAME;
+                updateSql = TEST_CURRENCY_TYPE_UPDATE_SQL;
+                break;
+            default:
+        }
         LOGGER.info("current type is:[{}]", type);
-        testTypeSql(sqlType, globalCommit, sqlClass.getInsertSql(), sqlClass.getTableName(), sqlClass.getUpdateSql());
+        testTypeSql(POSTGRESQL, globalCommit, insertSql, tableName, updateSql);
     }
 
     @Test
@@ -125,9 +116,9 @@ public class ATModeSupportDataBaseDataTypeTest {
         // get before image
         helperConn = helperDS.getConnection();
         helperStat = helperConn.createStatement();
-        helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
+        helperRes = helperStat.executeQuery("select * from " + tableName + " where \"ID\" = " + TEST_RECORD_ID);
         LOGGER.info("the helperRes is:[{}]", helperRes);
-        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(io.seata.sqlparser.util.JdbcConstants.ORACLE)
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POSTGRESQL)
             .getTableMeta(dataSourceProxy.getPlainConnection(), tableName, dataSourceProxy.getResourceId());
         TableRecords beforeImage = TableRecords.buildRecords(tableMeta, helperRes);
 
@@ -148,7 +139,7 @@ public class ATModeSupportDataBaseDataTypeTest {
                 dataSourceProxy.getResourceId(), null);
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
-            helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
+            helperRes = helperStat.executeQuery("select * from " + tableName + " where \"ID\" = " + TEST_RECORD_ID);
             TableRecords currentImage = TableRecords.buildRecords(tableMeta, helperRes);
             LOGGER.info("the currentImage Rows is:[{}]", currentImage.getRows());
             Assertions.assertTrue(DataCompareUtils.isRecordsEquals(beforeImage, currentImage).getResult());
@@ -174,74 +165,5 @@ public class ATModeSupportDataBaseDataTypeTest {
                 String applicationData) throws TransactionException {}
         });
 
-    }
-
-    private static class SqlClass {
-
-        private String tableName = "";
-        private String updateSql = "";
-        private String insertSql = "";
-
-        public SqlClass() {}
-
-        public String getTableName() {
-            return tableName;
-        }
-
-        public void setTableName(String tableName) {
-            this.tableName = tableName;
-        }
-
-        public String getUpdateSql() {
-            return updateSql;
-        }
-
-        public void setUpdateSql(String updateSql) {
-            this.updateSql = updateSql;
-        }
-
-        public String getInsertSql() {
-            return insertSql;
-        }
-
-        public void setInsertSql(String insertSql) {
-            this.insertSql = insertSql;
-        }
-    }
-
-    private SqlClass dogetType(int sqlType, int type) {
-        SqlClass sqlClass = new SqlClass();
-        switch (sqlType) {
-            case ORACLE:
-                switch (type) {
-                    case 1:
-                        sqlClass.setInsertSql(TEST_NUMBER_TYPE_INSERT_SQL);
-                        sqlClass.setTableName(NUMBER_TABLE_NAME);
-                        sqlClass.setUpdateSql(TEST_NUMBER_TYPE_UPDATE_SQL);
-                        break;
-                    case 2:
-                        sqlClass.setInsertSql(TEST_STRING_TYPE_INSERT_SQL);
-                        sqlClass.setTableName(STRING_TABLE_NAME);
-                        sqlClass.setUpdateSql(TEST_STRING_TYPE_UPDATE_SQL);
-                        break;
-                    case 3:
-                        sqlClass.setInsertSql(TEST_DATE_TYPE_INSERT_SQL);
-                        sqlClass.setTableName(DATE_TABLE_NAME);
-                        sqlClass.setTableName(TEST_DATE_TYPE_UPDATE_SQL);
-                        break;
-                    case 4:
-                        sqlClass.setInsertSql(TEST_BINARY_TYPE_INSERT_SQL);
-                        sqlClass.setTableName(BINARY_TABLE_NAME);
-                        sqlClass.setTableName(TEST_BINARY_TYPE_UPDATE_SQL);
-                    default:
-                }
-                break;
-            case POSTGRESQL:
-
-                break;
-            default:
-                throw new NotSupportYetException("not support");
-        }
-        return sqlClass;
     }
 }
