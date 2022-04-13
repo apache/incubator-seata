@@ -17,9 +17,11 @@ package io.seata.server.storage.db.store;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
@@ -217,6 +219,30 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
         }
         return null;
+    }
+
+    public List<GlobalSession> readTimeoutSession() {
+        int[] status = {GlobalStatus.Begin.getCode()};
+        Set<GlobalTransactionDO> globalTransactionDOs = new HashSet<>();
+        int count = 0;
+        do{
+            List<GlobalTransactionDO> transactionDOS = logStore.queryGlobalTransactionDO(status, logQueryLimit);
+            if (CollectionUtils.isNotEmpty(transactionDOS)) {
+                globalTransactionDOs.addAll(transactionDOS);
+            }
+
+            //todo sleep 10ms
+
+            if (CollectionUtils.isEmpty(transactionDOS) || transactionDOS.size() < logQueryLimit) {
+                break;
+            } else {
+                count++;
+            }
+        }while (globalTransactionDOs.size() >= logQueryLimit || count > 5);
+
+        return globalTransactionDOs.stream()
+                .map(globalTransactionDO -> getGlobalSession(globalTransactionDO,null ))
+                .collect(Collectors.toList());
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,

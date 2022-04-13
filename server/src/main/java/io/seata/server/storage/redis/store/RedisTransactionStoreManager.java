@@ -481,6 +481,39 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return null;
     }
 
+
+    public List<GlobalSession> readTimeoutSession() {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String key = buildGlobalStatus(GlobalStatus.Begin.getCode());
+            Set<String> allXids = new HashSet<>();
+            int start = 0;
+            do {
+                List<String> xids = jedis.lrange(key, start, start + logQueryLimit);
+                if (CollectionUtils.isNotEmpty(xids)) {
+                    allXids.addAll(xids);
+                }
+
+                if (CollectionUtils.isEmpty(xids) || xids.size() < logQueryLimit) {
+                    break;
+                } else {
+                    start += logQueryLimit;
+                }
+            } while (allXids.size() >= logQueryLimit);
+
+            List<GlobalSession> allGlobalSessions = Collections.synchronizedList(new ArrayList<>());
+            if (CollectionUtils.isNotEmpty(allXids)) {
+                allXids.parallelStream().forEach(xid -> {
+                    GlobalSession globalSession = this.readSession(xid, false);
+                    if (globalSession != null && globalSession.isTimeout()) {
+                        allGlobalSessions.add(globalSession);
+                    }
+                });
+            }
+
+            return allGlobalSessions;
+        }
+    }
+
     /**
      * query GlobalSession by status with page
      * @param param
