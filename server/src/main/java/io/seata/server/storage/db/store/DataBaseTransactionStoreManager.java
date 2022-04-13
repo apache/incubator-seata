@@ -231,12 +231,14 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
                 globalTransactionDOs.addAll(transactionDOS);
             }
 
-            //todo sleep 10ms
-
             if (CollectionUtils.isEmpty(transactionDOS) || transactionDOS.size() < logQueryLimit) {
                 break;
             } else {
                 count++;
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignore) {
+                }
             }
         }while (globalTransactionDOs.size() >= logQueryLimit || count > 5);
 
