@@ -28,14 +28,8 @@ import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
-import io.seata.server.lock.LockManager;
-import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.raft.RaftServerFactory;
 import io.seata.core.model.LockStatus;
-
 import io.seata.server.session.BranchSession;
-import io.seata.server.storage.raft.lock.RaftLockManager;
-
 
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 

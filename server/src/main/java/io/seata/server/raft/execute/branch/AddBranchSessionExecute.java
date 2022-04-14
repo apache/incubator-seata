@@ -15,7 +15,6 @@
  */
 package io.seata.server.raft.execute.branch;
 
-import io.seata.common.util.StringUtils;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
