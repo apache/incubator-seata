@@ -216,7 +216,7 @@ public class DefaultCore implements Core {
                             return CONTINUE;
                         case PhaseTwo_CommitFailed_Unretryable:
                             //not at branch
-                            SessionHelper.endCommitFailed(globalSession,retrying);
+                            SessionHelper.endCommitFailed(globalSession, retrying);
                             LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
                             return false;
 
@@ -256,17 +256,20 @@ public class DefaultCore implements Core {
                 return false;
             }
             if (!retrying) {
-                //contains tcc branch
+                //contains not AT branch
                 globalSession.setStatus(GlobalStatus.Committed);
-                MetricsPublisher.postSessionDoneEvent(globalSession, false);
             }
         }
         // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
         // executed to improve concurrency performance, and the global transaction ends..
-        if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
-            SessionHelper.endCommitted(globalSession,true);
+        if (success && globalSession.getBranchSessions().isEmpty()) {
 
-            LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
+            if (retrying) {
+                SessionHelper.endCommitted(globalSession, true);
+                LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
+            } else {
+                MetricsPublisher.postSessionDoneEvent(globalSession, false);
+            }
         }
         return success;
     }
