@@ -106,6 +106,7 @@ seata:
     rollback-retry-timeout-unlock-enable: false
     enableCheckAuth: true
     retryDeadThreshold: 130000
+    xaerNotaRetryTimeout: 60000
     recovery:
       handle-all-session-period: 1000
     undo:
