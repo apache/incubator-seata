@@ -136,9 +136,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         String clusterUpperName = clusterName.toUpperCase();
         if (!LISTENER_SERVICE_MAP.containsKey(clusterUpperName)) {
             Object lock = CLUSTER_LOCK.computeIfAbsent(clusterUpperName, k -> new Object());
-            if (lock == null) {
-                lock = CLUSTER_LOCK.get(clusterUpperName);
-            }
             synchronized (lock) {
                 if (!LISTENER_SERVICE_MAP.containsKey(clusterUpperName)) {
                     refreshCluster(clusterUpperName);
