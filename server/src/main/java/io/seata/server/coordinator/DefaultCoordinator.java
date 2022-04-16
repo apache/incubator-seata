@@ -69,6 +69,7 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.store.StoreMode;
 import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -392,7 +393,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
-                SessionHelper.postTcSessionBeginEvent(globalSession, GlobalStatus.TimeoutRollbacking);
+                MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false);
 
                 return true;
             });
@@ -438,10 +439,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.error("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
-                    SessionHelper.endRollbackFailed(rollbackingSession);
+                    SessionHelper.endRollbackFailed(rollbackingSession, true);
 
                     // rollback retry timeout event
-                    SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
+                    MetricsPublisher.postSessionDoneEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout,true);
 
                     //The function of this 'return' is 'continue'.
                     return;
@@ -478,7 +479,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
-                    SessionHelper.postTcSessionEndEvent(committingSession, GlobalStatus.CommitRetryTimeout);
+                    MetricsPublisher.postSessionDoneEvent(committingSession, GlobalStatus.CommitRetryTimeout,true);
 
                     //The function of this 'return' is 'continue'.
                     return;
