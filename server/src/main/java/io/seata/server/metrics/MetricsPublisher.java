@@ -23,6 +23,8 @@ import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 
 /**
+ * The type Metrics publisher.
+ *
  * @author slievrly
  */
 public class MetricsPublisher {
@@ -33,9 +35,12 @@ public class MetricsPublisher {
      * post end event
      *
      * @param globalSession the global session
+     * @param retryGlobal   the retry global
+     * @param retryBranch   the retry branch
      */
-    public static void postSessionDoneEvent(final GlobalSession globalSession, boolean retry) {
-        postSessionDoneEvent(globalSession, globalSession.getStatus(), retry);
+    public static void postSessionDoneEvent(final GlobalSession globalSession, boolean retryGlobal,
+                                            boolean retryBranch) {
+        postSessionDoneEvent(globalSession, globalSession.getStatus(), retryGlobal, retryBranch);
     }
 
     /**
@@ -43,9 +48,12 @@ public class MetricsPublisher {
      *
      * @param globalSession the global session
      * @param status        the global status
+     * @param retryGlobal   the retry global
+     * @param retryBranch   the retry branch
      */
-    public static void postSessionDoneEvent(final GlobalSession globalSession, GlobalStatus status, boolean retry) {
-        postSessionDoneEvent(globalSession, status.name(), retry, globalSession.getBeginTime());
+    public static void postSessionDoneEvent(final GlobalSession globalSession, GlobalStatus status, boolean retryGlobal,
+                                            boolean retryBranch) {
+        postSessionDoneEvent(globalSession, status.name(), retryGlobal, globalSession.getBeginTime(), retryBranch);
     }
 
     /**
@@ -53,25 +61,24 @@ public class MetricsPublisher {
      *
      * @param globalSession the global session
      * @param status        the status
-     * @param retry         the retry
+     * @param retryGlobal   the retry global
      * @param beginTime     the begin time
+     * @param retryBranch   the retry branch
      */
-    public static void postSessionDoneEvent(final GlobalSession globalSession, String status, boolean retry,
-                                            long beginTime) {
+    public static void postSessionDoneEvent(final GlobalSession globalSession, String status, boolean retryGlobal, long beginTime, boolean retryBranch) {
         EVENT_BUS.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             globalSession.getTransactionName(), globalSession.getApplicationId(),
-            globalSession.getTransactionServiceGroup(), beginTime, System.currentTimeMillis(),
-            status, retry));
+            globalSession.getTransactionServiceGroup(), beginTime, System.currentTimeMillis(), status, retryGlobal, retryBranch));
     }
 
     /**
      * Post session doing event.
      *
      * @param globalSession the global session
-     * @param retry         the retry
+     * @param retryGlobal   the retry global
      */
-    public static void postSessionDoingEvent(final GlobalSession globalSession, boolean retry) {
-        postSessionDoingEvent(globalSession, globalSession.getStatus().name(), retry);
+    public static void postSessionDoingEvent(final GlobalSession globalSession, boolean retryGlobal) {
+        postSessionDoingEvent(globalSession, globalSession.getStatus().name(), retryGlobal, false);
     }
 
     /**
@@ -79,10 +86,13 @@ public class MetricsPublisher {
      *
      * @param globalSession the global session
      * @param status        the status
-     * @param retry         the retry
+     * @param retryGlobal   the retry global
+     * @param retryBranch   the retry branch
      */
-    public static void postSessionDoingEvent(final GlobalSession globalSession, String status, boolean retry) {
-        EVENT_BUS.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(), globalSession.getApplicationId(),
-            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null, status,retry));
+    public static void postSessionDoingEvent(final GlobalSession globalSession, String status, boolean retryGlobal,
+                                             boolean retryBranch) {
+        EVENT_BUS.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getApplicationId(),
+            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null, status, retryGlobal, retryBranch));
     }
 }

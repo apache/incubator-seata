@@ -30,6 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -78,7 +79,6 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
 
 import static io.seata.common.Constants.HANDLE_ALL_SESSION;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
@@ -393,7 +393,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
-                MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false);
+                MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false, false);
 
                 return true;
             });
@@ -442,7 +442,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     SessionHelper.endRollbackFailed(rollbackingSession, true);
 
                     // rollback retry timeout event
-                    MetricsPublisher.postSessionDoneEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout,true);
+                    MetricsPublisher.postSessionDoneEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout, true, false);
 
                     //The function of this 'return' is 'continue'.
                     return;
@@ -479,7 +479,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
-                    MetricsPublisher.postSessionDoneEvent(committingSession, GlobalStatus.CommitRetryTimeout,true);
+                    MetricsPublisher.postSessionDoneEvent(committingSession, GlobalStatus.CommitRetryTimeout, true, false);
 
                     //The function of this 'return' is 'continue'.
                     return;

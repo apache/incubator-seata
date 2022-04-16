@@ -160,7 +160,7 @@ public class DefaultCore implements Core {
                 globalSession.closeAndClean();
                 if (globalSession.canBeCommittedAsync()) {
                     globalSession.asyncCommit();
-                    MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Committed, false);
+                    MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Committed, false, false);
                     return false;
                 } else {
                     globalSession.changeGlobalStatus(GlobalStatus.Committing);
@@ -268,7 +268,7 @@ public class DefaultCore implements Core {
                 SessionHelper.endCommitted(globalSession, true);
                 LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
             } else {
-                MetricsPublisher.postSessionDoneEvent(globalSession, false);
+                MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
             }
         }
         return success;
@@ -350,15 +350,16 @@ public class DefaultCore implements Core {
                 return result;
             }
         }
-        if (!retrying) {
-            MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false);
-        }
+
         // In db mode, lock and branch data residual problems may occur.
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
-        if (success && retrying) {
-            SessionHelper.endRollbacked(globalSession, true);
-
-            LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
+        if (success) {
+            if (retrying) {
+                SessionHelper.endRollbacked(globalSession, true);
+                LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
+            } else {
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
+            }
         }
         return success;
     }

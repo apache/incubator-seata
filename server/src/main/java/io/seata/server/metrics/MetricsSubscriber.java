@@ -28,10 +28,10 @@ import io.seata.server.event.EventBusManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.metrics.IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY;
-import static io.seata.metrics.IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY;
 import static io.seata.metrics.IdConstants.APP_ID_KEY;
 import static io.seata.metrics.IdConstants.GROUP_KEY;
+import static io.seata.metrics.IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY;
+import static io.seata.metrics.IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY;
 
 /**
  * Event subscriber for metrics
@@ -76,7 +76,7 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusCommitted(GlobalTransactionEvent event) {
-        if (event.isRetry()) {
+        if (event.isRetryGlobal()) {
             return;
         }
         decreaseActive(event);
@@ -93,7 +93,7 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusRollbacked(GlobalTransactionEvent event) {
-        if (event.isRetry()) {
+        if (event.isRetryGlobal()) {
             return;
         }
         decreaseActive(event);
@@ -110,6 +110,9 @@ public class MetricsSubscriber {
     }
 
     private void processAfterGlobalRollbacked(GlobalTransactionEvent event) {
+        if (event.isRetryGlobal() && event.isRetryBranch()) {
+            decreaseActive(event);
+        }
         registry.getCounter(MeterIdConstants.COUNTER_AFTER_ROLLBACKED
             .withTag(APP_ID_KEY, event.getApplicationId())
             .withTag(GROUP_KEY, event.getGroup())).increase(1);
@@ -123,6 +126,9 @@ public class MetricsSubscriber {
     }
 
     private void processAfterGlobalCommitted(GlobalTransactionEvent event) {
+        if (event.isRetryGlobal() && event.isRetryBranch()) {
+            decreaseActive(event);
+        }
         registry.getCounter(MeterIdConstants.COUNTER_AFTER_COMMITTED
             .withTag(APP_ID_KEY, event.getApplicationId())
             .withTag(GROUP_KEY, event.getGroup())).increase(1);
