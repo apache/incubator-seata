@@ -70,7 +70,11 @@ public class OracleMultiInsertItemRecognizer extends BaseRecognizer implements S
 
     @Override
     public String getTableAlias() {
-        return ((OracleMultiInsertStatement.InsertIntoClause) ast.getEntries().get(0)).getAlias();
+        if (this.item instanceof OracleMultiInsertStatement.ConditionalInsertClauseItem) {
+            return ((OracleMultiInsertStatement.ConditionalInsertClauseItem) this.item).getThen().getAlias();
+        } else {
+            return ((OracleMultiInsertStatement.InsertIntoClause) this.item).getAlias();
+        }
     }
 
     @Override
@@ -170,7 +174,11 @@ public class OracleMultiInsertItemRecognizer extends BaseRecognizer implements S
 
     @Override
     public String getSubQuerySql() {
-        return this.ast.getSubQuery().toString();
+        String subQuery = this.ast.getSubQuery().toString();
+        if (this.item instanceof OracleMultiInsertStatement.ConditionalInsertClauseItem) {
+            return subQuery + ((OracleMultiInsertStatement.ConditionalInsertClauseItem) this.item).getWhen().toString();
+        }
+        return subQuery;
     }
 
     @Override
