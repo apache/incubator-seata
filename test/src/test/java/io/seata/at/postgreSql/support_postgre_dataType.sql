@@ -55,3 +55,24 @@ CREATE TABLE "public"."CURRENCY_TEST"
 ;
 ALTER TABLE "public"."CURRENCY_TEST"
     OWNER TO "postgres";
+
+-- number type
+CREATE TABLE "public"."NUMBER_TEST"
+(
+    "ID"                    int4             NOT NULL,
+    "SMALLINT_TEST"         smallint         NOT NULL,
+    "INTEGER_TEST"          integer          NOT NULL,
+    "BIGINT_TEST"           bigint           NOT NULL,
+    "DECIMAL_TEST"          decimal          NOT NULL,
+    "NUMERIC_TEST"          numeric          NOT NULL,
+    "REAL_TEST"             real             NOT NULL,
+    "DOUBLE_PRECISION_TEST" double precision NOT NULL,
+    "SMALLSERIAL_TEST"      smallserial      NOT NULL,
+    "SERIAL_TEST"           serial           NOT NULL,
+    "BIGSERIAL_TEST"        bigserial        NOT NULL,
+
+    CONSTRAINT "NUMBER_TEST_PKEY" PRIMARY KEY ("ID")
+)
+;
+ALTER TABLE "public"."NUMBER_TEST"
+    OWNER TO "postgres";

@@ -41,6 +41,7 @@ import static io.seata.at.DruidDataSourceUtils.createNewDruidDataSource;
 import static io.seata.at.oracle.OracleSqlConstant.TEST_RECORD_ID;
 import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TABLE_NAME;
 import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TYPE;
+import static io.seata.at.postgreSql.PostgreSqlConstant.NUMBER_TYPE;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_INSERT_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_UPDATE_SQL;
 
@@ -61,6 +62,7 @@ public class SupportPostgreSqlDataTypeTest {
     @Test
     public void doHandlerTest() throws Throwable {
         doType(CURRENCY_TYPE, false);
+        doType(NUMBER_TYPE, false);
     }
 
     public void doType(int type, boolean globalCommit) throws Throwable {

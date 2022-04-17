@@ -46,10 +46,13 @@ public class DruidDataSourceUtils {
     /**
      * PostgreSQL:
      *
+     * version: 10 jdbc:postgresql://localhost:5433/postgres postgres root
+     *
+     * version: 14.2 jdbc:postgresql://localhost:5434/postgres postgreSqls14 postgreSqls14
      */
-    public static final String POSTGRESQL_JDBC_URL = "jdbc:postgresql://localhost:5432/postgres";
-    public static final String POSTGRESQL_USERNAME = "postgres";
-    public static final String POSTGRESQL_PASSWORD = "root";
+    public static final String POSTGRESQL_JDBC_URL = "jdbc:postgresql://localhost:5434/postgres";
+    public static final String POSTGRESQL_USERNAME = "postgreSqls14";
+    public static final String POSTGRESQL_PASSWORD = "postgreSqls14";
     public static final String POSTGRESQL_DRIVER_CLASSNAME = JdbcUtils.POSTGRESQL_DRIVER;
 
     public static DruidDataSource createNewDruidDataSource(int type) throws Throwable {

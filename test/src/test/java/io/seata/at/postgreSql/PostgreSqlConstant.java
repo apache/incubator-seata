@@ -27,6 +27,11 @@ public class PostgreSqlConstant {
      */
     public static final int CURRENCY_TYPE = 1;
 
+    /**
+     * number type
+     */
+    public static final int NUMBER_TYPE = 2;
+
     public static final String CURRENCY_TABLE_NAME = "\"public\".\"CURRENCY_TEST\"";
 
     public static final String TEST_CURRENCY_TYPE_INSERT_SQL =
@@ -34,4 +39,14 @@ public class PostgreSqlConstant {
 
     public static final String TEST_CURRENCY_TYPE_UPDATE_SQL =
         "UPDATE" + CURRENCY_TABLE_NAME + "SET \"MONEY_TEST\" = '1231231231' WHERE \"ID\" =" + TEST_RECORD_ID;
+
+    public static final String NUMBER_TABLE_NAME = "\"public\".\"NUMBER_TEST\"";
+
+    public static final String TEST_NUMBER_TYPE_INSERT_SQL = "INSERT INTO " + NUMBER_TABLE_NAME
+            + "( \"ID\", \"SMALLINT_TEST\", \"INTEGER_TEST\", \"BIGINT_TEST\", \"DECIMAL_TEST\", \"NUMERIC_TEST\", \"REAL_TEST\", \"DOUBLE_PRECISION_TEST\", \"SMALLSERIAL_TEST\", \"SERIAL_TEST\", \"BIGSERIAL_TEST\" )\n"
+            + "VALUES\n"
+            + "\t( 1, 112, 1231, 53235324234532, '123.123', '54353.1', '1.23', '12.12', 12, 123, 12312312313 );";
+
+    public static final String TEST_NUMBER_TYPE_UPDATE_SQL = "UPDATE" + NUMBER_TABLE_NAME
+            + "SET \"BIGSERIAL_TEST\" = 12312312312312312\n" + "WHERE \"ID\" = " + TEST_RECORD_ID;
 }
