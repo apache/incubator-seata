@@ -75,20 +75,16 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
+        if (StringUtils.isEmpty(tableNames)) {
+            return  null;
+        }
         String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
-        if (tableItems.length == 1) {
-            String selectSQL = buildBeforeImageSQL(tableItems[0], tableItems[0], paramAppenderList);
-            TableRecords tableRecords = buildTableRecords(getTableMeta(tableItems[0]), selectSQL, paramAppenderList);
-            //用tableName做区分，可能不对？？？
-            beforeImagesMap.put(tableItems[0], tableRecords);
-        } else {
-            //update join
-            String unionTable = tableItems[0];
-            for (int i = 1; i < tableItems.length; i++) {
-                String selectSQL = buildBeforeImageSQL(unionTable, tableItems[i], paramAppenderList);
-                TableRecords tableRecords = buildTableRecords(getTableMeta(tableItems[i]), selectSQL, paramAppenderList);
-                beforeImagesMap.put(tableItems[i], tableRecords);
-            }
+        int itemTableIndex = tableItems.length == 1 ? 0 : 1; // if length > 1,consider update join sql
+        String unionTable = tableItems[0];
+        for (int i = itemTableIndex; i < tableItems.length; i++) {
+            String selectSQL = buildBeforeImageSQL(unionTable, tableItems[i], paramAppenderList);
+            TableRecords tableRecords = buildTableRecords(getTableMeta(tableItems[i]), selectSQL, paramAppenderList);
+            beforeImagesMap.put(tableItems[i], tableRecords);
         }
         return null;
     }
@@ -150,34 +146,23 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
+        if (StringUtils.isEmpty(tableNames)) {
+            return null;
+        }
         String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
-        if (tableItems.length == 1) {
-            beforeImage = beforeImagesMap.get(tableItems[0]);
-            String selectSQL = buildAfterImageSQL(tableItems[0], tableItems[0], beforeImage);
+        int itemTableIndex = tableItems.length == 1 ? 0 : 1; // if length > 1,consider update join sql
+        String unionTable = tableItems[0];
+        for (int i = itemTableIndex; i < tableItems.length; i++) {
+            beforeImage = beforeImagesMap.get(tableItems[i]);
+            String selectSQL = buildAfterImageSQL(unionTable, tableItems[i], beforeImage);
             ResultSet rs = null;
             try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
-                SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta(tableItems[0]).getPrimaryKeyOnlyName(), pst);
+                SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta(tableItems[i]).getPrimaryKeyOnlyName(), pst);
                 rs = pst.executeQuery();
-                TableRecords afterImage = TableRecords.buildRecords(getTableMeta(tableItems[0]), rs);
-                afterImagesMap.put(tableItems[0], afterImage);
+                TableRecords afterImage = TableRecords.buildRecords(getTableMeta(tableItems[i]), rs);
+                afterImagesMap.put(tableItems[i], afterImage);
             } finally {
                 IOUtil.close(rs);
-            }
-        } else {
-            //update join
-            String unionTable = tableItems[0];
-            for (int i = 1; i < tableItems.length; i++) {
-                beforeImage = beforeImagesMap.get(tableItems[i]);
-                String selectSQL = buildAfterImageSQL(unionTable, tableItems[i], beforeImage);
-                ResultSet rs = null;
-                try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
-                    SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta(tableItems[i]).getPrimaryKeyOnlyName(), pst);
-                    rs = pst.executeQuery();
-                    TableRecords afterImage = TableRecords.buildRecords(getTableMeta(tableItems[i]), rs);
-                    afterImagesMap.put(tableItems[i], afterImage);
-                } finally {
-                    IOUtil.close(rs);
-                }
             }
         }
         return null;
