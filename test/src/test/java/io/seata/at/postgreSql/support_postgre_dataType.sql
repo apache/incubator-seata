@@ -76,3 +76,17 @@ CREATE TABLE "public"."NUMBER_TEST"
 ;
 ALTER TABLE "public"."NUMBER_TEST"
     OWNER TO "postgres";
+
+-- char type
+CREATE TABLE "public"."CHAR_TEST"
+(
+    "ID"             int4          NOT NULL,
+    "CHARACTER_TEST" character(10) NOT NULL,
+    "VARCHAR_TEST"   varchar(256)  NOT NULL,
+    "CHAR_TEST"      char(128)     NOT NULL,
+    "TEXT_TEST"      text          NOT NULL,
+    CONSTRAINT "CHAR_TEST_PKEY" PRIMARY KEY ("ID")
+)
+;
+ALTER TABLE "public"."CHAR_TEST"
+    OWNER TO "postgres";

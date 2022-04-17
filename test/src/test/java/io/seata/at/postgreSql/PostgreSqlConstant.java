@@ -32,6 +32,11 @@ public class PostgreSqlConstant {
      */
     public static final int NUMBER_TYPE = 2;
 
+    /**
+     * char type
+     */
+    public static final int CHAR_TYPE = 3;
+
     public static final String CURRENCY_TABLE_NAME = "\"public\".\"CURRENCY_TEST\"";
 
     public static final String TEST_CURRENCY_TYPE_INSERT_SQL =
@@ -49,4 +54,13 @@ public class PostgreSqlConstant {
 
     public static final String TEST_NUMBER_TYPE_UPDATE_SQL = "UPDATE" + NUMBER_TABLE_NAME
             + "SET \"BIGSERIAL_TEST\" = 12312312312312312\n" + "WHERE \"ID\" = " + TEST_RECORD_ID;
+
+    public static final String CHAR_TABLE_NAME = "\"public\".\"CHAR_TEST\"";
+
+    public static final String TEST_CHAR_TYPE_INSERT_SQL = "INSERT INTO " + CHAR_TABLE_NAME
+            + "( \"ID\", \"CHARACTER_TEST\", \"VARCHAR_TEST\", \"CHAR_TEST\", \"TEXT_TEST\" )\n" + "VALUES\n"
+            + "\t( 1, '12   ', '12312', '1212                                                                                                            ', '131231EQWERQWERWQERQWR' );";
+
+    public static final String TEST_CHAR_TYPE_UPDATE_SQL =
+            "UPDATE" + CHAR_TABLE_NAME + "SET \"TEXT_TEST\" = '1231231QWERWQERWR'\n" + "WHERE \"ID\" = " + TEST_RECORD_ID;
 }

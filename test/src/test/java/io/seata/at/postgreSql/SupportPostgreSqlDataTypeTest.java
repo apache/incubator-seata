@@ -39,14 +39,21 @@ import java.sql.Statement;
 import static io.seata.at.DruidDataSourceUtils.POSTGRESQL;
 import static io.seata.at.DruidDataSourceUtils.createNewDruidDataSource;
 import static io.seata.at.oracle.OracleSqlConstant.TEST_RECORD_ID;
+import static io.seata.at.postgreSql.PostgreSqlConstant.CHAR_TABLE_NAME;
+import static io.seata.at.postgreSql.PostgreSqlConstant.CHAR_TYPE;
 import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TABLE_NAME;
 import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TYPE;
+import static io.seata.at.postgreSql.PostgreSqlConstant.NUMBER_TABLE_NAME;
 import static io.seata.at.postgreSql.PostgreSqlConstant.NUMBER_TYPE;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CHAR_TYPE_INSERT_SQL;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CHAR_TYPE_UPDATE_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_INSERT_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_UPDATE_SQL;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_NUMBER_TYPE_INSERT_SQL;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_NUMBER_TYPE_UPDATE_SQL;
 
 /**
- * add AT transaction mode tests to support database data types (Oracle)
+ * add AT transaction mode tests to support database data types (postGreSql)
  *
  * author doubleDimple
  */
@@ -63,6 +70,7 @@ public class SupportPostgreSqlDataTypeTest {
     public void doHandlerTest() throws Throwable {
         doType(CURRENCY_TYPE, false);
         doType(NUMBER_TYPE, false);
+        doType(CHAR_TYPE, false);
     }
 
     public void doType(int type, boolean globalCommit) throws Throwable {
@@ -74,6 +82,16 @@ public class SupportPostgreSqlDataTypeTest {
                 insertSql = TEST_CURRENCY_TYPE_INSERT_SQL;
                 tableName = CURRENCY_TABLE_NAME;
                 updateSql = TEST_CURRENCY_TYPE_UPDATE_SQL;
+                break;
+            case 2:
+                insertSql = TEST_NUMBER_TYPE_INSERT_SQL;
+                tableName = NUMBER_TABLE_NAME;
+                updateSql = TEST_NUMBER_TYPE_UPDATE_SQL;
+                break;
+            case 3:
+                insertSql = TEST_CHAR_TYPE_INSERT_SQL;
+                tableName = CHAR_TABLE_NAME;
+                updateSql = TEST_CHAR_TYPE_UPDATE_SQL;
                 break;
             default:
         }
