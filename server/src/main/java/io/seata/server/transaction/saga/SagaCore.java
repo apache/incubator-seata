@@ -110,7 +110,7 @@ public class SagaCore extends AbstractCore {
                 case PhaseTwo_Rollbacked:
                     LOGGER.info("Successfully rollbacked SAGA global[" + globalSession.getXid() + "]");
                     SessionHelper.removeAllBranch(globalSession, !retrying);
-                    SessionHelper.endRollbacked(globalSession);
+                    SessionHelper.endRollbacked(globalSession, retrying);
                     return false;
                 case PhaseTwo_RollbackFailed_Retryable:
                     LOGGER.error("By [{}], failed to rollback SAGA global [{}], will retry later.", branchStatus,
@@ -130,7 +130,7 @@ public class SagaCore extends AbstractCore {
                                 globalSession.getXid());
                         break;
                     } else {
-                        SessionHelper.endCommitFailed(globalSession);
+                        SessionHelper.endCommitFailed(globalSession,retrying);
                         LOGGER.error("Finally, failed to commit SAGA global[{}]", globalSession.getXid());
                         return false;
                     }
@@ -165,7 +165,7 @@ public class SagaCore extends AbstractCore {
                     LOGGER.info("Successfully rollbacked SAGA global[{}]",globalSession.getXid());
                     break;
                 case PhaseTwo_RollbackFailed_Unretryable:
-                    SessionHelper.endRollbackFailed(globalSession);
+                    SessionHelper.endRollbackFailed(globalSession, retrying);
                     LOGGER.error("Failed to rollback SAGA global[{}]", globalSession.getXid());
                     return false;
                 case PhaseTwo_CommitFailed_Retryable:
@@ -194,12 +194,12 @@ public class SagaCore extends AbstractCore {
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
         if (GlobalStatus.Committed.equals(globalStatus)) {
             SessionHelper.removeAllBranch(globalSession, false);
-            SessionHelper.endCommitted(globalSession);
+            SessionHelper.endCommitted(globalSession,false);
             LOGGER.info("Global[{}] committed", globalSession.getXid());
         } else if (GlobalStatus.Rollbacked.equals(globalStatus)
                 || GlobalStatus.Finished.equals(globalStatus)) {
             SessionHelper.removeAllBranch(globalSession, false);
-            SessionHelper.endRollbacked(globalSession);
+            SessionHelper.endRollbacked(globalSession, false);
             LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
         } else {
             globalSession.changeGlobalStatus(globalStatus);
