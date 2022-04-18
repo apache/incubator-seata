@@ -369,7 +369,7 @@ public class SessionStoreTest {
 
             globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
             globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Unretryable);
-            SessionHelper.endRollbackFailed(globalSession);
+            SessionHelper.endRollbackFailed(globalSession, false);
 
             // Lock is released.
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
