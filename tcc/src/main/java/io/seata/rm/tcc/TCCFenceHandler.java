@@ -62,6 +62,9 @@ public class TCCFenceHandler {
 
     private static final int MAX_QUEUE_SIZE = 500;
 
+    /**
+     * limit of delete record by date (per sql)
+     */
     private static final int LIMIT_DELETE_BY_DATE = 10000;
 
     private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
@@ -289,7 +292,7 @@ public class TCCFenceHandler {
         do {
             del = doDeleteFenceByDate(datetime, LIMIT_DELETE_BY_DATE);
             total += del;
-        } while (del < LIMIT_DELETE_BY_DATE);
+        } while (del > 0);
         return total;
     }
 
