@@ -30,6 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -69,6 +70,7 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.store.StoreMode;
 import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -77,7 +79,6 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
 
 import static io.seata.common.Constants.HANDLE_ALL_SESSION;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
@@ -391,7 +392,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
 
                 // transaction timeout and start rollbacking event
-                SessionHelper.postTcSessionBeginEvent(globalSession, GlobalStatus.TimeoutRollbacking);
+                MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false, false);
 
                 return true;
             });
@@ -435,10 +436,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     }
                     // Prevent thread safety issues
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
+                    LOGGER.error("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
+
+                    SessionHelper.endRollbackFailed(rollbackingSession, true);
 
                     // rollback retry timeout event
-                    SessionHelper.postTcSessionEndEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout);
+                    MetricsPublisher.postSessionDoneEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout, true, false);
 
                     //The function of this 'return' is 'continue'.
                     return;
@@ -475,7 +478,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
-                    SessionHelper.postTcSessionEndEvent(committingSession, GlobalStatus.CommitRetryTimeout);
+                    MetricsPublisher.postSessionDoneEvent(committingSession, GlobalStatus.CommitRetryTimeout, true, false);
 
                     //The function of this 'return' is 'continue'.
                     return;
@@ -494,7 +497,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     /**
      * Handle async committing.
-     * 
+     *
      * @param asyncCommittingSessions
      */
     protected void handleAsyncCommitting(Collection<GlobalSession> asyncCommittingSessions) {
@@ -575,6 +578,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
+        undoLogDelete.shutdown();
         branchRemoveExecutor.shutdown();
         try {
             handleAllSession.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
@@ -582,6 +586,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 

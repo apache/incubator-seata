@@ -167,7 +167,12 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
-                    public void onEnd(GlobalSession globalSession) throws TransactionException {
+                    public void onSuccessEnd(GlobalSession globalSession) throws TransactionException {
+
+                    }
+
+                    @Override
+                    public void onFailEnd(GlobalSession globalSession) throws TransactionException {
 
                     }
                 });

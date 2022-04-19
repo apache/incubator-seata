@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
@@ -199,7 +200,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void changeStatus(GlobalStatus status) throws TransactionException {
+    public void changeGlobalStatus(GlobalStatus status) throws TransactionException {
         if (GlobalStatus.Rollbacking == status || GlobalStatus.TimeoutRollbacking == status) {
             LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
@@ -235,12 +236,25 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
-        // Clean locks first
-        clean();
-
-        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onEnd(this);
+        if (isSuccessEnd()) {
+            // Clean locks first
+            clean();
+            for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+                lifecycleListener.onSuccessEnd(this);
+            }
+        } else {
+            for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+                lifecycleListener.onFailEnd(this);
+            }
         }
+    }
+
+    public boolean isSuccessEnd() {
+        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
+            || status == GlobalStatus.TimeoutRollbacked) {
+            return true;
+        }
+        return false;
     }
 
     public void clean() throws TransactionException {
@@ -772,4 +786,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
     }
 
+    @Override
+    public String toString() {
+        return "GlobalSession{" + "xid='" + xid + '\'' + ", transactionId=" + transactionId + ", status=" + status
+            + ", applicationId='" + applicationId + '\'' + ", transactionServiceGroup='" + transactionServiceGroup
+            + '\'' + ", transactionName='" + transactionName + '\'' + ", timeout=" + timeout + ", beginTime="
+            + beginTime + ", applicationData='" + applicationData + '\'' + ", lazyLoadBranch=" + lazyLoadBranch
+            + ", active=" + active + ", branchSessions=" + branchSessions + ", globalSessionLock=" + globalSessionLock
+            + ", lifecycleListeners=" + lifecycleListeners + '}';
+    }
 }
