@@ -138,9 +138,25 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endCommitFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
-        globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+        endCommitFailed(globalSession, retryGlobal, false);
+    }
+
+    /**
+     * End commit failed.
+     *
+     * @param globalSession the global session
+     * @param retryGlobal   the retry global
+     * @param isRetryTimeout   is retry timeout
+     * @throws TransactionException the transaction exception
+     */
+    public static void endCommitFailed(GlobalSession globalSession, boolean retryGlobal, boolean isRetryTimeout) throws TransactionException {
+        if (isRetryTimeout){
+            globalSession.changeGlobalStatus(GlobalStatus.CommitRetryTimeout);
+        }else{
+            globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+        }
         LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.",
-            globalSession.getXid(), globalSession.getStatus());
+                globalSession.getXid(), globalSession.getStatus());
 
         globalSession.end();
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
@@ -181,8 +197,22 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
+        endRollbackFailed(globalSession, retryGlobal, false);
+    }
+
+    /**
+     * End rollback failed.
+     *
+     * @param globalSession the global session
+     * @param retryGlobal   the retry global
+     * @param isRetryTimeout   is retry timeout
+     * @throws TransactionException the transaction exception
+     */
+    public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal, boolean isRetryTimeout) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (isTimeoutGlobalStatus(currentStatus)) {
+        if (isRetryTimeout){
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetryTimeout);
+        }else if (isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
