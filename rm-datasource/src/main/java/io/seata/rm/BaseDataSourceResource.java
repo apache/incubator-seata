@@ -57,7 +57,7 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     private Map<String, T> keeper = new ConcurrentHashMap<>();
 
     private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
-        CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
+            CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
     /**
      * Gets target data source.
@@ -211,6 +211,10 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
         if (StringUtils.isNotBlank(xaBranchXid)) {
             BRANCH_STATUS_CACHE.invalidate(xaBranchXid);
         }
+    }
+
+    public Map<String, T> getKeeper() {
+        return keeper;
     }
 
 }
