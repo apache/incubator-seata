@@ -389,7 +389,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 globalSession.close();
 
                 globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-                globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+                globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);
 
                 // transaction timeout and start rollbacking event
                 MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false, false);
