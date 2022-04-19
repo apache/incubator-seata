@@ -485,14 +485,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
-            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), true);
+            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), !sessionCondition.isLazyLoadBranch());
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }
             return globalSessions;
         } else if (sessionCondition.getTransactionId() != null) {
             GlobalSession globalSession = this
-                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
+                .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), !sessionCondition.isLazyLoadBranch());
             if (globalSession != null) {
                 globalSessions.add(globalSession);
             }
