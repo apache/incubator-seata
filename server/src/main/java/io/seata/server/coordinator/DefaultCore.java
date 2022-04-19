@@ -162,12 +162,9 @@ public class DefaultCore implements Core {
                 if (globalSession.canBeCommittedAsync()) {
                     globalSession.asyncCommit();
                     MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Committed, false, false);
-                    return false;
                 } else {
-                    globalSession.changeStatus(GlobalStatus.Committing);
-                    shouldCommitNow = true;
                     globalSession.changeGlobalStatus(GlobalStatus.Committing);
-                    return true;
+                    shouldCommitNow = true;
                 }
                 //clean session after changing status successfully.
                 globalSession.clean();
