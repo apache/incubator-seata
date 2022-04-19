@@ -345,6 +345,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void handleRetryRollbacking() {
         SessionCondition sessionCondition = new SessionCondition(rollbackingStatuses);
+        sessionCondition.setLazyLoadBranch(true);
         Collection<GlobalSession> rollbackingSessions =
             SessionHolder.getRetryRollbackingSessionManager().findGlobalSessions(sessionCondition);
         long now = System.currentTimeMillis();
