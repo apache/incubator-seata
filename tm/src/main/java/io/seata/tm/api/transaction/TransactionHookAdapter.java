@@ -26,32 +26,32 @@ public class TransactionHookAdapter implements TransactionHook {
     }
 
     @Override
-    public void afterBegin() {
+    public void afterBegin(String xid) {
 
     }
 
     @Override
-    public void beforeCommit() {
+    public void beforeCommit(String xid) {
 
     }
 
     @Override
-    public void afterCommit() {
+    public void afterCommit(String xid) {
 
     }
 
     @Override
-    public void beforeRollback() {
+    public void beforeRollback(String xid) {
 
     }
 
     @Override
-    public void afterRollback() {
+    public void afterRollback(String xid) {
 
     }
 
     @Override
-    public void afterCompletion() {
+    public void afterCompletion(String xid) {
 
     }
 }

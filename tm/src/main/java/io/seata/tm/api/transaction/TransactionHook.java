@@ -28,30 +28,30 @@ public interface TransactionHook {
     /**
      * after tx begin
      */
-    void afterBegin();
+    void afterBegin(String xid);
 
     /**
      * before tx commit
      */
-    void beforeCommit();
+    void beforeCommit(String xid);
 
     /**
      * after tx commit
      */
-    void afterCommit();
+    void afterCommit(String xid);
 
     /**
      * before tx rollback
      */
-    void beforeRollback();
+    void beforeRollback(String xid);
 
     /**
      * after tx rollback
      */
-    void afterRollback();
+    void afterRollback(String xid);
 
     /**
      * after tx all Completed
      */
-    void afterCompletion();
+    void afterCompletion(String xid);
 }

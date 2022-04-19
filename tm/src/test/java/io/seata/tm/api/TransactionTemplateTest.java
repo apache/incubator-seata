@@ -140,18 +140,20 @@ public class TransactionTemplateTest {
     }
 
     private void verifyCommit(TransactionHook transactionHook) {
+        String xid = "test-xid";
         verify(transactionHook).beforeBegin();
-        verify(transactionHook).afterBegin();
-        verify(transactionHook).beforeCommit();
-        verify(transactionHook).afterCommit();
-        verify(transactionHook).afterCompletion();
+        verify(transactionHook).afterBegin(xid);
+        verify(transactionHook).beforeCommit(xid);
+        verify(transactionHook).afterCommit(xid);
+        verify(transactionHook).afterCompletion(xid);
     }
 
     private void verifyRollBack(TransactionHook transactionHook) {
+        String xid = "test-xid";
         verify(transactionHook).beforeBegin();
-        verify(transactionHook).afterBegin();
-        verify(transactionHook).beforeRollback();
-        verify(transactionHook).afterRollback();
-        verify(transactionHook).afterCompletion();
+        verify(transactionHook).afterBegin(xid);
+        verify(transactionHook).beforeRollback(xid);
+        verify(transactionHook).afterRollback(xid);
+        verify(transactionHook).afterCompletion(xid);
     }
 }
