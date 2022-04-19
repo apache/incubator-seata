@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.ws.rs.HEAD;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.GlobalTransactionEvent;
@@ -57,10 +58,10 @@ public class DefaultCoreForEventBusTest {
     public void test() throws IOException, TransactionException, InterruptedException {
         class GlobalTransactionEventSubscriber {
 
-            private final Map<GlobalStatus, AtomicInteger> eventCounters;
+            private final Map<String, AtomicInteger> eventCounters;
             private CountDownLatch downLatch;
 
-            public Map<GlobalStatus, AtomicInteger> getEventCounters() {
+            public Map<String, AtomicInteger> getEventCounters() {
                 return eventCounters;
             }
 
@@ -126,11 +127,11 @@ public class DefaultCoreForEventBusTest {
             Thread.sleep(1500);
             //check
             subscriber.getDownLatch().await(1500, TimeUnit.MILLISECONDS);
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
             //Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
             //the 'doGlobalRollback' method will actually be triggered twice.
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
-            Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked));
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
+            Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked.name()));
 
             //start more one new transaction for test timeout and let this transaction immediately timeout
             subscriber.setDownLatch(new CountDownLatch(1));
@@ -141,7 +142,7 @@ public class DefaultCoreForEventBusTest {
 
             //at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
             subscriber.downLatch.await(5000, TimeUnit.MILLISECONDS);
-            Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking).get() >= 1);
+            Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking.name()).get() >= 1);
         } finally {
             // call SpringContextShutdownHook
             if (null != subscriber) {
