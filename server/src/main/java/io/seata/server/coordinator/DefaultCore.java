@@ -267,7 +267,10 @@ public class DefaultCore implements Core {
         // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
         // executed to improve concurrency performance, and the global transaction ends..
         if (success && globalSession.getBranchSessions().isEmpty()) {
-            if (!delayHandleSession || retrying) {
+            if (!delayHandleSession) {
+                SessionHelper.endCommitted(globalSession, retrying);
+                LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
+            } else if (retrying) {
                 SessionHelper.endCommitted(globalSession, true);
                 LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
             } else {
@@ -357,7 +360,10 @@ public class DefaultCore implements Core {
         // In db mode, lock and branch data residual problems may occur.
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
         if (success) {
-            if (!delayHandleSession || retrying) {
+            if (!delayHandleSession) {
+                SessionHelper.endRollbacked(globalSession, retrying);
+                LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
+            } else if (retrying) {
                 SessionHelper.endRollbacked(globalSession, true);
                 LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
             } else {
