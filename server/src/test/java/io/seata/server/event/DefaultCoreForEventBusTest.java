@@ -112,7 +112,7 @@ public class DefaultCoreForEventBusTest {
 
 
             //we need sleep for a short while because default canBeCommittedAsync() is true
-            subscriber.getDownLatch().await(5000, TimeUnit.MILLISECONDS);
+            subscriber.getDownLatch().await();
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting.name()).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
@@ -127,8 +127,7 @@ public class DefaultCoreForEventBusTest {
             subscriber.getDownLatch().await(1500, TimeUnit.MILLISECONDS);
             Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
             //Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
-            //the 'doGlobalRollback' method will actually be triggered twice.
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
             Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked.name()));
 
             //start more one new transaction for test timeout and let this transaction immediately timeout
