@@ -42,7 +42,7 @@ public class ServerRaftProperties {
 
     private Integer disruptorBufferSize = 16384;
 
-    private Integer electionTimeoutMs = 2000;
+    private Integer electionTimeoutMs = 3000;
 
     private boolean reporterEnabled = false;
 
