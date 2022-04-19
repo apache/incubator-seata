@@ -164,11 +164,11 @@ public interface SeataServicecombKeys {
     String DEFAULT_REGISTRY_URL = "http://127.0.0.1:30100";
     String COMMA = ",";
     String PUBLIC = "public";
-    String DEFAULT_SERVICE_POLLINGWAITSEC="10";
+    String DEFAULT_SERVICE_POLLINGWAITSEC = "10";
     String KIE = "kie";
     String SEMICOLON = ";";
     String COLON = ":";
-    String DEFAULT_INSTANCE_PULL_INTERVAL="15";
+    String DEFAULT_INSTANCE_PULL_INTERVAL = "15";
     String UP = "UP";
     String DEFAULT_INSTANCE_HEALTH_CHECK_INTERVAL = "15";
     String DEFAULT_INSTANCE_HEALTH_CHECK_TIMES = "3";
