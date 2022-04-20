@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -28,6 +29,7 @@ import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.StoreMode;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.event.EventBusManager;
@@ -56,8 +58,12 @@ public class SessionHelper {
      */
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
+    private static final boolean DELAY_HANDLE_SESSION =
+        !StringUtils.equalsIgnoreCase(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE)), StoreMode.FILE.getName());
 
-    private SessionHelper() {}
+    private SessionHelper() {
+    }
 
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId, String lockKeys, String clientId) {
         return newBranchByGlobal(globalSession, branchType, resourceId, null, lockKeys, clientId);

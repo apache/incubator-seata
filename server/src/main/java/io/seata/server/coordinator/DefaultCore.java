@@ -54,17 +54,12 @@ public class DefaultCore implements Core {
 
     private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
-    private final boolean delayHandleSession;
-
     /**
      * get the Default core.
      *
      * @param remotingServer the remoting server
      */
     public DefaultCore(RemotingServer remotingServer) {
-        String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
-        // file mode requires no delay in processing
-        this.delayHandleSession = !StringUtils.equalsIgnoreCase(mode, StoreMode.FILE.getName());
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
             new Class[] {RemotingServer.class}, new Object[] {remotingServer});
         if (CollectionUtils.isNotEmpty(allCore)) {
@@ -255,7 +250,7 @@ public class DefaultCore implements Core {
         }
         // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
         // executed to improve concurrency performance, and the global transaction ends..
-        if (success && globalSession.getBranchSessions().isEmpty() && (!delayHandleSession || retrying)) {
+        if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
 
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
@@ -337,7 +332,7 @@ public class DefaultCore implements Core {
         }
         // In db mode, lock and branch data residual problems may occur.
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
-        if (success && (!delayHandleSession || retrying)) {
+        if (success && retrying) {
             SessionHelper.endRollbacked(globalSession);
 
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
