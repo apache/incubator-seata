@@ -115,19 +115,20 @@ public class DefaultCoreForEventBusTest {
             subscriber.getDownLatch().await();
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting.name()).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
+            // after event and sync event
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
 
             //start and rollback transaction
             subscriber.setDownLatch(new CountDownLatch(3));
             xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
             core.rollback(xid);
+            //sleep for retryRollback
+            Thread.sleep(1500);
             //check
             subscriber.getDownLatch().await();
             Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
             //Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
-            //sleep for retryRollback
-            Thread.sleep(1500);
             Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked.name()));
 
             //start more one new transaction for test timeout and let this transaction immediately timeout
