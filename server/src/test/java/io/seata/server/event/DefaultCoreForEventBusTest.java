@@ -106,7 +106,7 @@ public class DefaultCoreForEventBusTest {
             EventBusManager.get().register(subscriber);
 
             //start and commit a transaction
-            subscriber.setDownLatch(new CountDownLatch(3));
+            subscriber.setDownLatch(new CountDownLatch(4));
             String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
             core.commit(xid);
 
