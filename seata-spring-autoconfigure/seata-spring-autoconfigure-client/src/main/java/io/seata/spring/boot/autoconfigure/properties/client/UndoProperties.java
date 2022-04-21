@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
@@ -34,6 +35,10 @@ public class UndoProperties {
     private String logSerialization = DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
     private String logTable = DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
     private boolean onlyCareUpdateColumns = DEFAULT_ONLY_CARE_UPDATE_COLUMNS;
+    /**
+     * {"tableName1":"columnName1,columnName2,columnName3","tableName2":"columnName1,columnName2,columnName3"}
+     */
+    private String ignoreNocheckColumns = DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 
     public boolean isDataValidation() {
         return dataValidation;
@@ -69,5 +74,13 @@ public class UndoProperties {
     public UndoProperties setOnlyCareUpdateColumns(boolean onlyCareUpdateColumns) {
         this.onlyCareUpdateColumns = onlyCareUpdateColumns;
         return this;
+    }
+
+    public String getIgnoreNocheckColumns() {
+        return ignoreNocheckColumns;
+    }
+
+    public void setIgnoreNocheckColumns(String ignoreNocheckColumns) {
+        this.ignoreNocheckColumns = ignoreNocheckColumns;
     }
 }

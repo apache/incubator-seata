@@ -37,6 +37,7 @@ seata:
       log-serialization: jackson
       log-table: undo_log
       only-care-update-columns: true
+      ignoreNocheckColumns: { }
       compress:
         enable: true
         type: zip

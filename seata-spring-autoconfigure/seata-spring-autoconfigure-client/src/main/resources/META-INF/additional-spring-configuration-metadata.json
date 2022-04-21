@@ -187,6 +187,12 @@
       "defaultValue": true
     },
     {
+      "name": "seata.client.undo.ignoreNocheckColumns",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.UndoProperties",
+      "defaultValue": ""
+    },
+    {
       "name": "seata.client.undo.compress.enable",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties",

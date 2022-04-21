@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeSet;
-
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import io.seata.common.DefaultValues;
@@ -56,8 +55,6 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
 
@@ -447,19 +444,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
             columns.addAll(recognizer.getInsertColumns());
             columns.addAll(pkColumnNameList);
-            Set<String> ignoreAfterColumns = doGetCheckColumns(columns);
-            for (String columnName : ignoreAfterColumns) {
-                selectSQLJoin.add(columnName);
-            }
+            doIgnoreCheckColumns(columns, selectSQLJoin);
         } else {
-            Set<String> columns = doGetCheckColumns(getTableMeta().getOnlyAllColumnNames());
-            if (columns.size() == 0) {
-                selectSQLJoin.add(" * ");
-            } else {
-                for (String columnName : columns) {
-                    selectSQLJoin.add(columnName);
-                }
-            }
+            doIgnoreCheckColumns(getTableMeta().getOnlyAllColumnNames(), selectSQLJoin);
         }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
@@ -480,12 +467,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
     }
 
-    protected Set<String> doGetCheckColumns(Set<String> onlyAllColumnNames) {
+    protected void doIgnoreCheckColumns(Set<String> columnNames, StringJoiner selectSQLJoin) {
 
         Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        Set<String> tmpColumns = onlyAllColumnNames;
+        columns.addAll(columnNames);
         Map<String, Set<String>> ignoreCheckFields = new HashMap<>();
-
 
         try {
             if (IGNORE_NOCHECK_COLUMNS.length() > 0) {
@@ -498,25 +484,21 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn("Please confirm whether this configuration:[{}] is correct error:[{}]", IGNORE_NOCHECK_COLUMNS, e.getMessage());
+            LOGGER.warn("Please confirm whether this configuration:[{}] is correct,error:[{}]", IGNORE_NOCHECK_COLUMNS, e.getMessage());
             e.printStackTrace();
         }
 
         if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
             final String tableName = getFromTableInSQL();
             if (ignoreCheckFields.containsKey(tableName)) {
-                onlyAllColumnNames.removeAll(ignoreCheckFields.get(tableName));
-                if (onlyAllColumnNames.size() == 0) {
-                    columns = tmpColumns;
-                } else {
-                    columns = onlyAllColumnNames;
+                columnNames.removeAll(ignoreCheckFields.get(tableName));
+                if (columnNames.size() > 0) {
+                    columns = columnNames;
                 }
             }
-        } else {
-            columns = onlyAllColumnNames;
         }
 
-        return columns;
+        columns.forEach(column -> selectSQLJoin.add(column));
     }
 
     /**
