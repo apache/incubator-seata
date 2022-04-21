@@ -425,7 +425,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
-     * build TableRecords
+     * build a AfterImage
      *
      * @param pkValuesMap the pkValuesMap
      * @return return TableRecords;
