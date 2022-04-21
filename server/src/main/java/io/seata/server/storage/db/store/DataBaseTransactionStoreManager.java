@@ -180,7 +180,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         //global transaction
         List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(states, logQueryLimit);
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
-            return null;
+            return new ArrayList<>();
         }
         List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
         Map<String, List<BranchTransactionDO>> branchTransactionDOsMap;
