@@ -65,10 +65,10 @@ if [[ -z ${tenant} ]]; then
     tenant=""
 fi
 if [[ -z ${username} ]]; then
-    username=""
+    username="nacos"
 fi
 if [[ -z ${password} ]]; then
-    password=""
+    password="nacos"
 fi
 
 nacosAddr=$host:$port
