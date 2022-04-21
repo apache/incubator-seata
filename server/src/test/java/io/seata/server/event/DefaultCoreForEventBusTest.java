@@ -56,10 +56,10 @@ public class DefaultCoreForEventBusTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         class GlobalTransactionEventSubscriber {
-            private final Map<GlobalStatus, AtomicInteger> eventCounters;
+            private final Map<String, AtomicInteger> eventCounters;
             private CountDownLatch downLatch;
 
-            public Map<GlobalStatus, AtomicInteger> getEventCounters() {
+            public Map<String, AtomicInteger> getEventCounters() {
                 return eventCounters;
             }
 
@@ -71,7 +71,7 @@ public class DefaultCoreForEventBusTest {
             @AllowConcurrentEvents
             public void processGlobalTransactionEvent(GlobalTransactionEvent event) {
                 AtomicInteger counter = eventCounters.computeIfAbsent(event.getStatus(),
-                    status -> new AtomicInteger(0));
+                        status -> new AtomicInteger(0));
                 counter.addAndGet(1);
                 //System.out.println("current status:" + event.getName() + "," + event.getStatus() + "," + eventCounters.size());
                 if (null != downLatch) {
@@ -106,27 +106,30 @@ public class DefaultCoreForEventBusTest {
             EventBusManager.get().register(subscriber);
 
             //start and commit a transaction
-            subscriber.setDownLatch(new CountDownLatch(3));
+            subscriber.setDownLatch(new CountDownLatch(4));
             String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
             core.commit(xid);
 
 
             //we need sleep for a short while because default canBeCommittedAsync() is true
-            subscriber.getDownLatch().await(5000, TimeUnit.MILLISECONDS);
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed).get());
+            subscriber.getDownLatch().await();
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting.name()).get());
+            // after event and sync event
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
 
             //start and rollback transaction
             subscriber.setDownLatch(new CountDownLatch(3));
             xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
             core.rollback(xid);
-
+            //sleep for retryRollback
+            Thread.sleep(1500);
             //check
-            subscriber.getDownLatch().await(1000, TimeUnit.MILLISECONDS);
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
-            Assertions.assertNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked));
+            subscriber.getDownLatch().await();
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
+            //Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
+            Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked.name()));
 
             //start more one new transaction for test timeout and let this transaction immediately timeout
             subscriber.setDownLatch(new CountDownLatch(1));
@@ -137,7 +140,7 @@ public class DefaultCoreForEventBusTest {
 
             //at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
             subscriber.downLatch.await(5000, TimeUnit.MILLISECONDS);
-            Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking).get() >= 1);
+            Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking.name()).get() >= 1);
         } finally {
             // call SpringContextShutdownHook
             if (null != subscriber) {
