@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.seata.common.util.CollectionUtils;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalSessionVO;
