@@ -477,7 +477,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             if (IGNORE_NOCHECK_COLUMNS.length() > 0) {
                 Map<String, String> maps = (Map) JSON.parse(IGNORE_NOCHECK_COLUMNS);
                 if (maps.size() > 0) {
-                    Set<String> sets = new HashSet<>();
                     maps.forEach((key, value) -> {
                         ignoreCheckFields.put(key, Sets.newHashSet(Arrays.asList(value)));
                     });
