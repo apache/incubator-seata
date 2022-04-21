@@ -442,7 +442,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            columns.addAll(recognizer.getInsertColumns());
+            columns.addAll(insertColumns);
             columns.addAll(pkColumnNameList);
             doIgnoreCheckColumns(columns, selectSQLJoin);
         } else {
