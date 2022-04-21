@@ -57,6 +57,9 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
         checkParam(param);
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
+        if (CollectionUtils.isEmpty(allSessions)) {
+            return PageResult.success(null, 0, 0, 0, 0);
+        }
 
         final AtomicInteger total = new AtomicInteger();
         List<RowLock> result = allSessions

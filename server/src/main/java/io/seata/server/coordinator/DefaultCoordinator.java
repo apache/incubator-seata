@@ -350,6 +350,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         sessionCondition.setLazyLoadBranch(true);
         Collection<GlobalSession> rollbackingSessions =
             SessionHolder.getRetryRollbackingSessionManager().findGlobalSessions(sessionCondition);
+        if (CollectionUtils.isEmpty(rollbackingSessions)) {
+            return;
+        }
+        if (!rollbackingSessions.isEmpty() && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("handleRetryRollbacking, size: {}", rollbackingSessions.size());
+        }
         long now = System.currentTimeMillis();
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
