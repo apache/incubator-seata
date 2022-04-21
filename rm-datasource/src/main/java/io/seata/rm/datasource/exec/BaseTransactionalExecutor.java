@@ -22,7 +22,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,7 +54,10 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
+import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
 
 /**
@@ -70,10 +72,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseTransactionalExecutor.class);
 
     private static final boolean ONLY_CARE_UPDATE_COLUMNS = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
+            TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
 
     private static final String IGNORE_NOCHECK_COLUMNS = ConfigurationFactory.getInstance()
-            .getConfig(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, StringUtils.EMPTY);
+            .getConfig(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
 
     /**
      * The Statement proxy.
