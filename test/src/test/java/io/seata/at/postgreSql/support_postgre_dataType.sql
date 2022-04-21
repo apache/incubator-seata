@@ -90,3 +90,18 @@ CREATE TABLE "public"."CHAR_TEST"
 ;
 ALTER TABLE "public"."CHAR_TEST"
     OWNER TO "postgres";
+
+-- date type
+CREATE TABLE "public"."DATE_TEST"
+(
+    "ID"                            int4                     NOT NULL,
+    "TIMESTAMP_TEST"                timestamp                NOT NULL,
+    "TIMESTAMP_WITH_TIME_ZONE_TEST" timestamp with time zone NOT NULL,
+    "DATE_TEST_AT"                  date                     NOT NULL,
+    "TIME_TEST_AT"                  time                     NOT NULL,
+    "TIME_WITH_TIME_ZONE_TEST"      time with time zone      NOT NULL,
+    CONSTRAINT "DATE_TEST_PKEY" PRIMARY KEY ("ID")
+)
+;
+ALTER TABLE "public"."DATE_TEST"
+    OWNER TO "postgres";

@@ -43,12 +43,15 @@ import static io.seata.at.postgreSql.PostgreSqlConstant.CHAR_TABLE_NAME;
 import static io.seata.at.postgreSql.PostgreSqlConstant.CHAR_TYPE;
 import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TABLE_NAME;
 import static io.seata.at.postgreSql.PostgreSqlConstant.CURRENCY_TYPE;
+import static io.seata.at.postgreSql.PostgreSqlConstant.DATE_TABLE_NAME;
 import static io.seata.at.postgreSql.PostgreSqlConstant.NUMBER_TABLE_NAME;
 import static io.seata.at.postgreSql.PostgreSqlConstant.NUMBER_TYPE;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CHAR_TYPE_INSERT_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CHAR_TYPE_UPDATE_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_INSERT_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_CURRENCY_TYPE_UPDATE_SQL;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_DATE_TYPE_INSERT_SQL;
+import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_DATE_TYPE_UPDATE_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_NUMBER_TYPE_INSERT_SQL;
 import static io.seata.at.postgreSql.PostgreSqlConstant.TEST_NUMBER_TYPE_UPDATE_SQL;
 
@@ -92,6 +95,11 @@ public class SupportPostgreSqlDataTypeTest {
                 insertSql = TEST_CHAR_TYPE_INSERT_SQL;
                 tableName = CHAR_TABLE_NAME;
                 updateSql = TEST_CHAR_TYPE_UPDATE_SQL;
+                break;
+            case 4:
+                insertSql = TEST_DATE_TYPE_INSERT_SQL;
+                tableName = DATE_TABLE_NAME;
+                updateSql = TEST_DATE_TYPE_UPDATE_SQL;
                 break;
             default:
         }

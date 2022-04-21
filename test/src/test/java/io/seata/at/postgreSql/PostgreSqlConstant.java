@@ -63,4 +63,16 @@ public class PostgreSqlConstant {
 
     public static final String TEST_CHAR_TYPE_UPDATE_SQL =
             "UPDATE" + CHAR_TABLE_NAME + "SET \"TEXT_TEST\" = '1231231QWERWQERWR'\n" + "WHERE \"ID\" = " + TEST_RECORD_ID;
+
+    public static final String DATE_TABLE_NAME = "\"public\".\"DATE_TEST\"";
+
+    public static final String TEST_DATE_TYPE_INSERT_SQL = "INSERT INTO " + DATE_TABLE_NAME
+            + "( \"ID\", \"TIMESTAMP_TEST\", \"TIMESTAMP_WITH_TIME_ZONE_TEST\", \"DATE_TEST\", \"TIME_TEST\", \"TIME_WITH_TIME_ZONE_TEST\" )\n"
+            + "VALUES\n" + "\t( 1, NULL, NULL, NULL, NULL, '22:12:42-01' );";
+
+    public static final String TEST_DATE_TYPE_UPDATE_SQL = "UPDATE" + DATE_TABLE_NAME
+            // + "SET \"TIMESTAMP_TEST\" = '2023-04-16 21:43:11',\n"
+            + "SET \"TIME_WITH_TIME_ZONE_TEST\" = '21:43:11+01'\n"
+            // + "\"TIMESTAMP_WITH_TIME_ZONE_TEST\" = '2022-04-18 21:57:23+03'\n"
+            + "WHERE\n" + "\t\"ID\" = " + TEST_RECORD_ID;
 }
