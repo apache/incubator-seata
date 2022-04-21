@@ -53,9 +53,6 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
         }
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
-        if (CollectionUtils.isEmpty(allSessions)) {
-            return PageResult.success(null, 0, 0, 0, 0);
-        }
 
         final List<GlobalSession> filteredSessions = allSessions
                 .parallelStream()
