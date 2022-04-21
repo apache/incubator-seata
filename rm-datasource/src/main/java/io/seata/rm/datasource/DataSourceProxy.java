@@ -26,7 +26,7 @@ import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -73,7 +73,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
             ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
 
-    private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledExecutorService tableMetaExecutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("tableMetaChecker", 1, true));
 
     /**
@@ -116,7 +116,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-            tableMetaExcutor.scheduleAtFixedRate(() -> {
+            tableMetaExecutor.scheduleAtFixedRate(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
                         .refresh(connection, DataSourceProxy.this.getResourceId());

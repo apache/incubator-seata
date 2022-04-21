@@ -19,8 +19,8 @@ import { UserType } from '@/reducers/login';
 export async function loginService(data: UserType):Promise<any> {
   let result = await request('/auth/login', {
     method: 'post',
-    data
+    data,
   });
 
-  return result;
+  return result.data;
 }
