@@ -81,6 +81,33 @@ public class GlobalTransactionEvent implements Event {
     private boolean retryBranch;
 
     /**
+     * Instantiates a new Global transaction event.
+     *
+     * @param id            the id
+     * @param role          the role
+     * @param name          the name
+     * @param applicationId the application id
+     * @param group         the group
+     * @param beginTime     the begin time
+     * @param endTime       the end time
+     * @param status        the status
+     * @param retryGlobal   the retry(1. delay delete global session 2. asyn retry branch session)
+     * @param retryBranch   retry branch session
+     */
+    public GlobalTransactionEvent(long id, String role, String name, String applicationId, String group, Long beginTime, Long endTime, String status, boolean retryGlobal, boolean retryBranch) {
+        this.id = id;
+        this.role = role;
+        this.name = name;
+        this.applicationId = applicationId;
+        this.group = group;
+        this.beginTime = beginTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.retryGlobal = retryGlobal;
+        this.retryBranch = retryBranch;
+    }
+
+    /**
      * Gets id.
      *
      * @return the id
@@ -168,33 +195,6 @@ public class GlobalTransactionEvent implements Event {
      */
     public boolean isRetryBranch() {
         return retryBranch;
-    }
-
-    /**
-     * Instantiates a new Global transaction event.
-     *
-     * @param id            the id
-     * @param role          the role
-     * @param name          the name
-     * @param applicationId the application id
-     * @param group         the group
-     * @param beginTime     the begin time
-     * @param endTime       the end time
-     * @param status        the status
-     * @param retryGlobal   the retry(1. delay delete global session 2. asyn retry branch session)
-     * @param retryBranch   retry branch session
-     */
-    public GlobalTransactionEvent(long id, String role, String name, String applicationId, String group, Long beginTime, Long endTime, String status, boolean retryGlobal, boolean retryBranch) {
-        this.id = id;
-        this.role = role;
-        this.name = name;
-        this.applicationId = applicationId;
-        this.group = group;
-        this.beginTime = beginTime;
-        this.endTime = endTime;
-        this.status = status;
-        this.retryGlobal = retryGlobal;
-        this.retryBranch = retryBranch;
     }
 
     @Override
