@@ -388,6 +388,11 @@ public interface ConfigurationKeys {
     String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
 
     /**
+     * The constant TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.
+     */
+    String TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS = CLIENT_UNDO_PREFIX + "ignoreNocheckColumns";
+
+    /**
      * the constant CLIENT_UNDO_COMPRESS_PREFIX
      */
     String CLIENT_UNDO_COMPRESS_PREFIX = CLIENT_UNDO_PREFIX + "compress.";

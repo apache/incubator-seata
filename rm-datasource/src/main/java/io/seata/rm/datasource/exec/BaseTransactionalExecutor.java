@@ -20,6 +20,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +30,8 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeSet;
 
+import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Sets;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -49,8 +54,11 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
+import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
 
 /**
@@ -62,8 +70,13 @@ import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseTransactionalExecutor.class);
+
     private static final boolean ONLY_CARE_UPDATE_COLUMNS = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
+
+    private static final String IGNORE_NOCHECK_COLUMNS = ConfigurationFactory.getInstance()
+            .getConfig(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, StringUtils.EMPTY);
 
     /**
      * The Statement proxy.
@@ -434,11 +447,19 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
             columns.addAll(recognizer.getInsertColumns());
             columns.addAll(pkColumnNameList);
-            for (String columnName : columns) {
+            Set<String> ignoreAfterColumns = doGetCheckColumns(columns);
+            for (String columnName : ignoreAfterColumns) {
                 selectSQLJoin.add(columnName);
             }
         } else {
-            selectSQLJoin.add(" * ");
+            Set<String> columns = doGetCheckColumns(getTableMeta().getOnlyAllColumnNames());
+            if (columns.size() == 0) {
+                selectSQLJoin.add(" * ");
+            } else {
+                for (String columnName : columns) {
+                    selectSQLJoin.add(columnName);
+                }
+            }
         }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
@@ -457,6 +478,45 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } finally {
             IOUtil.close(rs);
         }
+    }
+
+    protected Set<String> doGetCheckColumns(Set<String> onlyAllColumnNames) {
+
+        Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        Set<String> tmpColumns = onlyAllColumnNames;
+        Map<String, Set<String>> ignoreCheckFields = new HashMap<>();
+
+
+        try {
+            if (IGNORE_NOCHECK_COLUMNS.length() > 0) {
+                Map<String, String> maps = (Map) JSON.parse(IGNORE_NOCHECK_COLUMNS);
+                if (maps.size() > 0) {
+                    Set<String> sets = new HashSet<>();
+                    maps.forEach((key, value) -> {
+                        ignoreCheckFields.put(key, Sets.newHashSet(Arrays.asList(value)));
+                    });
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Please confirm whether this configuration:[{}] is correct error:[{}]", IGNORE_NOCHECK_COLUMNS, e.getMessage());
+            e.printStackTrace();
+        }
+
+        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
+            final String tableName = getFromTableInSQL();
+            if (ignoreCheckFields.containsKey(tableName)) {
+                onlyAllColumnNames.removeAll(ignoreCheckFields.get(tableName));
+                if (onlyAllColumnNames.size() == 0) {
+                    columns = tmpColumns;
+                } else {
+                    columns = onlyAllColumnNames;
+                }
+            }
+        } else {
+            columns = onlyAllColumnNames;
+        }
+
+        return columns;
     }
 
     /**

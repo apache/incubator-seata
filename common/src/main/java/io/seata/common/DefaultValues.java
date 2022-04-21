@@ -15,6 +15,8 @@
  */
 package io.seata.common;
 
+import io.seata.common.util.StringUtils;
+
 import java.time.Duration;
 
 /**
@@ -62,6 +64,11 @@ public interface DefaultValues {
     boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
     String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = "jackson";
     boolean DEFAULT_ONLY_CARE_UPDATE_COLUMNS = true;
+
+    /**
+     * The constant  DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.
+     */
+    String DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS = StringUtils.EMPTY;
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_LOG_TABLE.
      */

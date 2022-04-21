@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
@@ -105,6 +107,19 @@ public class TableMeta {
             }
         }
         return null;
+    }
+
+    /**
+     * get Only AllColumnNames
+     *
+     * @return List<String>
+     */
+    public Set<String> getOnlyAllColumnNames() {
+        Set<String> allColumnNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+        allColumns.forEach((k, v) -> allColumnNames.add(k));
+
+        return allColumnNames;
     }
 
     /**
