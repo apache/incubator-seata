@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalSessionVO;
@@ -52,6 +53,9 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
         }
 
         final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
+        if (CollectionUtils.isEmpty(allSessions)) {
+            return PageResult.success(null, 0, 0, 0, 0);
+        }
 
         final List<GlobalSession> filteredSessions = allSessions
                 .parallelStream()
