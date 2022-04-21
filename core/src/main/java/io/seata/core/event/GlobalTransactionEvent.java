@@ -15,18 +15,25 @@
  */
 package io.seata.core.event;
 
-import io.seata.core.model.GlobalStatus;
-
 /**
  * Event data for global transaction.
  *
  * @author zhengyangyong
  */
 public class GlobalTransactionEvent implements Event {
+    /**
+     * The constant ROLE_TC.
+     */
     public static final String ROLE_TC = "tc";
 
+    /**
+     * The constant ROLE_TM.
+     */
     public static final String ROLE_TM = "tm";
 
+    /**
+     * The constant ROLE_RM.
+     */
     public static final String ROLE_RM = "rm";
 
     /**
@@ -48,7 +55,7 @@ public class GlobalTransactionEvent implements Event {
      * business applicationId
      */
     private String applicationId;
-    
+
     /**
      * Transaction Service Group
      */
@@ -67,42 +74,117 @@ public class GlobalTransactionEvent implements Event {
     /**
      * Transaction Status
      */
-    private final GlobalStatus status;
+    private final String status;
 
+    private final boolean retryGlobal;
+
+    private boolean retryBranch;
+
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * Gets role.
+     *
+     * @return the role
+     */
     public String getRole() {
         return role;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets application id.
+     *
+     * @return the application id
+     */
     public String getApplicationId() {
         return applicationId;
     }
-    
+
+    /**
+     * Gets group.
+     *
+     * @return the group
+     */
     public String getGroup() {
         return group;
     }
 
+    /**
+     * Gets begin time.
+     *
+     * @return the begin time
+     */
     public Long getBeginTime() {
         return beginTime;
     }
 
+    /**
+     * Gets end time.
+     *
+     * @return the end time
+     */
     public Long getEndTime() {
         return endTime;
     }
 
-    public GlobalStatus getStatus() {
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
+    public String getStatus() {
         return status;
     }
 
-    public GlobalTransactionEvent(long id, String role, String name, String applicationId,
-            String group, Long beginTime, Long endTime, GlobalStatus status) {
+    /**
+     * Is retry boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isRetryGlobal() {
+        return retryGlobal;
+    }
+
+    /**
+     * Is retry branch boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isRetryBranch() {
+        return retryBranch;
+    }
+
+    /**
+     * Instantiates a new Global transaction event.
+     *
+     * @param id            the id
+     * @param role          the role
+     * @param name          the name
+     * @param applicationId the application id
+     * @param group         the group
+     * @param beginTime     the begin time
+     * @param endTime       the end time
+     * @param status        the status
+     * @param retryGlobal   the retry(1. delay delete global session 2. asyn retry branch session)
+     * @param retryBranch   retry branch session
+     */
+    public GlobalTransactionEvent(long id, String role, String name, String applicationId, String group, Long beginTime, Long endTime, String status, boolean retryGlobal, boolean retryBranch) {
         this.id = id;
         this.role = role;
         this.name = name;
@@ -111,12 +193,15 @@ public class GlobalTransactionEvent implements Event {
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.status = status;
+        this.retryGlobal = retryGlobal;
+        this.retryBranch = retryBranch;
     }
 
     @Override
     public String toString() {
         return "GlobalTransactionEvent{" + "id=" + id + ", role='" + role + '\'' + ", name='" + name + '\''
             + ", applicationId='" + applicationId + '\'' + ", group='" + group + '\'' + ", beginTime=" + beginTime
-            + ", endTime=" + endTime + ", status=" + status + '}';
+            + ", endTime=" + endTime + ", status='" + status + '\'' + ", retryGlobal=" + retryGlobal + ", retryBranch="
+            + retryBranch + '}';
     }
 }
