@@ -15,28 +15,12 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.TreeSet;
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Sets;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -54,6 +38,18 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.TreeSet;
 
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS;
@@ -473,22 +469,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
         Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         columns.addAll(columnNames);
-        Map<String, Set<String>> ignoreCheckFields = new HashMap<>();
 
-        try {
-            if (IGNORE_NOCHECK_COLUMNS.length() > 0) {
-                Map<String, String> maps = (Map) JSON.parse(IGNORE_NOCHECK_COLUMNS);
-                if (maps.size() > 0) {
-                    maps.forEach((key, value) -> {
-                        ignoreCheckFields.put(key, Sets.newHashSet(Arrays.asList(value)));
-                    });
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Please confirm whether this configuration:[{}] is correct,error:[{}]", IGNORE_NOCHECK_COLUMNS, e.getMessage());
-            e.printStackTrace();
-        }
-
+        IgnoreUncheckFieldController ignoreUncheckFieldController = new IgnoreUncheckFieldController();
+        Map<String, Set<String>> ignoreCheckFields = ignoreUncheckFieldController.getNoCheckFields();
         if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
             final String tableName = getFromTableInSQL();
             if (ignoreCheckFields.containsKey(tableName)) {

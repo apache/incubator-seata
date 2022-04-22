@@ -22,9 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LowerCaseLinkHashMap;
@@ -116,11 +114,8 @@ public class TableMeta {
      * @return List<String>
      */
     public Set<String> getOnlyAllColumnNames() {
-        Set<String> allColumnNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
-        allColumns.forEach((k, v) -> allColumnNames.add(k));
-
-        return allColumnNames;
+        return allColumns.keySet();
     }
 
     /**
