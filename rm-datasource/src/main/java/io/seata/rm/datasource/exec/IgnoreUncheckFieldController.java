@@ -57,7 +57,7 @@ public class IgnoreUncheckFieldController {
         this.ignoreCheckFields = getNoCheckFields();
     }
 
-    Map<String, Set<String>> getNoCheckFields() {
+    public Map<String, Set<String>> getNoCheckFields() {
         return LISTENER.getResultValue();
     }
 

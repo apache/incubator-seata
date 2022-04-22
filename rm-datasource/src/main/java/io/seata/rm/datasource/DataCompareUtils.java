@@ -18,6 +18,7 @@ package io.seata.rm.datasource;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.Result;
+import io.seata.rm.datasource.exec.IgnoreUncheckFieldController;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -193,6 +195,9 @@ public class DataCompareUtils {
                 if (newField == null) {
                     return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
                 }
+                if (checkIgnoreFields(tableMetaData.getTableName(), newField)) {
+                    continue;
+                }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
                 if (!oldEqualsNewFieldResult.getResult()) {
                     return oldEqualsNewFieldResult;
@@ -200,6 +205,25 @@ public class DataCompareUtils {
             }
         }
         return Result.ok();
+    }
+
+    private static Boolean checkIgnoreFields(String tableName, Field newField) {
+
+        IgnoreUncheckFieldController ignoreUncheckFieldController = new IgnoreUncheckFieldController();
+
+        Map<String, Set<String>> ignoreCheckFields = ignoreUncheckFieldController.getNoCheckFields();
+
+        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
+            if (ignoreCheckFields.containsKey(tableName)) {
+                Set<String> columns = ignoreCheckFields.get(tableName);
+                if (columns.contains(newField.getName())) {
+                    return Boolean.TRUE;
+                } else {
+                    return Boolean.FALSE;
+                }
+            }
+        }
+        return Boolean.FALSE;
     }
 
     /**
