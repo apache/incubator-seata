@@ -82,7 +82,6 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
                 e.getMessage());
             e.printStackTrace();
         }
-
     }
 
 }

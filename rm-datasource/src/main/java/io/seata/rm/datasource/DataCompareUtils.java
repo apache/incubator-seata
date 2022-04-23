@@ -194,6 +194,7 @@ public class DataCompareUtils {
             if (newRow == null) {
                 return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", key);
             }
+            boolean ignoreRemoveAllColumns = ignoreRemoveAllColumns(tableMetaData.getTableName(), oldRow);
             for (Map.Entry<String, Field> oldRowEntry : oldRow.entrySet()) {
                 String fieldName = oldRowEntry.getKey();
                 Field oldField = oldRowEntry.getValue();
@@ -201,8 +202,7 @@ public class DataCompareUtils {
                 if (newField == null) {
                     return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
                 }
-                if (ignoreRemoveAllColumns(tableMetaData.getTableName(), oldRow)
-                    && checkIgnoreFields(tableMetaData.getTableName(), newField)) {
+                if (ignoreRemoveAllColumns && checkIgnoreFields(tableMetaData.getTableName(), newField)) {
                     continue;
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
