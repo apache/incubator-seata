@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import com.google.common.collect.Sets;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.Result;
@@ -25,6 +26,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -39,6 +42,7 @@ import java.util.HashMap;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
+import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 
 /**
  * The type Data compare utils.
@@ -46,6 +50,8 @@ import java.util.stream.Collectors;
  * @author Geng Zhang
  */
 public class DataCompareUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataCompareUtils.class);
 
     private DataCompareUtils() {
 
@@ -195,7 +201,8 @@ public class DataCompareUtils {
                 if (newField == null) {
                     return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
                 }
-                if (checkIgnoreFields(tableMetaData.getTableName(), newField)) {
+                if (ignoreRemoveAllColumns(tableMetaData.getTableName(), oldRow)
+                    && checkIgnoreFields(tableMetaData.getTableName(), newField)) {
                     continue;
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
@@ -207,15 +214,40 @@ public class DataCompareUtils {
         return Result.ok();
     }
 
-    private static Boolean checkIgnoreFields(String tableName, Field newField) {
+    private static boolean ignoreRemoveAllColumns(String tableName, Map<String, Field> oldRow) {
 
-        IgnoreUncheckFieldController ignoreUncheckFieldController = new IgnoreUncheckFieldController();
+        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
+        Set<String> columnsNew = Sets.newHashSet();
 
-        Map<String, Set<String>> ignoreCheckFields = ignoreUncheckFieldController.getNoCheckFields();
+        oldRow.values().forEach(filed -> columnsNew.add(filed.getName()));
 
         if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
             if (ignoreCheckFields.containsKey(tableName)) {
                 Set<String> columns = ignoreCheckFields.get(tableName);
+                columnsNew.removeAll(columns);
+                if (columnsNew.size() == 0) {
+                    LOGGER.warn(
+                        "the tableName:[{}] config:[{}] columns cause all to be removed so this configuration is no loner in effect",
+                        tableName, TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
+                    return Boolean.FALSE;
+                } else {
+                    return Boolean.TRUE;
+                }
+            }
+        }
+        return Boolean.TRUE;
+    }
+
+    private static Boolean checkIgnoreFields(String tableName, Field newField) {
+
+        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
+
+        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
+            if (ignoreCheckFields.containsKey(tableName)) {
+                Set<String> columns = ignoreCheckFields.get(tableName);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.info("tableName:[{}] ignore uncheck column:[{}] ", tableName, columns);
+                }
                 if (columns.contains(newField.getName())) {
                     return Boolean.TRUE;
                 } else {

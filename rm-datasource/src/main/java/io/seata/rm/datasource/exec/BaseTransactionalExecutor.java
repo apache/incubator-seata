@@ -470,19 +470,22 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         columns.addAll(columnNames);
 
-        IgnoreUncheckFieldController ignoreUncheckFieldController = new IgnoreUncheckFieldController();
-        Map<String, Set<String>> ignoreCheckFields = ignoreUncheckFieldController.getNoCheckFields();
+        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
         if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
             final String tableName = getFromTableInSQL();
             if (ignoreCheckFields.containsKey(tableName)) {
                 columnNames.removeAll(ignoreCheckFields.get(tableName));
                 if (columnNames.size() > 0) {
                     columns = columnNames;
+                } else {
+                    LOGGER.warn(
+                        "the tableName:[{}] config:[{}] columns cause all to be removed so this configuration is no loner in effect",
+                        tableName, TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
                 }
             }
         }
 
-        columns.forEach(column -> selectSQLJoin.add(column));
+        columns.forEach(selectSQLJoin::add);
     }
 
     /**
