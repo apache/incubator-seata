@@ -15,12 +15,11 @@
  */
 package io.seata.rm.datasource.exec;
 
-import com.google.common.collect.Maps;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
-import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +40,13 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreUncheckFieldController.class);
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     private String noCheckFields;
 
-    private static Map<String, Set<String>> mapFields;
+    private static Map<String, Set<String>> mapFields = new HashMap<>();
 
-    private static class IgnoreUncheckFieldControllerHolder {
+    private static final class IgnoreUncheckFieldControllerHolder {
         private static IgnoreUncheckFieldController instance = new IgnoreUncheckFieldController();
     }
 
@@ -54,9 +55,6 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
     }
 
     public Map<String, Set<String>> getNoCheckFields() {
-        if (null == mapFields) {
-            return Maps.newHashMap();
-        }
         return mapFields;
     }
 
@@ -67,10 +65,9 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         if (TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.equals(dataId)) {
             noCheckFields = StringUtils.isBlank(newValue) ? DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS : newValue;
         }
-        mapFields = new HashMap<>();
         try {
             if (noCheckFields.length() > 0) {
-                Map<String, String> maps = FastjsonUndoLogParser.parseObject(noCheckFields, Map.class);
+                Map<String, String> maps = mapper.readValue(noCheckFields, Map.class);
                 if (maps.size() > 0) {
                     maps.forEach((key, value) -> {
                         mapFields.put(key, Sets.newHashSet(Arrays.asList(value)));

@@ -62,8 +62,4 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
         String text = new String(bytes, Constants.DEFAULT_CHARSET);
         return JSON.parseObject(text, BranchUndoLog.class);
     }
-
-    public static <T> T parseObject(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
-    }
 }

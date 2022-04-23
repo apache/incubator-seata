@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import com.google.common.collect.Sets;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.Result;
@@ -42,7 +41,6 @@ import java.util.HashMap;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 
 /**
  * The type Data compare utils.
@@ -194,7 +192,6 @@ public class DataCompareUtils {
             if (newRow == null) {
                 return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", key);
             }
-            boolean ignoreRemoveAllColumns = ignoreRemoveAllColumns(tableMetaData.getTableName(), oldRow);
             for (Map.Entry<String, Field> oldRowEntry : oldRow.entrySet()) {
                 String fieldName = oldRowEntry.getKey();
                 Field oldField = oldRowEntry.getValue();
@@ -202,7 +199,7 @@ public class DataCompareUtils {
                 if (newField == null) {
                     return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
                 }
-                if (ignoreRemoveAllColumns && checkIgnoreFields(tableMetaData.getTableName(), newField)) {
+                if (checkIgnoreFields(tableMetaData.getTableName(), newField)) {
                     continue;
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
@@ -212,30 +209,6 @@ public class DataCompareUtils {
             }
         }
         return Result.ok();
-    }
-
-    private static boolean ignoreRemoveAllColumns(String tableName, Map<String, Field> oldRow) {
-
-        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
-        Set<String> columnsNew = Sets.newHashSet();
-
-        oldRow.values().forEach(filed -> columnsNew.add(filed.getName()));
-
-        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
-            if (ignoreCheckFields.containsKey(tableName)) {
-                Set<String> columns = ignoreCheckFields.get(tableName);
-                columnsNew.removeAll(columns);
-                if (columnsNew.size() == 0) {
-                    LOGGER.warn(
-                        "the tableName:[{}] config:[{}] columns cause all to be removed so this configuration is no loner in effect",
-                        tableName, TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
-                    return Boolean.FALSE;
-                } else {
-                    return Boolean.TRUE;
-                }
-            }
-        }
-        return Boolean.TRUE;
     }
 
     private static Boolean checkIgnoreFields(String tableName, Field newField) {
