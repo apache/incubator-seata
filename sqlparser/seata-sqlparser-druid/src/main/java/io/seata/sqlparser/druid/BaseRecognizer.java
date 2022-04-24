@@ -24,6 +24,7 @@ import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
+import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
@@ -77,6 +78,8 @@ public abstract class BaseRecognizer implements SQLRecognizer {
             visitor.visit((SQLBetweenExpr) where);
         } else if (where instanceof SQLExistsExpr) {
             visitor.visit((SQLExistsExpr) where);
+        } else if (where instanceof SQLMethodInvokeExpr) {
+            visitor.visit((SQLMethodInvokeExpr) where);
         } else {
             throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
         }
