@@ -22,4 +22,6 @@ export interface ILocale {
   Header: ILocaleMap;
   Login: ILocaleMap;
   Overview: ILocaleMap;
+  TransactionInfo: ILocaleMap;
+  GlobalLockInfo: ILocaleMap;
 }
