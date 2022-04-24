@@ -90,7 +90,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn("Please confirm whether this configuration:[{}] is correct,error:[{}]", noCheckFields,
+            LOGGER.error("Please confirm whether this configuration:[{}] is correct,error:[{}]", noCheckFields,
                     e.getMessage());
             e.printStackTrace();
         }
