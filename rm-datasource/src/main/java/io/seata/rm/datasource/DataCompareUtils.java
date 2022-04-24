@@ -15,19 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.core.model.Result;
-import io.seata.rm.datasource.exec.IgnoreUncheckFieldController;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -39,8 +26,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.Comparator;
-import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.core.model.Result;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.AbstractUndoLogManager;
+import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static io.seata.rm.datasource.exec.IgnoreUncheckFieldController.checkIgnoreFields;
 
 /**
  * The type Data compare utils.
@@ -209,26 +209,6 @@ public class DataCompareUtils {
             }
         }
         return Result.ok();
-    }
-
-    private static Boolean checkIgnoreFields(String tableName, Field newField) {
-
-        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
-
-        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
-            if (ignoreCheckFields.containsKey(tableName)) {
-                Set<String> columns = ignoreCheckFields.get(tableName);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.info("tableName:[{}] ignore uncheck column:[{}] ", tableName, columns);
-                }
-                if (columns.contains(newField.getName())) {
-                    return Boolean.TRUE;
-                } else {
-                    return Boolean.FALSE;
-                }
-            }
-        }
-        return Boolean.FALSE;
     }
 
     /**

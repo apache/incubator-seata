@@ -15,6 +15,19 @@
  */
 package io.seata.rm.datasource.exec;
 
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.TreeSet;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -36,25 +49,9 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.TreeSet;
-
-import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS;
-import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
+import static io.seata.rm.datasource.exec.IgnoreUncheckFieldController.doIgnoreCheckColumns;
 
 /**
  * The type Base transactional executor.
@@ -65,13 +62,8 @@ import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseTransactionalExecutor.class);
-
     private static final boolean ONLY_CARE_UPDATE_COLUMNS = ConfigurationFactory.getInstance().getBoolean(
             TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
-
-    private static final String IGNORE_NOCHECK_COLUMNS = ConfigurationFactory.getInstance()
-            .getConfig(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
 
     /**
      * The Statement proxy.
@@ -442,9 +434,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
             columns.addAll(insertColumns);
             columns.addAll(pkColumnNameList);
-            doIgnoreCheckColumns(columns, selectSQLJoin);
+            doIgnoreCheckColumns(columns, selectSQLJoin, getFromTableInSQL());
         } else {
-            doIgnoreCheckColumns(getTableMeta().getOnlyAllColumnNames(), selectSQLJoin);
+            doIgnoreCheckColumns(getTableMeta().getOnlyAllColumnNames(), selectSQLJoin, getFromTableInSQL());
         }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
@@ -463,29 +455,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } finally {
             IOUtil.close(rs);
         }
-    }
-
-    protected void doIgnoreCheckColumns(Set<String> columnNames, StringJoiner selectSQLJoin) {
-
-        Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        columns.addAll(columnNames);
-
-        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
-        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
-            final String tableName = getFromTableInSQL();
-            if (ignoreCheckFields.containsKey(tableName)) {
-                columnNames.removeAll(ignoreCheckFields.get(tableName));
-                if (columnNames.size() > 0) {
-                    columns = columnNames;
-                } else {
-                    LOGGER.warn(
-                        "the tableName:[{}] config:[{}] columns cause all to be removed so this configuration is no loner in effect",
-                        tableName, TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
-                }
-            }
-        }
-
-        columns.forEach(selectSQLJoin::add);
     }
 
     /**
