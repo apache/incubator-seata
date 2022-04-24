@@ -79,7 +79,12 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         } else if (where instanceof SQLExistsExpr) {
             visitor.visit((SQLExistsExpr) where);
         } else if (where instanceof SQLMethodInvokeExpr) {
-            visitor.visit((SQLMethodInvokeExpr) where);
+            SQLMethodInvokeExpr whereMethod = (SQLMethodInvokeExpr) where;
+            if (whereMethod.getMethodName().equalsIgnoreCase("FIND_IN_SET")) {
+                visitor.visit((SQLMethodInvokeExpr) where);
+            } else {
+                throw new IllegalArgumentException("not support where method: " + whereMethod.getMethodName());
+            }
         } else {
             throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
         }
