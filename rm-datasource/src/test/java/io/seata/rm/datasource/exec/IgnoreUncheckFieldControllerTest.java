@@ -33,6 +33,7 @@ public class IgnoreUncheckFieldControllerTest {
 
     @Test
     void testRetryNotExceeded() {
+
         assertDoesNotThrow(() -> {
             final Map<String, Set<String>> noCheckFields =
                 IgnoreUncheckFieldController.getInstance().getNoCheckFields();
