@@ -18,13 +18,10 @@ package io.seata.rm.datasource.exec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -32,7 +29,6 @@ import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.datasource.sql.struct.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +66,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
     }
 
     public Map<String, Set<String>> getNoCheckFields() {
-
-        return mapFields;
+        return getMapCheckFields();
     }
 
     @Override
@@ -93,21 +88,26 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
                 return;
             }
             noCheckFields = newValue;
+
+            mapFields = getMapCheckFields();
         }
+    }
 
+    private Map<String, Set<String>> getMapCheckFields() {
         Map<String, Set<String>> mapFieldsNew = new HashMap<>();
-
         try {
             final Map<String, String> map = objectMapper.readValue(noCheckFields, Map.class);
             map.forEach((key, value) -> {
                 mapFieldsNew.put(key, new HashSet<>(Arrays.asList(value.split(","))));
             });
         } catch (Exception e) {
-            LOGGER.error("Please confirm whether this configuration:[{}] is correct,error:[{}]", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
-                    e.getMessage());
+            LOGGER.error("Please confirm whether this configuration:[{}] is correct,error:[{}]",
+                TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, e.getMessage());
         }
 
         mapFields = mapFieldsNew;
+
+        return mapFields;
     }
 
     public static void doIgnoreCheckColumns(Set<String> columnNames, StringJoiner selectSQLJoin, String tableName) {
