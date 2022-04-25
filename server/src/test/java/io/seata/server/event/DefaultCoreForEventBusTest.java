@@ -73,7 +73,7 @@ public class DefaultCoreForEventBusTest {
             @AllowConcurrentEvents
             public void processGlobalTransactionEvent(GlobalTransactionEvent event) {
                 AtomicInteger counter = eventCounters.computeIfAbsent(event.getStatus(),
-                    status -> new AtomicInteger(0));
+                        status -> new AtomicInteger(0));
                 counter.addAndGet(1);
                 //System.out.println("current status:" + event.getName() + "," + event.getStatus() + "," + eventCounters.size());
                 if (null != downLatch) {
@@ -108,16 +108,17 @@ public class DefaultCoreForEventBusTest {
             EventBusManager.get().register(subscriber);
 
             //start and commit a transaction
-            subscriber.setDownLatch(new CountDownLatch(3));
+            subscriber.setDownLatch(new CountDownLatch(4));
             String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
             core.commit(xid);
 
 
             //we need sleep for a short while because default canBeCommittedAsync() is true
             subscriber.getDownLatch().await();
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed).get());
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting.name()).get());
+            // after event and sync event
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
 
             //start and rollback transaction
             subscriber.setDownLatch(new CountDownLatch(3));
@@ -126,11 +127,10 @@ public class DefaultCoreForEventBusTest {
             //sleep for retryRollback
             Thread.sleep(1500);
             //check
-            subscriber.getDownLatch().await(1500, TimeUnit.MILLISECONDS);
+            subscriber.getDownLatch().await();
             Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
             //Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
-            //the 'doGlobalRollback' method will actually be triggered twice.
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
             Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked.name()));
 
             //start more one new transaction for test timeout and let this transaction immediately timeout

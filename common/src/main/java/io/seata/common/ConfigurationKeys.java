@@ -363,9 +363,24 @@ public interface ConfigurationKeys {
     String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
 
     /**
-     * The constant HANDLE_ALL_SESSION_PERIOD.
+     * The constant COMMITING_RETRY_PERIOD.
      */
-    String HANDLE_ALL_SESSION_PERIOD = RECOVERY_PREFIX + "handleAllSessionPeriod";
+    String COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "committingRetryPeriod";
+
+    /**
+     * The constant ASYN_COMMITING_RETRY_PERIOD.
+     */
+    String ASYN_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asynCommittingRetryPeriod";
+
+    /**
+     * The constant ROLLBACKING_RETRY_PERIOD.
+     */
+    String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
+
+    /**
+     * The constant TIMEOUT_RETRY_PERIOD.
+     */
+    String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
 
     /**
      * The constant CLIENT_UNDO_PREFIX.
@@ -376,6 +391,7 @@ public interface ConfigurationKeys {
      * The constant TRANSACTION_UNDO_DATA_VALIDATION.
      */
     String TRANSACTION_UNDO_DATA_VALIDATION = CLIENT_UNDO_PREFIX + "dataValidation";
+
     /**
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */

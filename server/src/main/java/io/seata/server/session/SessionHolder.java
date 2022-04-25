@@ -121,15 +121,6 @@ public class SessionHolder {
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
-                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
-                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
-                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
             if (StoreMode.RAFT.equals(storeMode) || StoreMode.RAFT.getName()
                 .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
@@ -138,6 +129,13 @@ public class SessionHolder {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             }
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+                new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+            ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
+            RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
+            RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -338,6 +336,7 @@ public class SessionHolder {
      *
      * @return the async committing session manager
      */
+    @Deprecated
     public static SessionManager getAsyncCommittingSessionManager() {
         if (ASYNC_COMMITTING_SESSION_MANAGER == null) {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
@@ -350,6 +349,7 @@ public class SessionHolder {
      *
      * @return the retry committing session manager
      */
+    @Deprecated
     public static SessionManager getRetryCommittingSessionManager() {
         if (RETRY_COMMITTING_SESSION_MANAGER == null) {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
@@ -362,6 +362,7 @@ public class SessionHolder {
      *
      * @return the retry rollbacking session manager
      */
+    @Deprecated
     public static SessionManager getRetryRollbackingSessionManager() {
         if (RETRY_ROLLBACKING_SESSION_MANAGER == null) {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
@@ -461,15 +462,6 @@ public class SessionHolder {
         }
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
-        }
-        if (ASYNC_COMMITTING_SESSION_MANAGER != null) {
-            ASYNC_COMMITTING_SESSION_MANAGER.destroy();
-        }
-        if (RETRY_COMMITTING_SESSION_MANAGER != null) {
-            RETRY_COMMITTING_SESSION_MANAGER.destroy();
-        }
-        if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
-            RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
         }
     }
 

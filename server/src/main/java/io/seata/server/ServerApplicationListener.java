@@ -72,7 +72,7 @@ public class ServerApplicationListener implements GenericApplicationListener {
 
         String[] args = environmentPreparedEvent.getArgs();
 
-        // port: -h > -D > env > yml > default
+        // port: -p > -D > env > yml > default
 
         //-p 8091
         if (args != null && args.length >= 2) {
@@ -85,28 +85,28 @@ public class ServerApplicationListener implements GenericApplicationListener {
         }
 
         // -Dserver.servicePort=8091
-        String dPort = config.getConfig(SERVER_SERVICE_PORT_CAMEL);
+        String dPort = environment.getProperty(SERVER_SERVICE_PORT_CAMEL, String.class);
         if (StringUtils.isNotBlank(dPort)) {
             setTargetPort(environment, dPort, true);
             return;
         }
 
         //docker -e SEATA_PORT=8091
-        String envPort = environment.getProperty(ENV_SEATA_PORT_KEY);
+        String envPort = environment.getProperty(ENV_SEATA_PORT_KEY, String.class);
         if (StringUtils.isNotBlank(envPort)) {
             setTargetPort(environment, envPort, true);
             return;
         }
 
-        //yml properties server.servicePort=8091
-        String configPort = config.getConfig(SERVER_SERVICE_PORT_CAMEL);
+        //yml properties server.service-port=8091
+        String configPort = environment.getProperty(SERVER_SERVICE_PORT_CONFIG, String.class);
         if (StringUtils.isNotBlank(configPort)) {
             setTargetPort(environment, configPort, false);
             return;
         }
 
         // server.port=7091
-        String serverPort = environment.getProperty("server.port");
+        String serverPort = environment.getProperty("server.port", String.class);
         if (StringUtils.isBlank(serverPort)) {
             serverPort = "8080";
         }

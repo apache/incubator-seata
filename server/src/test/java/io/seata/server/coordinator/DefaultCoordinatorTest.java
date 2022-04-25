@@ -153,7 +153,7 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(branchId);
 
         Thread.sleep(100);
-        defaultCoordinator.handleAllSession();
+        defaultCoordinator.timeoutCheck();
         defaultCoordinator.handleRetryRollbacking();
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
@@ -229,15 +229,15 @@ public class DefaultCoordinatorTest {
         }
     }
 
+    private static void deleteAndCreateDataFile() throws IOException {
+        StoreUtil.deleteDataFile();
+        SessionHolder.init(StoreMode.FILE.name());
+    }
+
     @AfterEach
     public void tearDown() throws IOException {
         MetricsManager.get().getRegistry().clearUp();
         StoreUtil.deleteDataFile();
-    }
-
-    private static void deleteAndCreateDataFile() throws IOException {
-        StoreUtil.deleteDataFile();
-        SessionHolder.init(StoreMode.FILE.name());
     }
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {

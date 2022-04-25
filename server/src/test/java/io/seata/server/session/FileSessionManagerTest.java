@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.console.result.PageResult;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -47,7 +48,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static io.seata.server.session.SessionHolder.CONFIG;
 /**
  * The type File based session manager test.
  *
