@@ -80,7 +80,8 @@ public class UndoProperties {
         return ignoreNocheckColumns;
     }
 
-    public void setIgnoreNocheckColumns(String ignoreNocheckColumns) {
+    public UndoProperties setIgnoreNocheckColumns(String ignoreNocheckColumns) {
         this.ignoreNocheckColumns = ignoreNocheckColumns;
+        return this;
     }
 }
