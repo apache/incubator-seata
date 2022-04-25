@@ -23,12 +23,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.datasource.sql.struct.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +48,18 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreUncheckFieldController.class);
 
+    private static final IgnoreUncheckFieldController LISTENER = new IgnoreUncheckFieldController();
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private String noCheckFields;
+    private volatile String noCheckFields = ConfigurationFactory.getInstance().getConfig(
+            TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, StringUtils.EMPTY);
 
     private static volatile Map<String, Set<String>> mapFields = new HashMap<>();
+
+    static {
+        ConfigurationCache.addConfigListener(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, LISTENER);
+    }
 
     private static final class IgnoreUncheckFieldControllerHolder {
         private static IgnoreUncheckFieldController instance = new IgnoreUncheckFieldController();
@@ -59,6 +70,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
     }
 
     public Map<String, Set<String>> getNoCheckFields() {
+
         return mapFields;
     }
 
@@ -69,6 +81,11 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         String newValue = event.getNewValue();
 
         if (TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.equals(dataId)) {
+            if (StringUtils.isNotBlank(newValue)) {
+                LOGGER.info("{} config changed, old value:{}, new value:{}", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
+                        noCheckFields, event.getNewValue());
+                ConfigurationCache.removeConfigListener(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, this);
+            }
             if (StringUtils.isBlank(newValue)) {
                 if (CollectionUtils.isNotEmpty(mapFields)) {
                     mapFields.clear();
@@ -81,14 +98,10 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         Map<String, Set<String>> mapFieldsNew = new HashMap<>();
 
         try {
-            final List<Map<String, String>> mapList = objectMapper.readValue(noCheckFields, List.class);
-            if (CollectionUtils.isNotEmpty(mapList)) {
-                for (Map<String, String> stringStringMap : mapList) {
-                    stringStringMap.forEach((key, value) -> {
-                        mapFieldsNew.put(key, new HashSet<>(Arrays.asList(value.split(","))));
-                    });
-                }
-            }
+            final Map<String, String> map = objectMapper.readValue(noCheckFields, Map.class);
+            map.forEach((key, value) -> {
+                mapFieldsNew.put(key, new HashSet<>(Arrays.asList(value.split(","))));
+            });
         } catch (Exception e) {
             LOGGER.error("Please confirm whether this configuration:[{}] is correct,error:[{}]", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
                     e.getMessage());
