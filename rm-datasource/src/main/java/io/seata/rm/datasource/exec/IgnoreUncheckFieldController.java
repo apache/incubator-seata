@@ -64,8 +64,10 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
+
         String dataId = event.getDataId();
         String newValue = event.getNewValue();
+
         if (TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.equals(dataId)) {
             if (StringUtils.isBlank(newValue)) {
                 if (CollectionUtils.isNotEmpty(mapFields)) {
@@ -75,18 +77,16 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
             }
             noCheckFields = newValue;
         }
-        mapFields = new HashMap<>();
+
+        Map<String, Set<String>> mapFieldsNew = new HashMap<>();
+
         try {
-            if (StringUtils.isNotBlank(noCheckFields)) {
-                final List<Map<String, String>> mapList = objectMapper.readValue(noCheckFields, List.class);
-                if (CollectionUtils.isNotEmpty(mapList)) {
-                    for (Map<String, String> stringStringMap : mapList) {
-                        stringStringMap.forEach((key, value) -> {
-                            Set<String> stringSet = new HashSet<>();
-                            (Arrays.stream(value.split(","))).forEach(e -> stringSet.add(e));
-                            mapFields.put(key, stringSet);
-                        });
-                    }
+            final List<Map<String, String>> mapList = objectMapper.readValue(noCheckFields, List.class);
+            if (CollectionUtils.isNotEmpty(mapList)) {
+                for (Map<String, String> stringStringMap : mapList) {
+                    stringStringMap.forEach((key, value) -> {
+                        mapFieldsNew.put(key, new HashSet<>(Arrays.asList(value.split(","))));
+                    });
                 }
             }
         } catch (Exception e) {
@@ -94,6 +94,8 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
                     e.getMessage());
             e.printStackTrace();
         }
+
+        mapFields = mapFieldsNew;
     }
 
     public static void doIgnoreCheckColumns(Set<String> columnNames, StringJoiner selectSQLJoin, String tableName) {
