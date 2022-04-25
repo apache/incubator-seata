@@ -35,9 +35,8 @@ public class IgnoreUncheckFieldControllerTest {
     void testRetryNotExceeded() {
 
         assertDoesNotThrow(() -> {
-            final Map<String, Set<String>> noCheckFields =
-                IgnoreUncheckFieldController.getInstance().getNoCheckFields();
-            LOGGER.info("result:[{}]", noCheckFields);
+            IgnoreUncheckFieldController.getInstance().createMapCheckFields();
+            LOGGER.info("result:[{}]");
         }, "should not throw anything when retry not exceeded");
     }
 }

@@ -53,15 +53,15 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     static {
         ConfigurationCache.addConfigListener(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
-            IgnoreUncheckFieldControllerHolder.instance);
+            IgnoreUncheckFieldControllerHolder.INSTANCE);
     }
 
-    private static final class IgnoreUncheckFieldControllerHolder {
-        private static final IgnoreUncheckFieldController instance = new IgnoreUncheckFieldController();
+    private static class IgnoreUncheckFieldControllerHolder {
+        private static final IgnoreUncheckFieldController INSTANCE = new IgnoreUncheckFieldController();
     }
 
     public static IgnoreUncheckFieldController getInstance() {
-        return IgnoreUncheckFieldControllerHolder.instance;
+        return IgnoreUncheckFieldControllerHolder.INSTANCE;
     }
 
     public void createMapCheckFields() {
