@@ -44,8 +44,6 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreUncheckFieldController.class);
 
-    private static final IgnoreUncheckFieldController LISTENER = new IgnoreUncheckFieldController();
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private volatile String noCheckFields = ConfigurationFactory.getInstance().getConfig(
@@ -54,19 +52,21 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
     private static volatile Map<String, Set<String>> mapFields = new HashMap<>();
 
     static {
-        ConfigurationCache.addConfigListener(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, LISTENER);
+        ConfigurationCache.addConfigListener(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
+            IgnoreUncheckFieldControllerHolder.instance);
     }
 
     private static final class IgnoreUncheckFieldControllerHolder {
-        private static IgnoreUncheckFieldController instance = new IgnoreUncheckFieldController();
+        private static final IgnoreUncheckFieldController instance = new IgnoreUncheckFieldController();
     }
 
     public static IgnoreUncheckFieldController getInstance() {
         return IgnoreUncheckFieldControllerHolder.instance;
     }
 
-    public Map<String, Set<String>> getNoCheckFields() {
-        return getMapCheckFields();
+    public void createMapCheckFields() {
+
+        getMapCheckFields();
     }
 
     @Override
@@ -79,21 +79,21 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
             if (StringUtils.isNotBlank(newValue)) {
                 LOGGER.info("{} config changed, old value:{}, new value:{}", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
                         noCheckFields, event.getNewValue());
-                ConfigurationCache.removeConfigListener(TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, this);
-            }
-            if (StringUtils.isBlank(newValue)) {
-                if (CollectionUtils.isNotEmpty(mapFields)) {
-                    mapFields.clear();
+            } else {
+                if (StringUtils.isBlank(newValue)) {
+                    if (CollectionUtils.isNotEmpty(mapFields)) {
+                        mapFields.clear();
+                    }
+                    return;
                 }
-                return;
             }
             noCheckFields = newValue;
 
-            mapFields = getMapCheckFields();
+            createMapCheckFields();
         }
     }
 
-    private Map<String, Set<String>> getMapCheckFields() {
+    private void getMapCheckFields() {
         Map<String, Set<String>> mapFieldsNew = new HashMap<>();
         try {
             final Map<String, String> map = objectMapper.readValue(noCheckFields, Map.class);
@@ -106,8 +106,6 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         }
 
         mapFields = mapFieldsNew;
-
-        return mapFields;
     }
 
     public static void doIgnoreCheckColumns(Set<String> columnNames, StringJoiner selectSQLJoin, String tableName) {
@@ -115,10 +113,10 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         columns.addAll(columnNames);
 
-        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
-        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
-            if (ignoreCheckFields.containsKey(tableName)) {
-                columnNames.removeAll(ignoreCheckFields.get(tableName));
+        IgnoreUncheckFieldController.getInstance().createMapCheckFields();
+        if (CollectionUtils.isNotEmpty(mapFields)) {
+            if (mapFields.containsKey(tableName)) {
+                columnNames.removeAll(mapFields.get(tableName));
                 if (columnNames.size() > 0) {
                     columns = columnNames;
                 } else {
@@ -134,11 +132,11 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     public static Boolean checkIgnoreFields(String tableName, Field newField) {
 
-        Map<String, Set<String>> ignoreCheckFields = IgnoreUncheckFieldController.getInstance().getNoCheckFields();
+        IgnoreUncheckFieldController.getInstance().createMapCheckFields();
 
-        if (CollectionUtils.isNotEmpty(ignoreCheckFields)) {
-            if (ignoreCheckFields.containsKey(tableName)) {
-                Set<String> columns = ignoreCheckFields.get(tableName);
+        if (CollectionUtils.isNotEmpty(mapFields)) {
+            if (mapFields.containsKey(tableName)) {
+                Set<String> columns = mapFields.get(tableName);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.info("tableName:[{}] ignore uncheck column:[{}] ", tableName, columns);
                 }
