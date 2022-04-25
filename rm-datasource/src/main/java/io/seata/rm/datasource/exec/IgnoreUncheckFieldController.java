@@ -90,9 +90,8 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Please confirm whether this configuration:[{}] is correct,error:[{}]", noCheckFields,
+            LOGGER.error("Please confirm whether this configuration:[{}] is correct,error:[{}]", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
                     e.getMessage());
-            e.printStackTrace();
         }
 
         mapFields = mapFieldsNew;
