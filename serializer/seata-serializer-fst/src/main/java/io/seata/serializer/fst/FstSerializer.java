@@ -27,12 +27,12 @@ public class FstSerializer implements Serializer {
     private FstSerializerFactory fstFactory = FstSerializerFactory.getDefaultFactory();
 
     @Override
-    public <T> byte[] serialize(T t) {
+    public <T> byte[] serialize(T t, byte version) {
         return fstFactory.serialize(t);
     }
 
     @Override
-    public <T> T deserialize(byte[] bytes) {
+    public <T> T deserialize(byte[] bytes, byte version) {
         return (T)fstFactory.deserialize(bytes);
     }
 

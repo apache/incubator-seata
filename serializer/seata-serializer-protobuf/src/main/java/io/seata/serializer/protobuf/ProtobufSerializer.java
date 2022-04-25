@@ -36,7 +36,7 @@ public class ProtobufSerializer implements Serializer {
     protected static final Charset UTF8 = StandardCharsets.UTF_8;
 
     @Override
-    public <T> byte[] serialize(T t) {
+    public <T> byte[] serialize(T t, byte version) {
         if (t == null) {
             throw new NullPointerException();
         }
@@ -60,7 +60,7 @@ public class ProtobufSerializer implements Serializer {
     }
 
     @Override
-    public <T> T deserialize(byte[] bytes) {
+    public <T> T deserialize(byte[] bytes, byte version) {
         if (bytes == null) {
             throw new NullPointerException();
         }

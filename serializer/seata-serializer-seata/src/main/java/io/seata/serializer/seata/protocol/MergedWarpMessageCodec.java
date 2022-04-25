@@ -21,10 +21,10 @@ import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.seata.serializer.seata.MessageCodecFactory;
-import io.seata.serializer.seata.MessageSeataCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.serializer.seata.MessageCodecFactory;
+import io.seata.serializer.seata.MessageSeataCodec;
 
 /**
  * The type Merged warp message codec.
@@ -32,6 +32,15 @@ import io.seata.core.protocol.MergedWarpMessage;
  * @author zhangsen
  */
 public class MergedWarpMessageCodec extends AbstractMessageCodec {
+
+    /**
+     * Instantiates a new Merged warp message codec.
+     *
+     * @param version the version
+     */
+    public MergedWarpMessageCodec(byte version) {
+        this.version = version;
+    }
 
     @Override
     public Class<?> getMessageClassType() {
@@ -51,7 +60,7 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         for (final AbstractMessage msg : msgs) {
             final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(subBuffer);
@@ -97,7 +106,7 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
             AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.decode(abstractMessage, byteBuffer);
             msgs.add(abstractMessage);
         }

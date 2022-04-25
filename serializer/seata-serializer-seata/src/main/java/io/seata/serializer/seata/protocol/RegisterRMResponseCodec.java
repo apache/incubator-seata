@@ -24,6 +24,15 @@ import io.seata.core.protocol.RegisterRMResponse;
  */
 public class RegisterRMResponseCodec extends AbstractIdentifyResponseCodec {
 
+    /**
+     * Instantiates a new Register rm response codec.
+     *
+     * @param version the version
+     */
+    public RegisterRMResponseCodec(byte version) {
+        this.version = version;
+    }
+
     @Override
     public Class<?> getMessageClassType() {
         return RegisterRMResponse.class;

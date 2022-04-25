@@ -18,6 +18,7 @@ package io.seata.serializer.kryo;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
@@ -48,8 +49,8 @@ public class KryoSerializerTest {
         branchCommitRequest.setBranchId(20190809);
         branchCommitRequest.setApplicationData("app");
 
-        byte[] bytes = kryoCodec.serialize(branchCommitRequest);
-        BranchCommitRequest t = kryoCodec.deserialize(bytes);
+        byte[] bytes = kryoCodec.serialize(branchCommitRequest, ProtocolConstants.VERSION_CURRENT);
+        BranchCommitRequest t = kryoCodec.deserialize(bytes, ProtocolConstants.VERSION_CURRENT);
 
         assertThat(t.getTypeCode()).isEqualTo(branchCommitRequest.getTypeCode());
         assertThat(t.getBranchType()).isEqualTo(branchCommitRequest.getBranchType());
@@ -71,8 +72,8 @@ public class KryoSerializerTest {
         branchCommitResponse.setXid("20190809");
         branchCommitResponse.setResultCode(ResultCode.Failed);
 
-        byte[] bytes = kryoCodec.serialize(branchCommitResponse);
-        BranchCommitResponse t = kryoCodec.deserialize(bytes);
+        byte[] bytes = kryoCodec.serialize(branchCommitResponse, ProtocolConstants.VERSION_CURRENT);
+        BranchCommitResponse t = kryoCodec.deserialize(bytes, ProtocolConstants.VERSION_CURRENT);
 
         assertThat(t.getTransactionExceptionCode()).isEqualTo(branchCommitResponse.getTransactionExceptionCode());
         assertThat(t.getBranchId()).isEqualTo(branchCommitResponse.getBranchId());

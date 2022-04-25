@@ -15,10 +15,10 @@
  */
 package io.seata.core.protocol;
 
-import io.seata.common.util.StringUtils;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import io.seata.common.util.StringUtils;
 
 /**
  * The type Rpc message.
@@ -33,6 +33,10 @@ public class RpcMessage {
     private byte compressor;
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
+    /**
+     * protocol version
+    */
+    private byte version = ProtocolConstants.VERSION_CURRENT;
 
     /**
      * Gets id.
@@ -166,6 +170,24 @@ public class RpcMessage {
      */
     public void setMessageType(byte messageType) {
         this.messageType = messageType;
+    }
+
+    /**
+     * Gets version.
+     *
+     * @return the version
+     */
+    public byte getVersion() {
+        return version;
+    }
+
+    /**
+     * Sets version.
+     *
+     * @param version the version
+     */
+    public void setVersion(byte version) {
+        this.version = version;
     }
 
     @Override

@@ -16,8 +16,8 @@
 package io.seata.serializer.kryo;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.core.serializer.Serializer;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.serializer.Serializer;
 
 /**
  * @author jsbxyyx
@@ -26,7 +26,7 @@ import io.seata.core.protocol.AbstractMessage;
 public class KryoSerializer implements Serializer {
 
     @Override
-    public <T> byte[] serialize(T t) {
+    public <T> byte[] serialize(T t, byte version) {
         if (!(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("message is illegal");
         }
@@ -39,7 +39,7 @@ public class KryoSerializer implements Serializer {
     }
 
     @Override
-    public <T> T deserialize(byte[] bytes) {
+    public <T> T deserialize(byte[] bytes, byte version) {
         if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("bytes is null");
         }

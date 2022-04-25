@@ -18,6 +18,7 @@ package io.seata.serializer.hessian;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
@@ -48,8 +49,8 @@ public class HessianSerializerTest {
         branchCommitRequest.setBranchId(20190809);
         branchCommitRequest.setApplicationData("app");
 
-        byte[] bytes = hessianCodec.serialize(branchCommitRequest);
-        BranchCommitRequest t = hessianCodec.deserialize(bytes);
+        byte[] bytes = hessianCodec.serialize(branchCommitRequest, ProtocolConstants.VERSION_CURRENT);
+        BranchCommitRequest t = hessianCodec.deserialize(bytes, ProtocolConstants.VERSION_CURRENT);
 
         assertThat(t.getTypeCode()).isEqualTo(branchCommitRequest.getTypeCode());
         assertThat(t.getBranchType()).isEqualTo(branchCommitRequest.getBranchType());
@@ -71,8 +72,8 @@ public class HessianSerializerTest {
         branchCommitResponse.setXid("20190809");
         branchCommitResponse.setResultCode(ResultCode.Failed);
 
-        byte[] bytes = hessianCodec.serialize(branchCommitResponse);
-        BranchCommitResponse t = hessianCodec.deserialize(bytes);
+        byte[] bytes = hessianCodec.serialize(branchCommitResponse, ProtocolConstants.VERSION_CURRENT);
+        BranchCommitResponse t = hessianCodec.deserialize(bytes, ProtocolConstants.VERSION_CURRENT);
 
         assertThat(t.getTransactionExceptionCode()).isEqualTo(branchCommitResponse.getTransactionExceptionCode());
         assertThat(t.getBranchId()).isEqualTo(branchCommitResponse.getBranchId());

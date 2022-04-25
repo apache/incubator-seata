@@ -15,13 +15,13 @@
  */
 package io.seata.serializer.seata;
 
+import java.nio.ByteBuffer;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.serializer.Serializer;
-
-import java.nio.ByteBuffer;
 
 /**
  * The Seata codec.
@@ -32,7 +32,7 @@ import java.nio.ByteBuffer;
 public class SeataSerializer implements Serializer {
 
     @Override
-    public <T> byte[] serialize(T t) {
+    public <T> byte[] serialize(T t, byte version) {
         if (t == null || !(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
@@ -40,7 +40,7 @@ public class SeataSerializer implements Serializer {
         //typecode
         short typecode = abstractMessage.getTypeCode();
         //msg codec
-        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode, version);
         //get empty ByteBuffer
         ByteBuf out = Unpooled.buffer(1024);
         //msg encode
@@ -60,7 +60,7 @@ public class SeataSerializer implements Serializer {
     }
 
     @Override
-    public <T> T deserialize(byte[] bytes) {
+    public <T> T deserialize(byte[] bytes, byte version) {
         if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("Nothing to decode.");
         }
@@ -77,7 +77,7 @@ public class SeataSerializer implements Serializer {
         //new Messgae
         AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typecode);
         //get messageCodec
-        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode, version);
         //decode
         messageCodec.decode(abstractMessage, in);
         return (T)abstractMessage;

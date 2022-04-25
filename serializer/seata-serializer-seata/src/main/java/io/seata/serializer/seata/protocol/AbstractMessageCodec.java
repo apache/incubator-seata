@@ -30,6 +30,10 @@ import java.nio.charset.StandardCharsets;
 public abstract class AbstractMessageCodec implements MessageSeataCodec {
 
     /**
+     * The Version.
+     */
+    protected byte version;
+    /**
      * The constant LOGGER.
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessageCodec.class);

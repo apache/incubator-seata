@@ -32,9 +32,19 @@ public interface ProtocolConstants {
     byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
 
     /**
-     * Protocol version
+     * Protocol version V1
      */
-    byte VERSION = 1;
+    byte VERSION_1 = 1;
+
+    /**
+     * Protocol version V2
+     */
+    byte VERSION_2 = 2;
+
+    /**
+     * Protocol version current
+     */
+    byte VERSION_CURRENT = VERSION_2;
 
     /**
      * Max frame length

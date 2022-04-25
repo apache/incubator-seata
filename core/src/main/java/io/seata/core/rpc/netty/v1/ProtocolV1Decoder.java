@@ -15,22 +15,22 @@
  */
 package io.seata.core.rpc.netty.v1;
 
+import java.util.Map;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.seata.core.exception.DecodeException;
-import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
+import io.seata.core.exception.DecodeException;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * <pre>
@@ -118,6 +118,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         int requestId = frame.readInt();
 
         RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setVersion(version);
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
         rpcMessage.setCompressor(compressorType);
@@ -143,7 +144,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 Compressor compressor = CompressorFactory.getCompressor(compressorType);
                 bs = compressor.decompress(bs);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
-                rpcMessage.setBody(serializer.deserialize(bs));
+                rpcMessage.setBody(serializer.deserialize(bs, version));
             }
         }
 

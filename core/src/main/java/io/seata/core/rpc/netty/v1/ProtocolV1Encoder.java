@@ -15,20 +15,20 @@
  */
 package io.seata.core.rpc.netty.v1;
 
+import java.util.Map;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * <pre>
@@ -72,7 +72,7 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
 
                 byte messageType = rpcMessage.getMessageType();
                 out.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
-                out.writeByte(ProtocolConstants.VERSION);
+                out.writeByte(rpcMessage.getVersion());
                 // full Length(4B) and head length(2B) will fix in the end. 
                 out.writerIndex(out.writerIndex() + 6);
                 out.writeByte(messageType);
@@ -93,7 +93,7 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                         && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     // heartbeat has no body
                     Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
-                    bodyBytes = serializer.serialize(rpcMessage.getBody());
+                    bodyBytes = serializer.serialize(rpcMessage.getBody(), rpcMessage.getVersion());
                     Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
                     bodyBytes = compressor.compress(bodyBytes);
                     fullLength += bodyBytes.length;

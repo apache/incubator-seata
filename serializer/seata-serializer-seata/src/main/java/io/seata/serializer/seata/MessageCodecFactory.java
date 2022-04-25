@@ -18,34 +18,6 @@ package io.seata.serializer.seata;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import io.seata.serializer.seata.protocol.BatchResultMessageCodec;
-import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
-import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
-import io.seata.serializer.seata.protocol.RegisterRMRequestCodec;
-import io.seata.serializer.seata.protocol.RegisterRMResponseCodec;
-import io.seata.serializer.seata.protocol.RegisterTMRequestCodec;
-import io.seata.serializer.seata.protocol.RegisterTMResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchCommitRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchCommitResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchRegisterRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchRegisterResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchReportRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchReportResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchRollbackRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.BranchRollbackResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalBeginRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalBeginResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalCommitRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalCommitResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalLockQueryRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalLockQueryResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalReportRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalReportResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalRollbackRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalRollbackResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.BatchResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
@@ -76,6 +48,34 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import io.seata.serializer.seata.protocol.BatchResultMessageCodec;
+import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
+import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
+import io.seata.serializer.seata.protocol.RegisterRMRequestCodec;
+import io.seata.serializer.seata.protocol.RegisterRMResponseCodec;
+import io.seata.serializer.seata.protocol.RegisterTMRequestCodec;
+import io.seata.serializer.seata.protocol.RegisterTMResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchCommitRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchCommitResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchRegisterRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchRegisterResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchReportRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchReportResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchRollbackRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchRollbackResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalBeginRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalBeginResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalCommitRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalCommitResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalLockQueryRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalLockQueryResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalReportRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalReportResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalRollbackRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalRollbackResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 
 /**
  * The type Message codec factory.
@@ -93,38 +93,40 @@ public class MessageCodecFactory {
      * Get message codec message codec.
      *
      * @param abstractMessage the abstract message
+     * @param version         the version
      * @return the message codec
      */
-    public static MessageSeataCodec getMessageCodec(AbstractMessage abstractMessage) {
-        return getMessageCodec(abstractMessage.getTypeCode());
+    public static MessageSeataCodec getMessageCodec(AbstractMessage abstractMessage, byte version) {
+        return getMessageCodec(abstractMessage.getTypeCode(), version);
     }
 
     /**
      * Gets msg instance by code.
      *
      * @param typeCode the type code
+     * @param version  the version
      * @return the msg instance by code
      */
-    public static MessageSeataCodec getMessageCodec(short typeCode) {
+    public static MessageSeataCodec getMessageCodec(short typeCode, byte version) {
         MessageSeataCodec msgCodec = null;
         switch (typeCode) {
             case MessageType.TYPE_SEATA_MERGE:
-                msgCodec = new MergedWarpMessageCodec();
+                msgCodec = new MergedWarpMessageCodec(version);
                 break;
             case MessageType.TYPE_SEATA_MERGE_RESULT:
-                msgCodec = new MergeResultMessageCodec();
+                msgCodec = new MergeResultMessageCodec(version);
                 break;
             case MessageType.TYPE_REG_CLT:
                 msgCodec = new RegisterTMRequestCodec();
                 break;
             case MessageType.TYPE_REG_CLT_RESULT:
-                msgCodec = new RegisterTMResponseCodec();
+                msgCodec = new RegisterTMResponseCodec(version);
                 break;
             case MessageType.TYPE_REG_RM:
                 msgCodec = new RegisterRMRequestCodec();
                 break;
             case MessageType.TYPE_REG_RM_RESULT:
-                msgCodec = new RegisterRMResponseCodec();
+                msgCodec = new RegisterRMResponseCodec(version);
                 break;
             case MessageType.TYPE_BRANCH_COMMIT:
                 msgCodec = new BranchCommitRequestCodec();
@@ -136,7 +138,7 @@ public class MessageCodecFactory {
                 msgCodec = new GlobalReportRequestCodec();
                 break;
             case MessageType.TYPE_BATCH_RESULT_MSG:
-                msgCodec = new BatchResultMessageCodec();
+                msgCodec = new BatchResultMessageCodec(version);
                 break;
             default:
                 break;

@@ -35,7 +35,7 @@ public class HessianSerializer implements Serializer {
     private static final Logger LOGGER = LoggerFactory.getLogger(HessianSerializer.class);
 
     @Override
-    public <T> byte[] serialize(T t) {
+    public <T> byte[] serialize(T t, byte version) {
         byte[] stream = null;
         SerializerFactory hessian = HessianSerializerFactory.getInstance();
         try {
@@ -52,7 +52,7 @@ public class HessianSerializer implements Serializer {
     }
 
     @Override
-    public <T> T deserialize(byte[] bytes) {
+    public <T> T deserialize(byte[] bytes, byte version) {
         T obj = null;
         try (ByteArrayInputStream is = new ByteArrayInputStream(bytes);) {
             Hessian2Input input = new Hessian2Input(is);

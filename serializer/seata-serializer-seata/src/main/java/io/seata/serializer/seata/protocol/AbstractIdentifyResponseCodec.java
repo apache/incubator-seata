@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
 import io.seata.core.protocol.AbstractIdentifyResponse;
+import io.seata.core.protocol.ProtocolConstants;
 
 /**
  * The type Abstract identify response.
@@ -26,7 +27,6 @@ import io.seata.core.protocol.AbstractIdentifyResponse;
  * @author sharajava
  */
 public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessageCodec {
-
     @Override
     public Class<?> getMessageClassType() {
         return AbstractIdentifyResponse.class;
@@ -37,6 +37,7 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
         AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
         boolean identified = abstractIdentifyResponse.isIdentified();
         String version = abstractIdentifyResponse.getVersion();
+        String errMsg = abstractIdentifyResponse.getMsg();
 
         out.writeByte(identified ? (byte)1 : (byte)0);
         if (version != null) {
@@ -48,6 +49,17 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
         } else {
             out.writeShort((short)0);
         }
+        if (this.version == ProtocolConstants.VERSION_2) {
+            if (errMsg != null) {
+                byte[] bs = errMsg.getBytes(UTF8);
+                out.writeShort((short)bs.length);
+                if (bs.length > 0) {
+                    out.writeBytes(bs);
+                }
+            } else {
+                out.writeShort((short)0);
+            }
+        }
     }
 
     @Override
@@ -56,15 +68,22 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
 
         abstractIdentifyResponse.setIdentified(in.get() == 1);
         short len = in.getShort();
-        if (len <= 0) {
-            return;
-        }
-        if (in.remaining() < len) {
+        if (len <= 0 || in.remaining() < len) {
             return;
         }
         byte[] bs = new byte[len];
         in.get(bs);
         abstractIdentifyResponse.setVersion(new String(bs, UTF8));
+
+        if (this.version == ProtocolConstants.VERSION_2) {
+            len = in.getShort();
+            if (len <= 0 || in.remaining() < len) {
+                return;
+            }
+            bs = new byte[len];
+            in.get(bs);
+            abstractIdentifyResponse.setMsg(new String(bs, UTF8));
+        }
     }
 
 }

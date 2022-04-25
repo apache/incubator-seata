@@ -260,6 +260,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         rpcMessage.setCodec(clientRequestRpcInfo.getCodec());
         rpcMessage.setCompressor(clientRequestRpcInfo.getCompressor());
         rpcMessage.setHeadMap(clientRequestRpcInfo.getHeadMap());
+        rpcMessage.setVersion(clientRequestRpcInfo.getVersion());
         return rpcMessage;
     }
 
@@ -292,11 +293,17 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
          */
         private Map<String, String> headMap;
 
+        /**
+         * the Outer layer rpcMessage version
+         */
+        private byte version;
+
         public ClientRequestRpcInfo(RpcMessage rpcMessage) {
             this.rpcMessageId = rpcMessage.getId();
             this.codec = rpcMessage.getCodec();
             this.compressor = rpcMessage.getCompressor();
             this.headMap = rpcMessage.getHeadMap();
+            this.version = rpcMessage.getVersion();
         }
 
         public int getRpcMessageId() {
@@ -331,6 +338,14 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             this.headMap = headMap;
         }
 
+        public byte getVersion() {
+            return version;
+        }
+
+        public void setVersion(byte version) {
+            this.version = version;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -341,12 +356,13 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             }
             ClientRequestRpcInfo that = (ClientRequestRpcInfo) o;
             return rpcMessageId == that.rpcMessageId && codec == that.codec
-                && compressor == that.compressor && headMap.equals(that.headMap);
+                && compressor == that.compressor && headMap.equals(that.headMap)
+                && version == that.version;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(rpcMessageId, codec, compressor, headMap);
+            return Objects.hash(rpcMessageId, codec, compressor, headMap, version);
         }
     }
 

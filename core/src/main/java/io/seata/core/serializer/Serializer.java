@@ -25,18 +25,20 @@ public interface Serializer {
     /**
      * Encode object to byte[].
      *
-     * @param <T> the type parameter
-     * @param t   the t
+     * @param <T>     the type parameter
+     * @param t       the t
+     * @param version the version
      * @return the byte [ ]
      */
-    <T> byte[] serialize(T t);
+    <T> byte[] serialize(T t, byte version);
 
     /**
      * Decode t from byte[].
      *
-     * @param <T>   the type parameter
-     * @param bytes the bytes
+     * @param <T>     the type parameter
+     * @param bytes   the bytes
+     * @param version the version
      * @return the t
      */
-    <T> T deserialize(byte[] bytes);
+    <T> T deserialize(byte[] bytes, byte version);
 }

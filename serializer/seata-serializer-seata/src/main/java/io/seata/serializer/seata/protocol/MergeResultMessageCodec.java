@@ -18,11 +18,11 @@ package io.seata.serializer.seata.protocol;
 import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.serializer.seata.MessageCodecFactory;
-import io.seata.serializer.seata.MessageSeataCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
+import io.seata.serializer.seata.MessageCodecFactory;
+import io.seata.serializer.seata.MessageSeataCodec;
 
 /**
  * The type Merge result message codec.
@@ -30,6 +30,15 @@ import io.seata.core.protocol.MergeResultMessage;
  * @author zhangsen
  */
 public class MergeResultMessageCodec extends AbstractMessageCodec {
+
+    /**
+     * Instantiates a new Merge result message codec.
+     *
+     * @param version the version
+     */
+    public MergeResultMessageCodec(byte version) {
+        this.version = version;
+    }
 
     @Override
     public Class<?> getMessageClassType() {
@@ -48,7 +57,7 @@ public class MergeResultMessageCodec extends AbstractMessageCodec {
             short typeCode = msg.getTypeCode();
             //put typeCode
             out.writeShort(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.encode(msg, out);
         }
 
@@ -91,7 +100,7 @@ public class MergeResultMessageCodec extends AbstractMessageCodec {
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
             AbstractMessage abstractResultMessage = MessageCodecFactory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.decode(abstractResultMessage, byteBuffer);
             msgs[idx] = (AbstractResultMessage)abstractResultMessage;
         }
