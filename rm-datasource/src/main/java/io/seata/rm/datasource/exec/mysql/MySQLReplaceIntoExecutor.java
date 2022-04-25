@@ -61,9 +61,6 @@ public class MySQLReplaceIntoExecutor extends MySQLInsertOrUpdateExecutor implem
 
     @Override
     protected Object executeAutoCommitFalse(Object[] args) throws Exception {
-        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1) {
-            throw new NotSupportYetException("multi pk only support mysql!");
-        }
         TableRecords beforeImage = beforeImage();
         // insert rows are not existed
         if (CollectionUtils.isNotEmpty(beforeImage.getRows())) {
