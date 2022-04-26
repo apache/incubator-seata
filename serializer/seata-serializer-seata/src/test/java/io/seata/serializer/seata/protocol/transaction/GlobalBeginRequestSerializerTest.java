@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.jupiter.api.Test;
@@ -42,9 +43,9 @@ public class GlobalBeginRequestSerializerTest {
         globalBeginRequest.setTimeout(10);
         globalBeginRequest.setTransactionName("a24");
 
-        byte[] bytes = seataSerializer.serialize(globalBeginRequest);
+        byte[] bytes = seataSerializer.serialize(globalBeginRequest, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalBeginRequest globalBeginRequest2 = seataSerializer.deserialize(bytes);
+        GlobalBeginRequest globalBeginRequest2 = seataSerializer.deserialize(bytes,ProtocolConstants.VERSION_CURRENT);
         assertThat(globalBeginRequest2.getTransactionName()).isEqualTo(globalBeginRequest.getTransactionName());
         assertThat(globalBeginRequest2.getTimeout()).isEqualTo(globalBeginRequest.getTimeout());
     }

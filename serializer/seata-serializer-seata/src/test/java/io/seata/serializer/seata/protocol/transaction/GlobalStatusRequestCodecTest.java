@@ -15,8 +15,9 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,9 +43,10 @@ public class GlobalStatusRequestCodecTest {
         globalStatusRequest.setExtraData("aaaa");
         globalStatusRequest.setXid("aaa123");
 
-        byte[] bytes = seataSerializer.serialize(globalStatusRequest);
+        byte[] bytes = seataSerializer.serialize(globalStatusRequest, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalStatusRequest globalStatusRequest2 = seataSerializer.deserialize(bytes);
+        GlobalStatusRequest globalStatusRequest2 = seataSerializer.deserialize(bytes,
+            ProtocolConstants.VERSION_CURRENT);
         assertThat(globalStatusRequest2.getExtraData()).isEqualTo(globalStatusRequest.getExtraData());
         assertThat(globalStatusRequest2.getXid()).isEqualTo(globalStatusRequest.getXid());
     }

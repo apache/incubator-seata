@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -50,9 +51,9 @@ public class MergeResultMessageSerializerTest {
         msgs[1] = globalBeginResponse2;
         mergeResultMessage.setMsgs(msgs);
 
-        byte[] body = seataSerializer.serialize(mergeResultMessage);
+        byte[] body = seataSerializer.serialize(mergeResultMessage, ProtocolConstants.VERSION_CURRENT);
 
-        MergeResultMessage mergeResultMessage2 = seataSerializer.deserialize(body);
+        MergeResultMessage mergeResultMessage2 = seataSerializer.deserialize(body,ProtocolConstants.VERSION_CURRENT);
         assertThat(mergeResultMessage2.msgs.length).isEqualTo(mergeResultMessage.msgs.length);
 
         GlobalBeginResponse globalBeginResponse21 = (GlobalBeginResponse) mergeResultMessage2.msgs[0];

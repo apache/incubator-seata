@@ -15,8 +15,9 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,9 +43,10 @@ public class GlobalRollbackRequestCodecTest {
         globalRollbackRequest.setExtraData("aaaa");
         globalRollbackRequest.setXid("aaaa");
 
-        byte[] bytes = seataSerializer.serialize(globalRollbackRequest);
+        byte[] bytes = seataSerializer.serialize(globalRollbackRequest, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalRollbackRequest globalRollbackRequest2 = seataSerializer.deserialize(bytes);
+        GlobalRollbackRequest globalRollbackRequest2 = seataSerializer.deserialize(bytes,
+            ProtocolConstants.VERSION_CURRENT);
         assertThat(globalRollbackRequest2.getXid()).isEqualTo(globalRollbackRequest.getXid());
         assertThat(globalRollbackRequest2.getExtraData()).isEqualTo(globalRollbackRequest.getExtraData());
     }

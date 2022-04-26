@@ -16,6 +16,7 @@
 package io.seata.serializer.seata.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -58,9 +59,9 @@ public class RegisterTMRequestSerializerTest {
         registerTMRequest.setTransactionServiceGroup("def");
         registerTMRequest.setVersion("1");
 
-        byte[] body = seataSerializer.serialize(registerTMRequest);
+        byte[] body = seataSerializer.serialize(registerTMRequest,ProtocolConstants.VERSION_CURRENT);
 
-        RegisterTMRequest registerTMRequest2 = seataSerializer.deserialize(body);
+        RegisterTMRequest registerTMRequest2 = seataSerializer.deserialize(body, ProtocolConstants.VERSION_CURRENT);
 
         assertThat(registerTMRequest2.getApplicationId()).isEqualTo(registerTMRequest.getApplicationId());
         assertThat(registerTMRequest2.getExtraData()).isEqualTo(registerTMRequest.getExtraData());
@@ -114,7 +115,7 @@ public class RegisterTMRequestSerializerTest {
     public void testDecodeEmpty() {
         BB.clear();
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
@@ -131,7 +132,7 @@ public class RegisterTMRequestSerializerTest {
             BB.writeShort(i);
         }
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
@@ -148,7 +149,7 @@ public class RegisterTMRequestSerializerTest {
             BB.writeShort(i);
         }
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
@@ -165,7 +166,7 @@ public class RegisterTMRequestSerializerTest {
             BB.writeShort(i);
         }
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
@@ -182,7 +183,7 @@ public class RegisterTMRequestSerializerTest {
             BB.writeShort(i);
         }
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
@@ -200,7 +201,7 @@ public class RegisterTMRequestSerializerTest {
         }
 
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
@@ -220,7 +221,7 @@ public class RegisterTMRequestSerializerTest {
             BB.writeShort(i);
         }
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");
@@ -240,7 +241,7 @@ public class RegisterTMRequestSerializerTest {
             BB.writeShort(i);
         }
         try {
-            seataSerializer.deserialize(BB.array());
+            seataSerializer.deserialize(BB.array(),ProtocolConstants.VERSION_CURRENT);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("not support "), "error data");

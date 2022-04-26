@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -48,9 +49,9 @@ public class BranchReportRequestSerializerTest {
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Done);
         branchReportRequest.setXid("abc123");
 
-        byte[] bytes = seataSerializer.serialize(branchReportRequest);
+        byte[] bytes = seataSerializer.serialize(branchReportRequest, ProtocolConstants.VERSION_CURRENT);
 
-        BranchReportRequest branchReportRequest2 = seataSerializer.deserialize(bytes);
+        BranchReportRequest branchReportRequest2 = seataSerializer.deserialize(bytes,ProtocolConstants.VERSION_CURRENT);
         assertThat(branchReportRequest2.getBranchId()).isEqualTo(branchReportRequest.getBranchId());
         assertThat(branchReportRequest2.getBranchType()).isEqualTo(branchReportRequest.getBranchType());
         assertThat(branchReportRequest2.getApplicationData()).isEqualTo(branchReportRequest.getApplicationData());

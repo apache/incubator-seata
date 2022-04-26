@@ -15,10 +15,11 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,9 +47,10 @@ public class GlobalLockQueryResponseSerializerTest {
         globalLockQueryResponse.setResultCode(ResultCode.Failed);
         globalLockQueryResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalTransactionStatusInvalid);
 
-        byte[] bytes = seataSerializer.serialize(globalLockQueryResponse);
+        byte[] bytes = seataSerializer.serialize(globalLockQueryResponse, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalLockQueryResponse globalLockQueryResponse2 = seataSerializer.deserialize(bytes);
+        GlobalLockQueryResponse globalLockQueryResponse2 = seataSerializer.deserialize(bytes,
+            ProtocolConstants.VERSION_CURRENT);
 
         assertThat(globalLockQueryResponse2.isLockable()).isEqualTo(globalLockQueryResponse.isLockable());
         assertThat(globalLockQueryResponse2.getResultCode()).isEqualTo(globalLockQueryResponse.getResultCode());

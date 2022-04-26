@@ -20,6 +20,7 @@ import java.util.List;
 
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
@@ -57,9 +58,9 @@ public class MergedWarpMessageSerializerTest {
         mergedWarpMessage.msgIds = msgIds;
 
 
-        byte[] body = seataSerializer.serialize(mergedWarpMessage);
+        byte[] body = seataSerializer.serialize(mergedWarpMessage, ProtocolConstants.VERSION_CURRENT);
 
-        MergedWarpMessage mergedWarpMessage2 = seataSerializer.deserialize(body);
+        MergedWarpMessage mergedWarpMessage2 = seataSerializer.deserialize(body,ProtocolConstants.VERSION_CURRENT);
         assertThat(mergedWarpMessage2.msgs.size()).isEqualTo(mergedWarpMessage.msgs.size());
 
         assertThat(mergedWarpMessage2.msgIds.size()).isEqualTo(2);

@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.ResultCode;
@@ -47,9 +48,9 @@ public class RegisterRMResponseSerializerTest {
         registerRMResponse.setVersion("12");
         registerRMResponse.setResultCode(ResultCode.Failed);
 
-        byte[] body = seataSerializer.serialize(registerRMResponse);
+        byte[] body = seataSerializer.serialize(registerRMResponse, ProtocolConstants.VERSION_CURRENT);
 
-        RegisterRMResponse registerRMRespons2 = seataSerializer.deserialize(body);
+        RegisterRMResponse registerRMRespons2 = seataSerializer.deserialize(body,ProtocolConstants.VERSION_CURRENT);
 
         assertThat(registerRMRespons2.isIdentified()).isEqualTo(registerRMResponse.isIdentified());
         assertThat(registerRMRespons2.getVersion()).isEqualTo(registerRMResponse.getVersion());

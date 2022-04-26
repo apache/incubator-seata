@@ -15,9 +15,10 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.model.BranchType;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,9 +46,10 @@ public class GlobalLockQueryRequestSerializerTest {
         globalLockQueryRequest.setXid("aaa");
         globalLockQueryRequest.setResourceId("1s");
 
-        byte[] bytes = seataSerializer.serialize(globalLockQueryRequest);
+        byte[] bytes = seataSerializer.serialize(globalLockQueryRequest, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalLockQueryRequest globalLockQueryRequest2 = seataSerializer.deserialize(bytes);
+        GlobalLockQueryRequest globalLockQueryRequest2 = seataSerializer.deserialize(bytes,
+            ProtocolConstants.VERSION_CURRENT);
 
         assertThat(globalLockQueryRequest2.getApplicationData()).isEqualTo(globalLockQueryRequest.getApplicationData());
         assertThat(globalLockQueryRequest2.getBranchType()).isEqualTo(globalLockQueryRequest.getBranchType());

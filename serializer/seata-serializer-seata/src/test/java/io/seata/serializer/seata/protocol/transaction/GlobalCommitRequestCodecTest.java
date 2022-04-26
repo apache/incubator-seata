@@ -15,8 +15,9 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.transaction.GlobalCommitRequest;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,9 +43,9 @@ public class GlobalCommitRequestCodecTest {
         globalCommitRequest.setExtraData("aaaa");
         globalCommitRequest.setXid("adf");
 
-        byte[] bytes = seataSerializer.serialize(globalCommitRequest);
+        byte[] bytes = seataSerializer.serialize(globalCommitRequest, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalCommitRequest globalCommitRequest2 = seataSerializer.deserialize(bytes);
+        GlobalCommitRequest globalCommitRequest2 = seataSerializer.deserialize(bytes,ProtocolConstants.VERSION_CURRENT);
 
         assertThat(globalCommitRequest2.getExtraData()).isEqualTo(globalCommitRequest.getExtraData());
         assertThat(globalCommitRequest2.getXid()).isEqualTo(globalCommitRequest.getXid());

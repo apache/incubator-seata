@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.ResultCode;
@@ -46,9 +47,9 @@ public class GlobalBeginResponseSerializerTest {
         globalBeginResponse.setResultCode(ResultCode.Failed);
         globalBeginResponse.setMsg("abcs");
 
-        byte[] bytes = seataSerializer.serialize(globalBeginResponse);
+        byte[] bytes = seataSerializer.serialize(globalBeginResponse, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalBeginResponse globalBeginResponse2 = seataSerializer.deserialize(bytes);
+        GlobalBeginResponse globalBeginResponse2 = seataSerializer.deserialize(bytes,ProtocolConstants.VERSION_CURRENT);
 
         assertThat(globalBeginResponse2.getTransactionExceptionCode()).isEqualTo(globalBeginResponse.getTransactionExceptionCode());
         assertThat(globalBeginResponse2.getResultCode()).isEqualTo(globalBeginResponse.getResultCode());

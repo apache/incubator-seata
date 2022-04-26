@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -49,9 +50,9 @@ public class BranchRollbackResponseSerializerTest {
         branchRollbackResponse.setMsg("abc");
         branchRollbackResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchTransactionNotExist);
 
-        byte[] bytes = seataSerializer.serialize(branchRollbackResponse);
+        byte[] bytes = seataSerializer.serialize(branchRollbackResponse, ProtocolConstants.VERSION_CURRENT);
 
-        BranchRollbackResponse branchRollbackResponse2 = seataSerializer.deserialize(bytes);
+        BranchRollbackResponse branchRollbackResponse2 = seataSerializer.deserialize(bytes,ProtocolConstants.VERSION_CURRENT);
 
         assertThat(branchRollbackResponse2.getBranchId()).isEqualTo(branchRollbackResponse.getBranchId());
         assertThat(branchRollbackResponse2.getBranchStatus()).isEqualTo(branchRollbackResponse.getBranchStatus());

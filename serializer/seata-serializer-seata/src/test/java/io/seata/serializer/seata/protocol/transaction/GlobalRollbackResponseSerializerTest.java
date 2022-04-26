@@ -15,11 +15,12 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,9 +48,10 @@ public class GlobalRollbackResponseSerializerTest {
         globalRollbackResponse.setResultCode(ResultCode.Failed);
         globalRollbackResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalTransactionNotExist);
 
-        byte[] bytes = seataSerializer.serialize(globalRollbackResponse);
+        byte[] bytes = seataSerializer.serialize(globalRollbackResponse, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalRollbackResponse globalRollbackResponse2 = seataSerializer.deserialize(bytes);
+        GlobalRollbackResponse globalRollbackResponse2 = seataSerializer.deserialize(bytes,
+            ProtocolConstants.VERSION_CURRENT);
         assertThat(globalRollbackResponse2.getGlobalStatus()).isEqualTo(globalRollbackResponse.getGlobalStatus());
         assertThat(globalRollbackResponse2.getMsg()).isEqualTo(globalRollbackResponse.getMsg());
         assertThat(globalRollbackResponse2.getResultCode()).isEqualTo(globalRollbackResponse.getResultCode());

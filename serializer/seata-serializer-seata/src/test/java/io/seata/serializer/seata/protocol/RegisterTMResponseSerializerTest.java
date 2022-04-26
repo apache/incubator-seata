@@ -15,9 +15,10 @@
  */
 package io.seata.serializer.seata.protocol;
 
-import io.seata.serializer.seata.SeataSerializer;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.ResultCode;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,9 +47,9 @@ public class RegisterTMResponseSerializerTest {
         registerTMResponse.setMsg("123456");
         registerTMResponse.setResultCode(ResultCode.Failed);
 
-        byte[] bytes = seataSerializer.serialize(registerTMResponse);
+        byte[] bytes = seataSerializer.serialize(registerTMResponse, ProtocolConstants.VERSION_CURRENT);
 
-        RegisterTMResponse registerTMResponse2 = seataSerializer.deserialize(bytes);
+        RegisterTMResponse registerTMResponse2 = seataSerializer.deserialize(bytes, ProtocolConstants.VERSION_CURRENT);
 
         assertThat(registerTMResponse2.isIdentified()).isEqualTo(registerTMResponse.isIdentified());
         assertThat(registerTMResponse2.getVersion()).isEqualTo(registerTMResponse.getVersion());

@@ -15,11 +15,12 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,9 +47,10 @@ public class GlobalStatusResponseSerializerTest {
         globalStatusResponse.setResultCode(ResultCode.Failed);
         globalStatusResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalTransactionNotExist);
 
-        byte[] bytes = seataSerializer.serialize(globalStatusResponse);
+        byte[] bytes = seataSerializer.serialize(globalStatusResponse, ProtocolConstants.VERSION_CURRENT);
 
-        GlobalStatusResponse globalStatusResponse2 = seataSerializer.deserialize(bytes);
+        GlobalStatusResponse globalStatusResponse2 = seataSerializer.deserialize(bytes,
+            ProtocolConstants.VERSION_CURRENT);
         assertThat(globalStatusResponse2.getGlobalStatus()).isEqualTo(globalStatusResponse.getGlobalStatus());
         assertThat(globalStatusResponse2.getMsg()).isEqualTo(globalStatusResponse.getMsg());
         assertThat(globalStatusResponse2.getTransactionExceptionCode()).isEqualTo(globalStatusResponse.getTransactionExceptionCode());

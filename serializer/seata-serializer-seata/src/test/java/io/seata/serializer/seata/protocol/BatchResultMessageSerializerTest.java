@@ -21,6 +21,7 @@ import java.util.List;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.serializer.seata.SeataSerializer;
@@ -57,8 +58,8 @@ public class BatchResultMessageSerializerTest {
         batchResultMessage.setResultMessages(msgs);
         batchResultMessage.setMsgIds(msgIds);
 
-        byte[] body = seataSerializer.serialize(batchResultMessage);
-        BatchResultMessage batchResultMessage2 = seataSerializer.deserialize(body);
+        byte[] body = seataSerializer.serialize(batchResultMessage, ProtocolConstants.VERSION_CURRENT);
+        BatchResultMessage batchResultMessage2 = seataSerializer.deserialize(body,ProtocolConstants.VERSION_CURRENT);
 
         // validate msgIds
         assertThat(batchResultMessage2.getMsgIds().size()).isEqualTo(2);

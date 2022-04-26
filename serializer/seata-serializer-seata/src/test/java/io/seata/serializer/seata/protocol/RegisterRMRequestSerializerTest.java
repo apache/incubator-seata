@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.protocol.RegisterRMRequest;
 import org.junit.jupiter.api.Test;
@@ -45,9 +46,9 @@ public class RegisterRMRequestSerializerTest {
         registerRMRequest.setTransactionServiceGroup("def");
         registerRMRequest.setVersion("1");
 
-        byte[] body = seataSerializer.serialize(registerRMRequest);
+        byte[] body = seataSerializer.serialize(registerRMRequest, ProtocolConstants.VERSION_CURRENT);
 
-        RegisterRMRequest registerRMRequest2 = seataSerializer.deserialize(body);
+        RegisterRMRequest registerRMRequest2 = seataSerializer.deserialize(body,ProtocolConstants.VERSION_CURRENT);
         assertThat(registerRMRequest2.getResourceIds()).isEqualTo(registerRMRequest.getResourceIds());
         assertThat(registerRMRequest2.getExtraData()).isEqualTo(registerRMRequest.getExtraData());
         assertThat(registerRMRequest2.getApplicationId()).isEqualTo(registerRMRequest.getApplicationId());
