@@ -44,6 +44,10 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreUncheckFieldController.class);
 
+    public IgnoreUncheckFieldController() {
+        createMapCheckFields();
+    }
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private volatile String noCheckFields = ConfigurationFactory.getInstance().getConfig(
@@ -88,7 +92,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         }
     }
 
-    private void createMapCheckFields() {
+    public void createMapCheckFields() {
         Map<String, Set<String>> mapFieldsNew = new HashMap<>();
         try {
             final Map<String, String> map = objectMapper.readValue(noCheckFields, Map.class);
@@ -107,7 +111,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
         Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         columns.addAll(columnNames);
-        
+
         if (CollectionUtils.isNotEmpty(mapFields)) {
             if (mapFields.containsKey(tableName)) {
                 columnNames.removeAll(mapFields.get(tableName));
