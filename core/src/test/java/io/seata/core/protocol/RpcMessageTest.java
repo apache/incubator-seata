@@ -47,7 +47,8 @@ public class RpcMessageTest {
             "\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
             "\t\"headMap\":" + HEAD_FIELD + ",\n" +
             "\t\"id\":" + ID_FIELD + ",\n" +
-            "\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
+            "\t\"messageType\":" + MSG_TYPE_FIELD + ",\n" +
+            "\t\"version\":" + ProtocolConstants.VERSION_CURRENT + "\n" +
             "}";
         RpcMessage fromJsonMessage = JSON.parseObject(fromJson, RpcMessage.class);
         assertThat(fromJsonMessage.getBody()).isEqualTo(BODY_FIELD);

@@ -55,7 +55,8 @@ public class MessageFutureTest {
             "\t\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
             "\t\t\"headMap\":" + HEAD_FIELD + ",\n" +
             "\t\t\"id\":" + ID_FIELD + ",\n" +
-            "\t\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
+            "\t\t\"messageType\":" + MSG_TYPE_FIELD + ",\n" +
+            "\t\t\"version\":" + ProtocolConstants.VERSION_CURRENT + "\n" +
             "\t},\n" +
             "\t\"timeout\":" + TIME_OUT_FIELD + "\n" +
             "}";
