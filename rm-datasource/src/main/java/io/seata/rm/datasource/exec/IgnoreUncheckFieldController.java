@@ -79,12 +79,10 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
                 LOGGER.info("{} config changed, old value:{}, new value:{}", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
                         noCheckFields, event.getNewValue());
             } else {
-                if (StringUtils.isBlank(newValue)) {
-                    if (CollectionUtils.isNotEmpty(mapFields)) {
-                        mapFields.clear();
-                    }
-                    return;
+                if (CollectionUtils.isNotEmpty(mapFields)) {
+                    mapFields.clear();
                 }
+                return;
             }
             noCheckFields = newValue;
 
