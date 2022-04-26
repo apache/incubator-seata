@@ -64,11 +64,6 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         return IgnoreUncheckFieldControllerHolder.INSTANCE;
     }
 
-    public void createMapCheckFields() {
-
-        getMapCheckFields();
-    }
-
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
 
@@ -93,7 +88,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         }
     }
 
-    private void getMapCheckFields() {
+    private void createMapCheckFields() {
         Map<String, Set<String>> mapFieldsNew = new HashMap<>();
         try {
             final Map<String, String> map = objectMapper.readValue(noCheckFields, Map.class);
@@ -102,7 +97,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
             });
         } catch (Exception e) {
             LOGGER.error("Please confirm whether this configuration:[{}] is correct,error:[{}]",
-                TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, e.getMessage());
+                    TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, e.getMessage());
         }
 
         mapFields = mapFieldsNew;
