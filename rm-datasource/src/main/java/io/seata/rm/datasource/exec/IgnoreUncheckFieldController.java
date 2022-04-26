@@ -127,8 +127,6 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
     public static Boolean checkIgnoreFields(String tableName, Field newField) {
 
-        IgnoreUncheckFieldController.getInstance().createMapCheckFields();
-
         if (CollectionUtils.isNotEmpty(mapFields)) {
             if (mapFields.containsKey(tableName)) {
                 Set<String> columns = mapFields.get(tableName);
