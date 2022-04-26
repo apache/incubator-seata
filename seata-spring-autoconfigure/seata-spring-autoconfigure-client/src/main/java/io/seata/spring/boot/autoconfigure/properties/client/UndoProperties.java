@@ -36,7 +36,7 @@ public class UndoProperties {
     private String logTable = DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
     private boolean onlyCareUpdateColumns = DEFAULT_ONLY_CARE_UPDATE_COLUMNS;
     /**
-     * [{"tableName1":"columnName1,columnName2,columnName3"},{"tableName2":"columnName1,columnName2,columnName3"}]
+     * '{"tableName1":"columns1,columns2","tableName2":"column1,column2"}'
      */
     private String ignoreNocheckColumns = DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 
