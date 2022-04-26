@@ -107,8 +107,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
         Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         columns.addAll(columnNames);
-
-        IgnoreUncheckFieldController.getInstance().createMapCheckFields();
+        
         if (CollectionUtils.isNotEmpty(mapFields)) {
             if (mapFields.containsKey(tableName)) {
                 columnNames.removeAll(mapFields.get(tableName));
