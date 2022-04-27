@@ -76,7 +76,9 @@ public class SeataAutoConfiguration {
         GlobalTransactionScanner.addScannablePackages(seataProperties.getScanPackages());
         // add excludeBeanNames
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanning());
-
+        //set accessKey and secretKey
+        GlobalTransactionScanner.setAccessKey(seataProperties.getAccessKey());
+        GlobalTransactionScanner.setSecretKey(seataProperties.getSecretKey());
         // create global transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }

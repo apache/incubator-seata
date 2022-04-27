@@ -2,6 +2,8 @@ seata:
   enabled: true
   application-id: applicationName
   tx-service-group: default_tx_group
+  access-key: aliyunAccessKey
+  secret-key: aliyunSecretKey
   enable-auto-data-source-proxy: true
   data-source-proxy-mode: AT
   use-jdk-proxy: false
