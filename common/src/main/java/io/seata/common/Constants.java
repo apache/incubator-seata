@@ -160,5 +160,10 @@ public interface Constants {
      * The constant SKIP_CHECK_LOCK
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
+    
+    /**
+     * The constant MODE_TYPE
+     */
+    String MODE_TYPE = "modeType";
 
 }

@@ -32,6 +32,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.ModeType;
 
 /**
  * TCC resource manager
@@ -97,6 +98,14 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
+
+            // if the TwoPhaseBusinessAction annotation's mode is SAGA, cancel the commit
+            ModeType modeType = (ModeType) businessActionContext.getActionContext(Constants.MODE_TYPE);
+            if(modeType != null && modeType.equals( ModeType.SAGA)) {
+                LOGGER.info("TwoPhaseBusinessAction's ModeType is SAGA, cancel the commit, xid: {}, branchId: {}, resourceId: {}", xid, branchId, resourceId);
+                return BranchStatus.PhaseTwo_Committed;
+            }
+            
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
