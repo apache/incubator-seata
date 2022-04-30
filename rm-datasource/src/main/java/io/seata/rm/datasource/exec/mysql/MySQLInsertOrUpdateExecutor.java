@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import com.google.common.base.Joiner;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
