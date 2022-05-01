@@ -102,7 +102,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         int updateCount = statementProxy.getUpdateCount();
         if (updateCount > 0) {
             TableRecords afterImage = afterImage(beforeImage);
-            prepareUndoLog(beforeImage, afterImage);
+            prepareUndoLogAll(beforeImage, afterImage);
         }
         return result;
     }
