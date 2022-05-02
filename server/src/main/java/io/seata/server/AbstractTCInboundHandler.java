@@ -346,35 +346,36 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
         response.setMode(mode);
         if (StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(), mode)) {
-            getCluster(response);
+            getCluster(response,request.getGroup());
         }
         response.setResultCode(ResultCode.Success);
         return response;
     }
 
-    protected ClusterMetaDataResponse getCluster(ClusterMetaDataResponse response) {
+    protected ClusterMetaDataResponse getCluster(ClusterMetaDataResponse response, String group) {
         String currentConf = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (!StringUtils.isBlank(currentConf)) {
+            String raftGroup = StringUtils.isNotBlank(group) ? group : SEATA_RAFT_GROUP;
             final Configuration currentClusters = new Configuration();
             if (!currentClusters.parse(currentConf)) {
                 throw new IllegalArgumentException("fail to parse initConf:" + currentConf);
             }
             RouteTable routeTable = RouteTable.getInstance();
-            if (!Objects.equals(routeTable.getConfiguration(SEATA_RAFT_GROUP), currentClusters)) {
-                routeTable.updateConfiguration(SEATA_RAFT_GROUP, currentClusters);
+            if (!Objects.equals(routeTable.getConfiguration(raftGroup), currentClusters)) {
+                routeTable.updateConfiguration(raftGroup, currentClusters);
             }
             try {
-                routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), SEATA_RAFT_GROUP, 1000);
-                PeerId leader = routeTable.selectLeader(SEATA_RAFT_GROUP);
+                routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), raftGroup, 1000);
+                PeerId leader = routeTable.selectLeader(raftGroup);
                 if (leader != null) {
                     response.setLeaderAddress(leader.getIp() + ":" + (leader.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
-                    Configuration configuration = routeTable.getConfiguration(SEATA_RAFT_GROUP);
-                    response.setLearners(String.join(",",
-                        configuration.getLearners().parallelStream()
-                            .map(learner -> learner.getIp() + ":" + (learner.getPort() - DEFAULT_RAFT_PORT_INTERVAL))
-                            .collect(Collectors.toList())));
-                    response.setFollowers(String.join(",", configuration.getPeers().parallelStream()
-                        .map(follower -> follower.getIp() + ":" + (follower.getPort() - DEFAULT_RAFT_PORT_INTERVAL)).collect(Collectors.toList())));
+                    Configuration configuration = routeTable.getConfiguration(raftGroup);
+                    response.setLearners(configuration.getLearners().parallelStream()
+                        .map(learner -> learner.getIp() + ":" + (learner.getPort() - DEFAULT_RAFT_PORT_INTERVAL))
+                        .collect(Collectors.joining(",")));
+                    response.setFollowers(configuration.getPeers().parallelStream()
+                        .map(follower -> follower.getIp() + ":" + (follower.getPort() - DEFAULT_RAFT_PORT_INTERVAL))
+                        .collect(Collectors.joining(",")));
                 }
             } catch (Exception e) {
                 LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);

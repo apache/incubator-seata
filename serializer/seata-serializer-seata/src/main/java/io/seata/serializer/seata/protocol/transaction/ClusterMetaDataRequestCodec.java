@@ -34,10 +34,28 @@ public class ClusterMetaDataRequestCodec extends AbstractTransactionRequestToTCC
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
+        ClusterMetaDataRequest clusterMetaDataRequest = (ClusterMetaDataRequest)t;
+        String group = clusterMetaDataRequest.getGroup();
+        if (group != null) {
+            byte[] bs = group.getBytes(UTF8);
+            out.writeShort((short)bs.length);
+            if (bs.length > 0) {
+                out.writeBytes(bs);
+            }
+        } else {
+            out.writeShort((short)0);
+        }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
+        ClusterMetaDataRequest clusterMetaDataRequest = (ClusterMetaDataRequest)t;
+        short len = in.getShort();
+        if (len > 0) {
+            byte[] bs = new byte[len];
+            in.get(bs);
+            clusterMetaDataRequest.setGroup(new String(bs, UTF8));
+        }
     }
 
 }

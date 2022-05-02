@@ -25,6 +25,16 @@ import io.seata.core.rpc.RpcContext;
  */
 public class ClusterMetaDataRequest extends AbstractTransactionRequestToTC {
 
+    String group;
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
     @Override
     public short getTypeCode() {
         return MessageType.TYPE_RAFT_METADATA;

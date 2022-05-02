@@ -70,12 +70,15 @@ public class RaftSessionManager extends FileSessionManager {
                 completableFuture.complete(true);
             } else {
                 try {
-                    super.removeGlobalSession(globalSession);
                     completableFuture.completeExceptionally(
                         new TransactionException(TransactionExceptionCode.NotRaftLeader,
                             "seata raft state machine exception: " + status.getErrorMsg()));
-                } catch (TransactionException e) {
-                    completableFuture.completeExceptionally(e);
+                } finally {
+                    try {
+                        super.removeGlobalSession(globalSession);
+                    } catch (TransactionException e) {
+                        completableFuture.completeExceptionally(e);
+                    }
                 }
             }
         };
@@ -131,12 +134,15 @@ public class RaftSessionManager extends FileSessionManager {
                 completableFuture.complete(true);
             } else {
                 try {
-                    globalSession.removeBranch(branchSession);
                     completableFuture.completeExceptionally(
                         new TransactionException(TransactionExceptionCode.NotRaftLeader,
                             "seata raft state machine exception: " + status.getErrorMsg()));
-                } catch (TransactionException e) {
-                    completableFuture.completeExceptionally(e);
+                } finally {
+                    try {
+                        globalSession.removeBranch(branchSession);
+                    } catch (TransactionException e) {
+                        completableFuture.completeExceptionally(e);
+                    }
                 }
             }
         };

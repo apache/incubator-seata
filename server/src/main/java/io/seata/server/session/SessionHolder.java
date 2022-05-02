@@ -121,16 +121,13 @@ public class SessionHolder {
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
-            if (StoreMode.RAFT.equals(storeMode) || StoreMode.RAFT.getName()
-                .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
+            if (StoreMode.RAFT.equals(storeMode)) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             } else {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             }
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
@@ -167,11 +164,8 @@ public class SessionHolder {
      * @param storeMode the mode of store
      */
     protected static void reload(StoreMode storeMode) {
-
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable)ROOT_SESSION_MANAGER).reload();
-        }
-        if (StoreMode.FILE == storeMode) {
             reload(ROOT_SESSION_MANAGER.allSessions(), storeMode);
         }
     }

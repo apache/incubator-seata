@@ -144,8 +144,7 @@ public class RaftServerFactory {
     }
 
     public Boolean isLeader() {
-        return !isRaftMode() && raftServer == null ? true
-            : stateMachine != null && stateMachine.isLeader() ? true : false;
+        return !isRaftMode() && raftServer == null || (stateMachine != null && stateMachine.isLeader());
     }
 
     public Boolean isRaftMode() {

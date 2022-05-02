@@ -135,6 +135,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
         if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
+            done.run(Status.OK());
             return;
         }
         // gets a record of the lock and session at the moment
@@ -204,19 +205,18 @@ public class RaftStateMachine extends StateMachineAdapter {
                     session.decode(v);
                     sessionMap.put(k, session);
                 });
-                rootSessionMap.putAll(sessionMap);
                 if (CollectionUtils.isNotEmpty(branchSessionByteMap)) {
                     branchSessionByteMap.forEach((k, v) -> {
                         BranchSession branchSession = new BranchSession();
                         branchSession.decode(v);
                         try {
                             branchSession.lock();
-                            rootSessionMap.get(branchSession.getXid()).add(branchSession);
+                            sessionMap.get(branchSession.getXid()).add(branchSession);
                         } catch (TransactionException e) {
                             LOGGER.error(e.getMessage());
                         }
                     });
-                    rootSessionMap.values().parallelStream().forEach(globalSession -> {
+                    sessionMap.values().parallelStream().forEach(globalSession -> {
                         if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
                             || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
                             globalSession.getBranchSessions().parallelStream()
@@ -224,6 +224,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                         }
                     });
                 }
+                rootSessionMap.putAll(sessionMap);
             }
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("on snapshot load end index: {}", reader.load().getLastIncludedIndex());
