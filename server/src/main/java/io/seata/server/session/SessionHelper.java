@@ -43,6 +43,7 @@ import org.slf4j.MDC;
  * @author sharajava
  */
 public class SessionHelper {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionHelper.class);
 
     /**
@@ -50,17 +51,22 @@ public class SessionHelper {
      */
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
-            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, false);
-
     /**
      * The instance of DefaultCoordinator
      */
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
+    private static final String STORE_MODE =
+        ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE, StoreMode.FILE.getName()));
+
     private static final boolean DELAY_HANDLE_SESSION =
-        !StringUtils.equalsIgnoreCase(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE)), StoreMode.FILE.getName());
+        !(StringUtils.equalsIgnoreCase(STORE_MODE, StoreMode.FILE.getName())
+            || StringUtils.equalsIgnoreCase(STORE_MODE, StoreMode.RAFT.getName()));
+
+    private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE =
+        CONFIG.getBoolean(ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, false)
+            && !StringUtils.equalsIgnoreCase(STORE_MODE, StoreMode.RAFT.getName());
 
     private SessionHelper() {
     }

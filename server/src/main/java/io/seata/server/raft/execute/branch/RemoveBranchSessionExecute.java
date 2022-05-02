@@ -31,7 +31,7 @@ public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
         if (globalSession != null) {
             BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
             if (branchSession != null) {
-                branchSession.unlock();
+                raftLockManager.localReleaseLock(branchSession);
                 globalSession.remove(branchSession);
             }
             if (logger.isDebugEnabled()) {

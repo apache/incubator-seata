@@ -131,8 +131,6 @@ public class SessionHolder {
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -210,13 +208,21 @@ public class SessionHolder {
                             case RollbackRetrying:
                             case TimeoutRollbacking:
                             case TimeoutRollbackRetrying:
-                                globalSession.getBranchSessions().parallelStream()
-                                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                                globalSession.getBranchSessions().parallelStream().forEach(branchSession -> {
+                                    if (storeMode == StoreMode.RAFT) {
+                                        if (globalSession.getStatus() == GlobalStatus.Rollbacking) {
+                                            globalSession.setStatus(GlobalStatus.RollbackRetrying);
+                                            LOGGER.info("xid :{} change status RollbackRetrying", globalSession.getXid());
+                                        }
+                                    }
+                                    branchSession.setLockStatus(LockStatus.Rollbacking);
+                                });
                                 queueToRetryRollback(globalSession);
                                 break;
                             case Begin:
                                 if (storeMode == StoreMode.RAFT) {
                                     globalSession.setStatus(GlobalStatus.RollbackRetrying);
+                                    LOGGER.info("xid :{} change status RollbackRetrying", globalSession.getXid());
                                     queueToRetryRollback(globalSession);
                                 } else {
                                     globalSession.setActive(true);

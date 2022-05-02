@@ -149,7 +149,7 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
     @Override
     public String toString() {
         return "RaftSessionSyncMsg{" + "globalSession=" + globalSession + ", branchSession=" + branchSession
-            + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", msgType=" + msgType + '}';
+            + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", msgType=" + msgType.name() + '}';
     }
     
 }

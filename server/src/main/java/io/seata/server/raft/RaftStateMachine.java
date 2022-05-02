@@ -125,6 +125,9 @@ public class RaftStateMachine extends StateMachineAdapter {
                     RaftSessionSyncMsg msg =
                         (RaftSessionSyncMsg)RaftSyncMsgSerializer.decode(byteBuffer.array()).getBody();
                     // follower executes the corresponding task
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("sync msg: {}", msg);
+                    }
                     onExecuteRaft(msg);
                 }
             }

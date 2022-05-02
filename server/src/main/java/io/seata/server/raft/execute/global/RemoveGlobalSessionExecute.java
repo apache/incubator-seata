@@ -42,7 +42,7 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
                 raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
             if (globalSession != null) {
                 try {
-                    raftLockManager.releaseGlobalSessionLock(globalSession);
+                    raftLockManager.localReleaseGlobalSessionLock(globalSession);
                     raftSessionManager.removeGlobalSession(globalSession);
                     if (logger.isDebugEnabled()) {
                         logger.debug("end xid: {}", globalSession.getXid());
