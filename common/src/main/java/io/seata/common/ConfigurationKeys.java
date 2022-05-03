@@ -825,7 +825,6 @@ public interface ConfigurationKeys {
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
 
     /**
-<<<<<<< HEAD
      * The constant SERVER_RAFT.
      */
     String SERVER_RAFT = SERVER_PREFIX + "raft.";

@@ -66,7 +66,7 @@ public class SessionHelper {
 
     private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE =
         CONFIG.getBoolean(ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, false)
-            && !StringUtils.equalsIgnoreCase(STORE_MODE, StoreMode.RAFT.getName());
+            && DELAY_HANDLE_SESSION;
 
     private SessionHelper() {
     }
