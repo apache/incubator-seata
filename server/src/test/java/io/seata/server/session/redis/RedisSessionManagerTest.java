@@ -18,7 +18,7 @@ package io.seata.server.session.redis;
 import java.io.IOException;
 import java.util.List;
 
-import com.github.fppt.jedismock.RedisServer;
+import com.github.microwww.redis.RedisServer;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -48,13 +48,13 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  */
 @SpringBootTest
 public class RedisSessionManagerTest {
-    private static RedisServer server = null;
+    private static RedisServer    server         = null;
     private static SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
+        server = new RedisServer();
+        server.listener("127.0.0.1", 6789);
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
@@ -337,8 +337,8 @@ public class RedisSessionManagerTest {
 
 
     @AfterAll
-    public static void after() {
-        server.stop();
+    public static void after() throws IOException {
+        server.close();
         server = null;
     }
 

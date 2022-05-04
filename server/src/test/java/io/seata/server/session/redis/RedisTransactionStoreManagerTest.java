@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.github.fppt.jedismock.RedisServer;
+import com.github.microwww.redis.RedisServer;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
@@ -30,11 +30,13 @@ import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -54,14 +56,14 @@ public class RedisTransactionStoreManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
-    private static RedisServer server = null;
+    private static RedisServer                  server                       = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
     private static SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
+        server = new RedisServer();
+        server.listener("127.0.0.1", 6789);
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
@@ -212,6 +214,34 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
+    public void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
+        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 3000);
+        String xid1 = XID.generateXID(session1.getTransactionId());
+        session1.setXid(xid1);
+        session1.setTransactionId(session1.getTransactionId());
+        session1.setBeginTime(System.currentTimeMillis());
+        session1.setApplicationData("abc=878s1");
+        session1.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session1);
+
+        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 2000);
+        String xid2 = XID.generateXID(session2.getTransactionId());
+        session2.setXid(xid2);
+        session2.setTransactionId(session2.getTransactionId());
+        session2.setBeginTime(System.currentTimeMillis());
+        session2.setApplicationData("abc1=878s2");
+        session2.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session2);
+        SessionCondition sessionCondition=new SessionCondition(GlobalStatus.Begin);
+        Thread.sleep(3000);
+        List<GlobalSession> list=sessionManager.findGlobalSessions(sessionCondition);
+        Assertions.assertEquals(2, list.size());
+        Assertions.assertEquals(xid2, list.get(0).getXid());
+        sessionManager.removeGlobalSession(session1);
+        sessionManager.removeGlobalSession(session2);
+    }
+
+    @Test
     public void testreadisQuery() {
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageNum(0);
@@ -230,8 +260,8 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @AfterAll
-    public static void after() {
-        server.stop();
+    public static void after() throws IOException {
+        server.close();
         server = null;
     }
 

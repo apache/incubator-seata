@@ -17,7 +17,7 @@ package io.seata.server.lock.redis;
 
 import java.io.IOException;
 
-import com.github.fppt.jedismock.RedisServer;
+import com.github.microwww.redis.RedisServer;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.server.lock.LockManager;
@@ -39,13 +39,13 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 @SpringBootTest
 public class RedisLockManagerTest {
-    static RedisServer server = null;
+    static RedisServer server      = null;
     static LockManager lockManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
+        server = new RedisServer();
+        server.listener("127.0.0.1", 6789);
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
@@ -95,8 +95,8 @@ public class RedisLockManagerTest {
     }
 
     @AfterAll
-    public static void after() {
-        server.stop();
+    public static void after() throws IOException {
+        server.close();
         server = null;
     }
 

@@ -465,7 +465,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         // queryCount
         final long queryCount = Math.min(logQueryLimit, countGlobalSessions);
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Set<String> values = jedis.zrange(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, 0, System.currentTimeMillis());
+            Set<String> values =
+                jedis.zrangeByScore(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, 0, System.currentTimeMillis(), 0,
+                        (int) queryCount);
             List<Map<String, String>> rep;
             try (Pipeline pipeline = jedis.pipelined()) {
                 for (String value : values) {
@@ -486,9 +488,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 }
                 return null;
             }).filter(Objects::nonNull).collect(Collectors.toList());
-            if (list.size() > queryCount) {
-                list = list.subList(0, (int) queryCount);
-            }
         }
         return list;
     }
