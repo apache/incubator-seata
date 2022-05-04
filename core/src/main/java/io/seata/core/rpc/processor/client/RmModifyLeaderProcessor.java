@@ -23,13 +23,13 @@ import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.processor.RemotingProcessor;
 
 /**
- * process TC undo log delete command.
+ * process TC leader notify.
  * <p>
  * process message type:
- * {@link UndoLogDeleteRequest}
+ * {@link LeaderNotifyRequest}
  *
- * @author zhangchenghui.dev@gmail.com
- * @since 1.3.0
+ * @author funkye
+ * @since 2.0.0
  */
 public class RmModifyLeaderProcessor implements RemotingProcessor {
 
