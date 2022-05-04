@@ -15,6 +15,8 @@
  */
 package io.seata.server.raft.execute.global;
 
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.LockStatus;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
@@ -29,6 +31,11 @@ public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
             globalSession.setStatus(sessionSyncMsg.getGlobalStatus());
+            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                globalSession.getBranchSessions().parallelStream()
+                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+            }
             if (logger.isDebugEnabled()) {
                 logger.debug("xid: {},status: {}", globalSession.getXid(), globalSession.getStatus());
             }
