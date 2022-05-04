@@ -43,7 +43,8 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 /**
  * @description redis distributed lock test
  *
- * @author zhongxiang.wang funkye
+ * @author zhongxiang.wang
+ * @author funkye
  */
 @SpringBootTest
 public class RedisDistributedLockerTest {
