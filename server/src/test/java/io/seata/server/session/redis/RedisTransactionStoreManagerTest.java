@@ -17,6 +17,7 @@ package io.seata.server.session.redis;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,7 +206,7 @@ public class RedisTransactionStoreManagerTest {
 
     @Test
     public void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
-        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 3000);
+        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 10);
         String xid1 = XID.generateXID(session1.getTransactionId());
         session1.setXid(xid1);
         session1.setTransactionId(session1.getTransactionId());
@@ -214,7 +215,7 @@ public class RedisTransactionStoreManagerTest {
         session1.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session1);
 
-        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 2000);
+        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 10);
         String xid2 = XID.generateXID(session2.getTransactionId());
         session2.setXid(xid2);
         session2.setTransactionId(session2.getTransactionId());
@@ -222,11 +223,13 @@ public class RedisTransactionStoreManagerTest {
         session2.setApplicationData("abc1=878s2");
         session2.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session2);
-        SessionCondition sessionCondition=new SessionCondition(GlobalStatus.Begin);
-        Thread.sleep(3000);
-        List<GlobalSession> list=sessionManager.findGlobalSessions(sessionCondition);
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
+        Thread.sleep(500);
+        List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
+        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
         Assertions.assertEquals(2, list.size());
-        Assertions.assertEquals(xid2, list.get(0).getXid());
+        Assertions.assertEquals(xid1, list.get(0).getXid());
+        Assertions.assertNotEquals(list2.get(0).getXid(),list.get(0).getXid());
         sessionManager.removeGlobalSession(session1);
         sessionManager.removeGlobalSession(session2);
     }

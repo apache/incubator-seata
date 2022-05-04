@@ -301,6 +301,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             try (Pipeline pipelined = jedis.pipelined()) {
                 pipelined.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, globalTransactionDO.getXid());
                 pipelined.del(globalKey);
+                if (GlobalStatus.Begin.getCode() == globalTransactionDO.getStatus()
+                    || GlobalStatus.UnKnown.getCode() == globalTransactionDO.getStatus()) {
+                    pipelined.zrem(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, globalKey);
+                }
                 pipelined.sync();
             }
             return true;
