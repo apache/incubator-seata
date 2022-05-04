@@ -15,7 +15,6 @@
  */
 package io.seata.server.session.redis;
 
-import com.github.microwww.redis.RedisServer;
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
 import org.junit.jupiter.api.AfterAll;
@@ -25,12 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolAbstract;
-import redis.clients.jedis.JedisPoolConfig;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import io.seata.core.store.DistributedLockDO;
@@ -53,18 +47,12 @@ public class RedisDistributedLockerTest {
     private String retryCommiting = "RetryCommiting";
     private String lockValue = "127.1.1.1:9081";
     private static DistributedLocker distributedLocker;
-    private static RedisServer server = null;
     private static Jedis jedis;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = new RedisServer();
-        server.listener("127.0.0.1", 6789);
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
-        EnhancedServiceLoader.unload(DistributedLocker.class);
+        MockRedisServer.getInstance();
+        EnhancedServiceLoader.unloadAll();
         DistributedLockerFactory.cleanLocker();
         distributedLocker = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         jedis = JedisPooledFactory.getJedisInstance();
@@ -97,32 +85,32 @@ public class RedisDistributedLockerTest {
     public void test_acquireLock_concurrent() {
         //acquire the lock success
         boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000l));
-        Assertions.assertEquals(true,accquire);
+        Assertions.assertTrue(accquire);
         String lockValueExisted = jedis.get(retryRollbacking);
         Assertions.assertEquals(lockValue,lockValueExisted);
 
         // concurrent acquire
-       for(int i = 0;i < 1000;i++){
+       for(int i = 0;i < 10;i++){
            boolean b = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + i, 60000l));
-           Assertions.assertEquals(false,b);
+           Assertions.assertFalse(b);
        }
 
        //release the lock
        boolean release = distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue ,null));
-       Assertions.assertEquals(true,release);
+       Assertions.assertTrue(release);
        Assertions.assertNull(jedis.get(retryRollbacking));
 
        // other acquire the lock success
-       boolean c = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 1, 60000l));
+       boolean c = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 1, 2000L));
         Assertions.assertTrue(c);
 
         //other2 acquire the lock failed
-        boolean d = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000l));
+        boolean d = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 2000L));
         Assertions.assertFalse(d);
 
        //sleep 60s
         try {
-            Thread.sleep(60*1000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -140,17 +128,15 @@ public class RedisDistributedLockerTest {
         String set = jedis.set(retryCommiting, lockValue);
         Assertions.assertEquals("OK",set);
         boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
-        Assertions.assertEquals(false,acquire);
+        Assertions.assertFalse(acquire);
     }
 
     @AfterAll
     public static void after() throws IOException {
-        DistributedLockerFactory.cleanLocker();
         EnhancedServiceLoader.unload(DistributedLocker.class);
+        DistributedLockerFactory.cleanLocker();
         DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
         jedis.close();
-        server.close();
-        server = null;
     }
 
 }

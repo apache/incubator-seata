@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.github.microwww.redis.RedisServer;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
@@ -35,7 +34,6 @@ import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,8 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
@@ -56,18 +52,12 @@ public class RedisTransactionStoreManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
-    private static RedisServer                  server                       = null;
     private static RedisTransactionStoreManager redisTransactionStoreManager = null;
     private static SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = new RedisServer();
-        server.listener("127.0.0.1", 6789);
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
+        MockRedisServer.getInstance();
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
@@ -257,12 +247,6 @@ public class RedisTransactionStoreManagerTest {
         redisTransactionStoreManager.setLogQueryLimit(20);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
         LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
-    }
-
-    @AfterAll
-    public static void after() throws IOException {
-        server.close();
-        server = null;
     }
 
 }
