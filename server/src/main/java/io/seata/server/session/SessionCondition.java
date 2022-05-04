@@ -15,9 +15,6 @@
  */
 package io.seata.server.session;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import io.seata.core.model.GlobalStatus;
 
 /**
