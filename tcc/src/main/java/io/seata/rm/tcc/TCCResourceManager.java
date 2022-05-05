@@ -101,7 +101,7 @@ public class TCCResourceManager extends AbstractResourceManager {
 
             // if the TwoPhaseBusinessAction annotation's mode is SAGA, cancel the commit
             ModeType modeType = (ModeType) businessActionContext.getActionContext(Constants.MODE_TYPE);
-            if(modeType != null && modeType.equals( ModeType.SAGA)) {
+            if (modeType != null && modeType.equals(ModeType.SAGA)) {
                 LOGGER.info("TwoPhaseBusinessAction's ModeType is SAGA, cancel the commit, xid: {}, branchId: {}, resourceId: {}", xid, branchId, resourceId);
                 return BranchStatus.PhaseTwo_Committed;
             }
