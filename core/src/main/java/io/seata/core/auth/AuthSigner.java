@@ -19,5 +19,11 @@ package io.seata.core.auth;
  * @author slievrly
  */
 public interface AuthSigner {
+    
     String sign(String data, String key);
+    
+    default String getSignVersion() {
+        return null;
+    }
+    
 }
