@@ -104,7 +104,6 @@ public class RamSignAdapter {
             Mac mac = Mac.getInstance(signMethod);
             mac.init(new SecretKeySpec(regionSignkey, signMethod));
             byte[] thirdSigningKey = mac.doFinal(productCode.getBytes(StandardCharsets.UTF_8));
-            // 计算最终派生秘钥
             mac = Mac.getInstance(signMethod);
             mac.init(new SecretKeySpec(thirdSigningKey, signMethod));
             return mac.doFinal(CONSTANT.getBytes(StandardCharsets.UTF_8));
