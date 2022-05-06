@@ -31,10 +31,6 @@ import static java.time.ZoneOffset.UTC;
  */
 public class OffsetTimeUtils {
 
-    public static final int TIMESTAMP_WITH_TIME_ZONE = -101;
-
-    public static final int TIMESTAMP_WITH_LOCAL_TIME_ZONE = -102;
-
     public static final String PATTERN_1 = "yyyy-MM-dd HH:mm:ss.SSS";
 
     public static final String PATTERN_2 = "yyyy-MM-dd HH:mm:ss";

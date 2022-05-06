@@ -35,8 +35,8 @@ import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
-import static io.seata.rm.datasource.util.OffsetTimeUtils.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
-import static io.seata.rm.datasource.util.OffsetTimeUtils.TIMESTAMP_WITH_TIME_ZONE;
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
 import static io.seata.rm.datasource.util.OffsetTimeUtils.convertOffSetTime;
 import static io.seata.rm.datasource.util.OffsetTimeUtils.timeToOffsetDateTime;
 
@@ -241,8 +241,6 @@ public class TableRecords implements java.io.Serializable {
                     if (object != null) {
                         field.setValue(new SerialJavaObject(object));
                     }
-                } else if (dataType == Types.TIMESTAMP) {
-                    field.setValue(String.valueOf(resultSet.getObject(i)));
                 } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
                     field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
                 } else {
