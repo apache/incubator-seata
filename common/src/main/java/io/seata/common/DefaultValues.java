@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import io.seata.common.util.StringUtils;
-
 import java.time.Duration;
 
 /**
