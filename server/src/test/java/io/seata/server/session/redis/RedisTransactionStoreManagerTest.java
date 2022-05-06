@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.BeanUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.console.param.GlobalSessionParam;
@@ -35,6 +36,7 @@ import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -53,12 +55,13 @@ public class RedisTransactionStoreManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
-    private static RedisTransactionStoreManager redisTransactionStoreManager = null;
-    private static SessionManager sessionManager = null;
+    private static volatile RedisTransactionStoreManager redisTransactionStoreManager = null;
+    private static volatile SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
         MockRedisServer.getInstance();
+        EnhancedServiceLoader.unloadAll();
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
@@ -228,8 +231,9 @@ public class RedisTransactionStoreManagerTest {
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
         List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
         Assertions.assertEquals(2, list.size());
+        Assertions.assertEquals(2, list2.size());
         Assertions.assertEquals(xid1, list.get(0).getXid());
-        Assertions.assertNotEquals(list2.get(0).getXid(),list.get(0).getXid());
+        Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
         sessionManager.removeGlobalSession(session1);
         sessionManager.removeGlobalSession(session2);
     }
@@ -250,6 +254,11 @@ public class RedisTransactionStoreManagerTest {
         redisTransactionStoreManager.setLogQueryLimit(20);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
         LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
+    }
+
+    @AfterAll
+    public static void close(){
+        redisTransactionStoreManager=null;
     }
 
 }
