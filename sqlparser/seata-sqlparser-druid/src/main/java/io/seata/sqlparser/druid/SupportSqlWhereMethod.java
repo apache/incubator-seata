@@ -21,12 +21,10 @@ import java.util.List;
  */
 public class SupportSqlWhereMethod {
 
-    public static final String FIND_IN_SET = "FIND_IN_SET";
-
     public static final List<String> supportSqlMethods = new ArrayList<>();
 
     static {
-        supportSqlMethods.add(FIND_IN_SET);
+        supportSqlMethods.add("FIND_IN_SET");
     }
 
     /**
