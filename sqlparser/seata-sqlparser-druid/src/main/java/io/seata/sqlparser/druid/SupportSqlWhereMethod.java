@@ -15,17 +15,26 @@
  */
 package io.seata.sqlparser.druid;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * author: doubleDimple lovele.cn@gmail.com
  */
 public class SupportSqlWhereMethod {
 
-    public static final List<String> SUPPORT_SQL_METHODS = new ArrayList<>();
+    private static final Set<String> SUPPORT_SQL_METHODS = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
-    static {
+    private static class SupportSqlWhereMethodHolder {
+        private static SupportSqlWhereMethod instance = new SupportSqlWhereMethod();
+    }
+
+    public static SupportSqlWhereMethod getInstance() {
+        add();
+        return SupportSqlWhereMethodHolder.instance;
+    }
+
+    private static void add() {
         SUPPORT_SQL_METHODS.add("FIND_IN_SET");
     }
 
@@ -34,7 +43,7 @@ public class SupportSqlWhereMethod {
      * @param methodName
      * @return boolean
      */
-    public static boolean checkIsSupport(String methodName) {
+    public boolean checkIsSupport(String methodName) {
         int size =
             (int)SUPPORT_SQL_METHODS.stream().filter(sqlMethod -> sqlMethod.equalsIgnoreCase(methodName)).count();
         if (size > 0) {
