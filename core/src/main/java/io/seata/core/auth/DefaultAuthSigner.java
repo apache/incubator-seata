@@ -23,6 +23,7 @@ import io.seata.common.util.StringUtils;
  */
 @LoadLevel(name = "defaultAuthSigner", order = 100)
 public class DefaultAuthSigner implements AuthSigner {
+    
     @Override
     public String sign(String data, String key) {
         if (StringUtils.isNotBlank(key) && StringUtils.isNotBlank(data)) {
@@ -30,4 +31,10 @@ public class DefaultAuthSigner implements AuthSigner {
         }
         return data;
     }
+    
+    @Override
+    public String getSignVersion() {
+        return "V4";
+    }
+    
 }
