@@ -21,10 +21,10 @@ import java.util.List;
  */
 public class SupportSqlWhereMethod {
 
-    public static final List<String> supportSqlMethods = new ArrayList<>();
+    public static final List<String> SUPPORT_SQL_METHODS = new ArrayList<>();
 
     static {
-        supportSqlMethods.add("FIND_IN_SET");
+        SUPPORT_SQL_METHODS.add("FIND_IN_SET");
     }
 
     /**
@@ -33,7 +33,8 @@ public class SupportSqlWhereMethod {
      * @return boolean
      */
     public static boolean checkIsSupport(String methodName) {
-        int size = (int)supportSqlMethods.stream().filter(sqlMethod -> sqlMethod.equalsIgnoreCase(methodName)).count();
+        int size =
+            (int)SUPPORT_SQL_METHODS.stream().filter(sqlMethod -> sqlMethod.equalsIgnoreCase(methodName)).count();
         if (size > 0) {
             return true;
         }
