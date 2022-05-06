@@ -26,12 +26,12 @@ public class SupportSqlWhereMethod {
     private static final Set<String> SUPPORT_SQL_METHODS = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
     private static class SupportSqlWhereMethodHolder {
-        private static SupportSqlWhereMethod instance = new SupportSqlWhereMethod();
+        private static final SupportSqlWhereMethod INSTANCE = new SupportSqlWhereMethod();
     }
 
     public static SupportSqlWhereMethod getInstance() {
         add();
-        return SupportSqlWhereMethodHolder.instance;
+        return SupportSqlWhereMethodHolder.INSTANCE;
     }
 
     private static void add() {
