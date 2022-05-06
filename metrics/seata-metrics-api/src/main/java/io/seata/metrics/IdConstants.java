@@ -23,6 +23,8 @@ package io.seata.metrics;
 public interface IdConstants {
     String SEATA_TRANSACTION = "seata.transaction";
 
+    String SEATA_EXCEPTION = "seata.exception";
+
     String APP_ID_KEY = "applicationId";
     
     String GROUP_KEY = "group";
