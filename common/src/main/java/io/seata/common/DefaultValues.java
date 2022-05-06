@@ -68,7 +68,7 @@ public interface DefaultValues {
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.
      */
-    String DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS = StringUtils.EMPTY;
+    String DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS = "{}";
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_LOG_TABLE.
      */

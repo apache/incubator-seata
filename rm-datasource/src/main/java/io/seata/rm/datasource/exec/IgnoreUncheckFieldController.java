@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 
 /**
  * Ignore uncheckField Controller
@@ -51,7 +52,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private volatile String noCheckFields = ConfigurationFactory.getInstance().getConfig(
-            TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, StringUtils.EMPTY);
+        TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
 
     private static volatile Map<String, Set<String>> mapFields = new HashMap<>();
 
@@ -75,10 +76,10 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         String newValue = event.getNewValue();
 
         if (TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.equals(dataId)) {
-            if (StringUtils.isNotBlank(newValue)) {
-                LOGGER.info("{} config changed, old value:{}, new value:{}", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
-                        noCheckFields, event.getNewValue());
-            } else {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
+                noCheckFields, event.getNewValue());
+
+            if (StringUtils.isBlank(newValue)) {
                 if (CollectionUtils.isNotEmpty(mapFields)) {
                     mapFields.clear();
                 }
@@ -143,5 +144,4 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         }
         return Boolean.FALSE;
     }
-
 }
