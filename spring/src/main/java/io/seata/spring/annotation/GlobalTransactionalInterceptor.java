@@ -83,9 +83,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
     private static final EventBus EVENT_BUS = new GuavaEventBus("degradeCheckEventBus", true);
-    private static ScheduledThreadPoolExecutor executor =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
-
+    private static ScheduledThreadPoolExecutor executor;
     //region DEFAULT_GLOBAL_TRANSACTION_TIMEOUT
 
     private static int defaultGlobalTransactionTimeout = 0;
@@ -302,14 +300,30 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             degradeCheck = Boolean.parseBoolean(event.getNewValue());
             if (!degradeCheck) {
                 degradeNum = 0;
+                stopDegradeCheck();
+            } else {
+                startDegradeCheck();
             }
+        }
+    }
+
+    /**
+     * stop auto degrade
+     */
+    private static synchronized void stopDegradeCheck() {
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdownNow();
         }
     }
 
     /**
      * auto upgrade service detection
      */
-    private static void startDegradeCheck() {
+    private static synchronized void startDegradeCheck() {
+        if (executor != null && !executor.isShutdown()) {
+            return;
+        }
+        executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
         executor.scheduleAtFixedRate(() -> {
             if (degradeCheck) {
                 try {
