@@ -128,15 +128,13 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
-        if (degradeCheck) {
-            degradeCheckPeriod = ConfigurationFactory.getInstance()
+        degradeCheckPeriod = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
-            degradeCheckAllowTimes = ConfigurationFactory.getInstance()
+        degradeCheckAllowTimes = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
-            EVENT_BUS.register(this);
-            if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                startDegradeCheck();
-            }
+        EVENT_BUS.register(this);
+        if (degradeCheck && degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+            startDegradeCheck();
         }
         this.initDefaultGlobalTransactionTimeout();
     }
