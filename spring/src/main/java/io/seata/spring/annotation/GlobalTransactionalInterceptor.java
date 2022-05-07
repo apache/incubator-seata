@@ -302,7 +302,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 degradeNum = 0;
                 stopDegradeCheck();
             } else {
-                startDegradeCheck();
+                if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+                    startDegradeCheck();
+                }
             }
         }
     }
