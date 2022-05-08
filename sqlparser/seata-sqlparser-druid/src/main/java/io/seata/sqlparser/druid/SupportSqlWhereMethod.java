@@ -47,9 +47,8 @@ public class SupportSqlWhereMethod {
      * @return boolean
      */
     public boolean checkIsSupport(String methodName) {
-        int size =
-            (int)supportMethodNames.stream().filter(sqlMethod -> sqlMethod.equalsIgnoreCase(methodName)).count();
-        if (size > 0) {
+
+        if (supportMethodNames.contains(methodName)) {
             return true;
         }
         return false;
