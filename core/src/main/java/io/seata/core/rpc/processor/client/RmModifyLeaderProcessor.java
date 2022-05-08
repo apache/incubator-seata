@@ -18,7 +18,6 @@ package io.seata.core.rpc.processor.client;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.processor.RemotingProcessor;
 
