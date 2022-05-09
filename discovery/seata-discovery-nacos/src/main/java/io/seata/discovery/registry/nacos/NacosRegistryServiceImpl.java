@@ -135,7 +135,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     List<String> clusters = new ArrayList<>();
                     clusters.add(clusterName);
                     List<Instance> firstAllInstances = getNamingInstance().getAllInstances(getServiceName(), getServiceGroup(), clusters);
-                    if (null != firstAllInstances) {
+                    if (null != firstAllInstances && !firstAllInstances.isEmpty()) {
                         List<InetSocketAddress> newAddressList = firstAllInstances.stream()
                                 .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
                                 .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
@@ -151,7 +151,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                                     .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
                                     .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
                                     .collect(Collectors.toList());
-                            CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                            if (!newAddressList.isEmpty()) {
+                                CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                            }
                         }
                     });
                 }
