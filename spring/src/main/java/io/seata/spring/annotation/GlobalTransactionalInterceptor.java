@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.eventbus.Subscribe;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -83,10 +84,15 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
     private static final EventBus EVENT_BUS = new GuavaEventBus("degradeCheckEventBus", true);
-    private static ScheduledThreadPoolExecutor executor;
+    private static volatile ScheduledThreadPoolExecutor executor;
     //region DEFAULT_GLOBAL_TRANSACTION_TIMEOUT
 
     private static int defaultGlobalTransactionTimeout = 0;
+
+    /**
+     * if degradeCheck is changing
+     */
+    private static AtomicBoolean autoDegradeChange = new AtomicBoolean(false);
 
     private void initDefaultGlobalTransactionTimeout() {
         if (GlobalTransactionalInterceptor.defaultGlobalTransactionTimeout <= 0) {
@@ -292,17 +298,16 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     public void onChangeEvent(ConfigurationChangeEvent event) {
         if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                disable, event.getNewValue());
+                    disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
             degradeCheck = Boolean.parseBoolean(event.getNewValue());
             if (!degradeCheck) {
                 degradeNum = 0;
                 stopDegradeCheck();
-            } else {
-                if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                    startDegradeCheck();
-                }
+            } else if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+                startDegradeCheck();
+
             }
         }
     }
@@ -310,31 +315,53 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     /**
      * stop auto degrade
      */
-    private static synchronized void stopDegradeCheck() {
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdownNow();
+    private static void stopDegradeCheck() {
+        while (!autoDegradeChange.compareAndSet(false, true)) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                LOGGER.error("auto degrade start thread sleep error", e);
+            }
+        }
+        try {
+            if (executor != null && !executor.isShutdown()) {
+                executor.shutdown();
+            }
+        } finally {
+            autoDegradeChange.set(false);
         }
     }
 
     /**
      * auto upgrade service detection
      */
-    private static synchronized void startDegradeCheck() {
-        if (executor != null && !executor.isShutdown()) {
-            return;
-        }
-        executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
-        executor.scheduleAtFixedRate(() -> {
-            if (degradeCheck) {
-                try {
-                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
-                    TransactionManagerHolder.get().commit(xid);
-                    EVENT_BUS.post(new DegradeCheckEvent(true));
-                } catch (Exception e) {
-                    EVENT_BUS.post(new DegradeCheckEvent(false));
-                }
+    private static void startDegradeCheck() {
+        while (!autoDegradeChange.compareAndSet(false, true)) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                LOGGER.error("auto degrade start thread sleep error", e);
             }
-        }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
+        }
+        try {
+            if (executor != null && !executor.isShutdown()) {
+                return;
+            }
+            executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
+            executor.scheduleAtFixedRate(() -> {
+                if (degradeCheck) {
+                    try {
+                        String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
+                        TransactionManagerHolder.get().commit(xid);
+                        EVENT_BUS.post(new DegradeCheckEvent(true));
+                    } catch (Exception e) {
+                        EVENT_BUS.post(new DegradeCheckEvent(false));
+                    }
+                }
+            }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
+        } finally {
+            autoDegradeChange.set(false);
+        }
     }
 
     @Subscribe
