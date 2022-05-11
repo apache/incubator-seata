@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import com.google.common.base.Joiner;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -92,6 +93,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     @Override
     protected Object executeAutoCommitFalse(Object[] args) throws Exception {
+        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1) {
+            throw new NotSupportYetException("multi pk only support mysql!");
+        }
         TableRecords beforeImage = beforeImage();
         if (CollectionUtils.isNotEmpty(beforeImage.getRows())) {
             isUpdateFlag = true;

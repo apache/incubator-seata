@@ -121,7 +121,7 @@ public class ExecuteTemplate {
                                         new MySQLReplaceExecutor(statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             default:
-                                throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
+                                throw new NotSupportYetException(dbType + " not support to REPLACE");
                         }
                         break;
                     default:

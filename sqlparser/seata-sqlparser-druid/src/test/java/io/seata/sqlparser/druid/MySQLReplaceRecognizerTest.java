@@ -64,4 +64,22 @@ public class MySQLReplaceRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals("SELECT Name, City FROM Person WHERE id = 2", mySQLReplaceRecognizer.getSelectQuery());
     }
 
+    /**
+     * Replace recognizer test 3.
+     */
+    @Test
+    public void replaceRecognizerTest_3() {
+        String sql = "REPLACE INTO test VALUES (1, 'Old', '2014-08-20 18:47:00')";
+        SQLStatement statement = getSQLStatement(sql);
+        MySQLReplaceRecognizer mySQLReplaceRecognizer = new MySQLReplaceRecognizer(sql, statement);
+
+        Assertions.assertEquals(sql, mySQLReplaceRecognizer.getOriginalSQL());
+        Assertions.assertEquals(true, mySQLReplaceRecognizer.selectQueryIsEmpty());
+        Assertions.assertEquals("test", mySQLReplaceRecognizer.getTableName());
+        Assertions.assertEquals(null, mySQLReplaceRecognizer.getReplaceColumns());
+        List<String> allValues = mySQLReplaceRecognizer.getReplaceValues();
+        String[] values = allValues.get(0).split(", ");
+        Assertions.assertEquals("1", values[0]);
+    }
+
 }

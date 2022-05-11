@@ -13,10 +13,7 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.struct.*;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.sqlparser.SQLInsertRecognizer;
-import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.SQLReplaceRecognizer;
-import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.*;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -61,7 +58,7 @@ public class MySQLReplaceExecutor extends MySQLInsertExecutor implements Default
     @Override
     protected Object executeAutoCommitFalse(Object[] args) throws Exception {
         TableRecords beforeImage = beforeImage();
-        // insert rows are not existed
+        // replace rows are not existed
         if (CollectionUtils.isNotEmpty(beforeImage.getRows())) {
             isExistFlag = true;
         } else {
@@ -150,12 +147,16 @@ public class MySQLReplaceExecutor extends MySQLInsertExecutor implements Default
             paramAppenderList = new ArrayList<>();
         }
         SQLReplaceRecognizer recognizer = (SQLReplaceRecognizer) sqlRecognizer;
-        int insertNum = recognizer.getReplaceValues().size();
-        Map<String, ArrayList<Object>> imageParamperterMap = buildImageParamperters(recognizer);
+        int replaceNum = recognizer.getReplaceValues().size();
+        Map<String, ArrayList<Object>> imageParameterMap = buildImageParameters(recognizer);
         StringBuilder prefix = new StringBuilder("SELECT * ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        // TODO: implement subSelect before image
+        if (!recognizer.selectQueryIsEmpty()) {
+            throw new ShouldNeverHappenException("replace include subQuery is not implemented now!");
+        }
         boolean[] isContainWhere = {false};
-        for (int i = 0; i < insertNum; i++) {
+        for (int i = 0; i < replaceNum; i++) {
             int finalI = i;
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
@@ -164,12 +165,12 @@ public class MySQLReplaceExecutor extends MySQLInsertExecutor implements Default
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
-                        if (imageParamperterMap.get(columnName) == null && m.getColumnDef() != null) {
+                        if (imageParameterMap.get(columnName) == null && m.getColumnDef() != null) {
                             uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
                             columnIsNull = false;
                             continue;
                         }
-                        if ((imageParamperterMap.get(columnName) == null && m.getColumnDef() == null) || imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
+                        if ((imageParameterMap.get(columnName) == null && m.getColumnDef() == null) || imageParameterMap.get(columnName).get(finalI) == null || imageParameterMap.get(columnName).get(finalI) instanceof Null) {
                             if (!"PRIMARY".equalsIgnoreCase(k)) {
                                 columnIsNull = false;
                                 uniqueList.add(columnName + " is ? ");
@@ -180,7 +181,7 @@ public class MySQLReplaceExecutor extends MySQLInsertExecutor implements Default
                         }
                         columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
-                        paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
+                        paramAppenderTempList.add(imageParameterMap.get(columnName).get(finalI));
                     }
                     if (!columnIsNull) {
                         if (isContainWhere[0]) {
@@ -205,42 +206,52 @@ public class MySQLReplaceExecutor extends MySQLInsertExecutor implements Default
      * @return map, key is column, value is paramperter
      */
     @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
-    public Map<String, ArrayList<Object>> buildImageParamperters(SQLReplaceRecognizer recognizer) {
+    public Map<String, ArrayList<Object>> buildImageParameters(SQLReplaceRecognizer recognizer) {
         List<String> replaceColumns = recognizer.getReplaceColumns();
-        if (CollectionUtils.isNotEmpty(replaceColumns)) {
-            getTableMeta().getAllIndexes().forEach((k, v) -> {
-                if ("PRIMARY".equalsIgnoreCase(k)) {
-                    for (ColumnMeta m : v.getValues()) {
-                        if (replaceColumns.contains(m.getColumnName())) {
-                            throw new ShouldNeverHappenException("update pk value is not supported!");
-                        }
-                    }
-                }
-            });
-        }
         Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        List<String> insertParamsList = recognizer.getReplaceValues();
+        List<String> replaceParamsList = recognizer.getReplaceValues();
         int paramsindex = 1;
-        for (String insertParams : insertParamsList) {
-            String[] insertParamsArray = insertParams.split(",");
+        for (String replaceParams : replaceParamsList) {
+            String[] replaceParamsArray = replaceParams.split(",");
+            if (replaceColumns == null) {
+                Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
+                int i = 0;
+                for (Map.Entry<String, ColumnMeta> column : allColumns.entrySet()) {
+                    String m = column.getKey();
+                    ArrayList<Object> imageListTemp = imageParamperterMap.computeIfAbsent(m, k -> new ArrayList<>());
+                    String params = replaceParamsArray[i];
+                    if ("?".equals(params.trim())) {
+                        ArrayList<Object> objects = parameters.get(paramsindex);
+                        imageListTemp.addAll(objects);
+                        paramsindex++;
+                    } else {
+                        // params is character string constant
+                        if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
+                            params = params.trim();
+                            params = params.substring(1, params.length() - 1);
+                        }
+                        imageListTemp.add(params);
+                    }
+                    imageParamperterMap.put(m, imageListTemp);
+                }
+                continue;
+            }
             for (int i = 0; i < replaceColumns.size(); i++) {
                 String m = replaceColumns.get(i);
-                String params = insertParamsArray[i];
+                String params = replaceParamsArray[i];
                 ArrayList<Object> imageListTemp = imageParamperterMap.computeIfAbsent(m, k -> new ArrayList<>());
                 if ("?".equals(params.trim())) {
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
                     paramsindex++;
-                } else if (params instanceof String) {
-                    // params is characterstring constant
+                } else {
+                    // params is character string constant
                     if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
                         params = params.trim();
                         params = params.substring(1, params.length() - 1);
                     }
-                    imageListTemp.add(params);
-                } else {
                     imageListTemp.add(params);
                 }
                 imageParamperterMap.put(m, imageListTemp);

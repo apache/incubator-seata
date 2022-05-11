@@ -26,6 +26,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
  * @author hanwen created at 2019-01-25
  */
 public abstract class AbstractRecognizerTest {
+
     /**
      * Gets sql statement.
      *
