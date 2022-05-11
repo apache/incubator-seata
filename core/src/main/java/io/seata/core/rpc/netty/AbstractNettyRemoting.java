@@ -42,7 +42,6 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -89,7 +88,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * The Now mills.
      */
     protected volatile long nowMills = 0;
-    private static final int TIMEOUT_CHECK_INTERNAL = 3000;
+    private static final int TIMEOUT_CHECK_INTERVAL = 3000;
     protected final Object lock = new Object();
     /**
      * The Is sending.
@@ -110,9 +109,12 @@ public abstract class AbstractNettyRemoting implements Disposable {
             @Override
             public void run() {
                 for (Map.Entry<Integer, MessageFuture> entry : futures.entrySet()) {
-                    if (entry.getValue().isTimeout()) {
+                    MessageFuture future = entry.getValue();
+                    if (future.isTimeout()) {
                         futures.remove(entry.getKey());
-                        entry.getValue().setResultMessage(null);
+                        RpcMessage rpcMessage = future.getRequestMessage();
+                        future.setResultMessage(new TimeoutException(String
+                            .format("msgId: %s ,msgType: %s ,msg: %s ,request timeout", rpcMessage.getId(), String.valueOf(rpcMessage.getMessageType()), rpcMessage.getBody().toString())));
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("timeout clear future: {}", entry.getValue().getRequestMessage().getBody());
                         }
@@ -121,7 +123,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
                 nowMills = System.currentTimeMillis();
             }
-        }, TIMEOUT_CHECK_INTERNAL, TIMEOUT_CHECK_INTERNAL, TimeUnit.MILLISECONDS);
+        }, TIMEOUT_CHECK_INTERVAL, TIMEOUT_CHECK_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     public AbstractNettyRemoting(ThreadPoolExecutor messageExecutor) {
@@ -289,9 +291,11 @@ public abstract class AbstractNettyRemoting implements Disposable {
                         if (allowDumpStack) {
                             String name = ManagementFactory.getRuntimeMXBean().getName();
                             String pid = name.split("@")[0];
-                            int idx = new Random().nextInt(100);
+                            long idx = System.currentTimeMillis();
                             try {
-                                Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
+                                String jstackFile = idx + ".log";
+                                LOGGER.info("jstack command will dump to " + jstackFile);
+                                Runtime.getRuntime().exec(String.format("jstack %s > %s", pid, jstackFile));
                             } catch (IOException exx) {
                                 LOGGER.error(exx.getMessage());
                             }

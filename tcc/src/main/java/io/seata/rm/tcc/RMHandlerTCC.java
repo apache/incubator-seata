@@ -33,11 +33,6 @@ public class RMHandlerTCC extends AbstractRMHandler {
         //DO nothing
     }
 
-    /**
-     * get TCC resource manager
-     *
-     * @return
-     */
     @Override
     protected ResourceManager getResourceManager() {
         return DefaultResourceManager.get().getResourceManager(BranchType.TCC);

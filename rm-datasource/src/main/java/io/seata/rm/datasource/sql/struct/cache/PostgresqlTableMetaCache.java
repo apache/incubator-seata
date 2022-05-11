@@ -19,6 +19,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -59,8 +61,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
-            DatabaseMetaData dbmd = connection.getMetaData();
-            return resultSetMetaToSchema(dbmd, tableName);
+            return resultSetMetaToSchema(connection, tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {
@@ -68,7 +69,8 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
+    private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
+        DatabaseMetaData dbmd = connection.getMetaData();
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
@@ -97,7 +99,10 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             } else {
                 schemaName = schemaName.toLowerCase();
             }
+        } else {
+            schemaName = connection.getSchema();
         }
+
         if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
             tableName = tableName.replaceAll("(^\")|(\"$)", "");
         } else {
@@ -127,6 +132,10 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
+
+                if (tm.getAllColumns().containsKey(col.getColumnName())) {
+                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
 

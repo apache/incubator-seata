@@ -16,6 +16,7 @@
 package io.seata.core.context;
 
 import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -45,6 +46,11 @@ public class RootContext {
      * The constant KEY_XID.
      */
     public static final String KEY_XID = "TX_XID";
+
+    /**
+     * The constant KEY_TIMEOUT.
+     */
+    public static final String KEY_TIMEOUT = "TX_TIMEOUT";
 
     /**
      * The constant MDC_KEY_XID for logback
@@ -102,17 +108,25 @@ public class RootContext {
      */
     public static void bind(@Nonnull String xid) {
         if (StringUtils.isBlank(xid)) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("xid is blank, switch to unbind operation!");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("xid is blank, switch to unbind operation!");
             }
             unbind();
         } else {
             MDC.put(MDC_KEY_XID, xid);
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("bind {}", xid);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("bind {}", xid);
             }
             CONTEXT_HOLDER.put(KEY_XID, xid);
         }
+    }
+
+    public static Integer getTimeout() {
+        return (Integer) CONTEXT_HOLDER.get(KEY_TIMEOUT);
+    }
+
+    public static void setTimeout(Integer timeout) {
+        CONTEXT_HOLDER.put(KEY_TIMEOUT,timeout);
     }
 
     /**
@@ -136,8 +150,8 @@ public class RootContext {
     public static String unbind() {
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
         if (xid != null) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("unbind {} ", xid);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("unbind {} ", xid);
             }
             MDC.remove(MDC_KEY_XID);
         }
@@ -240,7 +254,8 @@ public class RootContext {
      */
     public static void assertNotInGlobalTransaction() {
         if (inGlobalTransaction()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException(String.format("expect has not xid, but was:%s",
+                CONTEXT_HOLDER.get(KEY_XID)));
         }
     }
 

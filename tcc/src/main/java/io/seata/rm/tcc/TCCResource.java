@@ -24,6 +24,7 @@ import io.seata.core.model.Resource;
  * The type Tcc resource.
  *
  * @author zhangsen
+ * @author Yujianfei
  */
 public class TCCResource implements Resource {
 
@@ -44,6 +45,14 @@ public class TCCResource implements Resource {
     private String rollbackMethodName;
 
     private Method rollbackMethod;
+
+    private Class<?>[] commitArgsClasses;
+
+    private Class<?>[] rollbackArgsClasses;
+
+    private String[] phaseTwoCommitKeys;
+
+    private String[] phaseTwoRollbackKeys;
 
     @Override
     public String getResourceGroupId() {
@@ -213,6 +222,70 @@ public class TCCResource implements Resource {
         this.rollbackMethodName = rollbackMethodName;
     }
 
+    /**
+     * get commit method args
+     * @return class array
+     */
+    public Class<?>[] getCommitArgsClasses() {
+        return commitArgsClasses;
+    }
+
+    /**
+     * set commit method args
+     * @param commitArgsClasses commitArgsClasses
+     */
+    public void setCommitArgsClasses(Class<?>[] commitArgsClasses) {
+        this.commitArgsClasses = commitArgsClasses;
+    }
+
+    /**
+     * get rollback method args
+     * @return class array
+     */
+    public Class<?>[] getRollbackArgsClasses() {
+        return rollbackArgsClasses;
+    }
+
+    /**
+     * set rollback method args
+     * @param rollbackArgsClasses rollbackArgsClasses
+     */
+    public void setRollbackArgsClasses(Class<?>[] rollbackArgsClasses) {
+        this.rollbackArgsClasses = rollbackArgsClasses;
+    }
+
+    /**
+     * get commit method args key
+     * @return keys array
+     */
+    public String[] getPhaseTwoCommitKeys() {
+        return phaseTwoCommitKeys;
+    }
+
+    /**
+     * set commit method args key
+     * @param phaseTwoCommitKeys phaseTwoCommitKeys
+     */
+    public void setPhaseTwoCommitKeys(String[] phaseTwoCommitKeys) {
+        this.phaseTwoCommitKeys = phaseTwoCommitKeys;
+    }
+
+    /**
+     * get rollback method args keys
+     * @return keys array
+     */
+    public String[] getPhaseTwoRollbackKeys() {
+        return phaseTwoRollbackKeys;
+    }
+
+    /**
+     * set rollback method args key
+     * @param phaseTwoRollbackKeys phaseTwoRollbackKeys
+     */
+    public void setPhaseTwoRollbackKeys(String[] phaseTwoRollbackKeys) {
+        this.phaseTwoRollbackKeys = phaseTwoRollbackKeys;
+    }
+
     @Override
     public int hashCode() {
         return actionName.hashCode();
@@ -225,4 +298,5 @@ public class TCCResource implements Resource {
         }
         return this.actionName.equals(((TCCResource)obj).actionName);
     }
+
 }

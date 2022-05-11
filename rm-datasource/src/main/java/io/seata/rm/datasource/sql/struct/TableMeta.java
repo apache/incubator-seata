@@ -17,14 +17,15 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.rm.datasource.ColumnUtils;
 
 /**
@@ -38,12 +39,12 @@ public class TableMeta {
     /**
      * key: column name
      */
+    private final Map<String, ColumnMeta> allColumns = new LowerCaseLinkHashMap<>();
 
-    private Map<String, ColumnMeta> allColumns = new LinkedHashMap<>();
     /**
      * key: index name
      */
-    private Map<String, IndexMeta> allIndexes = new LinkedHashMap<>();
+    private final Map<String, IndexMeta> allIndexes = new LowerCaseLinkHashMap<>();
 
     /**
      * Gets table name.
@@ -144,9 +145,19 @@ public class TableMeta {
     }
 
     /**
+     * Gets all the on update columns only name.
+     *
+     * @return all the on update columns only name
+     */
+    public List<String> getOnUpdateColumnsOnlyName() {
+        return allColumns.values().stream().filter(ColumnMeta::isOnUpdate).map(ColumnMeta::getColumnName).collect(Collectors.toList());
+    }
+
+    /**
      * Gets add escape pk name.
-     * @param dbType
-     * @return
+     *
+     * @param dbType the db type
+     * @return escape pk name list
      */
     public List<String> getEscapePkNameList(String dbType) {
         return ColumnUtils.addEscape(getPrimaryKeyOnlyName(), dbType);

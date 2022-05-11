@@ -1,0 +1,137 @@
+{
+    "Name": "simpleLoopTestStateMachine",
+    "Comment": "带循环参数的测试状态机定义",
+    "StartState": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "CompensateState": "CompensateFirstState",
+            "Loop": {
+                "Parallel": 3,
+                "Collection": "$.[collection]",
+                "ElementVariableName": "element",
+                "ElementIndexName": "loopCounter",
+                "CompletionCondition": "[nrOfCompletedInstances] == ([collection].size()-4)"
+            },
+            "Input": [
+                {
+                    "loopCounter": "$.[loopCounter]",
+                    "element": "$.[element]",
+                    "throwException": "$.[fooThrowException]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Next": "ChoiceState"
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression": "[loopResult].?[#this[fooResult] == null].size() == 0 && [a] == 1",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression": "[loopResult].?[#this[fooResult] == null].size() == 0 && [a] == 2",
+                    "Next":"CallSubStateMachine"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar",
+            "CompensateState": "CompensateSecondState",
+            "Loop": {
+                "Parallel": 3,
+                "Collection": "$.[collection]",
+                "ElementVariableName": "element",
+                "CompletionCondition": "[nrOfCompletedInstances] / [nrOfInstances] >= 0.4",
+                "ElementIndexName": "loopCounter"
+            },
+            "Input": [
+                {
+                    "loopCounter": "$.[loopCounter]",
+                    "loopElement": "$.[element]",
+                    "throwException": "$.[barThrowException]"
+                }
+            ],
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "io.seata.saga.engine.mock.DemoException"
+                    ],
+                    "Next": "CompensationTriggerTest"
+                }
+            ]
+        },
+        "CallSubStateMachine": {
+            "Type": "SubStateMachine",
+            "StateMachineName": "simpleCompensationStateMachine",
+            "Loop": {
+                "Parallel": 3,
+                "Collection": "$.[collection]",
+                "ElementVariableName": "element",
+                "CompletionCondition": "[nrOfCompletedInstances] / [nrOfInstances] >= 0.4",
+                "ElementIndexName": "loopCounter"
+            },
+            "Input": [
+                {
+                    "a": 1,
+                    "collection": "$.[collection]",
+                    "loopCounter": "$.[loopCounter]",
+                    "element": "$.[element]",
+                    "barThrowException": "$.[barThrowException]",
+                    "fooThrowException": "$.[fooThrowException]",
+                    "compensateFooThrowException": "$.[compensateFooThrowException]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Next": "Succeed"
+        },
+        "CompensateFirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "compensateFoo",
+            "Input": [
+                {
+                    "compensateFooInput": "$.[fooResult]",
+                    "throwException": "$.[compensateFooThrowException]",
+                    "loopCounter": "$.[loopCounter]",
+                    "element": "$.[element]"
+                }
+            ]
+        },
+        "CompensateSecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "compensateBar",
+            "Input": [
+                {
+                    "compensateBarInput": "$.[barResult]",
+                    "loopCounter": "$.[loopCounter]",
+                    "loopElement": "$.[element]"
+                }
+            ]
+        },
+        "CompensationTriggerTest": {
+            "Type": "CompensationTrigger",
+            "Next": "Fail"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}

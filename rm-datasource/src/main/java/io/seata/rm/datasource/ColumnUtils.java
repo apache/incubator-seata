@@ -45,6 +45,9 @@ public final class ColumnUtils {
          * mysql series escape
          */
         MYSQL('`');
+        /**
+         * The Value.
+         */
         public final char value;
 
         Escape(char value) {
@@ -57,7 +60,7 @@ public final class ColumnUtils {
      *
      * @param cols   the cols
      * @param dbType the db type
-     * @return
+     * @return list
      */
     public static List<String> delEscape(List<String> cols, String dbType) {
         // sql standard
@@ -96,7 +99,7 @@ public final class ColumnUtils {
      *
      * @param colName the column name
      * @param dbType  the db type
-     * @return
+     * @return string string
      */
     public static String delEscape(String colName, String dbType) {
         String newColName = delEscape(colName, Escape.STANDARD);
@@ -111,7 +114,7 @@ public final class ColumnUtils {
      *
      * @param colName the column name
      * @param escape  the escape
-     * @return
+     * @return string string
      */
     public static String delEscape(String colName, Escape escape) {
         if (colName == null || colName.isEmpty()) {
@@ -156,7 +159,7 @@ public final class ColumnUtils {
      *
      * @param cols   the column name list
      * @param dbType the db type
-     * @return
+     * @return list list
      */
     public static List<String> addEscape(List<String> cols, String dbType) {
         if (CollectionUtils.isEmpty(cols)) {

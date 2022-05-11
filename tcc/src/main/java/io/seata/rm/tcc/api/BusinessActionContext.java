@@ -17,6 +17,10 @@ package io.seata.rm.tcc.api;
 
 import java.io.Serializable;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import io.seata.rm.tcc.interceptor.ActionContextUtil;
 
 /**
  * The type Business action context.
@@ -31,6 +35,24 @@ public class BusinessActionContext implements Serializable {
 
     private String actionName;
 
+    /**
+     * delay branch report while sharing params to tcc phase 2 to enhance performance
+     *
+     * @see io.seata.rm.tcc.api.BusinessActionContextUtil
+     * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction
+     */
+    private Boolean isDelayReport;
+
+    /**
+     * mark that actionContext has been updated by business
+     *
+     * @see io.seata.rm.tcc.api.BusinessActionContextUtil
+     */
+    private Boolean isUpdated;
+
+    /**
+     * action context
+     */
     private Map<String, Object> actionContext;
 
     /**
@@ -49,7 +71,7 @@ public class BusinessActionContext implements Serializable {
     public BusinessActionContext(String xid, String branchId, Map<String, Object> actionContext) {
         this.xid = xid;
         this.branchId = branchId;
-        this.setActionContext(actionContext);
+        this.actionContext = actionContext;
     }
 
     /**
@@ -58,8 +80,23 @@ public class BusinessActionContext implements Serializable {
      * @param key the key
      * @return the action context
      */
+    @Nullable
     public Object getActionContext(String key) {
         return actionContext.get(key);
+    }
+
+    /**
+     * Gets action context.
+     *
+     * @param key         the key
+     * @param targetClazz the target class
+     * @param <T>         the target type
+     * @return the action context of the target type
+     */
+    @Nullable
+    public <T> T getActionContext(String key, @Nonnull Class<T> targetClazz) {
+        Object value = actionContext.get(key);
+        return ActionContextUtil.convertActionContext(key, value, targetClazz);
     }
 
     /**
@@ -78,6 +115,15 @@ public class BusinessActionContext implements Serializable {
      */
     public void setBranchId(long branchId) {
         this.branchId = String.valueOf(branchId);
+    }
+
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
+    public void setBranchId(String branchId) {
+        this.branchId = branchId;
     }
 
     /**
@@ -117,15 +163,6 @@ public class BusinessActionContext implements Serializable {
     }
 
     /**
-     * Sets branch id.
-     *
-     * @param branchId the branch id
-     */
-    public void setBranchId(String branchId) {
-        this.branchId = branchId;
-    }
-
-    /**
      * Gets action name.
      *
      * @return the action name
@@ -143,13 +180,55 @@ public class BusinessActionContext implements Serializable {
         this.actionName = actionName;
     }
 
+    /**
+     * add actionContext
+     *
+     * @param key   the action context's key
+     * @param value biz value
+     * @return the action context is changed
+     * @see BusinessActionContextUtil // the TCC API utils
+     * @deprecated Don't use this method in the `Try` method. Please use {@link BusinessActionContextUtil#addContext}
+     */
+    @Deprecated
+    public boolean addActionContext(String key, Object value) {
+        if (value == null) {
+            return false;
+        }
+
+        Object previousValue = this.actionContext.put(key, value);
+        boolean isChanged = !value.equals(previousValue);
+        if (isChanged) {
+            this.setUpdated(true);
+        }
+        return isChanged;
+    }
+
+    public Boolean getDelayReport() {
+        return isDelayReport;
+    }
+
+    public void setDelayReport(Boolean delayReport) {
+        isDelayReport = delayReport;
+    }
+
+    public Boolean getUpdated() {
+        return isUpdated;
+    }
+
+    public void setUpdated(Boolean updated) {
+        isUpdated = updated;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[xid:").append(xid)
-            .append(",branch_Id:").append(branchId).append(",action_name:").append(actionName)
-            .append(",action_context:")
-            .append(actionContext).append("]");
+                .append(",branch_Id:").append(branchId)
+                .append(",action_name:").append(actionName)
+                .append(",is_delay_report:").append(isDelayReport)
+                .append(",is_updated:").append(isDelayReport)
+                .append(",action_context:")
+                .append(actionContext).append("]");
         return sb.toString();
     }
 }

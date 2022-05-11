@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationListener=\
+io.seata.server.ServerApplicationListener

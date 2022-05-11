@@ -15,13 +15,20 @@
  */
 package io.seata.core.exception;
 
+import java.util.Objects;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.model.LockStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type Abstract exception handler.
@@ -54,33 +61,39 @@ public abstract class AbstractExceptionHandler {
         void execute(T request, S response) throws TransactionException;
 
         /**
-         * on Success
+         * On success.
          *
-         * @param request
-         * @param response
+         * @param request  the request
+         * @param response the response
          */
         void onSuccess(T request, S response);
 
         /**
          * onTransactionException
          *
-         * @param request
-         * @param response
-         * @param exception
+         * @param request   the request
+         * @param response  the response
+         * @param exception the exception
          */
         void onTransactionException(T request, S response, TransactionException exception);
 
         /**
          * on other exception
          *
-         * @param request
-         * @param response
-         * @param exception
+         * @param request   the request
+         * @param response  the response
+         * @param exception the exception
          */
         void onException(T request, S response, Exception exception);
 
     }
 
+    /**
+     * The type Abstract callback.
+     *
+     * @param <T> the type parameter
+     * @param <S> the type parameter
+     */
     public abstract static class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
         implements Callback<T, S> {
 
@@ -107,6 +120,8 @@ public abstract class AbstractExceptionHandler {
     /**
      * Exception handle template.
      *
+     * @param <T>      the type parameter
+     * @param <S>      the type parameter
      * @param callback the callback
      * @param request  the request
      * @param response the response
@@ -116,7 +131,15 @@ public abstract class AbstractExceptionHandler {
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
-            LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
+            if (Objects.equals(LockKeyConflict, tex.getCode())) {
+                LOGGER.info("this request cannot acquire global lock, you can let Seata retry by setting config [{}] = false or manually retry by yourself. request: {}",
+                        ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, request);
+            } else if (Objects.equals(LockKeyConflictFailFast, tex.getCode())) {
+                LOGGER.info("this request cannot acquire global lock, decide fail-fast because LockStatus is {}. request: {}",
+                        LockStatus.Rollbacking, request);
+            } else {
+                LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
+            }
             callback.onTransactionException(request, response, tex);
         } catch (RuntimeException rex) {
             LOGGER.error("Catch RuntimeException while do RPC, request: {}", request, rex);
