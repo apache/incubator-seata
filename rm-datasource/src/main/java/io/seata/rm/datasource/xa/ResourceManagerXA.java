@@ -118,22 +118,17 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                 }
             } catch (XAException | SQLException sqle) {
                 if (sqle instanceof XAException) {
-                    int errorCode = ((XAException)sqle).errorCode;
-                    // -3 An XA control connection could not be created; -4 The XA transaction has ended
-                    boolean rationalFail = errorCode == XAException.XAER_NOTA || errorCode == XAException.XAER_RMERR;
-                    if (rationalFail) {
-                        try {
-                            if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
-                                if (committed) {
-                                    return BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable;
-                                } else {
-                                    return BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable;
-                                }
+                    try {
+                        if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
+                            if (committed) {
+                                return BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable;
+                            } else {
+                                return BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable;
                             }
-                        } finally {
-                            BaseDataSourceResource.setBranchStatus(xaBranchXid.toString(),
-                                committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
                         }
+                    } finally {
+                        BaseDataSourceResource.setBranchStatus(xaBranchXid.toString(),
+                            committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
                     }
                 }
                 if (committed) {
