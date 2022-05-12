@@ -18,6 +18,7 @@ package io.seata.rm.datasource.xa;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.PooledConnection;
+import javax.sql.XADataSource;
 import io.seata.rm.BaseDataSourceResource;
 
 /**
@@ -28,6 +29,8 @@ import io.seata.rm.BaseDataSourceResource;
 public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<ConnectionProxyXA> {
 
     protected static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT_XA";
+
+    protected XADataSource xaDataSource;
 
     /**
      * Get a ConnectionProxyXA instance for finishing XA branch(XA commit/XA rollback)
@@ -48,6 +51,8 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
     }
 
     protected abstract Connection getConnectionProxyXA() throws SQLException;
+
+    public abstract XADataSource getXADataSource() throws SQLException;
 
     /**
      * Force close the physical connection kept for XA branch of given XAXid.

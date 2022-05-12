@@ -143,7 +143,7 @@ public class DataSourceProxyXATest {
         druidDataSource.setPassword("123456");
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
 
-        Assertions.assertTrue(dataSourceProxyXA.getTargetDataSource() instanceof SQLServerXADataSource);
+        Assertions.assertTrue(dataSourceProxyXA.getXADataSource() instanceof SQLServerXADataSource);
     }
 
     @AfterAll

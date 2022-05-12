@@ -71,4 +71,10 @@ public class DataSourceProxyXANative extends AbstractDataSourceProxyXA {
     protected Connection getConnectionProxyXA() throws SQLException {
         return getConnection();
     }
+
+    @Override
+    public XADataSource getXADataSource() throws SQLException {
+        return null;
+    }
+
 }

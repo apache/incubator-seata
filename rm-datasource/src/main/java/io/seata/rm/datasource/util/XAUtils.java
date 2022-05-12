@@ -16,10 +16,13 @@
 package io.seata.rm.datasource.util;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
@@ -30,6 +33,8 @@ import org.mariadb.jdbc.MariaDbConnection;
 import org.mariadb.jdbc.MariaXaConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.sqlparser.util.JdbcConstants.SQL_SERVER;
 
 public class XAUtils {
 
@@ -86,6 +91,31 @@ public class XAUtils {
                 throw new SQLException(e);
             }
         }
-
     }
+
+    public static XADataSource createXADatasource(BaseDataSourceResource dataSource){
+        if (SQL_SERVER.equalsIgnoreCase(dataSource.getDbType())) {
+            try (Connection connection = dataSource.getConnection()) {
+                String username = connection.getMetaData().getUserName();
+                DataSource targetDatasource = dataSource.getTargetDataSource();
+                Method getPassword = targetDatasource.getClass().getMethod("getPassword");
+                Object pwd = getPassword.invoke(targetDatasource);
+                if (pwd == null) {
+                    throw new SQLException("failed to get data source password");
+                }
+                String password = String.valueOf(pwd);
+                Class<?> sqlServerXADataSource = Class.forName("com.microsoft.sqlserver.jdbc.SQLServerXADataSource");
+                XADataSource xaDataSource = (XADataSource)sqlServerXADataSource.newInstance();
+                Method setUser = sqlServerXADataSource.getMethod("setUser", String.class);
+                setUser.invoke(xaDataSource, username);
+                Method setPassword = sqlServerXADataSource.getMethod("setPassword", String.class);
+                setPassword.invoke(xaDataSource, password);
+                return xaDataSource;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create sqlServer XA DataSource", e);
+            }
+        }
+        return null;
+    }
+
 }
