@@ -93,7 +93,7 @@ public class XAUtils {
         }
     }
 
-    public static XADataSource createXADatasource(BaseDataSourceResource dataSource){
+    public static XADataSource createXADatasource(BaseDataSourceResource dataSource) {
         if (SQL_SERVER.equalsIgnoreCase(dataSource.getDbType())) {
             try (Connection connection = dataSource.getConnection()) {
                 String username = connection.getMetaData().getUserName();

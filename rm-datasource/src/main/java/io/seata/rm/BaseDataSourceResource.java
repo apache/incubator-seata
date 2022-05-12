@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import javax.sql.XADataSource;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.seata.common.exception.ShouldNeverHappenException;
