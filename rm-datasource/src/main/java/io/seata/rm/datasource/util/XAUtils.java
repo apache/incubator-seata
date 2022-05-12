@@ -106,6 +106,8 @@ public class XAUtils {
                 String password = String.valueOf(pwd);
                 Class<?> sqlServerXADataSource = Class.forName("com.microsoft.sqlserver.jdbc.SQLServerXADataSource");
                 XADataSource xaDataSource = (XADataSource)sqlServerXADataSource.newInstance();
+                Method setUrl = sqlServerXADataSource.getMethod("setURL", String.class);
+                setUrl.invoke(xaDataSource, connection.getMetaData().getURL());
                 Method setUser = sqlServerXADataSource.getMethod("setUser", String.class);
                 setUser.invoke(xaDataSource, username);
                 Method setPassword = sqlServerXADataSource.getMethod("setPassword", String.class);
