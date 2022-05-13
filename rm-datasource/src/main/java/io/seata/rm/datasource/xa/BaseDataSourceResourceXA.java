@@ -29,8 +29,8 @@ import io.seata.rm.BaseDataSourceResource;
 /**
  * @author jianbin.chen
  */
-public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseDataSourceResource implements Holder<T>,
-	XADataSource {
+public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseDataSourceResource
+    implements Holder<T>, XADataSource {
 
     private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
         CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
@@ -93,4 +93,5 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
     public void setXaDataSource(XADataSource xaDataSource) {
         this.xaDataSource = xaDataSource;
     }
+
 }
