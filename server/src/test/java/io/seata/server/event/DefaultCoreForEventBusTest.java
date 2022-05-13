@@ -39,6 +39,7 @@ import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -60,7 +61,10 @@ public class DefaultCoreForEventBusTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) throws InterruptedException {
+        StoreUtil.deleteDataFile();
+        SessionHolder.destroy();
         Thread.sleep(5000);
+        SessionHolder.init(null);
         Optional.ofNullable(DefaultCoordinator.getInstance()).ifPresent(DefaultCoordinator::destroy);
         Optional.ofNullable(MetricsManager.get().getRegistry()).ifPresent(Registry::clearUp);
     }
@@ -107,7 +111,6 @@ public class DefaultCoreForEventBusTest {
         }
         RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(remotingServer);
-        SessionHolder.init(null);
         coordinator.init();
         GlobalTransactionEventSubscriber subscriber = null;
         try {
