@@ -63,9 +63,6 @@ public class DefaultCoreForEventBusTest {
     public static void setUp(ApplicationContext context) throws InterruptedException {
         StoreUtil.deleteDataFile();
         Thread.sleep(5000);
-        SessionHolder.init(null);
-        Optional.ofNullable(DefaultCoordinator.getInstance()).ifPresent(DefaultCoordinator::destroy);
-        Optional.ofNullable(MetricsManager.get().getRegistry()).ifPresent(Registry::clearUp);
     }
 
     @Test
@@ -114,7 +111,7 @@ public class DefaultCoreForEventBusTest {
         GlobalTransactionEventSubscriber subscriber = null;
         try {
             DefaultCore core = new DefaultCore(remotingServer);
-
+            SessionHolder.init(null);
             subscriber = new GlobalTransactionEventSubscriber();
             EventBusManager.get().unregisterAll();
             EventBusManager.get().register(subscriber);
