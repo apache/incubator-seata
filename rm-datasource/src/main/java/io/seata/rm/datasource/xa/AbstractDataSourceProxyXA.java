@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.PooledConnection;
 import javax.sql.XADataSource;
-import io.seata.rm.BaseDataSourceResource;
 
 /**
  * Abstract DataSource proxy for XA mode.

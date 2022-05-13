@@ -51,36 +51,36 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
         }
     }
 
-	@Override
-	public T hold(String key, T value) {
-		if (value.isHeld()) {
-			T x = keeper.get(key);
-			if (x != value) {
-				throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x +
-					"] but[" + value + "] is also kept with the same key[" + key + "]");
-			}
-			return value;
-		}
-		T x = keeper.put(key, value);
-		value.setHeld(true);
-		return x;
-	}
+    @Override
+    public T hold(String key, T value) {
+        if (value.isHeld()) {
+            T x = keeper.get(key);
+            if (x != value) {
+                throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x + "] but[" + value
+                    + "] is also kept with the same key[" + key + "]");
+            }
+            return value;
+        }
+        T x = keeper.put(key, value);
+        value.setHeld(true);
+        return x;
+    }
 
-	@Override
-	public T release(String key, T value) {
-		T x = keeper.remove(key);
-		if (x != value) {
-			throw new ShouldNeverHappenException("something wrong with keeper, released[" + x +
-				"] but[" + value + "] is wanted with key[" + key + "]");
-		}
-		value.setHeld(false);
-		return x;
-	}
+    @Override
+    public T release(String key, T value) {
+        T x = keeper.remove(key);
+        if (x != value) {
+            throw new ShouldNeverHappenException(
+                "something wrong with keeper, released[" + x + "] but[" + value + "] is wanted with key[" + key + "]");
+        }
+        value.setHeld(false);
+        return x;
+    }
 
-	@Override
-	public T lookup(String key) {
-		return keeper.get(key);
-	}
+    @Override
+    public T lookup(String key) {
+        return keeper.get(key);
+    }
 
     public Map<String, T> getKeeper() {
         return keeper;
