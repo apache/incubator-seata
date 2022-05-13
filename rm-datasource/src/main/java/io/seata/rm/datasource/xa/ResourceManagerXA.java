@@ -29,7 +29,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.datasource.AbstractDataSourceCacheResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
             @Override
             public void run() {
                 for (Map.Entry<String, Resource> entry : dataSourceCache.entrySet()) {
-                    BaseDataSourceResource resource = (BaseDataSourceResource) entry.getValue();
+                    BaseDataSourceResourceXA resource = (BaseDataSourceResourceXA) entry.getValue();
                     Map<String, ConnectionProxyXA> keeper = resource.getKeeper();
                     for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
                         ConnectionProxyXA connection = connectionEntry.getValue();
@@ -127,7 +126,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                             }
                         }
                     } finally {
-                        BaseDataSourceResource.setBranchStatus(xaBranchXid.toString(),
+                        BaseDataSourceResourceXA.setBranchStatus(xaBranchXid.toString(),
                             committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
                     }
                 }

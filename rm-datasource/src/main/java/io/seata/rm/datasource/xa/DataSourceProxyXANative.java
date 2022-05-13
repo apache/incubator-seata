@@ -49,13 +49,13 @@ public class DataSourceProxyXANative extends AbstractDataSourceProxyXA {
 
     @Override
     public Connection getConnection() throws SQLException {
-        XAConnection xaConnection = xaDataSource.getXAConnection();
+        XAConnection xaConnection = getXAConnection();
         return getConnectionProxy(xaConnection);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        XAConnection xaConnection = xaDataSource.getXAConnection(username, password);
+        XAConnection xaConnection = getXAConnection(username,password);
         return getConnectionProxy(xaConnection);
     }
 
@@ -74,7 +74,17 @@ public class DataSourceProxyXANative extends AbstractDataSourceProxyXA {
 
     @Override
     public XADataSource getXADataSource() throws SQLException {
-        return null;
+        return this.xaDataSource;
+    }
+
+    @Override
+    public XAConnection getXAConnection() throws SQLException {
+        return xaDataSource.getXAConnection();
+    }
+
+    @Override
+    public XAConnection getXAConnection(String user, String password) throws SQLException {
+        return xaDataSource.getXAConnection(user, password);
     }
 
 }

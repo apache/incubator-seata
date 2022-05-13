@@ -26,11 +26,9 @@ import io.seata.rm.BaseDataSourceResource;
  *
  * @author sharajava
  */
-public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<ConnectionProxyXA> {
+public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResourceXA<ConnectionProxyXA> {
 
     protected static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT_XA";
-
-    protected XADataSource xaDataSource;
 
     /**
      * Get a ConnectionProxyXA instance for finishing XA branch(XA commit/XA rollback)
@@ -70,7 +68,6 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
             // Force close the physical connection
             physicalConn.close();
         }
-
-
     }
+
 }

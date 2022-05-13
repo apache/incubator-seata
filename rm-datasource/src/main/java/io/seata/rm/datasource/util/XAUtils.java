@@ -27,7 +27,7 @@ import javax.transaction.xa.XAException;
 import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.PGUtils;
-import io.seata.rm.BaseDataSourceResource;
+import io.seata.rm.datasource.xa.BaseDataSourceResourceXA;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.mariadb.jdbc.MariaDbConnection;
 import org.mariadb.jdbc.MariaXaConnection;
@@ -44,7 +44,7 @@ public class XAUtils {
         return JdbcUtils.getDbType(jdbcUrl, driverClassName);
     }
 
-    public static XAConnection createXAConnection(Connection physicalConn, BaseDataSourceResource dataSourceResource) throws SQLException {
+    public static XAConnection createXAConnection(Connection physicalConn, BaseDataSourceResourceXA dataSourceResource) throws SQLException {
         return createXAConnection(physicalConn, dataSourceResource.getDriver(), dataSourceResource.getDbType());
     }
 
@@ -93,7 +93,8 @@ public class XAUtils {
         }
     }
 
-    public static XADataSource createXADatasource(BaseDataSourceResource dataSource) {
+    public static XADataSource createXADatasource(BaseDataSourceResourceXA dataSource) {
+        // DruidXADataSource not support SqlServer XA
         if (SQL_SERVER.equalsIgnoreCase(dataSource.getDbType())) {
             try (Connection connection = dataSource.getConnection()) {
                 String username = connection.getMetaData().getUserName();
@@ -115,6 +116,11 @@ public class XAUtils {
                 return xaDataSource;
             } catch (Exception e) {
                 throw new RuntimeException("Failed to create sqlServer XA DataSource", e);
+            }
+        } else {
+            if (dataSource.getTargetDataSource() instanceof XADataSource) {
+                // Use DruidXADataSource or MysqlXADataSource or MariaDbDataSource or OracleXADataSource .....
+                return (XADataSource)dataSource.getTargetDataSource();
             }
         }
         return null;

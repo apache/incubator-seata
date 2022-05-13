@@ -92,7 +92,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
             xaConnection = XAUtils.createXAConnection(physicalConn, this);
         } else {
             connection.close();
-            xaConnection = xaDataSource.getXAConnection();
+            xaConnection = getXAConnection();
             connection = xaConnection.getConnection();
         }
         ConnectionProxyXA connectionProxyXA =
@@ -101,4 +101,14 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         return connectionProxyXA;
     }
 
+    @Override
+    public XAConnection getXAConnection() throws SQLException {
+        return this.xaDataSource.getXAConnection();
+    }
+
+    @Override
+    public XAConnection getXAConnection(String user, String password) throws SQLException {
+        return this.xaDataSource.getXAConnection(user, password);
+    }
+    
 }

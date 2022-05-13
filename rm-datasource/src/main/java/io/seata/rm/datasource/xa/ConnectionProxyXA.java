@@ -28,7 +28,6 @@ import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
-import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param resource The corresponding Resource(DataSource proxy) from which the connections was created.
      * @param xid Seata global transaction xid.
      */
-    public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource, String xid) {
+    public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResourceXA resource, String xid) {
         super(originalConnection, xaConnection, resource, xid);
     }
 
@@ -346,7 +345,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private void termination(String xaBranchXid) throws SQLException {
         // if it is not empty, the resource will hang and need to be terminated early
-        BranchStatus branchStatus = BaseDataSourceResource.getBranchStatus(xaBranchXid);
+        BranchStatus branchStatus = BaseDataSourceResourceXA.getBranchStatus(xaBranchXid);
         if (branchStatus != null) {
             releaseIfNecessary();
             throw new SQLException("failed xa branch " + xid
