@@ -61,7 +61,6 @@ public class DefaultCoreForEventBusTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) throws InterruptedException {
-        SessionHolder.destroy();
         StoreUtil.deleteDataFile();
         Thread.sleep(5000);
         SessionHolder.init(null);
