@@ -15,17 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -33,6 +22,10 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import java.util.*;
 
 import static io.seata.common.Constants.AUTO_COMMIT;
 import static io.seata.common.Constants.SKIP_CHECK_LOCK;
@@ -43,7 +36,7 @@ import static io.seata.common.Constants.SKIP_CHECK_LOCK;
  * @author sharajava
  */
 public class ConnectionContext {
-    private static final Savepoint    DEFAULT_SAVEPOINT = new Savepoint() {
+    private static final Savepoint DEFAULT_SAVEPOINT = new Savepoint() {
         @Override
         public int getSavepointId() throws SQLException {
             return 0;
@@ -113,6 +106,7 @@ public class ConnectionContext {
 
     /**
      * Append savepoint
+     *
      * @param savepoint the savepoint
      */
     void appendSavepoint(Savepoint savepoint) {
@@ -362,6 +356,7 @@ public class ConnectionContext {
 
     /**
      * Get the savepoints after target savepoint(include the param savepoint)
+     *
      * @param savepoint the target savepoint
      * @return after savepoints
      */
@@ -381,7 +376,7 @@ public class ConnectionContext {
     private boolean allBeforeImageEmpty() {
         for (List<SQLUndoLog> sqlUndoLogs : sqlUndoItemsBuffer.values()) {
             for (SQLUndoLog undoLog : sqlUndoLogs) {
-                if (null == undoLog.getBeforeImage() || undoLog.getBeforeImage().size() != 0) {
+                if (null != undoLog.getBeforeImage() && undoLog.getBeforeImage().size() != 0) {
                     return false;
                 }
             }
