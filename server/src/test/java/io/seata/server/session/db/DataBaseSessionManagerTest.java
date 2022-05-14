@@ -37,6 +37,7 @@ import io.seata.server.storage.db.session.DataBaseSessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -600,6 +601,9 @@ public class DataBaseSessionManagerTest {
         }
     }
 
-
+    @AfterAll
+    public static void setDown() throws SQLException {
+        dataSource.close();
+    }
 
 }
