@@ -544,6 +544,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         // 3. third destroy SessionHolder
         SessionHolder.destroy();
+        instance = null;
     }
 
     /**
