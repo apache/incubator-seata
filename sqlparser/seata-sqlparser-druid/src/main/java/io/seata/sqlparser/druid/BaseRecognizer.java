@@ -134,13 +134,6 @@ public abstract class BaseRecognizer implements SQLRecognizer {
             }
 
             @Override
-            public boolean visit(SQLReplaceStatement x) {
-                //just like: replace into t (id,dr) values (1,'2'), (2,'3')
-                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-            }
-
-            @Override
             public boolean visit(SQLMergeStatement x) {
                 //just like: merge into ... WHEN MATCHED THEN ...
                 throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x

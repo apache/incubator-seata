@@ -15,7 +15,6 @@ import java.util.List;
  * @author jingliu_xiong@foxmail.com
  */
 public class MySQLReplaceRecognizer extends BaseMySQLRecognizer implements SQLReplaceRecognizer {
-
     private final SQLReplaceStatement ast;
 
     /**
