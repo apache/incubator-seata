@@ -25,6 +25,7 @@
     <version>${revision}</version>
 
     <name>Seata Build ${project.version}</name>
+    <description>Seata Build Pom</description>
 
     <licenses>
         <license>
