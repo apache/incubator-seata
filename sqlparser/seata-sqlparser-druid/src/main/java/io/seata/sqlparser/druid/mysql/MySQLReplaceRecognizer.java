@@ -87,7 +87,7 @@ public class MySQLReplaceRecognizer extends BaseMySQLRecognizer implements SQLRe
     @Override
     public String getSelectQuery() {
         String originSql = this.ast.getQuery().toString();
-        if (originSql.equals("")) {
+        if ("".equals(originSql)) {
             return originSql;
         }
         originSql = originSql.trim().replace("\n\t", " ");

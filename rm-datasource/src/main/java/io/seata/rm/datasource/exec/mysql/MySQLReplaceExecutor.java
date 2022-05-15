@@ -345,5 +345,4 @@ public class MySQLReplaceExecutor extends MySQLInsertExecutor implements Default
         sqlUndoLog.setAfterImage(afterImage);
         return sqlUndoLog;
     }
-
 }
