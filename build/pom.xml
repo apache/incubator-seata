@@ -290,7 +290,7 @@
         <profile>
             <id>release</id>
             <properties>
-                <image.publish.skip>true</image.publish.skip>
+                <image.publish.skip>false</image.publish.skip>
                 <image.tags>${project.version},latest</image.tags>
             </properties>
             <build>
