@@ -25,6 +25,7 @@
     <version>${revision}</version>
 
     <name>Seata Build ${project.version}</name>
+    <description>Seata Build Pom</description>
 
     <licenses>
         <license>
@@ -289,7 +290,7 @@
         <profile>
             <id>release</id>
             <properties>
-                <image.publish.skip>false</image.publish.skip>
+                <image.publish.skip>true</image.publish.skip>
                 <image.tags>${project.version},latest</image.tags>
             </properties>
             <build>
