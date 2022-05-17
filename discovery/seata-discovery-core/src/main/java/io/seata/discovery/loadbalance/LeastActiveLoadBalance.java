@@ -29,10 +29,10 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.LEAST_ACTIVE_LOA
  * @author ph3636
  */
 @LoadLevel(name = LEAST_ACTIVE_LOAD_BALANCE)
-public class LeastActiveLoadBalance extends AbstractLoadBalance {
+public class LeastActiveLoadBalance implements LoadBalance {
 
     @Override
-    protected <T> T doSelect(List<T> invokers, String xid) {
+    public <T> T select(List<T> invokers, String xid) {
         int length = invokers.size();
         long leastActive = -1;
         int leastCount = 0;

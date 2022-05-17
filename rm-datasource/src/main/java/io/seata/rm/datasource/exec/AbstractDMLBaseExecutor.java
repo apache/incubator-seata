@@ -98,8 +98,11 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         }
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        TableRecords afterImage = afterImage(beforeImage);
-        prepareUndoLog(beforeImage, afterImage);
+        int updateCount = statementProxy.getUpdateCount();
+        if (updateCount > 0) {
+            TableRecords afterImage = afterImage(beforeImage);
+            prepareUndoLog(beforeImage, afterImage);
+        }
         return result;
     }
 
@@ -172,10 +175,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     protected abstract TableRecords afterImage(TableRecords beforeImage) throws SQLException;
 
     private static class LockRetryPolicy extends ConnectionProxy.LockRetryPolicy {
-        private final ConnectionProxy connection;
 
         LockRetryPolicy(final ConnectionProxy connection) {
-            this.connection = connection;
+            super(connection);
         }
 
         @Override

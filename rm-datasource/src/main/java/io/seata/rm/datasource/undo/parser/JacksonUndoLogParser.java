@@ -15,11 +15,16 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
-import java.util.Arrays;
 import java.io.IOException;
+import java.io.Reader;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
@@ -30,13 +35,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.type.WritableTypeId;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -65,6 +70,11 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
     public static final String NAME = "jackson";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonUndoLogParser.class);
+
+    /**
+     * the zoneId for LocalDateTime
+     */
+    private static ZoneId zoneId = ZoneId.systemDefault();
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -100,6 +110,16 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
      */
     private final JsonDeserializer clobDeserializer = new ClobDeserializer();
 
+    /**
+     * customize serializer of java.time.LocalDateTime
+     */
+    private final JsonSerializer localDateTimeSerializer = new LocalDateTimeSerializer();
+
+    /**
+     * customize deserializer of java.time.LocalDateTime
+     */
+    private final JsonDeserializer localDateTimeDeserializer = new LocalDateTimeDeserializer();
+
     @Override
     public void init() {
         try {
@@ -130,6 +150,8 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         module.addDeserializer(SerialBlob.class, blobDeserializer);
         module.addSerializer(SerialClob.class, clobSerializer);
         module.addDeserializer(SerialClob.class, clobDeserializer);
+        module.addSerializer(LocalDateTime.class, localDateTimeSerializer);
+        module.addDeserializer(LocalDateTime.class, localDateTimeDeserializer);
         mapper.registerModule(module);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
@@ -181,8 +203,14 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         @Override
         public void serializeWithType(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers,
                                       TypeSerializer typeSerializer) throws IOException {
+            JsonToken valueShape = JsonToken.VALUE_NUMBER_INT;
+            // if has microseconds, serialized as an array
+            if (timestamp.getNanos() % 1000000 > 0) {
+                valueShape = JsonToken.START_ARRAY;
+            }
+
             WritableTypeId typeId = typeSerializer.writeTypePrefix(gen,
-                typeSerializer.typeId(timestamp, JsonToken.START_ARRAY));
+                typeSerializer.typeId(timestamp, valueShape));
             serialize(timestamp, gen, serializers);
             gen.writeTypeSuffix(typeId);
         }
@@ -191,11 +219,13 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public void serialize(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers) {
             try {
                 gen.writeNumber(timestamp.getTime());
-                gen.writeNumber(timestamp.getNanos());
+                // if has microseconds, serialized as an array, write the nanos to the array
+                if (timestamp.getNanos() % 1000000 > 0) {
+                    gen.writeNumber(timestamp.getNanos());
+                }
             } catch (IOException e) {
                 LOGGER.error("serialize java.sql.Timestamp error : {}", e.getMessage(), e);
             }
-
         }
     }
 
@@ -207,18 +237,19 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
 
         @Override
         public Timestamp deserialize(JsonParser p, DeserializationContext ctxt) {
-            if (p.isExpectedStartArrayToken()) {
-                ArrayNode arrayNode;
-                try {
-                    arrayNode = p.getCodec().readTree(p);
+            try {
+                if (p.isExpectedStartArrayToken()) {
+                    ArrayNode arrayNode = p.getCodec().readTree(p);
                     Timestamp timestamp = new Timestamp(arrayNode.get(0).asLong());
                     timestamp.setNanos(arrayNode.get(1).asInt());
                     return timestamp;
-                } catch (IOException e) {
-                    LOGGER.error("deserialize java.sql.Timestamp error : {}", e.getMessage(), e);
+                } else {
+                    long timestamp = p.getLongValue();
+                    return new Timestamp(timestamp);
                 }
+            } catch (IOException e) {
+                LOGGER.error("deserialize java.sql.Timestamp error : {}", e.getMessage(), e);
             }
-            LOGGER.error("deserialize java.sql.Timestamp type error.");
             return null;
         }
     }
@@ -279,8 +310,8 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
 
         @Override
         public void serialize(SerialClob clob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            try {
-                gen.writeString(clob.getCharacterStream(), (int)clob.length());
+            try (Reader r = clob.getCharacterStream()) {
+                gen.writeString(r, (int)clob.length());
             } catch (SerialException e) {
                 LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
             }
@@ -293,12 +324,85 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public SerialClob deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             try {
                 return new SerialClob(p.getValueAsString().toCharArray());
-
             } catch (SQLException e) {
                 LOGGER.error("deserialize java.sql.Clob error : {}", e.getMessage(), e);
             }
             return null;
         }
+    }
+
+    /**
+     * the class of serialize LocalDateTime type
+     */
+    private static class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+
+        @Override
+        public void serializeWithType(LocalDateTime localDateTime, JsonGenerator gen, SerializerProvider serializers,
+                                      TypeSerializer typeSer) throws IOException {
+            JsonToken valueShape = JsonToken.VALUE_NUMBER_INT;
+            // if has microseconds, serialized as an array
+            if (localDateTime.getNano() % 1000000 > 0) {
+                valueShape = JsonToken.START_ARRAY;
+            }
+
+            WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen,
+                    typeSer.typeId(localDateTime, valueShape));
+            serialize(localDateTime, gen, serializers);
+            typeSer.writeTypeSuffix(gen, typeIdDef);
+        }
+
+        @Override
+        public void serialize(LocalDateTime localDateTime, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            try {
+                Instant instant = localDateTime.atZone(zoneId).toInstant();
+                gen.writeNumber(instant.toEpochMilli());
+                // if has microseconds, serialized as an array, write the nano to the array
+                if (instant.getNano() % 1000000 > 0) {
+                    gen.writeNumber(instant.getNano());
+                }
+            } catch (IOException e) {
+                LOGGER.error("serialize java.time.LocalDateTime error : {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * the class of deserialize LocalDateTime type
+     */
+    private static class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
+
+        @Override
+        public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            try {
+                Instant instant;
+                if (p.isExpectedStartArrayToken()) {
+                    ArrayNode arrayNode = p.getCodec().readTree(p);
+                    long timestamp = arrayNode.get(0).asLong();
+                    instant = Instant.ofEpochMilli(timestamp);
+                    if (arrayNode.size() > 1) {
+                        int nano = arrayNode.get(1).asInt();
+                        instant = instant.plusNanos(nano % 1000000);
+                    }
+                } else {
+                    long timestamp = p.getLongValue();
+                    instant = Instant.ofEpochMilli(timestamp);
+                }
+                return LocalDateTime.ofInstant(instant, zoneId);
+            } catch (Exception e) {
+                LOGGER.error("deserialize java.time.LocalDateTime error : {}", e.getMessage(), e);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * set zone id
+     *
+     * @param zoneId the zoneId
+     */
+    public static void setZoneOffset(ZoneId zoneId) {
+        Objects.requireNonNull(zoneId, "zoneId must be not null");
+        JacksonUndoLogParser.zoneId = zoneId;
     }
 
 }

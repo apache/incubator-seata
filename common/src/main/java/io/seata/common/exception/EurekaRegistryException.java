@@ -21,12 +21,6 @@ package io.seata.common.exception;
  * @author: rui_849217@163.com
  */
 public class EurekaRegistryException extends RuntimeException {
-    /**
-     * eureka registry exception.
-     */
-    public EurekaRegistryException() {
-        super();
-    }
 
     /**
      * eureka registry exception.

@@ -15,16 +15,25 @@
  */
 package io.seata.rm.datasource.xa;
 
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.sql.SQLException;
+import javax.transaction.xa.XAException;
+import io.seata.common.DefaultValues;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
+import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.datasource.AbstractDataSourceCacheResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.transaction.xa.XAException;
-import java.sql.SQLException;
+import static io.seata.core.constants.ConfigurationKeys.XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
 
 /**
  * RM for XA mode.
@@ -35,10 +44,43 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceManagerXA.class);
 
+    private static final int TWO_PHASE_HOLD_TIMEOUT = ConfigurationFactory.getInstance().getInt(XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT,
+            DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT);
+
+    private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
+    private static final long SCHEDULE_INTERVAL_MILLS = 1000L;
+    /**
+     * The Timer check xa branch two phase hold timeout.
+     */
+    protected final ScheduledExecutorService xaTwoPhaseTimeoutChecker = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("xaTwoPhaseTimeoutChecker", 1, true));
+
     @Override
     public void init() {
         LOGGER.info("ResourceManagerXA init ...");
-
+        xaTwoPhaseTimeoutChecker.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<String, Resource> entry : dataSourceCache.entrySet()) {
+                    BaseDataSourceResource resource = (BaseDataSourceResource) entry.getValue();
+                    Map<String, ConnectionProxyXA> keeper = resource.getKeeper();
+                    for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
+                        ConnectionProxyXA connection = connectionEntry.getValue();
+                        long now = System.currentTimeMillis();
+                        synchronized (connection) {
+                            if (connection.getPrepareTime() != null &&
+                                    now - connection.getPrepareTime() > TWO_PHASE_HOLD_TIMEOUT) {
+                                try {
+                                    connection.closeForce();
+                                } catch (SQLException e) {
+                                    LOGGER.info("Force close the xa physical connection fail", e);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -63,7 +105,8 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
         XAXid xaBranchXid = XAXidBuilder.build(xid, branchId);
         Resource resource = dataSourceCache.get(resourceId);
         if (resource instanceof AbstractDataSourceProxyXA) {
-            try (ConnectionProxyXA connectionProxyXA = ((AbstractDataSourceProxyXA)resource).getConnectionForXAFinish(xaBranchXid)) {
+            try (ConnectionProxyXA connectionProxyXA =
+                ((AbstractDataSourceProxyXA)resource).getConnectionForXAFinish(xaBranchXid)) {
                 if (committed) {
                     connectionProxyXA.xaCommit(xid, branchId, applicationData);
                     LOGGER.info(xaBranchXid + " was committed.");
@@ -75,12 +118,17 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                 }
             } catch (XAException | SQLException sqle) {
                 if (sqle instanceof XAException) {
-                    if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
-                        if (committed) {
-                            return BranchStatus.PhaseTwo_Committed;
-                        } else {
-                            return BranchStatus.PhaseTwo_Rollbacked;
+                    try {
+                        if (((XAException) sqle).errorCode == XAException.XAER_NOTA) {
+                            if (committed) {
+                                return BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable;
+                            } else {
+                                return BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable;
+                            }
                         }
+                    } finally {
+                        BaseDataSourceResource.setBranchStatus(xaBranchXid.toString(),
+                                committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
                     }
                 }
                 if (committed) {

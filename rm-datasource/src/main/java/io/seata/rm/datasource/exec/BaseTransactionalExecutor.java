@@ -23,11 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.TreeSet;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -39,9 +45,13 @@ import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
+
+
+import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
 
 /**
  * The type Base transactional executor.
@@ -51,6 +61,9 @@ import io.seata.sqlparser.WhereRecognizer;
  * @author sharajava
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
+
+    private static final boolean ONLY_CARE_UPDATE_COLUMNS = ConfigurationFactory.getInstance().getBoolean(
+            ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
 
     /**
      * The Statement proxy.
@@ -147,6 +160,38 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             whereCondition = whereConditionSb.toString();
         }
         return whereCondition;
+    }
+
+    /**
+     * build buildOrderCondition
+     * @param recognizer
+     * @param paramAppenderList
+     * @return the string
+     */
+    protected String buildOrderCondition(WhereRecognizer recognizer, ArrayList<List<Object>> paramAppenderList) {
+        String orderByCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            orderByCondition = recognizer.getOrderByCondition((ParametersHolder) statementProxy, paramAppenderList);
+        } else {
+            orderByCondition = recognizer.getOrderByCondition();
+        }
+        return orderByCondition;
+    }
+
+    /**
+     * build buildLimitCondition
+     * @param recognizer
+     * @param paramAppenderList
+     * @return the string
+     */
+    protected String buildLimitCondition(WhereRecognizer recognizer, ArrayList<List<Object>> paramAppenderList) {
+        String limitCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            limitCondition = recognizer.getLimitCondition((ParametersHolder) statementProxy, paramAppenderList);
+        } else {
+            limitCondition = recognizer.getLimitCondition();
+        }
+        return limitCondition;
     }
 
     /**
@@ -251,7 +296,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String getStandardPkColumnName(String userColumnName) {
         String newUserColumnName = ColumnUtils.delEscape(userColumnName, getDbType());
         for (String cn : getTableMeta().getPrimaryKeyOnlyName()) {
-            if (cn.toUpperCase().equals(newUserColumnName.toUpperCase())) {
+            if (cn.equalsIgnoreCase(newUserColumnName)) {
                 return cn;
             }
         }
@@ -302,9 +347,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sb.append(":");
         int filedSequence = 0;
         List<Map<String, Field>> pksRows = rowsIncludingPK.pkRows();
+        List<String> primaryKeysOnlyName = getTableMeta().getPrimaryKeyOnlyName();
         for (Map<String, Field> rowMap : pksRows) {
             int pkSplitIndex = 0;
-            for (String pkName : getTableMeta().getPrimaryKeyOnlyName()) {
+            for (String pkName : primaryKeysOnlyName) {
                 if (pkSplitIndex > 0) {
                     sb.append("_");
                 }
@@ -374,20 +420,28 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        StringBuilder sql = new StringBuilder()
-            .append("SELECT * FROM ")
-            .append(getFromTableInSQL())
-            .append(" WHERE ");
+        StringBuilder prefix = new StringBuilder("SELECT ");
+        StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         // build check sql
         String firstKey = pkValuesMap.keySet().stream().findFirst().get();
         int rowSize = pkValuesMap.get(firstKey).size();
-        sql.append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
-
-        PreparedStatement ps = null;
+        suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
+        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
+        List<String> insertColumns = recognizer.getInsertColumns();
+        if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
+            Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            columns.addAll(recognizer.getInsertColumns());
+            columns.addAll(pkColumnNameList);
+            for (String columnName : columns) {
+                selectSQLJoin.add(columnName);
+            }
+        } else {
+            selectSQLJoin.add(" * ");
+        }
         ResultSet rs = null;
-        try {
-            ps = statementProxy.getConnection().prepareStatement(sql.toString());
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
 
             int paramIndex = 1;
             for (int r = 0; r < rowSize; r++) {

@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -28,18 +29,22 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * AbstractDMLBaseExecutor test
  *
  * @author ggndnn
  */
+@DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
 public class AbstractDMLBaseExecutorTest {
     private ConnectionProxy connectionProxy;
 
@@ -59,7 +64,7 @@ public class AbstractDMLBaseExecutorTest {
 
         Connection targetConnection = Mockito.mock(Connection.class);
         connectionProxy = Mockito.mock(ConnectionProxy.class);
-        Mockito.doThrow(new LockConflictException())
+        Mockito.doThrow(new LockConflictException("mock exception"))
                 .when(connectionProxy).commit();
         Mockito.when(connectionProxy.getAutoCommit())
                 .thenReturn(Boolean.TRUE);
@@ -120,4 +125,25 @@ public class AbstractDMLBaseExecutorTest {
         Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList("id","userCode"));
         Assertions.assertThrows(NotSupportYetException.class,()-> executor.executeAutoCommitFalse(null));
     }
+
+
+    @Test
+    public void testExecuteAutoCommitFalse() throws Exception {
+        Mockito.when(connectionProxy.getContext())
+                .thenReturn(new ConnectionContext());
+        PreparedStatementProxy statementProxy = Mockito.mock(PreparedStatementProxy.class);
+        Mockito.when(statementProxy.getConnectionProxy())
+                .thenReturn(connectionProxy);
+        SQLInsertRecognizer sqlInsertRecognizer = Mockito.mock(SQLInsertRecognizer.class);
+        TableMeta tableMeta = Mockito.mock(TableMeta.class);
+        executor = Mockito.spy(new OracleInsertExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, sqlInsertRecognizer));
+        Mockito.when(executor.getDbType()).thenReturn(JdbcConstants.ORACLE);
+        Mockito.doReturn(tableMeta).when(executor).getTableMeta();
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
+        Assertions.assertNull(executor.executeAutoCommitFalse(null));
+    }
+
+
 }

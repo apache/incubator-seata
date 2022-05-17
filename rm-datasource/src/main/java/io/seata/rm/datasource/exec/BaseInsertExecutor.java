@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -208,7 +209,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         }
         if (pkValuesMap.isEmpty()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("pkValuesMap is empty");
         }
         boolean b = this.checkPkValues(pkValuesMap, ps);
         if (!b) {
@@ -263,14 +264,17 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         final String sql = sequenceable.getSequenceSql(expr);
         LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
 
-        ResultSet genKeys;
-        genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
-        pkValues = new ArrayList<>();
-        while (genKeys.next()) {
-            Object v = genKeys.getObject(1);
-            pkValues.add(v);
+        Connection conn = statementProxy.getConnection();
+        try (Statement ps = conn.createStatement();
+             ResultSet genKeys = ps.executeQuery(sql)) {
+
+            pkValues = new ArrayList<>();
+            while (genKeys.next()) {
+                Object v = genKeys.getObject(1);
+                pkValues.add(v);
+            }
+            return pkValues;
         }
-        return pkValues;
     }
 
     /**
@@ -284,7 +288,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     protected boolean checkPkValuesForMultiPk(Map<String, List<Object>> pkValues) {
         Set<String> pkNames = pkValues.keySet();
         if (pkNames.isEmpty()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("pkNames is empty");
         }
         int rowSize = pkValues.get(pkNames.iterator().next()).size();
         for (int i = 0; i < rowSize; i++) {
@@ -331,6 +335,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @param ps       true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
      */
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     protected boolean checkPkValuesForSinglePk(List<Object> pkValues, boolean ps) {
         /*
         ps = true

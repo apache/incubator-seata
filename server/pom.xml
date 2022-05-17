@@ -27,12 +27,29 @@
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
 
-    <properties>
-        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
-        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
-    </properties>
-
     <dependencies>
+        <!-- springboot web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-spring-autoconfigure-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
@@ -65,6 +82,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-console</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- for database -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -90,6 +113,14 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+        <!-- Copyright restrictions, do not reference this dependency.
+             You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
+        <dependency>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>${ojdbc.version}</version>
+        </dependency>-->
+
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
@@ -99,12 +130,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>
-
-        <!-- logback -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
         </dependency>
 
         <!-- jedis -->
@@ -124,162 +149,42 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
+        <!-- logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <!-- logback appenders -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>${logstash-logback-encoder.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.danielwegener</groupId>
             <artifactId>logback-kafka-appender</artifactId>
-            <version>${kafka-appender.version}</version>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>release-seata</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <configuration>
-                            <excludeDefaultDirectories>false</excludeDefaultDirectories>
-                            <filesets>
-                                <fileset>
-                                    <directory>../distribution</directory>
-                                    <includes>
-                                        <include>bin/**</include>
-                                        <include>conf/**</include>
-                                        <include>logs/**</include>
-                                        <include>lib/**</include>
-                                        <include>seata-server-${revision}/**</include>
-                                    </includes>
-                                </fileset>
-                            </filesets>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>appassembler-maven-plugin</artifactId>
-                        <version>1.10</version>
-                        <executions>
-                            <execution>
-                                <id>make-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>assemble</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <configurationDirectory>conf</configurationDirectory>
-                            <configurationSourceDirectory>src/main/resources</configurationSourceDirectory>
-                            <copyConfigurationDirectory>true</copyConfigurationDirectory>
-                            <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-                            <repositoryLayout>flat</repositoryLayout>
-                            <repositoryName>lib</repositoryName>
-                            <encoding>UTF-8</encoding>
-                            <useWildcardClassPath>true</useWildcardClassPath>
-                            <binFileExtensions>
-                                <unix>.sh</unix>
-                                <windows>.bat</windows>
-                            </binFileExtensions>
-                            <assembleDirectory>../distribution/seata-server-${revision}</assembleDirectory>
-                            <logsDirectory>logs</logsDirectory>
-                            <programs>
-                                <program>
-                                    <mainClass>io.seata.server.Server</mainClass>
-                                    <name>seata-server</name>
-                                    <jvmSettings>
-                                        <extraArguments>
-                                            <extraArgument>-server</extraArgument>
-                                            <extraArgument>-Xmx2048m</extraArgument>
-                                            <extraArgument>-Xms2048m</extraArgument>
-                                            <extraArgument>-Xmn1024m</extraArgument>
-                                            <extraArgument>-Xss512k</extraArgument>
-                                            <extraArgument>-XX:SurvivorRatio=10</extraArgument>
-                                            <extraArgument>-XX:MetaspaceSize=128m</extraArgument>
-                                            <extraArgument>-XX:MaxMetaspaceSize=256m</extraArgument>
-                                            <extraArgument>-XX:MaxDirectMemorySize=1024m</extraArgument>
-                                            <extraArgument>-XX:-OmitStackTraceInFastThrow</extraArgument>
-                                            <extraArgument>-XX:-UseAdaptiveSizePolicy</extraArgument>
-                                            <extraArgument>-XX:+HeapDumpOnOutOfMemoryError</extraArgument>
-                                            <extraArgument>-XX:HeapDumpPath=@BASEDIR@/logs/java_heapdump.hprof</extraArgument>
-                                            <!--gc-->
-                                            <extraArgument>-XX:+DisableExplicitGC</extraArgument>
-                                            <extraArgument>-XX:+CMSParallelRemarkEnabled</extraArgument>
-                                            <extraArgument>-XX:+UseCMSInitiatingOccupancyOnly</extraArgument>
-                                            <extraArgument>-XX:CMSInitiatingOccupancyFraction=75</extraArgument>
-                                            <extraArgument>-Xloggc:@BASEDIR@/logs/seata_gc.log</extraArgument>
-                                            <extraArgument>-verbose:gc</extraArgument>
-                                            <!--netty-->
-                                            <extraArgument>-Dio.netty.leakDetectionLevel=advanced</extraArgument>
-                                            <!--log-->
-                                            <extraArgument>-Dlogback.color.disable-for-bat=true</extraArgument>
-                                        </extraArguments>
-                                    </jvmSettings>
-                                    <platforms>
-                                        <platform>windows</platform>
-                                        <platform>unix</platform>
-                                    </platforms>
-                                </program>
-                            </programs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-mysql</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>mysql</groupId>
-                                    <artifactId>mysql-connector-java</artifactId>
-                                    <version>${mysql.jdbc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>mysql</groupId>
-                                    <artifactId>mysql-connector-java</artifactId>
-                                    <version>${mysql8.jdbc.version}</version>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>
-                                ${basedir}/target/lib/jdbc
-                            </outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>2.3.0</version>
+                <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
                         <image>${IMAGE_NAME}</image>
                     </from>
                     <to>
                         <image>docker.io/seataio/seata-server</image>
-                        <tags>
-                            ${image.tags}
-                        </tags>
+                        <tags>${image.tags}</tags>
                         <auth>
                             <username>${REGISTRY_USERNAME}</username>
                             <password>${REGISTRY_PASSWORD}</password>
@@ -288,7 +193,7 @@
                     <container>
                         <appRoot>/seata-server</appRoot>
                         <workingDirectory>/seata-server</workingDirectory>
-                        <mainClass>io.seata.server.Server</mainClass>
+                        <mainClass>io.seata.server.ServerApplication</mainClass>
                         <ports>
                             <port>8091</port>
                         </ports>
@@ -345,4 +250,30 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>release-seata</id>
+            <build>
+                <finalName>seata-server</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot.version}</version>
+                        <configuration>
+                            <mainClass>io.seata.server.ServerApplication</mainClass>
+                            <layout>ZIP</layout>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

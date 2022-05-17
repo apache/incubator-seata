@@ -67,6 +67,11 @@ public interface Constants {
     String ACTION_NAME = "actionName";
 
     /**
+     * Use TCC fence
+     */
+    String USE_TCC_FENCE = "useTCCFence";
+
+    /**
      * phase one method name
      */
     String PREPARE_METHOD = "sys::prepare";
@@ -87,21 +92,6 @@ public interface Constants {
     String HOST_NAME = "host-name";
 
     /**
-     * The constant TCC_METHOD_RESULT.
-     */
-    String TCC_METHOD_RESULT = "result";
-
-    /**
-     * The constant TCC_METHOD_ARGUMENTS.
-     */
-    String TCC_METHOD_ARGUMENTS = "arguments";
-
-    /**
-     * transaction context
-     */
-    String TCC_ACTIVITY_CONTEXT = "activityContext";
-
-    /**
      * branch context
      */
     String TCC_ACTION_CONTEXT = "actionContext";
@@ -119,6 +109,10 @@ public interface Constants {
      * The constant OBJECT_KEY_SPRING_APPLICATION_CONTEXT
      */
     String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
+    /**
+     * The constant OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT
+     */
+    String OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT = "springConfigurableEnvironment";
     /**
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
@@ -156,5 +150,15 @@ public interface Constants {
      * The constant UNDOLOG_DELETE
      */
     String UNDOLOG_DELETE = "UndologDelete";
+
+    /**
+     * The constant AUTO_COMMIT
+     */
+    String AUTO_COMMIT = "autoCommit";
+
+    /**
+     * The constant SKIP_CHECK_LOCK
+     */
+    String SKIP_CHECK_LOCK = "skipCheckLock";
 
 }

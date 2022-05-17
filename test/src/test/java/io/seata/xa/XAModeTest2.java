@@ -15,6 +15,17 @@
  */
 package io.seata.xa;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.sql.DataSource;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.alibaba.druid.util.JdbcUtils;
@@ -32,24 +43,13 @@ import io.seata.rm.datasource.xa.ResourceManagerXA;
 import io.seata.rm.datasource.xa.XAXid;
 import io.seata.rm.datasource.xa.XAXidBuilder;
 import io.seata.spring.annotation.GlobalTransactionScanner;
+import io.seata.sqlparser.util.JdbcConstants;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.postgresql.xa.PGXADataSource;
-
-import javax.sql.DataSource;
-import javax.sql.XAConnection;
-import javax.sql.XADataSource;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 public class XAModeTest2 {
 
@@ -80,7 +80,7 @@ public class XAModeTest2 {
     private static final String oracle_driverClassName = JdbcUtils.ORACLE_DRIVER;
 
     // Test on different DB, including: MySQL(5.7, 8.0), PostgreSQL(11), Oracle(11)
-    private static final String dbType = JdbcUtils.MYSQL;
+    private static final String dbType = JdbcConstants.MYSQL;
 
     private static final boolean nativeXA = false;
 
@@ -101,14 +101,14 @@ public class XAModeTest2 {
     }
 
     private XADataSource createNewNativeXADataSource() throws Throwable {
-        if (dbType.equalsIgnoreCase(JdbcUtils.POSTGRESQL)) {
+        if (dbType.equalsIgnoreCase(JdbcConstants.POSTGRESQL)) {
             PGXADataSource pgxaDataSource = new PGXADataSource();
             pgxaDataSource.setUrl(pg_jdbcUrl);
             pgxaDataSource.setUser(pg_username);
             pgxaDataSource.setPassword(pg_password);
             return pgxaDataSource;
 
-        } else if (dbType.equalsIgnoreCase(JdbcUtils.MYSQL)) {
+        } else if (dbType.equalsIgnoreCase(JdbcConstants.MYSQL)) {
             MysqlXADataSource mysqlXADataSource = new MysqlXADataSource();
             if (mySQL8) {
                 mysqlXADataSource.setURL(mysql8_jdbcUrl);
@@ -122,7 +122,7 @@ public class XAModeTest2 {
             }
             return mysqlXADataSource;
 
-        } else if (dbType.equalsIgnoreCase(JdbcUtils.ORACLE)) {
+        } else if (dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
             return createOracleXADataSource();
 
         } else {
@@ -158,13 +158,13 @@ public class XAModeTest2 {
 
     private void initDruidDataSource(DruidDataSource druidDataSource) throws Throwable {
         druidDataSource.setDbType(dbType);
-        if (dbType.equalsIgnoreCase(JdbcUtils.POSTGRESQL)) {
+        if (dbType.equalsIgnoreCase(JdbcConstants.POSTGRESQL)) {
             druidDataSource.setUrl(pg_jdbcUrl);
             druidDataSource.setUsername(pg_username);
             druidDataSource.setPassword(pg_password);
             druidDataSource.setDriverClassName(pg_driverClassName);
 
-        } else if (dbType.equalsIgnoreCase(JdbcUtils.MYSQL)) {
+        } else if (dbType.equalsIgnoreCase(JdbcConstants.MYSQL)) {
             if (mySQL8) {
                 druidDataSource.setUrl(mysql8_jdbcUrl);
                 druidDataSource.setUsername(mysql8_username);
@@ -178,7 +178,7 @@ public class XAModeTest2 {
                 druidDataSource.setDriverClassName(mysql_driverClassName);
             }
 
-        } else if (dbType.equalsIgnoreCase(JdbcUtils.ORACLE)) {
+        } else if (dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
             druidDataSource.setUrl(oracle_jdbcUrl);
             druidDataSource.setUsername(oracle_username);
             druidDataSource.setPassword(oracle_password);
@@ -377,7 +377,7 @@ public class XAModeTest2 {
         helperStat.close();
         helperConn.close();
 
-        if (JdbcUtils.MYSQL.equals(dbType)) {
+        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
             XAXid xaXid = XAXidBuilder.build(mockXid, mockBranchId);
             dataSourceProxyXA.forceClosePhysicalConnection(xaXid);
         }
@@ -610,7 +610,7 @@ public class XAModeTest2 {
     }
 
     private GlobalTransaction createGlobalTransaction() {
-        String vgroup = "my_test_tx_group";
+        String vgroup = "default_tx_group";
         GlobalTransactionScanner scanner = new GlobalTransactionScanner(vgroup);
         scanner.afterPropertiesSet();
 

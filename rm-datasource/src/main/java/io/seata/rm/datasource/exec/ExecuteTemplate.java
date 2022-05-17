@@ -15,16 +15,20 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Execute template.
@@ -86,8 +90,8 @@ public class ExecuteTemplate {
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
                         executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
-                                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                                    new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                    new Object[]{statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
@@ -97,6 +101,17 @@ public class ExecuteTemplate {
                         break;
                     case SELECT_FOR_UPDATE:
                         executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case INSERT_ON_DUPLICATE_UPDATE:
+                        switch (dbType) {
+                            case JdbcConstants.MYSQL:
+                            case JdbcConstants.MARIADB:
+                                executor =
+                                    new MySQLInsertOrUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                break;
+                            default:
+                                throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
+                        }
                         break;
                     default:
                         executor = new PlainExecutor<>(statementProxy, statementCallback);

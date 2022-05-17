@@ -16,6 +16,8 @@
 package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
@@ -71,6 +73,30 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
         return super.getWhereCondition(where);
     }
 
+    @Override
+    public String getLimitCondition() {
+        SQLLimit limit = getSelect().getLimit();
+        return super.getLimitCondition(limit);
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLLimit limit = getSelect().getLimit();
+        return super.getLimitCondition(limit, parametersHolder, paramAppenderList);
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
+    }
+
     private SQLSelectQueryBlock getSelect() {
         SQLSelect select = ast.getSelect();
         if (select == null) {
@@ -107,4 +133,8 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
         return sb.toString();
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

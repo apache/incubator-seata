@@ -15,29 +15,57 @@
  */
 package io.seata.server.lock;
 
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
+import javax.annotation.Resource;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.console.result.PageResult;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.console.param.GlobalLockParam;
+import io.seata.server.console.service.GlobalLockService;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.lock.file.FileLockManagerForTest;
 import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
+import io.seata.server.session.SessionManager;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Lock manager test.
  *
  * @author tianming.xm @gmail.com
+ * @author miaoxueyu
  * @since 2019 /1/23
  */
+@SpringBootTest
 public class LockManagerTest {
+
+
+    @Resource(type = GlobalLockService.class)
+    private GlobalLockService globalLockService;
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context){
+
+    }
 
     /**
      * Acquire lock success.
@@ -175,13 +203,125 @@ public class LockManagerTest {
     public void duplicatePkBranchSessionHolderTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
         LockManager lockManager = new FileLockManagerForTest();
         Assertions.assertTrue(lockManager.acquireLock(branchSession1));
-        Assertions.assertEquals(4, branchSession1.getLockHolder().values().stream().map(Set::size).count());
+        Assertions.assertEquals(4, (long) branchSession1.getLockHolder().values().size());
         Assertions.assertTrue(lockManager.releaseLock(branchSession1));
-        Assertions.assertEquals(0, branchSession1.getLockHolder().values().stream().map(Set::size).count());
+        Assertions.assertEquals(0, (long) branchSession1.getLockHolder().values().size());
         Assertions.assertTrue(lockManager.acquireLock(branchSession2));
-        Assertions.assertEquals(4, branchSession2.getLockHolder().values().stream().map(Set::size).count());
+        Assertions.assertEquals(4, (long) branchSession2.getLockHolder().values().size());
         Assertions.assertTrue(lockManager.releaseLock(branchSession2));
-        Assertions.assertEquals(0, branchSession2.getLockHolder().values().stream().map(Set::size).count());
+        Assertions.assertEquals(0, (long) branchSession2.getLockHolder().values().size());
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
+        SessionHolder.getRootSessionManager().destroy();
+        SessionHolder.init("file");
+        final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        //make sure sessionMaanager is empty
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            //FileSessionManager use ConcurrentHashMap is thread safe
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
+        try {
+            sessionManager.addGlobalSession(globalSessions1);
+            sessionManager.addGlobalSession(globalSessions2);
+
+            final GlobalLockParam param = new GlobalLockParam();
+
+
+            // wrong pageSize or pageNum
+            Assertions.assertThrows(
+                    IllegalArgumentException.class,
+                    () -> globalLockService.query(param)
+            );
+
+            param.setPageNum(1);
+            param.setPageSize(10);
+
+            // query all data
+            final PageResult<GlobalLockVO> fullQueryTestResult = globalLockService.query(param);
+            Assertions.assertEquals(1,fullQueryTestResult.getPages());
+            Assertions.assertEquals(8,fullQueryTestResult.getTotal());
+            Assertions.assertEquals(8,fullQueryTestResult.getData().size());
+
+            // test paging
+            param.setPageSize(1);
+            final PageResult<GlobalLockVO> pagingTestResult = globalLockService.query(param);
+            Assertions.assertEquals(8, pagingTestResult.getPages());
+            Assertions.assertEquals(8, pagingTestResult.getTotal());
+            Assertions.assertEquals(1, pagingTestResult.getData().size());
+
+            // transaction id
+            param.setPageSize(10);
+            param.setTransactionId("49");
+            final PageResult<GlobalLockVO> transactionIdTestResult1 = globalLockService.query(param);
+            Assertions.assertEquals(2, transactionIdTestResult1.getTotal());
+
+            param.setTransactionId("72");
+            final PageResult<GlobalLockVO> transactionIdTestResult2 = globalLockService.query(param);
+            Assertions.assertEquals(6, transactionIdTestResult2.getTotal());
+
+            param.setTransactionId("493747292");
+            final PageResult<GlobalLockVO> transactionIdTestResult3 = globalLockService.query(param);
+            Assertions.assertEquals(2, transactionIdTestResult3.getTotal());
+
+            // branch id
+            param.setTransactionId(null);
+            param.setBranchId("2");
+            final PageResult<GlobalLockVO> branchIdTestResult = globalLockService.query(param);
+            Assertions.assertEquals(1, branchIdTestResult.getPages());
+            Assertions.assertEquals(4, branchIdTestResult.getTotal());
+            Assertions.assertEquals(4, branchIdTestResult.getData().size());
+
+            // xid
+            param.setBranchId(null);
+            param.setXid("id1");
+            final PageResult<GlobalLockVO> xidTestResult1 = globalLockService.query(param);
+            Assertions.assertEquals(4, xidTestResult1.getTotal());
+
+            param.setXid("d");
+            final PageResult<GlobalLockVO> xidTestResult2 = globalLockService.query(param);
+            Assertions.assertEquals(8, xidTestResult2.getTotal());
+
+            // table name
+            param.setXid(null);
+            param.setTableName("de");
+            final PageResult<GlobalLockVO> tableTestResult1 = globalLockService.query(param);
+            Assertions.assertEquals(2, tableTestResult1.getTotal());
+
+            param.setTableName("e");
+            final PageResult<GlobalLockVO> tableTestResult2 = globalLockService.query(param);
+            Assertions.assertEquals(4, tableTestResult2.getTotal());
+
+            // timeStart and timeEnd
+            final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            param.setTableName(null);
+            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:01").getTime());
+            final PageResult<GlobalLockVO> timeTestResult1 = globalLockService.query(param);
+            Assertions.assertEquals(0, timeTestResult1.getTotal());
+
+            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:00").getTime());
+            final PageResult<GlobalLockVO> timeTestResult2 = globalLockService.query(param);
+            Assertions.assertEquals(4, timeTestResult2.getTotal());
+
+            param.setTimeStart(null);
+            param.setTimeEnd(dateFormat.parse("2022-1-1 02:59:59").getTime());
+            final PageResult<GlobalLockVO> timeTestResult3 = globalLockService.query(param);
+            Assertions.assertEquals(0, timeTestResult3.getTotal());
+
+            param.setTimeEnd(dateFormat.parse("2022-1-1 03:00:00").getTime());
+            final PageResult<GlobalLockVO> timeTestResult4 = globalLockService.query(param);
+            Assertions.assertEquals(4, timeTestResult4.getTotal());
+
+        } finally {
+            sessionManager.removeGlobalSession(globalSessions1);
+            sessionManager.removeGlobalSession(globalSessions2);
+            sessionManager.destroy();
+        }
     }
 
     /**
@@ -194,7 +334,7 @@ public class LockManagerTest {
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(0L);
         branchSession.setClientId("c1");
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t:0");
         branchSession.setBranchType(BranchType.AT);
@@ -205,16 +345,16 @@ public class LockManagerTest {
     }
 
     /**
-     * Base branch sessions provider object [ ] [ ]. Could assign resource and lock keys.
+     * Branch session provider object [ ] [ ].
      *
      * @return the object [ ] [ ]
      */
-    static Stream<Arguments> baseBranchSessionsProvider(String resource, String lockKey1, String lockKey2) {
+    static BranchSession[] baseBranchSession(String resource, String lockKey1, String lockKey2) {
         BranchSession branchSession1 = new BranchSession();
         branchSession1.setTransactionId(UUIDGenerator.generateUUID());
         branchSession1.setBranchId(1L);
         branchSession1.setClientId("c1");
-        branchSession1.setResourceGroupId("my_test_tx_group");
+        branchSession1.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession1.setResourceId(resource);
         branchSession1.setLockKey(lockKey1);
         branchSession1.setBranchType(BranchType.AT);
@@ -225,14 +365,61 @@ public class LockManagerTest {
         branchSession2.setTransactionId(UUIDGenerator.generateUUID());
         branchSession2.setBranchId(2L);
         branchSession2.setClientId("c1");
-        branchSession2.setResourceGroupId("my_test_tx_group");
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession2.setResourceId(resource);
         branchSession2.setLockKey(lockKey2);
         branchSession2.setBranchType(BranchType.AT);
         branchSession2.setApplicationData("{\"data\":\"test\"}");
         branchSession2.setBranchType(BranchType.AT);
-        return Stream.of(
-                Arguments.of(branchSession1, branchSession2));
+
+        return new BranchSession[]{branchSession1, branchSession2};
+    }
+
+    /**
+     * global sessions provider object [ ] [ ].
+     * @return the objects [ ] [ ]
+     */
+    static Stream<Arguments> globalSessionForLockTestProvider() throws ParseException {
+        final BranchSession[] branchSessions1 = baseBranchSession("department", "a:1,2", "e:1,2");
+
+        final BranchSession branchSession1 = branchSessions1[0];
+        branchSession1.setTransactionId(39721L);
+        final BranchSession branchSession2 = branchSessions1[1];
+        branchSession2.setTransactionId(89721L);
+
+        final BranchSession[] branchSessions2 = baseBranchSession("employee", "de:43,99", "df:33,66");
+        final BranchSession branchSession3 = branchSessions2[0];
+        branchSession3.setTransactionId(924823L);
+
+        final BranchSession branchSession4 = branchSessions2[1];
+        branchSession4.setTransactionId(493747292L);
+
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 6000);
+        globalSession1.setXid("xid1");
+        globalSession1.add(branchSession1);
+        globalSession1.add(branchSession2);
+        globalSession1.setBeginTime(dateFormat.parse("2022-1-1 03:00:00").getTime());
+
+        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
+        globalSession2.setXid("ddd1");
+        globalSession2.add(branchSession3);
+        globalSession2.add(branchSession4);
+        globalSession2.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
+
+        return Stream.of(Arguments.of(globalSession1, globalSession2));
+    }
+
+    /**
+     * Base branch sessions provider object [ ] [ ]. Could assign resource and lock keys.
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> baseBranchSessionsProvider(String resource, String lockKey1, String lockKey2) {
+
+        return Stream.of(Arguments.of(baseBranchSession(resource, lockKey1, lockKey2)));
     }
 
     /**

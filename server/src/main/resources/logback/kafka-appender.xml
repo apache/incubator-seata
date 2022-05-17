@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <included>
     <!-- kafka-appender properties -->
-    <property name="KAFKA_BOOTSTRAP_SERVERS" value="localhost:9092"/>
-    <property name="KAFKA_TOPIC" value="logback_to_logstash"/>
+    <springProperty name="KAFKA_BOOTSTRAP_SERVERS" source="logging.extend.kafka-appender.bootstrap-servers"
+                    defaultValue="127.0.0.1:9092"/>
+    <springProperty name="KAFKA_TOPIC" source="logging.extend.kafka-appender.topic"
+                    defaultValue="logback_to_logstash"/>
 
     <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <encoder>
-            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%p|seata-server|${PORT:-0}|%t|%logger|%X{X-TX-XID:-}|%X{X-TX-BRANCH-ID:-}|%m|%wex</pattern>-->
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%p|${APPLICATION_NAME:-seata-server}|${RPC_PORT:-0}|%t|%logger|%X{X-TX-XID:-}|%X{X-TX-BRANCH-ID:-}|%m|%wex</pattern>-->
             <pattern>{
     "@timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
     "level":"%p",
-    "app_name":"${APPLICATION_NAME:-}",
-    "PORT": ${PORT:-0},
+    "app_name":"${APPLICATION_NAME:-seata-server}",
+    "PORT": ${RPC_PORT:-0},
     "thread_name": "%t",
     "logger_name": "%logger",
     "X-TX-XID": "%X{X-TX-XID:-}",
