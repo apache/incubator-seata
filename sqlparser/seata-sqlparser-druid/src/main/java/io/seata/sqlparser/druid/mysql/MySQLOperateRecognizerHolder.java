@@ -16,14 +16,11 @@
 package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import javax.print.DocFlavor;
 
 /**
  * The class MySqlOperateRecognizerHolder
