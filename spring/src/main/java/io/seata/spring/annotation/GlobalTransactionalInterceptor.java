@@ -307,7 +307,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 stopDegradeCheck();
             } else if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startDegradeCheck();
-
             }
         }
     }
@@ -316,12 +315,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * stop auto degrade
      */
     private static void stopDegradeCheck() {
-        while (!autoDegradeChange.compareAndSet(false, true)) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                LOGGER.error("auto degrade start thread sleep error", e);
-            }
+        if (!autoDegradeChange.compareAndSet(false, true)) {
+            return;
         }
         try {
             if (executor != null && !executor.isShutdown()) {
@@ -336,12 +331,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * auto upgrade service detection
      */
     private static void startDegradeCheck() {
-        while (!autoDegradeChange.compareAndSet(false, true)) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                LOGGER.error("auto degrade start thread sleep error", e);
-            }
+        if (!autoDegradeChange.compareAndSet(false, true)) {
+            return;
         }
         try {
             if (executor != null && !executor.isShutdown()) {
