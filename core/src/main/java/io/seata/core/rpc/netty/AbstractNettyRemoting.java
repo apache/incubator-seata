@@ -369,6 +369,15 @@ public abstract class AbstractNettyRemoting implements Disposable {
      */
     public abstract void destroyChannel(String serverAddress, Channel channel);
 
+    /**
+     * register processor
+     *
+     * @param messageType {@link io.seata.core.protocol.MessageType}
+     * @param processor   {@link RemotingProcessor}
+     * @param executor    thread pool
+     */
+   public abstract void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
+
     protected void doBeforeRpcHooks(String remoteAddr, RpcMessage request) {
         for (RpcHook rpcHook: rpcHooks) {
             rpcHook.doBeforeRequest(remoteAddr, request);

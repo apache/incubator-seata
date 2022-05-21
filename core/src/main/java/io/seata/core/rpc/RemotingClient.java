@@ -20,9 +20,6 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
-import io.seata.core.rpc.processor.RemotingProcessor;
-
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -93,13 +90,4 @@ public interface RemotingClient {
      * @param requestMessage the request message
      */
     void onRegisterMsgFail(String serverAddress, Channel channel, Object response, AbstractMessage requestMessage);
-
-    /**
-     * register processor
-     *
-     * @param messageType {@link io.seata.core.protocol.MessageType}
-     * @param processor   {@link RemotingProcessor}
-     * @param executor    thread pool
-     */
-    void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
 }
