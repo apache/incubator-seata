@@ -72,21 +72,17 @@ final class ExtensionDefinition<S> {
             return false;
         }
 
-        try {
-            ExtensionDefinition<S> other = (ExtensionDefinition<S>) obj;
-            if (!StringUtils.equals(name, other.name)) {
-                return false;
-            }
-            if (!serviceClass.equals(other.serviceClass)) {
-                return false;
-            }
-            if (!order.equals(other.order)) {
-                return false;
-            }
-            return !scope.equals(other.scope);
-        } catch (ClassCastException classCastException) {
+        ExtensionDefinition<?> other = (ExtensionDefinition<?>) obj;
+        if (!StringUtils.equals(name, other.name)) {
             return false;
         }
+        if (!serviceClass.equals(other.serviceClass)) {
+            return false;
+        }
+        if (!order.equals(other.order)) {
+            return false;
+        }
+        return !scope.equals(other.scope);
     }
 
     public String getName() {

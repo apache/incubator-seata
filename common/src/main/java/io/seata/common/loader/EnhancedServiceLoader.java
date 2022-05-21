@@ -323,7 +323,7 @@ public class EnhancedServiceLoader {
          */
         private S load(String activateName, Object[] args, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
-            Class[] argsType = null;
+            Class<?>[] argsType = null;
             if (args != null && args.length > 0) {
                 argsType = new Class[args.length];
                 for (int i = 0; i < args.length; i++) {
@@ -343,7 +343,7 @@ public class EnhancedServiceLoader {
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        private S load(String activateName, Class[] argsType, Object[] args, ClassLoader loader)
+        private S load(String activateName, Class<?>[] argsType, Object[] args, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
             return loadExtension(activateName, loader, argsType, args);
         }
@@ -558,27 +558,26 @@ public class EnhancedServiceLoader {
             //Check whether the definition has been loaded
             if (!isDefinitionContainsClazz(className, loader)) {
                 Class<?> clazz = Class.forName(className, true, loader);
-                try {
-                    Class<S> enhancedServiceClass = (Class<S>) clazz;
-                    String serviceName = null;
-                    int priority = 0;
-                    Scope scope = Scope.SINGLETON;
-                    LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
-                    if (loadLevel != null) {
-                        serviceName = loadLevel.name();
-                        priority = loadLevel.order();
-                        scope = loadLevel.scope();
-                    }
-                    ExtensionDefinition<S> result = new ExtensionDefinition<S>(serviceName, priority, scope, enhancedServiceClass);
-                    classToDefinitionMap.put(clazz, result);
-                    if (serviceName != null) {
-                        CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
-                                .add(result);
-                    }
-                    return result;
-                } catch (ClassCastException classCastException) {
+                if (!type.isAssignableFrom(clazz)) {
                     return null;
                 }
+                Class<S> enhancedServiceClass = (Class<S>) clazz;
+                String serviceName = null;
+                int priority = 0;
+                Scope scope = Scope.SINGLETON;
+                LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
+                if (loadLevel != null) {
+                    serviceName = loadLevel.name();
+                    priority = loadLevel.order();
+                    scope = loadLevel.scope();
+                }
+                ExtensionDefinition<S> result = new ExtensionDefinition<>(serviceName, priority, scope, enhancedServiceClass);
+                classToDefinitionMap.put(clazz, result);
+                if (serviceName != null) {
+                    CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
+                            .add(result);
+                }
+                return result;
             }
             return null;
         }
