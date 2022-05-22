@@ -109,6 +109,7 @@
         <!-- Other -->
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
         <os-maven-plugin.version>1.5.0.Final</os-maven-plugin.version>
+        <easyj-maven-plugin.version>0.3.9</easyj-maven-plugin.version>
 
         <!-- Default values of the Maven plugins -->
         <checkstyle.skip>true</checkstyle.skip>
