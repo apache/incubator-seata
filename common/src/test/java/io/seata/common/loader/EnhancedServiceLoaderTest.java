@@ -126,4 +126,11 @@ public class EnhancedServiceLoaderTest {
         }
     }
 
+    @Test
+    public void classCastExceptionTest() {
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
+            Hello1 load = EnhancedServiceLoader.load(Hello1.class);
+        });
+    }
+
 }

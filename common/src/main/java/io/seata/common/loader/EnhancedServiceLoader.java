@@ -541,6 +541,9 @@ public class EnhancedServiceLoader {
                                     extensions.add(extensionDefinition);
                                 } catch (LinkageError | ClassNotFoundException e) {
                                     LOGGER.warn("Load [{}] class fail. {}", line, e.getMessage());
+                                } catch (ClassCastException e) {
+                                    LOGGER.error("Load [{}] class fail, please make sure the extension" +
+                                            " config in {} implements {}.", line, fileName, type.getName());
                                 }
                             }
                         }
@@ -553,12 +556,13 @@ public class EnhancedServiceLoader {
 
         @SuppressWarnings("unchecked")
         private ExtensionDefinition<S> getUnloadedExtensionDefinition(String className, ClassLoader loader)
-            throws ClassNotFoundException {
+                throws ClassNotFoundException, ClassCastException {
             //Check whether the definition has been loaded
             if (!isDefinitionContainsClazz(className, loader)) {
                 Class<?> clazz = Class.forName(className, true, loader);
                 if (!type.isAssignableFrom(clazz)) {
-                    return null;
+                    LOGGER.error("can't cast {} to {}", clazz.getName(), type.getName());
+                    throw new ClassCastException();
                 }
                 Class<S> enhancedServiceClass = (Class<S>) clazz;
                 String serviceName = null;
