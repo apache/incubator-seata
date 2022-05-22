@@ -491,6 +491,11 @@ public interface ConfigurationKeys {
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
     /**
+     * The constant CONCURRENT_HANDLE_BRANCH_ENABLE.
+     */
+    String CONCURRENT_HANDLE_BRANCH_ENABLE = SERVER_PREFIX + "concurrentHandleBranchEnable";
+
+    /**
      * the constant RETRY_DEAD_THRESHOLD
      */
     String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
