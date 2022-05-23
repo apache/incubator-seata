@@ -79,7 +79,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private int order;
     protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
-    private static final AtomicBoolean atomicDegradeCheck = new AtomicBoolean(false);
+    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
@@ -150,7 +150,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-            boolean localDisable = disable || (atomicDegradeCheck.get() && degradeNum >= degradeCheckAllowTimes);
+            boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
                     AspectTransactional transactional;
@@ -264,7 +264,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            if (atomicDegradeCheck.get()) {
+            if (ATOMIC_DEGRADE_CHECK.get()) {
                 EVENT_BUS.post(new DegradeCheckEvent(succeed));
             }
         }
@@ -310,7 +310,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * stop auto degrade
      */
     private static void stopDegradeCheck() {
-        if (!atomicDegradeCheck.compareAndSet(true, false)) {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(true, false)) {
             return;
         }
         if (executor != null && !executor.isShutdown()) {
@@ -322,7 +322,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * auto upgrade service detection
      */
     private static void startDegradeCheck() {
-        if (!atomicDegradeCheck.compareAndSet(false, true)) {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(false, true)) {
             return;
         }
         if (executor != null && !executor.isShutdown()) {
@@ -330,7 +330,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
         executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
         executor.scheduleAtFixedRate(() -> {
-            if (atomicDegradeCheck.get()) {
+            if (ATOMIC_DEGRADE_CHECK.get()) {
                 try {
                     String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
                     TransactionManagerHolder.get().commit(xid);
