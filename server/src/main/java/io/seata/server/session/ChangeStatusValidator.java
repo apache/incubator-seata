@@ -3,11 +3,11 @@ package io.seata.server.session;
 import io.seata.core.model.GlobalStatus;
 
 /**
- * The type Session status helper.
+ * The type change status validator.
  *
  * @author Bughue
  */
-public class SessionStatusHelper {
+public class ChangeStatusValidator {
 
     /**
      * is timeout global status timeout
