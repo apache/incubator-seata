@@ -144,6 +144,9 @@ public abstract class AbstractExceptionHandler {
         } catch (RuntimeException rex) {
             LOGGER.error("Catch RuntimeException while do RPC, request: {}", request, rex);
             callback.onException(request, response, rex);
+        } catch (Exception ex) {
+            LOGGER.error("Catch Exception while do RPC, request: {}", request, ex);
+            callback.onException(request, response, ex);
         }
     }
 
