@@ -28,6 +28,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.server.session.SessionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -325,6 +326,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (previousStatus.equals(String.valueOf(globalTransactionDO.getStatus()))) {
                 jedis.unwatch();
                 return true;
+            }
+            if (SessionHelper.validateUpdateStatus(GlobalStatus.get(Integer.parseInt(previousStatus)),
+                GlobalStatus.get(globalTransactionDO.getStatus()))) {
+                throw new StoreException("illegal changing of global status, update global transaction failed.");
             }
 
             String previousGmtModified = statusAndGmtModified.get(1);
