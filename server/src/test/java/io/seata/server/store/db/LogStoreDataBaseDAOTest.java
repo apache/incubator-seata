@@ -681,7 +681,8 @@ public class LogStoreDataBaseDAOTest {
     }
 
     @AfterAll
-    public static void clearStoreDB(){
+    public static void clearStoreDB() throws SQLException {
+        dataSource.close();
         FileUtils.deleteRecursive("db_store", true);
     }
 
