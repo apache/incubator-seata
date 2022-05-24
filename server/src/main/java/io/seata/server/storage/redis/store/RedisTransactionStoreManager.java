@@ -327,9 +327,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 jedis.unwatch();
                 return true;
             }
-            if (!ChangeStatusValidator.validateUpdateStatus(GlobalStatus.get(Integer.parseInt(previousStatus)),
-                GlobalStatus.get(globalTransactionDO.getStatus()))) {
-                throw new StoreException("illegal changing of global status, update global transaction failed.");
+            GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
+            GlobalStatus after = GlobalStatus.get(globalTransactionDO.getStatus());
+            if (!ChangeStatusValidator.validateUpdateStatus(before,after)) {
+                throw new StoreException("illegal changing of global status, update global transaction failed." +
+                        "beforeStatus=" + before.name()+
+                        "afterStatus=" + after.name() );
             }
 
             String previousGmtModified = statusAndGmtModified.get(1);
