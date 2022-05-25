@@ -15,17 +15,13 @@
  */
 package io.seata.core.rpc.processor.server;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -167,34 +163,19 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                 List<AbstractMessage> msgs = ((MergedWarpMessage) message).msgs;
                 List<Integer> msgIds = ((MergedWarpMessage) message).msgIds;
                 for (int i = 0; i < msgs.size(); i++) {
-                    int finalI = i;
-                    CompletableFuture.runAsync(() -> {
-                        AbstractResultMessage resultMessage =
-                            transactionMessageHandler.onRequest(msgs.get(finalI), rpcContext);
-                        BlockingQueue<QueueItem> msgQueue = computeIfAbsentMsgQueue(ctx.channel());
-                        offerMsg(msgQueue, rpcMessage, resultMessage, msgIds.get(finalI), ctx.channel());
-                        notifyBatchRespondingThread();
-                    });
+                    AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(msgs.get(i), rpcContext);
+                    BlockingQueue<QueueItem> msgQueue = computeIfAbsentMsgQueue(ctx.channel());
+                    offerMsg(msgQueue, rpcMessage, resultMessage, msgIds.get(i), ctx.channel());
+                    notifyBatchRespondingThread();
                 }
             } else {
-                List<AbstractResultMessage> results = new CopyOnWriteArrayList<>();
-                List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
-                for (int i = 0; i < ((MergedWarpMessage)message).msgs.size(); i++) {
-                    int finalI = i;
-                    completableFutures.add(CompletableFuture.runAsync(() -> {
-                        final AbstractMessage subMessage = ((MergedWarpMessage)message).msgs.get(finalI);
-                        AbstractResultMessage resultMessage =
-                            transactionMessageHandler.onRequest(subMessage, rpcContext);
-                        results.add(finalI, resultMessage);
-                    }));
-                }
-                try {
-                    CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get();
-                } catch (InterruptedException | ExecutionException e) {
-                    LOGGER.error("handle request error: {}", e.getMessage(), e);
+                AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
+                for (int i = 0; i < results.length; i++) {
+                    final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
+                    results[i] = transactionMessageHandler.onRequest(subMessage, rpcContext);
                 }
                 MergeResultMessage resultMessage = new MergeResultMessage();
-                resultMessage.setMsgs(results.toArray(new AbstractResultMessage[0]));
+                resultMessage.setMsgs(results);
                 remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
             }
         } else {
