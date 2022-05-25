@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -247,6 +248,9 @@ public class SessionHelper {
      * @since 1.5.0
      */
     public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return;
+        }
         sessions.parallelStream().forEach(globalSession -> {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
