@@ -17,7 +17,10 @@ package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -65,7 +68,7 @@ public class TCCFenceHandler {
     /**
      * limit of delete record by date (per sql)
      */
-    private static final int LIMIT_DELETE_BY_DATE = 10000;
+    private static final int LIMIT_DELETE = 1000;
 
     private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
 
@@ -288,24 +291,56 @@ public class TCCFenceHandler {
      */
     public static int deleteFenceByDate(Date datetime) {
         int total = 0;
-        int del = 0;
-        do {
-            del = doDeleteFenceByDate(datetime, LIMIT_DELETE_BY_DATE);
-            total += del;
-        } while (del > 0);
+
+//        while (true){
+//            List<String> xids = new ArrayList<>();
+//            Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(conn, datetime, LIMIT_DELETE);
+//            xids.addAll();
+//            if(xids.isEmpty()){
+//               break;
+//            }
+//            total += TCC_FENCE_DAO.deleteTCCFenceDO(conn, xids);
+//        }
+//
+//
+//        transactionTemplate.execute(status -> {
+//            boolean ret = false;
+//            try {
+//                Connection conn = DataSourceUtils.getConnection(dataSource);
+//            } catch (RuntimeException e) {
+//                status.setRollbackOnly();
+//                LOGGER.error("delete fence log failed ",  e);
+//            }
+//            return ret;
+//        });
+
         return total;
     }
 
-    private static int doDeleteFenceByDate(Date datetime, int limit) {
-        return transactionTemplate.execute(status -> {
+
+    public static int deleteFenceByDate2(Date datetime) {
+        int total = 0;
+        transactionTemplate.execute(status -> {
+            boolean ret = false;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime, limit);
+                while (true){
+                    List<String> xids = new ArrayList<>();
+                    Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(conn, datetime, LIMIT_DELETE);
+                    xids.addAll(xidSet);
+                    if(xids.isEmpty()){
+                        break;
+                    }
+                    total += TCC_FENCE_DAO.deleteTCCFenceDO(conn, xids);
+                }
             } catch (RuntimeException e) {
                 status.setRollbackOnly();
-                throw e;
+                LOGGER.error("delete fence log failed ",  e);
             }
+            return ret;
         });
+
+        return total;
     }
 
     private static void initLogCleanExecutor() {
