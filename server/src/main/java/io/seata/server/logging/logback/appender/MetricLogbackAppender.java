@@ -40,7 +40,7 @@ public class MetricLogbackAppender extends AppenderBase<ILoggingEvent> {
             Level level = event.getLevel();
 
             if (level.isGreaterOrEqual(Level.ERROR)) {
-                ThrowableProxy info = (ThrowableProxy) event.getThrowableProxy();
+                ThrowableProxy info = (ThrowableProxy)event.getThrowableProxy();
 
                 if (info != null) {
                     Throwable throwable = info.getThrowable();
