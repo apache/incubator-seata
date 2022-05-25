@@ -18,12 +18,14 @@ package io.seata.server.session;
 import io.seata.core.model.GlobalStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * the type change status validator test
  *
  * @author Bughue
  */
+@SpringBootTest
 public class SessionStatusValidatorTest {
 
     @Test
