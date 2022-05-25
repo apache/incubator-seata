@@ -283,64 +283,30 @@ public class TCCFenceHandler {
         });
     }
 
-    /**
-     * Delete TCC Fence By Datetime
-     *
-     * @param datetime datetime
-     * @return the deleted row count
-     */
+
+
     public static int deleteFenceByDate(Date datetime) {
-        int total = 0;
-
-//        while (true){
-//            List<String> xids = new ArrayList<>();
-//            Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(conn, datetime, LIMIT_DELETE);
-//            xids.addAll();
-//            if(xids.isEmpty()){
-//               break;
-//            }
-//            total += TCC_FENCE_DAO.deleteTCCFenceDO(conn, xids);
-//        }
-//
-//
-//        transactionTemplate.execute(status -> {
-//            boolean ret = false;
-//            try {
-//                Connection conn = DataSourceUtils.getConnection(dataSource);
-//            } catch (RuntimeException e) {
-//                status.setRollbackOnly();
-//                LOGGER.error("delete fence log failed ",  e);
-//            }
-//            return ret;
-//        });
-
-        return total;
-    }
-
-
-    public static int deleteFenceByDate2(Date datetime) {
-        int total = 0;
-        transactionTemplate.execute(status -> {
-            boolean ret = false;
+        Integer totalDel = transactionTemplate.execute(status -> {
+            int total = 0;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                while (true){
+                while (true) {
                     List<String> xids = new ArrayList<>();
                     Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(conn, datetime, LIMIT_DELETE);
                     xids.addAll(xidSet);
-                    if(xids.isEmpty()){
+                    if (xids.isEmpty()) {
                         break;
                     }
                     total += TCC_FENCE_DAO.deleteTCCFenceDO(conn, xids);
                 }
             } catch (RuntimeException e) {
                 status.setRollbackOnly();
-                LOGGER.error("delete fence log failed ",  e);
+                LOGGER.error("delete fence log failed ", e);
             }
-            return ret;
+            return total;
         });
 
-        return total;
+        return totalDel;
     }
 
     private static void initLogCleanExecutor() {
