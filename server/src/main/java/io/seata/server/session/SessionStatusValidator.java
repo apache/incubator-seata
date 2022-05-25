@@ -22,7 +22,7 @@ import io.seata.core.model.GlobalStatus;
  *
  * @author Bughue
  */
-public class ChangeStatusValidator {
+public class SessionStatusValidator {
 
     /**
      * is timeout global status timeout

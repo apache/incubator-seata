@@ -28,7 +28,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.server.session.ChangeStatusValidator;
+import io.seata.server.session.SessionStatusValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -329,7 +329,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
             GlobalStatus after = GlobalStatus.get(globalTransactionDO.getStatus());
-            if (!ChangeStatusValidator.validateUpdateStatus(before, after)) {
+            if (!SessionStatusValidator.validateUpdateStatus(before, after)) {
                 throw new StoreException("illegal changing of global status, update global transaction failed."
                     + " beforeStatus[" + before.name() + "] cannot be changed to afterStatus[" + after.name() + "]");
             }
