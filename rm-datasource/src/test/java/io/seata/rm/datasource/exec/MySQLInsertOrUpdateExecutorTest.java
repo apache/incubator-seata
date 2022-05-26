@@ -112,8 +112,8 @@ public class MySQLInsertOrUpdateExecutorTest {
 
     @Test
     public void testBuildImageSQL(){
-        String selectSQLStr = "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? ) ";
-        String paramAppenderListStr = "[[userId1, 100], [userId2, 101]]";
+        String selectSQLStr = "SELECT *  FROM null WHERE (user_id) IN(?,?)  OR (id) IN(?,?) ";
+        String paramAppenderListStr = "{[user_id]=[userId1, userId2], [id]=[100, 101]}";
         mockImageParamperterMap_contain_constant();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,userStatus1");
@@ -123,7 +123,7 @@ public class MySQLInsertOrUpdateExecutorTest {
         mockAllIndexes();
         String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
         Assertions.assertEquals(selectSQLStr,selectSQL);
-        Assertions.assertEquals(paramAppenderListStr,insertOrUpdateExecutor.getParamAppenderList().toString());
+        Assertions.assertEquals(paramAppenderListStr,insertOrUpdateExecutor.getParamAppenderMap().toString());
     }
 
     @Test
@@ -139,8 +139,9 @@ public class MySQLInsertOrUpdateExecutorTest {
         try {
             TableRecords tableRecords = new TableRecords();
             String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
-            ArrayList<List<Object>> paramAppenderList = insertOrUpdateExecutor.getParamAppenderList();
-            doReturn(tableRecords).when(insertOrUpdateExecutor).buildTableRecords2(tableMeta,selectSQL,paramAppenderList);
+            HashMap<List<String>, List<Object>> paramAppenderMap = insertOrUpdateExecutor.getParamAppenderMap();
+            doReturn(tableRecords).when(insertOrUpdateExecutor).buildTableRecords2(tableMeta, selectSQL, paramAppenderMap);
+            insertOrUpdateExecutor.setSelectSQL(selectSQL);
             TableRecords tableRecordsResult = insertOrUpdateExecutor.beforeImage();
             Assertions.assertEquals(tableRecords,tableRecordsResult);
         } catch (SQLException throwables) {

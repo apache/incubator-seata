@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.Objects;
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -66,19 +67,23 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         return selectSQL;
     }
 
+    public void setSelectSQL(String selectSQL) {
+        this.selectSQL = selectSQL;
+    }
+
     /**
      * before image sql and after image sql,condition is unique index
      */
     private String selectSQL;
 
-    public ArrayList<List<Object>> getParamAppenderList() {
-        return paramAppenderList;
+    public HashMap<List<String>, List<Object>> getParamAppenderMap() {
+        return paramAppenderMap;
     }
 
     /**
      * the params of selectSQL, value is the unique index
      */
-    private ArrayList<List<Object>> paramAppenderList;
+    private HashMap<List<String>, List<Object>> paramAppenderMap;
 
     public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
@@ -106,7 +111,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         int updateCount = statementProxy.getUpdateCount();
         if (updateCount > 0) {
             TableRecords afterImage = afterImage(beforeImage);
-            prepareUndoLog(beforeImage, afterImage);
+            prepareUndoLogAll(beforeImage, afterImage);
         }
         return result;
     }
@@ -213,15 +218,10 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         });
 
         StringBuilder afterImageSql = new StringBuilder(selectSQL);
-        for (int i = 0; i < rows.size(); i++) {
-            int finalI = i;
-            List<String> wherePrimaryList = new ArrayList<>();
-            primaryValueMap.forEach((k, v) -> {
-                wherePrimaryList.add(k + " = " +  primaryValueMap.get(k).get(finalI) + " ");
-            });
-            afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
-        }
-        return buildTableRecords2(tmeta, afterImageSql.toString(), paramAppenderList);
+        primaryValueMap.forEach((k, v) -> {
+            afterImageSql.append(" OR ").append(k).append(" IN (").append(Joiner.on(",").join(v)).append(")");
+        });
+        return buildTableRecords2(tmeta, afterImageSql.toString(), paramAppenderMap);
     }
 
     @Override
@@ -229,10 +229,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         TableMeta tmeta = getTableMeta();
         //after image sql the same of before image
         if (StringUtils.isBlank(selectSQL)) {
-            paramAppenderList = new ArrayList<>();
             selectSQL = buildImageSQL(tmeta);
         }
-        return buildTableRecords2(tmeta, selectSQL, paramAppenderList);
+        return buildTableRecords2(tmeta, selectSQL, paramAppenderMap);
     }
 
     /**
@@ -240,18 +239,18 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      *
      * @param tableMeta
      * @param selectSQL
-     * @param paramAppenderList
+     * @param paramAppenderMap
      * @return the table records
      * @throws SQLException
      */
-    public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+    public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, HashMap<List<String>, List<Object>> paramAppenderMap) throws SQLException {
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL + " FOR UPDATE")) {
-            if (CollectionUtils.isNotEmpty(paramAppenderList)) {
-                for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
-                    List<Object> paramAppender = paramAppenderList.get(i);
-                    for (int j = 0, ds = paramAppender.size(); j < ds; j++) {
-                        ps.setObject(i * ds + j + 1, "NULL".equals(paramAppender.get(j).toString()) ? null : paramAppender.get(j));
+            if (CollectionUtils.isNotEmpty(paramAppenderMap)) {
+                int i = 1;
+                for (Map.Entry<List<String>, List<Object>> entry : paramAppenderMap.entrySet()) {
+                    for (Object o : entry.getValue()) {
+                        ps.setObject(i++, o);
                     }
                 }
             }
@@ -269,53 +268,56 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @return image sql
      */
     public String buildImageSQL(TableMeta tableMeta) {
-        if (CollectionUtils.isEmpty(paramAppenderList)) {
-            paramAppenderList = new ArrayList<>();
-        }
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         int insertNum = recognizer.getInsertParamsValue().size();
         Map<String, ArrayList<Object>> imageParamperterMap = buildImageParamperters(recognizer);
         StringBuilder prefix = new StringBuilder("SELECT * ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        boolean[] isContainWhere = {false};
         for (int i = 0; i < insertNum; i++) {
             int finalI = i;
-            List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
                 if (!v.isNonUnique()) {
-                    boolean columnIsNull = true;
-                    List<String> uniqueList = new ArrayList<>();
+                    List<String> columnList = new ArrayList<>(v.getValues().size());
+                    List<Object> columnValue = new ArrayList<>(v.getValues().size());
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
                         if (imageParamperterMap.get(columnName) == null && m.getColumnDef() != null) {
-                            uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
-                            columnIsNull = false;
+                            columnList.add(columnName);
+                            columnValue.add("DEFAULT(" + columnName + ")");
                             continue;
                         }
                         if ((imageParamperterMap.get(columnName) == null && m.getColumnDef() == null) || imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
                             if (!"PRIMARY".equalsIgnoreCase(k)) {
-                                columnIsNull = false;
-                                uniqueList.add(columnName + " is ? ");
-                                paramAppenderTempList.add("NULL");
+                                columnList.add(columnName);
+                                columnValue.add("NULL");
                                 continue;
                             }
                             break;
                         }
-                        columnIsNull = false;
-                        uniqueList.add(columnName + " = ? ");
-                        paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
+                        columnList.add(columnName);
+                        columnValue.add(imageParamperterMap.get(columnName).get(finalI));
                     }
-                    if (!columnIsNull) {
-                        if (isContainWhere[0]) {
-                            suffix.append(" OR (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
-                        } else {
-                            suffix.append(" WHERE (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
-                            isContainWhere[0] = true;
-                        }
+                    if (CollectionUtils.isNotEmpty(columnList)) {
+                        CollectionUtils.computeIfAbsent(paramAppenderMap, columnList, e -> new ArrayList<>())
+                                .addAll(columnValue);
                     }
                 }
             });
-            paramAppenderList.add(paramAppenderTempList);
+        }
+        if (CollectionUtils.isNotEmpty(paramAppenderMap)) {
+            suffix.append(" WHERE ");
+            paramAppenderMap.forEach((k, v) -> {
+                suffix.append("(");
+                k.forEach(column -> suffix.append(column).append(","));
+                suffix.delete(suffix.length() - 1, suffix.length());
+                suffix.append(")");
+                suffix.append(" IN(");
+                v.forEach(value -> suffix.append("?").append(","));
+                suffix.delete(suffix.length() - 1, suffix.length());
+                suffix.append(") ");
+                suffix.append(" OR ");
+            });
+            suffix.delete(suffix.length() - 4, suffix.length());
         }
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         return selectSQLJoin.toString();
@@ -369,6 +371,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 }
                 imageParamperterMap.put(m, imageListTemp);
             }
+        }
+        if (Objects.isNull(paramAppenderMap)) {
+            paramAppenderMap = new HashMap<>(imageParamperterMap.size(), 1.001f);
         }
         return imageParamperterMap;
     }
