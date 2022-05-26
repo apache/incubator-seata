@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.tcc;
+package io.seata.rm.tcc.interceptor;
 
 import java.lang.reflect.Method;
 import javax.annotation.Nullable;
@@ -26,9 +26,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
 import io.seata.rm.tcc.remoting.RemotingDesc;
-import io.seata.rm.tcc.remoting.parser.DubboUtil;
+import io.seata.spring.util.DubboUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

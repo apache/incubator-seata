@@ -37,10 +37,9 @@ import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
-import io.seata.spring.tcc.TccActionInterceptor;
+import io.seata.spring.autoproxy.DefaultTransactionAutoProxy;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
-import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.aop.Advice;
@@ -261,7 +260,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
      * @see io.seata.rm.tcc.remoting.RemotingParser // Remote TCC service parser
      * Corresponding interceptor:
-     * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
+     * @see io.seata.rm.tcc.interceptor.TccActionInterceptor // the interceptor of TCC mode
      */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
@@ -276,14 +275,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     return bean;
                 }
                 interceptor = null;
-                //check TCC proxy
-                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
-                    // init tcc fence clean task if enable useTccFence
-                    TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext);
-                    //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
-                    interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
+                //check Transaction proxy
+                interceptor = DefaultTransactionAutoProxy.get().isTransactionAutoProxy(bean, beanName, applicationContext);
+                if (interceptor != null) {
                     ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                            (ConfigurationChangeListener)interceptor);
+                            (ConfigurationChangeListener) interceptor);
                 } else {
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);

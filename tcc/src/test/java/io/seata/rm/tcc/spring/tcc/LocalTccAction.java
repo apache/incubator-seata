@@ -13,13 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.tcc;
+package io.seata.rm.tcc.spring.tcc;
+
+import io.seata.rm.tcc.api.LocalTCC;
 
 /**
- * The type Local tcc action.
+ * The interface Local tcc action.
  *
  * @author zhangsen
  */
-public class LocalTccActionImpl extends TccActionImpl implements LocalTccAction {
-
+@LocalTCC
+public interface LocalTccAction extends TccAction {
 }
