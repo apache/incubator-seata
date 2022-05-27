@@ -19,16 +19,15 @@ package io.seata.rm.jedispool;
  * @author funkye
  */
 public class KVUndolog {
-	private String key;
+    private String key;
 
-	private String method;
+    private String method;
 
-	private String beforeValue;
+    private String beforeValue;
 
-	private String afterValue;
+    private String afterValue;
 
-	public KVUndolog() {
-	}
+    public KVUndolog() {}
 
     public KVUndolog(String key, String beforeValue, String afterValue, String method) {
         this.key = key;
@@ -37,70 +36,70 @@ public class KVUndolog {
         this.method = method;
     }
 
-	public String getKey() {
-		return key;
-	}
+    public String getKey() {
+        return key;
+    }
 
-	public void setKey(String key) {
-		this.key = key;
-	}
+    public void setKey(String key) {
+        this.key = key;
+    }
 
-	public String getBeforeValue() {
-		return beforeValue;
-	}
+    public String getBeforeValue() {
+        return beforeValue;
+    }
 
-	public void setBeforeValue(String beforeValue) {
-		this.beforeValue = beforeValue;
-	}
+    public void setBeforeValue(String beforeValue) {
+        this.beforeValue = beforeValue;
+    }
 
-	public String getAfterValue() {
-		return afterValue;
-	}
+    public String getAfterValue() {
+        return afterValue;
+    }
 
-	public void setAfterValue(String afterValue) {
-		this.afterValue = afterValue;
-	}
+    public void setAfterValue(String afterValue) {
+        this.afterValue = afterValue;
+    }
 
-	public String getMethod() {
-		return method;
-	}
+    public String getMethod() {
+        return method;
+    }
 
-	public void setMethod(String method) {
-		this.method = method;
-	}
+    public void setMethod(String method) {
+        this.method = method;
+    }
 
-	/**
-	 * The enum redis method name
-	 */
+    /**
+     * The enum redis method name
+     */
     public enum RedisMethod {
-		/**
-		 * set
-		 */
+        /**
+         * set
+         */
         set("set"),
-		/**
-		 * rpush
-		 */
-		rpush("rpush"),
-		/**
-		 * hget
-		 */
-		hset("hset"),
-		/**
-		 * get
-		 */
-		get("get");
+        /**
+         * rpush
+         */
+        rpush("rpush"),
+        /**
+         * hget
+         */
+        hset("hset"),
+        /**
+         * get
+         */
+        get("get");
 
-		/**
-		 * method
-		 */
+        /**
+         * method
+         */
         final String method;
 
-		/**
-		 * @param method method
-		 */
+        /**
+         * @param method method
+         */
         RedisMethod(String method) {
             this.method = method;
         }
     }
-	
+
 }

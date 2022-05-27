@@ -16,7 +16,6 @@ import static io.seata.common.Constants.REDIS_TX_LOG;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;

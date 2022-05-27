@@ -64,6 +64,8 @@ public class JedisProxy extends Jedis {
                 context.buildLockKeys()));
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            context.reset();
         }
         return jedis.set(key, value);
     }
@@ -86,6 +88,8 @@ public class JedisProxy extends Jedis {
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            context.reset();
         }
         return jedis.get(key);
     }
@@ -102,6 +106,8 @@ public class JedisProxy extends Jedis {
                 context.buildLockKeys()));
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            context.reset();
         }
         return jedis.hset(key, field, value);
     }
@@ -126,6 +132,8 @@ public class JedisProxy extends Jedis {
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            context.reset();
         }
         return jedis.hget(key, field);
     }
