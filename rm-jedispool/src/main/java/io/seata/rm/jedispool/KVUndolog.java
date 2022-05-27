@@ -84,7 +84,11 @@ public class KVUndolog {
 		/**
 		 * hget
 		 */
-		hset("hget");
+		hset("hset"),
+		/**
+		 * get
+		 */
+		get("get");
 
 		/**
 		 * method
