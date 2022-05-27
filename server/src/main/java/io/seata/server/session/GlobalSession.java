@@ -148,7 +148,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public boolean hasATBranch() {
         List<BranchSession> branchSessions = getBranchSessions();
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.AT) {
+            if (branchSession.getBranchType() == BranchType.AT
+                || branchSession.getBranchType() == BranchType.ATbyJedis) {
                 return true;
             }
         }

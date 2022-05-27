@@ -27,6 +27,7 @@ import java.util.Set;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
@@ -37,7 +38,9 @@ import io.seata.core.exception.TransactionException;
  * @author funkye
  */
 public class JedisContext {
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private final Map<String, String> applicationData = new HashMap<>(2, 1.0001f);
     /**
      * the lock keys buffer
@@ -197,7 +200,8 @@ public class JedisContext {
             this.applicationData.putAll(MAPPER.readValue(applicationData, new TypeReference<Map<String, String>>() {}));
             String txLog = this.applicationData.get(REDIS_TX_LOG);
             if (StringUtils.isNotBlank(txLog)) {
-                this.kvUndoItemsBuffer.addAll(MAPPER.readValue(txLog, new TypeReference<List<KVUndolog>>() {}));
+                CollectionType javaType = MAPPER.getTypeFactory().constructCollectionType(List.class, KVUndolog.class);
+                this.kvUndoItemsBuffer.addAll(MAPPER.readValue(txLog, javaType));
             }
         } catch (JsonProcessingException e) {
             throw new TransactionException(e.getMessage(), e);
@@ -258,7 +262,7 @@ public class JedisContext {
      * @return the undo items
      */
     public List<KVUndolog> getUndoItems() {
-        return Collections.unmodifiableList(kvUndoItemsBuffer);
+        return kvUndoItemsBuffer;
     }
 
     /**

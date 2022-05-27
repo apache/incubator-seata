@@ -27,11 +27,15 @@ public class KVUndolog {
 
 	private String afterValue;
 
-	public KVUndolog(String key, String beforeValue, String afterValue,String method) {
-		this.key = key;
-		this.beforeValue = beforeValue;
-		this.afterValue = afterValue;
+	public KVUndolog() {
 	}
+
+    public KVUndolog(String key, String beforeValue, String afterValue, String method) {
+        this.key = key;
+        this.beforeValue = beforeValue;
+        this.afterValue = afterValue;
+        this.method = method;
+    }
 
 	public String getKey() {
 		return key;
@@ -64,12 +68,32 @@ public class KVUndolog {
 	public void setMethod(String method) {
 		this.method = method;
 	}
-	
-    public enum RedisMethod {
-        set("set"), rpush("rpush"), hset("hget");
 
+	/**
+	 * The enum redis method name
+	 */
+    public enum RedisMethod {
+		/**
+		 * set
+		 */
+        set("set"),
+		/**
+		 * rpush
+		 */
+		rpush("rpush"),
+		/**
+		 * hget
+		 */
+		hset("hget");
+
+		/**
+		 * method
+		 */
         final String method;
 
+		/**
+		 * @param method method
+		 */
         RedisMethod(String method) {
             this.method = method;
         }

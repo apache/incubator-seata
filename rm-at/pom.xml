@@ -13,11 +13,6 @@
     <packaging>jar</packaging>
     <name>seata-rm-at ${project.version}</name>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

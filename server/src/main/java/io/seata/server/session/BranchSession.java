@@ -265,7 +265,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     public boolean canBeCommittedAsync() {
-        return branchType == BranchType.AT || status == BranchStatus.PhaseOne_Failed;
+        return branchType == BranchType.AT || this.getBranchType().equals(BranchType.ATbyJedis)
+            || status == BranchStatus.PhaseOne_Failed;
     }
 
     /**
@@ -283,7 +284,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     public boolean lock(boolean autoCommit, boolean skipCheckLock) throws TransactionException {
-        if (this.getBranchType().equals(BranchType.AT)) {
+        if (this.getBranchType().equals(BranchType.AT) || this.getBranchType().equals(BranchType.ATbyJedis)) {
             return LockerManagerFactory.getLockManager().acquireLock(this, autoCommit, skipCheckLock);
         }
         return true;
@@ -291,7 +292,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean unlock() throws TransactionException {
-        if (this.getBranchType() == BranchType.AT) {
+        if (this.getBranchType().equals(BranchType.AT) || this.getBranchType().equals(BranchType.ATbyJedis)) {
             return LockerManagerFactory.getLockManager().releaseLock(this);
         }
         return true;

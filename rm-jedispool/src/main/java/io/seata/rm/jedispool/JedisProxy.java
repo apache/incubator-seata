@@ -26,6 +26,7 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.exceptions.JedisException;
 
 /**
@@ -37,9 +38,10 @@ public class JedisProxy extends Jedis {
 
     private Jedis jedis;
 
-    public JedisProxy(Jedis jedis) {
+    public JedisProxy(Jedis jedis, JedisPoolAbstract dataSource) {
         this.jedis = jedis;
         context.bind(RootContext.getXID());
+        this.dataSource = dataSource;
     }
 
     /**
@@ -53,7 +55,7 @@ public class JedisProxy extends Jedis {
      */
     @Override
     public String set(final String key, final String value) {
-        context.appendLockKey(key);
+        context.appendLockKey(buildLockKey(key));
         KVUndolog kvUndolog = new KVUndolog(key, jedis.get(key), value, KVUndolog.RedisMethod.set.method);
         context.appendUndoItem(kvUndolog);
         try {
@@ -63,9 +65,7 @@ public class JedisProxy extends Jedis {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        checkIsInMultiOrPipeline();
-        client.set(key, value);
-        return client.getStatusCodeReply();
+        return jedis.set(key, value);
     }
 
     /**
@@ -78,18 +78,16 @@ public class JedisProxy extends Jedis {
      */
     @Override
     public String get(final String key) {
-        context.appendLockKey(key);
+        context.appendLockKey(buildLockKey(key));
         try {
             doRetryOnLockConflict(() -> {
-                checkLock(key);
+                checkLock(context.buildLockKeys());
                 return null;
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        checkIsInMultiOrPipeline();
-        client.get(key);
-        return client.getBulkReply();
+        return jedis.get(key);
     }
 
 
@@ -105,9 +103,7 @@ public class JedisProxy extends Jedis {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        checkIsInMultiOrPipeline();
-        client.hset(key, field, value);
-        return client.getIntegerReply();
+        return jedis.hset(key, field, value);
     }
 
     public Jedis getJedis() {
@@ -239,9 +235,13 @@ public class JedisProxy extends Jedis {
 
     private String buildLockKey(String key, String field) {
         if (field == null) {
-            return key;
+            return getDB() + ":" + key;
         }
-        return key + "~~~~~>>>>>" + field;
+        return getDB() + ":" + key + "~~~~~>>>>>" + field;
     }
-    
+
+    private String buildLockKey(String key) {
+        return buildLockKey(key, null);
+    }
+
 }
