@@ -15,7 +15,6 @@
  */
 package io.seata.rm.jedispool;
 
-import java.util.NoSuchElementException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
@@ -23,9 +22,7 @@ import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
-import redis.clients.jedis.exceptions.JedisExhaustedPoolException;
 
 /**
  * @author funkye

@@ -19,9 +19,10 @@ import io.seata.core.model.ResourceManager;
  * @author funkye
  */
 public class RMHandlerATbyJedis extends AbstractRMHandler {
+
     @Override
     protected ResourceManager getResourceManager() {
-	   return DefaultResourceManager.get().getResourceManager(BranchType.ATbyJedis);
+        return DefaultResourceManager.get().getResourceManager(BranchType.ATbyJedis);
     }
 
     @Override
