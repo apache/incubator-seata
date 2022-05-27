@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import io.seata.common.util.StringUtils;
-
 import java.time.Duration;
 
 /**
@@ -32,7 +30,7 @@ public interface DefaultValues {
     int DEFAULT_TM_DEGRADE_CHECK_PERIOD = 2000;
     int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
     boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
-    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = true;
     long DEFAULT_TABLE_META_CHECKER_INTERVAL = 60000L;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
@@ -68,7 +66,7 @@ public interface DefaultValues {
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.
      */
-    String DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS = StringUtils.EMPTY;
+    String DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS = "{}";
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_LOG_TABLE.
      */

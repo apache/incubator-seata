@@ -29,10 +29,12 @@ import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.rm.datasource.sql.struct.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS;
 
 /**
  * Ignore uncheckField Controller
@@ -50,7 +52,7 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private volatile String noCheckFields = ConfigurationFactory.getInstance().getConfig(
-            TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, StringUtils.EMPTY);
+        TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS, DEFAULT_TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS);
 
     private static volatile Map<String, Set<String>> mapFields = new HashMap<>();
 
@@ -74,10 +76,10 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         String newValue = event.getNewValue();
 
         if (TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS.equals(dataId)) {
-            if (StringUtils.isNotBlank(newValue)) {
-                LOGGER.info("{} config changed, old value:{}, new value:{}", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
-                        noCheckFields, event.getNewValue());
-            } else {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", TRANSACTION_UNDO_IGNORE_NOCHECK_COLUMNS,
+                noCheckFields, event.getNewValue());
+
+            if (StringUtils.isBlank(newValue)) {
                 if (CollectionUtils.isNotEmpty(mapFields)) {
                     mapFields.clear();
                 }
@@ -123,5 +125,23 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
         }
 
         columns.forEach(selectSQLJoin::add);
+    }
+
+    public static Boolean checkIgnoreFields(String tableName, Field newField) {
+
+        if (CollectionUtils.isNotEmpty(mapFields)) {
+            if (mapFields.containsKey(tableName)) {
+                Set<String> columns = mapFields.get(tableName);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.info("tableName:[{}] ignore uncheck column:[{}] ", tableName, columns);
+                }
+                if (columns.contains(newField.getName())) {
+                    return Boolean.TRUE;
+                } else {
+                    return Boolean.FALSE;
+                }
+            }
+        }
+        return Boolean.FALSE;
     }
 }
