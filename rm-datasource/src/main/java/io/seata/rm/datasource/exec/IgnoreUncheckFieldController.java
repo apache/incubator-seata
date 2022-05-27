@@ -29,7 +29,6 @@ import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.rm.datasource.sql.struct.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,23 +124,4 @@ public class IgnoreUncheckFieldController implements ConfigurationChangeListener
 
         columns.forEach(selectSQLJoin::add);
     }
-
-    public static Boolean checkIgnoreFields(String tableName, Field newField) {
-
-        if (CollectionUtils.isNotEmpty(mapFields)) {
-            if (mapFields.containsKey(tableName)) {
-                Set<String> columns = mapFields.get(tableName);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.info("tableName:[{}] ignore uncheck column:[{}] ", tableName, columns);
-                }
-                if (columns.contains(newField.getName())) {
-                    return Boolean.TRUE;
-                } else {
-                    return Boolean.FALSE;
-                }
-            }
-        }
-        return Boolean.FALSE;
-    }
-
 }

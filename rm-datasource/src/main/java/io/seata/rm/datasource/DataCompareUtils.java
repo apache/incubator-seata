@@ -40,8 +40,6 @@ import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.rm.datasource.exec.IgnoreUncheckFieldController.checkIgnoreFields;
-
 /**
  * The type Data compare utils.
  *
@@ -198,9 +196,6 @@ public class DataCompareUtils {
                 Field newField = newRow.get(fieldName);
                 if (newField == null) {
                     return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
-                }
-                if (checkIgnoreFields(tableMetaData.getTableName(), newField)) {
-                    continue;
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
                 if (!oldEqualsNewFieldResult.getResult()) {
