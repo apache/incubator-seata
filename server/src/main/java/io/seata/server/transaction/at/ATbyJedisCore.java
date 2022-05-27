@@ -21,7 +21,7 @@ import io.seata.core.rpc.RemotingServer;
 /**
  * @author funkye
  */
-public class ATbyJedisCore extends ATCore{
+public class ATbyJedisCore extends ATCore {
 
     public ATbyJedisCore(RemotingServer remotingServer) {
         super(remotingServer);

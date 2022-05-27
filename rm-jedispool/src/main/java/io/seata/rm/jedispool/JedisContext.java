@@ -196,7 +196,8 @@ public class JedisContext {
 
     public JedisContext reloadApplicationData(String applicationData) throws TransactionException {
         try {
-            this.applicationData.putAll(MAPPER.readValue(applicationData, new TypeReference<Map<String, String>>() {}));
+            this.applicationData.putAll(MAPPER.readValue(applicationData, new TypeReference<Map<String, String>>() {
+            }));
             String txLog = this.applicationData.get(REDIS_TX_LOG);
             if (StringUtils.isNotBlank(txLog)) {
                 CollectionType javaType = MAPPER.getTypeFactory().constructCollectionType(List.class, KVUndolog.class);
