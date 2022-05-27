@@ -161,4 +161,9 @@ public interface Constants {
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
 
+    /**
+     * The constant REDIS_TX_LOG
+     */
+    String REDIS_TX_LOG = "redis-tx-log";
+
 }
