@@ -106,6 +106,30 @@ public class JedisProxy extends Jedis {
         return jedis.hset(key, field, value);
     }
 
+    /**
+     * If key holds a hash, retrieve the value associated to the specified field.
+     * <p>
+     * If the field is not found or the key does not exist, a special 'nil' value is returned.
+     * <p>
+     * <b>Time complexity:</b> O(1)
+     * @param key
+     * @param field
+     * @return Bulk reply
+     */
+    @Override
+    public String hget(final String key, final String field) {
+        context.appendLockKey(buildLockKey(key, field));
+        try {
+            doRetryOnLockConflict(() -> {
+                checkLock(context.buildLockKeys());
+                return null;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return jedis.hget(key, field);
+    }
+
     public Jedis getJedis() {
         return jedis;
     }
