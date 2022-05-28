@@ -16,10 +16,7 @@
 package io.seata.rm.context;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.exception.ShouldNeverHappenException;
 
