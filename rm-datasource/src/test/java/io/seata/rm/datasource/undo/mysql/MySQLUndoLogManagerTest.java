@@ -148,7 +148,7 @@ public class MySQLUndoLogManagerTest {
     public void testFlushUndoLogs() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
         connectionProxy.bind("xid");
         ConnectionContext context = connectionProxy.getContext();
-        Method method = context.getClass().getDeclaredMethod("setBranchId", Long.class);
+        Method method = context.getClass().getMethod("setBranchId", Long.class);
         method.setAccessible(true);
         method.invoke(context, 1L);
 
