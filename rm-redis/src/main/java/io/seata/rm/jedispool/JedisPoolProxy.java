@@ -22,20 +22,21 @@ import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.exceptions.JedisException;
 
 /**
  * @author funkye
  */
-public class JedisPoolProxy extends JedisPool implements Resource {
+public class JedisPoolProxy extends JedisPoolAbstract implements Resource {
 
-    private JedisPool targetJedisPool;
+    private JedisPoolAbstract targetJedisPool;
 
     private String resourceId;
 
     private String resourceGroupId;
 
-    public JedisPoolProxy(JedisPool jedisPool, String resourceId) {
+    public JedisPoolProxy(JedisPoolAbstract jedisPool, String resourceId) {
         this.resourceId = resourceId;
         this.targetJedisPool = jedisPool;
         DefaultResourceManager.get().registerResource(this);
@@ -69,7 +70,7 @@ public class JedisPoolProxy extends JedisPool implements Resource {
         }
     }
 
-    public JedisPool getTargetJedisPool() {
+    public JedisPoolAbstract getTargetJedisPool() {
         return targetJedisPool;
     }
 
@@ -96,6 +97,6 @@ public class JedisPoolProxy extends JedisPool implements Resource {
 
     @Override
     public BranchType getBranchType() {
-        return BranchType.ATbyJedis;
+        return BranchType.ATbyRedis;
     }
 }

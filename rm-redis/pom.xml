@@ -8,20 +8,16 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>seata-rm-jedispool</artifactId>
+    <artifactId>seata-rm-redis</artifactId>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
-    <name>seata-rm-jedispool ${project.version}</name>
+    <name>seata-rm-redis ${project.version}</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-rm-at</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>

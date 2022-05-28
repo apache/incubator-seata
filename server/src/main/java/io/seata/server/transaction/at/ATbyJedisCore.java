@@ -29,7 +29,7 @@ public class ATbyJedisCore extends ATCore {
 
     @Override
     public BranchType getHandleBranchType() {
-        return BranchType.ATbyJedis;
+        return BranchType.ATbyRedis;
     }
 
 }

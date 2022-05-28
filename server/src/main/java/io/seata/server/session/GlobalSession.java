@@ -149,7 +149,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         List<BranchSession> branchSessions = getBranchSessions();
         for (BranchSession branchSession : branchSessions) {
             if (branchSession.getBranchType() == BranchType.AT
-                || branchSession.getBranchType() == BranchType.ATbyJedis) {
+                || branchSession.getBranchType() == BranchType.ATbyRedis) {
                 return true;
             }
         }

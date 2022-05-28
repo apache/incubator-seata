@@ -22,11 +22,11 @@ public class RMHandlerATbyJedis extends AbstractRMHandler {
 
     @Override
     protected ResourceManager getResourceManager() {
-        return DefaultResourceManager.get().getResourceManager(BranchType.ATbyJedis);
+        return DefaultResourceManager.get().getResourceManager(BranchType.ATbyRedis);
     }
 
     @Override
     public BranchType getBranchType() {
-        return BranchType.ATbyJedis;
+        return BranchType.ATbyRedis;
     }
 }

@@ -181,7 +181,7 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-rm-jedispool</artifactId>
+            <artifactId>seata-rm-redis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

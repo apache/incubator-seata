@@ -15,16 +15,18 @@
  */
 package io.seata.rm.jedispool;
 
-import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.exceptions.JedisException;
@@ -33,10 +35,14 @@ import redis.clients.jedis.exceptions.JedisException;
  * @author funkye
  */
 public class JedisProxy extends Jedis {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(JedisProxy.class);
 
     private final JedisContext context = new JedisContext();
 
     private Jedis jedis;
+    
+    private Long branchId;
 
     public JedisProxy(Jedis jedis, JedisPoolAbstract dataSource) {
         this.jedis = jedis;
@@ -49,25 +55,42 @@ public class JedisProxy extends Jedis {
      * <p>
      * Time complexity: O(1)
      * 
-     * @param key
-     * @param value
+     * @param key key
+     * @param value value
      * @return Status code reply
      */
     @Override
     public String set(final String key, final String value) {
-        context.appendLockKey(buildLockKey(key));
-        KVUndolog kvUndolog = new KVUndolog(key, jedis.get(key), value, KVUndolog.RedisMethod.set.method);
-        context.appendUndoItem(kvUndolog);
-        try {
-            doRetryOnLockConflict(() -> DefaultResourceManager.get().branchRegister(BranchType.ATbyJedis,
-                ((JedisPoolProxy)dataSource).getResourceId(), null, context.getXid(), context.getApplicationData(),
-                context.buildLockKeys()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            context.reset();
-        }
+        registry(key, null, value, KVUndolog.RedisMethod.set.method);
         return jedis.set(key, value);
+    }
+
+    /**
+     * SETNX works exactly like {@link #set(String, String) SET} with the only difference that if the
+     * key already exists no operation is performed. SETNX actually means "SET if Not eXists".
+     * <p>
+     * Time complexity: O(1)
+     * @param key key
+     * @param value value
+     * @return Integer reply, specifically: 1 if the key was set 0 if the key was not set
+     */
+    @Override
+    public Long setnx(final String key, final String value) {
+        registry(key, null, value, KVUndolog.RedisMethod.setnx.method);
+        long result = jedis.setnx(key, value);
+        try {
+            return result;
+        } finally {
+            if (result != 1) {
+                try {
+                    // set nx In the event of a failure, you do not need to issue a two-stage directive because the operation was not committed
+                    DefaultResourceManager.get().branchReport(BranchType.ATbyRedis, RootContext.getXID(), branchId,
+                        BranchStatus.PhaseOne_Failed, null);
+                } catch (TransactionException e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            }
+        }
     }
 
     /**
@@ -75,40 +98,19 @@ public class JedisProxy extends Jedis {
      * stored at key is not a string an error is returned because GET can only handle string values.
      * <p>
      * Time complexity: O(1)
-     * @param key
+     * @param key key
      * @return Bulk reply
      */
     @Override
     public String get(final String key) {
-        context.appendLockKey(buildLockKey(key));
-        try {
-            doRetryOnLockConflict(() -> {
-                checkLock(context.buildLockKeys());
-                return null;
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            context.reset();
-        }
+        readCommitted(key);
         return jedis.get(key);
     }
 
 
     @Override
     public Long hset(final String key, final String field, final String value) {
-        context.appendLockKey(buildLockKey(key, field));
-        KVUndolog kvUndolog = new KVUndolog(key, jedis.hget(key, field), value, KVUndolog.RedisMethod.hset.method);
-        context.appendUndoItem(kvUndolog);
-        try {
-            doRetryOnLockConflict(() -> DefaultResourceManager.get().branchRegister(BranchType.ATbyJedis,
-                ((JedisPoolProxy)dataSource).getResourceId(), null, context.getXid(), context.getApplicationData(),
-                context.buildLockKeys()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            context.reset();
-        }
+        registry(key, field, value, KVUndolog.RedisMethod.hset.method);
         return jedis.hset(key, field, value);
     }
 
@@ -118,23 +120,13 @@ public class JedisProxy extends Jedis {
      * If the field is not found or the key does not exist, a special 'nil' value is returned.
      * <p>
      * <b>Time complexity:</b> O(1)
-     * @param key
-     * @param field
+     * @param key key
+     * @param field field
      * @return Bulk reply
      */
     @Override
     public String hget(final String key, final String field) {
-        context.appendLockKey(buildLockKey(key, field));
-        try {
-            doRetryOnLockConflict(() -> {
-                checkLock(context.buildLockKeys());
-                return null;
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            context.reset();
-        }
+        readCommitted(key, field);
         return jedis.hget(key, field);
     }
 
@@ -183,18 +175,64 @@ public class JedisProxy extends Jedis {
     }
 
     /**
-     * Check lock.
-     *
-     * @param lockKeys the lockKeys
-     * @throws SQLException the sql exception
+     * registry branch
+     * @param key key
+     * @param value value
      */
+    public void registry(String key, String field, String value, String method) {
+        if (StringUtils.isNotBlank(value)) {
+            context.appendLockKey(buildLockKey(key, field));
+            KVUndolog kvUndolog = new KVUndolog(key, field,
+                StringUtils.isNotBlank(field) ? jedis.hget(key, field) : jedis.get(key), value, method);
+            context.appendUndoItem(kvUndolog);
+            try {
+                doRetryOnLockConflict(() -> branchId = DefaultResourceManager.get().branchRegister(BranchType.ATbyRedis,
+                    ((JedisPoolProxy)dataSource).getResourceId(), null, context.getXid(), context.getApplicationData(),
+                    context.buildLockKeys()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                context.reset();
+            }
+        }
+    }
+
+    /**
+     * read committed.
+     *
+     * @param key the key
+     */
+    public void readCommitted(String key) {
+        readCommitted(key, null);
+    }
+
+    /**
+     * read committed.
+     *
+     * @param key the key
+     * @param field the field
+     */
+    public void readCommitted(String key, String field) {
+        context.appendLockKey(buildLockKey(key, field));
+        try {
+            doRetryOnLockConflict(() -> {
+                checkLock(context.buildLockKeys());
+                return null;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            context.reset();
+        }
+    }
+
     public void checkLock(String lockKeys) throws Exception {
         if (StringUtils.isBlank(lockKeys)) {
             return;
         }
         // Just check lock without requiring lock by now.
         try {
-            boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.ATbyJedis,
+            boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.ATbyRedis,
                 ((JedisPoolProxy)dataSource).getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
                 throw new LockConflictException(String.format("get lock failed, lockKey: %s", lockKeys));
@@ -215,7 +253,7 @@ public class JedisProxy extends Jedis {
         // Just check lock without requiring lock by now.
         boolean result = false;
         try {
-            result = DefaultResourceManager.get().lockQuery(BranchType.ATbyJedis, ((JedisPoolProxy)dataSource).getResourceId(),
+            result = DefaultResourceManager.get().lockQuery(BranchType.ATbyRedis, ((JedisPoolProxy)dataSource).getResourceId(),
                 context.getXid(), lockKeys);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, lockKeys);

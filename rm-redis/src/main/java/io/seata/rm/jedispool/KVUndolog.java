@@ -19,7 +19,10 @@ package io.seata.rm.jedispool;
  * @author funkye
  */
 public class KVUndolog {
+
     private String key;
+
+    private String field;
 
     private String method;
 
@@ -31,6 +34,14 @@ public class KVUndolog {
 
     public KVUndolog(String key, String beforeValue, String afterValue, String method) {
         this.key = key;
+        this.beforeValue = beforeValue;
+        this.afterValue = afterValue;
+        this.method = method;
+    }
+
+    public KVUndolog(String key,String field, String beforeValue, String afterValue, String method) {
+        this.key = key;
+        this.field = field;
         this.beforeValue = beforeValue;
         this.afterValue = afterValue;
         this.method = method;
@@ -68,6 +79,14 @@ public class KVUndolog {
         this.method = method;
     }
 
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+
     /**
      * The enum redis method name
      */
@@ -76,6 +95,10 @@ public class KVUndolog {
          * set
          */
         set("set"),
+        /**
+         * setnx
+         */
+        setnx("setnx"),
         /**
          * rpush
          */

@@ -32,6 +32,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
+import io.seata.rm.context.ATContext;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import static io.seata.common.Constants.AUTO_COMMIT;
@@ -42,7 +43,7 @@ import static io.seata.common.Constants.SKIP_CHECK_LOCK;
  *
  * @author sharajava
  */
-public class ConnectionContext {
+public class ConnectionContext extends ATContext {
     private static final Savepoint    DEFAULT_SAVEPOINT = new Savepoint() {
         @Override
         public int getSavepointId() throws SQLException {
@@ -55,14 +56,8 @@ public class ConnectionContext {
         }
     };
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    private String xid;
-    private Long branchId;
-    private boolean isGlobalLockRequire;
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
     private boolean autoCommitChanged;
-    private final Map<String, Object> applicationData = new HashMap<>(2, 1.0001f);
 
     /**
      * the lock keys buffer
@@ -74,33 +69,6 @@ public class ConnectionContext {
     private final Map<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new LinkedHashMap<>();
 
     private final List<Savepoint> savepoints = new ArrayList<>(8);
-
-    /**
-     * whether requires global lock in this connection
-     *
-     * @return
-     */
-    boolean isGlobalLockRequire() {
-        return isGlobalLockRequire;
-    }
-
-    /**
-     * set whether requires global lock in this connection
-     *
-     * @param isGlobalLockRequire
-     */
-    void setGlobalLockRequire(boolean isGlobalLockRequire) {
-        this.isGlobalLockRequire = isGlobalLockRequire;
-    }
-
-    /**
-     * Append lock key.
-     *
-     * @param lockKey the lock key
-     */
-    void appendLockKey(String lockKey) {
-        lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>()).add(lockKey);
-    }
 
     /**
      * Append undo item.
@@ -160,42 +128,6 @@ public class ConnectionContext {
     }
 
     /**
-     * In global transaction boolean.
-     *
-     * @return the boolean
-     */
-    public boolean inGlobalTransaction() {
-        return xid != null;
-    }
-
-    /**
-     * Is branch registered boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isBranchRegistered() {
-        return branchId != null;
-    }
-
-    /**
-     * Bind.
-     *
-     * @param xid the xid
-     */
-    void bind(String xid) {
-        if (xid == null) {
-            throw new IllegalArgumentException("xid should not be null");
-        }
-        if (!inGlobalTransaction()) {
-            setXid(xid);
-        } else {
-            if (!this.xid.equals(xid)) {
-                throw new ShouldNeverHappenException(String.format("bind xid: %s, while current xid: %s", xid, this.xid));
-            }
-        }
-    }
-
-    /**
      * Has undo log boolean.
      *
      * @return the boolean
@@ -211,42 +143,6 @@ public class ConnectionContext {
      */
     public boolean hasLockKey() {
         return !lockKeysBuffer.isEmpty();
-    }
-
-    /**
-     * Gets xid.
-     *
-     * @return the xid
-     */
-    public String getXid() {
-        return xid;
-    }
-
-    /**
-     * Sets xid.
-     *
-     * @param xid the xid
-     */
-    void setXid(String xid) {
-        this.xid = xid;
-    }
-
-    /**
-     * Gets branch id.
-     *
-     * @return the branch id
-     */
-    public Long getBranchId() {
-        return branchId;
-    }
-
-    /**
-     * Sets branch id.
-     *
-     * @param branchId the branch id
-     */
-    void setBranchId(Long branchId) {
-        this.branchId = branchId;
     }
 
     /**
@@ -297,6 +193,7 @@ public class ConnectionContext {
     /**
      * Reset.
      */
+    @Override
     public void reset() {
         this.reset(null);
     }
@@ -306,44 +203,12 @@ public class ConnectionContext {
      *
      * @param xid the xid
      */
-    void reset(String xid) {
-        this.xid = xid;
-        branchId = null;
-        this.isGlobalLockRequire = false;
+    @Override
+    protected void reset(String xid) {
+        super.reset(xid);
         savepoints.clear();
-        lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
         this.autoCommitChanged = false;
-        applicationData.clear();
-    }
-
-    /**
-     * Build lock keys string.
-     *
-     * @return the string
-     */
-    public String buildLockKeys() {
-        if (lockKeysBuffer.isEmpty()) {
-            return null;
-        }
-        Set<String> lockKeysBufferSet = new HashSet<>();
-        for (Set<String> lockKeys : lockKeysBuffer.values()) {
-            lockKeysBufferSet.addAll(lockKeys);
-        }
-
-        if (lockKeysBufferSet.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder appender = new StringBuilder();
-        Iterator<String> iterable = lockKeysBufferSet.iterator();
-        while (iterable.hasNext()) {
-            appender.append(iterable.next());
-            if (iterable.hasNext()) {
-                appender.append(";");
-            }
-        }
-        return appender.toString();
     }
 
     /**

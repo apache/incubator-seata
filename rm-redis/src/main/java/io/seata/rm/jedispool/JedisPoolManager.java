@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.AbstractResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 /**
  * The type jedis pool manager.
@@ -101,34 +103,60 @@ public class JedisPoolManager extends AbstractResourceManager {
 
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+        String applicationData) throws TransactionException {
+        JedisPoolProxy jedisPoolProxy = get(resourceId);
+        if (jedisPoolProxy == null) {
+            throw new ShouldNeverHappenException(String.format("resource: %s not found", resourceId));
+        }
+        JedisContext jedisContext = new JedisContext();
+        jedisContext.reloadApplicationData(applicationData);
+        if (CollectionUtils.isNotEmpty(jedisContext.getUndoItems())) {
+            try (Jedis jedis = jedisPoolProxy.getResource()) {
+                jedisContext.getUndoItems().parallelStream().forEach(undolog -> {
+                    KVUndolog.RedisMethod redisMethod = KVUndolog.RedisMethod.valueOf(undolog.getMethod());
+                    if (redisMethod == KVUndolog.RedisMethod.setnx) {
+                        String currentValue = jedis.get(undolog.getKey());
+                        if (StringUtils.equalsIgnoreCase(currentValue, undolog.getAfterValue())) {
+                            jedis.set(undolog.getKey(), undolog.getAfterValue());
+                        }
+                    }
+                });
+            }
+        }
         return BranchStatus.PhaseTwo_Committed;
     }
 
     @Override
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+        String applicationData) throws TransactionException {
         JedisPoolProxy jedisPoolProxy = get(resourceId);
         if (jedisPoolProxy == null) {
-            throw new ShouldNeverHappenException(String.format("resource: %s not found",resourceId));
+            throw new ShouldNeverHappenException(String.format("resource: %s not found", resourceId));
         }
         try {
             JedisContext jedisContext = new JedisContext();
             jedisContext.reloadApplicationData(applicationData);
             if (CollectionUtils.isNotEmpty(jedisContext.getUndoItems())) {
-                jedisContext.getUndoItems().parallelStream().forEach(undolog -> {
-                    KVUndolog.RedisMethod redisMethod = KVUndolog.RedisMethod.valueOf(undolog.getMethod());
-                    try (Jedis jedis = jedisPoolProxy.getResource()) {
+                try (Jedis jedis = jedisPoolProxy.getResource(); Pipeline pipeline = jedis.pipelined()) {
+                    jedisContext.getUndoItems().parallelStream().forEach(undolog -> {
+                        KVUndolog.RedisMethod redisMethod = KVUndolog.RedisMethod.valueOf(undolog.getMethod());
                         if (redisMethod == KVUndolog.RedisMethod.set) {
-                            jedis.set(undolog.getKey(), undolog.getBeforeValue());
+                            pipeline.set(undolog.getKey(), undolog.getBeforeValue());
                         }
-                    }
-                });
+                        if (redisMethod == KVUndolog.RedisMethod.hset) {
+                            pipeline.hset(undolog.getKey(), undolog.getField(), undolog.getBeforeValue());
+                        }
+                        if (redisMethod == KVUndolog.RedisMethod.setnx) {
+                            pipeline.set(undolog.getKey(), undolog.getBeforeValue());
+                        }
+                    });
+                    pipeline.sync();
+                }
             }
         } catch (TransactionException te) {
             StackTraceLogger.info(LOGGER, te,
                 "branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. reason:[{}]",
-                new Object[]{branchType, xid, branchId, resourceId, applicationData, te.getMessage()});
+                new Object[] {branchType, xid, branchId, resourceId, applicationData, te.getMessage()});
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
                 return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             } else {
@@ -145,7 +173,7 @@ public class JedisPoolManager extends AbstractResourceManager {
 
     @Override
     public BranchType getBranchType() {
-        return BranchType.ATbyJedis;
+        return BranchType.ATbyRedis;
     }
 
 }
