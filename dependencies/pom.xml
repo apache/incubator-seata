@@ -37,7 +37,7 @@
         <hsf.version>1.8.3</hsf.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
-        <fastjson.version>1.2.73</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
         <commons-logging.version>1.2</commons-logging.version>
@@ -121,6 +121,13 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- spring-beans CVE-2022-22965-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring-beans.version}</version>
             </dependency>
 
             <!-- the 3rd part -->

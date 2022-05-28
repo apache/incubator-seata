@@ -74,6 +74,7 @@
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
         <spring-boot.version>2.4.13</spring-boot.version>
+        <spring-beans.version>5.3.18</spring-beans.version>
 
         <!-- Maven plugin versions -->
         <!-- Build -->
