@@ -72,7 +72,8 @@ public class JedisContext extends ATContext {
 
     public JedisContext reloadApplicationData(String applicationData) throws TransactionException {
         try {
-            this.applicationData.putAll(MAPPER.readValue(applicationData, new TypeReference<Map<String, String>>() {}));
+            this.applicationData.putAll(MAPPER.readValue(applicationData, new TypeReference<Map<String, String>>() {
+            }));
             String txLog = (String)this.applicationData.get(REDIS_TX_LOG);
             if (StringUtils.isNotBlank(txLog)) {
                 CollectionType javaType = MAPPER.getTypeFactory().constructCollectionType(List.class, KVUndolog.class);
@@ -114,7 +115,7 @@ public class JedisContext extends ATContext {
     }
 
     @Override
-    public void reset(){
+    public void reset() {
         super.reset();
         kvUndoItemsBuffer.clear();
     }
