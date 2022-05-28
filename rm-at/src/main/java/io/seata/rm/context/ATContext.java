@@ -31,10 +31,6 @@ public class ATContext {
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
     public final Map<String, Object> applicationData = new HashMap<>(2, 1.0001f);
-    /**
-     * the lock keys buffer
-     */
-    public final Set<String>         lockKeysBuffer  = new LinkedHashSet<>();
 
     public String xid;
 
@@ -59,15 +55,6 @@ public class ATContext {
      */
     public void setGlobalLockRequire(boolean isGlobalLockRequire) {
         this.isGlobalLockRequire = isGlobalLockRequire;
-    }
-
-    /**
-     * Append lock key.
-     *
-     * @param lockKey the lock key
-     */
-    public void appendLockKey(String lockKey) {
-        lockKeysBuffer.add(lockKey);
     }
 
     /**
@@ -105,15 +92,6 @@ public class ATContext {
                         String.format("bind xid: %s, while current xid: %s", xid, this.xid));
             }
         }
-    }
-
-    /**
-     * Gets lock keys buffer.
-     *
-     * @return the lock keys buffer
-     */
-    public boolean hasLockKey() {
-        return !lockKeysBuffer.isEmpty();
     }
 
     /**
@@ -167,29 +145,7 @@ public class ATContext {
         this.xid = xid;
         branchId = null;
         this.isGlobalLockRequire = false;
-        lockKeysBuffer.clear();
         applicationData.clear();
-    }
-
-    /**
-     * Build lock keys string.
-     *
-     * @return the string
-     */
-    public String buildLockKeys() {
-        if (lockKeysBuffer.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder appender = new StringBuilder();
-        Iterator<String> iterable = lockKeysBuffer.iterator();
-        while (iterable.hasNext()) {
-            appender.append(iterable.next());
-            if (iterable.hasNext()) {
-                appender.append(";");
-            }
-        }
-        return appender.toString();
     }
 
 }

@@ -16,8 +16,11 @@ import static io.seata.common.Constants.REDIS_TX_LOG;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,6 +35,11 @@ import io.seata.rm.context.ATContext;
  * @author funkye
  */
 public class JedisContext extends ATContext {
+
+    /**
+     * the lock keys buffer
+     */
+    public final  Set<String>   lockKeysBuffer    = new LinkedHashSet<>();
 
     /**
      * the undo items buffer
@@ -118,6 +126,45 @@ public class JedisContext extends ATContext {
     public void reset() {
         super.reset();
         kvUndoItemsBuffer.clear();
+        lockKeysBuffer.clear();
     }
 
+    /**
+     * Append lock key.
+     *
+     * @param lockKey the lock key
+     */
+    public void appendLockKey(String lockKey) {
+        lockKeysBuffer.add(lockKey);
+    }
+
+    /**
+     * Gets lock keys buffer.
+     *
+     * @return the lock keys buffer
+     */
+    public boolean hasLockKey() {
+        return !lockKeysBuffer.isEmpty();
+    }
+
+    /**
+     * Build lock keys string.
+     *
+     * @return the string
+     */
+    public String buildLockKeys() {
+        if (lockKeysBuffer.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder appender = new StringBuilder();
+        Iterator<String> iterable = lockKeysBuffer.iterator();
+        while (iterable.hasNext()) {
+            appender.append(iterable.next());
+            if (iterable.hasNext()) {
+                appender.append(";");
+            }
+        }
+        return appender.toString();
+    }
 }

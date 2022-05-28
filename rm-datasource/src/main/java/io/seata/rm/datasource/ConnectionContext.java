@@ -18,13 +18,17 @@ package io.seata.rm.datasource;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
@@ -54,7 +58,6 @@ public class ConnectionContext extends ATContext {
 
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
     private boolean autoCommitChanged;
-
     /**
      * the lock keys buffer
      */
@@ -65,6 +68,15 @@ public class ConnectionContext extends ATContext {
     private final Map<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new LinkedHashMap<>();
 
     private final List<Savepoint> savepoints = new ArrayList<>(8);
+
+    /**
+     * Append lock key.
+     *
+     * @param lockKey the lock key
+     */
+    void appendLockKey(String lockKey) {
+        lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>()).add(lockKey);
+    }
 
     /**
      * Append undo item.
@@ -121,6 +133,24 @@ public class ConnectionContext extends ATContext {
                         .addAll(savepointLockKeys);
             }
         }
+    }
+
+    /**
+     * In global transaction boolean.
+     *
+     * @return the boolean
+     */
+    public boolean inGlobalTransaction() {
+        return xid != null;
+    }
+
+    /**
+     * Is branch registered boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isBranchRegistered() {
+        return branchId != null;
     }
 
     /**
@@ -203,8 +233,38 @@ public class ConnectionContext extends ATContext {
     public void reset(String xid) {
         super.reset(xid);
         savepoints.clear();
+        lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
         this.autoCommitChanged = false;
+    }
+
+    /**
+     * Build lock keys string.
+     *
+     * @return the string
+     */
+    public String buildLockKeys() {
+        if (lockKeysBuffer.isEmpty()) {
+            return null;
+        }
+        Set<String> lockKeysBufferSet = new HashSet<>();
+        for (Set<String> lockKeys : lockKeysBuffer.values()) {
+            lockKeysBufferSet.addAll(lockKeys);
+        }
+
+        if (lockKeysBufferSet.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder appender = new StringBuilder();
+        Iterator<String> iterable = lockKeysBufferSet.iterator();
+        while (iterable.hasNext()) {
+            appender.append(iterable.next());
+            if (iterable.hasNext()) {
+                appender.append(";");
+            }
+        }
+        return appender.toString();
     }
 
     /**
