@@ -615,23 +615,29 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Easyj: Shade Compatible Flatten -->
+            <!-- Easyj -->
             <plugin>
                 <groupId>icu.easyj.maven.plugins</groupId>
                 <artifactId>easyj-maven-plugin</artifactId>
-                <version>${easyj-maven-plugin.version}</version>
                 <executions>
+                    <!-- Use this goal to recreate the simplified pom.xml after the shade -->
                     <execution>
-                        <id>shade-compatible-flatten</id>
-                        <phase>prepare-package</phase>
+                        <id>create-pom-file</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>shade-compatible-flatten</goal>
+                            <goal>create-pom-file</goal>
                         </goals>
-                        <configuration>
-                            <removeCurrentPluginFromPom>true</removeCurrentPluginFromPom>
-                        </configuration>
                     </execution>
                 </executions>
+                <!-- the config of the 'simplify-pom' plugin -->
+                <configuration>
+                    <keepProvidedDependencies>true</keepProvidedDependencies>
+                    <keepOptionalDependencies>true</keepOptionalDependencies>
+                    <excludeDependencies>
+                        <!-- Exclude dependencies that need to be shaded. -->
+                        <dependency>io.seata:*</dependency>
+                    </excludeDependencies>
+                </configuration>
             </plugin>
             <!-- Shade -->
             <plugin>
