@@ -264,7 +264,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 }
             }
             for (int i = 0; i < primaryKeys.size(); i++) {
-                ps.setObject(ts * ds + i, primaryKeys.get(i));
+                ps.setObject(ts * ds + i + 1, primaryKeys.get(i));
             }
 
             rs = ps.executeQuery();
