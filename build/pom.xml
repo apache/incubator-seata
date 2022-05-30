@@ -77,7 +77,7 @@
 
         <!-- Maven plugin versions -->
         <!-- Build -->
-        <easyj-maven-plugin.version>0.5.3</easyj-maven-plugin.version>
+        <easyj-maven-plugin.version>0.5.4</easyj-maven-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <!-- Compiler -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -169,6 +169,7 @@
                     <groupId>icu.easyj.maven.plugins</groupId>
                     <artifactId>easyj-maven-plugin</artifactId>
                     <version>${easyj-maven-plugin.version}</version>
+                    <!-- This goal can replace flatten-maven-plugin to flatten the pom, and replace '${revision}' to the actual version. -->
                     <executions>
                         <execution>
                             <id>simplify-pom</id>

@@ -615,30 +615,6 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Easyj -->
-            <plugin>
-                <groupId>icu.easyj.maven.plugins</groupId>
-                <artifactId>easyj-maven-plugin</artifactId>
-                <executions>
-                    <!-- Use this goal to recreate the simplified pom.xml after the shade -->
-                    <execution>
-                        <id>create-pom-file</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>create-pom-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <!-- the config of the 'simplify-pom' plugin -->
-                <configuration>
-                    <keepProvidedDependencies>true</keepProvidedDependencies>
-                    <keepOptionalDependencies>true</keepOptionalDependencies>
-                    <excludeDependencies>
-                        <!-- Exclude dependencies that need to be shaded. -->
-                        <dependency>io.seata:*</dependency>
-                    </excludeDependencies>
-                </configuration>
-            </plugin>
             <!-- Shade -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -691,6 +667,30 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Easyj -->
+            <plugin>
+                <groupId>icu.easyj.maven.plugins</groupId>
+                <artifactId>easyj-maven-plugin</artifactId>
+                <executions>
+                    <!-- Use this goal to recreate the '.flattened-pom.xml' after shade. -->
+                    <execution>
+                        <id>create-pom-file</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>create-pom-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <!-- the config of the 'simplify-pom' plugin -->
+                <configuration>
+                    <keepProvidedDependencies>true</keepProvidedDependencies>
+                    <keepOptionalDependencies>true</keepOptionalDependencies>
+                    <excludeDependencies>
+                        <!-- Exclude dependencies that need to be shaded. -->
+                        <dependency>io.seata:*</dependency>
+                    </excludeDependencies>
+                </configuration>
             </plugin>
             <!-- Dependency -->
             <plugin>
