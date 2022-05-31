@@ -84,6 +84,10 @@ public class TCCFenceHandler {
         }
     }
 
+    public static DataSource getDataSource() {
+        return TCCFenceHandler.dataSource;
+    }
+
     public static void setDataSource(DataSource dataSource) {
         TCCFenceHandler.dataSource = dataSource;
     }
@@ -286,27 +290,29 @@ public class TCCFenceHandler {
 
 
     public static int deleteFenceByDate(Date datetime) {
-        Integer totalDel = transactionTemplate.execute(status -> {
-            int total = 0;
-            try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                while (true) {
-                    List<String> xids = new ArrayList<>();
-                    Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(conn, datetime, LIMIT_DELETE);
-                    xids.addAll(xidSet);
-                    if (xids.isEmpty()) {
-                        break;
-                    }
-                    total += TCC_FENCE_DAO.deleteTCCFenceDO(conn, xids);
+        DataSource dataSource = TCCFenceHandler.getDataSource();
+        Connection connection = null;
+        int total = 0;
+        try {
+            connection = DataSourceUtils.getConnection(dataSource);
+            while (true) {
+                List<String> xids = new ArrayList<>();
+                Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(connection, datetime, LIMIT_DELETE);
+                xids.addAll(xidSet);
+                if (xids.isEmpty()) {
+                    break;
                 }
-            } catch (RuntimeException e) {
-                status.setRollbackOnly();
-                LOGGER.error("delete fence log failed ", e);
+                total += TCC_FENCE_DAO.deleteTCCFenceDO(connection, xids);
             }
-            return total;
-        });
+        } catch (RuntimeException e) {
+            LOGGER.error("delete fence log failed ", e);
+        } finally {
+            if (connection != null) {
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
+        }
+        return total;
 
-        return totalDel;
     }
 
     private static void initLogCleanExecutor() {
