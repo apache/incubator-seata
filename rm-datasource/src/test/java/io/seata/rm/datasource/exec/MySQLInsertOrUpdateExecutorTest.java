@@ -16,7 +16,12 @@
 package io.seata.rm.datasource.exec;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Collections;
 
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
