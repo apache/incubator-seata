@@ -205,12 +205,6 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         TableMeta tableMeta = getTableMeta();
 
-        // The origin select sql contains the unique keys sql
-        StringBuilder afterImageSql = new StringBuilder(selectSQL);
-
-        List<Object> primaryValues = new ArrayList<>();
-
-
         List<Row> rows = beforeImage.getRows();
         Map<String, ArrayList<Object>> primaryValueMap = new HashMap<>();
         rows.forEach(m -> {
@@ -220,6 +214,10 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 values.add(f.getValue());
             });
         });
+
+        // The origin select sql contains the unique keys sql
+        StringBuilder afterImageSql = new StringBuilder(selectSQL);
+        List<Object> primaryValues = new ArrayList<>();
 
         // Appends the pk when the origin select sql not contains
         for (int i = 0; i < rows.size(); i++) {
