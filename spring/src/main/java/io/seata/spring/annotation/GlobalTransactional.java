@@ -40,7 +40,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) io.seata.spring
  * .annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation)// RM: the interceptor of
  * GlobalLockLogic and AT/XA mode
- * @see io.seata.spring.tcc.TccActionInterceptor#invoke(MethodInvocation) io.seata.spring.tcc
+ * @see io.seata.rm.tcc.interceptor.TccActionInterceptor#invoke(MethodInvocation) io.seata.spring.tcc
  * .TccActionInterceptor#invoke(MethodInvocation)// RM: the interceptor of TCC mode
  */
 @Retention(RetentionPolicy.RUNTIME)

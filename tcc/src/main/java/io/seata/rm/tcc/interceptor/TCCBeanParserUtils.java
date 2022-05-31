@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.util;
+package io.seata.rm.tcc.interceptor;
 
 import io.seata.common.DefaultValues;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -22,7 +22,7 @@ import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
 import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
-import io.seata.spring.tcc.TccActionInterceptor;
+import io.seata.spring.util.SpringProxyUtils;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
 

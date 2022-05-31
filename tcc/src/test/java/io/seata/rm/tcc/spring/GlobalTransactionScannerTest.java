@@ -13,12 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+package io.seata.rm.tcc.spring;
 
-import io.seata.spring.tcc.LocalTccAction;
-import io.seata.spring.tcc.LocalTccActionImpl;
-import io.seata.spring.tcc.TccAction;
-import io.seata.spring.tcc.TccActionImpl;
+import io.seata.rm.tcc.spring.tcc.LocalTccAction;
+import io.seata.rm.tcc.spring.tcc.LocalTccActionImpl;
+import io.seata.rm.tcc.spring.tcc.TccAction;
+import io.seata.rm.tcc.spring.tcc.TccActionImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,7 +34,7 @@ public class GlobalTransactionScannerTest {
     /**
      * The Global transaction scanner.
      */
-    protected GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner("global-trans-scanner-test");
+    protected GlobalTransactionScannerSub globalTransactionScanner = new GlobalTransactionScannerSub("global-trans-scanner-test");
 
     /**
      * Test wrap normal bean.

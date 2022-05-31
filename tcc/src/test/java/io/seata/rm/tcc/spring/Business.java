@@ -13,15 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.tcc;
-
-import io.seata.rm.tcc.api.LocalTCC;
+package io.seata.rm.tcc.spring;
 
 /**
- * The interface Local tcc action.
- *
- * @author zhangsen
+ * The interface Business.
  */
-@LocalTCC
-public interface LocalTccAction extends TccAction {
+public interface Business {
+    /**
+     * Do biz string.
+     *
+     * @param msg the msg
+     * @return the string
+     */
+    String doBiz(String msg);
 }
