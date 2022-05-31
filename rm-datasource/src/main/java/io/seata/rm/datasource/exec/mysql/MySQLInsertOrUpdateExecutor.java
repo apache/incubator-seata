@@ -204,28 +204,25 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
 
         List<Object> primaryValues = new ArrayList<>();
 
-        // If there is no more
-        if (((SQLInsertRecognizer)sqlRecognizer).getInsertColumns().stream().noneMatch(o -> tableMeta.getPrimaryKeyOnlyName().contains(o))) {
 
-            List<Row> rows = beforeImage.getRows();
-            Map<String, ArrayList<Object>> primaryValueMap = new HashMap<>();
-            rows.forEach(m -> {
-                List<Field> fields = m.primaryKeys();
-                fields.forEach(f -> {
-                    ArrayList<Object> values = primaryValueMap.computeIfAbsent(f.getName(), v -> new ArrayList<>());
-                    values.add(f.getValue());
-                });
+        List<Row> rows = beforeImage.getRows();
+        Map<String, ArrayList<Object>> primaryValueMap = new HashMap<>();
+        rows.forEach(m -> {
+            List<Field> fields = m.primaryKeys();
+            fields.forEach(f -> {
+                ArrayList<Object> values = primaryValueMap.computeIfAbsent(f.getName(), v -> new ArrayList<>());
+                values.add(f.getValue());
             });
+        });
 
-            // Appends the other pk when the origin select sql not contains
-            for (int i = 0; i < rows.size(); i++) {
-                List<String> wherePrimaryList = new ArrayList<>();
-                primaryValueMap.forEach((k, v) -> {
-                    wherePrimaryList.add(k + " = ? ");
-                    primaryValues.add(v);
-                });
-                afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
-            }
+        // Appends the pk when the origin select sql not contains
+        for (int i = 0; i < rows.size(); i++) {
+            List<String> wherePrimaryList = new ArrayList<>();
+            primaryValueMap.forEach((k, v) -> {
+                wherePrimaryList.add(k + " = ? ");
+                primaryValues.add(v);
+            });
+            afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
         }
 
         return buildTableRecords2(tableMeta, afterImageSql.toString(), paramAppenderList, primaryValues);
