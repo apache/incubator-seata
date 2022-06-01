@@ -129,7 +129,19 @@ public enum GlobalStatus {
      * The rollback retry Timeout .
      */
     // Finally: failed to rollback since retry timeout
-    RollbackRetryTimeout(17)
+    RollbackRetryTimeout(17),
+
+    /**
+     * The wait commit finished.
+     */
+    //After committed,waiting asynchronously delay handling session
+    WaitingCommittedFinished(18),
+
+    /**
+     * The wait rollback finished.
+     */
+    //After rollbacked or tmeoutRollbacked,waiting asynchronously delay handling session
+    WaitingRollbackedFinished(19)
 
     ;
 

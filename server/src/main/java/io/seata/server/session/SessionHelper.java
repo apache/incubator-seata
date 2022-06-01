@@ -15,10 +15,6 @@
  */
 package io.seata.server.session;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -36,6 +32,10 @@ import io.seata.server.metrics.MetricsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * The type Session helper.
@@ -59,8 +59,8 @@ public class SessionHelper {
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
     private static final boolean DELAY_HANDLE_SESSION =
-        !StringUtils.equalsIgnoreCase(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE)), StoreMode.FILE.getName());
+            !StringUtils.equalsIgnoreCase(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+                    ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE)), StoreMode.FILE.getName());
 
     private SessionHelper() {
     }
@@ -80,7 +80,7 @@ public class SessionHelper {
      * @return the branch session
      */
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId,
-            String applicationData, String lockKeys, String clientId) {
+                                                  String applicationData, String lockKeys, String clientId) {
         BranchSession branchSession = new BranchSession();
 
         branchSession.setXid(globalSession.getXid());
@@ -132,9 +132,11 @@ public class SessionHelper {
                 MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
-                beginTime, retryBranch);
+                    beginTime, retryBranch);
         } else {
+            globalSession.setStatus(GlobalStatus.Committed);
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+            globalSession.changeGlobalStatus(GlobalStatus.WaitingCommittedFinished);
         }
     }
 
@@ -148,7 +150,7 @@ public class SessionHelper {
     public static void endCommitFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
         globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
         LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.",
-            globalSession.getXid(), globalSession.getStatus());
+                globalSession.getXid(), globalSession.getStatus());
 
         globalSession.end();
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
@@ -166,7 +168,7 @@ public class SessionHelper {
             long beginTime = System.currentTimeMillis();
             GlobalStatus currentStatus = globalSession.getStatus();
             boolean retryBranch =
-                currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
+                    currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
             if (isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else {
@@ -177,8 +179,14 @@ public class SessionHelper {
                 MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
-                beginTime, retryBranch);
+                    beginTime, retryBranch);
         } else {
+            globalSession.changeGlobalStatus(GlobalStatus.WaitingRollbackedFinished);
+            if (isTimeoutGlobalStatus(globalSession.getStatus())) {
+                globalSession.setStatus(GlobalStatus.TimeoutRollbacked);
+            } else {
+                globalSession.setStatus(GlobalStatus.Rollbacked);
+            }
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
         }
     }
@@ -259,9 +267,10 @@ public class SessionHelper {
 
     /**
      * remove branchSession from globalSession
+     *
      * @param globalSession the globalSession
      * @param branchSession the branchSession
-     * @param isAsync if asynchronous remove
+     * @param isAsync       if asynchronous remove
      */
     public static void removeBranch(GlobalSession globalSession, BranchSession branchSession, boolean isAsync)
             throws TransactionException {
@@ -274,8 +283,9 @@ public class SessionHelper {
 
     /**
      * remove branchSession from globalSession
+     *
      * @param globalSession the globalSession
-     * @param isAsync if asynchronous remove
+     * @param isAsync       if asynchronous remove
      */
     public static void removeAllBranch(GlobalSession globalSession, boolean isAsync)
             throws TransactionException {
