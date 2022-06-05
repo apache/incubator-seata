@@ -123,11 +123,11 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- spring-beans CVE-2022-22965-->
+            <!-- spring-core CVE-2022-22965-->
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-                <version>${spring-beans.version}</version>
+                <artifactId>spring-core</artifactId>
+                <version>${spring-core.version}</version>
             </dependency>
 
             <!-- the 3rd part -->
