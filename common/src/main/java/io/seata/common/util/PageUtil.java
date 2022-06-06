@@ -128,9 +128,14 @@ public class PageUtil {
         switch (dbType) {
             case "mysql":
             case "h2":
-            case "postgresql":
             case "oceanbase":
             case "oracle":
+                return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
+            case "postgresql":
+                int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");
+                if (lastIndexOfOrderBy != -1) {
+                    return sourceSql.substring(0, lastIndexOfOrderBy).replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
+                }
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             default:
                 throw new NotSupportYetException("PageUtil not support this dbType:" + dbType);
