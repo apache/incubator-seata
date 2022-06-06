@@ -159,7 +159,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.WaitingRollbackedFinished};
 
     private final GlobalStatus[] retryCommittingStatuses =
-            new GlobalStatus[]{GlobalStatus.WaitingRollbackedFinished, GlobalStatus.CommitRetrying};
+            new GlobalStatus[]{GlobalStatus.WaitingCommittedFinished, GlobalStatus.CommitRetrying};
 
     private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,

@@ -181,13 +181,13 @@ public class SessionHelper {
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
                     beginTime, retryBranch);
         } else {
-            globalSession.changeGlobalStatus(GlobalStatus.WaitingRollbackedFinished);
             if (isTimeoutGlobalStatus(globalSession.getStatus())) {
                 globalSession.setStatus(GlobalStatus.TimeoutRollbacked);
             } else {
                 globalSession.setStatus(GlobalStatus.Rollbacked);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+            globalSession.changeGlobalStatus(GlobalStatus.WaitingRollbackedFinished);
         }
     }
 
