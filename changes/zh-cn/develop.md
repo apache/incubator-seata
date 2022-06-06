@@ -5,6 +5,8 @@
 ### feature：
 
 ### bugfix：
+  - [[#4515](https://github.com/seata/seata/pull/4515)] 修复develop分支SeataTCCFenceAutoConfiguration在客户端未使用DB时，启动抛出ClassNotFoundException的问题。
+
 
 ### optimize：
 - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞

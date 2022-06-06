@@ -7,6 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### bugfix：
+  - [[#4515](https://github.com/seata/seata/pull/4515)] fix the error of SeataTCCFenceAutoConfiguration when database unused
 
 
 ### optimize：
