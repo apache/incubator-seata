@@ -155,11 +155,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor undoLogDelete =
             new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(UNDOLOG_DELETE, 1));
 
-    private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[]{GlobalStatus.TimeoutRollbacking,
+    private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
             GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.WaitingRollbackedFinished};
 
     private final GlobalStatus[] retryCommittingStatuses =
-            new GlobalStatus[]{GlobalStatus.WaitingCommittedFinished, GlobalStatus.CommitRetrying};
+            new GlobalStatus[] {GlobalStatus.WaitingCommittedFinished, GlobalStatus.CommitRetrying};
 
     private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
@@ -482,24 +482,24 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(
-                () -> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking), 0,
-                ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+            () -> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking), 0,
+            ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(
-                () -> SessionHolder.distributedLockAndExecute(RETRY_COMMITTING, this::handleRetryCommitting), 0,
-                COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+            () -> SessionHolder.distributedLockAndExecute(RETRY_COMMITTING, this::handleRetryCommitting), 0,
+            COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(
-                () -> SessionHolder.distributedLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting), 0,
-                ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+            () -> SessionHolder.distributedLockAndExecute(ASYNC_COMMITTING, this::handleAsyncCommitting), 0,
+            ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(
-                () -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck), 0,
-                TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+            () -> SessionHolder.distributedLockAndExecute(TX_TIMEOUT_CHECK, this::timeoutCheck), 0,
+            TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         undoLogDelete.scheduleAtFixedRate(
-                () -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
-                UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+            () -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
+            UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
