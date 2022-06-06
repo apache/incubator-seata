@@ -141,9 +141,8 @@ public class BusinessActionContext implements Serializable {
      * @param actionContext the action context
      */
     public void setActionContext(Map<String, Object> actionContext) {
-        boolean isChange = this.actionContext != actionContext;
-        this.actionContext = actionContext;
-        if (isChange) {
+        if (this.actionContext != actionContext) {
+            this.actionContext = actionContext;
             this.setUpdated(true);
         }
     }
