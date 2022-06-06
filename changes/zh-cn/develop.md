@@ -18,5 +18,6 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [pengten](https://github.com/pengten)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
