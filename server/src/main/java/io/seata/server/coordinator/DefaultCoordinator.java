@@ -155,11 +155,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor undoLogDelete =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(UNDOLOG_DELETE, 1));
 
-    private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
+    private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[]{GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking,
         GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.WaitingRollbackedFinished};
 
     private final GlobalStatus[] retryCommittingStatuses =
-        new GlobalStatus[] {GlobalStatus.WaitingCommittedFinished, GlobalStatus.CommitRetrying};
+        new GlobalStatus[]{GlobalStatus.Committing, GlobalStatus.WaitingCommittedFinished, GlobalStatus.CommitRetrying};
 
     private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
@@ -357,7 +357,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
-                if (rollbackingSession.getStatus().equals(GlobalStatus.WaitingRollbackedFinished)
+                if ((rollbackingSession.getStatus().equals(GlobalStatus.WaitingRollbackedFinished)
+                        || rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking))
                     && !rollbackingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
@@ -402,7 +403,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
-                if (committingSession.getStatus().equals(GlobalStatus.WaitingCommittedFinished)
+                if ((committingSession.getStatus().equals(GlobalStatus.WaitingCommittedFinished) || committingSession.getStatus().equals(GlobalStatus.Rollbacking))
                     && !committingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
@@ -551,6 +552,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     /**
      * only used for mock test
+     *
      * @param remotingServer
      */
     public void setRemotingServer(RemotingServer remotingServer) {
@@ -574,6 +576,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         /**
          * If you use this construct, the task will remove the branchSession provided by the parameter
+         *
          * @param globalSession the globalSession
          */
         public BranchRemoveTask(GlobalSession globalSession, BranchSession branchSession) {
@@ -583,6 +586,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         /**
          * If you use this construct, the task will remove all branchSession
+         *
          * @param globalSession the globalSession
          */
         public BranchRemoveTask(GlobalSession globalSession) {

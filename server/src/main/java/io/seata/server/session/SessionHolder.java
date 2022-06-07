@@ -175,7 +175,11 @@ public class SessionHolder {
                             break;
                         case Committing:
                         case CommitRetrying:
+                        case WaitingCommittedFinished:
                             queueToRetryCommit(globalSession);
+                            break;
+                        case WaitingRollbackedFinished:
+                            queueToRetryRollback(globalSession);
                             break;
                         default: {
                             lockBranchSessions(globalSession.getSortedBranches());

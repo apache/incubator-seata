@@ -167,16 +167,16 @@ public class RedisSessionManager extends AbstractSessionManager
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.CommitRetrying, GlobalStatus.Committing, GlobalStatus.WaitingCommittedFinished}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
-                GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.RollbackRetrying,
+                GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.WaitingRollbackedFinished}));
         } else {
             // all data
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.UnKnown, GlobalStatus.Begin,
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.UnKnown, GlobalStatus.Begin,
                 GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
                 GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
-                GlobalStatus.AsyncCommitting}));
+                GlobalStatus.AsyncCommitting, GlobalStatus.WaitingCommittedFinished, GlobalStatus.WaitingRollbackedFinished}));
         }
     }
 
