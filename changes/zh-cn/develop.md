@@ -12,7 +12,7 @@
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
 
 ### test：
-
+  - [[#4650](https://github.com/seata/seata/pull/4411)] 测试Oracle数据库AT模式下类型支持
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
@@ -20,5 +20,6 @@
 - [slievrly](https://github.com/slievrly)
 - [pengten](https://github.com/pengten)
 - [YSF-A](https://github.com/YSF-A)
+- [doubleDimple](https://github.com/doubleDimple)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
