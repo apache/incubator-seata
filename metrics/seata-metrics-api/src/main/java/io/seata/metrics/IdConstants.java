@@ -71,4 +71,10 @@ public interface IdConstants {
 
     String STATUS_VALUE_TWO_PHASE_TIMEOUT = "2phaseTimeout";
 
+    String RETRY_KEY = "retry";
+
+    String STATUS_VALUE_AFTER_COMMITTED_KEY = "AfterCommitted";
+
+    String STATUS_VALUE_AFTER_ROLLBACKED_KEY = "AfterRollbacked";
+
 }

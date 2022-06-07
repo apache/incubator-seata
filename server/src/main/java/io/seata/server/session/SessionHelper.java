@@ -19,18 +19,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
-import io.seata.core.event.EventBus;
-import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.StoreMode;
+import io.seata.metrics.IdConstants;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.event.EventBusManager;
+import io.seata.server.metrics.MetricsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -56,8 +58,12 @@ public class SessionHelper {
      */
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
+    private static final boolean DELAY_HANDLE_SESSION =
+        !StringUtils.equalsIgnoreCase(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE)), StoreMode.FILE.getName());
 
-    private SessionHelper() {}
+    private SessionHelper() {
+    }
 
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId, String lockKeys, String clientId) {
         return newBranchByGlobal(globalSession, branchType, resourceId, null, lockKeys, clientId);
@@ -113,52 +119,78 @@ public class SessionHelper {
      * End committed.
      *
      * @param globalSession the global session
+     * @param retryGlobal   the retry global
      * @throws TransactionException the transaction exception
      */
-    public static void endCommitted(GlobalSession globalSession) throws TransactionException {
-        globalSession.changeGlobalStatus(GlobalStatus.Committed);
-        globalSession.end();
-        postTcSessionEndEvent(globalSession);
+    public static void endCommitted(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
+        if (retryGlobal || !DELAY_HANDLE_SESSION) {
+            long beginTime = System.currentTimeMillis();
+            boolean retryBranch = globalSession.getStatus() == GlobalStatus.CommitRetrying;
+            globalSession.changeGlobalStatus(GlobalStatus.Committed);
+            globalSession.end();
+            if (!DELAY_HANDLE_SESSION) {
+                MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+            }
+            MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
+                beginTime, retryBranch);
+        } else {
+            MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+        }
     }
 
     /**
      * End commit failed.
      *
      * @param globalSession the global session
+     * @param retryGlobal   the retry global
      * @throws TransactionException the transaction exception
      */
-    public static void endCommitFailed(GlobalSession globalSession) throws TransactionException {
+    public static void endCommitFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
         globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
-        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
+        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.",
+            globalSession.getXid(), globalSession.getStatus());
 
         globalSession.end();
-        postTcSessionEndEvent(globalSession);
+        MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
     }
 
     /**
      * End rollbacked.
      *
      * @param globalSession the global session
+     * @param retryGlobal   the retry global
      * @throws TransactionException the transaction exception
      */
-    public static void endRollbacked(GlobalSession globalSession) throws TransactionException {
-        GlobalStatus currentStatus = globalSession.getStatus();
-        if (isTimeoutGlobalStatus(currentStatus)) {
-            globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
+    public static void endRollbacked(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
+        if (retryGlobal || !DELAY_HANDLE_SESSION) {
+            long beginTime = System.currentTimeMillis();
+            GlobalStatus currentStatus = globalSession.getStatus();
+            boolean retryBranch =
+                currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
+            if (isTimeoutGlobalStatus(currentStatus)) {
+                globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
+            } else {
+                globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
+            }
+            globalSession.end();
+            if (!DELAY_HANDLE_SESSION) {
+                MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+            }
+            MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
+                beginTime, retryBranch);
         } else {
-            globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
+            MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
         }
-        globalSession.end();
-        postTcSessionEndEvent(globalSession);
     }
 
     /**
      * End rollback failed.
      *
      * @param globalSession the global session
+     * @param retryGlobal   the retry global
      * @throws TransactionException the transaction exception
      */
-    public static void endRollbackFailed(GlobalSession globalSession) throws TransactionException {
+    public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
@@ -166,53 +198,8 @@ public class SessionHelper {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
         }
         LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
-
         globalSession.end();
-        postTcSessionEndEvent(globalSession);
-    }
-
-    /**
-     * post end event
-     *
-     * @param globalSession the global session
-     */
-    public static void postTcSessionEndEvent(GlobalSession globalSession) {
-        postTcSessionEndEvent(globalSession, globalSession.getStatus());
-    }
-
-    /**
-     * post end event (force specified state)
-     *
-     * @param globalSession the global session
-     * @param status the global status
-     */
-    public static void postTcSessionEndEvent(GlobalSession globalSession, GlobalStatus status) {
-        EventBus eventBus = EventBusManager.get();
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getApplicationId(),
-            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), System.currentTimeMillis(),
-            status));
-    }
-
-    /**
-     * post begin event
-     *
-     * @param globalSession the global session
-     */
-    public static void postTcSessionBeginEvent(GlobalSession globalSession) {
-        postTcSessionBeginEvent(globalSession, globalSession.getStatus());
-    }
-
-    /**
-     * post begin event(force specified state)
-     *
-     * @param globalSession the global session
-     */
-    public static void postTcSessionBeginEvent(GlobalSession globalSession, GlobalStatus status) {
-        EventBus eventBus = EventBusManager.get();
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getApplicationId(),
-            globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null, status));
+        MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
     }
 
     public static boolean isTimeoutGlobalStatus(GlobalStatus status) {
@@ -230,6 +217,9 @@ public class SessionHelper {
      * @since 1.5.0
      */
     public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return;
+        }
         sessions.parallelStream().forEach(globalSession -> {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
