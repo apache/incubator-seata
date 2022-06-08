@@ -135,7 +135,6 @@ public class SessionHelper {
                 beginTime, retryBranch);
         } else {
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
-            globalSession.changeGlobalStatus(GlobalStatus.WaitingCommittedFinished);
         }
     }
 
@@ -186,7 +185,6 @@ public class SessionHelper {
                 globalSession.setStatus(GlobalStatus.Rollbacked);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
-            globalSession.changeGlobalStatus(GlobalStatus.WaitingRollbackedFinished);
         }
     }
 
