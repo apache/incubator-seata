@@ -10,7 +10,7 @@
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
-
+  - [[#4670](https://github.com/seata/seata/pull/4670)] 优化branchResultMessageExecutor线程池的线程数
 ### test：
 
 
@@ -20,5 +20,6 @@
 - [slievrly](https://github.com/slievrly)
 - [pengten](https://github.com/pengten)
 - [YSF-A](https://github.com/YSF-A)
+- [tuwenlin](https://github.com/tuwenlin)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
