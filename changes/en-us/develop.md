@@ -12,6 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities
+  - [[#4670](https://github.com/seata/seata/pull/4670)] optimize the thread pool size of branchResultMessageExecutor
 
 ### test:
 
@@ -21,5 +22,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [slievrly](https://github.com/slievrly)
 - [pengten](https://github.com/pengten)
 - [YSF-A](https://github.com/YSF-A)
+- [tuwenlin](https://github.com/tuwenlin)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
