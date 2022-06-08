@@ -77,12 +77,6 @@ const statusList:Array<StatusType> = [
     iconColor: '#1DC11D',
   },
   {
-    label: 'WaitingCommittedFinished',
-    value: 18,
-    iconType: 'success',
-    iconColor: '#1DC11D'
-  },
-  {
     label: 'CommitFailed',
     value: 10,
     iconType: 'error',
@@ -115,12 +109,6 @@ const statusList:Array<StatusType> = [
   {
     label: 'Rollbacked',
     value: 11,
-    iconType: 'error',
-    iconColor: '#FF3333',
-  },
-  {
-    label: 'WaitingRollbackedFinished',
-    value: 19,
     iconType: 'error',
     iconColor: '#FF3333',
   },
