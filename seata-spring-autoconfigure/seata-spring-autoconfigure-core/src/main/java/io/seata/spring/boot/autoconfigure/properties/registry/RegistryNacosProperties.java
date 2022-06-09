@@ -35,6 +35,7 @@ public class RegistryNacosProperties {
     private String accessKey = "";
     private String secretKey = "";
     private String application = "seata-server";
+    private boolean pubnet = false;
 
     public String getServerAddr() {
         return serverAddr;
@@ -112,6 +113,15 @@ public class RegistryNacosProperties {
 
     public RegistryNacosProperties setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+        return this;
+    }
+
+    public boolean getPubnet() {
+        return pubnet;
+    }
+
+    public RegistryNacosProperties setPubnet(boolean pubnet) {
+        this.pubnet = pubnet;
         return this;
     }
 }
