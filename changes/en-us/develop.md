@@ -4,6 +4,7 @@ Add changes here for all PR submitted to the develop branch.
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
 ### feature：
+  - [[#4676](https://github.com/seata/seata/pull/4676)] add pubnet service address discover for nacos registry
 
 
 ### bugfix：
@@ -23,5 +24,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [pengten](https://github.com/pengten)
 - [YSF-A](https://github.com/YSF-A)
 - [tuwenlin](https://github.com/tuwenlin)
+- [2129zxl](https://github.com/2129zxl)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

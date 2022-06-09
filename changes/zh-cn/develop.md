@@ -3,6 +3,7 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature：
+  - [[#4676](https://github.com/seata/seata/pull/4676)] 新增nacos注册中心公网地址服务发现机制
 
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] 修复develop分支SeataTCCFenceAutoConfiguration在客户端未使用DB时，启动抛出ClassNotFoundException的问题。
@@ -21,5 +22,6 @@
 - [pengten](https://github.com/pengten)
 - [YSF-A](https://github.com/YSF-A)
 - [tuwenlin](https://github.com/tuwenlin)
+- [2129zxl](https://github.com/2129zxl)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
