@@ -194,7 +194,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         // New configuration takes precedence
         String newConfig = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
                 String.valueOf(DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST));
-        if (io.seata.common.util.StringUtils.isNotBlank(newConfig)) {
+        if (StringUtils.isNotBlank(newConfig)) {
             return Boolean.parseBoolean(newConfig);
         }
         return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
