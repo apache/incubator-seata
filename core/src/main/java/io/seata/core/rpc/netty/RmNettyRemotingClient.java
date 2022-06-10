@@ -273,7 +273,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     public boolean isEnableClientBatchSendRequest() {
         // New configuration takes precedence
-        String newConfig = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
+        String newConfig = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST,
+                String.valueOf(DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST));
         if (StringUtils.isNotBlank(newConfig)) {
             return Boolean.parseBoolean(newConfig);
         }
