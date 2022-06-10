@@ -25,7 +25,7 @@ import io.seata.core.model.GlobalStatus;
 public class SessionStatusValidator {
 
     /**
-     * is timeout global status timeout
+     * is timeout global status
      *
      * @param status the global session
      */
@@ -37,7 +37,7 @@ public class SessionStatusValidator {
     }
 
     /**
-     * is rollback global status timeout
+     * is rollback global status
      *
      * @param status the global session
      */
@@ -50,7 +50,7 @@ public class SessionStatusValidator {
     }
 
     /**
-     * is commit global status timeout
+     * is commit global status
      *
      * @param status the global session
      */

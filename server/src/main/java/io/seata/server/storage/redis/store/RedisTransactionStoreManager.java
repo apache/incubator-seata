@@ -330,7 +330,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
             GlobalStatus after = GlobalStatus.get(globalTransactionDO.getStatus());
             if (!SessionStatusValidator.validateUpdateStatus(before, after)) {
-                throw new StoreException("illegal changing of global status, update global transaction failed."
+                throw new StoreException("Illegal changing of global status, update global transaction failed."
                     + " beforeStatus[" + before.name() + "] cannot be changed to afterStatus[" + after.name() + "]");
             }
 
