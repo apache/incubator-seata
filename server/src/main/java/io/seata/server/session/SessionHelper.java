@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -166,7 +167,7 @@ public class SessionHelper {
             GlobalStatus currentStatus = globalSession.getStatus();
             boolean retryBranch =
                 currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
-            if (isTimeoutGlobalStatus(currentStatus)) {
+            if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
@@ -191,7 +192,7 @@ public class SessionHelper {
      */
     public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (isTimeoutGlobalStatus(currentStatus)) {
+        if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
@@ -201,12 +202,7 @@ public class SessionHelper {
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
     }
 
-    public static boolean isTimeoutGlobalStatus(GlobalStatus status) {
-        return status == GlobalStatus.TimeoutRollbacked
-                || status == GlobalStatus.TimeoutRollbackFailed
-                || status == GlobalStatus.TimeoutRollbacking
-                || status == GlobalStatus.TimeoutRollbackRetrying;
-    }
+
 
     /**
      * Foreach global sessions.
@@ -216,6 +212,9 @@ public class SessionHelper {
      * @since 1.5.0
      */
     public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return;
+        }
         sessions.parallelStream().forEach(globalSession -> {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
