@@ -15,6 +15,7 @@
  */
 package io.seata.server.storage.redis.store;
 
+import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -732,7 +733,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
 
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            for (String key : targetMap.keySet()) {
+            Iterator<Map.Entry<String,Integer>> iterator =targetMap.entrySet().iterator();
+            while(iterator.hasNext()){
+                String key = iterator.next().getKey();
                 final long sum = listList.stream().mapToLong(List::size).sum();
                 final long diffCount = queryCount - sum;
                 if (diffCount <= 0) {
@@ -750,7 +753,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     listList.add(list);
                 } else {
                     if (list.size() == 0) {
-                        targetMap.remove(key);
+                        iterator.remove() ;
                     }
                 }
             }
