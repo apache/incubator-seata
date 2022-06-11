@@ -45,7 +45,7 @@ public class MultiRegistryFactory {
             ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY
                 + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
         if (StringUtils.isBlank(registryTypeNamesStr)) {
-            throw new IllegalArgumentException("value of registry type must not be blank");
+            registryTypeNamesStr = RegistryType.File.name();
         }
         String[] registryTypeNames = registryTypeNamesStr.split(Constants.REGISTRY_TYPE_SPLIT_CHAR);
         for (String registryTypeName : registryTypeNames) {
