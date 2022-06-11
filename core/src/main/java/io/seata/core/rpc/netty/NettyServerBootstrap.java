@@ -169,8 +169,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.serverBootstrap.bind(getListenPort()).sync();
             XID.setPort(getListenPort());
             LOGGER.info("Server started, service listen port: {}", getListenPort());
+            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
             for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
-                registryService.register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+                registryService.register(address);
             }
             initialized.set(true);
         } catch (SocketException se) {
@@ -187,8 +188,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 LOGGER.info("Shutting server down, the listen port: {}", XID.getPort());
             }
             if (initialized.get()) {
+                InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
                 for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
-                    registryService.unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+                    registryService.unregister(address);
                     registryService.close();
                 }
                 //wait a few seconds for server transport
