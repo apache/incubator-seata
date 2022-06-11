@@ -105,6 +105,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
+    protected boolean enableClientBatchSendRequest;
 
     @Override
     public void init() {
