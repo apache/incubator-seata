@@ -22,7 +22,10 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
-import io.seata.config.*;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
@@ -88,37 +91,18 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                                   ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
         // set enableClientBatchSendRequest
-        // New configuration takes precedence
-        String newConfig = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
-        if(StringUtils.isNotBlank(newConfig)){
-            enableClientBatchSendRequest = Boolean.parseBoolean(newConfig);
-            ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST, new ConfigurationChangeListener() {
-                @Override
-                public void onChangeEvent(ConfigurationChangeEvent event) {
-                    String dataId = event.getDataId();
-                    String newValue = event.getNewValue();
-                    if (ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST.equals(dataId) && StringUtils.isNotBlank(newValue)) {
-                        enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
-                    }
+        this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST,
+                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST,DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST));
+        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST, new ConfigurationChangeListener() {
+            @Override
+            public void onChangeEvent(ConfigurationChangeEvent event) {
+                String dataId = event.getDataId();
+                String newValue = event.getNewValue();
+                if (ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST.equals(dataId) && StringUtils.isNotBlank(newValue)) {
+                    enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
                 }
-            });
-        }else {
-            // Compatible with old configuration
-            // If the old configuration exists, use the old configuration
-            // RM client Turns on batch sending by default
-            enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST,
-                    DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST);
-            ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, new ConfigurationChangeListener() {
-                @Override
-                public void onChangeEvent(ConfigurationChangeEvent event) {
-                    String dataId = event.getDataId();
-                    String newValue = event.getNewValue();
-                    if (ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST.equals(dataId) && StringUtils.isNotBlank(newValue)) {
-                        enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
-                    }
-                }
-            });
-        }
+            }
+        });
     }
 
     /**
