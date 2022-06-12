@@ -273,14 +273,15 @@ public class ConnectionContext {
      * @return the application data
      */
     public String getApplicationData() throws TransactionException {
+        if (applicationData.isEmpty()) {
+            this.applicationData.put(SKIP_CHECK_LOCK, true);
+        } else {
+            this.applicationData.remove(SKIP_CHECK_LOCK);
+        }
         boolean autoCommit = this.isAutoCommitChanged();
         // when transaction are enabled, it must be false
         if (!autoCommit) {
             this.applicationData.put(AUTO_COMMIT, autoCommit);
-        }
-
-        if (allBeforeImageEmpty()) {
-            this.applicationData.put(SKIP_CHECK_LOCK, true);
         }
 
         if (!this.applicationData.isEmpty()) {

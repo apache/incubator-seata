@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -335,6 +336,9 @@ public class LockStoreDataBaseDAO implements LockStore {
             ps.setInt(8, LockStatus.Locked.getCode());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            if (e instanceof SQLIntegrityConstraintViolationException) {
+                return false;
+            }
             throw new StoreException(e);
         } finally {
             IOUtil.close(ps);
@@ -367,8 +371,10 @@ public class LockStoreDataBaseDAO implements LockStore {
             }
             return ps.executeBatch().length == lockDOs.size();
         } catch (SQLException e) {
-            LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
-            //return false,let the caller go to conn.rollabck()
+            if (!(e instanceof SQLIntegrityConstraintViolationException)) {
+                LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
+                // return false,let the caller go to conn.rollabck()
+            }
             return false;
         } finally {
             IOUtil.close(ps);
