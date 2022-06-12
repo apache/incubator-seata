@@ -11,6 +11,9 @@
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
   - [[#4670](https://github.com/seata/seata/pull/4670)] 优化branchResultMessageExecutor线程池的线程数
+  - [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程
+
+
 ### test：
 
 
@@ -21,5 +24,6 @@
 - [pengten](https://github.com/pengten)
 - [YSF-A](https://github.com/YSF-A)
 - [tuwenlin](https://github.com/tuwenlin)
+- [a364176773](https://github.com/a364176773)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
