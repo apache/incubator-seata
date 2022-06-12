@@ -9,6 +9,9 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] fix the error of SeataTCCFenceAutoConfiguration when database unused
   - [[#4661](https://github.com/seata/seata/pull/4661)] fix sql exception with PostgreSQL in module console
+  - [[#4667](https://github.com/seata/seata/issues/4667)] fix the exception in RedisTransactionStoreManager for update map During iteration
+
+
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities

@@ -749,7 +749,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     list = jedis.lrange(key, start, end);
                 }
 
-                if (list.size() > 0 && sum < queryCount) {
+                if (list.size() > 0) {
                     listList.add(list);
                 } else {
                     if (list.size() == 0) {

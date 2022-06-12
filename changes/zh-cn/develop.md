@@ -7,6 +7,9 @@
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] 修复develop分支SeataTCCFenceAutoConfiguration在客户端未使用DB时，启动抛出ClassNotFoundException的问题。
   - [[#4661](https://github.com/seata/seata/pull/4661)] 修复控制台中使用PostgreSQL出现的SQL异常
+  - [[#4667](https://github.com/seata/seata/issues/4667)] 修复develop分支RedisTransactionStoreManager迭代时更新map的异常
+
+
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
