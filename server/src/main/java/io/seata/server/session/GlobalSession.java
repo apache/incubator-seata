@@ -64,6 +64,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
 
+    private static ThreadLocal<GlobalStatus> expectedStatusThreadLocal = new ThreadLocal<>();
+
     /**
      * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
      *  then the tx will be remand as need to retry rollback
@@ -76,8 +78,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private long transactionId;
 
     private volatile GlobalStatus status;
-
-    private volatile GlobalStatus expectedStatus;
 
     private String applicationId;
 
@@ -456,24 +456,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * Gets old status.
-     *
-     * @return the expected status
-     */
-    public GlobalStatus getExpectedStatus() {
-        return expectedStatus;
-    }
-
-    /**
-     * Sets status.
-     *
-     * @param expectedStatus the expected status
-     */
-    public void setExpectedStatus(GlobalStatus expectedStatus) {
-        this.expectedStatus = expectedStatus;
-    }
-
-    /**
      * Sets xid.
      *
      * @param xid the xid
@@ -784,6 +766,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.setStatus(GlobalStatus.RollbackRetrying);
         }
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
+    }
+
+    public void setExpectedStatusFromCurrent(){
+        expectedStatusThreadLocal.set(this.status);
+    }
+
+    public void cleanExpectedStatus(){
+        expectedStatusThreadLocal.remove();
+    }
+
+    public GlobalStatus getExpectedStatus(){
+        return expectedStatusThreadLocal.get();
     }
 
     @Override

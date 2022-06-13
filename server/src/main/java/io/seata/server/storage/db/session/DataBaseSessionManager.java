@@ -97,13 +97,18 @@ public class DataBaseSessionManager extends AbstractSessionManager
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }
-        // session.getStatus() must equals status in store
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
-        if (!ret) {
-            throw new StoreException("updateGlobalSessionStatus failed.");
+        try {
+            //  set expected status threadlocal
+            session.setExpectedStatusFromCurrent();
+            session.setStatus(status);
+            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+            if (!ret) {
+                throw new StoreException("updateGlobalSessionStatus failed.");
+            }
+        } finally {
+            //  remove expected status threadlocal
+            session.cleanExpectedStatus();
         }
-        // set session status after update successfully
-        session.setStatus(status);
     }
 
     /**
