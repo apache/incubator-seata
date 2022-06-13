@@ -273,10 +273,10 @@ public class ConnectionContext {
      * @return the application data
      */
     public String getApplicationData() throws TransactionException {
-        if (applicationData.isEmpty()) {
-            this.applicationData.put(SKIP_CHECK_LOCK, true);
-        } else {
+        if (applicationData.containsKey(SKIP_CHECK_LOCK)) {
             this.applicationData.remove(SKIP_CHECK_LOCK);
+        } else {
+            this.applicationData.put(SKIP_CHECK_LOCK, true);
         }
         boolean autoCommit = this.isAutoCommitChanged();
         // when transaction are enabled, it must be false
