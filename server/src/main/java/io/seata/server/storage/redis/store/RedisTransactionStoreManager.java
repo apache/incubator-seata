@@ -734,7 +734,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Iterator<Map.Entry<String, Integer>> iterator = targetMap.entrySet().iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 String key = iterator.next().getKey();
                 final long sum = listList.stream().mapToLong(List::size).sum();
                 final long diffCount = queryCount - sum;
