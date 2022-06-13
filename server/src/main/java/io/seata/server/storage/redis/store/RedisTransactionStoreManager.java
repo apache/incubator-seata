@@ -15,6 +15,7 @@
  */
 package io.seata.server.storage.redis.store;
 
+import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -664,7 +665,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return
      */
     private Map<String, Integer> calculateStatuskeysHasData(List<String> statusKeys) {
-        Map<String, Integer> resultMap = Collections.synchronizedMap(new LinkedHashMap<>());
+        Map<String, Integer> resultMap = new LinkedHashMap<>();
         Map<String, Integer> keysMap = new HashMap<>(statusKeys.size());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             statusKeys.forEach(key -> pipelined.llen(key));
@@ -732,7 +733,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
 
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            for (String key : targetMap.keySet()) {
+            Iterator<Map.Entry<String, Integer>> iterator = targetMap.entrySet().iterator();
+            while (iterator.hasNext()) {
+                String key = iterator.next().getKey();
                 final long sum = listList.stream().mapToLong(List::size).sum();
                 final long diffCount = queryCount - sum;
                 if (diffCount <= 0) {
@@ -746,11 +749,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     list = jedis.lrange(key, start, end);
                 }
 
-                if (list.size() > 0 && sum < queryCount) {
+                if (list.size() > 0) {
                     listList.add(list);
                 } else {
                     if (list.size() == 0) {
-                        targetMap.remove(key);
+                        iterator.remove();
                     }
                 }
             }
