@@ -73,7 +73,7 @@ public interface LogStore {
      * @param expectedStatus the expected Status
      * @return the boolean
      */
-    boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO,Integer expectedStatus);
+    boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO, Integer expectedStatus);
 
     /**
      * Delete global transaction do boolean.
