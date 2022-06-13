@@ -58,7 +58,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * Update global session status.
      *
      * @param session the session
-     * @param status        the status
+     * @param status  the status
      * @throws TransactionException the transaction exception
      */
     void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException;
