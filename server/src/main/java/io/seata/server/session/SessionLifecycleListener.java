@@ -38,7 +38,7 @@ public interface SessionLifecycleListener {
      * On status change.
      *
      * @param globalSession the global session
-     * @param status   the target status
+     * @param status        the status
      * @throws TransactionException the transaction exception
      */
     void onStatusChange(GlobalSession globalSession, GlobalStatus status) throws TransactionException;
