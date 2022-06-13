@@ -7,8 +7,8 @@
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] 修复develop分支SeataTCCFenceAutoConfiguration在客户端未使用DB时，启动抛出ClassNotFoundException的问题。
   - [[#4661](https://github.com/seata/seata/pull/4661)] 修复控制台中使用PostgreSQL出现的SQL异常
-  - [[#4667](https://github.com/seata/seata/issues/4667)] 修复develop分支RedisTransactionStoreManager迭代时更新map的异常
-
+  - [[#4667](https://github.com/seata/seata/pull/4682)] 修复develop分支RedisTransactionStoreManager迭代时更新map的异常
+  - [[#4678](https://github.com/seata/seata/pull/4678)] 修复属性transport.enableRmClientBatchSendRequest没有配置的情况下缓存穿透的问题
 
 
 ### optimize：
@@ -24,5 +24,7 @@
 - [pengten](https://github.com/pengten)
 - [YSF-A](https://github.com/YSF-A)
 - [tuwenlin](https://github.com/tuwenlin)
+- [Ifdevil](https://github.com/Ifdevil)
+- [wingchi-leung](https://github.com/wingchi-leung)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
