@@ -206,7 +206,12 @@ public class SessionHelper {
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
     }
 
-
+    public static boolean isTimeoutGlobalStatus(GlobalStatus status) {
+        return status == GlobalStatus.TimeoutRollbacked
+                || status == GlobalStatus.TimeoutRollbackFailed
+                || status == GlobalStatus.TimeoutRollbacking
+                || status == GlobalStatus.TimeoutRollbackRetrying;
+    }
 
     /**
      * Foreach global sessions.
