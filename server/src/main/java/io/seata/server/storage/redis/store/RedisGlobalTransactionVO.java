@@ -15,8 +15,8 @@
  */
 package io.seata.server.storage.redis.store;
 
-import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.core.model.GlobalStatus;
 
 /**
  * redis Global Transaction data object
