@@ -12,9 +12,104 @@
       "defaultValue": "logback_to_logstash"
     },
     {
+      "name": "logging.extend.kafka-appender.producer-configs",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>"
+    },
+    {
+      "name": "logging.extend.kafka-appender.pattern",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "defaultValue": "{\"@timestamp\":\"%d{yyyy-MM-dd HH:mm:ss.SSS}\",\"level\":\"%p\",\"app_name\":\"${spring.application.name:seata-server}\",\"PORT\":\"${server.servicePort:0}\",\"thread_name\":\"%t\",\"logger_name\":\"%logger\",\"X-TX-XID\":\"%X{X-TX-XID:-}\",\"X-TX-BRANCH-ID\":\"%X{X-TX-BRANCH-ID:-}\",\"message\":\"%m\"}"
+    },
+    {
+      "name": "logging.extend.kafka-appender.keying-strategy",
+      "type": "java.lang.String",
+      "description": "config for logging.extend.kafka-appender.keying-strategy.",
+      "defaultValue": "noKey"
+    },
+    {
       "name": "logging.extend.logstash-appender.destination",
       "type": "java.lang.String",
       "defaultValue": "localhost:4560"
+    },
+    {
+      "name": "logging.extend.logstash-appender.pattern",
+      "type": "java.lang.String",
+      "defaultValue": "{\"timestamp\":\"%date{yyyy-MM-dd HH:mm:ss.SSS}\",\"level\":\"%p\",\"app_name\":\"${spring.application.name:seata-server}\",\"PORT\":\"${server.servicePort:0}\",\"thread_name\":\"%t\",\"logger_name\":\"%logger\",\"X-TX-XID\":\"%X{X-TX-XID:-}\",\"X-TX-BRANCH-ID\":\"%X{X-TX-BRANCH-ID:-}\",\"message\":\"%m\"}"
+    },
+    {
+      "name": "logging.extend.logstash-appender.keep-alive-duration",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.keep-alive-duration."
+    },
+    {
+      "name": "logging.extend.logstash-appender.keep-alive-message",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.keep-alive-message."
+    },
+    {
+      "name": "logging.extend.logstash-appender.keep-alive-charset",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.keep-alive-charset."
+    },
+    {
+      "name": "logging.extend.logstash-appender.reconnection-delay",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.reconnection-delay."
+    },
+    {
+      "name": "logging.extend.logstash-appender.connection-strategy",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.connection-strategy."
+    },
+    {
+      "name": "logging.extend.logstash-appender.connection-ttl",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.connection-ttl."
+    },
+    {
+      "name": "logging.extend.logstash-appender.write-buffer-size",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.write-buffer-size."
+    },
+    {
+      "name": "logging.extend.logstash-appender.write-timeout",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.write-timeout."
+    },
+    {
+      "name": "logging.extend.logstash-appender.connection-timeout",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.connection-timeout."
+    },
+    {
+      "name": "logging.extend.logstash-appender.ssl.trustStore.location",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.ssl.trustStore.location."
+    },
+    {
+      "name": "logging.extend.logstash-appender.ssl.trustStore.password",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.ssl.trustStore.password."
+    },
+    {
+      "name": "logging.extend.logstash-appender.ssl.trustStore.provider",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.ssl.trustStore.provider."
+    },
+    {
+      "name": "logging.extend.logstash-appender.ssl.trustStore.type",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.ssl.trustStore.type."
+    },
+    {
+      "name": "logging.extend.logstash-appender.ring-buffer-size",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.ring-buffer-size."
+    },
+    {
+      "name": "logging.extend.logstash-appender.wait-strategy",
+      "type": "java.lang.String",
+      "description": "Description for logging.extend.logstash-appender.wait-strategy."
     }
   ],
   "hints": [

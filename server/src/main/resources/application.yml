@@ -9,12 +9,13 @@ logging:
   config: classpath:logback-spring.xml
   file:
     path: ${user.home}/logs/seata
-  extend:
-    logstash-appender:
-      destination: 127.0.0.1:4560
-    kafka-appender:
-      bootstrap-servers: 127.0.0.1:9092
-      topic: logback_to_logstash
+#  logging extend off by default
+#  extend:
+#    logstash-appender:
+#      destination: 127.0.0.1:4560
+#    kafka-appender:
+#      bootstrap-servers: 127.0.0.1:9092
+#      topic: logback_to_logstash
 
 console:
   user:

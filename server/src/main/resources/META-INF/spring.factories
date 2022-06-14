@@ -1,2 +1,3 @@
 org.springframework.context.ApplicationListener=\
-io.seata.server.ServerApplicationListener
+io.seata.server.ServerApplicationListener,\
+io.seata.server.logging.listener.SeataLogbackLoggingExtendListener

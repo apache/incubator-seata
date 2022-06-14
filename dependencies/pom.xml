@@ -78,7 +78,7 @@
 
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
-        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
 
         <!-- redis -->
