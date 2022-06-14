@@ -38,7 +38,7 @@ public class SessionProperties {
     /**
      * enable to asynchronous remove branchSession
      */
-    private Boolean enableBranchAsyncRemove = true;
+    private Boolean enableBranchAsyncRemove = false;
 
     public Integer getBranchAsyncQueueSize() {
         return branchAsyncQueueSize;
