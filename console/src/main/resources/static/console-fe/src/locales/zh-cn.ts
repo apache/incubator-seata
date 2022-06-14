@@ -28,7 +28,7 @@ const zhCn: ILocale = {
     docs: '文档',
     blog: '博客',
     community: '社区',
-    download:'下载',
+    download: '下载',
     languageSwitchButton: 'En',
     logout: '登出',
   },
