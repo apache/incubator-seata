@@ -16,6 +16,7 @@
   - [[#4670](https://github.com/seata/seata/pull/4670)] 优化branchResultMessageExecutor线程池的线程数
   - [[#4662](https://github.com/seata/seata/pull/4662)] 优化回滚事务监控指标
   - [[#4693](https://github.com/seata/seata/pull/4693)] 优化控制台导航栏
+  - [[#4544](https://github.com/seata/seata/pull/4544)] 优化测试用例TransactionContextFilterTest中jackson包依赖问题
 
 ### test：
 
@@ -29,5 +30,6 @@
 - [tuwenlin](https://github.com/tuwenlin)
 - [Ifdevil](https://github.com/Ifdevil)
 - [wingchi-leung](https://github.com/wingchi-leung)
+- [liurong](https://github.com/robynron)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
