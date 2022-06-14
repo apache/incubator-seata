@@ -179,7 +179,11 @@ public class SessionHelper {
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
                 beginTime, retryBranch);
         } else {
-            MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+            if (SessionStatusValidator.isTimeoutGlobalStatus(globalSession.getStatus())) {
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
+            } else {
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
+            }
         }
     }
 
@@ -201,8 +205,6 @@ public class SessionHelper {
         globalSession.end();
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
     }
-
-
 
     /**
      * Foreach global sessions.
