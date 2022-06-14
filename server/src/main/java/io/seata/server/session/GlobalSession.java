@@ -768,15 +768,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
     }
 
-    public void setExpectedStatusFromCurrent(){
+    public void setExpectedStatusFromCurrent() {
         expectedStatusThreadLocal.set(this.status);
     }
 
-    public void cleanExpectedStatus(){
+    public void cleanExpectedStatus() {
         expectedStatusThreadLocal.remove();
     }
 
-    public GlobalStatus getExpectedStatus(){
+    public GlobalStatus getExpectedStatus() {
         return expectedStatusThreadLocal.get();
     }
 
