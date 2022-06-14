@@ -17,6 +17,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities
   - [[#4670](https://github.com/seata/seata/pull/4670)] optimize the thread pool size of branchResultMessageExecutor
   - [[#4662](https://github.com/seata/seata/pull/4662)] optimize rollback transaction metrics
+  - [[#4693](https://github.com/seata/seata/pull/4693)] optimize the console navigation bar
   - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
 
 ### test:
