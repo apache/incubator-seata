@@ -10,6 +10,7 @@
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
+  - [[#4662](https://github.com/seata/seata/pull/4662)] 优化回滚事务监控指标
 
 ### test：
 
