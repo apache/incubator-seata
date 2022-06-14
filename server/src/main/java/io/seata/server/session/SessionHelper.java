@@ -180,11 +180,10 @@ public class SessionHelper {
                 beginTime, retryBranch);
         } else {
             if (isTimeoutGlobalStatus(globalSession.getStatus())) {
-                globalSession.setStatus(GlobalStatus.TimeoutRollbacked);
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
             } else {
-                globalSession.setStatus(GlobalStatus.Rollbacked);
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
             }
-            MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
         }
     }
 
