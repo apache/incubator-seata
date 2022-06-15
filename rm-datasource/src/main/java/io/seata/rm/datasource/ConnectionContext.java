@@ -31,7 +31,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import static io.seata.common.Constants.AUTO_COMMIT;
@@ -273,10 +275,13 @@ public class ConnectionContext {
      * @return the application data
      */
     public String getApplicationData() throws TransactionException {
-        if (applicationData.containsKey(SKIP_CHECK_LOCK)) {
-            this.applicationData.remove(SKIP_CHECK_LOCK);
-        } else {
-            this.applicationData.put(SKIP_CHECK_LOCK, true);
+        GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
+        if (globalLockConfig.isSkipCheckLock() || allBeforeImageEmpty()) {
+            if (applicationData.containsKey(SKIP_CHECK_LOCK)) {
+                this.applicationData.remove(SKIP_CHECK_LOCK);
+            } else {
+                this.applicationData.put(SKIP_CHECK_LOCK, true);
+            }
         }
         boolean autoCommit = this.isAutoCommitChanged();
         // when transaction are enabled, it must be false

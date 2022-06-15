@@ -37,6 +37,8 @@ public final class TransactionInfo implements Serializable {
 
     private int lockRetryTimes;
 
+    boolean skipCheckLock;
+
     public int getTimeOut() {
         return timeOut;
     }
@@ -107,4 +109,13 @@ public final class TransactionInfo implements Serializable {
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
     }
+
+    public boolean isSkipCheckLock() {
+        return skipCheckLock;
+    }
+
+    public void setSkipCheckLock(boolean skipCheckLock) {
+        this.skipCheckLock = skipCheckLock;
+    }
+
 }

@@ -165,7 +165,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                             globalTransactionalAnnotation.noRollbackForClassName(),
                             globalTransactionalAnnotation.propagation(),
                             globalTransactionalAnnotation.lockRetryInterval(),
-                            globalTransactionalAnnotation.lockRetryTimes());
+                            globalTransactionalAnnotation.lockRetryTimes(),
+                            globalTransactionalAnnotation.skipCheckLock());
                     } else {
                         transactional = this.aspectTransactional;
                     }
@@ -190,6 +191,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 GlobalLockConfig config = new GlobalLockConfig();
                 config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
                 config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
+                config.setSkipCheckLock(globalLockAnno.skipCheckLock());
                 return config;
             }
         });
@@ -227,6 +229,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     transactionInfo.setPropagation(aspectTransactional.getPropagation());
                     transactionInfo.setLockRetryInterval(aspectTransactional.getLockRetryInterval());
                     transactionInfo.setLockRetryTimes(aspectTransactional.getLockRetryTimes());
+                    transactionInfo.setSkipCheckLock(aspectTransactional.isSkipCheckLock());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : aspectTransactional.getRollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));

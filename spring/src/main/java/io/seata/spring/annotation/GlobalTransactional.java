@@ -127,4 +127,13 @@ public @interface GlobalTransactional {
      * @return int
      */
     int lockRetryTimes() default -1;
+
+    /**
+     * Whether to skip checking for lock owners
+     * When you do not have resources to reent the scene, we recommend that you enable this
+     * configuration, which can greatly improve performance
+     * @return skip check lock
+     */
+    boolean skipCheckLock() default false;
+
 }
