@@ -38,6 +38,9 @@ import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.autoproxy.DefaultTransactionAutoProxy;
+import io.seata.spring.autoproxy.IsTransactionProxyResult;
+import io.seata.spring.interceptor.TCCBeanParserUtils;
+import io.seata.spring.remoting.parser.LocalServiceRemotingParser;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
@@ -258,9 +261,18 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
      * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
-     * @see io.seata.rm.tcc.remoting.RemotingParser // Remote TCC service parser
+     * @see io.seata.spring.remoting.RemotingParser // Remote TCC service parser
      * Corresponding interceptor:
      * @see io.seata.rm.tcc.interceptor.TccActionInterceptor // the interceptor of TCC mode
+     * 
+     * SAGA annotation mode:
+     * @see LocalService // local service annotation on interface
+     * @see io.seata.saga.api.SagaTransactional // SAGA annotation on commit method
+     * @see LocalServiceRemotingParser // Remote SAGA service parser
+     * @see io.seata.saga.autoproxy.SagaTransactionAutoProxy // SAGA transaction auto proxy
+     * Corresponding interceptor:
+     * @see io.seata.saga.interceptor.SagaActionInterceptor // the interceptor of SAGA annotation mode
+     * 
      */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
@@ -276,8 +288,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
                 interceptor = null;
                 //check Transaction proxy
-                interceptor = DefaultTransactionAutoProxy.get().isTransactionAutoProxy(bean, beanName, applicationContext);
-                if (interceptor != null) {
+                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
+                    IsTransactionProxyResult isTransactionProxyResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
+                    // init tcc fence clean task if enable useTccFence
+                    TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext, isTransactionProxyResult.isUseFence());
+                    interceptor = isTransactionProxyResult.getMethodInterceptor();
                     ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                             (ConfigurationChangeListener) interceptor);
                 } else {

@@ -148,6 +148,11 @@ public interface DefaultValues {
     int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
 
     /**
+     * the constant SAGA_ACTION_INTERCEPTOR_ORDER
+     */
+    int SAGA_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+
+    /**
      * the constant DEFAULT_DISTRIBUTED_LOCK_EXPIRE
      */
     int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;

@@ -15,24 +15,20 @@
  */
 package io.seata.spring.autoproxy;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.context.ApplicationContext;
+import io.seata.spring.remoting.RemotingDesc;
 
 /**
- * The interface Transaction Auto Proxy.
- * if result is not null, then proxied by tcc/saga with SPI.
+ * The interface Transaction Auto Proxy. Proxied by tcc/saga with SPI.
  *
  * @author ruishansun
  */
 public interface TransactionAutoProxy {
 
     /**
-     * if it is transaction auto proxy? (tcc or saga)
+     * Whether it is transaction auto proxy? (tcc or saga)
      *
-     * @param bean               the bean
-     * @param beanName           the beanName
-     * @param applicationContext the applicationContext
-     * @return the MethodInterceptor
+     * @param remotingDesc the remotingDesc
+     * @return the IsTransactionProxyResult
      */
-    MethodInterceptor isTransactionAutoProxy(Object bean, String beanName, ApplicationContext applicationContext);
+    IsTransactionProxyResult isTransactionProxyTargetBean(RemotingDesc remotingDesc);
 }

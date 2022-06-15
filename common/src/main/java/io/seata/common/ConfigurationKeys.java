@@ -232,6 +232,11 @@ public interface ConfigurationKeys {
     String TCC_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "tccActionInterceptorOrder";
 
     /**
+     * The constant SAGA_ACTION_INTERCEPTOR_ORDER.
+     */
+    String SAGA_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "sagaActionInterceptorOrder";
+
+    /**
      * The constant CLIENT_TM_PREFIX.
      */
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";

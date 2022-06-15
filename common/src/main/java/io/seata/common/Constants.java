@@ -162,8 +162,8 @@ public interface Constants {
     String SKIP_CHECK_LOCK = "skipCheckLock";
     
     /**
-     * The constant MODE_TYPE
+     * phase two compensation method name
      */
-    String MODE_TYPE = "modeType";
+    String COMPENSATION_METHOD = "sys::compensation";
 
 }

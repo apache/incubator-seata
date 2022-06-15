@@ -19,18 +19,7 @@ import io.seata.sqlparser.SqlParserType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
-import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
-import static io.seata.common.DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER;
-import static io.seata.common.DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
-import static io.seata.common.DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
+import static io.seata.common.DefaultValues.*;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**
@@ -49,6 +38,7 @@ public class RmProperties {
     private boolean sagaRetryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
     private boolean sagaCompensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
     private int tccActionInterceptorOrder = TCC_ACTION_INTERCEPTOR_ORDER;
+    private int sagaActionInterceptorOrder = SAGA_ACTION_INTERCEPTOR_ORDER;
     private int branchExecutionTimeoutXA = DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
     private int connectionTwoPhaseHoldTimeoutXA = DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
     private String sqlParserType = SqlParserType.SQL_PARSER_TYPE_DRUID;
@@ -164,4 +154,11 @@ public class RmProperties {
         this.connectionTwoPhaseHoldTimeoutXA = connectionTwoPhaseHoldTimeoutXA;
     }
 
+    public int getSagaActionInterceptorOrder() {
+        return sagaActionInterceptorOrder;
+    }
+
+    public void setSagaActionInterceptorOrder(int sagaActionInterceptorOrder) {
+        this.sagaActionInterceptorOrder = sagaActionInterceptorOrder;
+    }
 }

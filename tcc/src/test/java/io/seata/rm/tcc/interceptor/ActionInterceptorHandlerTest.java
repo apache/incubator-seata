@@ -18,6 +18,7 @@ package io.seata.rm.tcc.interceptor;
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccParam;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.spring.interceptor.ActionInterceptorHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

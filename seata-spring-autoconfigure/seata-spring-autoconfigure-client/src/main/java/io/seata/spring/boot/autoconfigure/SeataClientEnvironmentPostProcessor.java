@@ -16,7 +16,7 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.common.holder.ObjectHolder;
-import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.spring.fence.config.TCCFenceConfig;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;

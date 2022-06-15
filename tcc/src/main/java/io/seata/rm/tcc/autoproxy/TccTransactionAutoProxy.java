@@ -15,11 +15,18 @@
  */
 package io.seata.rm.tcc.autoproxy;
 
-import io.seata.rm.tcc.interceptor.TCCBeanParserUtils;
+import io.seata.common.exception.FrameworkException;
+import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.TCCResource;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptor;
+import io.seata.spring.autoproxy.IsTransactionProxyResult;
 import io.seata.spring.autoproxy.TransactionAutoProxy;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.context.ApplicationContext;
+import io.seata.spring.remoting.Protocols;
+import io.seata.spring.remoting.RemotingDesc;
+import io.seata.spring.remoting.parser.DefaultRemotingParser;
+
+import java.lang.reflect.Method;
 
 /**
  * the tcc implements of TransactionAutoProxy
@@ -28,14 +35,95 @@ import org.springframework.context.ApplicationContext;
  */
 public class TccTransactionAutoProxy implements TransactionAutoProxy {
 
+    /**
+     * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
+     *
+     * @param remotingDesc the remoting desc
+     * @return boolean
+     */
     @Override
-    public MethodInterceptor isTransactionAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
-        if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
-            // init tcc fence clean task if enable useTccFence
-            TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext);
-            //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
-            return new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
+    public IsTransactionProxyResult isTransactionProxyTargetBean(RemotingDesc remotingDesc) {
+        if (remotingDesc == null) {
+            return new IsTransactionProxyResult();
         }
-        return null;
+        //check if it is TCC bean
+        boolean isTccClazz = false;
+        boolean userFence = false;
+        Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
+        Method[] methods = tccInterfaceClazz.getMethods();
+        TwoPhaseBusinessAction twoPhaseBusinessAction;
+        for (Method method : methods) {
+            twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
+            if (twoPhaseBusinessAction != null) {
+                isTccClazz = true;
+                if (twoPhaseBusinessAction.useTCCFence()) {
+                    userFence = true;
+                }
+                break;
+            }
+        }
+        if (!isTccClazz) {
+            return new IsTransactionProxyResult();
+        }
+        short protocols = remotingDesc.getProtocol();
+        //LocalTCC
+        if (Protocols.IN_JVM == protocols) {
+            this.registryResource(remotingDesc);
+            //in jvm TCC bean , AOP
+            IsTransactionProxyResult result = new IsTransactionProxyResult();
+            result.setProxyTargetBean(true);
+            result.setUseFence(userFence);
+            result.setMethodInterceptor(new TccActionInterceptor(remotingDesc));
+            return result;
+        }
+        // sofa:reference /  dubbo:reference, AOP
+        if (remotingDesc.isReference()) {
+            this.registryResource(remotingDesc);
+            IsTransactionProxyResult result = new IsTransactionProxyResult();
+            result.setProxyTargetBean(true);
+            result.setUseFence(userFence);
+            result.setMethodInterceptor(new TccActionInterceptor(remotingDesc));
+            return result;
+        } else {
+            return new IsTransactionProxyResult();
+        }
+    }
+
+    private void registryResource(RemotingDesc remotingDesc) {
+        if (!remotingDesc.isReference()) {
+            try {
+                Class<?> interfaceClass = remotingDesc.getInterfaceClass();
+                Method[] methods = interfaceClass.getMethods();
+                //service bean, registry resource
+                Object targetBean = remotingDesc.getTargetBean();
+                for (Method m : methods) {
+                    TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
+                    if (twoPhaseBusinessAction != null) {
+                        TCCResource tccResource = new TCCResource();
+                        tccResource.setActionName(twoPhaseBusinessAction.name());
+                        tccResource.setTargetBean(targetBean);
+                        tccResource.setPrepareMethod(m);
+                        tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
+                        tccResource.setCommitMethod(interfaceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                                twoPhaseBusinessAction.commitArgsClasses()));
+                        tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
+                        tccResource.setRollbackMethod(interfaceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                                twoPhaseBusinessAction.rollbackArgsClasses()));
+                        // set argsClasses
+                        tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
+                        tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
+                        // set phase two method's keys
+                        tccResource.setPhaseTwoCommitKeys(DefaultRemotingParser.get().getTwoPhaseArgs(tccResource.getCommitMethod(),
+                                twoPhaseBusinessAction.commitArgsClasses()));
+                        tccResource.setPhaseTwoRollbackKeys(DefaultRemotingParser.get().getTwoPhaseArgs(tccResource.getRollbackMethod(),
+                                twoPhaseBusinessAction.rollbackArgsClasses()));
+                        //registry tcc resource
+                        DefaultResourceManager.get().registerResource(tccResource);
+                    }
+                }
+            } catch (Throwable t) {
+                throw new FrameworkException(t, "parser remoting service error");
+            }
+        }
     }
 }

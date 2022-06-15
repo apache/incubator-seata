@@ -30,6 +30,11 @@ public class SagaResource implements Resource {
     private String applicationId;
 
     /**
+     * whether used saga annotation mode
+     */
+    private boolean useSagaAnnotationMode;
+
+    /**
      * Gets get resource group id.
      *
      * @return the get resource group id
@@ -84,5 +89,13 @@ public class SagaResource implements Resource {
      */
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
+    }
+
+    public boolean isUseSagaAnnotationMode() {
+        return useSagaAnnotationMode;
+    }
+
+    public void setUseSagaAnnotationMode(boolean useSagaAnnotationMode) {
+        this.useSagaAnnotationMode = useSagaAnnotationMode;
     }
 }

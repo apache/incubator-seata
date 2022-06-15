@@ -89,11 +89,4 @@ public @interface TwoPhaseBusinessAction {
      * @return the Class[]
      */
     Class<?>[] rollbackArgsClasses() default {BusinessActionContext.class};
-
-    /**
-     * Define TCC or SAGA mode
-     * 
-     * @return the mode
-     */
-    ModeType modeType() default ModeType.TCC;
 }
