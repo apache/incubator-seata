@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
  * @author ruishansun
  */
 public class SagaTransactionAutoProxy implements TransactionAutoProxy {
-    
+
     @Override
     public IsTransactionProxyResult isTransactionProxyTargetBean(RemotingDesc remotingDesc) {
 
@@ -46,7 +46,7 @@ public class SagaTransactionAutoProxy implements TransactionAutoProxy {
         Method[] methods = sagaInterfaceClazz.getMethods();
         for (Method method : methods) {
             SagaTransactional sagaTransactional = method.getAnnotation(SagaTransactional.class);
-            if(sagaTransactional != null && (Protocols.IN_JVM == remotingDesc.getProtocol() || remotingDesc.isReference())) {
+            if (sagaTransactional != null && (Protocols.IN_JVM == remotingDesc.getProtocol() || remotingDesc.isReference())) {
                 this.registryResource(remotingDesc);
                 IsTransactionProxyResult result = new IsTransactionProxyResult();
                 result.setProxyTargetBean(true);
@@ -60,6 +60,7 @@ public class SagaTransactionAutoProxy implements TransactionAutoProxy {
 
     /**
      * register saga resource
+     *
      * @param remotingDesc the remotingDesc
      */
     private void registryResource(RemotingDesc remotingDesc) {

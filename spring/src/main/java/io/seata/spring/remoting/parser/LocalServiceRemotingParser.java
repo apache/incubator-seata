@@ -29,7 +29,7 @@ import java.util.Set;
  * @author ruishansun
  */
 public class LocalServiceRemotingParser extends AbstractedRemotingParser {
-    
+
     @Override
     public boolean isReference(Object bean, String beanName) {
         return isLocalService(bean);

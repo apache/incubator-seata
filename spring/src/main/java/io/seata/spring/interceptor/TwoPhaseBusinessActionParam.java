@@ -20,7 +20,7 @@ import io.seata.core.model.BranchType;
 import java.util.Map;
 
 /**
- * The two phase business action parameters. 
+ * The two phase business action parameters.
  *
  * @author ruishansun
  */
