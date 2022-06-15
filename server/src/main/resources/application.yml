@@ -16,6 +16,13 @@ logging:
 #    kafka-appender:
 #      bootstrap-servers: 127.0.0.1:9092
 #      topic: logback_to_logstash
+#      producer-configs:
+#        acks: 0
+#        linger:
+#          ms: 1000
+#        max:
+#          block:
+#            ms: 0
 
 console:
   user:

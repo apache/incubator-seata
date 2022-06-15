@@ -5,29 +5,37 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.encoder.Encoder;
-import ch.qos.logback.core.spi.LifeCycle;
+import ch.qos.logback.core.hook.DelayingShutdownHook;
+import ch.qos.logback.core.util.Duration;
 import io.seata.server.logging.extend.LoggingExtendPropertyResolver;
 import io.seata.server.logging.extend.SeataLoggingExtendAppender;
-import org.slf4j.ILoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.springframework.boot.context.logging.LoggingApplicationListener.REGISTER_SHUTDOWN_HOOK_PROPERTY;
 
 /**
+ * AbstractClass for SeataLogbackLoggingExtendAppender
+ *
  * @author wlx
  * @date 2022/5/30 11:28 下午
+ * @see io.seata.server.logging.logback.extend.SeataLogbackLoggingLogstashExtendAppender
+ * @see io.seata.server.logging.logback.extend.SeataLogbackLoggingExtendKafkaAppender
  */
 public abstract class AbstractSeataLogbackLoggingExtendAppender implements SeataLoggingExtendAppender {
 
     static final String LOGGING_EXTEND_CONFIG_PREFIX = "logging.extend";
 
-    LoggingExtendPropertyResolver propertyResolver;
+    protected LoggingExtendPropertyResolver propertyResolver;
 
-    LoggerContext loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
+    protected LoggerContext loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
 
-    Appender<ILoggingEvent> appender;
+    private static final AtomicBoolean SHUTDOWN_HOOK_REGISTERED = new AtomicBoolean();
 
     @Override
     public void appendAppender(ConfigurableEnvironment environment) {
@@ -36,8 +44,10 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
         }
         Appender<ILoggingEvent> appender = createLoggingExtendAppender();
         if (!Objects.isNull(appender)) {
-            this.appender = appender;
-            this.start();
+            appender.start();
+            Logger rootLogger = getRootLogger(loggerContext);
+            rootLogger.addAppender(appender);
+            registerShutdownHookIfNecessary(environment);
         }
 
     }
@@ -95,23 +105,6 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
      */
     abstract Class<?> loggingExtendAppenderType();
 
-
-    @Override
-    public void start() {
-        if (!Objects.isNull(appender)) {
-            appender.start();
-            Logger rootLogger = getRootLogger(loggerContext);
-            rootLogger.addAppender(appender);
-        }
-    }
-
-    @Override
-    public void stop() {
-        if (!Objects.isNull(appender)) {
-            appender.stop();
-        }
-    }
-
     /**
      * get root Logger from LoggerContext
      *
@@ -125,4 +118,17 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
     public void setPropertyResolver(LoggingExtendPropertyResolver propertyResolver) {
         this.propertyResolver = propertyResolver;
     }
+
+    private void registerShutdownHookIfNecessary(Environment environment) {
+        boolean registerShutdownHook = environment.getProperty(REGISTER_SHUTDOWN_HOOK_PROPERTY, Boolean.class, false);
+        // if registerShutdownHook is true ,the shutdownHook have been registered by LoggingApplicationListener
+        if (!registerShutdownHook && SHUTDOWN_HOOK_REGISTERED.compareAndSet(false, true)) {
+            // register delayingShutdownHook ,delaying 5s to wait other shutdownHook do logging
+            DelayingShutdownHook delayingShutdownHook = new DelayingShutdownHook();
+            delayingShutdownHook.setContext(loggerContext);
+            delayingShutdownHook.setDelay(Duration.valueOf("5000"));
+            Runtime.getRuntime().addShutdownHook(new Thread(delayingShutdownHook));
+        }
+    }
+
 }

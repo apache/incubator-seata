@@ -4,11 +4,9 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.server.logging.extend.SeataLoggingExtendAppender;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -41,27 +39,17 @@ public class SeataLogbackLoggingExtendListener implements GenericApplicationList
         if (Objects.isNull(typeRawClass)) {
             return false;
         } else {
-            return ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(typeRawClass) ||
-                    ContextClosedEvent.class.isAssignableFrom(typeRawClass) ||
-                    ApplicationFailedEvent.class.isAssignableFrom(typeRawClass);
+            return ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(typeRawClass);
         }
     }
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         List<SeataLoggingExtendAppender> appenderList = EnhancedServiceLoader.loadAll(SeataLoggingExtendAppender.class);
-        if (event instanceof ApplicationEnvironmentPreparedEvent) {
-            ConfigurableEnvironment environment = ((ApplicationEnvironmentPreparedEvent) event).getEnvironment();
-            appenderList.forEach(
-                    appender -> appender.appendAppender(environment)
-            );
-        } else if (event instanceof ContextClosedEvent) {
-            // stop appender rather than register shutdownHook to release connection and do't stop console logging
-            appenderList.forEach(SeataLoggingExtendAppender::stop);
-        } else if (event instanceof ApplicationFailedEvent) {
-            // stop appender rather than register shutdownHook to release connection and do't stop console logging
-            appenderList.forEach(SeataLoggingExtendAppender::stop);
-        }
+        ConfigurableEnvironment environment = ((ApplicationEnvironmentPreparedEvent) event).getEnvironment();
+        appenderList.forEach(
+                appender -> appender.appendAppender(environment)
+        );
     }
 
     @Override

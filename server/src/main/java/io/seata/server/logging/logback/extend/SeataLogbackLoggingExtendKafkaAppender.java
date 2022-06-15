@@ -11,12 +11,44 @@ import com.github.danielwegener.logback.kafka.keying.*;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import org.springframework.core.env.Environment;
 
 import java.util.Map;
 
 /**
+ * The type of SeataLogbackLoggingExtendKafkaAppender to support config {@link KafkaAppender} with spring
+ * {@link Environment}
+ * you can config it in spring application.yml like this
+ * <pre>
+ * logging:
+ *   extend:
+ *     kafka-appender:
+ *       bootstrap-servers: 127.0.0.1:9092
+ *       topic: logback_to_logstash
+ * </pre>
+ * <p>
+ * We also support more configuration items defined in the {@link KafkaAppender} and you can add kafka
+ * producer config like this
+ * <pre>
+ * logging:
+ *   extend:
+ *     kafka-appender:
+ *       bootstrap-servers: 127.0.0.1:9092
+ *       topic: logback_to_logstash
+ *       pattern: '{"@timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","app_name":"${spring.application.name:seata-server}","PORT":"${server.servicePort:0}","thread_name":"%t","logger_name":"%logger","X-TX-XID":"%X{X-TX-XID:-}","X-TX-BRANCH-ID":"%X{X-TX-BRANCH-ID:-}","message":"%m"}'
+ *       keying-strategy: noKey
+ *       producer-configs:
+ *         acks: 0
+ *         linger:
+ *           ms: 1000
+ *         max:
+ *           block:
+ *             ms: 0
+ * </pre>
+ *
  * @author wlx
  * @date 2022/5/30 11:30 下午
+ * @see KafkaAppender
  */
 @LoadLevel(name = "SeataLogbackLoggingExtendKafkaAppender")
 public class SeataLogbackLoggingExtendKafkaAppender extends AbstractSeataLogbackLoggingExtendAppender {

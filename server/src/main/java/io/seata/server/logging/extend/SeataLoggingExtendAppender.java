@@ -16,13 +16,4 @@ public interface SeataLoggingExtendAppender {
      */
     void appendAppender(ConfigurableEnvironment environment);
 
-    /**
-     * start appender for logging extend
-     */
-    void start();
-
-    /**
-     * stop appender to cleanly shut down appender
-     */
-    void stop();
 }

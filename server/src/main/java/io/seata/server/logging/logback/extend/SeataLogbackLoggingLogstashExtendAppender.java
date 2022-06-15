@@ -14,13 +14,44 @@ import net.logstash.logback.composite.JsonProviders;
 import net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders;
 import net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider;
 import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
+import org.springframework.core.env.Environment;
 
 import java.nio.charset.Charset;
 import java.util.Objects;
 
 /**
+ * The type of SeataLogbackLoggingLogstashExtendAppender to support config {@link LogstashTcpSocketAppender} with spring
+ * {@link Environment}
+ * you can config it in spring application.yml like this
+ * <pre>
+ * logging:
+ *   extend:
+ *     logstash-appender:
+ *       destination: 127.0.0.1:4560
+ * </pre>
+ * We also support more configuration items defined in the {@link LogstashTcpSocketAppender}
+ * <pre>
+ * logging:
+ *   extend:
+ *     logstash-appender:
+ *       destination: 127.0.0.1:4560
+ *       pattern: '{"timestamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","app_name":"${spring.application.name:seata-server}","PORT":"${server.servicePort:0}","thread_name":"%t","logger_name":"%logger","X-TX-XID":"%X{X-TX-XID:-}","X-TX-BRANCH-ID":"%X{X-TX-BRANCH-ID:-}","message":"%m"}'
+ *       keep-alive-duration: 5 minutes
+ *       keep-alive-message: ping
+ *       keep-alive-charset: UTF-8
+ *       reconnection-delay: 30 seconds
+ *       connection-strategy: preferPrimary
+ *       connection-ttl: 10 seconds
+ *       write-buffer-size: 8192
+ *       write-timeout: 1 minute
+ *       connection-timeout: 5 seconds
+ *       ring-buffer-size: 8192
+ *       wait-strategy: blocking
+ * </pre>
+ *
  * @author wlx
  * @date 2022/5/30 11:30 下午
+ * @see LogstashTcpSocketAppender
  */
 @LoadLevel(name = "SeataLogbackLoggingExtendKafkaAppender")
 public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogbackLoggingExtendAppender {
