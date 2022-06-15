@@ -67,16 +67,16 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
     private static final String USE_PARSE_RULE = "false";
-    private static final String PRO_LOCAL_TAG = "pubnet";
     private static final String PUBLIC_NAMING_ADDRESS_PREFIX = "public_";
     private static final String PUBLIC_NAMING_SERVICE_META_IP_KEY = "publicIp";
     private static final String PUBLIC_NAMING_SERVICE_META_PORT_KEY = "publicPort";
+    private static final String ALIYUN_NACOS_TAG = "mse.aliyuncs.com";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile NacosRegistryServiceImpl instance;
-    private static volatile NamingMaintainService maingmaintain;
+    private static volatile NamingMaintainService namingMaintain;
     private static final Object LOCK_OBJ = new Object();
 
     private NacosRegistryServiceImpl() {
@@ -139,7 +139,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         if (clusterName == null) {
             return null;
         }
-        if(Boolean.valueOf(getNamingProperties().getProperty(PRO_LOCAL_TAG))){
+        if(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY).contains(ALIYUN_NACOS_TAG)
+                && !getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY).contains("internal")){
+            LOGGER.info("visit seata on aliyun with pubnet mode");
             if (!CLUSTER_ADDRESS_MAP.containsKey(PUBLIC_NAMING_ADDRESS_PREFIX+clusterName)){
                 Service service = getNamingMaintainInstance().queryService(DEFAULT_APPLICATION,clusterName);
                 String pubnetIp = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_IP_KEY);
@@ -209,14 +211,14 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     }
 
     public static NamingMaintainService getNamingMaintainInstance() throws Exception {
-        if (maingmaintain == null) {
+        if (namingMaintain == null) {
             synchronized (NacosRegistryServiceImpl.class) {
-                if (maingmaintain == null) {
-                    maingmaintain = NacosFactory.createMaintainService(getNamingProperties());
+                if (namingMaintain == null) {
+                    namingMaintain = NacosFactory.createMaintainService(getNamingProperties());
                 }
             }
         }
-        return maingmaintain;
+        return namingMaintain;
     }
 
     private static Properties getNamingProperties() {
@@ -257,13 +259,6 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     LOGGER.info("Nacos check auth with ak/sk.");
                 }
             }
-        }
-        if (System.getProperty(PRO_LOCAL_TAG) != null) {
-            properties.setProperty(PRO_LOCAL_TAG, System.getProperty(PRO_LOCAL_TAG));
-        }
-        else {
-            boolean pubnet = FILE_CONFIG.getBoolean(getNacosPubnet());
-            properties.setProperty(PRO_LOCAL_TAG, String.valueOf(pubnet));
         }
         return properties;
     }
@@ -316,7 +311,4 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
     }
 
-    public static String getNacosPubnet() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_LOCAL_TAG);
-    }
 }
