@@ -98,7 +98,7 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
         }
 
         IsTransactionProxyResult isProxyTargetBeanResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
-        if(isProxyTargetBeanResult.isProxyTargetBean()) {
+        if (isProxyTargetBeanResult.isProxyTargetBean()) {
             Object proxyBean = TCCBeanParserUtils.createProxy(interfaceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
             field.setAccessible(true);
             field.set(bean, proxyBean);
