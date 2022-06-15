@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4661](https://github.com/seata/seata/pull/4661)] fix sql exception with PostgreSQL in module console
   - [[#4667](https://github.com/seata/seata/pull/4682)] fix the exception in RedisTransactionStoreManager for update map During iteration
   - [[#4678](https://github.com/seata/seata/pull/4678)] fix the error of key transport.enableRmClientBatchSendRequest cache penetration if not configure
+  - [[#4701](https://github.com/seata/seata/pull/4701)] fix missing command line args
 
 
 ### optimize：
