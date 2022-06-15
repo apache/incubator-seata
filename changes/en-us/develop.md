@@ -9,6 +9,7 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] fix the error of SeataTCCFenceAutoConfiguration when database unused
   - [[#4661](https://github.com/seata/seata/pull/4661)] fix sql exception with PostgreSQL in module console
+  - [[#4678](https://github.com/seata/seata/pull/4678)] fix the error of key transport.enableRmClientBatchSendRequest cache penetration if not configure
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities
@@ -25,5 +26,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [YSF-A](https://github.com/YSF-A)
 - [tuwenlin](https://github.com/tuwenlin)
 - [a364176773](https://github.com/a364176773)
+- [Ifdevil](https://github.com/Ifdevil)
+
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
