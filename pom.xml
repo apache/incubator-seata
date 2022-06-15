@@ -64,7 +64,6 @@
         <module>sqlparser</module>
         <module>server</module>
         <module>ext/apm-seata-skywalking-plugin</module>
-        <module>anotation-mode</module>
         <!--<module>seata-plugin</module>-->
     </modules>
 
