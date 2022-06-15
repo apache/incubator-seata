@@ -20,8 +20,6 @@ package io.seata.core.store.db.sql.distributed.lock;
  */
 public class DistributedLockSqlFactory {
     private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
-    private static final DistributedLockSql ORACLE_DISTRIBUTED_LOCK_SQL = new OracleDistributedLockSql();
-
 
     /**
      * get the lock store sql
@@ -30,9 +28,6 @@ public class DistributedLockSqlFactory {
      * @return lock store sql
      */
     public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
-        if("oracle".equals(dbType)){
-            return ORACLE_DISTRIBUTED_LOCK_SQL;
-        }
         return DISTRIBUTED_LOCK_SQL;
     }
 }
