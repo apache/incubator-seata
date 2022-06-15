@@ -69,7 +69,7 @@ public class SagaResourceManager extends AbstractResourceManager {
      */
     @Override
     public void registerResource(Resource resource) {
-        SagaResource sagaResource = (SagaResource)resource;
+        SagaResource sagaResource = (SagaResource) resource;
         sagaResourceCache.put(sagaResource.getResourceId(), sagaResource);
         super.registerResource(sagaResource);
     }
@@ -95,28 +95,28 @@ public class SagaResourceManager extends AbstractResourceManager {
                                      String applicationData) throws TransactionException {
 
         // Saga annotation mode
-        SagaResource sagaResource = (SagaResource)sagaResourceCache.get(resourceId);
+        SagaResource sagaResource = (SagaResource) sagaResourceCache.get(resourceId);
         if (sagaResource == null) {
             throw new ShouldNeverHappenException(String.format("Saga resource is not exist, resourceId: %s", resourceId));
         }
-        if(sagaResource.isUseSagaAnnotationMode()) {
+        if (sagaResource.isUseSagaAnnotationMode()) {
             return BranchStatus.PhaseTwo_Committed;
         }
-        
+
         // Saga state machine mode
         try {
             StateMachineInstance machineInstance = StateMachineEngineHolder.getStateMachineEngine().forward(xid, null);
 
             if (ExecutionStatus.SU.equals(machineInstance.getStatus())
-                && machineInstance.getCompensationStatus() == null) {
+                    && machineInstance.getCompensationStatus() == null) {
                 return BranchStatus.PhaseTwo_Committed;
             } else if (ExecutionStatus.SU.equals(machineInstance.getCompensationStatus())) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             } else if (ExecutionStatus.FA.equals(machineInstance.getCompensationStatus()) || ExecutionStatus.UN.equals(
-                machineInstance.getCompensationStatus())) {
+                    machineInstance.getCompensationStatus())) {
                 return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
             } else if (ExecutionStatus.FA.equals(machineInstance.getStatus())
-                && machineInstance.getCompensationStatus() == null) {
+                    && machineInstance.getCompensationStatus() == null) {
                 return BranchStatus.PhaseOne_Failed;
             }
 
@@ -149,11 +149,11 @@ public class SagaResourceManager extends AbstractResourceManager {
                                        String applicationData) throws TransactionException {
 
         // Saga annotation mode
-        SagaResource sagaResource = (SagaResource)sagaResourceCache.get(resourceId);
+        SagaResource sagaResource = (SagaResource) sagaResourceCache.get(resourceId);
         if (sagaResource == null) {
             throw new ShouldNeverHappenException(String.format("Saga resource is not exist, resourceId: %s", resourceId));
         }
-        if(sagaResource.isUseSagaAnnotationMode()) {
+        if (sagaResource.isUseSagaAnnotationMode()) {
             return this.sagaCompensateBranch(xid, branchId, resourceId, applicationData, (SagaAnnotationResource) sagaResource);
         }
 
@@ -164,14 +164,14 @@ public class SagaResourceManager extends AbstractResourceManager {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
             if (RecoverStrategy.Forward.equals(stateMachineInstance.getStateMachine().getRecoverStrategy())
-                && (GlobalStatus.TimeoutRollbacking.name().equals(applicationData)
-                        || GlobalStatus.TimeoutRollbackRetrying.name().equals(applicationData))) {
+                    && (GlobalStatus.TimeoutRollbacking.name().equals(applicationData)
+                    || GlobalStatus.TimeoutRollbackRetrying.name().equals(applicationData))) {
                 LOGGER.warn("Retry by custom recover strategy [Forward] on timeout, SAGA global[{}]", xid);
                 return BranchStatus.PhaseTwo_CommitFailed_Retryable;
             }
 
             stateMachineInstance = StateMachineEngineHolder.getStateMachineEngine().compensate(xid,
-                null);
+                    null);
             if (ExecutionStatus.SU.equals(stateMachineInstance.getCompensationStatus())) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
@@ -187,7 +187,7 @@ public class SagaResourceManager extends AbstractResourceManager {
         }
         return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
     }
-    
+
     private BranchStatus sagaCompensateBranch(String xid, long branchId, String resourceId, String applicationData, SagaAnnotationResource sagaAnnotationResource) {
         if (sagaAnnotationResource == null) {
             throw new ShouldNeverHappenException(String.format("Saga annotation resource is not exist, resourceId: %s", resourceId));
@@ -202,7 +202,7 @@ public class SagaResourceManager extends AbstractResourceManager {
             BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
                     applicationData);
             Object[] args = this.getTwoPhaseCompensationArgs(sagaAnnotationResource, businessActionContext);
-            
+
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -217,9 +217,9 @@ public class SagaResourceManager extends AbstractResourceManager {
                 ret = compensationMethod.invoke(targetSagaBean, args);
                 if (ret != null) {
                     if (ret instanceof TwoPhaseResult) {
-                        result = ((TwoPhaseResult)ret).isSuccess();
+                        result = ((TwoPhaseResult) ret).isSuccess();
                     } else {
-                        result = (boolean)ret;
+                        result = (boolean) ret;
                     }
                 } else {
                     result = true;
@@ -236,8 +236,9 @@ public class SagaResourceManager extends AbstractResourceManager {
 
     /**
      * get phase two compensate method's args
+     *
      * @param sagaAnnotationResource sagaAnnotationResource
-     * @param businessActionContext businessActionContext
+     * @param businessActionContext  businessActionContext
      * @return args
      */
     private Object[] getTwoPhaseCompensationArgs(SagaAnnotationResource sagaAnnotationResource, BusinessActionContext businessActionContext) {
