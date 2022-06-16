@@ -127,6 +127,7 @@ public class TransactionalTemplate {
                     // Do Your Business
                     TransactionDepthManager.depthInc();
                     rs = business.execute();
+                    TransactionDepthManager.depthDec();
                 } catch (Throwable ex) {
                     // 3. The needed business exception to rollback.
                     completeTransactionAfterThrowing(txInfo, tx, ex);
@@ -139,7 +140,6 @@ public class TransactionalTemplate {
                 return rs;
             } finally {
                 //5. clear
-                TransactionDepthManager.depthDec();
                 resumeGlobalLockConfig(previousConfig);
                 triggerAfterCompletion();
                 cleanUp();

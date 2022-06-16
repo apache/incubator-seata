@@ -16,8 +16,7 @@ public class TransactionDepthManager {
     }
 
     public static boolean isOriginDepth() {
-        // Compatible with last depthDec action
-        return LOCAL_DEPTH.get() <= 1;
+        return Integer.valueOf(0).equals(LOCAL_DEPTH.get());
     }
 
     public static Integer suspend() {
