@@ -15,8 +15,6 @@
  */
 package io.seata.tm.api;
 
-import java.util.List;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
@@ -24,9 +22,12 @@ import io.seata.core.model.GlobalLockConfig;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
+import io.seata.tm.api.transaction.TransactionDepthManager;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,6 +125,7 @@ public class TransactionalTemplate {
                 Object rs;
                 try {
                     // Do Your Business
+                    TransactionDepthManager.depthInc();
                     rs = business.execute();
                 } catch (Throwable ex) {
                     // 3. The needed business exception to rollback.
@@ -137,6 +139,7 @@ public class TransactionalTemplate {
                 return rs;
             } finally {
                 //5. clear
+                TransactionDepthManager.depthDec();
                 resumeGlobalLockConfig(previousConfig);
                 triggerAfterCompletion();
                 cleanUp();
@@ -292,10 +295,12 @@ public class TransactionalTemplate {
     }
 
     private void cleanUp() {
-        TransactionHookManager.clear();
+        if (TransactionDepthManager.isOriginDepth()) {
+            TransactionHookManager.clear();
+        }
     }
 
     private List<TransactionHook> getCurrentHooks() {
-        return TransactionHookManager.getHooks();
+        return TransactionDepthManager.isOriginDepth() ? TransactionHookManager.getHooks() : Collections.emptyList();
     }
 }

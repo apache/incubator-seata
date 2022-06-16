@@ -23,6 +23,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
+import io.seata.tm.api.transaction.TransactionDepthManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,11 +187,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         // In order to associate the following logs with XID, first get and then unbind.
         String xid = RootContext.getXID();
         if (xid != null) {
+            Integer suspendDepth = TransactionDepthManager.suspend();
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Suspending current transaction, xid = {}", xid);
+                LOGGER.info("Suspending current transaction, xid = {}, depth = {}", xid, suspendDepth);
             }
             RootContext.unbind();
-            return new SuspendedResourcesHolder(xid);
+            return new SuspendedResourcesHolder(xid, suspendDepth);
         } else {
             return null;
         }
@@ -203,8 +205,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
         String xid = suspendedResourcesHolder.getXid();
         RootContext.bind(xid);
+        Integer depth = suspendedResourcesHolder.getDepth();
+        TransactionDepthManager.resume(depth);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Resumimg the transaction,xid = {}", xid);
+            LOGGER.debug("Resuming the transaction, xid = {}, depth  = {}", xid, depth);
         }
     }
 
