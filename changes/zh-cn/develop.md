@@ -18,7 +18,7 @@
   - [[#4662](https://github.com/seata/seata/pull/4662)] 优化回滚事务监控指标
   - [[#4693](https://github.com/seata/seata/pull/4693)] 优化控制台导航栏
   - [[#4544](https://github.com/seata/seata/pull/4544)] 优化测试用例TransactionContextFilterTest中jackson包依赖问题
-  - [[#4708](https://github.com/seata/seata/pull/4708)] 优化@GlobalTransactional嵌套时TransactionHook的执行时机
+  - [[#4709](https://github.com/seata/seata/pull/4709)] 优化@GlobalTransactional嵌套时TransactionHook的执行时机
 
 ### test：
 
