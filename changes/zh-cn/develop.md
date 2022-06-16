@@ -10,6 +10,7 @@
   - [[#4667](https://github.com/seata/seata/pull/4682)] 修复develop分支RedisTransactionStoreManager迭代时更新map的异常
   - [[#4678](https://github.com/seata/seata/pull/4678)] 修复属性transport.enableRmClientBatchSendRequest没有配置的情况下缓存穿透的问题
   - [[#4701](https://github.com/seata/seata/pull/4701)] 修复命令行参数丢失问题
+  - [[#4607](https://github.com/seata/seata/pull/4607)] 修复跳过全局锁校验的缺陷
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
