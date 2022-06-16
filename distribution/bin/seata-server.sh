@@ -151,7 +151,9 @@ if [ ! -x "$BASEDIR"/logs ]; then
   mkdir "$BASEDIR"/logs
 fi
 
+CMD_LINE_ARGS=$@
+
 # start
-echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
-nohup $JAVACMD ${JAVA_OPT} >> ${BASEDIR}/logs/start.out 2>&1 &
+echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
+nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
 echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
