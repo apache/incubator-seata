@@ -43,7 +43,7 @@ import static io.seata.common.Constants.SKIP_CHECK_LOCK;
  * @author sharajava
  */
 public class ConnectionContext {
-    private static final Savepoint    DEFAULT_SAVEPOINT = new Savepoint() {
+    private static final Savepoint DEFAULT_SAVEPOINT = new Savepoint() {
         @Override
         public int getSavepointId() throws SQLException {
             return 0;
@@ -113,6 +113,7 @@ public class ConnectionContext {
 
     /**
      * Append savepoint
+     *
      * @param savepoint the savepoint
      */
     void appendSavepoint(Savepoint savepoint) {
@@ -362,6 +363,7 @@ public class ConnectionContext {
 
     /**
      * Get the savepoints after target savepoint(include the param savepoint)
+     *
      * @param savepoint the target savepoint
      * @return after savepoints
      */
@@ -381,7 +383,7 @@ public class ConnectionContext {
     private boolean allBeforeImageEmpty() {
         for (List<SQLUndoLog> sqlUndoLogs : sqlUndoItemsBuffer.values()) {
             for (SQLUndoLog undoLog : sqlUndoLogs) {
-                if (null == undoLog.getBeforeImage() || undoLog.getBeforeImage().size() != 0) {
+                if (null != undoLog.getBeforeImage() && undoLog.getBeforeImage().size() != 0) {
                     return false;
                 }
             }
