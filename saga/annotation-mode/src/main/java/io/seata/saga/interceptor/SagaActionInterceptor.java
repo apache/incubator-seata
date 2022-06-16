@@ -107,6 +107,7 @@ public class SagaActionInterceptor implements MethodInterceptor, ConfigurationCh
                 businessActionParam.setActionName(sagaTransactional.name());
                 businessActionParam.setDelayReport(false);
                 businessActionParam.setUseFence(true);
+                businessActionParam.setBranchType(BranchType.SAGA);
                 Map<String, Object> businessActionContextMap = new HashMap<>(4);
                 //the phase two method name
                 businessActionContextMap.put(Constants.COMPENSATION_METHOD, sagaTransactional.compensationMethod());
