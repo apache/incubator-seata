@@ -5,26 +5,31 @@ package io.seata.tm.api.transaction;
  * @author ninggc
  */
 public class TransactionDepthManager {
-    private static final ThreadLocal<Integer> depth = ThreadLocal.withInitial(() -> 0);
+    private static final ThreadLocal<Integer> LOCAL_DEPTH = ThreadLocal.withInitial(() -> 0);
 
     public static void depthInc() {
-        depth.set(depth.get() + 1);
+        LOCAL_DEPTH.set(LOCAL_DEPTH.get() + 1);
     }
 
     public static void depthDec() {
-        depth.set(depth.get() - 1);
+        LOCAL_DEPTH.set(LOCAL_DEPTH.get() - 1);
     }
 
     public static boolean isOriginDepth() {
-        return Integer.valueOf(0).equals(depth.get());
+        // Compatible with last depthDec action
+        return LOCAL_DEPTH.get() <= 1;
     }
 
     public static Integer suspend() {
-        depth.remove();
-        return depth.get();
+        LOCAL_DEPTH.remove();
+        return LOCAL_DEPTH.get();
     }
 
     public static void resume(Integer resumeDepth) {
-        depth.set(resumeDepth);
+        LOCAL_DEPTH.set(resumeDepth);
+    }
+
+    public static void clear() {
+        LOCAL_DEPTH.remove();
     }
 }

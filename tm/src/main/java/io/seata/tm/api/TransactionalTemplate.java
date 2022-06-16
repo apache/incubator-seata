@@ -297,6 +297,7 @@ public class TransactionalTemplate {
     private void cleanUp() {
         if (TransactionDepthManager.isOriginDepth()) {
             TransactionHookManager.clear();
+            TransactionDepthManager.clear();
         }
     }
 
