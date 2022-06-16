@@ -30,16 +30,26 @@ public class SuspendedResourcesHolder {
      * The xid
      */
     private String xid;
+    /**
+     * the depth
+     */
+    private Integer depth;
 
-    public SuspendedResourcesHolder(String xid) {
+    public SuspendedResourcesHolder(String xid, Integer depth) {
         if (xid == null) {
             throw new IllegalArgumentException("xid must be not null");
         }
         this.xid = xid;
+        this.depth = depth;
     }
 
     @Nonnull
     public String getXid() {
         return xid;
+    }
+
+    @Nonnull
+    public Integer getDepth() {
+        return depth;
     }
 }
