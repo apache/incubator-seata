@@ -294,6 +294,7 @@
                                     <excludeTransitive>false</excludeTransitive>
                                     <stripVersion>false</stripVersion>
                                     <silent>true</silent>
+                                    <overWriteIfNewer>true</overWriteIfNewer>
                                     <!--resolve slf4j-simple conflicts-->
                                     <includeScope>runtime</includeScope>
                                     <excludeGroupIds>org.apache.logging.log4j,log4j</excludeGroupIds>
