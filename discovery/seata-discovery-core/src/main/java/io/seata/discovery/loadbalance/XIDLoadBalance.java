@@ -34,12 +34,14 @@ import io.seata.common.util.StringUtils;
 public class XIDLoadBalance implements LoadBalance {
     
     private static final LoadBalance RANDOM_LOAD_BALANCE = EnhancedServiceLoader.load(LoadBalance.class,
-            LoadBalanceFactory.RANDOM_LOAD_BALANCE);
-    
+        LoadBalanceFactory.RANDOM_LOAD_BALANCE);
+
+    private static final String SPLIT = ":";
+
     @Override
     public <T> T select(List<T> invokers, String xid) throws Exception {
-        if (StringUtils.isNotBlank(xid)) {
-            String[] xidArray = xid.split(":");
+        if (StringUtils.isNotBlank(xid) && xid.contains(SPLIT)) {
+            String[] xidArray = xid.split(SPLIT);
             int port = Integer.parseInt(xidArray[1]);
             String ip = xidArray[0];
             for (T invoker : invokers) {
