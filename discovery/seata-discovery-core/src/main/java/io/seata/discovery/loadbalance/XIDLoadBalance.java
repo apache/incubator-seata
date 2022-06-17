@@ -21,6 +21,7 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.XID_LOAD_BALANCE
 import java.net.InetSocketAddress;
 import java.util.List;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 
@@ -31,19 +32,25 @@ import io.seata.common.util.StringUtils;
  */
 @LoadLevel(name = XID_LOAD_BALANCE)
 public class XIDLoadBalance implements LoadBalance {
-
+    
+    private static final LoadBalance RANDOM_LOAD_BALANCE = EnhancedServiceLoader.load(LoadBalance.class,
+            LoadBalanceFactory.RANDOM_LOAD_BALANCE);
+    
     @Override
-    public <T> T select(List<T> invokers, String xid) {
-        String[] xidArray = xid.split(":");
-        int port = Integer.parseInt(xidArray[1]);
-        String ip = xidArray[0];
-        for (T invoker : invokers) {
-            InetSocketAddress inetSocketAddress = (InetSocketAddress)invoker;
-            if (StringUtils.equals(ip,inetSocketAddress.getHostName()) && inetSocketAddress.getPort() == port) {
-                return (T)inetSocketAddress;
+    public <T> T select(List<T> invokers, String xid) throws Exception {
+        if (StringUtils.isNotBlank(xid)) {
+            String[] xidArray = xid.split(":");
+            int port = Integer.parseInt(xidArray[1]);
+            String ip = xidArray[0];
+            for (T invoker : invokers) {
+                InetSocketAddress inetSocketAddress = (InetSocketAddress)invoker;
+                if (StringUtils.equals(ip, inetSocketAddress.getHostName()) && inetSocketAddress.getPort() == port) {
+                    return (T)inetSocketAddress;
+                }
             }
+            throw new RuntimeException("not found seata-server channel");
         }
-        throw new RuntimeException("not found seata-server channel");
+        return RANDOM_LOAD_BALANCE.select(invokers, xid);
     }
 
 }
