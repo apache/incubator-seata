@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4661](https://github.com/seata/seata/pull/4661)] fix sql exception with PostgreSQL in module console
   - [[#4667](https://github.com/seata/seata/pull/4682)] fix the exception in RedisTransactionStoreManager for update map During iteration
   - [[#4678](https://github.com/seata/seata/pull/4678)] fix the error of key transport.enableRmClientBatchSendRequest cache penetration if not configure
+  - [[#4701](https://github.com/seata/seata/pull/4701)] fix missing command line args
   - [[#4607](https://github.com/seata/seata/pull/4607)] fix bug on skipping lock check
 
 
@@ -20,6 +21,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4662](https://github.com/seata/seata/pull/4662)] optimize rollback transaction metrics
   - [[#4693](https://github.com/seata/seata/pull/4693)] optimize the console navigation bar
   - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
+  - [[#4700](https://github.com/seata/seata/pull/4700)] fix maven-compiler-plugin and maven-resources-plugin execute failed
 
 ### test:
 

@@ -263,6 +263,7 @@
                         <configuration>
                             <mainClass>io.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
+                            <attach>false</attach>
                             <includes>
                                 <include>
                                     <groupId>null</groupId>
