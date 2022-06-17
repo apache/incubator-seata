@@ -35,5 +35,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [Ifdevil](https://github.com/Ifdevil)
 - [wingchi-leung](https://github.com/wingchi-leung)
 - [liurong](https://github.com/robynron)
+- [a364176773](https://github.com/a364176773)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

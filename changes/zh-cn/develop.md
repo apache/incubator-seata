@@ -34,5 +34,6 @@
 - [Ifdevil](https://github.com/Ifdevil)
 - [wingchi-leung](https://github.com/wingchi-leung)
 - [liurong](https://github.com/robynron)
+- [a364176773](https://github.com/a364176773)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
