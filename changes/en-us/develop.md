@@ -21,6 +21,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4662](https://github.com/seata/seata/pull/4662)] optimize rollback transaction metrics
   - [[#4693](https://github.com/seata/seata/pull/4693)] optimize the console navigation bar
   - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
+  - [[#4700](https://github.com/seata/seata/pull/4700)] fix maven-compiler-plugin and maven-resources-plugin execute failed
 
 ### test:
 
