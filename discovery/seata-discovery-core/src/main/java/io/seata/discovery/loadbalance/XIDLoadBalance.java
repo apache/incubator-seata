@@ -46,7 +46,7 @@ public class XIDLoadBalance implements LoadBalance {
             String ip = xidArray[0];
             for (T invoker : invokers) {
                 InetSocketAddress inetSocketAddress = (InetSocketAddress)invoker;
-                if (StringUtils.equals(ip, inetSocketAddress.getHostName()) && inetSocketAddress.getPort() == port) {
+                if (StringUtils.equals(ip, inetSocketAddress.getAddress().getHostAddress()) && inetSocketAddress.getPort() == port) {
                     return (T)inetSocketAddress;
                 }
             }
