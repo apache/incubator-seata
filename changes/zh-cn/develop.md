@@ -9,7 +9,8 @@
   - [[#4661](https://github.com/seata/seata/pull/4661)] 修复控制台中使用PostgreSQL出现的SQL异常
   - [[#4667](https://github.com/seata/seata/pull/4682)] 修复develop分支RedisTransactionStoreManager迭代时更新map的异常
   - [[#4678](https://github.com/seata/seata/pull/4678)] 修复属性transport.enableRmClientBatchSendRequest没有配置的情况下缓存穿透的问题
-
+  - [[#4701](https://github.com/seata/seata/pull/4701)] 修复命令行参数丢失问题
+  - [[#4607](https://github.com/seata/seata/pull/4607)] 修复跳过全局锁校验的缺陷
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
@@ -17,6 +18,7 @@
   - [[#4662](https://github.com/seata/seata/pull/4662)] 优化回滚事务监控指标
   - [[#4693](https://github.com/seata/seata/pull/4693)] 优化控制台导航栏
   - [[#4544](https://github.com/seata/seata/pull/4544)] 优化测试用例TransactionContextFilterTest中jackson包依赖问题
+  - [[#4700](https://github.com/seata/seata/pull/4700)] 修复 maven-compiler-plugin 和 maven-resources-plugin 执行失败
 
 ### test：
 
