@@ -92,6 +92,9 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
     }
 
     void start(E appender) {
+        if (appender.isStarted()) {
+            return;
+        }
         appender.start();
         Logger rootLogger = getRootLogger(loggerContext);
         rootLogger.addAppender(appender);
