@@ -91,6 +91,11 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
         return null;
     }
 
+    /**
+     * start appender
+     *
+     * @param appender appender
+     */
     void start(E appender) {
         if (appender.isStarted()) {
             return;
@@ -100,10 +105,22 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
         rootLogger.addAppender(appender);
     }
 
+    /**
+     * stop appender
+     *
+     * @param appender appender
+     */
     void stop(E appender) {
-        appender.stop();
+        if (appender.isStarted()) {
+            appender.stop();
+        }
     }
 
+    /**
+     * config appender with ConfigurableEnvironment
+     *
+     * @param appender appender
+     */
     void doConfiguration(E appender) {
         if (appender.isStarted()) {
             // if appender is started, it means that the appender has been configured in XML.
