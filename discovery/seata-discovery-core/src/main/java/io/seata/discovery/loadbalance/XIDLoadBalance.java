@@ -20,6 +20,7 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.XID_LOAD_BALANCE
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Objects;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
@@ -41,12 +42,17 @@ public class XIDLoadBalance implements LoadBalance {
     @Override
     public <T> T select(List<T> invokers, String xid) throws Exception {
         if (StringUtils.isNotBlank(xid) && xid.contains(SPLIT)) {
-            String[] xidArray = xid.split(SPLIT);
-            int port = Integer.parseInt(xidArray[1]);
-            String ip = xidArray[0];
+            // ip:port:transactionId -> ip:port
+            String serverAddress = xid.substring(0, xid.lastIndexOf(SPLIT));
+            // ip:port -> port
+            int index = serverAddress.lastIndexOf(SPLIT);
+            int port = Integer.parseInt(serverAddress.substring(index + 1));
+            // ipv4/v6
+            String ip = serverAddress.substring(0, index);
+            InetSocketAddress xidInetSocketAddress = new InetSocketAddress(ip, port);
             for (T invoker : invokers) {
                 InetSocketAddress inetSocketAddress = (InetSocketAddress)invoker;
-                if (StringUtils.equals(ip, inetSocketAddress.getAddress().getHostAddress()) && inetSocketAddress.getPort() == port) {
+                if (Objects.equals(xidInetSocketAddress, inetSocketAddress)) {
                     return (T)inetSocketAddress;
                 }
             }
