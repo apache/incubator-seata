@@ -12,7 +12,7 @@ public interface SeataLoggingExtendAppender {
      * build a Logging Appender whit spring environment
      * and append  it to loggerContext.
      *
-     * @param environment   environment
+     * @param environment environment
      */
     void appendAppender(ConfigurableEnvironment environment);
 

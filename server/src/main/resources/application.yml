@@ -10,19 +10,21 @@ logging:
   file:
     path: ${user.home}/logs/seata
 #  logging extend off by default
-#  extend:
-#    logstash-appender:
-#      destination: 127.0.0.1:4560
-#    kafka-appender:
-#      bootstrap-servers: 127.0.0.1:9092
-#      topic: logback_to_logstash
-#      producer-configs:
-#        acks: 0
-#        linger:
-#          ms: 1000
-#        max:
-#          block:
-#            ms: 0
+  extend:
+    logstash-appender:
+      destinations: 127.0.0.1:4560
+      enable: false
+    kafka-appender:
+      enable: false
+      bootstrap-servers: 127.0.0.1:9092
+      topic: logback_to_logstash
+      producer-configs:
+        acks: 0
+        linger:
+          ms: 1000
+        max:
+          block:
+            ms: 0
 
 console:
   user:
@@ -39,8 +41,8 @@ seata:
   store:
     # support: file 、 db 、 redis
     mode: file
-#  server:
-#    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+  #  server:
+  #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000

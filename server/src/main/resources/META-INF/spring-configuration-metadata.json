@@ -27,7 +27,7 @@
       "defaultValue": "noKey"
     },
     {
-      "name": "logging.extend.logstash-appender.destination",
+      "name": "logging.extend.logstash-appender.destinations",
       "type": "java.lang.String",
       "defaultValue": "localhost:4560"
     },
@@ -110,6 +110,16 @@
       "name": "logging.extend.logstash-appender.wait-strategy",
       "type": "java.lang.String",
       "description": "Description for logging.extend.logstash-appender.wait-strategy."
+    },
+    {
+      "name": "logging.extend.logstash-appender.enable",
+      "type": "java.lang.Boolean",
+      "description": "Description for logging.extend.logstash-appender.enable."
+    },
+    {
+      "name": "logging.extend.kafka-appender.enable",
+      "type": "java.lang.Boolean",
+      "description": "Description for logging.extend.kafka-appender.enable."
     }
   ],
   "hints": [

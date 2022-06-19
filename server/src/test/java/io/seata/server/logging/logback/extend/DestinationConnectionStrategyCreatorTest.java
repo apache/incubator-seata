@@ -1,6 +1,5 @@
 package io.seata.server.logging.logback.extend;
 
-import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.util.Duration;
 import net.logstash.logback.appender.destination.DestinationConnectionStrategy;
 import net.logstash.logback.appender.destination.PreferPrimaryDestinationConnectionStrategy;

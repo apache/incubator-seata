@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.hook.DelayingShutdownHook;
+import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.util.Duration;
 import io.seata.server.logging.extend.LoggingExtendPropertyResolver;
 import io.seata.server.logging.extend.SeataLoggingExtendAppender;
@@ -14,6 +15,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,9 +27,9 @@ import static org.springframework.boot.context.logging.LoggingApplicationListene
  * @author wlx
  * @date 2022/5/30 11:28 下午
  * @see io.seata.server.logging.logback.extend.SeataLogbackLoggingLogstashExtendAppender
- * @see io.seata.server.logging.logback.extend.SeataLogbackLoggingExtendKafkaAppender
+ * @see SeataLogbackLoggingKafkaExtendAppender
  */
-public abstract class AbstractSeataLogbackLoggingExtendAppender implements SeataLoggingExtendAppender {
+public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Appender<ILoggingEvent>> implements SeataLoggingExtendAppender {
 
     static final String LOGGING_EXTEND_CONFIG_PREFIX = "logging.extend";
 
@@ -42,18 +44,22 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
         if (Objects.isNull(propertyResolver)) {
             propertyResolver = new LoggingExtendPropertyResolver(environment);
         }
-        Appender<ILoggingEvent> appender = createLoggingExtendAppender();
-        if (!Objects.isNull(appender)) {
-            appender.start();
-            Logger rootLogger = getRootLogger(loggerContext);
-            rootLogger.addAppender(appender);
+        if (necessary()) {
+            E appender = getOrCreateLoggingExtendAppender();
+            doConfiguration(appender);
+            this.start(appender);
             registerShutdownHookIfNecessary(environment);
+            checkErrorStatus();
         }
-
     }
 
-    Appender<ILoggingEvent> createLoggingExtendAppender() {
-        Appender<ILoggingEvent> appender = getLoggingExtendAppender();
+    /**
+     * Get an appender from loggerContext. If not, create a new appender
+     *
+     * @return appender
+     */
+    E getOrCreateLoggingExtendAppender() {
+        E appender = getLoggingExtendAppender();
         // double check to make sure only one appender append to rootLogger
         if (Objects.isNull(appender)) {
             synchronized (this) {
@@ -67,21 +73,40 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
     }
 
     /**
-     * get appender from loggerContext if exit.
+     * Get an appender from loggerContext.
      *
-     * @return appender if exit else return null
+     * @return appender
      */
-    Appender<ILoggingEvent> getLoggingExtendAppender() {
+    @SuppressWarnings("unchecked")
+    E getLoggingExtendAppender() {
         Class<?> loggingExtendAppenderType = this.loggingExtendAppenderType();
         Logger rootLogger = getRootLogger(loggerContext);
         Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
             if (appender.getClass().isAssignableFrom(loggingExtendAppenderType)) {
-                return appender;
+                return (E) appender;
             }
         }
         return null;
+    }
+
+    void start(E appender) {
+        appender.start();
+        Logger rootLogger = getRootLogger(loggerContext);
+        rootLogger.addAppender(appender);
+    }
+
+    void stop(E appender) {
+        appender.stop();
+    }
+
+    void doConfiguration(E appender) {
+        if (appender.isStarted()) {
+            // if appender is started, it means that the appender has been configured in XML.
+            return;
+        }
+        doConfigurationInner(appender);
     }
 
     /**
@@ -89,7 +114,7 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
      *
      * @return Appender
      */
-    abstract Appender<ILoggingEvent> loggingExtendAppender();
+    abstract E loggingExtendAppender();
 
     /**
      * build Encoder with ConfigurableEnvironment
@@ -106,6 +131,20 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
     abstract Class<?> loggingExtendAppenderType();
 
     /**
+     * determine whether it is necessary to appendAppender
+     *
+     * @return whether it is necessary to appendAppender
+     */
+    abstract boolean necessary();
+
+    /**
+     * do Configuration for  appender
+     *
+     * @param appender appender
+     */
+    abstract void doConfigurationInner(E appender);
+
+    /**
      * get root Logger from LoggerContext
      *
      * @param loggerContext loggerContext
@@ -115,6 +154,11 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
         return loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
     }
 
+    /**
+     * just for test
+     *
+     * @param propertyResolver propertyResolver
+     */
     public void setPropertyResolver(LoggingExtendPropertyResolver propertyResolver) {
         this.propertyResolver = propertyResolver;
     }
@@ -128,6 +172,20 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender implements Seata
             delayingShutdownHook.setContext(loggerContext);
             delayingShutdownHook.setDelay(Duration.valueOf("5000"));
             Runtime.getRuntime().addShutdownHook(new Thread(delayingShutdownHook));
+        }
+    }
+
+    private void checkErrorStatus() {
+        List<Status> statuses = loggerContext.getStatusManager().getCopyOfStatusList();
+        StringBuilder errors = new StringBuilder();
+        for (Status status : statuses) {
+            if (status.getLevel() == Status.ERROR) {
+                errors.append((errors.length() > 0) ? String.format("%n") : "");
+                errors.append(status.toString());
+            }
+        }
+        if (errors.length() > 0) {
+            throw new IllegalStateException(String.format("Logback configuration error detected: %n%s", errors));
         }
     }
 

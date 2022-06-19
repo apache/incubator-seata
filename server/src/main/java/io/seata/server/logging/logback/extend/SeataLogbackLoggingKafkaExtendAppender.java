@@ -3,7 +3,6 @@ package io.seata.server.logging.logback.extend;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.encoder.Encoder;
 import com.github.danielwegener.logback.kafka.KafkaAppender;
 import com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy;
@@ -51,7 +50,7 @@ import java.util.Map;
  * @see KafkaAppender
  */
 @LoadLevel(name = "SeataLogbackLoggingExtendKafkaAppender")
-public class SeataLogbackLoggingExtendKafkaAppender extends AbstractSeataLogbackLoggingExtendAppender {
+public class SeataLogbackLoggingKafkaExtendAppender extends AbstractSeataLogbackLoggingExtendAppender<KafkaAppender<ILoggingEvent>> {
 
     /**
      * prefix
@@ -84,22 +83,26 @@ public class SeataLogbackLoggingExtendKafkaAppender extends AbstractSeataLogback
     private static final String KAFKA = "KAFKA";
 
     /**
+     * enable
+     */
+    private static final String ENABLE = KAFKA_EXTEND_CONFIG_PREFIX + ".enable";
+
+    /**
      * default logging pattern
      */
     private static final String DEFAULT_PATTERN = "{\"@timestamp\":\"%d{yyyy-MM-dd HH:mm:ss.SSS}\",\"level\":\"%p\",\"app_name\":\"${spring.application.name:seata-server}\",\"PORT\":\"${server.servicePort:0}\",\"thread_name\":\"%t\",\"logger_name\":\"%logger\",\"X-TX-XID\":\"%X{X-TX-XID:-}\",\"X-TX-BRANCH-ID\":\"%X{X-TX-BRANCH-ID:-}\",\"message\":\"%m\",\"stack_trace\":\"%wex\"}";
 
     @Override
-    Appender<ILoggingEvent> loggingExtendAppender() {
+    KafkaAppender<ILoggingEvent> loggingExtendAppender() {
         String kafkaBootstrapServer = propertyResolver.getProperty(KAFKA_BOOTSTRAP_SERVERS);
-        String kafkaTopic = propertyResolver.getProperty(KAFKA_TOPIC);
-        if (StringUtils.isNullOrEmpty(kafkaBootstrapServer) || StringUtils.isNullOrEmpty(kafkaTopic)) {
-            return null;
+        if (StringUtils.isNullOrEmpty(kafkaBootstrapServer)) {
+            throw new IllegalArgumentException("bootstrap-servers can't be null,please config it by" + KAFKA_BOOTSTRAP_SERVERS);
         }
-        KafkaAppender<ILoggingEvent> kafkaAppender = new KafkaAppender<>();
-        doKafkaAppenderConfig(kafkaAppender);
-        Encoder<ILoggingEvent> encoder = loggingExtendEncoder();
-        kafkaAppender.setEncoder(encoder);
-        return kafkaAppender;
+        String kafkaTopic = propertyResolver.getProperty(KAFKA_TOPIC);
+        if (StringUtils.isNullOrEmpty(kafkaTopic)) {
+            throw new IllegalArgumentException("topic can't be null,please config it by" + KAFKA_TOPIC);
+        }
+        return new KafkaAppender<>();
     }
 
     @Override
@@ -117,11 +120,19 @@ public class SeataLogbackLoggingExtendKafkaAppender extends AbstractSeataLogback
         return KafkaAppender.class;
     }
 
-    private void doKafkaAppenderConfig(KafkaAppender<ILoggingEvent> appender) {
+    @Override
+    boolean necessary() {
+        return propertyResolver.getProperty(ENABLE, Boolean.class, false);
+    }
+
+    @Override
+    void doConfigurationInner(KafkaAppender<ILoggingEvent> appender) {
         String kafkaTopic = propertyResolver.getProperty(KAFKA_TOPIC);
         appender.setContext(loggerContext);
         appender.setName(KAFKA);
         appender.setTopic(kafkaTopic);
+        Encoder<ILoggingEvent> encoder = loggingExtendEncoder();
+        appender.setEncoder(encoder);
         doKeyingStrategyConfig(appender);
         doDeliveryStrategyConfig(appender);
         doProducerConfig(appender);

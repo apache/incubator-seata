@@ -1,7 +1,6 @@
 package io.seata.server.logging.logback.extend;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.net.ssl.KeyStoreFactoryBean;
 import ch.qos.logback.core.net.ssl.SSLConfiguration;
@@ -16,8 +15,12 @@ import net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvid
 import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
 import org.springframework.core.env.Environment;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Objects;
+
+import static ch.qos.logback.core.net.AbstractSocketAppender.DEFAULT_PORT;
 
 /**
  * The type of SeataLogbackLoggingLogstashExtendAppender to support config {@link LogstashTcpSocketAppender} with spring
@@ -54,7 +57,7 @@ import java.util.Objects;
  * @see LogstashTcpSocketAppender
  */
 @LoadLevel(name = "SeataLogbackLoggingExtendKafkaAppender")
-public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogbackLoggingExtendAppender {
+public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogbackLoggingExtendAppender<LogstashTcpSocketAppender> {
 
     /**
      * prefix
@@ -64,7 +67,7 @@ public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogb
     /**
      * destination config key
      */
-    private static final String DESTINATION = LOGSTASH_EXTEND_CONFIG_PREFIX + ".destination";
+    private static final String DESTINATIONS = LOGSTASH_EXTEND_CONFIG_PREFIX + ".destinations";
 
     /**
      * pattern config key
@@ -81,18 +84,18 @@ public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogb
      */
     private static final String LOGSTASH_APPENDER_NAME = "LOGSTASH";
 
+    /**
+     * enable
+     */
+    private static final String ENABLE = LOGSTASH_EXTEND_CONFIG_PREFIX + ".enable";
+
     @Override
-    Appender<ILoggingEvent> loggingExtendAppender() {
-        // not config destination do't build logstash appender
-        String destination = propertyResolver.getProperty(DESTINATION);
+    LogstashTcpSocketAppender loggingExtendAppender() {
+        String destination = propertyResolver.getProperty(DESTINATIONS);
         if (StringUtils.isNullOrEmpty(destination)) {
-            return null;
+            throw new IllegalArgumentException("destination can't be null,please config it by" + DESTINATIONS);
         }
-        LogstashTcpSocketAppender logstashTcpSocketAppender = new LogstashTcpSocketAppender();
-        doLogstashTcpSocketAppenderConfig(logstashTcpSocketAppender);
-        Encoder<ILoggingEvent> encoder = loggingExtendEncoder();
-        logstashTcpSocketAppender.setEncoder(encoder);
-        return logstashTcpSocketAppender;
+        return new LogstashTcpSocketAppender();
 
     }
 
@@ -125,16 +128,25 @@ public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogb
         return LogstashTcpSocketAppender.class;
     }
 
-    private void doLogstashTcpSocketAppenderConfig(LogstashTcpSocketAppender logstashTcpSocketAppender) {
-        logstashTcpSocketAppender.setName(LOGSTASH_APPENDER_NAME);
-        logstashTcpSocketAppender.setContext(loggerContext);
-        doKeepAliveConfig(logstashTcpSocketAppender);
-        doDestinationsConfig(logstashTcpSocketAppender);
-        doConnectionTimeoutConfig(logstashTcpSocketAppender);
-        doReconnectionConfig(logstashTcpSocketAppender);
-        doWaitConfig(logstashTcpSocketAppender);
-        doWriteConfig(logstashTcpSocketAppender);
-        doSslConfig(logstashTcpSocketAppender);
+    @Override
+    boolean necessary() {
+        return propertyResolver.getProperty(ENABLE, Boolean.class, false);
+    }
+
+    @Override
+    void doConfigurationInner(LogstashTcpSocketAppender appender) {
+        appender.stop();
+        appender.setName(LOGSTASH_APPENDER_NAME);
+        appender.setContext(loggerContext);
+        Encoder<ILoggingEvent> encoder = loggingExtendEncoder();
+        appender.setEncoder(encoder);
+        doKeepAliveConfig(appender);
+        doDestinationsConfig(appender);
+        doConnectionTimeoutConfig(appender);
+        doReconnectionConfig(appender);
+        doWaitConfig(appender);
+        doWriteConfig(appender);
+        doSslConfig(appender);
     }
 
     private void doKeepAliveConfig(LogstashTcpSocketAppender logstashTcpSocketAppender) {
@@ -153,8 +165,15 @@ public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogb
     }
 
     private void doDestinationsConfig(LogstashTcpSocketAppender logstashTcpSocketAppender) {
-        String destination = propertyResolver.getProperty(DESTINATION);
-        logstashTcpSocketAppender.addDestination(destination);
+        String destinations = propertyResolver.getProperty(DESTINATIONS);
+        List<InetSocketAddress> parsedDestinations = DestinationParser.parse(destinations, DEFAULT_PORT);
+        parsedDestinations.forEach(
+                destination -> {
+                    if (!logstashTcpSocketAppender.getDestinations().contains(destination)) {
+                        logstashTcpSocketAppender.addDestination(destinations);
+                    }
+                }
+        );
         String connectionStrategy = propertyResolver.getProperty(LOGSTASH_EXTEND_CONFIG_PREFIX + ".connection-strategy");
         if (!StringUtils.isNullOrEmpty(connectionStrategy)) {
             String connectionTtl = propertyResolver.getProperty(LOGSTASH_EXTEND_CONFIG_PREFIX + ".connection-ttl");

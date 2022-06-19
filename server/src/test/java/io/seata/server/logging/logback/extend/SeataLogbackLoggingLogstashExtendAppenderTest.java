@@ -54,15 +54,15 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
                 .findFirst().get());
         ILoggerFactory loggerFactory = StaticLoggerBinder.getSingleton().getLoggerFactory();
         loggerContext = (LoggerContext) loggerFactory;
-         appender.setPropertyResolver(new LoggingExtendPropertyResolver(environment));
-        System.setProperty("logging.extend.logstash-appender.destination", "127.0.0.1:4560");
+        appender.setPropertyResolver(new LoggingExtendPropertyResolver(environment));
+        System.setProperty("logging.extend.logstash-appender.enable", "true");
     }
 
     @Test
     public void defaultPatternTest() throws IOException {
         final ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor.forClass(
                 LoggingEvent.class);
-        final Appender<ILoggingEvent> mockAppender = spy(appender.createLoggingExtendAppender());
+        final Appender<ILoggingEvent> mockAppender = spy(appender.getOrCreateLoggingExtendAppender());
 
         Logger rootLogger = appender.getRootLogger(loggerContext);
         mockAppender.start();
@@ -107,7 +107,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         System.setProperty("logging.extend.logstash-appender.pattern", pattern);
         final ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor.forClass(
                 LoggingEvent.class);
-        final Appender<ILoggingEvent> mockAppender = spy(appender.createLoggingExtendAppender());
+        final Appender<ILoggingEvent> mockAppender = spy(appender.getOrCreateLoggingExtendAppender());
 
         Logger rootLogger = appender.getRootLogger(loggerContext);
         mockAppender.start();
@@ -153,8 +153,8 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         System.setProperty("logging.extend.logstash-appender.ring-buffer-size", "8192");
         System.setProperty("logging.extend.logstash-appender.wait-strategy", "blocking");
 
-        LogstashTcpSocketAppender loggingExtendAppender = (LogstashTcpSocketAppender) appender.loggingExtendAppender();
-
+        LogstashTcpSocketAppender loggingExtendAppender = appender.loggingExtendAppender();
+        appender.doConfigurationInner(loggingExtendAppender);
         assertThat(loggingExtendAppender.getKeepAliveCharset().name().equals("UTF-8")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveMessage().equals("ping")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveDuration().getMilliseconds() == 1000).isTrue();
