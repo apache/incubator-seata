@@ -153,12 +153,16 @@ public class SeataLogbackLoggingKafkaExtendAppender extends AbstractSeataLogback
         String kafkaBootstrapServer = propertyResolver.getProperty(KAFKA_BOOTSTRAP_SERVERS);
         appender.addProducerConfigValue("bootstrap.servers", kafkaBootstrapServer);
         Map<String, Object> producerConfigs = propertyResolver.getPropertyMapByPrefix(KAFKA_CONFIG_PREFIX);
-        if (CollectionUtils.isNotEmpty(producerConfigs)) {
-            // add kafka configs
-            producerConfigs.forEach(
-                    appender::addProducerConfigValue
-            );
+        if (CollectionUtils.isEmpty(producerConfigs)) {
+            // add default producer configs
+            producerConfigs.put("acks", "0");
+            producerConfigs.put("linger.ms", "1000");
+            producerConfigs.put("max.block.ms", "0");
         }
+        // add kafka producer configs
+        producerConfigs.forEach(
+                appender::addProducerConfigValue
+        );
     }
 
     static class KeyingStrategyFactory {
