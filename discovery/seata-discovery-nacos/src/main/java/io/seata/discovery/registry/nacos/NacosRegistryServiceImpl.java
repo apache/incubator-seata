@@ -15,6 +15,23 @@
  */
 package io.seata.discovery.registry.nacos;
 
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.naming.NamingMaintainService;
+import com.alibaba.nacos.api.naming.NamingService;
+import com.alibaba.nacos.api.naming.listener.EventListener;
+import com.alibaba.nacos.api.naming.listener.NamingEvent;
+import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.alibaba.nacos.api.naming.pojo.Service;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
+import io.seata.discovery.registry.RegistryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,26 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import com.alibaba.nacos.api.NacosFactory;
-import com.alibaba.nacos.api.naming.NamingMaintainService;
-import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.listener.EventListener;
-import com.alibaba.nacos.api.naming.listener.NamingEvent;
-import com.alibaba.nacos.api.naming.pojo.Instance;
-
-import com.alibaba.nacos.api.naming.pojo.Service;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
-import io.seata.discovery.registry.RegistryService;
-import org.ietf.jgss.GSSContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Nacos registry service.
@@ -67,7 +64,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
-    private static final String SERVICE_META_PATTERN = "pattern";
+    private static final String SLB_PATTERN = "slbPattern";
     private static final String USE_PARSE_RULE = "false";
     private static final String PUBLIC_NAMING_ADDRESS_PREFIX = "public_";
     private static final String PUBLIC_NAMING_SERVICE_META_IP_KEY = "publicIp";
@@ -79,7 +76,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static volatile NacosRegistryServiceImpl instance;
     private static volatile NamingMaintainService namingMaintain;
     private static final Object LOCK_OBJ = new Object();
-    private static final Pattern DEFAULT_CUSTOMER_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
+    private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
+    private static Pattern patternOfNacosRegistryForSLB;
+    private static Boolean useSLBWay;
 
     private NacosRegistryServiceImpl() {
     }
@@ -141,24 +140,28 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         if (clusterName == null) {
             return null;
         }
-        Pattern nacosRegistryPatternForMeta = StringUtils.isBlank(getNamingProperties().getProperty(SERVICE_META_PATTERN))?
-                DEFAULT_CUSTOMER_REGISTRY_PATTERN : Pattern.compile(getNamingProperties().getProperty(SERVICE_META_PATTERN));
-        if(nacosRegistryPatternForMeta.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches()){
-            LOGGER.info("visit seata on aliyun with pubnet mode");
-            if (!CLUSTER_ADDRESS_MAP.containsKey(PUBLIC_NAMING_ADDRESS_PREFIX+clusterName)){
-                Service service = getNamingMaintainInstance().queryService(DEFAULT_APPLICATION,clusterName);
+        if (patternOfNacosRegistryForSLB == null) {
+            patternOfNacosRegistryForSLB = StringUtils.isBlank(FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB()))
+                    ? DEFAULT_SLB_REGISTRY_PATTERN
+                    : Pattern.compile(FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB()));
+            useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
+        }
+        if (useSLBWay) {
+            LOGGER.info("look up service address of SLB by nacos");
+            if (!CLUSTER_ADDRESS_MAP.containsKey(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName)) {
+                Service service = getNamingMaintainInstance().queryService(DEFAULT_APPLICATION, clusterName);
                 String pubnetIp = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_IP_KEY);
                 String pubnetPort = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_PORT_KEY);
-                if(StringUtils.isBlank(pubnetIp) || StringUtils.isBlank(pubnetPort)){
-                    throw new Exception("cannot find service address when using pubnet mode");
+                if (StringUtils.isBlank(pubnetIp) || StringUtils.isBlank(pubnetPort)) {
+                    throw new Exception("cannot find service address from nacos naming mata-data");
                 }
                 InetSocketAddress publicAddress = new InetSocketAddress(pubnetIp,
                         Integer.valueOf(pubnetPort));
                 List<InetSocketAddress> publicAddressList = Arrays.asList(publicAddress);
-                CLUSTER_ADDRESS_MAP.put(PUBLIC_NAMING_ADDRESS_PREFIX+clusterName,publicAddressList);
+                CLUSTER_ADDRESS_MAP.put(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName, publicAddressList);
                 return publicAddressList;
             }
-            return CLUSTER_ADDRESS_MAP.get(PUBLIC_NAMING_ADDRESS_PREFIX+clusterName);
+            return CLUSTER_ADDRESS_MAP.get(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName);
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             synchronized (LOCK_OBJ) {
@@ -176,7 +179,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     subscribe(clusterName, event -> {
                         List<Instance> instances = ((NamingEvent) event).getInstances();
                         if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                            LOGGER.info("receive empty server list,cluster:{}",clusterName);
+                            LOGGER.info("receive empty server list,cluster:{}", clusterName);
                         } else {
                             List<InetSocketAddress> newAddressList = instances.stream()
                                     .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
@@ -263,14 +266,6 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                 }
             }
         }
-        if (System.getProperty(SERVICE_META_PATTERN) != null) {
-            properties.setProperty(SERVICE_META_PATTERN, System.getProperty(SERVICE_META_PATTERN));
-        } else {
-            String pattern = FILE_CONFIG.getConfig(getNacosPattern());
-            if (pattern != null) {
-                properties.setProperty(SERVICE_META_PATTERN, pattern);
-            }
-        }
         return properties;
     }
 
@@ -322,8 +317,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
     }
 
-    private static String getNacosPattern() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SERVICE_META_PATTERN);
+    private static String getNacosUrlPatternOfSLB() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
     }
 
 }

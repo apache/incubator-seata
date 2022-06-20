@@ -4,8 +4,7 @@ Add changes here for all PR submitted to the develop branch.
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
 ### feature：
-  - [[#4676](https://github.com/seata/seata/pull/4676)] add pubnet service address discover for nacos registry
-
+  - [[#4676](https://github.com/seata/seata/pull/4676)] support server to expose Nacos services by mounting SLB
 
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] fix the error of SeataTCCFenceAutoConfiguration when database unused
