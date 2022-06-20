@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.alibaba.nacos.api.NacosFactory;
@@ -66,11 +67,11 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
+    private static final String SERVICE_META_PATTERN = "pattern";
     private static final String USE_PARSE_RULE = "false";
     private static final String PUBLIC_NAMING_ADDRESS_PREFIX = "public_";
     private static final String PUBLIC_NAMING_SERVICE_META_IP_KEY = "publicIp";
     private static final String PUBLIC_NAMING_SERVICE_META_PORT_KEY = "publicPort";
-    private static final String ALIYUN_NACOS_TAG = "mse.aliyuncs.com";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
@@ -78,6 +79,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static volatile NacosRegistryServiceImpl instance;
     private static volatile NamingMaintainService namingMaintain;
     private static final Object LOCK_OBJ = new Object();
+    private static final Pattern DEFAULT_CUSTOMER_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
 
     private NacosRegistryServiceImpl() {
     }
@@ -139,8 +141,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         if (clusterName == null) {
             return null;
         }
-        if(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY).contains(ALIYUN_NACOS_TAG)
-                && !getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY).contains("internal")){
+        Pattern nacosRegistryPatternForMeta = StringUtils.isBlank(getNamingProperties().getProperty(SERVICE_META_PATTERN))?
+                DEFAULT_CUSTOMER_REGISTRY_PATTERN : Pattern.compile(getNamingProperties().getProperty(SERVICE_META_PATTERN));
+        if(nacosRegistryPatternForMeta.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches()){
             LOGGER.info("visit seata on aliyun with pubnet mode");
             if (!CLUSTER_ADDRESS_MAP.containsKey(PUBLIC_NAMING_ADDRESS_PREFIX+clusterName)){
                 Service service = getNamingMaintainInstance().queryService(DEFAULT_APPLICATION,clusterName);
@@ -260,6 +263,14 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                 }
             }
         }
+        if (System.getProperty(SERVICE_META_PATTERN) != null) {
+            properties.setProperty(SERVICE_META_PATTERN, System.getProperty(SERVICE_META_PATTERN));
+        } else {
+            String pattern = FILE_CONFIG.getConfig(getNacosPattern());
+            if (pattern != null) {
+                properties.setProperty(SERVICE_META_PATTERN, pattern);
+            }
+        }
         return properties;
     }
 
@@ -309,6 +320,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     public static String getNacosSecretKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
+    }
+
+    private static String getNacosPattern() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SERVICE_META_PATTERN);
     }
 
 }
