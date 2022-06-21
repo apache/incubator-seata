@@ -157,9 +157,9 @@
                 <image.tags>latest</image.tags>
             </properties>
         </profile>
-        <!-- profile: M1 -->
+        <!-- profile: arrch64 -->
         <profile>
-            <id>M1</id>
+            <id>arrch64</id>
             <properties>
                 <os.detected.classifier>osx-x86_64</os.detected.classifier>
             </properties>
