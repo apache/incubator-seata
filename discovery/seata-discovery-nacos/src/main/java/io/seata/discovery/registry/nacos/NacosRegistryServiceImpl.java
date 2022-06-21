@@ -81,13 +81,11 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static Boolean useSLBWay;
 
     private NacosRegistryServiceImpl() {
-        if (patternOfNacosRegistryForSLB == null) {
-            String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
-            patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
-                    ? DEFAULT_SLB_REGISTRY_PATTERN
-                    : Pattern.compile(configForNacosSLB);
-            useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
-        }
+        String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
+        patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
+                ? DEFAULT_SLB_REGISTRY_PATTERN
+                : Pattern.compile(configForNacosSLB);
+        useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
     }
 
     /**
