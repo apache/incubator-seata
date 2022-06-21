@@ -15,6 +15,15 @@
  */
 package io.seata.discovery.registry.nacos;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.naming.NamingMaintainService;
 import com.alibaba.nacos.api.naming.NamingService;
@@ -32,15 +41,6 @@ import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * The type Nacos registry service.
@@ -141,9 +141,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             return null;
         }
         if (patternOfNacosRegistryForSLB == null) {
-            patternOfNacosRegistryForSLB = StringUtils.isBlank(FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB()))
+            String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
+            patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
                     ? DEFAULT_SLB_REGISTRY_PATTERN
-                    : Pattern.compile(FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB()));
+                    : Pattern.compile(configForNacosSLB);
             useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
         }
         if (useSLBWay) {
