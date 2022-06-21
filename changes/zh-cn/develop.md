@@ -11,7 +11,7 @@
   - [[#4678](https://github.com/seata/seata/pull/4678)] 修复属性transport.enableRmClientBatchSendRequest没有配置的情况下缓存穿透的问题
   - [[#4701](https://github.com/seata/seata/pull/4701)] 修复命令行参数丢失问题
   - [[#4607](https://github.com/seata/seata/pull/4607)] 修复跳过全局锁校验的缺陷
-  - [[#4696](https://github.com/seata/seata/pull/4696)] 修复Oracle存储时的插入问题
+  - [[#4696](https://github.com/seata/seata/pull/4696)] 修复 oracle 存储模式时的插入问题
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
@@ -20,7 +20,7 @@
   - [[#4693](https://github.com/seata/seata/pull/4693)] 优化控制台导航栏
   - [[#4544](https://github.com/seata/seata/pull/4544)] 优化测试用例TransactionContextFilterTest中jackson包依赖问题
   - [[#4700](https://github.com/seata/seata/pull/4700)] 修复 maven-compiler-plugin 和 maven-resources-plugin 执行失败
-  - [[#4711](https://github.com/seata/seata/pull/4711)] 分离部署时的lib依赖
+  - [[#4711](https://github.com/seata/seata/pull/4711)] 分离部署时 lib 依赖
 
 ### test：
 
