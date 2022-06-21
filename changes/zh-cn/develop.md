@@ -11,6 +11,7 @@
   - [[#4678](https://github.com/seata/seata/pull/4678)] 修复属性transport.enableRmClientBatchSendRequest没有配置的情况下缓存穿透的问题
   - [[#4701](https://github.com/seata/seata/pull/4701)] 修复命令行参数丢失问题
   - [[#4607](https://github.com/seata/seata/pull/4607)] 修复跳过全局锁校验的缺陷
+  - [[#4696](https://github.com/seata/seata/pull/4696)] 修复Oracle存储时的插入问题
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
@@ -34,5 +35,6 @@
 - [Ifdevil](https://github.com/Ifdevil)
 - [wingchi-leung](https://github.com/wingchi-leung)
 - [liurong](https://github.com/robynron)
+- [opelok-z](https://github.com/opelok-z)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

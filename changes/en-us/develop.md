@@ -13,6 +13,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4678](https://github.com/seata/seata/pull/4678)] fix the error of key transport.enableRmClientBatchSendRequest cache penetration if not configure
   - [[#4701](https://github.com/seata/seata/pull/4701)] fix missing command line args
   - [[#4607](https://github.com/seata/seata/pull/4607)] fix bug on skipping lock check
+  - [[#4696](https://github.com/seata/seata/pull/4696)] fix oracle database insert value
 
 
 ### optimize：
@@ -36,5 +37,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [Ifdevil](https://github.com/Ifdevil)
 - [wingchi-leung](https://github.com/wingchi-leung)
 - [liurong](https://github.com/robynron)
+- [opelok-z](https://github.com/opelok-z)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
