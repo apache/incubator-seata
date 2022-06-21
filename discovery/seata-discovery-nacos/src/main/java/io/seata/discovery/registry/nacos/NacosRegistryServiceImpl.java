@@ -81,6 +81,13 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static Boolean useSLBWay;
 
     private NacosRegistryServiceImpl() {
+        if (patternOfNacosRegistryForSLB == null) {
+            String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
+            patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
+                    ? DEFAULT_SLB_REGISTRY_PATTERN
+                    : Pattern.compile(configForNacosSLB);
+            useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
+        }
     }
 
     /**
@@ -139,13 +146,6 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
             return null;
-        }
-        if (patternOfNacosRegistryForSLB == null) {
-            String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
-            patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
-                    ? DEFAULT_SLB_REGISTRY_PATTERN
-                    : Pattern.compile(configForNacosSLB);
-            useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
         }
         if (useSLBWay) {
             LOGGER.info("look up service address of SLB by nacos");
