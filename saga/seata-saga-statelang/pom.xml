@@ -24,8 +24,9 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>seata-saga-statelang ${project.version}</name>
     <artifactId>seata-saga-statelang</artifactId>
+    <name>seata-saga-statelang ${project.version}</name>
+    <description>saga resource manager for Seata built with Maven</description>
 
 
     <dependencies>
