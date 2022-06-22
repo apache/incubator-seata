@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-all</artifactId>
     <name>seata-discovery-all ${project.version}</name>
+    <description>discovery-all for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

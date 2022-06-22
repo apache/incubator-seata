@@ -28,6 +28,7 @@
 
     <artifactId>seata-dubbo-alibaba</artifactId>
     <name>seata-dubbo-alibaba ${project.version}</name>
+    <description>alibaba dubbo integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

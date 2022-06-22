@@ -27,6 +27,7 @@
     <artifactId>seata-rm-datasource</artifactId>
     <packaging>jar</packaging>
     <name>seata-rm-datasource ${project.version}</name>
+    <description>datasource resource manager for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

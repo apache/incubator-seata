@@ -27,6 +27,7 @@
     <artifactId>seata-tcc</artifactId>
     <packaging>jar</packaging>
     <name>seata-tcc ${project.version}</name>
+    <description>tcc transaction mode for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

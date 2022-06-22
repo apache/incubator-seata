@@ -26,6 +26,7 @@
     <artifactId>seata-serializer</artifactId>
     <packaging>pom</packaging>
     <name>seata-serializer ${project.version}</name>
+    <description>serializer top parent for Seata built with Maven</description>
 
     <modules>
         <module>seata-serializer-all</module>

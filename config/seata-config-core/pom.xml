@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-core</artifactId>
     <name>seata-config-core ${project.version}</name>
+    <description>config-core for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

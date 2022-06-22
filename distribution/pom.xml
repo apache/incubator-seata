@@ -26,6 +26,7 @@
     <artifactId>seata-distribution</artifactId>
     <packaging>pom</packaging>
     <name>seata-distribution ${project.version}</name>
+    <description>distribution for Seata built with Maven</description>
 
     <profiles>
         <profile>

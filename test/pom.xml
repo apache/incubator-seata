@@ -26,6 +26,7 @@
     <artifactId>seata-test</artifactId>
     <packaging>jar</packaging>
     <name>seata-test ${project.version}</name>
+    <description>test for Seata built with Maven</description>
 
     <build>
         <plugins>

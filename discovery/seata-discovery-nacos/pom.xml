@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-nacos</artifactId>
     <name>seata-discovery-nacos ${project.version}</name>
+    <description>discovery-nacos for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

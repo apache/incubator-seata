@@ -25,6 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-compressor-all</artifactId>
     <name>seata-compressor-all ${project.version}</name>
+    <description>compressor-all for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

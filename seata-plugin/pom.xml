@@ -28,6 +28,7 @@
     <artifactId>seata-plugin</artifactId>
     <packaging>pom</packaging>
     <name>seata-plugin ${project.version}</name>
+    <description>plugin for Seata built with Maven</description>
 
     <modules>
         <module>seata-jackson-parser-oracle</module>

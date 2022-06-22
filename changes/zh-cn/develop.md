@@ -20,6 +20,7 @@
   - [[#4693](https://github.com/seata/seata/pull/4693)] 优化控制台导航栏
   - [[#4544](https://github.com/seata/seata/pull/4544)] 优化测试用例TransactionContextFilterTest中jackson包依赖问题
   - [[#4700](https://github.com/seata/seata/pull/4700)] 修复 maven-compiler-plugin 和 maven-resources-plugin 执行失败
+  - [[#4720](https://github.com/seata/seata/pull/4720)] 优化pom描述
 
 ### test：
 

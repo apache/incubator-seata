@@ -26,6 +26,8 @@
     <artifactId>seata-serializer-hessian</artifactId>
     <packaging>jar</packaging>
     <name>seata-serializer-hessian ${project.version}</name>
+    <description>serializer-hessian for Seata built with Maven</description>
+
     <dependencies>
         <dependency>
             <groupId>com.caucho</groupId>
