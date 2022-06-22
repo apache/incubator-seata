@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-etcd3</artifactId>
     <name>seata-discovery-etcd3 ${project.version}</name>
+    <description>discovery-etcd3 for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

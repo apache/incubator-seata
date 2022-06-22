@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-etcd3</artifactId>
     <name>seata-config-etcd3 ${project.version}</name>
+    <description>config-etcd3 for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

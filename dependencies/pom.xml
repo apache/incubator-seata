@@ -29,7 +29,7 @@
     <packaging>pom</packaging>
 
     <name>Seata dependencies ${project.version}</name>
-    <description>Seata dependencies</description>
+    <description>dependencies for Seata built with Maven</description>
 
     <properties>
         <dubbo.version>2.7.4</dubbo.version>

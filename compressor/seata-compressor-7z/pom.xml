@@ -26,6 +26,7 @@
     <artifactId>seata-compressor-7z</artifactId>
     <packaging>jar</packaging>
     <name>seata-compressor-7z ${project.version}</name>
+    <description>compressor-7z for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

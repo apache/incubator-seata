@@ -11,6 +11,7 @@
 
     <artifactId>seata-spring-autoconfigure-core</artifactId>
     <name>seata-spring-autoconfigure-core ${project.version}</name>
+    <description>spring-autoconfigure-core for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

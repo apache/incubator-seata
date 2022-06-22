@@ -26,6 +26,7 @@
     <artifactId>seata-compressor-gzip</artifactId>
     <packaging>jar</packaging>
     <name>seata-compressor-gzip ${project.version}</name>
+    <description>compressor-gzip for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

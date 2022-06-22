@@ -11,6 +11,7 @@
 
     <artifactId>seata-spring-autoconfigure-client</artifactId>
     <name>seata-spring-autoconfigure-client ${project.version}</name>
+    <description>spring-autoconfigure-client for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

@@ -28,6 +28,7 @@
     <artifactId>seata-motan</artifactId>
     <packaging>jar</packaging>
     <name>seata-motan ${project.version}</name>
+    <description>motan integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

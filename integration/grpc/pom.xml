@@ -27,6 +27,7 @@
     <artifactId>seata-grpc</artifactId>
     <packaging>jar</packaging>
     <name>seata-grpc ${project.version}</name>
+    <description>gRPC integration for Seata built with Maven</description>
 
 
     <dependencies>

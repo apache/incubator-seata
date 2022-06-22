@@ -22,6 +22,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4693](https://github.com/seata/seata/pull/4693)] optimize the console navigation bar
   - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
   - [[#4700](https://github.com/seata/seata/pull/4700)] fix maven-compiler-plugin and maven-resources-plugin execute failed
+  - [[#4720](https://github.com/seata/seata/pull/4720)] optimize pom description
 
 ### test:
 

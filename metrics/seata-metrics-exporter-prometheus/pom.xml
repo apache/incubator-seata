@@ -26,6 +26,7 @@
 
     <artifactId>seata-metrics-exporter-prometheus</artifactId>
     <name>seata-metrics-exporter-prometheus ${project.version}</name>
+    <description>prometheus exporter for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

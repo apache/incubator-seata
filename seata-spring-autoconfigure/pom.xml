@@ -26,6 +26,7 @@
     <artifactId>seata-spring-autoconfigure</artifactId>
     <packaging>pom</packaging>
     <name>seata-spring-autoconfigure ${project.version}</name>
+    <description>spring-autoconfigure top parent for Seata built with Maven</description>
 
     <modules>
         <module>seata-spring-autoconfigure-core</module>
