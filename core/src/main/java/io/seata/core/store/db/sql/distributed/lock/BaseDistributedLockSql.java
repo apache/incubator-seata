@@ -30,7 +30,7 @@ public class BaseDistributedLockSql implements DistributedLockSql {
             + " WHERE " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + " = ? FOR UPDATE";
 
     protected static final String INSERT_DISTRIBUTED_LOCK_SQL = "INSERT INTO " + DISTRIBUTED_LOCK_TABLE_PLACE_HOLD + "("
-            + ALL_COLUMNS + ") VALUE (?, ?, ?)";
+            + ALL_COLUMNS + ") VALUES (?, ?, ?)";
 
     protected static final String UPDATE_DISTRIBUTED_LOCK_SQL = "UPDATE " + DISTRIBUTED_LOCK_TABLE_PLACE_HOLD + " SET "
             + ServerTableColumnsName.DISTRIBUTED_LOCK_VALUE + "=?, " + ServerTableColumnsName.DISTRIBUTED_LOCK_EXPIRE + "=?"
