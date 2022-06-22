@@ -77,12 +77,11 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static volatile NamingMaintainService namingMaintain;
     private static final Object LOCK_OBJ = new Object();
     private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
-    private static Pattern patternOfNacosRegistryForSLB;
-    private static Boolean useSLBWay;
+    private static volatile Boolean useSLBWay;
 
     private NacosRegistryServiceImpl() {
         String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
-        patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
+        Pattern patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
                 ? DEFAULT_SLB_REGISTRY_PATTERN
                 : Pattern.compile(configForNacosSLB);
         useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
