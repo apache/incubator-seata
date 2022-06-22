@@ -5,6 +5,8 @@ Add changes here for all PR submitted to the develop branch.
 
 ### feature：
   - [[#4661](https://github.com/seata/seata/pull/4713)] support xid load balance
+  - [[#4676](https://github.com/seata/seata/pull/4676)] support server to expose Nacos services by mounting SLB
+ 
 
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] fix the error of SeataTCCFenceAutoConfiguration when database unused
@@ -22,6 +24,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4693](https://github.com/seata/seata/pull/4693)] optimize the console navigation bar
   - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
   - [[#4700](https://github.com/seata/seata/pull/4700)] fix maven-compiler-plugin and maven-resources-plugin execute failed
+  - [[#4720](https://github.com/seata/seata/pull/4720)] optimize pom description
 
 ### test:
 
@@ -36,5 +39,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [wingchi-leung](https://github.com/wingchi-leung)
 - [liurong](https://github.com/robynron)
 - [a364176773](https://github.com/a364176773)
+- [2129zxl](https://github.com/2129zxl)
+
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-sqlparser-druid</artifactId>
     <name>seata-sqlparser-druid ${project.version}</name>
+    <description>sqlparser-druid for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
