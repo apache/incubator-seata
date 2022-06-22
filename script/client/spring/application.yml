@@ -127,6 +127,8 @@ seata:
       ##if use MSE Nacos with auth, mutex with username/password attribute
       #access-key: ""
       #secret-key: ""
+      ##if use Nacos naming meta-data for SLB service registry, specify nacos address pattern rules here
+      #slbPattern = ""
     redis:
       server-addr: localhost:6379
       db: 0
