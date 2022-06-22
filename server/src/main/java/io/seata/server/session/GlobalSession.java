@@ -752,7 +752,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void queueToRetryCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
-        this.setStatus(GlobalStatus.CommitRetrying);
         SessionHolder.getRetryCommittingSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
     }
 
