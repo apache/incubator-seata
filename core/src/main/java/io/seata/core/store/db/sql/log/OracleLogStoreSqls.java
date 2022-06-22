@@ -43,8 +43,8 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     /**
      * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE.
      */
-    public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE = UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE
-            + "   and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
+    public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE =
+        UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE + " and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.

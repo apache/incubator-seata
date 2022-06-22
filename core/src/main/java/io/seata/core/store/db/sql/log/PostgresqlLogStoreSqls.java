@@ -43,8 +43,8 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
     /**
      * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_POSTGRESQL.
      */
-    public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_POSTGRESQL = UPDATE_GLOBAL_TRANSACTION_STATUS_POSTGRESQL
-            + "   and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
+    public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_POSTGRESQL =
+        UPDATE_GLOBAL_TRANSACTION_STATUS_POSTGRESQL + " and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
 
 
     /**
