@@ -11,6 +11,7 @@
     <artifactId>seata-console</artifactId>
     <packaging>jar</packaging>
     <name>seata-console ${project.version}</name>
+    <description>console for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

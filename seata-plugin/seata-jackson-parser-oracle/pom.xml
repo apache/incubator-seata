@@ -27,6 +27,7 @@
 
     <artifactId>seata-jackson-parser-oracle</artifactId>
     <name>seata-jackson-parser-oracle ${project.version}</name>
+    <description>jackson-parser-oracle for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
