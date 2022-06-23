@@ -25,6 +25,8 @@ import java.util.Objects;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type xid load balance.
@@ -34,6 +36,8 @@ import io.seata.common.util.StringUtils;
 @LoadLevel(name = XID_LOAD_BALANCE)
 public class XIDLoadBalance implements LoadBalance {
     
+    private static final Logger LOGGER = LoggerFactory.getLogger(XIDLoadBalance.class);
+
     private static final LoadBalance RANDOM_LOAD_BALANCE = EnhancedServiceLoader.load(LoadBalance.class,
         LoadBalanceFactory.RANDOM_LOAD_BALANCE);
 
@@ -56,7 +60,7 @@ public class XIDLoadBalance implements LoadBalance {
                     return (T)inetSocketAddress;
                 }
             }
-            throw new RuntimeException("not found seata-server channel");
+            LOGGER.error("not found seata-server channel,xid: {}, try use random load balance", xid);
         }
         return RANDOM_LOAD_BALANCE.select(invokers, xid);
     }
