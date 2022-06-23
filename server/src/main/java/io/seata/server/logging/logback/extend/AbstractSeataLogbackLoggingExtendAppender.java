@@ -10,6 +10,11 @@ import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.util.Duration;
 import io.seata.server.logging.extend.LoggingExtendPropertyResolver;
 import io.seata.server.logging.extend.SeataLoggingExtendAppender;
+import net.logstash.logback.composite.JsonProviders;
+import net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders;
+import net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider;
+import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
+import org.slf4j.LoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -31,6 +36,8 @@ import static org.springframework.boot.context.logging.LoggingApplicationListene
  */
 public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Appender<ILoggingEvent>> implements SeataLoggingExtendAppender {
 
+    static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSeataLogbackLoggingExtendAppender.class);
+
     static final String LOGGING_EXTEND_CONFIG_PREFIX = "logging.extend";
 
     protected LoggingExtendPropertyResolver propertyResolver;
@@ -39,22 +46,36 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
 
     private static final AtomicBoolean SHUTDOWN_HOOK_REGISTERED = new AtomicBoolean();
 
+    /**
+     * default logging pattern
+     */
+    protected static final String DEFAULT_PATTERN = "{\"timestamp\":\"%d{yyyy-MM-dd HH:mm:ss.SSS}\",\"level\":\"%p\",\"app_name\":\"${spring.application.name:seata-server}\",\"PORT\":\"${server.servicePort:0}\",\"thread_name\":\"%t\",\"logger_name\":\"%logger\",\"X-TX-XID\":\"%X{X-TX-XID:-}\",\"X-TX-BRANCH-ID\":\"%X{X-TX-BRANCH-ID:-}\",\"message\":\"%m\",\"stack_trace\":\"%wex\"}";
+
+
     @Override
     public void appendAppender(ConfigurableEnvironment environment) {
         if (Objects.isNull(propertyResolver)) {
             propertyResolver = new LoggingExtendPropertyResolver(environment);
         }
-        if (necessary()) {
+
+
+        if (enable()) {
             E appender = getOrCreateLoggingExtendAppender();
-            doConfiguration(appender);
-            this.start(appender);
+            if (appender.isStarted()) {
+                LOGGER.warn("appender has been started, it may be configured in logback-spring.xml," +
+                        "we will reset it by properties in spring.yml may not take effect.");
+                this.reset(appender);
+            } else {
+                this.doConfiguration(appender);
+                this.start(appender);
+            }
             registerShutdownHookIfNecessary(environment);
             checkErrorStatus();
         }
     }
 
     /**
-     * Get an appender from loggerContext. If not, create a new appender
+     * Get an appender from loggerContext. If not create a new appender
      *
      * @return appender
      */
@@ -66,6 +87,7 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
                 appender = getLoggingExtendAppender();
                 if (Objects.isNull(appender)) {
                     appender = loggingExtendAppender();
+                    append(appender);
                 }
             }
         }
@@ -92,6 +114,16 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
     }
 
     /**
+     * append appender to rootLogger
+     *
+     * @param appender appender
+     */
+    void append(E appender) {
+        Logger rootLogger = getRootLogger(loggerContext);
+        rootLogger.addAppender(appender);
+    }
+
+    /**
      * start appender
      *
      * @param appender appender
@@ -101,8 +133,18 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
             return;
         }
         appender.start();
+        LOGGER.info("{} appender started success", appender.getName());
+    }
+
+    void reset(E appender) {
+        // detach it and create a new instance add append to rootLogger
         Logger rootLogger = getRootLogger(loggerContext);
-        rootLogger.addAppender(appender);
+        rootLogger.detachAppender(appender);
+        E loggingExtendAppender = loggingExtendAppender();
+        doConfiguration(loggingExtendAppender);
+        start(loggingExtendAppender);
+        rootLogger.addAppender(loggingExtendAppender);
+        LOGGER.info("reset {} appender success!", appender.getName());
     }
 
     /**
@@ -113,20 +155,8 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
     void stop(E appender) {
         if (appender.isStarted()) {
             appender.stop();
+            LOGGER.info("{} appender stopped success", appender.getName());
         }
-    }
-
-    /**
-     * config appender with ConfigurableEnvironment
-     *
-     * @param appender appender
-     */
-    void doConfiguration(E appender) {
-        if (appender.isStarted()) {
-            // if appender is started, it means that the appender has been configured in XML.
-            return;
-        }
-        doConfigurationInner(appender);
     }
 
     /**
@@ -137,11 +167,24 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
     abstract E loggingExtendAppender();
 
     /**
-     * build Encoder with ConfigurableEnvironment
+     * build JsonEncoder with ConfigurableEnvironment
      *
      * @return Encoder
      */
-    abstract Encoder<ILoggingEvent> loggingExtendEncoder();
+    Encoder<ILoggingEvent> loggingExtendJsonEncoder() {
+        LoggingEventCompositeJsonEncoder encoder = new LoggingEventCompositeJsonEncoder();
+        encoder.setProviders(jsonProviders());
+        encoder.setContext(loggerContext);
+        encoder.start();
+        return encoder;
+    }
+
+    /**
+     * get pattern config
+     *
+     * @return pattern
+     */
+    abstract String getLoggingPattern();
 
     /**
      * definition loggingExtendAppender type
@@ -155,14 +198,14 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
      *
      * @return whether it is necessary to appendAppender
      */
-    abstract boolean necessary();
+    abstract boolean enable();
 
     /**
      * do Configuration for  appender
      *
      * @param appender appender
      */
-    abstract void doConfigurationInner(E appender);
+    abstract void doConfiguration(E appender);
 
     /**
      * get root Logger from LoggerContext
@@ -207,6 +250,21 @@ public abstract class AbstractSeataLogbackLoggingExtendAppender<E extends Append
         if (errors.length() > 0) {
             throw new IllegalStateException(String.format("Logback configuration error detected: %n%s", errors));
         }
+    }
+
+    private JsonProviders<ILoggingEvent> jsonProviders() {
+        LoggingEventJsonProviders jsonProviders = new LoggingEventJsonProviders();
+        jsonProviders.setContext(loggerContext);
+        jsonProviders.addPattern(loggingEventPatternJsonProvider());
+        return jsonProviders;
+    }
+
+    private LoggingEventPatternJsonProvider loggingEventPatternJsonProvider() {
+        LoggingEventPatternJsonProvider patternJsonProvider = new LoggingEventPatternJsonProvider();
+        patternJsonProvider.setContext(loggerContext);
+        String pattern = getLoggingPattern();
+        patternJsonProvider.setPattern(propertyResolver.resolvePlaceholders(pattern));
+        return patternJsonProvider;
     }
 
 }

@@ -1,7 +1,6 @@
 package io.seata.server.logging.logback.extend;
 
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.encoder.Encoder;
 import com.github.danielwegener.logback.kafka.KafkaAppender;
@@ -87,10 +86,6 @@ public class SeataLogbackLoggingKafkaExtendAppender extends AbstractSeataLogback
      */
     private static final String ENABLE = KAFKA_EXTEND_CONFIG_PREFIX + ".enable";
 
-    /**
-     * default logging pattern
-     */
-    private static final String DEFAULT_PATTERN = "{\"@timestamp\":\"%d{yyyy-MM-dd HH:mm:ss.SSS}\",\"level\":\"%p\",\"app_name\":\"${spring.application.name:seata-server}\",\"PORT\":\"${server.servicePort:0}\",\"thread_name\":\"%t\",\"logger_name\":\"%logger\",\"X-TX-XID\":\"%X{X-TX-XID:-}\",\"X-TX-BRANCH-ID\":\"%X{X-TX-BRANCH-ID:-}\",\"message\":\"%m\",\"stack_trace\":\"%wex\"}";
 
     @Override
     KafkaAppender<ILoggingEvent> loggingExtendAppender() {
@@ -106,13 +101,8 @@ public class SeataLogbackLoggingKafkaExtendAppender extends AbstractSeataLogback
     }
 
     @Override
-    Encoder<ILoggingEvent> loggingExtendEncoder() {
-        String pattern = propertyResolver.getProperty(KAFKA_PATTERN, DEFAULT_PATTERN);
-        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        encoder.setPattern(propertyResolver.resolvePlaceholders(pattern));
-        encoder.setContext(loggerContext);
-        encoder.start();
-        return encoder;
+    String getLoggingPattern() {
+        return propertyResolver.getProperty(KAFKA_PATTERN, DEFAULT_PATTERN);
     }
 
     @Override
@@ -121,17 +111,17 @@ public class SeataLogbackLoggingKafkaExtendAppender extends AbstractSeataLogback
     }
 
     @Override
-    boolean necessary() {
+    boolean enable() {
         return propertyResolver.getProperty(ENABLE, Boolean.class, false);
     }
 
     @Override
-    void doConfigurationInner(KafkaAppender<ILoggingEvent> appender) {
+    void doConfiguration(KafkaAppender<ILoggingEvent> appender) {
         String kafkaTopic = propertyResolver.getProperty(KAFKA_TOPIC);
         appender.setContext(loggerContext);
         appender.setName(KAFKA);
         appender.setTopic(kafkaTopic);
-        Encoder<ILoggingEvent> encoder = loggingExtendEncoder();
+        Encoder<ILoggingEvent> encoder = loggingExtendJsonEncoder();
         appender.setEncoder(encoder);
         doKeyingStrategyConfig(appender);
         doDeliveryStrategyConfig(appender);

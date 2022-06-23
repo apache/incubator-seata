@@ -8,11 +8,12 @@ import ch.qos.logback.core.util.Duration;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import net.logstash.logback.appender.LogstashTcpSocketAppender;
-import net.logstash.logback.appender.destination.*;
-import net.logstash.logback.composite.JsonProviders;
-import net.logstash.logback.composite.loggingevent.LoggingEventJsonProviders;
-import net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider;
-import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
+import net.logstash.logback.appender.destination.DestinationConnectionStrategy;
+import net.logstash.logback.appender.destination.DestinationConnectionStrategyWithTtl;
+import net.logstash.logback.appender.destination.DestinationParser;
+import net.logstash.logback.appender.destination.PreferPrimaryDestinationConnectionStrategy;
+import net.logstash.logback.appender.destination.RandomDestinationConnectionStrategy;
+import net.logstash.logback.appender.destination.RoundRobinDestinationConnectionStrategy;
 import org.springframework.core.env.Environment;
 
 import java.net.InetSocketAddress;
@@ -57,7 +58,7 @@ import static ch.qos.logback.core.net.AbstractSocketAppender.DEFAULT_PORT;
  * @see LogstashTcpSocketAppender
  */
 @LoadLevel(name = "SeataLogbackLoggingExtendKafkaAppender")
-public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogbackLoggingExtendAppender<LogstashTcpSocketAppender> {
+public class  SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogbackLoggingExtendAppender<LogstashTcpSocketAppender> {
 
     /**
      * prefix
@@ -73,11 +74,6 @@ public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogb
      * pattern config key
      */
     private static final String LOGSTASH_PATTERN = LOGSTASH_EXTEND_CONFIG_PREFIX + ".pattern";
-
-    /**
-     * default logging pattern
-     */
-    private static final String DEFAULT_PATTERN = "{\"timestamp\":\"%date{yyyy-MM-dd HH:mm:ss.SSS}\",\"level\":\"%p\",\"app_name\":\"${spring.application.name:seata-server}\",\"PORT\":\"${server.servicePort:0}\",\"thread_name\":\"%t\",\"logger_name\":\"%logger\",\"X-TX-XID\":\"%X{X-TX-XID:-}\",\"X-TX-BRANCH-ID\":\"%X{X-TX-BRANCH-ID:-}\",\"message\":\"%m\",\"stack_trace\":\"%wex\"}";
 
     /**
      * logstash appender name
@@ -100,27 +96,8 @@ public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogb
     }
 
     @Override
-    Encoder<ILoggingEvent> loggingExtendEncoder() {
-        LoggingEventCompositeJsonEncoder encoder = new LoggingEventCompositeJsonEncoder();
-        encoder.setProviders(jsonProviders());
-        encoder.setContext(loggerContext);
-        encoder.start();
-        return encoder;
-    }
-
-    private JsonProviders<ILoggingEvent> jsonProviders() {
-        LoggingEventJsonProviders jsonProviders = new LoggingEventJsonProviders();
-        jsonProviders.setContext(loggerContext);
-        jsonProviders.addPattern(loggingEventPatternJsonProvider());
-        return jsonProviders;
-    }
-
-    private LoggingEventPatternJsonProvider loggingEventPatternJsonProvider() {
-        LoggingEventPatternJsonProvider patternJsonProvider = new LoggingEventPatternJsonProvider();
-        patternJsonProvider.setContext(loggerContext);
-        String pattern = propertyResolver.getProperty(LOGSTASH_PATTERN, DEFAULT_PATTERN);
-        patternJsonProvider.setPattern(propertyResolver.resolvePlaceholders(pattern));
-        return patternJsonProvider;
+    String getLoggingPattern() {
+        return propertyResolver.getProperty(LOGSTASH_PATTERN, DEFAULT_PATTERN);
     }
 
     @Override
@@ -129,16 +106,15 @@ public class SeataLogbackLoggingLogstashExtendAppender extends AbstractSeataLogb
     }
 
     @Override
-    boolean necessary() {
+    boolean enable() {
         return propertyResolver.getProperty(ENABLE, Boolean.class, false);
     }
 
     @Override
-    void doConfigurationInner(LogstashTcpSocketAppender appender) {
-        appender.stop();
+    void doConfiguration(LogstashTcpSocketAppender appender) {
         appender.setName(LOGSTASH_APPENDER_NAME);
         appender.setContext(loggerContext);
-        Encoder<ILoggingEvent> encoder = loggingExtendEncoder();
+        Encoder<ILoggingEvent> encoder = loggingExtendJsonEncoder();
         appender.setEncoder(encoder);
         doKeepAliveConfig(appender);
         doDestinationsConfig(appender);
