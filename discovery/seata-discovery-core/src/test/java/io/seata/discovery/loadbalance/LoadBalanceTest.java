@@ -82,6 +82,9 @@ public class LoadBalanceTest {
         // ipv6
         inetSocketAddress = loadBalance.select(addresses, "2000:0000:0000:0000:0001:2345:6789:abcd:8092:123456");
         Assertions.assertNotNull(inetSocketAddress);
+        // test not found tc channel
+        inetSocketAddress = loadBalance.select(addresses, "127.0.0.1:8199:123456");
+        Assertions.assertNotEquals(inetSocketAddress.getPort(),8199);
     }
 
     /**
