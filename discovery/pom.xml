@@ -27,6 +27,8 @@
     <packaging>pom</packaging>
     <artifactId>seata-discovery</artifactId>
     <name>seata-discovery ${project.version}</name>
+    <description>discovery top parent for Seata built with Maven</description>
+
     <modules>
         <module>seata-discovery-consul</module>
         <module>seata-discovery-core</module>

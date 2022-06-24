@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-custom</artifactId>
     <name>seata-config-custom ${project.version}</name>
+    <description>config-custom for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

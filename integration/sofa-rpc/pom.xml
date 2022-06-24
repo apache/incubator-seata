@@ -27,6 +27,7 @@
     <artifactId>seata-sofa-rpc</artifactId>
     <packaging>jar</packaging>
     <name>seata-sofa-rpc ${project.version}</name>
+    <description>sofa-rpc integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
