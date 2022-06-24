@@ -98,9 +98,7 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                 int msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("msg: {} is not found in futures.", msgId);
-                    }
+                    LOGGER.error("msg: {} is not found in futures, result message: {}", msgId,results.getMsgs()[i]);
                 } else {
                     future.setResultMessage(results.getMsgs()[i]);
                 }
@@ -112,9 +110,7 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                     int msgId = batchResultMessage.getMsgIds().get(i);
                     MessageFuture future = futures.remove(msgId);
                     if (future == null) {
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("msg: {} is not found in futures.", msgId);
-                        }
+                        LOGGER.error("msg: {} is not found in futures, result message: {}", msgId, batchResultMessage.getResultMessages().get(i));
                     } else {
                         future.setResultMessage(batchResultMessage.getResultMessages().get(i));
                     }
