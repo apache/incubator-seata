@@ -13,7 +13,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4678](https://github.com/seata/seata/pull/4678)] fix the error of key transport.enableRmClientBatchSendRequest cache penetration if not configure
   - [[#4701](https://github.com/seata/seata/pull/4701)] fix missing command line args
   - [[#4607](https://github.com/seata/seata/pull/4607)] fix bug on skipping lock check
-
+  - [[#4726](https://github.com/seata/seata/pull/4726)] fix batch message send may return NullPointException
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities

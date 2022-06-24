@@ -12,6 +12,7 @@
   - [[#4678](https://github.com/seata/seata/pull/4678)] 修复属性transport.enableRmClientBatchSendRequest没有配置的情况下缓存穿透的问题
   - [[#4701](https://github.com/seata/seata/pull/4701)] 修复命令行参数丢失问题
   - [[#4607](https://github.com/seata/seata/pull/4607)] 修复跳过全局锁校验的缺陷
+  - [[#4726](https://github.com/seata/seata/pull/4726)] 修复批量发送消息时可能的NPE问题
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
