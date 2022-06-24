@@ -3,7 +3,9 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature：
+  - [[#4661](https://github.com/seata/seata/pull/4713)] 支持根据xid负载均衡算法
   - [[#4676](https://github.com/seata/seata/pull/4676)] 支持Nacos作为注册中心时，server通过挂载SLB暴露服务
+
 
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] 修复develop分支SeataTCCFenceAutoConfiguration在客户端未使用DB时，启动抛出ClassNotFoundException的问题。
@@ -36,5 +38,6 @@
 - [Ifdevil](https://github.com/Ifdevil)
 - [wingchi-leung](https://github.com/wingchi-leung)
 - [liurong](https://github.com/robynron)
+- [a364176773](https://github.com/a364176773)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
