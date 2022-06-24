@@ -26,6 +26,7 @@
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
+    <description>server for Seata built with Maven</description>
 
     <dependencies>
         <!-- springboot web -->
@@ -263,6 +264,7 @@
                         <configuration>
                             <mainClass>io.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
+                            <attach>false</attach>
                         </configuration>
                         <executions>
                             <execution>

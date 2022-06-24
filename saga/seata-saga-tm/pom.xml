@@ -24,8 +24,9 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>seata-saga-tm ${project.version}</name>
     <artifactId>seata-saga-tm</artifactId>
+    <name>seata-saga-tm ${project.version}</name>
+    <description>saga transaction manager for Seata built with Maven</description>
 
 
     <dependencies>

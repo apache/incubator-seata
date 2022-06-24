@@ -26,6 +26,8 @@
     <artifactId>seata-serializer-protobuf</artifactId>
     <packaging>jar</packaging>
     <name>seata-serializer-protobuf ${project.version}</name>
+    <description>serializer-protobuf for Seata built with Maven</description>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
