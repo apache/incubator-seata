@@ -27,6 +27,7 @@
     <packaging>pom</packaging>
     <artifactId>seata-saga</artifactId>
     <name>seata-saga ${project.version}</name>
+    <description>saga top parent for Seata built with Maven</description>
 
     <modules>
         <module>seata-saga-processctrl</module>
