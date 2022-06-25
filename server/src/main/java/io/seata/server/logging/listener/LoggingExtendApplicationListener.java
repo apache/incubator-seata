@@ -1,6 +1,6 @@
 package io.seata.server.logging.listener;
 
-import io.seata.server.logging.logback.LogbackCompositeLoggingExtendProvider;
+import io.seata.server.logging.logback.LogbackExtendConfigurator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
@@ -23,6 +23,7 @@ import java.util.Objects;
  * @see ApplicationEnvironmentPreparedEvent
  */
 public class LoggingExtendApplicationListener implements GenericApplicationListener {
+
 
     @Override
     public boolean supportsSourceType(Class<?> sourceType) {
@@ -47,8 +48,8 @@ public class LoggingExtendApplicationListener implements GenericApplicationListe
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         ConfigurableEnvironment environment = ((ApplicationEnvironmentPreparedEvent) event).getEnvironment();
-        LogbackCompositeLoggingExtendProvider provider = LogbackCompositeLoggingExtendProvider.get(environment);
-        provider.appendToContext();
+        LogbackExtendConfigurator configurator = LogbackExtendConfigurator.get(environment);
+        configurator.doLoggingExtendConfiguration();
     }
 
     @Override
