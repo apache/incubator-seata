@@ -1,7 +1,6 @@
 package io.seata.server.logging.listener;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.server.logging.extend.SeataLoggingExtendAppender;
+import io.seata.server.logging.logback.LogbackCompositeLoggingExtendProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
@@ -11,17 +10,19 @@ import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import java.util.List;
 import java.util.Objects;
 
 
 /**
- * the type SeataLogbackLoggingExtendListener
+ * the type LoggingExtendApplicationListener, listen ApplicationEnvironmentPreparedEvent
+ * to load logging appender
  *
  * @author wlx
  * @date 2022/5/27 11:18 下午
+ * @see org.springframework.context.event.GenericApplicationListener
+ * @see ApplicationEnvironmentPreparedEvent
  */
-public class SeataLogbackLoggingExtendListener implements GenericApplicationListener {
+public class LoggingExtendApplicationListener implements GenericApplicationListener {
 
     @Override
     public boolean supportsSourceType(Class<?> sourceType) {
@@ -45,11 +46,9 @@ public class SeataLogbackLoggingExtendListener implements GenericApplicationList
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        List<SeataLoggingExtendAppender> appenderList = EnhancedServiceLoader.loadAll(SeataLoggingExtendAppender.class);
         ConfigurableEnvironment environment = ((ApplicationEnvironmentPreparedEvent) event).getEnvironment();
-        appenderList.forEach(
-                appender -> appender.appendAppender(environment)
-        );
+        LogbackCompositeLoggingExtendProvider provider = LogbackCompositeLoggingExtendProvider.get(environment);
+        provider.appendToContext();
     }
 
     @Override

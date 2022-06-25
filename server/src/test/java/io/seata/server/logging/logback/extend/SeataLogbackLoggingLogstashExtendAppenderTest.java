@@ -11,7 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.server.SpringBootIntegrationTest;
 import io.seata.server.logging.extend.LoggingExtendPropertyResolver;
-import io.seata.server.logging.extend.SeataLoggingExtendAppender;
+import io.seata.server.logging.extend.LoggingExtendAppenderProvider;
+import io.seata.server.logging.logback.LogbackLoggingExtendAppenderProvider;
 import net.logstash.logback.appender.LogstashTcpSocketAppender;
 import net.logstash.logback.appender.destination.PreferPrimaryDestinationConnectionStrategy;
 import net.logstash.logback.encoder.com.lmax.disruptor.BlockingWaitStrategy;
@@ -42,19 +43,20 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
     @Autowired
     private ConfigurableEnvironment environment;
 
-    private SeataLogbackLoggingLogstashExtendAppender appender;
+    private LogbackLoggingLogstashExtendAppenderProvider provider;
 
     private LoggerContext loggerContext;
 
     @BeforeEach
     void before() {
-        List<SeataLoggingExtendAppender> seataLoggingExtendAppenderList =
-                EnhancedServiceLoader.loadAll(SeataLoggingExtendAppender.class);
-        appender = ((SeataLogbackLoggingLogstashExtendAppender) seataLoggingExtendAppenderList.stream().filter(item -> item instanceof SeataLogbackLoggingLogstashExtendAppender)
+        List<LogbackLoggingExtendAppenderProvider> loggingExtendAppenderProviderList =
+                EnhancedServiceLoader.loadAll(LogbackLoggingExtendAppenderProvider.class);
+        provider = ((LogbackLoggingLogstashExtendAppenderProvider) loggingExtendAppenderProviderList.stream()
+                .filter(item -> item instanceof LogbackLoggingLogstashExtendAppenderProvider)
                 .findFirst().get());
         ILoggerFactory loggerFactory = StaticLoggerBinder.getSingleton().getLoggerFactory();
         loggerContext = (LoggerContext) loggerFactory;
-        appender.setPropertyResolver(new LoggingExtendPropertyResolver(environment));
+        provider.setPropertyResolver(new LoggingExtendPropertyResolver(environment));
         System.setProperty("logging.extend.logstash-appender.enable", "true");
     }
 
@@ -62,9 +64,9 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
     public void defaultPatternTest() throws IOException {
         final ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor.forClass(
                 LoggingEvent.class);
-        final Appender<ILoggingEvent> mockAppender = spy(appender.getOrCreateLoggingExtendAppender());
+        final Appender<ILoggingEvent> mockAppender = spy(provider.getOrCreateLoggingExtendAppender());
 
-        Logger rootLogger = appender.getRootLogger(loggerContext);
+        Logger rootLogger = this.provider.getRootLogger(loggerContext);
         mockAppender.start();
         rootLogger.addAppender(mockAppender);
 
@@ -72,10 +74,10 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         MDC.put("X-TX-BRANCH-ID", "branch-id");
 
         final org.slf4j.Logger logger = LoggerFactory.getLogger(SeataLogbackLoggingLogstashExtendAppenderTest.class);
-        logger.info("log message");
+        logger.info("❤❥웃유♋☮✌☏☢☠✔");
         verify(mockAppender).doAppend(captorLoggingEvent.capture());
         final LoggingEvent loggingEvent = captorLoggingEvent.getValue();
-        final Encoder<ILoggingEvent> encoder = appender.loggingExtendJsonEncoder();
+        final Encoder<ILoggingEvent> encoder = this.provider.loggingExtendJsonEncoder();
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         encoder.start();
@@ -84,7 +86,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         final ObjectMapper mapper = new ObjectMapper();
         final JsonNode node = mapper.readTree(outputStream.toByteArray());
 
-        assertThat(node.get("message").asText().equals("log message")).isTrue();
+        assertThat(node.get("message").asText().equals("❤❥웃유♋☮✌☏☢☠✔")).isTrue();
         assertThat(node.get("level").asText().equals("INFO")).isTrue();
         assertThat(node.get("app_name").asText().equals(environment.getProperty("spring.application.name"))).isTrue();
         assertThat(node.get("PORT").asText().equals(System.getProperty("server.servicePort"))).isTrue();
@@ -107,9 +109,9 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         System.setProperty("logging.extend.logstash-appender.pattern", pattern);
         final ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor.forClass(
                 LoggingEvent.class);
-        final Appender<ILoggingEvent> mockAppender = spy(appender.getOrCreateLoggingExtendAppender());
+        final Appender<ILoggingEvent> mockAppender = spy(provider.getOrCreateLoggingExtendAppender());
 
-        Logger rootLogger = appender.getRootLogger(loggerContext);
+        Logger rootLogger = provider.getRootLogger(loggerContext);
         mockAppender.start();
         rootLogger.addAppender(mockAppender);
 
@@ -117,7 +119,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         logger.info("patternTest");
         verify(mockAppender).doAppend(captorLoggingEvent.capture());
         final LoggingEvent loggingEvent = captorLoggingEvent.getValue();
-        final Encoder<ILoggingEvent> encoder = appender.loggingExtendJsonEncoder();
+        final Encoder<ILoggingEvent> encoder = provider.loggingExtendJsonEncoder();
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         encoder.start();
@@ -153,8 +155,8 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         System.setProperty("logging.extend.logstash-appender.ring-buffer-size", "8192");
         System.setProperty("logging.extend.logstash-appender.wait-strategy", "blocking");
 
-        LogstashTcpSocketAppender loggingExtendAppender = appender.loggingExtendAppender();
-        appender.doConfiguration(loggingExtendAppender);
+        LogstashTcpSocketAppender loggingExtendAppender = provider.createLoggingExtendAppender();
+        provider.doConfiguration(loggingExtendAppender);
         assertThat(loggingExtendAppender.getKeepAliveCharset().name().equals("UTF-8")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveMessage().equals("ping")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveDuration().getMilliseconds() == 1000).isTrue();

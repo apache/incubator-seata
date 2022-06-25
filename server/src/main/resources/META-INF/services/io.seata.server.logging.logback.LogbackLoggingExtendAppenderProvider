@@ -1,0 +1,2 @@
+io.seata.server.logging.logback.extend.LogbackLoggingLogstashExtendAppenderProvider
+io.seata.server.logging.logback.extend.LogbackLoggingKafkaExtendAppenderProvider

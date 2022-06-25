@@ -24,11 +24,11 @@ public class KeyingStrategyFactoryTest {
         //loggerName
         //noKey
         //threadName
-        KeyingStrategy<?> contextName = SeataLogbackLoggingKafkaExtendAppender.KeyingStrategyFactory.getKeyingStrategy("contextName", loggerContext);
-        KeyingStrategy<?> hostName = SeataLogbackLoggingKafkaExtendAppender.KeyingStrategyFactory.getKeyingStrategy("hostName", loggerContext);
-        KeyingStrategy<?> loggerName = SeataLogbackLoggingKafkaExtendAppender.KeyingStrategyFactory.getKeyingStrategy("loggerName", loggerContext);
-        KeyingStrategy<?> noKey = SeataLogbackLoggingKafkaExtendAppender.KeyingStrategyFactory.getKeyingStrategy("noKey", loggerContext);
-        KeyingStrategy<?> threadName = SeataLogbackLoggingKafkaExtendAppender.KeyingStrategyFactory.getKeyingStrategy("threadName", loggerContext);
+        KeyingStrategy<?> contextName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("contextName", loggerContext);
+        KeyingStrategy<?> hostName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("hostName", loggerContext);
+        KeyingStrategy<?> loggerName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("loggerName", loggerContext);
+        KeyingStrategy<?> noKey = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("noKey", loggerContext);
+        KeyingStrategy<?> threadName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("threadName", loggerContext);
 
         assertThat(contextName instanceof ContextNameKeyingStrategy).isTrue();
         assertThat(hostName instanceof HostNameKeyingStrategy).isTrue();
@@ -43,7 +43,7 @@ public class KeyingStrategyFactoryTest {
         ILoggerFactory loggerFactory = StaticLoggerBinder.getSingleton().getLoggerFactory();
         LoggerContext loggerContext = (LoggerContext) loggerFactory;
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            SeataLogbackLoggingKafkaExtendAppender.KeyingStrategyFactory.getKeyingStrategy("1234", loggerContext);
+            LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("1234", loggerContext);
         });
     }
 }
