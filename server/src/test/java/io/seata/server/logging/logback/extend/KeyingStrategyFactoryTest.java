@@ -24,11 +24,11 @@ public class KeyingStrategyFactoryTest {
         //loggerName
         //noKey
         //threadName
-        KeyingStrategy<?> contextName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("contextName", loggerContext);
-        KeyingStrategy<?> hostName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("hostName", loggerContext);
-        KeyingStrategy<?> loggerName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("loggerName", loggerContext);
-        KeyingStrategy<?> noKey = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("noKey", loggerContext);
-        KeyingStrategy<?> threadName = LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("threadName", loggerContext);
+        KeyingStrategy<?> contextName = LogbackLoggingExtendKafkaAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("contextName", loggerContext);
+        KeyingStrategy<?> hostName = LogbackLoggingExtendKafkaAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("hostName", loggerContext);
+        KeyingStrategy<?> loggerName = LogbackLoggingExtendKafkaAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("loggerName", loggerContext);
+        KeyingStrategy<?> noKey = LogbackLoggingExtendKafkaAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("noKey", loggerContext);
+        KeyingStrategy<?> threadName = LogbackLoggingExtendKafkaAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("threadName", loggerContext);
 
         assertThat(contextName instanceof ContextNameKeyingStrategy).isTrue();
         assertThat(hostName instanceof HostNameKeyingStrategy).isTrue();
@@ -43,7 +43,7 @@ public class KeyingStrategyFactoryTest {
         ILoggerFactory loggerFactory = StaticLoggerBinder.getSingleton().getLoggerFactory();
         LoggerContext loggerContext = (LoggerContext) loggerFactory;
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            LogbackLoggingKafkaExtendAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("1234", loggerContext);
+            LogbackLoggingExtendKafkaAppenderProvider.KeyingStrategyFactory.getKeyingStrategy("1234", loggerContext);
         });
     }
 }

@@ -49,8 +49,8 @@ import java.util.Map;
  * @date 2022/5/30 11:30 下午
  * @see KafkaAppender
  */
-@LoadLevel(name = "LogbackLoggingKafkaExtendAppenderProvider")
-public class LogbackLoggingKafkaExtendAppenderProvider extends AbstractLogbackLoggingExtendAppenderProvider<KafkaAppender<ILoggingEvent>> {
+@LoadLevel(name = "LogbackLoggingExtendKafkaAppenderProvider")
+public class LogbackLoggingExtendKafkaAppenderProvider extends AbstractLogbackLoggingExtendAppenderProvider<KafkaAppender<ILoggingEvent>> {
 
     /**
      * prefix
@@ -87,7 +87,7 @@ public class LogbackLoggingKafkaExtendAppenderProvider extends AbstractLogbackLo
      */
     private static final String ENABLE = KAFKA_EXTEND_CONFIG_PREFIX + ".enable";
 
-    public LogbackLoggingKafkaExtendAppenderProvider(ConfigurableEnvironment environment) {
+    public LogbackLoggingExtendKafkaAppenderProvider(ConfigurableEnvironment environment) {
         super(environment);
     }
 

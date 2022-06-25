@@ -20,9 +20,9 @@ public class DestinationConnectionStrategyCreatorTest {
     public void destinationConnectionStrategyCreatorTest() {
         // preferPrimary random roundRobin
         DestinationConnectionStrategy preferPrimary =
-                LogbackLoggingLogstashExtendAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("preferPrimary");
-        DestinationConnectionStrategy random = LogbackLoggingLogstashExtendAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("random");
-        DestinationConnectionStrategy roundRobin = LogbackLoggingLogstashExtendAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("roundRobin");
+                LogbackLoggingExtendLogstashAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("preferPrimary");
+        DestinationConnectionStrategy random = LogbackLoggingExtendLogstashAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("random");
+        DestinationConnectionStrategy roundRobin = LogbackLoggingExtendLogstashAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("roundRobin");
 
         assertThat(preferPrimary instanceof PreferPrimaryDestinationConnectionStrategy).isTrue();
         assertThat(random instanceof RandomDestinationConnectionStrategy).isTrue();
@@ -34,9 +34,9 @@ public class DestinationConnectionStrategyCreatorTest {
     public void destinationConnectionStrategyWithTtlCreatorTest() {
         // preferPrimary random roundRobin
         DestinationConnectionStrategy preferPrimary =
-                LogbackLoggingLogstashExtendAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("preferPrimary", "1000");
-        DestinationConnectionStrategy random = LogbackLoggingLogstashExtendAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("random", "1000");
-        DestinationConnectionStrategy roundRobin = LogbackLoggingLogstashExtendAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("roundRobin", "1000");
+                LogbackLoggingExtendLogstashAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("preferPrimary", "1000");
+        DestinationConnectionStrategy random = LogbackLoggingExtendLogstashAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("random", "1000");
+        DestinationConnectionStrategy roundRobin = LogbackLoggingExtendLogstashAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("roundRobin", "1000");
 
         assertThat(preferPrimary instanceof PreferPrimaryDestinationConnectionStrategy).isTrue();
         assertThat(random instanceof RandomDestinationConnectionStrategy).isTrue();
@@ -58,7 +58,7 @@ public class DestinationConnectionStrategyCreatorTest {
     @Test
     public void destinationConnectionStrategyCreatorThrowTest(){
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            LogbackLoggingLogstashExtendAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("1234", "1000");
+            LogbackLoggingExtendLogstashAppenderProvider.DestinationConnectionStrategyCreator.createDestinationConnectionStrategy("1234", "1000");
         });
     }
 

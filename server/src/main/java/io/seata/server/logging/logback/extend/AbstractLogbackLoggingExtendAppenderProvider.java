@@ -23,8 +23,8 @@ import java.util.Objects;
  *
  * @author wlx
  * @date 2022/5/30 11:28 下午
- * @see LogbackLoggingLogstashExtendAppenderProvider
- * @see LogbackLoggingKafkaExtendAppenderProvider
+ * @see LogbackLoggingExtendLogstashAppenderProvider
+ * @see LogbackLoggingExtendKafkaAppenderProvider
  */
 public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends Appender<ILoggingEvent>>
         implements LogbackLoggingExtendAppenderProvider {

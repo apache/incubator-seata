@@ -58,8 +58,8 @@ import static ch.qos.logback.core.net.AbstractSocketAppender.DEFAULT_PORT;
  * @date 2022/5/30 11:30 下午
  * @see LogstashTcpSocketAppender
  */
-@LoadLevel(name = "LogbackLoggingLogstashExtendAppenderProvider")
-public class LogbackLoggingLogstashExtendAppenderProvider extends AbstractLogbackLoggingExtendAppenderProvider<LogstashTcpSocketAppender> {
+@LoadLevel(name = "LogbackLoggingExtendLogstashAppenderProvider")
+public class LogbackLoggingExtendLogstashAppenderProvider extends AbstractLogbackLoggingExtendAppenderProvider<LogstashTcpSocketAppender> {
 
     /**
      * prefix
@@ -86,7 +86,7 @@ public class LogbackLoggingLogstashExtendAppenderProvider extends AbstractLogbac
      */
     private static final String ENABLE = LOGSTASH_EXTEND_CONFIG_PREFIX + ".enable";
 
-    public LogbackLoggingLogstashExtendAppenderProvider(ConfigurableEnvironment environment) {
+    public LogbackLoggingExtendLogstashAppenderProvider(ConfigurableEnvironment environment) {
         super(environment);
     }
 

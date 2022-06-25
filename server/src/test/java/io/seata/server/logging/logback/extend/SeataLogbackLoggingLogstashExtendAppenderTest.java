@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.server.SpringBootIntegrationTest;
 import io.seata.server.logging.extend.LoggingExtendPropertyResolver;
-import io.seata.server.logging.extend.LoggingExtendAppenderProvider;
 import io.seata.server.logging.logback.LogbackLoggingExtendAppenderProvider;
 import net.logstash.logback.appender.LogstashTcpSocketAppender;
 import net.logstash.logback.appender.destination.PreferPrimaryDestinationConnectionStrategy;
@@ -43,7 +42,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
     @Autowired
     private ConfigurableEnvironment environment;
 
-    private LogbackLoggingLogstashExtendAppenderProvider provider;
+    private LogbackLoggingExtendLogstashAppenderProvider provider;
 
     private LoggerContext loggerContext;
 
@@ -51,8 +50,8 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
     void before() {
         List<LogbackLoggingExtendAppenderProvider> loggingExtendAppenderProviderList =
                 EnhancedServiceLoader.loadAll(LogbackLoggingExtendAppenderProvider.class);
-        provider = ((LogbackLoggingLogstashExtendAppenderProvider) loggingExtendAppenderProviderList.stream()
-                .filter(item -> item instanceof LogbackLoggingLogstashExtendAppenderProvider)
+        provider = ((LogbackLoggingExtendLogstashAppenderProvider) loggingExtendAppenderProviderList.stream()
+                .filter(item -> item instanceof LogbackLoggingExtendLogstashAppenderProvider)
                 .findFirst().get());
         ILoggerFactory loggerFactory = StaticLoggerBinder.getSingleton().getLoggerFactory();
         loggerContext = (LoggerContext) loggerFactory;
