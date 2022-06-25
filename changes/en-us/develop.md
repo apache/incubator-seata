@@ -16,7 +16,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4701](https://github.com/seata/seata/pull/4701)] fix missing command line args
   - [[#4607](https://github.com/seata/seata/pull/4607)] fix bug on skipping lock check
   - [[#4696](https://github.com/seata/seata/pull/4696)] fix oracle database insert value
-
+  - [[#4726](https://github.com/seata/seata/pull/4726)] fix batch message send may return NullPointException
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities
