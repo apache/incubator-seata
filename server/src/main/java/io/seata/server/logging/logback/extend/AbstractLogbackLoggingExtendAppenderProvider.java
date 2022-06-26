@@ -42,20 +42,25 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
     }
 
     /**
+     * appender instance
+     */
+    protected E appender;
+
+    /**
      * default logging pattern
      */
     protected static final String DEFAULT_PATTERN = "{\"timestamp\":\"%d{yyyy-MM-dd HH:mm:ss.SSS}\",\"level\":\"%p\",\"app_name\":\"${spring.application.name:seata-server}\",\"PORT\":\"${server.servicePort:0}\",\"thread_name\":\"%t\",\"logger_name\":\"%logger\",\"X-TX-XID\":\"%X{X-TX-XID:-}\",\"X-TX-BRANCH-ID\":\"%X{X-TX-BRANCH-ID:-}\",\"message\":\"%m\",\"stack_trace\":\"%wex\"}";
 
     @Override
     public void appendTo() {
-        E appender = getOrCreateLoggingExtendAppender();
+        this.appender = getOrCreateLoggingExtendAppender();
         if (appender.isStarted()) {
             LOGGER.warn("appender has been started, " +
                     "we will reset it whit properties configured in spring.yml.");
-            this.reset(appender);
+            this.reset();
         } else {
-            this.doConfiguration(appender);
-            this.start(appender);
+            this.doConfiguration();
+            this.start();
         }
     }
 
@@ -66,15 +71,8 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
      */
     E getOrCreateLoggingExtendAppender() {
         E appender = getLoggingExtendAppender();
-        // double check to make sure only one appender append to rootLogger
         if (Objects.isNull(appender)) {
-            synchronized (this) {
-                appender = getLoggingExtendAppender();
-                if (Objects.isNull(appender)) {
-                    appender = createLoggingExtendAppender();
-                    append(appender);
-                }
-            }
+            return createLoggingExtendAppender();
         }
         return appender;
     }
@@ -87,7 +85,7 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
     @SuppressWarnings("unchecked")
     E getLoggingExtendAppender() {
         Class<?> loggingExtendAppenderType = this.loggingExtendAppenderType();
-        Logger rootLogger = getRootLogger(loggerContext);
+        Logger rootLogger = getRootLogger();
         Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
@@ -100,49 +98,45 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
 
     /**
      * append appender to rootLogger
-     *
-     * @param appender appender
      */
-    void append(E appender) {
-        Logger rootLogger = getRootLogger(loggerContext);
+    void append() {
+        Logger rootLogger = getRootLogger();
         rootLogger.addAppender(appender);
     }
 
-    /**
-     * start appender
-     *
-     * @param appender appender
-     */
-    void start(E appender) {
-        if (appender.isStarted()) {
+    @Override
+    public boolean isStarted() {
+        return appender.isStarted();
+    }
+
+    @Override
+    public void stop() {
+        if (!Objects.isNull(appender) && appender.isStarted()) {
+            appender.stop();
+            LOGGER.info("{} appender stopped success", appender.getName());
+        }
+    }
+
+    @Override
+    public void start() {
+        if (!Objects.isNull(appender) && appender.isStarted()) {
             return;
         }
         appender.start();
+        append();
         LOGGER.info("{} appender started success", appender.getName());
     }
 
-    void reset(E appender) {
+    void reset() {
         // detach it and create a new instance add append to rootLogger
         synchronized (this) {
-            Logger rootLogger = getRootLogger(loggerContext);
+            Logger rootLogger = getRootLogger();
             rootLogger.detachAppender(appender);
-            E loggingExtendAppender = createLoggingExtendAppender();
-            this.doConfiguration(loggingExtendAppender);
-            this.append(loggingExtendAppender);
-            this.start(loggingExtendAppender);
+            this.appender = createLoggingExtendAppender();
+            this.doConfiguration();
+            this.append();
+            this.start();
             LOGGER.info("reset {} appender success!", appender.getName());
-        }
-    }
-
-    /**
-     * stop appender
-     *
-     * @param appender appender
-     */
-    void stop(E appender) {
-        if (appender.isStarted()) {
-            appender.stop();
-            LOGGER.info("{} appender stopped success", appender.getName());
         }
     }
 
@@ -182,18 +176,15 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
 
     /**
      * do configuration for appender
-     *
-     * @param appender appender
      */
-    abstract void doConfiguration(E appender);
+    abstract void doConfiguration();
 
     /**
      * get root Logger from LoggerContext
      *
-     * @param loggerContext loggerContext
      * @return root Logger
      */
-    Logger getRootLogger(LoggerContext loggerContext) {
+    Logger getRootLogger() {
         return loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
     }
 

@@ -9,6 +9,7 @@ import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.util.Duration;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.server.logging.listener.LoggingExtendLoggerContextListener;
 import io.seata.server.logging.listener.SystemPropertyLoggerContextListener;
 import org.slf4j.impl.StaticLoggerBinder;
 import org.springframework.boot.logging.logback.ColorConverter;
@@ -37,6 +38,8 @@ public class LogbackExtendConfigurator {
 
     private static final AtomicBoolean SHUTDOWN_HOOK_REGISTERED = new AtomicBoolean();
 
+    private static final AtomicBoolean LISTENER_REGISTERED = new AtomicBoolean();
+
     protected LoggerContext loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
 
     private LogbackExtendConfigurator(ConfigurableEnvironment environment) {
@@ -59,6 +62,7 @@ public class LogbackExtendConfigurator {
                             if (provider.shouldAppend()) {
                                 provider.appendTo();
                                 registerShutdownHookIfNecessary();
+                                registerLoggingExtendLoggerContextListenerIfNecessary();
                             }
                         }
                 );
@@ -66,6 +70,21 @@ public class LogbackExtendConfigurator {
             checkErrorStatus();
         }
     }
+
+    /**
+     * stop appender
+     */
+    public void stop() {
+        synchronized (loggerContext.getConfigurationLock()) {
+            if (!CollectionUtils.isEmpty(loggingExtendAppenderProviders)) {
+                loggingExtendAppenderProviders.forEach(
+                        LogbackLoggingExtendAppenderProvider::stop
+                );
+                loggingExtendAppenderProviders.clear();
+            }
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     void conversionRule(String conversionWord, Class<? extends Converter<?>> converterClass) {
@@ -129,6 +148,11 @@ public class LogbackExtendConfigurator {
         }
     }
 
+    private void registerLoggingExtendLoggerContextListenerIfNecessary() {
+        if (LISTENER_REGISTERED.compareAndSet(false, true)) {
+            loggerContext.addListener(new LoggingExtendLoggerContextListener(environment));
+        }
+    }
 
     private boolean existLoggingLoggerContextListener(Class<? extends LoggerContextListener>
                                                               loggerContextListenerClass) {

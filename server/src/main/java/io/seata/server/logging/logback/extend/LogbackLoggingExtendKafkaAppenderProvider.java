@@ -116,7 +116,7 @@ public class LogbackLoggingExtendKafkaAppenderProvider extends AbstractLogbackLo
     }
 
     @Override
-    void doConfiguration(KafkaAppender<ILoggingEvent> appender) {
+    void doConfiguration() {
         String kafkaTopic = propertyResolver.getProperty(KAFKA_TOPIC);
         appender.setContext(loggerContext);
         appender.setName(KAFKA);

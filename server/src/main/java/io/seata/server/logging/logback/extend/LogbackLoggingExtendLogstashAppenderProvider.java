@@ -111,7 +111,7 @@ public class LogbackLoggingExtendLogstashAppenderProvider extends AbstractLogbac
     }
 
     @Override
-    void doConfiguration(LogstashTcpSocketAppender appender) {
+    void doConfiguration() {
         appender.setName(LOGSTASH_APPENDER_NAME);
         appender.setContext(loggerContext);
         doKeepAliveConfig(appender);

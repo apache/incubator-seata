@@ -65,7 +65,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
                 LoggingEvent.class);
         final Appender<ILoggingEvent> mockAppender = spy(provider.getOrCreateLoggingExtendAppender());
 
-        Logger rootLogger = this.provider.getRootLogger(loggerContext);
+        Logger rootLogger = this.provider.getRootLogger();
         mockAppender.start();
         rootLogger.addAppender(mockAppender);
 
@@ -110,7 +110,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
                 LoggingEvent.class);
         final Appender<ILoggingEvent> mockAppender = spy(provider.getOrCreateLoggingExtendAppender());
 
-        Logger rootLogger = provider.getRootLogger(loggerContext);
+        Logger rootLogger = provider.getRootLogger();
         mockAppender.start();
         rootLogger.addAppender(mockAppender);
 
@@ -155,7 +155,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         System.setProperty("logging.extend.logstash-appender.wait-strategy", "blocking");
 
         LogstashTcpSocketAppender loggingExtendAppender = provider.createLoggingExtendAppender();
-        provider.doConfiguration(loggingExtendAppender);
+        provider.doConfiguration();
         assertThat(loggingExtendAppender.getKeepAliveCharset().name().equals("UTF-8")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveMessage().equals("ping")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveDuration().getMilliseconds() == 1000).isTrue();

@@ -1,5 +1,6 @@
 package io.seata.server.logging.logback;
 
+import ch.qos.logback.core.spi.LifeCycle;
 import io.seata.server.logging.extend.LoggingExtendAppenderProvider;
 
 /**
@@ -9,5 +10,5 @@ import io.seata.server.logging.extend.LoggingExtendAppenderProvider;
  * @author wlx
  * @date 2022/6/25 1:33 下午
  */
-public interface LogbackLoggingExtendAppenderProvider extends LoggingExtendAppenderProvider {
+public interface LogbackLoggingExtendAppenderProvider extends LoggingExtendAppenderProvider , LifeCycle {
 }
