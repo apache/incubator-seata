@@ -1,14 +1,10 @@
 package io.seata.server.logging.logback;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.hook.DelayingShutdownHook;
 import ch.qos.logback.core.pattern.Converter;
-import ch.qos.logback.core.spi.ContextAwareBase;
-import ch.qos.logback.core.spi.LifeCycle;
 import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.util.Duration;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -33,9 +29,7 @@ import static org.springframework.boot.context.logging.LoggingApplicationListene
  * @date 2022/6/24 9:53 下午
  * @see LogbackLoggingExtendAppenderProvider
  */
-public class LogbackExtendConfigurator extends ContextAwareBase implements LoggerContextListener, LifeCycle {
-
-    private boolean started = false;
+public class LogbackExtendConfigurator {
 
     private final List<LogbackLoggingExtendAppenderProvider> loggingExtendAppenderProviders;
 
@@ -50,8 +44,6 @@ public class LogbackExtendConfigurator extends ContextAwareBase implements Logge
         this.loggingExtendAppenderProviders = EnhancedServiceLoader.loadAll(
                 LogbackLoggingExtendAppenderProvider.class, new Class[]{ConfigurableEnvironment.class}
                 , new Object[]{environment});
-        // add listener to make sure reload logging extend appender when loggingContext reset or start
-        this.loggerContext.addListener(this);
     }
 
     /**
@@ -73,63 +65,6 @@ public class LogbackExtendConfigurator extends ContextAwareBase implements Logge
             }
             checkErrorStatus();
         }
-    }
-
-    /**
-     * LoggingLoggerContextListener should not be removed subsequent to a LoggerContext reset.
-     *
-     * @return true
-     */
-    @Override
-    public boolean isResetResistant() {
-        return true;
-    }
-
-    @Override
-    public void onStart(LoggerContext context) {
-        LogbackExtendConfigurator configurator = LogbackExtendConfigurator.get(environment);
-        configurator.doLoggingExtendConfiguration();
-    }
-
-    /**
-     * when reset append logging extend appender to LoggerContext
-     *
-     * @param context context
-     */
-    @Override
-    public void onReset(LoggerContext context) {
-        LogbackExtendConfigurator configurator = LogbackExtendConfigurator.get(environment);
-        configurator.doLoggingExtendConfiguration();
-    }
-
-    @Override
-    public void onStop(LoggerContext context) {
-
-    }
-
-    @Override
-    public void onLevelChange(Logger logger, Level level) {
-
-    }
-
-    @Override
-    public void start() {
-        if (started) {
-            return;
-        }
-        this.started = true;
-    }
-
-    @Override
-    public void stop() {
-        if (started) {
-            this.started = false;
-        }
-    }
-
-    @Override
-    public boolean isStarted() {
-        return started;
     }
 
     @SuppressWarnings("unchecked")
@@ -160,7 +95,10 @@ public class LogbackExtendConfigurator extends ContextAwareBase implements Logge
     }
 
     private void loadDefaultLoggerContextListener() {
-        loggerContextListener(new SystemPropertyLoggerContextListener());
+        SystemPropertyLoggerContextListener systemPropertyLoggerContextListener = new SystemPropertyLoggerContextListener();
+        systemPropertyLoggerContextListener.setContext(loggerContext);
+        systemPropertyLoggerContextListener.start();
+        loggerContextListener(systemPropertyLoggerContextListener);
     }
 
     private static class SingletonHolder {
