@@ -265,12 +265,41 @@
                             <mainClass>io.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
                             <attach>false</attach>
+                            <includes>
+                                <include>
+                                    <groupId>null</groupId>
+                                    <artifactId>null</artifactId>
+                                </include>
+                            </includes>
                         </configuration>
                         <executions>
                             <execution>
                                 <goals>
                                     <goal>repackage</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                                    <excludeTransitive>false</excludeTransitive>
+                                    <stripVersion>false</stripVersion>
+                                    <silent>true</silent>
+                                    <overWriteIfNewer>true</overWriteIfNewer>
+                                    <!--resolve slf4j-simple conflicts-->
+                                    <includeScope>runtime</includeScope>
+                                    <excludeGroupIds>org.apache.logging.log4j,log4j</excludeGroupIds>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
