@@ -157,6 +157,13 @@
                 <image.tags>latest</image.tags>
             </properties>
         </profile>
+        <!-- profile: arrch64 -->
+        <profile>
+            <id>arrch64</id>
+            <properties>
+                <os.detected.classifier>osx-x86_64</os.detected.classifier>
+            </properties>
+        </profile>
         <!-- profile: checkstyle -->
         <profile>
             <id>checkstyle</id>
