@@ -119,7 +119,7 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
 
     @Override
     public void start() {
-        if (!Objects.isNull(appender) && appender.isStarted()) {
+        if (Objects.isNull(appender) || appender.isStarted()) {
             return;
         }
         appender.start();
