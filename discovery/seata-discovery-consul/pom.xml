@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-consul</artifactId>
     <name>seata-discovery-consul ${project.version}</name>
+    <description>discovery-consul for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
