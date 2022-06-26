@@ -50,6 +50,8 @@ public class LogbackExtendConfigurator extends ContextAwareBase implements Logge
         this.loggingExtendAppenderProviders = EnhancedServiceLoader.loadAll(
                 LogbackLoggingExtendAppenderProvider.class, new Class[]{ConfigurableEnvironment.class}
                 , new Object[]{environment});
+        // add listener to make sure reload logging extend appender when loggingContext reset or start
+        this.loggerContext.addListener(this);
     }
 
     /**
@@ -173,9 +175,6 @@ public class LogbackExtendConfigurator extends ContextAwareBase implements Logge
     public static LogbackExtendConfigurator get(ConfigurableEnvironment environment) {
         if (Objects.isNull(SingletonHolder.INSTANCE)) {
             SingletonHolder.INSTANCE = new LogbackExtendConfigurator(environment);
-            LoggerContext loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
-            // add listener to make sure reload logging extend appender when loggingContext reset or start
-            loggerContext.addListener(SingletonHolder.INSTANCE);
         }
         return SingletonHolder.INSTANCE;
     }
