@@ -26,6 +26,7 @@
     <artifactId>seata-sqlparser</artifactId>
     <packaging>pom</packaging>
     <name>seata-sqlparser ${project.version}</name>
+    <description>sqlparser top parent for Seata built with Maven</description>
 
     <modules>
         <module>seata-sqlparser-core</module>
