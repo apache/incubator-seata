@@ -193,6 +193,7 @@ public class TableRecords implements java.io.Serializable {
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
                 ColumnMeta col = tmeta.getColumnMeta(colName);
+                // todo todo_4572
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
