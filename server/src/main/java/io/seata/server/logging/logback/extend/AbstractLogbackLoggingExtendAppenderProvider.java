@@ -35,16 +35,18 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
 
     protected LoggingExtendPropertyResolver propertyResolver;
 
-    protected LoggerContext loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
-
-    public AbstractLogbackLoggingExtendAppenderProvider(ConfigurableEnvironment environment) {
-        this.propertyResolver = new LoggingExtendPropertyResolver(environment);
-    }
+    protected LoggerContext loggerContext;
 
     /**
      * appender instance
      */
     protected E appender;
+
+    public AbstractLogbackLoggingExtendAppenderProvider(ConfigurableEnvironment environment) {
+        this.loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
+        this.propertyResolver = new LoggingExtendPropertyResolver(environment);
+        this.appender = getOrCreateLoggingExtendAppender();
+    }
 
     /**
      * default logging pattern
@@ -53,7 +55,6 @@ public abstract class AbstractLogbackLoggingExtendAppenderProvider<E extends App
 
     @Override
     public void appendTo() {
-        this.appender = getOrCreateLoggingExtendAppender();
         if (appender.isStarted()) {
             LOGGER.warn("appender has been started, " +
                     "we will reset it whit properties configured in spring.yml.");

@@ -1,7 +1,6 @@
 package io.seata.server.logging.logback.extend;
 
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -18,10 +17,8 @@ import net.logstash.logback.encoder.com.lmax.disruptor.BlockingWaitStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.slf4j.impl.StaticLoggerBinder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
 
@@ -30,8 +27,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author wlx
@@ -44,8 +40,6 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
 
     private LogbackLoggingExtendLogstashAppenderProvider provider;
 
-    private LoggerContext loggerContext;
-
     @BeforeEach
     void before() {
         List<LogbackLoggingExtendAppenderProvider> loggingExtendAppenderProviderList =
@@ -53,8 +47,6 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         provider = ((LogbackLoggingExtendLogstashAppenderProvider) loggingExtendAppenderProviderList.stream()
                 .filter(item -> item instanceof LogbackLoggingExtendLogstashAppenderProvider)
                 .findFirst().get());
-        ILoggerFactory loggerFactory = StaticLoggerBinder.getSingleton().getLoggerFactory();
-        loggerContext = (LoggerContext) loggerFactory;
         provider.setPropertyResolver(new LoggingExtendPropertyResolver(environment));
         System.setProperty("logging.extend.logstash-appender.enable", "true");
     }
@@ -154,8 +146,8 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
         System.setProperty("logging.extend.logstash-appender.ring-buffer-size", "8192");
         System.setProperty("logging.extend.logstash-appender.wait-strategy", "blocking");
 
-        LogstashTcpSocketAppender loggingExtendAppender = provider.createLoggingExtendAppender();
         provider.doConfiguration();
+        LogstashTcpSocketAppender loggingExtendAppender = provider.appender;
         assertThat(loggingExtendAppender.getKeepAliveCharset().name().equals("UTF-8")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveMessage().equals("ping")).isTrue();
         assertThat(loggingExtendAppender.getKeepAliveDuration().getMilliseconds() == 1000).isTrue();

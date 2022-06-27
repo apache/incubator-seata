@@ -12,12 +12,14 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.server.logging.listener.LoggingExtendLoggerContextListener;
 import io.seata.server.logging.listener.SystemPropertyLoggerContextListener;
 import org.slf4j.impl.StaticLoggerBinder;
-import org.springframework.boot.logging.logback.ColorConverter;
 import org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.Assert;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.springframework.boot.context.logging.LoggingApplicationListener.REGISTER_SHUTDOWN_HOOK_PROPERTY;
@@ -30,7 +32,7 @@ import static org.springframework.boot.context.logging.LoggingApplicationListene
  * @date 2022/6/24 9:53 下午
  * @see LogbackLoggingExtendAppenderProvider
  */
-public class LogbackExtendConfigurator {
+public final class LogbackExtendConfigurator {
 
     private final List<LogbackLoggingExtendAppenderProvider> loggingExtendAppenderProviders;
 
@@ -40,10 +42,11 @@ public class LogbackExtendConfigurator {
 
     private static final AtomicBoolean LISTENER_REGISTERED = new AtomicBoolean();
 
-    protected LoggerContext loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
+    private final LoggerContext loggerContext;
 
     private LogbackExtendConfigurator(ConfigurableEnvironment environment) {
         this.environment = environment;
+        this.loggerContext = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
         this.loggingExtendAppenderProviders = EnhancedServiceLoader.loadAll(
                 LogbackLoggingExtendAppenderProvider.class, new Class[]{ConfigurableEnvironment.class}
                 , new Object[]{environment});
@@ -56,16 +59,18 @@ public class LogbackExtendConfigurator {
         synchronized (loggerContext.getConfigurationLock()) {
             loadDefaultConversionRule();
             loadDefaultLoggerContextListener();
+            boolean necessary = false;
             if (!CollectionUtils.isEmpty(loggingExtendAppenderProviders)) {
-                loggingExtendAppenderProviders.forEach(
-                        provider -> {
-                            if (provider.shouldAppend()) {
-                                provider.appendTo();
-                                registerShutdownHookIfNecessary();
-                                registerLoggingExtendLoggerContextListenerIfNecessary();
-                            }
-                        }
-                );
+                for (LogbackLoggingExtendAppenderProvider provider : loggingExtendAppenderProviders) {
+                    if (provider.shouldAppend()) {
+                        provider.appendTo();
+                        necessary = true;
+                    }
+                }
+            }
+            if (necessary) {
+                registerShutdownHookIfNecessary();
+                registerLoggingExtendLoggerContextListenerIfNecessary();
             }
             checkErrorStatus();
         }
@@ -107,10 +112,8 @@ public class LogbackExtendConfigurator {
     }
 
     private void loadDefaultConversionRule() {
-        conversionRule("clr", ColorConverter.class);
+        // for default pattern "stack_trace": "%wex"
         conversionRule("wex", WhitespaceThrowableProxyConverter.class);
-        conversionRule("wEx", org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter.class);
-        conversionRule("wEx2", ExtendedWhitespaceThrowableProxyConverter.class);
     }
 
     private void loadDefaultLoggerContextListener() {
