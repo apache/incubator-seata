@@ -16,6 +16,7 @@
   - [[#4607](https://github.com/seata/seata/pull/4607)] 修复跳过全局锁校验的缺陷
   - [[#4696](https://github.com/seata/seata/pull/4696)] 修复 oracle 存储模式时的插入问题
   - [[#4726](https://github.com/seata/seata/pull/4726)] 修复批量发送消息时可能的NPE问题
+  - [[#4729](https://github.com/seata/seata/pull/4729)] 修复AspectTransactional.rollbackForClassName设置错误
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
