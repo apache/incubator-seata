@@ -24,6 +24,8 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-sqlparser-core</artifactId>
     <name>seata-sqlparser-core ${project.version}</name>
+    <description>sqlparser-core for Seata built with Maven</description>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
