@@ -44,5 +44,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [opelok-z](https://github.com/opelok-z)
 - [a364176773](https://github.com/a364176773)
 - [2129zxl](https://github.com/2129zxl)
+- [Smery-lxm](https://github.com/Smery-lxm)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
