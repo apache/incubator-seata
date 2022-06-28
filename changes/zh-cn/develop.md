@@ -22,13 +22,14 @@
   - [[#4670](https://github.com/seata/seata/pull/4670)] 优化branchResultMessageExecutor线程池的线程数
   - [[#4662](https://github.com/seata/seata/pull/4662)] 优化回滚事务监控指标
   - [[#4693](https://github.com/seata/seata/pull/4693)] 优化控制台导航栏
-  - [[#4544](https://github.com/seata/seata/pull/4544)] 优化测试用例TransactionContextFilterTest中jackson包依赖问题
   - [[#4700](https://github.com/seata/seata/pull/4700)] 修复 maven-compiler-plugin 和 maven-resources-plugin 执行失败
   - [[#4711](https://github.com/seata/seata/pull/4711)] 分离部署时 lib 依赖
   - [[#4720](https://github.com/seata/seata/pull/4720)] 优化pom描述
   - [[#4728](https://github.com/seata/seata/pull/4728)] 将logback版本依赖升级至1.2.9
 
 ### test：
+  - [[#4544](https://github.com/seata/seata/pull/4544)] 优化TransactionContextFilterTest中jackson包依赖问题
+  - [[#4731](https://github.com/seata/seata/pull/4731)] 修复 AsyncWorkerTest 和 LockManagerTest 的单测问题。
 
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
