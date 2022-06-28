@@ -27,6 +27,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4700](https://github.com/seata/seata/pull/4700)] fix maven-compiler-plugin and maven-resources-plugin execute failed
   - [[#4711](https://github.com/seata/seata/pull/4711)] separate lib dependencies for deployments
   - [[#4720](https://github.com/seata/seata/pull/4720)] optimize pom description
+  - [[#4728](https://github.com/seata/seata/pull/4728)] upgrade logback dependency to 1.2.9
 
 ### test:
 

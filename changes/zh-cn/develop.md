@@ -26,6 +26,7 @@
   - [[#4700](https://github.com/seata/seata/pull/4700)] 修复 maven-compiler-plugin 和 maven-resources-plugin 执行失败
   - [[#4711](https://github.com/seata/seata/pull/4711)] 分离部署时 lib 依赖
   - [[#4720](https://github.com/seata/seata/pull/4720)] 优化pom描述
+  - [[#4728](https://github.com/seata/seata/pull/4728)] 将logback版本依赖升级至1.2.9
 
 ### test：
 
