@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.collect.Lists;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.IOUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.model.BranchStatus;
 import io.seata.rm.datasource.undo.UndoLogManager;
@@ -127,6 +128,10 @@ public class AsyncWorker {
     Map<String, List<Phase2Context>> groupedByResourceId(List<Phase2Context> contexts) {
         Map<String, List<Phase2Context>> groupedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
         contexts.forEach(context -> {
+            if (StringUtils.isBlank(context.resourceId)) {
+                LOGGER.warn("resourceId is empty, resource:{}", context);
+                return;
+            }
             List<Phase2Context> group = groupedContexts.computeIfAbsent(context.resourceId, key -> new LinkedList<>());
             group.add(context);
         });
@@ -134,6 +139,11 @@ public class AsyncWorker {
     }
 
     private void dealWithGroupedContexts(String resourceId, List<Phase2Context> contexts) {
+        if (StringUtils.isBlank(resourceId)) {
+            //ConcurrentHashMap required notNull key
+            LOGGER.warn("resourceId is empty and will skip.");
+            return;
+        }
         DataSourceProxy dataSourceProxy = dataSourceManager.get(resourceId);
         if (dataSourceProxy == null) {
             LOGGER.warn("failed to find resource for {} and requeue", resourceId);
@@ -210,5 +220,11 @@ public class AsyncWorker {
          * The Resource id.
          */
         String resourceId;
+
+        @Override
+        public String toString() {
+            return "Phase2Context{" + "xid='" + xid + '\'' + ", branchId=" + branchId + ", resourceId='" + resourceId
+                + '\'' + '}';
+        }
     }
 }
