@@ -39,13 +39,13 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
-import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.storage.file.FlushDiskMode;
 import io.seata.server.storage.file.ReloadableStore;
+import io.seata.server.storage.file.TransactionWriteStore;
+import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.storage.file.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -335,7 +335,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             }
         }
         try {
-            currFileChannel.force(true);
+            if (currFileChannel.isOpen()) {
+                currFileChannel.force(true);
+            }
         } catch (IOException e) {
             LOGGER.error("fileChannel force error: {}", e.getMessage(), e);
         }
