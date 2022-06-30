@@ -98,7 +98,7 @@ public abstract class BaseH2Test {
         try {
             s = connection.createStatement();
             set = s.executeQuery(sql);
-            return TableRecords.buildRecords(tableMeta, set);
+            return TableRecords.buildRecords(tableMeta, set, null);
         } finally {
             IOUtil.close(set, s);
         }

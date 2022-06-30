@@ -406,7 +406,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 }
             }
             rs = ps.executeQuery();
-            return TableRecords.buildRecords(tableMeta, rs);
+            return TableRecords.buildRecords(tableMeta, rs, statementProxy);
         } finally {
             IOUtil.close(rs);
         }
@@ -453,7 +453,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 }
             }
             rs = ps.executeQuery();
-            return TableRecords.buildRecords(getTableMeta(), rs);
+            return TableRecords.buildRecords(getTableMeta(), rs, statementProxy);
         } finally {
             IOUtil.close(rs);
         }

@@ -108,7 +108,7 @@ public class TableRecordsTest {
 
         ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
 
-        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
+        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet, null);
 
         Assertions.assertEquals(returnValue.length, tableRecords.pkRows().size());
     }
@@ -127,7 +127,7 @@ public class TableRecordsTest {
 
         ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
 
-        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
+        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet, null);
 
         Assertions.assertNotNull(tableRecords);
     }
@@ -147,7 +147,8 @@ public class TableRecordsTest {
 
         MockDriver mockDriverNewField = new MockDriver(returnValueColumnLabelsNewField, returnValueNewField, columnMetasNewField, indexMetas);
         ResultSet resultSet = mockDriverNewField.executeQuery(mockStatement, "select * from table_records_test");
-        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
+        // todo todo_4572
+        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet, null);
 
         Assertions.assertNotNull(tableRecords);
     }

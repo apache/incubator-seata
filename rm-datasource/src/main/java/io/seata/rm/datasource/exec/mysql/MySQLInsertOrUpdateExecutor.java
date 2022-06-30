@@ -256,7 +256,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 }
             }
             rs = ps.executeQuery();
-            return TableRecords.buildRecords(tableMeta, rs);
+            return TableRecords.buildRecords(tableMeta, rs, statementProxy);
         } finally {
             IOUtil.close(rs);
         }

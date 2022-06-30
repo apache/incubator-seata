@@ -15,25 +15,21 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.NClob;
-import java.sql.Ref;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
 import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exception.RmTableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
 
 /**
@@ -182,7 +178,7 @@ public class TableRecords implements java.io.Serializable {
      * @return the table records
      * @throws SQLException the sql exception
      */
-    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
+    private static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
@@ -192,8 +188,7 @@ public class TableRecords implements java.io.Serializable {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
-                ColumnMeta col = tmeta.getColumnMeta(colName);
-                // todo todo_4572
+                ColumnMeta col = checkAndGetColumnMeta(tmeta,colName);
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
@@ -252,6 +247,69 @@ public class TableRecords implements java.io.Serializable {
             records.add(row);
         }
         return records;
+    }
+
+    /**
+     * check if the column is null and return
+     * @param tmeta the table meta
+     * @param colName the column nmae
+     */
+    private static ColumnMeta checkAndGetColumnMeta(TableMeta tmeta , String colName) {
+        ColumnMeta col = tmeta.getColumnMeta(colName);
+        if (col == null) {
+            throw new RmTableMetaException(colName,tmeta);
+        }
+        return col;
+    }
+
+
+    /**
+     * Build records table records.
+     *
+     * @param tmeta     the tmeta
+     * @param resultSet the result set
+     * @param statementProxy the statement proxy
+     * @return the table records
+     * @throws SQLException the sql exception
+     */
+    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet, StatementProxy statementProxy) throws SQLException {
+        try {
+            return buildRecords(tmeta, resultSet);
+        } catch (RmTableMetaException e) {
+            //  exception might be rethrow if TABLE_META_REFRESH_SYNC=false
+            refreshTableMeta(statementProxy, e);
+            // try to build again after refresh table meta success
+            return buildRecords(tmeta, resultSet);
+        }
+    }
+
+    private static final boolean TABLE_META_REFRESH_SYNC = true;
+    private static final int STATE_REFRESHING = 0;
+    private static final int STATE_REFRESHED = 1;
+    private static ConcurrentHashMap<String,Integer> refreshMap = new ConcurrentHashMap();
+
+    private static void refreshTableMeta(StatementProxy statementProxy, RmTableMetaException e) {
+        String key = getRefreshKey(e);
+        // only one thread can put successfully
+        if (refreshMap.putIfAbsent(key, STATE_REFRESHING) == null) {
+            ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+            try (Connection connection = statementProxy.getConnection()) {
+                TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+                        .refresh(connection, connectionProxy.getDataSourceProxy().getResourceId());
+            } catch (Exception ignore) {
+            }
+            refreshMap.put(key, STATE_REFRESHED);
+        } else if (TABLE_META_REFRESH_SYNC) {
+            // wait until refresh finished
+            while (refreshMap.get(key) == STATE_REFRESHING) {
+            }
+        } else {
+             throw e;
+        }
+    }
+
+    private static String getRefreshKey(RmTableMetaException e) {
+        return e.getTableMeta().getTableName() + ":" + e.getColumnName();
     }
 
     /**

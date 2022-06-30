@@ -321,7 +321,8 @@ public abstract class AbstractUndoExecutor {
             }
 
             checkSet = statement.executeQuery();
-            currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
+            //todo todo_4572 ??undo 场景是不是不需要
+            currentRecords = TableRecords.buildRecords(tableMeta, checkSet, null);
         } finally {
             IOUtil.close(checkSet, statement);
         }
