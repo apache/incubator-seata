@@ -73,7 +73,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     }
 
     @Override
-    public void addUnrefreshableCol(final Connection connection, String tableName, String resourceId, String colName){
+    public void addUnrefreshableCol(final Connection connection, String tableName, String resourceId, String colName) {
         if (StringUtils.isNullOrEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
@@ -82,7 +82,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         final String key = getCacheKey(connection, tableName, resourceId);
         tmeta = TABLE_META_CACHE.getIfPresent(key);
         tmeta.addUnrefreshableColumn(colName);
-        TABLE_META_CACHE.put(key,tmeta);
+        TABLE_META_CACHE.put(key, tmeta);
     }
 
     @Override

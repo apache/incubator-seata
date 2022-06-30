@@ -317,7 +317,7 @@ public class TableRecords implements java.io.Serializable {
     }
 
 
-    private static TableMeta getCacheTableMeta(StatementProxy statementProxy, String tableName){
+    private static TableMeta getCacheTableMeta(StatementProxy statementProxy, String tableName) {
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         TableMeta tmeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).getTableMeta(
             connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
