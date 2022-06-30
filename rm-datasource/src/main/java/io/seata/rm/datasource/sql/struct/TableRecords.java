@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
@@ -272,47 +271,57 @@ public class TableRecords implements java.io.Serializable {
      * @return the table records
      * @throws SQLException the sql exception
      */
-    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet, StatementProxy statementProxy) throws SQLException {
+    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet, StatementProxy statementProxy)
+        throws SQLException {
         try {
             return buildRecords(tmeta, resultSet);
         } catch (RmTableMetaException e) {
             if (statementProxy == null) {
                 throw e;
             }
-            // exception might be rethrow if TABLE_META_REFRESH_SYNC=false
-            refreshTableMeta(statementProxy, e);
+            refreshTableMeta(statementProxy, e.getTableMeta(), e.getColumnName());
             // try to build again after refresh table meta success
-            return buildRecords(tmeta, resultSet);
+            return buildRecords(getCacheTableMeta(statementProxy, tmeta.getTableName()), resultSet);
         }
     }
 
-    private static final boolean TABLE_META_REFRESH_SYNC = true;
-    private static final int STATE_REFRESHING = 0;
-    private static final int STATE_REFRESHED = 1;
-    private static ConcurrentHashMap<String,Integer> refreshMap = new ConcurrentHashMap();
 
-    private static void refreshTableMeta(StatementProxy statementProxy, RmTableMetaException e) {
-        String key = getRefreshKey(e);
-        // only one thread can put successfully
-        if (refreshMap.putIfAbsent(key, STATE_REFRESHING) == null) {
-            ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-            try (Connection connection = statementProxy.getConnection()) {
-                TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-                        .refresh(connection, connectionProxy.getDataSourceProxy().getResourceId());
-            } catch (Exception ignore) {
+    private static void refreshTableMeta(StatementProxy statementProxy, TableMeta tmeta, String columnName)
+        throws SQLException {
+        if (columnEmptyAndRefreshable(statementProxy, tmeta, columnName)) {
+            synchronized (TableRecords.class) {
+                if (columnEmptyAndRefreshable(statementProxy, tmeta, columnName)) {
+                    ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+                    try (Connection connection = statementProxy.getConnection()) {
+                        TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(connection,
+                            connectionProxy.getDataSourceProxy().getResourceId());
+                    } catch (Exception exp) {
+                        throw exp;
+                    }
+                    // still empty after refreshed
+                    if (getCacheTableMeta(statementProxy, tmeta.getTableName()).getColumnMeta(columnName) == null) {
+                        TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).addUnrefreshableCol(
+                            connectionProxy.getTargetConnection(), tmeta.getTableName(),
+                            connectionProxy.getDataSourceProxy().getResourceId(), columnName);
+                    }
+                }
             }
-            refreshMap.put(key, STATE_REFRESHED);
-        } else if (TABLE_META_REFRESH_SYNC) {
-            // wait until refresh finished
-            while (refreshMap.get(key) == STATE_REFRESHING) {
-            }
-        } else {
-             throw e;
         }
     }
 
-    private static String getRefreshKey(RmTableMetaException e) {
-        return e.getTableMeta().getTableName() + ":" + e.getColumnName();
+    private static boolean columnEmptyAndRefreshable(StatementProxy statementProxy, TableMeta tmeta,
+        String columnName) {
+        TableMeta cacheTableMeta = getCacheTableMeta(statementProxy, tmeta.getTableName());
+        return cacheTableMeta.getColumnMeta(columnName) == null
+            && !cacheTableMeta.getUnrefreshableColumns().contains(columnName);
+    }
+
+
+    private static TableMeta getCacheTableMeta(StatementProxy statementProxy, String tableName){
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        TableMeta tmeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).getTableMeta(
+            connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
+        return tmeta;
     }
 
     /**

@@ -85,7 +85,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected List<SQLRecognizer> sqlRecognizers;
 
-    private TableMeta tableMeta;
 
     /**
      * Instantiates a new Base transactional executor.
@@ -252,13 +251,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the table meta
      */
     protected TableMeta getTableMeta(String tableName) {
-        if (tableMeta != null) {
-            return tableMeta;
-        }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-        tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+        return TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
             .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
-        return tableMeta;
     }
 
     /**
@@ -447,7 +442,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             for (int r = 0; r < rowSize; r++) {
                 for (int c = 0; c < pkColumnNameList.size(); c++) {
                     List<Object> pkColumnValueList = pkValuesMap.get(pkColumnNameList.get(c));
-                    int dataType = tableMeta.getColumnMeta(pkColumnNameList.get(c)).getDataType();
+                    int dataType = getTableMeta().getColumnMeta(pkColumnNameList.get(c)).getDataType();
                     ps.setObject(paramIndex, pkColumnValueList.get(r), dataType);
                     paramIndex++;
                 }

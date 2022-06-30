@@ -35,6 +35,16 @@ public interface TableMetaCache {
     TableMeta getTableMeta(Connection connection, String tableName, String resourceId);
 
     /**
+     * add unrefreshable column
+     *
+     * @param connection the connection
+     * @param tableName  the table name
+     * @param resourceId the resource id
+     * @param colName
+     */
+    void addUnrefreshableCol(Connection connection, String tableName, String resourceId, String colName);
+
+    /**
      * Clear the table meta cache
      *
      * @param connection the connection

@@ -17,10 +17,12 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
@@ -40,6 +42,11 @@ public class TableMeta {
      * key: column name
      */
     private final Map<String, ColumnMeta> allColumns = new LowerCaseLinkHashMap<>();
+
+    /**
+     * unrefreshable column name
+     */
+    private Set<String> unrefreshableColumns = new HashSet<>();
 
     /**
      * key: index name
@@ -91,6 +98,25 @@ public class TableMeta {
     public Map<String, IndexMeta> getAllIndexes() {
         return allIndexes;
     }
+
+    /**
+     * Gets unrefreshable columns.
+     *
+     * @return the all indexes
+     */
+    public Set<String> getUnrefreshableColumns() {
+        return unrefreshableColumns;
+    }
+
+    /**
+     * Add unrefreshable columns.
+     *
+     * @return the all indexes
+     */
+    public void addUnrefreshableColumn(String column) {
+        this.unrefreshableColumns.add(column);
+    }
+
 
     /**
      * Gets auto increase column.

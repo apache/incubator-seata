@@ -25,7 +25,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 public class RmTableMetaException extends RuntimeException {
     private String columnName;
     private TableMeta tableMeta;
-//    private
 
     public RmTableMetaException(String columnName, TableMeta tableMeta) {
         this.columnName = columnName;
