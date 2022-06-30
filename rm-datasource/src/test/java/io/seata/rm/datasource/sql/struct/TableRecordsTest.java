@@ -147,7 +147,7 @@ public class TableRecordsTest {
 
         MockDriver mockDriverNewField = new MockDriver(returnValueColumnLabelsNewField, returnValueNewField, columnMetasNewField, indexMetas);
         ResultSet resultSet = mockDriverNewField.executeQuery(mockStatement, "select * from table_records_test");
-        // todo todo_4572
+        // todo todo_4572 模拟新字段增加，现在可以得到npe效果
         TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet, null);
 
         Assertions.assertNotNull(tableRecords);

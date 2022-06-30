@@ -276,7 +276,10 @@ public class TableRecords implements java.io.Serializable {
         try {
             return buildRecords(tmeta, resultSet);
         } catch (RmTableMetaException e) {
-            //  exception might be rethrow if TABLE_META_REFRESH_SYNC=false
+            if (statementProxy == null) {
+                throw e;
+            }
+            // exception might be rethrow if TABLE_META_REFRESH_SYNC=false
             refreshTableMeta(statementProxy, e);
             // try to build again after refresh table meta success
             return buildRecords(tmeta, resultSet);
