@@ -8,6 +8,7 @@
   - [[#4642](https://github.com/seata/seata/pull/4642)] 支持client批量请求并行处理
   - [[#4567](https://github.com/seata/seata/pull/4567)] 支持where条件中find_in_set函数
 
+  - [[#4737](https://github.com/seata/seata/pull/4737)] 支持Spring boot actuator
 
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] 修复develop分支SeataTCCFenceAutoConfiguration在客户端未使用DB时，启动抛出ClassNotFoundException的问题。

@@ -8,6 +8,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4676](https://github.com/seata/seata/pull/4676)] support server to expose Nacos services by mounting SLB
   - [[#4642](https://github.com/seata/seata/pull/4642)] support batch message parallel processing
   - [[#4567](https://github.com/seata/seata/pull/4567)] support where method condition(find_in_set)
+  - [[#4737](https://github.com/seata/seata/pull/4737)] support spring boot actuator
  
 
 ### bugfix：
