@@ -17,18 +17,22 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4607](https://github.com/seata/seata/pull/4607)] fix bug on skipping lock check
   - [[#4696](https://github.com/seata/seata/pull/4696)] fix oracle database insert value
   - [[#4726](https://github.com/seata/seata/pull/4726)] fix batch message send may return NullPointException
+  - [[#4729](https://github.com/seata/seata/pull/4729)] fix set AspectTransactional.rollbackForClassName with wrong value
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities
   - [[#4670](https://github.com/seata/seata/pull/4670)] optimize the thread pool size of branchResultMessageExecutor
   - [[#4662](https://github.com/seata/seata/pull/4662)] optimize rollback transaction metrics
   - [[#4693](https://github.com/seata/seata/pull/4693)] optimize the console navigation bar
-  - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
   - [[#4700](https://github.com/seata/seata/pull/4700)] fix maven-compiler-plugin and maven-resources-plugin execute failed
   - [[#4711](https://github.com/seata/seata/pull/4711)] separate lib dependencies for deployments
   - [[#4720](https://github.com/seata/seata/pull/4720)] optimize pom description
+  - [[#4728](https://github.com/seata/seata/pull/4728)] upgrade logback dependency to 1.2.9
 
 ### test:
+
+  - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
+  - [[#4731](https://github.com/seata/seata/pull/4731)] fix UT failed in AsyncWorkerTest and LockManagerTest
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
@@ -43,5 +47,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [opelok-z](https://github.com/opelok-z)
 - [a364176773](https://github.com/a364176773)
 - [2129zxl](https://github.com/2129zxl)
+- [Smery-lxm](https://github.com/Smery-lxm)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
