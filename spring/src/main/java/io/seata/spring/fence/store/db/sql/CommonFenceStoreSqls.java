@@ -15,16 +15,16 @@
  */
 package io.seata.spring.fence.store.db.sql;
 
-import io.seata.spring.fence.constant.TCCFenceConstant;
+import io.seata.spring.fence.constant.CommonFenceConstant;
 
 /**
  * TCC Fence Store Sqls
  *
  * @author kaka2code
  */
-public class TCCFenceStoreSqls {
+public class CommonFenceStoreSqls {
 
-    private TCCFenceStoreSqls() {
+    private CommonFenceStoreSqls() {
         throw new IllegalStateException("Utility class");
     }
 
@@ -63,7 +63,7 @@ public class TCCFenceStoreSqls {
      */
     protected static final String DELETE_BY_DATE_AND_STATUS = "delete from " + LOCAL_TCC_LOG_PLACEHOLD
             + " where gmt_modified < ? "
-            + " and status in (" + TCCFenceConstant.STATUS_COMMITTED + " , " + TCCFenceConstant.STATUS_ROLLBACKED + " , " + TCCFenceConstant.STATUS_SUSPENDED + ")";
+            + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")";
 
     public static String getInsertLocalTCCLogSQL(String localTccTable) {
         return INSERT_LOCAL_TCC_LOG.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);

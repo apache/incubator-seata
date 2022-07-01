@@ -17,7 +17,7 @@ package io.seata.spring.interceptor;
 
 import io.seata.common.DefaultValues;
 import io.seata.spring.autoproxy.DefaultTransactionAutoProxy;
-import io.seata.spring.fence.config.TCCFenceConfig;
+import io.seata.spring.fence.config.CommonFenceConfig;
 import io.seata.spring.remoting.Protocols;
 import io.seata.spring.remoting.RemotingDesc;
 import io.seata.spring.remoting.RemotingParser;
@@ -28,31 +28,31 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
 
 /**
- * parser TCC bean
+ * parser transaction bean
  *
  * @author zhangsen
  */
-public class TCCBeanParserUtils {
+public class TxBeanParserUtils {
 
-    private TCCBeanParserUtils() {
+    private TxBeanParserUtils() {
     }
 
     /**
-     * is auto proxy TCC bean
+     * is auto proxy transaction bean
      *
      * @param bean               the bean
      * @param beanName           the bean name
      * @param applicationContext the application context
      * @return boolean boolean
      */
-    public static boolean isTccAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
+    public static boolean isTxAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
         boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
         //get RemotingBean description
         RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
         //is remoting bean
         if (isRemotingBean) {
             if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
-                //LocalTCC
+                //LocalService
                 return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
             } else {
                 // sofa:reference / dubbo:reference, factory bean
@@ -101,24 +101,24 @@ public class TCCBeanParserUtils {
     }
 
     /**
-     * init tcc fence clean task if enable useTccFence
+     * init common fence clean task if enable useCommonFence
      *
      * @param remotingDesc the remoting desc
      * @param applicationContext applicationContext
      */
-    public static void initTccFenceCleanTask(RemotingDesc remotingDesc, ApplicationContext applicationContext, boolean useFence) {
+    public static void initCommonFenceCleanTask(RemotingDesc remotingDesc, ApplicationContext applicationContext, boolean useCommonFence) {
         if (remotingDesc == null) {
             return;
         }
-        if (applicationContext != null && applicationContext.containsBean(DefaultValues.TCC_FENCE_BEAN_NAME)) {
-            TCCFenceConfig tccFenceConfig = (TCCFenceConfig) applicationContext.getBean(DefaultValues.TCC_FENCE_BEAN_NAME);
-            if (tccFenceConfig == null || tccFenceConfig.getInitialized().get()) {
+        if (applicationContext != null && applicationContext.containsBean(DefaultValues.COMMON_FENCE_BEAN_NAME)) {
+            CommonFenceConfig commonFenceConfig = (CommonFenceConfig) applicationContext.getBean(DefaultValues.COMMON_FENCE_BEAN_NAME);
+            if (commonFenceConfig == null || commonFenceConfig.getInitialized().get()) {
                 return;
             }
 
-            if (useFence && tccFenceConfig.getInitialized().compareAndSet(false, true)) {
-                // init tcc fence clean task if enable useTccFence
-                tccFenceConfig.initCleanTask();
+            if (useCommonFence && commonFenceConfig.getInitialized().compareAndSet(false, true)) {
+                // init common fence clean task if enable useCommonFence
+                commonFenceConfig.initCleanTask();
             }
         }
     }
@@ -139,7 +139,7 @@ public class TCCBeanParserUtils {
     }
 
     /**
-     * get the remoting description of TCC bean
+     * get the remoting description of Tx bean
      *
      * @param beanName the bean name
      * @return remoting desc
@@ -149,7 +149,7 @@ public class TCCBeanParserUtils {
     }
 
     /**
-     * Create a proxy bean for tcc service
+     * Create a proxy bean for transaction service
      *
      * @param interfaceClass
      * @param fieldValue

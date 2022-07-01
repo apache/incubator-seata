@@ -103,14 +103,14 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 TwoPhaseBusinessActionParam businessActionParam = new TwoPhaseBusinessActionParam();
                 businessActionParam.setActionName(businessAction.name());
                 businessActionParam.setDelayReport(businessAction.isDelayReport());
-                businessActionParam.setUseFence(businessAction.useTCCFence());
+                businessActionParam.setUseCommonFence(businessAction.useTCCFence());
                 businessActionParam.setBranchType(BranchType.TCC);
                 Map<String, Object> businessActionContextMap = new HashMap<>(4);
                 //the phase two method name
                 businessActionContextMap.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
                 businessActionContextMap.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
                 businessActionContextMap.put(Constants.ACTION_NAME, businessAction.name());
-                businessActionContextMap.put(Constants.USE_TCC_FENCE, businessAction.useTCCFence());
+                businessActionContextMap.put(Constants.USE_COMMON_FENCE, businessAction.useTCCFence());
                 businessActionParam.setBusinessActionContext(businessActionContextMap);
                 //Handler the TCC Aspect, and return the business result
                 return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessActionParam,

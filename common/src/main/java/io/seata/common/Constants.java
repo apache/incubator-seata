@@ -69,7 +69,7 @@ public interface Constants {
     /**
      * Use TCC fence
      */
-    String USE_TCC_FENCE = "useTCCFence";
+    String USE_COMMON_FENCE = "useTCCFence";
 
     /**
      * phase one method name
@@ -94,7 +94,7 @@ public interface Constants {
     /**
      * branch context
      */
-    String TCC_ACTION_CONTEXT = "actionContext";
+    String TX_ACTION_CONTEXT = "actionContext";
 
     /**
      * default charset name

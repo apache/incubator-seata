@@ -18,11 +18,11 @@ package io.seata.spring.fence.store;
 import java.util.Date;
 
 /**
- * TCC Fence Domain
+ * Common Fence Domain
  *
  * @author kaka2code
  */
-public class TCCFenceDO {
+public class CommonFenceDO {
 
     /**
      * the global transaction id
@@ -40,7 +40,7 @@ public class TCCFenceDO {
     private String actionName;
 
     /**
-     * the tcc fence status
+     * the common fence status
      * tried: 1; committed: 2; rollbacked: 3; suspended: 4
      */
     private Integer status;

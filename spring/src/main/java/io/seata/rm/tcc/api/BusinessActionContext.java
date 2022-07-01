@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.seata.core.model.BranchType;
 import io.seata.spring.interceptor.ActionContextUtil;
 
 /**
@@ -49,6 +50,11 @@ public class BusinessActionContext implements Serializable {
      * @see io.seata.rm.tcc.api.BusinessActionContextUtil
      */
     private Boolean isUpdated;
+
+    /**
+     * branch Type
+     */
+    private BranchType branchType;
 
     /**
      * action context
@@ -219,6 +225,14 @@ public class BusinessActionContext implements Serializable {
         isUpdated = updated;
     }
 
+    public BranchType getBranchType() {
+        return branchType;
+    }
+
+    public void setBranchType(BranchType branchType) {
+        this.branchType = branchType;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -227,6 +241,7 @@ public class BusinessActionContext implements Serializable {
                 .append(",action_name:").append(actionName)
                 .append(",is_delay_report:").append(isDelayReport)
                 .append(",is_updated:").append(isDelayReport)
+                .append(",branch_type:").append(branchType)
                 .append(",action_context:")
                 .append(actionContext).append("]");
         return sb.toString();

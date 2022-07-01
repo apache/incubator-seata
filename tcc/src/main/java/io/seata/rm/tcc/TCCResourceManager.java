@@ -25,7 +25,7 @@ import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
-import io.seata.spring.fence.TCCFenceHandler;
+import io.seata.spring.fence.CommonFenceHandler;
 import io.seata.spring.remoting.TwoPhaseResult;
 
 import java.lang.reflect.Method;
@@ -102,9 +102,9 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
+            if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
-                    result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, xid, branchId, args);
+                    result = CommonFenceHandler.commitFence(commitMethod, targetTCCBean, xid, branchId, args);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
@@ -160,9 +160,9 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
+            if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
-                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, xid, branchId,
+                    result = CommonFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, xid, branchId,
                             args, tccResource.getActionName());
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();

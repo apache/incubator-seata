@@ -27,9 +27,9 @@ import io.seata.common.DefaultValues;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.rpc.Disposable;
-import io.seata.spring.fence.TCCFenceHandler;
-import io.seata.spring.fence.exception.TCCFenceException;
-import io.seata.spring.fence.store.db.TCCFenceStoreDataBaseDAO;
+import io.seata.spring.fence.CommonFenceHandler;
+import io.seata.spring.fence.exception.CommonFenceException;
+import io.seata.spring.fence.store.db.CommonFenceStoreDataBaseDAO;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,48 +38,48 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * TCC Fence Config
+ * Common Fence Config
  *
  * @author kaka2code
  */
-public class TCCFenceConfig implements InitializingBean, Disposable {
+public class CommonFenceConfig implements InitializingBean, Disposable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonFenceConfig.class);
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
-     * TCC fence clean period max value. maximum interval is 68 years
+     * Common fence clean period max value. maximum interval is 68 years
      */
     private static final Duration MAX_PERIOD = Duration.ofSeconds(Integer.MAX_VALUE);
 
     /**
-     * TCC fence clean period. only duration type format are supported
+     * Common fence clean period. only duration type format are supported
      */
-    private Duration cleanPeriod = Duration.ofDays(DefaultValues.DEFAULT_TCC_FENCE_CLEAN_PERIOD);
+    private Duration cleanPeriod = Duration.ofDays(DefaultValues.DEFAULT_COMMON_FENCE_CLEAN_PERIOD);
 
     /**
-     * TCC fence log table name
+     * Common fence log table name
      */
-    private String logTableName = DefaultValues.DEFAULT_TCC_FENCE_LOG_TABLE_NAME;
+    private String logTableName = DefaultValues.DEFAULT_COMMON_FENCE_LOG_TABLE_NAME;
 
     /**
-     * TCC fence datasource
+     * Common fence datasource
      */
     private final DataSource dataSource;
 
     /**
-     * TCC fence transactionManager
+     * Common fence transactionManager
      */
     private final PlatformTransactionManager transactionManager;
 
     /**
-     * TCC fence clean scheduled thread pool
+     * Common fence clean scheduled thread pool
      */
     private final ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("tccFenceClean", 1));
 
-    public TCCFenceConfig(final DataSource dataSource, final PlatformTransactionManager transactionManager) {
+    public CommonFenceConfig(final DataSource dataSource, final PlatformTransactionManager transactionManager) {
         this.dataSource = dataSource;
         this.transactionManager = transactionManager;
     }
@@ -116,7 +116,7 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
                 Date timeBefore = null;
                 try {
                     timeBefore = DateUtils.addSeconds(new Date(), -(int)periodSeconds);
-                    int deletedRowCount = TCCFenceHandler.deleteFenceByDate(timeBefore);
+                    int deletedRowCount = CommonFenceHandler.deleteFenceByDate(timeBefore);
                     if (deletedRowCount > 0) {
                         LOGGER.info("TCC fence clean task executed success, timeBefore: {}, deleted row count: {}",
                                 timeBefore, deletedRowCount);
@@ -141,19 +141,19 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
     public void afterPropertiesSet() {
         // set log table name
         if (logTableName != null) {
-            TCCFenceStoreDataBaseDAO.getInstance().setLogTableName(logTableName);
+            CommonFenceStoreDataBaseDAO.getInstance().setLogTableName(logTableName);
         }
         if (dataSource != null) {
             // set dataSource
-            TCCFenceHandler.setDataSource(dataSource);
+            CommonFenceHandler.setDataSource(dataSource);
         } else {
-            throw new TCCFenceException(FrameworkErrorCode.DateSourceNeedInjected);
+            throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }
         if (transactionManager != null) {
             // set transaction template
-            TCCFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
+            CommonFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
         } else {
-            throw new TCCFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
+            throw new CommonFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
         }
     }
 }

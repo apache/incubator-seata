@@ -26,7 +26,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.spring.interceptor.ActionContextUtil;
 import org.slf4j.Logger;
@@ -108,11 +107,11 @@ public final class BusinessActionContextUtil {
         try {
             // branch report
             DefaultResourceManager.get().branchReport(
-                    BranchType.TCC,
+                    actionContext.getBranchType(),
                     actionContext.getXid(),
                     actionContext.getBranchId(),
                     BranchStatus.Registered,
-                    JSON.toJSONString(Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, actionContext.getActionContext()))
+                    JSON.toJSONString(Collections.singletonMap(Constants.TX_ACTION_CONTEXT, actionContext.getActionContext()))
             );
 
             // reset to un_updated
@@ -151,7 +150,7 @@ public final class BusinessActionContextUtil {
         Map actionContextMap = null;
         if (StringUtils.isNotBlank(applicationData)) {
             Map tccContext = JSON.parseObject(applicationData, Map.class);
-            actionContextMap = (Map) tccContext.get(Constants.TCC_ACTION_CONTEXT);
+            actionContextMap = (Map) tccContext.get(Constants.TX_ACTION_CONTEXT);
         }
         if (actionContextMap == null) {
             actionContextMap = new HashMap<>(2);

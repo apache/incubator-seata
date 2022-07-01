@@ -99,27 +99,27 @@ public class SagaActionInterceptor implements MethodInterceptor, ConfigurationCh
             //save the previous branchType
             BranchType previousBranchType = RootContext.getBranchType();
             //if not SAGA, bind SAGA branchType
-            if (BranchType.SAGA != previousBranchType) {
-                RootContext.bindBranchType(BranchType.SAGA);
+            if (BranchType.SAGA_ANNOTATION != previousBranchType) {
+                RootContext.bindBranchType(BranchType.SAGA_ANNOTATION);
             }
             try {
                 TwoPhaseBusinessActionParam businessActionParam = new TwoPhaseBusinessActionParam();
                 businessActionParam.setActionName(sagaTransactional.name());
-                businessActionParam.setDelayReport(false);
-                businessActionParam.setUseFence(true);
-                businessActionParam.setBranchType(BranchType.SAGA);
+                businessActionParam.setDelayReport(sagaTransactional.isDelayReport());
+                businessActionParam.setUseCommonFence(sagaTransactional.useCommonFence());
+                businessActionParam.setBranchType(BranchType.SAGA_ANNOTATION);
                 Map<String, Object> businessActionContextMap = new HashMap<>(4);
                 //the phase two method name
                 businessActionContextMap.put(Constants.COMPENSATION_METHOD, sagaTransactional.compensationMethod());
                 businessActionContextMap.put(Constants.ACTION_NAME, sagaTransactional.name());
-                businessActionContextMap.put(Constants.USE_TCC_FENCE, true);
+                businessActionContextMap.put(Constants.USE_COMMON_FENCE, sagaTransactional.useCommonFence());
                 businessActionParam.setBusinessActionContext(businessActionContextMap);
                 //Handler the Saga Aspect, and return the business result
                 return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessActionParam,
                         invocation::proceed);
             } finally {
                 //if not SAGA, unbind branchType
-                if (BranchType.SAGA != previousBranchType) {
+                if (BranchType.SAGA_ANNOTATION != previousBranchType) {
                     RootContext.unbindBranchType();
                 }
                 //MDC remove branchId

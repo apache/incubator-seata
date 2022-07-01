@@ -59,6 +59,20 @@ public @interface SagaTransactional {
     String compensationMethod() default "compensation";
 
     /**
+     * delay branch report while sharing params to saga phase 2 to enhance performance
+     *
+     * @return isDelayReport
+     */
+    boolean isDelayReport() default false;
+
+    /**
+     * whether use common fence (idempotent,non_rollback,suspend)
+     *
+     * @return the boolean
+     */
+    boolean useCommonFence() default false;
+
+    /**
      * compensation method's args
      *
      * @return the Class[]

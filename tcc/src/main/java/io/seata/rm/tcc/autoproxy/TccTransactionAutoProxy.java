@@ -72,7 +72,7 @@ public class TccTransactionAutoProxy implements TransactionAutoProxy {
             //in jvm TCC bean , AOP
             IsTransactionProxyResult result = new IsTransactionProxyResult();
             result.setProxyTargetBean(true);
-            result.setUseFence(userFence);
+            result.setUseCommonFence(userFence);
             result.setMethodInterceptor(new TccActionInterceptor(remotingDesc));
             return result;
         }
@@ -81,7 +81,7 @@ public class TccTransactionAutoProxy implements TransactionAutoProxy {
             this.registryResource(remotingDesc);
             IsTransactionProxyResult result = new IsTransactionProxyResult();
             result.setProxyTargetBean(true);
-            result.setUseFence(userFence);
+            result.setUseCommonFence(userFence);
             result.setMethodInterceptor(new TccActionInterceptor(remotingDesc));
             return result;
         } else {

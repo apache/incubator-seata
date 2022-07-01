@@ -19,7 +19,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.saga.api.SagaTransactional;
 import io.seata.saga.interceptor.SagaActionInterceptor;
-import io.seata.saga.rm.SagaAnnotationResource;
+import io.seata.saga.rm.annotation.SagaAnnotationResource;
 import io.seata.spring.autoproxy.IsTransactionProxyResult;
 import io.seata.spring.autoproxy.TransactionAutoProxy;
 import io.seata.spring.remoting.Protocols;
@@ -50,7 +50,7 @@ public class SagaTransactionAutoProxy implements TransactionAutoProxy {
                 this.registryResource(remotingDesc);
                 IsTransactionProxyResult result = new IsTransactionProxyResult();
                 result.setProxyTargetBean(true);
-                result.setUseFence(true);
+                result.setUseCommonFence(sagaTransactional.useCommonFence());
                 result.setMethodInterceptor(new SagaActionInterceptor(remotingDesc));
                 return result;
             }
@@ -74,7 +74,6 @@ public class SagaTransactionAutoProxy implements TransactionAutoProxy {
                     SagaTransactional sagaTransactional = m.getAnnotation(SagaTransactional.class);
                     if (sagaTransactional != null) {
                         SagaAnnotationResource sagaAnnotationResource = new SagaAnnotationResource();
-                        sagaAnnotationResource.setUseSagaAnnotationMode(true);
                         sagaAnnotationResource.setActionName(sagaTransactional.name());
                         sagaAnnotationResource.setTargetBean(targetBean);
                         sagaAnnotationResource.setCommitMethod(m);

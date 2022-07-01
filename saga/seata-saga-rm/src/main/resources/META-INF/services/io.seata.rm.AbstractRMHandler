@@ -1,1 +1,2 @@
 io.seata.saga.rm.RMHandlerSaga
+io.seata.saga.rm.annotation.RMHandlerSagaAnnotation

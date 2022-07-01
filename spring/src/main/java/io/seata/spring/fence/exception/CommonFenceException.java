@@ -19,33 +19,33 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 
 /**
- * TCC Fence Exception
+ * Common Fence Exception
  *
  * @author kaka2code
  */
-public class TCCFenceException extends FrameworkException {
+public class CommonFenceException extends FrameworkException {
 
-    public TCCFenceException(FrameworkErrorCode err) {
+    public CommonFenceException(FrameworkErrorCode err) {
         super(err);
     }
 
-    public TCCFenceException(String msg) {
+    public CommonFenceException(String msg) {
         super(msg);
     }
 
-    public TCCFenceException(String msg, FrameworkErrorCode errCode) {
+    public CommonFenceException(String msg, FrameworkErrorCode errCode) {
         super(msg, errCode);
     }
 
-    public TCCFenceException(Throwable cause, String msg, FrameworkErrorCode errCode) {
+    public CommonFenceException(Throwable cause, String msg, FrameworkErrorCode errCode) {
         super(cause, msg, errCode);
     }
 
-    public TCCFenceException(Throwable th) {
+    public CommonFenceException(Throwable th) {
         super(th);
     }
 
-    public TCCFenceException(Throwable th, String msg) {
+    public CommonFenceException(Throwable th, String msg) {
         super(th, msg);
     }
 

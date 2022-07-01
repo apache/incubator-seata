@@ -16,13 +16,13 @@
 package io.seata.spring.fence.constant;
 
 /**
- * TCC Fence Constant
+ * Common Fence Constant
  *
  * @author kaka2code
  */
-public class TCCFenceConstant {
+public class CommonFenceConstant {
 
-    private TCCFenceConstant() {
+    private CommonFenceConstant() {
         throw new IllegalStateException("Utility class");
     }
 

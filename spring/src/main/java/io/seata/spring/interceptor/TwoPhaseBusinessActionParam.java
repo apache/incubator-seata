@@ -30,7 +30,7 @@ public class TwoPhaseBusinessActionParam {
 
     private Boolean isDelayReport;
 
-    private Boolean useFence;
+    private Boolean useCommonFence;
 
     private Map<String, Object> businessActionContext;
 
@@ -52,12 +52,12 @@ public class TwoPhaseBusinessActionParam {
         isDelayReport = delayReport;
     }
 
-    public Boolean getUseFence() {
-        return useFence;
+    public Boolean getUseCommonFence() {
+        return useCommonFence;
     }
 
-    public void setUseFence(Boolean useFence) {
-        this.useFence = useFence;
+    public void setUseCommonFence(Boolean useCommonFence) {
+        this.useCommonFence = useCommonFence;
     }
 
     public Map<String, Object> getBusinessActionContext() {

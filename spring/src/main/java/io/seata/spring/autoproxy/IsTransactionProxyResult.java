@@ -30,9 +30,9 @@ public class IsTransactionProxyResult {
     private boolean isProxyTargetBean;
 
     /**
-     * whether used fence
+     * whether used common fence
      */
-    private boolean useFence;
+    private boolean useCommonFence;
 
     /**
      * transaction proxy method
@@ -47,12 +47,12 @@ public class IsTransactionProxyResult {
         isProxyTargetBean = proxyTargetBean;
     }
 
-    public boolean isUseFence() {
-        return useFence;
+    public boolean isUseCommonFence() {
+        return useCommonFence;
     }
 
-    public void setUseFence(boolean useFence) {
-        this.useFence = useFence;
+    public void setUseCommonFence(boolean useCommonFence) {
+        this.useCommonFence = useCommonFence;
     }
 
     public MethodInterceptor getMethodInterceptor() {

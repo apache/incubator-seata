@@ -39,7 +39,7 @@ import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.autoproxy.DefaultTransactionAutoProxy;
 import io.seata.spring.autoproxy.IsTransactionProxyResult;
-import io.seata.spring.interceptor.TCCBeanParserUtils;
+import io.seata.spring.interceptor.TxBeanParserUtils;
 import io.seata.spring.remoting.parser.LocalServiceRemotingParser;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
@@ -288,10 +288,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
                 interceptor = null;
                 //check Transaction proxy
-                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
+                if (TxBeanParserUtils.isTxAutoProxy(bean, beanName, applicationContext)) {
                     IsTransactionProxyResult isTransactionProxyResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
                     // init tcc fence clean task if enable useTccFence
-                    TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext, isTransactionProxyResult.isUseFence());
+                    TxBeanParserUtils.initCommonFenceCleanTask(TxBeanParserUtils.getRemotingDesc(beanName), applicationContext, isTransactionProxyResult.isUseCommonFence());
                     //transaction interceptor(TCC/SAGA), proxy bean of sofa:reference/dubbo:reference, LocalTCC and LocalService
                     interceptor = isTransactionProxyResult.getMethodInterceptor();
                     ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,

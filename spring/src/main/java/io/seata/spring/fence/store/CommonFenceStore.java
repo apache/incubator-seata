@@ -19,50 +19,50 @@ import java.sql.Connection;
 import java.util.Date;
 
 /**
- * The TCC Fence Store
+ * The common Fence Store
  *
  * @author kaka2code
  */
-public interface TCCFenceStore {
+public interface CommonFenceStore {
 
     /**
-     * Query tcc fence do.
+     * Query common fence do.
      * @param xid the global transaction id
      * @param branchId the branch transaction id
-     * @return the tcc fence do
+     * @return the common fence do
      */
-    TCCFenceDO queryTCCFenceDO(Connection conn, String xid, Long branchId);
+    CommonFenceDO queryCommonFenceDO(Connection conn, String xid, Long branchId);
 
     /**
-     * Insert tcc fence do boolean.
-     * @param tccFenceDO the tcc fence do
+     * Insert common fence do boolean.
+     * @param commonFenceDO the common fence do
      * @return the boolean
      */
-    boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO);
+    boolean insertCommonFenceDO(Connection conn, CommonFenceDO commonFenceDO);
 
     /**
-     * Update tcc fence do boolean.
+     * Update common fence do boolean.
      * @param xid the global transaction id
      * @param branchId the branch transaction id
      * @param newStatus the new status
      * @return the boolean
      */
-    boolean updateTCCFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus);
+    boolean updateCommonFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus);
 
     /**
-     * Delete tcc fence do boolean.
+     * Delete common fence do boolean.
      * @param xid the global transaction id
      * @param branchId the branch transaction id
      * @return the boolean
      */
-    boolean deleteTCCFenceDO(Connection conn, String xid, Long branchId);
+    boolean deleteCommonFenceDO(Connection conn, String xid, Long branchId);
 
     /**
-     * Delete tcc fence by datetime.
+     * Delete common fence by datetime.
      * @param datetime datetime
      * @return the deleted row count
      */
-    int deleteTCCFenceDOByDate(Connection conn, Date datetime);
+    int deleteCommonFenceDOByDate(Connection conn, Date datetime);
 
     /**
      * Set LogTable Name

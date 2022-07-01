@@ -33,12 +33,12 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * An annotation adapter for TCC
+ * An annotation adapter for transaction annotation
  *
  * @author ppf
  */
-public class TccAnnotationProcessor implements BeanPostProcessor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TccAnnotationProcessor.class);
+public class TxAnnotationProcessor implements BeanPostProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TxAnnotationProcessor.class);
 
     private static final List<Class<? extends Annotation>> ANNOTATIONS = new ArrayList<>(4);
     private static final Set<String> PROXIED_SET = new HashSet<>();
@@ -74,7 +74,7 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
                 return;
             }
 
-            addTccAdvise(bean, beanName, field, field.getType());
+            addTxAdvise(bean, beanName, field, field.getType());
 
         }, field -> !Modifier.isStatic(field.getModifiers())
                 && (field.isAnnotationPresent(annotation)));
@@ -83,7 +83,7 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
     }
 
     /**
-     * Add TCC interceptor for tcc proxy bean
+     * Add transaction interceptor for common transaction proxy bean
      *
      * @param bean           the bean
      * @param beanName       the bean name
@@ -91,7 +91,7 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
      * @param interfaceClass the interface class
      * @throws IllegalAccessException the illegal access exception
      */
-    public void addTccAdvise(Object bean, String beanName, Field field, Class interfaceClass) throws IllegalAccessException {
+    public void addTxAdvise(Object bean, String beanName, Field field, Class interfaceClass) throws IllegalAccessException {
         Object fieldValue = field.get(bean);
         if (fieldValue == null) {
             return;
@@ -99,7 +99,7 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
 
         IsTransactionProxyResult isProxyTargetBeanResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
         if (isProxyTargetBeanResult.isProxyTargetBean()) {
-            Object proxyBean = TCCBeanParserUtils.createProxy(interfaceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
+            Object proxyBean = TxBeanParserUtils.createProxy(interfaceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
             field.setAccessible(true);
             field.set(bean, proxyBean);
             LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy [" + isProxyTargetBeanResult.getMethodInterceptor().getClass().getName() + "]");

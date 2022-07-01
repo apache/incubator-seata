@@ -1,1 +1,2 @@
 io.seata.saga.rm.SagaResourceManager
+io.seata.saga.rm.annotation.SagaAnnotationResourceManager

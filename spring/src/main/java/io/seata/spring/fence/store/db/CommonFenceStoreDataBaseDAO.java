@@ -20,10 +20,10 @@ import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
-import io.seata.spring.fence.exception.TCCFenceException;
-import io.seata.spring.fence.store.TCCFenceDO;
-import io.seata.spring.fence.store.TCCFenceStore;
-import io.seata.spring.fence.store.db.sql.TCCFenceStoreSqls;
+import io.seata.spring.fence.exception.CommonFenceException;
+import io.seata.spring.fence.store.CommonFenceDO;
+import io.seata.spring.fence.store.CommonFenceStore;
+import io.seata.spring.fence.store.db.sql.CommonFenceStoreSqls;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,26 +34,26 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 
 /**
- * The type TCC Fence store data base dao
+ * The type Common Fence store data base dao
  *
  * @author kaka2code
  */
-public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
+public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
 
     /**
-     * TCC fence log table name
+     * Common fence log table name
      */
-    private String logTableName = DefaultValues.DEFAULT_TCC_FENCE_LOG_TABLE_NAME;
+    private String logTableName = DefaultValues.DEFAULT_COMMON_FENCE_LOG_TABLE_NAME;
 
-    private static volatile TCCFenceStoreDataBaseDAO instance = null;
+    private static volatile CommonFenceStoreDataBaseDAO instance = null;
 
-    private TCCFenceStoreDataBaseDAO() {}
+    private CommonFenceStoreDataBaseDAO() {}
 
-    public static TCCFenceStore getInstance() {
+    public static CommonFenceStore getInstance() {
         if (instance == null) {
-            synchronized (TCCFenceStore.class) {
+            synchronized (CommonFenceStore.class) {
                 if (instance == null) {
-                    instance = new TCCFenceStoreDataBaseDAO();
+                    instance = new CommonFenceStoreDataBaseDAO();
                 }
             }
         }
@@ -61,21 +61,21 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public TCCFenceDO queryTCCFenceDO(Connection conn, String xid, Long branchId) {
+    public CommonFenceDO queryCommonFenceDO(Connection conn, String xid, Long branchId) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            String sql = TCCFenceStoreSqls.getQuerySQLByBranchIdAndXid(logTableName);
+            String sql = CommonFenceStoreSqls.getQuerySQLByBranchIdAndXid(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                TCCFenceDO tccFenceDO = new TCCFenceDO();
-                tccFenceDO.setXid(rs.getString("xid"));
-                tccFenceDO.setBranchId(rs.getLong("branch_id"));
-                tccFenceDO.setStatus(rs.getInt("status"));
-                return tccFenceDO;
+                CommonFenceDO commonFenceDO = new CommonFenceDO();
+                commonFenceDO.setXid(rs.getString("xid"));
+                commonFenceDO.setBranchId(rs.getLong("branch_id"));
+                commonFenceDO.setStatus(rs.getInt("status"));
+                return commonFenceDO;
             } else {
                 return null;
             }
@@ -87,22 +87,22 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO) {
+    public boolean insertCommonFenceDO(Connection conn, CommonFenceDO commonFenceDO) {
         PreparedStatement ps = null;
         try {
             Timestamp now = new Timestamp(System.currentTimeMillis());
 
-            String sql = TCCFenceStoreSqls.getInsertLocalTCCLogSQL(logTableName);
+            String sql = CommonFenceStoreSqls.getInsertLocalTCCLogSQL(logTableName);
             ps = conn.prepareStatement(sql);
-            ps.setString(1, tccFenceDO.getXid());
-            ps.setLong(2, tccFenceDO.getBranchId());
-            ps.setString(3, tccFenceDO.getActionName());
-            ps.setInt(4, tccFenceDO.getStatus());
+            ps.setString(1, commonFenceDO.getXid());
+            ps.setLong(2, commonFenceDO.getBranchId());
+            ps.setString(3, commonFenceDO.getActionName());
+            ps.setInt(4, commonFenceDO.getStatus());
             ps.setTimestamp(5, now);
             ps.setTimestamp(6, now);
             return ps.executeUpdate() > 0;
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new TCCFenceException(String.format("Insert tcc fence record duplicate key exception. xid= %s, branchId= %s", tccFenceDO.getXid(), tccFenceDO.getBranchId()),
+            throw new CommonFenceException(String.format("Insert tcc fence record duplicate key exception. xid= %s, branchId= %s", commonFenceDO.getXid(), commonFenceDO.getBranchId()),
                     FrameworkErrorCode.DuplicateKeyException);
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -112,10 +112,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public boolean updateTCCFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus) {
+    public boolean updateCommonFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus) {
         PreparedStatement ps = null;
         try {
-            String sql = TCCFenceStoreSqls.getUpdateStatusSQLByBranchIdAndXid(logTableName);
+            String sql = CommonFenceStoreSqls.getUpdateStatusSQLByBranchIdAndXid(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setInt(1, newStatus);
             // gmt_modified
@@ -132,10 +132,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public boolean deleteTCCFenceDO(Connection conn, String xid, Long branchId) {
+    public boolean deleteCommonFenceDO(Connection conn, String xid, Long branchId) {
         PreparedStatement ps = null;
         try {
-            String sql = TCCFenceStoreSqls.getDeleteSQLByBranchIdAndXid(logTableName);
+            String sql = CommonFenceStoreSqls.getDeleteSQLByBranchIdAndXid(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
@@ -149,10 +149,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public int deleteTCCFenceDOByDate(Connection conn, Date datetime) {
+    public int deleteCommonFenceDOByDate(Connection conn, Date datetime) {
         PreparedStatement ps = null;
         try {
-            String sql = TCCFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
+            String sql = CommonFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setTimestamp(1, new Timestamp(datetime.getTime()));
             return ps.executeUpdate();

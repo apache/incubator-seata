@@ -28,7 +28,7 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.api.ParamType;
-import io.seata.spring.fence.TCCFenceHandler;
+import io.seata.spring.fence.CommonFenceHandler;
 import io.seata.spring.remoting.RemotingDesc;
 import io.seata.spring.util.DubboUtil;
 import io.seata.spring.util.SpringProxyUtils;
@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
+ * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
  *
  * @author zhangsen
  */
@@ -56,7 +56,7 @@ public class ActionInterceptorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
 
     /**
-     * Handler the TCC Aspect
+     * Handler the Tx Aspect
      *
      * @param method              the method
      * @param arguments           the arguments
@@ -77,9 +77,11 @@ public class ActionInterceptorHandler {
         actionContext.setActionName(actionName);
         //Set the delay report
         actionContext.setDelayReport(businessActionParam.getDelayReport());
+        //Set branch type
+        actionContext.setBranchType(businessActionParam.getBranchType());
 
         //Creating Branch Record
-        String branchId = doTccActionLogStore(method, arguments, businessActionParam, actionContext);
+        String branchId = doTxActionLogStore(method, arguments, businessActionParam, actionContext);
         actionContext.setBranchId(branchId);
         //MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
@@ -90,14 +92,14 @@ public class ActionInterceptorHandler {
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
 
-            if (businessActionParam.getUseFence()) {
+            if (businessActionParam.getUseCommonFence()) {
                 try {
-                    // Use TCC Fence, and return the business result
-                    return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), actionName, targetCallback);
+                    // Use common Fence, and return the business result
+                    return CommonFenceHandler.prepareFence(xid, Long.valueOf(branchId), actionName, targetCallback);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     Throwable originException = e.getCause();
                     if (originException instanceof FrameworkException) {
-                        LOGGER.error("[{}] prepare TCC fence error: {}", xid, originException.getMessage());
+                        LOGGER.error("[{}] prepare common fence error: {}", xid, originException.getMessage());
                     }
                     throw originException;
                 }
@@ -166,8 +168,8 @@ public class ActionInterceptorHandler {
      * @param actionContext       the action context
      * @return the branchId
      */
-    protected String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessActionParam businessActionParam,
-                                         BusinessActionContext actionContext) {
+    protected String doTxActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessActionParam businessActionParam,
+                                        BusinessActionContext actionContext) {
         String actionName = actionContext.getActionName();
         String xid = actionContext.getXid();
 
@@ -194,7 +196,7 @@ public class ActionInterceptorHandler {
         //endregion
 
         //Init applicationData
-        Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
+        Map<String, Object> applicationContext = Collections.singletonMap(Constants.TX_ACTION_CONTEXT, context);
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
@@ -202,7 +204,7 @@ public class ActionInterceptorHandler {
                     applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
-            String msg = String.format("TCC branch Register error, xid: %s", xid);
+            String msg = String.format("%s branch Register error, xid: %s", businessActionParam.getBranchType(), xid);
             LOGGER.error(msg, t);
             throw new FrameworkException(t, msg);
         }
