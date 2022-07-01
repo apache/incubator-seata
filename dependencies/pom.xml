@@ -32,7 +32,7 @@
     <description>dependencies for Seata built with Maven</description>
 
     <properties>
-        <dubbo.version>2.7.4</dubbo.version>
+        <dubbo.version>3.0.9</dubbo.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
