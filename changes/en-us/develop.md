@@ -24,13 +24,15 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4670](https://github.com/seata/seata/pull/4670)] optimize the thread pool size of branchResultMessageExecutor
   - [[#4662](https://github.com/seata/seata/pull/4662)] optimize rollback transaction metrics
   - [[#4693](https://github.com/seata/seata/pull/4693)] optimize the console navigation bar
-  - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
   - [[#4700](https://github.com/seata/seata/pull/4700)] fix maven-compiler-plugin and maven-resources-plugin execute failed
   - [[#4711](https://github.com/seata/seata/pull/4711)] separate lib dependencies for deployments
   - [[#4720](https://github.com/seata/seata/pull/4720)] optimize pom description
   - [[#4728](https://github.com/seata/seata/pull/4728)] upgrade logback dependency to 1.2.9
 
 ### test:
+
+  - [[#4544](https://github.com/seata/seata/pull/4544)] optimize jackson dependencies in TransactionContextFilterTest
+  - [[#4731](https://github.com/seata/seata/pull/4731)] fix UT failed in AsyncWorkerTest and LockManagerTest
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
