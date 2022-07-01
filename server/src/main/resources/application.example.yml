@@ -172,3 +172,12 @@ seata:
       boss-thread-prefix: NettyBoss
       worker-thread-prefix: NettyServerNIOWorker
       boss-thread-size: 1
+
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
+      show-details: when_authorized
+      show-components: when_authorized
