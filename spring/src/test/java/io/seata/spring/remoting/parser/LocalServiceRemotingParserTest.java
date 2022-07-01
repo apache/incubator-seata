@@ -18,6 +18,8 @@ package io.seata.spring.remoting.parser;
 import io.seata.spring.remoting.LocalServiceAction;
 import io.seata.spring.remoting.LocalServiceActionImpl;
 import io.seata.spring.remoting.RemotingDesc;
+import io.seata.spring.remoting.Protocols;
+import  io.seata.spring.remoting.NormalServiceActionImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +48,24 @@ public class LocalServiceRemotingParserTest {
         Assertions.assertEquals("io.seata.spring.remoting.LocalServiceAction", remotingDesc.getInterfaceClassName());
         Assertions.assertEquals(remotingDesc.getInterfaceClass(), LocalServiceAction.class);
         Assertions.assertEquals(remotingDesc.getTargetBean(), localServiceAction);
+    }
+
+    @Test
+    public void testProtocol() {
+        Assertions.assertEquals(Protocols.IN_JVM, localServiceRemotingParser.getProtocol());
+    }
+
+    @Test
+    public void testNoRemotingDesc() {
+        NormalServiceActionImpl normalServiceAction = new NormalServiceActionImpl();
+        RemotingDesc remotingDesc = localServiceRemotingParser.getServiceDesc(normalServiceAction, "normalServiceAction");
+        Assertions.assertNull(remotingDesc);
+    }
+    
+    @Test
+    public void testNotIsService() {
+        NormalServiceActionImpl normalServiceAction = new NormalServiceActionImpl();
+        Assertions.assertFalse(localServiceRemotingParser.isService(normalServiceAction, "normalServiceAction"));
     }
 
 }
