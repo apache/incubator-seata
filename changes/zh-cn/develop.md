@@ -5,7 +5,7 @@
 ### feature：
   - [[#4661](https://github.com/seata/seata/pull/4713)] 支持根据xid负载均衡算法
   - [[#4676](https://github.com/seata/seata/pull/4676)] 支持Nacos作为注册中心时，server通过挂载SLB暴露服务
-
+  - [[#4737](https://github.com/seata/seata/pull/4737)] 支持Spring boot actuator
 
 ### bugfix：
   - [[#4515](https://github.com/seata/seata/pull/4515)] 修复develop分支SeataTCCFenceAutoConfiguration在客户端未使用DB时，启动抛出ClassNotFoundException的问题。
