@@ -17,7 +17,7 @@ package io.seata.rm.saga;
 
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
-import io.seata.saga.api.SagaTransactional;
+import io.seata.saga.annotation.api.SagaTransactional;
 import io.seata.spring.annotation.LocalService;
 
 /**

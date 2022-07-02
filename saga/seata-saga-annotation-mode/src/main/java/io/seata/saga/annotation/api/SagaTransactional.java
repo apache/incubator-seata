@@ -13,12 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.api;
+package io.seata.saga.annotation.api;
 
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
-import io.seata.saga.interceptor.SagaActionInterceptor;
+import io.seata.saga.annotation.interceptor.SagaActionInterceptor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

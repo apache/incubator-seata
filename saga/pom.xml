@@ -36,7 +36,7 @@
         <module>seata-saga-rm</module>
         <module>seata-saga-tm</module>
         <module>seata-saga-engine-store</module>
-        <module>annotation-mode</module>
+        <module>seata-saga-annotation-mode</module>
     </modules>
 
     <dependencies>

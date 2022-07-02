@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.interceptor;
+package io.seata.saga.annotation.interceptor;
 
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
@@ -23,7 +23,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
-import io.seata.saga.api.SagaTransactional;
+import io.seata.saga.annotation.api.SagaTransactional;
 import io.seata.spring.interceptor.ActionInterceptorHandler;
 import io.seata.spring.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.spring.remoting.RemotingDesc;

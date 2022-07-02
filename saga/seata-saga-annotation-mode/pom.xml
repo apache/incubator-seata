@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>seata-saga-annotation-mode ${project.version}</name>
-    <artifactId>annotation-mode</artifactId>
+    <artifactId>seata-saga-annotation-mode</artifactId>
 
     <dependencies>
         <dependency>

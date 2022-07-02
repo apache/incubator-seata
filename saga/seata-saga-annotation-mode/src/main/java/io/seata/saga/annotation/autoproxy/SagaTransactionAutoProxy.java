@@ -13,12 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.autoproxy;
+package io.seata.saga.annotation.autoproxy;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.saga.api.SagaTransactional;
-import io.seata.saga.interceptor.SagaActionInterceptor;
+import io.seata.saga.annotation.interceptor.SagaActionInterceptor;
+import io.seata.saga.annotation.api.SagaTransactional;
 import io.seata.saga.rm.annotation.SagaAnnotationResource;
 import io.seata.spring.autoproxy.IsTransactionProxyResult;
 import io.seata.spring.autoproxy.TransactionAutoProxy;
