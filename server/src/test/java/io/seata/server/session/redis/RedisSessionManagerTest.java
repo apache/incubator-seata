@@ -36,6 +36,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.JedisPool;
@@ -48,6 +50,8 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  */
 @SpringBootTest
 public class RedisSessionManagerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisSessionManagerTest.class);
     private static RedisServer server = null;
     private static SessionManager sessionManager = null;
 
@@ -90,7 +94,6 @@ public class RedisSessionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session);
-        session.setStatus(GlobalStatus.Committing);
         sessionManager.updateGlobalSessionStatus(session,GlobalStatus.Committing);
     }
 

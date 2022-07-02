@@ -15,23 +15,19 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import com.google.common.collect.Lists;
+
 import io.seata.common.exception.StoreException;
-import io.seata.common.io.FileLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
@@ -41,6 +37,9 @@ import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.server.storage.redis.LuaParser;
+
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -50,11 +49,14 @@ import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
 import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
+import static io.seata.server.storage.redis.LuaParser.LuaErrorStatus;
+
 /**
  * The redis lock store operation
  *
  * @author funkye
  * @author wangzhongxiang
+ * @author conghuhu
  */
 public class RedisLocker extends AbstractLocker {
 
@@ -80,43 +82,44 @@ public class RedisLocker extends AbstractLocker {
 
     private static final String ROW_KEY = "rowKey";
 
-    private static final String REDIS_LUA_FILE_NAME = "lua/redislocker/redislock.lua";
+    private static final String LUA_PREFIX = "lua/redislocker/";
 
-    private static String ACQUIRE_LOCK_SHA;
+    private static final String ACQUIRE_LOCK_LUA_FILE_NAME = LUA_PREFIX + "acquireRedisLock.lua";
 
-    private static final String WHITE_SPACE = " ";
+    private static final String RELEASE_LOCK_LUA_FILE_NAME = LUA_PREFIX + "releaseRedisLock.lua";
 
-    private static final String ANNOTATION_LUA = "--";
+    private static final String UPDATE_LOCK_LUA_FILE_NAME = LUA_PREFIX + "updateLockStatus.lua";
+
+    private static final String LOCKABLE_LUA_FILE_NAME = LUA_PREFIX + "isLockable.lua";
+
+    /**
+     * key filename
+     * value LOCK_SHA_SCRIPT
+     */
+    private static final Map<String, String> LOCK_SHA_MAP = new HashMap<>(4);
 
     /**
      * Instantiates a new Redis locker.
      */
     public RedisLocker() {
-        if (ACQUIRE_LOCK_SHA == null) {
-            File luaFile = FileLoader.load(REDIS_LUA_FILE_NAME);
-            if (luaFile != null) {
-                StringBuilder acquireLockLuaByFile = new StringBuilder();
-                try (FileInputStream fis = new FileInputStream(luaFile)) {
-                    BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        if (line.trim().startsWith(ANNOTATION_LUA)) {
-                            continue;
-                        }
-                        acquireLockLuaByFile.append(line);
-                        acquireLockLuaByFile.append(WHITE_SPACE);
-                    }
-                // if it fails to read the file, pipeline mode is used
-                } catch (IOException e) {
-                    LOGGER.info("redis locker use pipeline mode");
-                    return;
-                }
-                try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                    ACQUIRE_LOCK_SHA = jedis.scriptLoad(acquireLockLuaByFile.toString());
-                    LOGGER.info("redis locker use lua mode");
-                }
-            } else {
-                LOGGER.info("redis locker use pipeline mode");
+        if (LOCK_SHA_MAP.isEmpty()) {
+            loadLuaFile(ACQUIRE_LOCK_LUA_FILE_NAME, "acquire lock");
+            loadLuaFile(RELEASE_LOCK_LUA_FILE_NAME, "release lock");
+            loadLuaFile(UPDATE_LOCK_LUA_FILE_NAME, "update lock");
+            loadLuaFile(LOCKABLE_LUA_FILE_NAME, "lockable");
+        }
+    }
+
+    private void loadLuaFile(String fileName, String mode) {
+        try {
+            LOCK_SHA_MAP.putAll(LuaParser.getEvalShaMapFromFile(fileName));
+        } catch (IOException e) {
+            // if it fails to read the file, pipeline mode is used
+            if (LOCK_SHA_MAP.get(fileName) != null) {
+                LOCK_SHA_MAP.remove(fileName);
+            }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("redis locker: {} use pipeline mode", mode);
             }
         }
     }
@@ -132,15 +135,17 @@ public class RedisLocker extends AbstractLocker {
             return true;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            if (ACQUIRE_LOCK_SHA != null && autoCommit) {
-                return acquireLockByLua(jedis, rowLocks);
+            String luaSHA = LOCK_SHA_MAP.get(ACQUIRE_LOCK_LUA_FILE_NAME);
+            if (luaSHA != null) {
+                return acquireLockByLua(jedis, rowLocks, luaSHA);
             } else {
                 return acquireLockByPipeline(jedis, rowLocks, autoCommit, skipCheckLock);
             }
         }
     }
 
-    private boolean acquireLockByPipeline(Jedis jedis, List<RowLock> rowLocks, boolean autoCommit, boolean skipCheckLock) {
+    private boolean acquireLockByPipeline(Jedis jedis, List<RowLock> rowLocks, boolean autoCommit,
+        boolean skipCheckLock) {
         String needLockXid = rowLocks.get(0).getXid();
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needLockDOS = convertToLockDO(rowLocks);
@@ -161,7 +166,7 @@ public class RedisLocker extends AbstractLocker {
                 }
             });
             List<List<String>> existedLockInfos =
-                    Lists.partition((List<String>)(List)pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
+                Lists.partition((List<String>) (List) pipeline1.syncAndReturnAll(), autoCommit ? 1 : 2);
 
             // When the local transaction and the global transaction are enabled,
             // the branch registration fails to acquire the global lock,
@@ -237,13 +242,13 @@ public class RedisLocker extends AbstractLocker {
         return true;
     }
 
-    private boolean acquireLockByLua(Jedis jedis, List<RowLock> rowLocks) {
+    private boolean acquireLockByLua(Jedis jedis, List<RowLock> rowLocks, String luaSHA) {
         String needLockXid = rowLocks.get(0).getXid();
         Long branchId = rowLocks.get(0).getBranchId();
         List<LockDO> needLockDOs = rowLocks.stream()
-                .map(this::convertToLockDO)
-                .filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
-                .collect(Collectors.toList());
+            .map(this::convertToLockDO)
+            .filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
+            .collect(Collectors.toList());
         ArrayList<String> keys = new ArrayList<>();
         ArrayList<String> args = new ArrayList<>();
         int size = needLockDOs.size();
@@ -263,16 +268,28 @@ public class RedisLocker extends AbstractLocker {
         String xidLockKey = buildXidLockKey(needLockXid);
         StringJoiner lockKeysString = new StringJoiner(ROW_LOCK_KEY_SPLIT_CHAR);
         needLockDOs.stream().map(lockDO -> buildLockKey(lockDO.getRowKey())).forEach(lockKeysString::add);
+
         keys.add(xidLockKey);
         keys.add(branchId.toString());
         args.add(lockKeysString.toString());
         // reset args index 2
         args.set(1, String.valueOf(args.size()));
-        String xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
-        if (xIdOwnLock.equals(needLockXid)) {
+
+        String result = (String) jedis.evalsha(luaSHA, keys, args);
+
+        LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
+
+        // luaResult.getData() : xIdOwnLock
+        if (luaResult.getSuccess() && luaResult.getData().equals(needLockXid)) {
             return true;
         } else {
-            logGlobalLockConflictInfo(needLockXid, keys.get(0), xIdOwnLock);
+            if (LuaErrorStatus.ANOTHER_ROLLBACKING.equals(luaResult.getStatus())) {
+                // if a global lock is found in the Rollbacking state,the fail-fast code is returned directly.
+                throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
+            } else if (LuaErrorStatus.ANOTHER_HOLDING.equals(luaResult.getStatus())) {
+                // means the rowKey is holding by another global transaction
+                logGlobalLockConflictInfo(needLockXid, keys.get(0), luaResult.getData());
+            }
             return false;
         }
     }
@@ -282,29 +299,16 @@ public class RedisLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseLock(List<RowLock> rowLocks) {
-        if (CollectionUtils.isEmpty(rowLocks)) {
-            return true;
-        }
-        String currentXid = rowLocks.get(0).getXid();
-        Long branchId = rowLocks.get(0).getBranchId();
-        List<LockDO> needReleaseLocks = convertToLockDO(rowLocks);
-        String[] needReleaseKeys = new String[needReleaseLocks.size()];
-        for (int i = 0; i < needReleaseLocks.size(); i++) {
-            needReleaseKeys[i] = buildLockKey(needReleaseLocks.get(i).getRowKey());
-        }
-
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
-            pipelined.del(needReleaseKeys);
-            pipelined.hdel(buildXidLockKey(currentXid), branchId.toString());
-            pipelined.sync();
-            return true;
-        }
-    }
-
-    @Override
     public boolean releaseLock(String xid) {
-        return doReleaseLock(xid, null);
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String xidLockKey = buildXidLockKey(xid);
+            String luaSHA = LOCK_SHA_MAP.get(RELEASE_LOCK_LUA_FILE_NAME);
+            if (luaSHA != null) {
+                return doReleaseLockByLua(xidLockKey, null, luaSHA, jedis);
+            } else {
+                return doReleaseLockByPipeline(xidLockKey, null, jedis);
+            }
+        }
     }
 
     @Override
@@ -312,7 +316,15 @@ public class RedisLocker extends AbstractLocker {
         if (branchId == null) {
             return true;
         }
-        return doReleaseLock(xid, branchId);
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String xidLockKey = buildXidLockKey(xid);
+            String luaSHA = LOCK_SHA_MAP.get(RELEASE_LOCK_LUA_FILE_NAME);
+            if (luaSHA != null) {
+                return doReleaseLockByLua(xidLockKey, branchId, luaSHA, jedis);
+            } else {
+                return doReleaseLockByPipeline(xidLockKey, branchId, jedis);
+            }
+        }
     }
 
     @Override
@@ -326,12 +338,12 @@ public class RedisLocker extends AbstractLocker {
             for (LockDO rowlock : locks) {
                 lockKeys.add(buildLockKey(rowlock.getRowKey()));
             }
-
             String xid = rowLocks.get(0).getXid();
-            try (Pipeline pipeline = jedis.pipelined()) {
-                lockKeys.forEach(key -> pipeline.hget(key, XID));
-                List<String> existedXids = (List<String>)(List)pipeline.syncAndReturnAll();
-                return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
+            String luaSHA = LOCK_SHA_MAP.get(LOCKABLE_LUA_FILE_NAME);
+            if (luaSHA != null) {
+                return doIsLockableByLua(lockKeys, xid, luaSHA, jedis);
+            } else {
+                return doIsLockableByPipeline(lockKeys, xid, jedis);
             }
         }
     }
@@ -340,48 +352,105 @@ public class RedisLocker extends AbstractLocker {
     public void updateLockStatus(String xid, LockStatus lockStatus) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String xidLockKey = buildXidLockKey(xid);
-            Map<String, String> branchAndLockKeys = jedis.hgetAll(xidLockKey);
-            if (CollectionUtils.isNotEmpty(branchAndLockKeys)) {
-                try (Pipeline pipeline = jedis.pipelined()) {
-                    branchAndLockKeys.values()
-                        .forEach(k -> pipeline.hset(k, STATUS, String.valueOf(lockStatus.getCode())));
-                    pipeline.sync();
-                }
+            String luaSHA = LOCK_SHA_MAP.get(UPDATE_LOCK_LUA_FILE_NAME);
+            if (luaSHA != null) {
+                doUpdateLockStatusByLua(xidLockKey, lockStatus, luaSHA, jedis);
+            } else {
+                doUpdateLockStatusByPipeline(xidLockKey, lockStatus, jedis);
             }
         }
     }
 
-    private boolean doReleaseLock(String xid, Long branchId) {
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String xidLockKey = buildXidLockKey(xid);
-            final List<String> rowKeys = new ArrayList<>();
-            if (null == branchId) {
-                Map<String, String> rowKeyMap = jedis.hgetAll(xidLockKey);
-                rowKeyMap.forEach((branch, rowKey) -> rowKeys.add(rowKey));
-            } else {
-                rowKeys.add(jedis.hget(xidLockKey, branchId.toString()));
+    private boolean doIsLockableByLua(Set<String> lockKeys, String xid, String luaSHA, Jedis jedis) {
+        ArrayList<String> keys = new ArrayList<>();
+        keys.add(String.valueOf(lockKeys.size()));
+        keys.addAll(lockKeys);
+        ArrayList<String> args = new ArrayList<>();
+        args.add(xid);
+        String res = (String) jedis.evalsha(luaSHA, keys, args);
+        return "true".equals(res);
+    }
+
+    private boolean doIsLockableByPipeline(Set<String> lockKeys, String xid, Jedis jedis) {
+        try (Pipeline pipeline = jedis.pipelined()) {
+            lockKeys.forEach(key -> pipeline.hget(key, XID));
+            List<String> existedXids = (List<String>) (List) pipeline.syncAndReturnAll();
+            return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
+        }
+    }
+
+    private void doUpdateLockStatusByLua(String xidLockKey, LockStatus lockStatus, String luaSHA, Jedis jedis) {
+        ArrayList<String> keys = new ArrayList<>();
+        ArrayList<String> args = new ArrayList<>();
+        keys.add(xidLockKey);
+        keys.add(STATUS);
+        args.add(String.valueOf(lockStatus.getCode()));
+        jedis.evalsha(luaSHA, keys, args);
+    }
+
+    private void doUpdateLockStatusByPipeline(String xidLockKey, LockStatus lockStatus, Jedis jedis) {
+        Map<String, String> branchAndLockKeys = jedis.hgetAll(xidLockKey);
+        if (CollectionUtils.isEmpty(branchAndLockKeys)) {
+            return;
+        }
+        try (Pipeline pipeline = jedis.pipelined()) {
+            if (CollectionUtils.isEmpty(branchAndLockKeys)) {
+                return;
             }
-            if (CollectionUtils.isNotEmpty(rowKeys)) {
-                Pipeline pipelined = jedis.pipelined();
-                if (null == branchId) {
-                    pipelined.del(xidLockKey);
-                } else {
-                    pipelined.hdel(xidLockKey, branchId.toString());
-                }
-                rowKeys.forEach(rowKeyStr -> {
-                    if (StringUtils.isNotEmpty(rowKeyStr)) {
-                        if (rowKeyStr.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
-                            String[] keys = rowKeyStr.split(ROW_LOCK_KEY_SPLIT_CHAR);
-                            pipelined.del(keys);
+            branchAndLockKeys.values()
+                .forEach(k -> {
+                    if (StringUtils.isNotEmpty(k)) {
+                        if (k.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
+                            String[] keys = k.split(ROW_LOCK_KEY_SPLIT_CHAR);
+                            for (String key : keys) {
+                                pipeline.hset(key, STATUS, String.valueOf(lockStatus.getCode()));
+                            }
                         } else {
-                            pipelined.del(rowKeyStr);
+                            pipeline.hset(k, STATUS, String.valueOf(lockStatus.getCode()));
                         }
                     }
                 });
-                pipelined.sync();
-            }
-            return true;
+            pipeline.sync();
         }
+    }
+
+    private boolean doReleaseLockByPipeline(String xidLockKey, Long branchId, Jedis jedis) {
+        final List<String> rowKeys = new ArrayList<>();
+        if (null == branchId) {
+            Map<String, String> rowKeyMap = jedis.hgetAll(xidLockKey);
+            rowKeyMap.forEach((branch, rowKey) -> rowKeys.add(rowKey));
+        } else {
+            rowKeys.add(jedis.hget(xidLockKey, branchId.toString()));
+        }
+        if (CollectionUtils.isNotEmpty(rowKeys)) {
+            Pipeline pipelined = jedis.pipelined();
+            if (null == branchId) {
+                pipelined.del(xidLockKey);
+            } else {
+                pipelined.hdel(xidLockKey, branchId.toString());
+            }
+            rowKeys.forEach(rowKeyStr -> {
+                if (StringUtils.isNotEmpty(rowKeyStr)) {
+                    if (rowKeyStr.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
+                        String[] keys = rowKeyStr.split(ROW_LOCK_KEY_SPLIT_CHAR);
+                        pipelined.del(keys);
+                    } else {
+                        pipelined.del(rowKeyStr);
+                    }
+                }
+            });
+            pipelined.sync();
+        }
+        return true;
+    }
+
+    private boolean doReleaseLockByLua(String xidLockKey, Long branchId, String luaSHA, Jedis jedis) {
+        ArrayList<String> keys = new ArrayList<>();
+        ArrayList<String> args = new ArrayList<>();
+        keys.add(xidLockKey);
+        Optional.ofNullable(branchId).ifPresent(val -> keys.add(String.valueOf(val)));
+        jedis.evalsha(luaSHA, keys, args);
+        return true;
     }
 
     private String buildXidLockKey(String xid) {
