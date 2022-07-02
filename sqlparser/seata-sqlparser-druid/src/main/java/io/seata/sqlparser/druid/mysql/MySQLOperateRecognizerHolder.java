@@ -52,4 +52,10 @@ public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder 
         }
         return null;
     }
+
+    @Override
+    public SQLRecognizer getReplaceRecognizer(String sql, SQLStatement ast) {
+        return new MySQLReplaceRecognizer(sql, ast);
+    }
+
 }

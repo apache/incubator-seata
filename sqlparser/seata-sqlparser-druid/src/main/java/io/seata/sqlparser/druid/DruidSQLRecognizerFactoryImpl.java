@@ -19,6 +19,7 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import io.seata.common.util.CollectionUtils;
@@ -58,6 +59,8 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
             } else if (ast instanceof SQLSelectStatement) {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
+            } else if (ast instanceof SQLReplaceStatement) {
+                recognizer = recognizerHolder.getReplaceRecognizer(sql, ast);
             }
             if (recognizer != null && recognizer.isSqlSyntaxSupports()) {
                 if (recognizers == null) {

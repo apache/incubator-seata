@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import io.seata.common.exception.NotSupportYetException;
+import com.google.common.base.Joiner;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -41,65 +41,51 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLReplaceRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
-import com.google.common.base.Joiner;
 
 /**
- * @author: yangyicong
+ * @author jingliu_xiong@foxmail.com
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
-public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
-
-
-    private static final String COLUMN_SEPARATOR = "|";
-
-    /**
-     * is updated or not
-     */
-    private boolean isUpdateFlag = false;
-
-    public String getSelectSQL() {
-        return selectSQL;
-    }
-
+public class MySQLReplaceExecutor extends MySQLInsertExecutor implements Defaultable {
     /**
      * before image sql and after image sql,condition is unique index
      */
     private String selectSQL;
-
-    public ArrayList<List<Object>> getParamAppenderList() {
-        return paramAppenderList;
-    }
-
+    private static final String COLUMN_SEPARATOR = "|";
     /**
      * the params of selectSQL, value is the unique index
      */
     private ArrayList<List<Object>> paramAppenderList;
 
-    public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    /**
+     * is the replaced data exist
+     */
+    private boolean isExistFlag = false;
+
+    public MySQLReplaceExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
-    /**
-     * Execute auto commit false t.
-     *
-     * @param args the args
-     * @return the t
-     * @throws Exception the exception
-     */
+    public String getSelectSQL() {
+        return selectSQL;
+    }
+
+    public ArrayList<List<Object>> getParamAppenderList() {
+        return paramAppenderList;
+    }
+
     @Override
     protected Object executeAutoCommitFalse(Object[] args) throws Exception {
-        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1) {
-            throw new NotSupportYetException("multi pk only support mysql!");
-        }
         TableRecords beforeImage = beforeImage();
+        // replace rows are not existed
         if (CollectionUtils.isNotEmpty(beforeImage.getRows())) {
-            isUpdateFlag = true;
+            isExistFlag = true;
         } else {
             beforeImage = TableRecords.empty(getTableMeta());
         }
@@ -112,97 +98,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         return result;
     }
 
-    /**
-     * prepare undo log.
-     *
-     * @param beforeImage the before image
-     * @param afterImage  the after image
-     */
-    protected void prepareUndoLogAll(TableRecords beforeImage, TableRecords afterImage) {
-        if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
-            return;
-        }
-        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-        TableRecords lockKeyRecords = afterImage;
-        String lockKeys = buildLockKey(lockKeyRecords);
-        connectionProxy.appendLockKey(lockKeys);
-        buildUndoItemAll(connectionProxy, beforeImage, afterImage);
-    }
-
-    /**
-     * build a SQLUndoLog
-     *
-     * @param beforeImage the before image
-     * @param afterImage  the after image
-     */
-    protected void buildUndoItemAll(ConnectionProxy connectionProxy, TableRecords beforeImage, TableRecords afterImage) {
-        if (!isUpdateFlag) {
-            SQLUndoLog sqlUndoLog = buildUndoItem(SQLType.INSERT, TableRecords.empty(getTableMeta()), afterImage);
-            connectionProxy.appendUndoLog(sqlUndoLog);
-            return;
-        }
-        List<Row> beforeImageRows = beforeImage.getRows();
-        List<String> beforePrimaryValues = new ArrayList<>();
-        for (Row r : beforeImageRows) {
-            String primaryValue = "";
-            for (Field f: r.primaryKeys()) {
-                primaryValue = primaryValue + f.getValue() + COLUMN_SEPARATOR;
-            }
-            beforePrimaryValues.add(primaryValue);
-        }
-        List<Row> insertRows = new ArrayList<>();
-        List<Row> updateRows = new ArrayList<>();
-        List<Row> afterImageRows = afterImage.getRows();
-        for (Row r : afterImageRows) {
-            String primaryValue = "";
-            for (Field f: r.primaryKeys()) {
-                primaryValue = primaryValue + f.getValue()  + COLUMN_SEPARATOR;
-            }
-            if (beforePrimaryValues.contains(primaryValue)) {
-                updateRows.add(r);
-            } else {
-                insertRows.add(r);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(updateRows)) {
-            TableRecords partAfterImage = new TableRecords(afterImage.getTableMeta());
-            partAfterImage.setTableName(afterImage.getTableName());
-            partAfterImage.setRows(updateRows);
-            if (beforeImage.getRows().size() != partAfterImage.getRows().size()) {
-                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
-            }
-            connectionProxy.appendUndoLog(buildUndoItem(SQLType.UPDATE, beforeImage, partAfterImage));
-        }
-        if (CollectionUtils.isNotEmpty(insertRows)) {
-            TableRecords partAfterImage = new TableRecords(afterImage.getTableMeta());
-            partAfterImage.setTableName(afterImage.getTableName());
-            partAfterImage.setRows(insertRows);
-            connectionProxy.appendUndoLog(buildUndoItem(SQLType.INSERT, TableRecords.empty(getTableMeta()), partAfterImage));
-        }
-    }
-
-    /**
-     * build a SQLUndoLog
-     *
-     * @param sqlType
-     * @param beforeImage
-     * @param afterImage
-     * @return sqlUndoLog the sql undo log
-     */
-    protected SQLUndoLog buildUndoItem(SQLType sqlType, TableRecords beforeImage, TableRecords afterImage) {
-        String tableName = sqlRecognizer.getTableName();
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(sqlType);
-        sqlUndoLog.setTableName(tableName);
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-        return sqlUndoLog;
-    }
-
-
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        TableMeta tmeta = getTableMeta();
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        TableMeta tableMeta = getTableMeta();
         List<Row> rows = beforeImage.getRows();
         Map<String, ArrayList<Object>> primaryValueMap = new HashMap<>();
         rows.forEach(m -> {
@@ -222,7 +120,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             });
             afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
         }
-        return buildTableRecords2(tmeta, afterImageSql.toString(), paramAppenderList);
+        return buildTableRecords2(tableMeta, afterImageSql.toString(), paramAppenderList);
     }
 
     @Override
@@ -273,13 +171,17 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         if (CollectionUtils.isEmpty(paramAppenderList)) {
             paramAppenderList = new ArrayList<>();
         }
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        int insertNum = recognizer.getInsertParamsValue().size();
-        Map<String, ArrayList<Object>> imageParamperterMap = buildImageParamperters(recognizer);
+        SQLReplaceRecognizer recognizer = (SQLReplaceRecognizer) sqlRecognizer;
+        int replaceNum = recognizer.getReplaceValues().size();
+        Map<String, ArrayList<Object>> imageParameterMap = buildImageParameters(recognizer);
         StringBuilder prefix = new StringBuilder("SELECT * ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        // TODO: implement subSelect before image
+        if (!recognizer.selectQueryIsEmpty()) {
+            throw new ShouldNeverHappenException("replace include subQuery is not implemented now!");
+        }
         boolean[] isContainWhere = {false};
-        for (int i = 0; i < insertNum; i++) {
+        for (int i = 0; i < replaceNum; i++) {
             int finalI = i;
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
@@ -288,12 +190,12 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
-                        if (imageParamperterMap.get(columnName) == null && m.getColumnDef() != null) {
+                        if (imageParameterMap.get(columnName) == null && m.getColumnDef() != null) {
                             uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
                             columnIsNull = false;
                             continue;
                         }
-                        if ((imageParamperterMap.get(columnName) == null && m.getColumnDef() == null) || imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
+                        if ((imageParameterMap.get(columnName) == null && m.getColumnDef() == null) || imageParameterMap.get(columnName).get(finalI) == null || imageParameterMap.get(columnName).get(finalI) instanceof Null) {
                             if (!"PRIMARY".equalsIgnoreCase(k)) {
                                 columnIsNull = false;
                                 uniqueList.add(columnName + " is ? ");
@@ -304,7 +206,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                         }
                         columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
-                        paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
+                        paramAppenderTempList.add(imageParameterMap.get(columnName).get(finalI));
                     }
                     if (!columnIsNull) {
                         if (isContainWhere[0]) {
@@ -329,43 +231,52 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @return map, key is column, value is paramperter
      */
     @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
-    public Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
-        List<String> duplicateKeyUpdateCloms = recognizer.getDuplicateKeyUpdate();
-        if (CollectionUtils.isNotEmpty(duplicateKeyUpdateCloms)) {
-            getTableMeta().getAllIndexes().forEach((k, v) -> {
-                if ("PRIMARY".equalsIgnoreCase(k)) {
-                    for (ColumnMeta m : v.getValues()) {
-                        if (duplicateKeyUpdateCloms.contains(m.getColumnName())) {
-                            throw new ShouldNeverHappenException("update pk value is not supported!");
-                        }
-                    }
-                }
-            });
-        }
+    public Map<String, ArrayList<Object>> buildImageParameters(SQLReplaceRecognizer recognizer) {
+        List<String> replaceColumns = recognizer.getReplaceColumns();
         Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        List<String> insertParamsList = recognizer.getInsertParamsValue();
-        List<String> insertColumns = recognizer.getInsertColumns();
+        List<String> replaceParamsList = recognizer.getReplaceValues();
         int paramsindex = 1;
-        for (String insertParams : insertParamsList) {
-            String[] insertParamsArray = insertParams.split(",");
-            for (int i = 0; i < insertColumns.size(); i++) {
-                String m = insertColumns.get(i);
-                String params = insertParamsArray[i];
+        for (String replaceParams : replaceParamsList) {
+            String[] replaceParamsArray = replaceParams.split(",");
+            if (replaceColumns == null) {
+                Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
+                int i = 0;
+                for (Map.Entry<String, ColumnMeta> column : allColumns.entrySet()) {
+                    String m = column.getKey();
+                    ArrayList<Object> imageListTemp = imageParamperterMap.computeIfAbsent(m, k -> new ArrayList<>());
+                    String params = replaceParamsArray[i];
+                    if ("?".equals(params.trim())) {
+                        ArrayList<Object> objects = parameters.get(paramsindex);
+                        imageListTemp.addAll(objects);
+                        paramsindex++;
+                    } else {
+                        // params is character string constant
+                        if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
+                            params = params.trim();
+                            params = params.substring(1, params.length() - 1);
+                        }
+                        imageListTemp.add(params);
+                    }
+                    imageParamperterMap.put(m, imageListTemp);
+                }
+                continue;
+            }
+            for (int i = 0; i < replaceColumns.size(); i++) {
+                String m = replaceColumns.get(i);
+                String params = replaceParamsArray[i];
                 ArrayList<Object> imageListTemp = imageParamperterMap.computeIfAbsent(m, k -> new ArrayList<>());
                 if ("?".equals(params.trim())) {
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
                     paramsindex++;
-                } else if (params instanceof String) {
-                    // params is characterstring constant
+                } else {
+                    // params is character string constant
                     if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
                         params = params.trim();
                         params = params.substring(1, params.length() - 1);
                     }
-                    imageListTemp.add(params);
-                } else {
                     imageListTemp.add(params);
                 }
                 imageParamperterMap.put(m, imageListTemp);
@@ -374,4 +285,89 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         return imageParamperterMap;
     }
 
+    /**
+     * prepare undo log.
+     *
+     * @param beforeImage the before image
+     * @param afterImage  the after image
+     */
+    protected void prepareUndoLogAll(TableRecords beforeImage, TableRecords afterImage) {
+        if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
+            return;
+        }
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        String lockKeys = buildLockKey(afterImage);
+        connectionProxy.appendLockKey(lockKeys);
+        buildUndoItemAll(connectionProxy, beforeImage, afterImage);
+    }
+
+    /**
+     * build a SQLUndoLog
+     *
+     * @param beforeImage the before image
+     * @param afterImage  the after image
+     */
+    protected void buildUndoItemAll(ConnectionProxy connectionProxy, TableRecords beforeImage, TableRecords afterImage) {
+        if (!isExistFlag) {
+            SQLUndoLog sqlUndoLog = buildUndoItem(SQLType.INSERT, TableRecords.empty(getTableMeta()), afterImage);
+            connectionProxy.appendUndoLog(sqlUndoLog);
+            return;
+        }
+        List<Row> beforeImageRows = beforeImage.getRows();
+        List<String> beforePrimaryValues = new ArrayList<>();
+        for (Row r : beforeImageRows) {
+            String primaryValue = "";
+            for (Field f: r.primaryKeys()) {
+                primaryValue = primaryValue + f.getValue() + COLUMN_SEPARATOR;
+            }
+            beforePrimaryValues.add(primaryValue);
+        }
+        List<Row> insertRows = new ArrayList<>();
+        List<Row> replaceRows = new ArrayList<>();
+        List<Row> afterImageRows = afterImage.getRows();
+        for (Row r : afterImageRows) {
+            String primaryValue = "";
+            for (Field f: r.primaryKeys()) {
+                primaryValue = primaryValue + f.getValue()  + COLUMN_SEPARATOR;
+            }
+            if (beforePrimaryValues.contains(primaryValue)) {
+                replaceRows.add(r);
+            } else {
+                insertRows.add(r);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(replaceRows)) {
+            TableRecords partAfterImage = new TableRecords(afterImage.getTableMeta());
+            partAfterImage.setTableName(afterImage.getTableName());
+            partAfterImage.setRows(replaceRows);
+            if (beforeImage.getRows().size() != partAfterImage.getRows().size()) {
+                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+            }
+            connectionProxy.appendUndoLog(buildUndoItem(SQLType.REPLACE, beforeImage, partAfterImage));
+        }
+        if (CollectionUtils.isNotEmpty(insertRows)) {
+            TableRecords partAfterImage = new TableRecords(afterImage.getTableMeta());
+            partAfterImage.setTableName(afterImage.getTableName());
+            partAfterImage.setRows(insertRows);
+            connectionProxy.appendUndoLog(buildUndoItem(SQLType.INSERT, TableRecords.empty(getTableMeta()), partAfterImage));
+        }
+    }
+
+    /**
+     * build a SQLUndoLog
+     *
+     * @param sqlType
+     * @param beforeImage
+     * @param afterImage
+     * @return sqlUndoLog the sql undo log
+     */
+    protected SQLUndoLog buildUndoItem(SQLType sqlType, TableRecords beforeImage, TableRecords afterImage) {
+        String tableName = sqlRecognizer.getTableName();
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setSqlType(sqlType);
+        sqlUndoLog.setTableName(tableName);
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
+        return sqlUndoLog;
+    }
 }

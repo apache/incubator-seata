@@ -54,4 +54,9 @@ public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHo
         }
         return null;
     }
+
+    @Override
+    public SQLRecognizer getReplaceRecognizer(String sql, SQLStatement ast) {
+        return null;
+    }
 }

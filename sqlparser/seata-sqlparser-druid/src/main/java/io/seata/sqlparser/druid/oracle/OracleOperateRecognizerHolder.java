@@ -52,4 +52,9 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
         }
         return null;
     }
+
+    @Override
+    public SQLRecognizer getReplaceRecognizer(String sql, SQLStatement ast) {
+        return null;
+    }
 }
