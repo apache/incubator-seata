@@ -26,6 +26,7 @@
 
     <artifactId>seata-metrics-registry-compact</artifactId>
     <name>seata-metrics-registry-compact ${project.version}</name>
+    <description>registry-compact for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

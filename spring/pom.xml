@@ -26,6 +26,7 @@
     <artifactId>seata-spring</artifactId>
     <packaging>jar</packaging>
     <name>seata-spring ${project.version}</name>
+    <description>spring for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

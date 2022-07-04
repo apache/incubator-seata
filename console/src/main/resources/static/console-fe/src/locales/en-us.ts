@@ -24,9 +24,11 @@ const enUs: ILocale = {
   },
   Header: {
     home: 'HOME',
+    cloud: 'CLOUD',
     docs: 'DOCS',
     blog: 'BLOG',
     community: 'COMMUNITY',
+    download: 'DOWNLOAD',
     languageSwitchButton: '中',
     logout: 'logout',
     passwordRequired: 'password should not be empty',
