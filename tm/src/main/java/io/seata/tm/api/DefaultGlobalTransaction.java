@@ -135,6 +135,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                     }
                 }
             }
+            if (status != GlobalStatus.Committed && status != GlobalStatus.CommitRetrying && status != GlobalStatus.Committing) {
+                throw new TransactionException("Failed to report global commit, status:" + status.name());
+            }
         } finally {
             if (xid.equals(RootContext.getXID())) {
                 suspend();
