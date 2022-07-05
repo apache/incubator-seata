@@ -34,11 +34,11 @@ public class DefaultTransactionAutoProxy {
     /**
      * all the transaction auto proxy
      */
-    protected static List<TransactionAutoProxy> allTransactionAutoProxies = new ArrayList<>();
+    protected static final List<TransactionAutoProxy> ALL_TRANSACTION_AUTO_PROXIES = new ArrayList<>();
     /**
      * method interceptor map, beanName -> IsTransactionProxyResult
      */
-    private final Map<String, IsTransactionProxyResult> methodInterceptorMap = new ConcurrentHashMap<>();
+    private static final Map<String, IsTransactionProxyResult> METHOD_INTERCEPTOR_MAP = new ConcurrentHashMap<>();
 
     private static class SingletonHolder {
         private static final DefaultTransactionAutoProxy INSTANCE = new DefaultTransactionAutoProxy();
@@ -66,7 +66,7 @@ public class DefaultTransactionAutoProxy {
     private void initTransactionAutoProxy() {
         List<TransactionAutoProxy> proxies = EnhancedServiceLoader.loadAll(TransactionAutoProxy.class);
         if (CollectionUtils.isNotEmpty(proxies)) {
-            allTransactionAutoProxies.addAll(proxies);
+            ALL_TRANSACTION_AUTO_PROXIES.addAll(proxies);
         }
     }
 
@@ -78,10 +78,10 @@ public class DefaultTransactionAutoProxy {
      * @return true or false
      */
     public boolean isTransactionAutoProxy(String beanName, RemotingDesc remotingDesc) {
-        for (TransactionAutoProxy proxy : allTransactionAutoProxies) {
+        for (TransactionAutoProxy proxy : ALL_TRANSACTION_AUTO_PROXIES) {
             IsTransactionProxyResult result = proxy.isTransactionProxyTargetBean(remotingDesc);
             if (result.isProxyTargetBean()) {
-                methodInterceptorMap.put(beanName, result);
+                METHOD_INTERCEPTOR_MAP.put(beanName, result);
                 return true;
             }
         }
@@ -95,7 +95,7 @@ public class DefaultTransactionAutoProxy {
      * @return the IsTransactionProxyResult
      */
     public IsTransactionProxyResult getIsProxyTargetBeanResult(String beanName) {
-        IsTransactionProxyResult result = methodInterceptorMap.get(beanName);
+        IsTransactionProxyResult result = METHOD_INTERCEPTOR_MAP.get(beanName);
         return result != null ? result : new IsTransactionProxyResult();
     }
 }
