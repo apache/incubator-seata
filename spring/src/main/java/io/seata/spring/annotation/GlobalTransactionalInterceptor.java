@@ -161,7 +161,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     if (globalTransactionalAnnotation != null) {
                         transactional = new AspectTransactional(globalTransactionalAnnotation.timeoutMills(),
                             globalTransactionalAnnotation.name(), globalTransactionalAnnotation.rollbackFor(),
-                            globalTransactionalAnnotation.noRollbackForClassName(),
+                            globalTransactionalAnnotation.rollbackForClassName(),
                             globalTransactionalAnnotation.noRollbackFor(),
                             globalTransactionalAnnotation.noRollbackForClassName(),
                             globalTransactionalAnnotation.propagation(),

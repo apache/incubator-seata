@@ -27,6 +27,7 @@
     <artifactId>seata-dubbo</artifactId>
     <packaging>jar</packaging>
     <name>seata-dubbo ${project.version}</name>
+    <description>apache dubbo integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
