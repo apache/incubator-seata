@@ -135,7 +135,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                     }
                 }
             }
-            if (status != GlobalStatus.Committed && status != GlobalStatus.CommitRetrying && status != GlobalStatus.Committing) {
+            if (status != GlobalStatus.Committed && status != GlobalStatus.CommitRetrying
+                && status != GlobalStatus.Committing && status != GlobalStatus.AsyncCommitting) {
                 throw new TransactionException("Failed to report global commit, status:" + status.name());
             }
         } finally {
