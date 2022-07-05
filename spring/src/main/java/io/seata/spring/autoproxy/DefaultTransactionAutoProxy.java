@@ -33,7 +33,7 @@ public class DefaultTransactionAutoProxy {
     /**
      * all the transaction auto proxy
      */
-    protected static final List<TransactionAutoProxy> allTransactionAutoProxies = new ArrayList<>();
+    protected static final List<TransactionAutoProxy> ALL_TRANSACTION_AUTO_PROXIES = new ArrayList<>();
 
     private static class SingletonHolder {
         private static final DefaultTransactionAutoProxy INSTANCE = new DefaultTransactionAutoProxy();
@@ -61,7 +61,7 @@ public class DefaultTransactionAutoProxy {
     private void initTransactionAutoProxy() {
         List<TransactionAutoProxy> proxies = EnhancedServiceLoader.loadAll(TransactionAutoProxy.class);
         if (CollectionUtils.isNotEmpty(proxies)) {
-            allTransactionAutoProxies.addAll(proxies);
+            ALL_TRANSACTION_AUTO_PROXIES.addAll(proxies);
         }
     }
 
@@ -74,7 +74,7 @@ public class DefaultTransactionAutoProxy {
      * @return the MethodInterceptor or null
      */
     public MethodInterceptor isTransactionAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
-        for (TransactionAutoProxy proxy : allTransactionAutoProxies) {
+        for (TransactionAutoProxy proxy : ALL_TRANSACTION_AUTO_PROXIES) {
             MethodInterceptor methodInterceptor = proxy.isTransactionAutoProxy(bean, beanName, applicationContext);
             if (methodInterceptor != null) {
                 return methodInterceptor;
