@@ -33,7 +33,7 @@ public class DefaultTransactionAutoProxy {
     /**
      * all the transaction auto proxy
      */
-    protected static List<TransactionAutoProxy> allTransactionAutoProxies = new ArrayList<>();
+    protected static final List<TransactionAutoProxy> allTransactionAutoProxies = new ArrayList<>();
 
     private static class SingletonHolder {
         private static final DefaultTransactionAutoProxy INSTANCE = new DefaultTransactionAutoProxy();
