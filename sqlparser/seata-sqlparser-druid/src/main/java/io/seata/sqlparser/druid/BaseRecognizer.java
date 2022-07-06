@@ -30,6 +30,7 @@ import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
+import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
@@ -214,6 +215,9 @@ public abstract class BaseRecognizer implements SQLRecognizer {
             SQLExpr expr = ((SQLBetweenExpr)left).getTestExpr();
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
+            }
+            if (expr instanceof SQLPropertyExpr) {
+                list.add(((SQLPropertyExpr)expr).getName());
             }
         } else if (left instanceof SQLIdentifierExpr) {
             list.add(((SQLIdentifierExpr)left).getName());
