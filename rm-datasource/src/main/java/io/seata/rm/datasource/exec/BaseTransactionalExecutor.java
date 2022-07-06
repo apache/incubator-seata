@@ -398,7 +398,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
         
-        try (Connection connection = statementProxy.getConnectionProxy().getDataSourceProxy().getConnection();
+        try (Connection connection = statementProxy.getConnectionProxy().getDataSourceProxy().getPlainConnection();
             PreparedStatement ps = connection.prepareStatement(selectSQL)) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
