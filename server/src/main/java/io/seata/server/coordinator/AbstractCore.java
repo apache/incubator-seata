@@ -202,7 +202,7 @@ public abstract class AbstractCore implements Core {
     }
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, long lossTime)
             throws TransactionException {
         return null;
     }

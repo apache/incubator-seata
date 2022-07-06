@@ -40,6 +40,7 @@ public abstract class AbstractConfiguration implements Configuration {
     public static final long DEFAULT_LONG = 0L;
     public static final Duration DEFAULT_DURATION = Duration.ZERO;
     public static final boolean DEFAULT_BOOLEAN = false;
+    public static final float DEFAULT_FLOAT = 0f;
 
 
     @Override

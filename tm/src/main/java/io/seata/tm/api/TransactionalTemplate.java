@@ -202,7 +202,8 @@ public class TransactionalTemplate {
         }
     }
 
-    private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException {
+    private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
+            throws TransactionalExecutor.ExecutionException {
         if (isTimeoutWithLoss(tx.getCreateTime(), txInfo)) {
             // business execution timeout
             throw new TransactionalExecutor.ExecutionException(tx, new TimeoutException(),
@@ -216,7 +217,7 @@ public class TransactionalTemplate {
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.CommitFailure);
+                    TransactionalExecutor.Code.CommitFailure);
         }
     }
 

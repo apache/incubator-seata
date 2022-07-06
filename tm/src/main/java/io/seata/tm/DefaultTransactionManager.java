@@ -15,6 +15,8 @@
  */
 package io.seata.tm;
 
+import java.util.concurrent.TimeoutException;
+
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -35,8 +37,6 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
-import java.util.concurrent.TimeoutException;
-
 /**
  * The type Default transaction manager.
  *
@@ -45,11 +45,12 @@ import java.util.concurrent.TimeoutException;
 public class DefaultTransactionManager implements TransactionManager {
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, long lossTime)
         throws TransactionException {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
+        request.setLossTime(lossTime);
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());

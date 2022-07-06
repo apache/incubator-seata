@@ -94,9 +94,9 @@ public class AspectTransactional {
      * customized loss time.
      * time consumed by network IO or disk IO or other
      *
-     * @return int
+     * @return long
      */
-    int lossTime = 0;
+    long lossTime = 1L;
 
     public AspectTransactional() {}
 
@@ -187,11 +187,11 @@ public class AspectTransactional {
         this.lockRetryTimes = lockRetryTimes;
     }
 
-    public int getLossTime() {
+    public long getLossTime() {
         return lossTime;
     }
 
-    public void setLossTime(int lossTime) {
+    public void setLossTime(long lossTime) {
         this.lossTime = lossTime;
     }
 

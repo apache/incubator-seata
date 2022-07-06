@@ -57,6 +57,7 @@ import org.springframework.util.ClassUtils;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_TM_LOSS_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
@@ -223,13 +224,21 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                         timeout = defaultGlobalTransactionTimeout;
                     }
 
+                    // reset the value of lossTime
+                    long lossTime = aspectTransactional.getLossTime();
+                    if (lossTime <= 0 || lossTime == DEFAULT_TM_LOSS_TIME) {
+                        lossTime = ConfigurationFactory.getInstance().getLong(
+                                ConfigurationKeys.DEFAULT_TM_LOSS_TIME,
+                                DEFAULT_TM_LOSS_TIME);
+                    }
+
                     TransactionInfo transactionInfo = new TransactionInfo();
                     transactionInfo.setTimeOut(timeout);
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(aspectTransactional.getPropagation());
                     transactionInfo.setLockRetryInterval(aspectTransactional.getLockRetryInterval());
                     transactionInfo.setLockRetryTimes(aspectTransactional.getLockRetryTimes());
-                    transactionInfo.setLossTime(aspectTransactional.getLossTime());
+                    transactionInfo.setLossTime(lossTime);
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : aspectTransactional.getRollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));
@@ -319,7 +328,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         executor.scheduleAtFixedRate(() -> {
             if (degradeCheck) {
                 try {
-                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
+                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000, DEFAULT_TM_LOSS_TIME);
                     TransactionManagerHolder.get().commit(xid);
                     EVENT_BUS.post(new DegradeCheckEvent(true));
                 } catch (Exception e) {

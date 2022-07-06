@@ -16,20 +16,21 @@
 package io.seata.tm.api;
 
 
-import io.netty.util.HashedWheelTimer;
+import java.lang.reflect.Field;
+
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.MyRuntimeException;
+
+import io.netty.util.HashedWheelTimer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
 
 /**
  * @author wangwei
@@ -45,7 +46,8 @@ class DefaultFailureHandlerImplTest {
 
         TransactionManagerHolder.set(new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+            public String begin(String applicationId, String transactionServiceGroup, String name,
+                                int timeout, long lossTime)
                     throws TransactionException {
                 return DEFAULT_XID;
             }

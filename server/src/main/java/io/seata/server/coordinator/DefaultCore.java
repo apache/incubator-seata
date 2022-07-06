@@ -126,10 +126,10 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, long lossTime)
         throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name,
-            timeout);
+            timeout, lossTime);
         MDC.put(RootContext.MDC_KEY_XID, session.getXid());
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
@@ -141,11 +141,18 @@ public class DefaultCore implements Core {
         return session.getXid();
     }
 
+
+
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         if (globalSession == null) {
             return GlobalStatus.Finished;
+        }
+
+        if (isTimeoutWithLossTime(globalSession)) {
+            globalSession.closeAndClean();
+            return GlobalStatus.TransactionTimeout;
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
@@ -387,6 +394,18 @@ public class DefaultCore implements Core {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Judge whether timeout occurs in case of IO delay and network communication delay
+     * @param globalSession the globalSession
+     * @return is timeout
+     */
+    private boolean isTimeoutWithLossTime(GlobalSession globalSession) {
+        final long lossTime = globalSession.getLossTime();
+        final long beginTime = globalSession.getBeginTime();
+        final int timeout = globalSession.getTimeout();
+        return (beginTime + timeout + lossTime) > System.currentTimeMillis();
     }
 
 }

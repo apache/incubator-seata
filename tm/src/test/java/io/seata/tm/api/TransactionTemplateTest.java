@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import static io.seata.common.DefaultValues.DEFAULT_TM_LOSS_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -51,7 +52,7 @@ public class TransactionTemplateTest {
     public void init() throws Exception {
         // mock transactionManager
         TransactionManager transactionManager = mock(TransactionManager.class);
-        when(transactionManager.begin(null, null, DEFAULT_NAME, DEFAULT_TIME_OUT)).thenReturn(DEFAULT_XID);
+        when(transactionManager.begin(null, null, DEFAULT_NAME, DEFAULT_TIME_OUT, DEFAULT_TM_LOSS_TIME)).thenReturn(DEFAULT_XID);
         when(transactionManager.commit(DEFAULT_XID)).thenReturn(GlobalStatus.Committed);
         when(transactionManager.rollback(DEFAULT_XID)).thenReturn(GlobalStatus.Rollbacked);
         when(transactionManager.getStatus(DEFAULT_XID)).thenReturn(GlobalStatus.Begin);

@@ -251,6 +251,11 @@ public interface ConfigurationKeys {
     String DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = CLIENT_TM_PREFIX + "defaultGlobalTransactionTimeout";
 
     /**
+     * The constant DEFAULT_TM_LOSS_TIME.
+     */
+    String DEFAULT_TM_LOSS_TIME = CLIENT_TM_PREFIX + "lossTime";
+
+    /**
      * The constant SERIALIZE_FOR_RPC.
      */
     String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";

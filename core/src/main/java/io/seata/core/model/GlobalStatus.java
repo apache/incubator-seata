@@ -129,7 +129,12 @@ public enum GlobalStatus {
      * The rollback retry Timeout .
      */
     // Finally: failed to rollback since retry timeout
-    RollbackRetryTimeout(17)
+    RollbackRetryTimeout(17),
+
+    /**
+     * The execution business logic Timeout .
+     */
+    TransactionTimeout(18)
 
     ;
 

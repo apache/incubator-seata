@@ -42,7 +42,8 @@ public class APITest {
     public static void init() {
         TransactionManagerHolder.set(new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+            public String begin(String applicationId, String transactionServiceGroup, String name,
+                                int timeout, long lossTime)
                     throws TransactionException {
                 return DEFAULT_XID;
             }
