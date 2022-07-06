@@ -307,7 +307,7 @@
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <!--resolve slf4j-simple conflicts-->
                                     <includeScope>runtime</includeScope>
-                                    <excludeGroupIds>org.apache.logging.log4j,log4j</excludeGroupIds>
+                                    <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
                                 </configuration>
                             </execution>
                             <execution>
