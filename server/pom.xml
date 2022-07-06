@@ -106,6 +106,8 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+       <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc
+       .version}-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -258,6 +260,10 @@
     <profiles>
         <profile>
             <id>release-seata</id>
+            <properties>
+                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+            </properties>
             <build>
                 <finalName>seata-server</finalName>
                 <plugins>
