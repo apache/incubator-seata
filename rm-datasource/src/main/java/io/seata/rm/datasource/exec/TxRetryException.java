@@ -1,4 +1,3 @@
-package io.seata.rm.datasource.exec;
 /*
  *  Copyright 1999-2019 Seata.io Group.
  *
@@ -14,6 +13,8 @@ package io.seata.rm.datasource.exec;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package io.seata.rm.datasource.exec;
+
 import java.sql.SQLException;
 
 /**

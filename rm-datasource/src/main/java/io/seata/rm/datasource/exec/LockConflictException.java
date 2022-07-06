@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
 import io.seata.core.exception.TransactionExceptionCode;
 
 /**
