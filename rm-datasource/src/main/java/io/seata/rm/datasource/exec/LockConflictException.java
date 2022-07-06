@@ -23,7 +23,7 @@ import io.seata.core.exception.TransactionExceptionCode;
  *
  * @author sharajava
  */
-public class LockConflictException extends SQLException {
+public class LockConflictException extends TxRetryException {
 
     TransactionExceptionCode code;
 

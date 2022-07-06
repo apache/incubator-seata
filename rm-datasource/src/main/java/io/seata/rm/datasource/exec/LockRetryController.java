@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.DefaultValues;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.NumberUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
@@ -63,7 +64,11 @@ public class LockRetryController {
         // prioritize the rollback of other transactions
         if (--lockRetryTimes < 0 || (e instanceof LockConflictException
             && ((LockConflictException)e).getCode() == TransactionExceptionCode.LockKeyConflictFailFast)) {
-            throw new LockWaitTimeoutException("Global lock wait timeout", e);
+            if (e instanceof LockConflictException) {
+                throw new LockWaitTimeoutException("Global lock wait timeout", e);
+            } else {
+                throw new ShouldNeverHappenException(e);
+            }
         }
 
         try {
@@ -133,4 +138,5 @@ public class LockRetryController {
             return globalLockRetryTimes;
         }
     }
+
 }
