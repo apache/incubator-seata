@@ -25,7 +25,7 @@
     <version>${revision}</version>
 
     <name>Seata Build ${project.version}</name>
-
+    <description>plugin management for Seata built with Maven</description>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.5.0</revision>
+        <revision>1.5.2-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -74,10 +74,11 @@
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
         <spring-boot.version>2.4.13</spring-boot.version>
+        <spring-framework.version>5.3.18</spring-framework.version>
 
         <!-- Maven plugin versions -->
         <!-- Build -->
-        <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
+        <easyj-maven-plugin.version>0.5.6</easyj-maven-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <!-- Compiler -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -165,6 +166,23 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>${mojo-license-maven-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>icu.easyj.maven.plugins</groupId>
+                    <artifactId>easyj-maven-plugin</artifactId>
+                    <version>${easyj-maven-plugin.version}</version>
+                    <!-- This goal can replace flatten-maven-plugin to flatten the pom, and replace '${revision}' to the actual version. -->
+                    <executions>
+                        <execution>
+                            <id>simplify-pom</id>
+                            <goals>
+                                <goal>simplify-pom</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <simplifiedPomFileName>.flattened-pom.xml</simplifiedPomFileName>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -224,7 +242,7 @@
                         <fileset>
                             <directory>./</directory>
                             <includes>
-                                <include>*-pom*.xml</include>
+                                <include>*-pom.xml</include>
                                 <include>**/db_store/**</include>
                                 <include>**/sessionStore/**</include>
                                 <include>**/root.data</include>
@@ -234,31 +252,10 @@
                     </filesets>
                 </configuration>
             </plugin>
-            <!-- Flatten -->
+            <!-- EasyJ -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <version>${flatten-maven-plugin.version}</version>
-                <configuration>
-                    <updatePomFile>true</updatePomFile>
-                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten.clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>icu.easyj.maven.plugins</groupId>
+                <artifactId>easyj-maven-plugin</artifactId>
             </plugin>
             <!-- Enforcer -->
             <plugin>

@@ -24,9 +24,11 @@ const zhCn: ILocale = {
   },
   Header: {
     home: '首页',
+    cloud: 'Seata企业版',
     docs: '文档',
     blog: '博客',
     community: '社区',
+    download: '下载',
     languageSwitchButton: 'En',
     logout: '登出',
   },

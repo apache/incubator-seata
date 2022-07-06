@@ -26,6 +26,7 @@
     <artifactId>seata-common</artifactId>
     <packaging>jar</packaging>
     <name>seata-common ${project.version}</name>
+    <description>common library for Seata built with Maven</description>
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>
