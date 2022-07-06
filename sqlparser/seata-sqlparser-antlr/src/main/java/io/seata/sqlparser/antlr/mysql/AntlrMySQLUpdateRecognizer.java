@@ -57,7 +57,13 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
         if (CollectionUtils.isNotEmpty(sqls)) {
             List<String> list = new ArrayList<>(sqls.size());
             for (MySqlContext.SQL sql : sqls) {
-                list.add(sql.getUpdateWhereColumnName());
+                String column = sql.getUpdateWhereColumnName();
+                int index = column.indexOf(".");
+                if (index > 0) {
+                    // table.column -> column name
+                    column = column.substring(index + 1);
+                }
+                list.add(column);
             }
             return list;
         }
@@ -67,7 +73,6 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
 
     @Override
     public List<String> getUpdateColumns() {
-
         List<MySqlContext.SQL> updateFoColumnNames = sqlContext.getUpdateFoColumnNames();
         List<String> sqlList = new ArrayList<>();
         for (MySqlContext.SQL sql : updateFoColumnNames) {
