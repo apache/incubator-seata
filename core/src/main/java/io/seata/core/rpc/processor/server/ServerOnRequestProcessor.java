@@ -33,11 +33,12 @@ import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
@@ -100,7 +101,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     private static final int MAX_BATCH_RESPONSE_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final String BATCH_RESPONSE_THREAD_PREFIX = "rpcBatchResponse";
-    private final PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
+    private static final boolean PARALLEL_REQUEST_HANDLE =
+        ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLED_PARALLEL_REQUEST_HANDLE_KEY, false);
 
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
@@ -162,36 +164,44 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         }
         // the batch send request message
         if (message instanceof MergedWarpMessage) {
-            if (NettyServerConfig.isEnableTcServerBatchSendResponse() &&
-                StringUtils.isNotBlank(rpcContext.getVersion()) && Version.isAboveOrEqualVersion150(rpcContext.getVersion())) {
-                List<AbstractMessage> msgs = ((MergedWarpMessage) message).msgs;
-                List<Integer> msgIds = ((MergedWarpMessage) message).msgIds;
+            if (NettyServerConfig.isEnableTcServerBatchSendResponse() && StringUtils.isNotBlank(rpcContext.getVersion())
+                && Version.isAboveOrEqualVersion150(rpcContext.getVersion())) {
+                List<AbstractMessage> msgs = ((MergedWarpMessage)message).msgs;
+                List<Integer> msgIds = ((MergedWarpMessage)message).msgIds;
                 for (int i = 0; i < msgs.size(); i++) {
-                    int finalI = i;
-                    CompletableFuture.runAsync(() -> {
-                        AbstractResultMessage resultMessage =
-                            transactionMessageHandler.onRequest(msgs.get(finalI), rpcContext);
-                        BlockingQueue<QueueItem> msgQueue = computeIfAbsentMsgQueue(ctx.channel());
-                        offerMsg(msgQueue, rpcMessage, resultMessage, msgIds.get(finalI), ctx.channel());
-                        notifyBatchRespondingThread();
-                    });
+                    AbstractMessage msg = msgs.get(i);
+                    int msgId = msgIds.get(i);
+                    if (PARALLEL_REQUEST_HANDLE) {
+                        CompletableFuture.runAsync(
+                            () -> handleRequestsByMergedWarpMessageBy150(msg, msgId, rpcMessage, ctx, rpcContext));
+                    } else {
+                        handleRequestsByMergedWarpMessageBy150(msg, msgId, rpcMessage, ctx, rpcContext);
+                    }
                 }
             } else {
                 List<AbstractResultMessage> results = new CopyOnWriteArrayList<>();
-                List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
+                List<CompletableFuture<Void>> completableFutures = null;
                 for (int i = 0; i < ((MergedWarpMessage)message).msgs.size(); i++) {
-                    int finalI = i;
-                    completableFutures.add(CompletableFuture.runAsync(() -> {
-                        final AbstractMessage subMessage = ((MergedWarpMessage)message).msgs.get(finalI);
-                        AbstractResultMessage resultMessage =
-                            transactionMessageHandler.onRequest(subMessage, rpcContext);
-                        results.add(finalI, resultMessage);
-                    }));
+                    if (PARALLEL_REQUEST_HANDLE) {
+                        if (completableFutures == null) {
+                            completableFutures = new ArrayList<>();
+                        }
+                        int finalI = i;
+                        completableFutures.add(CompletableFuture.runAsync(() -> {
+                            results.add(finalI, handleRequestsByMergedWarpMessage(
+                                ((MergedWarpMessage)message).msgs.get(finalI), rpcContext));
+                        }));
+                    } else {
+                        results.add(i,
+                            handleRequestsByMergedWarpMessage(((MergedWarpMessage)message).msgs.get(i), rpcContext));
+                    }
                 }
-                try {
-                    CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get();
-                } catch (InterruptedException | ExecutionException e) {
-                    LOGGER.error("handle request error: {}", e.getMessage(), e);
+                if (CollectionUtils.isNotEmpty(completableFutures)) {
+                    try {
+                        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        LOGGER.error("handle request error: {}", e.getMessage(), e);
+                    }
                 }
                 MergeResultMessage resultMessage = new MergeResultMessage();
                 resultMessage.setMsgs(results.toArray(new AbstractResultMessage[0]));
@@ -265,6 +275,30 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                 isResponding = false;
             }
         }
+    }
+
+    /**
+     * handle rpc request message
+     * @param rpcContext rpcContext
+     */
+    private AbstractResultMessage handleRequestsByMergedWarpMessage(AbstractMessage subMessage, RpcContext rpcContext) {
+        return transactionMessageHandler.onRequest(subMessage, rpcContext);
+    }
+
+    /**
+     * handle rpc request message
+     * @param msg msg
+     * @param msgId msgId
+     * @param rpcMessage rpcMessage
+     * @param ctx ctx
+     * @param rpcContext rpcContext
+     */
+    private void handleRequestsByMergedWarpMessageBy150(AbstractMessage msg, int msgId, RpcMessage rpcMessage,
+        ChannelHandlerContext ctx, RpcContext rpcContext) {
+        AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(msg, rpcContext);
+        BlockingQueue<QueueItem> msgQueue = computeIfAbsentMsgQueue(ctx.channel());
+        offerMsg(msgQueue, rpcMessage, resultMessage, msgId, ctx.channel());
+        notifyBatchRespondingThread();
     }
 
     /**
