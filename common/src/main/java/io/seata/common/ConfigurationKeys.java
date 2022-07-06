@@ -850,8 +850,8 @@ public interface ConfigurationKeys {
     String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
 
     /**
-     * The constant ENABLED_PARALLEL_REQUEST_HANDLE_KEY
+     * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
      */
-    String ENABLED_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enabledParallelRequestHandle";
+    String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
 
 }
