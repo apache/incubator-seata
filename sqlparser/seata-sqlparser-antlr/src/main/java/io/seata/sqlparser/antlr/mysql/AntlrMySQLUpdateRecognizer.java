@@ -53,11 +53,11 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
 
     @Override
     public List<String> getWhereColumns() {
-        List<MySqlContext.SQL> sqls = sqlContext.getQueryWhereColumnNames();
+        List<MySqlContext.SQL> sqls = sqlContext.getUpdateForWhereColumnNames();
         if (CollectionUtils.isNotEmpty(sqls)) {
             List<String> list = new ArrayList<>(sqls.size());
             for (MySqlContext.SQL sql : sqls) {
-                list.add(sql.getColumnName());
+                list.add(sql.getUpdateWhereColumnName());
             }
             return list;
         }
