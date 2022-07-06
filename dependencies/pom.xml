@@ -29,7 +29,7 @@
     <packaging>pom</packaging>
 
     <name>Seata dependencies ${project.version}</name>
-    <description>Seata dependencies</description>
+    <description>dependencies for Seata built with Maven</description>
 
     <properties>
         <dubbo.version>2.7.4</dubbo.version>
@@ -78,6 +78,7 @@
 
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
+        <logback.version>1.2.9</logback.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
 
@@ -586,6 +587,17 @@
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_httpserver</artifactId>
                 <version>${prometheus.client.version}</version>
+            </dependency>
+            <!-- logback -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
             </dependency>
             <!-- logback appenders -->
             <dependency>
