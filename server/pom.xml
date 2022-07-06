@@ -305,6 +305,30 @@
                                     <excludeGroupIds>org.apache.logging.log4j,log4j</excludeGroupIds>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>copy-mysql</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>mysql</groupId>
+                                            <artifactId>mysql-connector-java</artifactId>
+                                            <version>${mysql.jdbc.version}</version>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>mysql</groupId>
+                                            <artifactId>mysql-connector-java</artifactId>
+                                            <version>${mysql8.jdbc.version}</version>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>
+                                        ${project.build.directory}/lib/jdbc
+                                    </outputDirectory>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>
