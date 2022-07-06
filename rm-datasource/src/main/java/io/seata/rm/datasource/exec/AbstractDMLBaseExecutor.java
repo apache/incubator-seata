@@ -96,10 +96,10 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && isMultiPk()) {
             throw new NotSupportYetException("multi pk only support mysql!");
         }
-        TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
         int updateCount = statementProxy.getUpdateCount();
         if (updateCount > 0) {
+            TableRecords beforeImage = beforeImage();
             TableRecords afterImage = afterImage(beforeImage);
             prepareUndoLog(beforeImage, afterImage);
         }
