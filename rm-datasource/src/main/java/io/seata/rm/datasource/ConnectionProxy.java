@@ -356,10 +356,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                     return callable.call();
                 } catch (TxRetryException txRetryException) {
                     onException(txRetryException);
-                    if(txRetryException instanceof LockConflictException) {
-                        LockConflictException lockConflict= (LockConflictException)txRetryException;
+                    if (txRetryException instanceof LockConflictException) {
+                        LockConflictException lockConflict = (LockConflictException)txRetryException;
                         // AbstractDMLBaseExecutor#executeAutoCommitTrue the local lock is released
-                        if (connection.getContext().isAutoCommitChanged() && lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
+                        if (connection.getContext().isAutoCommitChanged()
+                            && lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
                             lockConflict.setCode(TransactionExceptionCode.LockKeyConflict);
                         }
                     }
