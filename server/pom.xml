@@ -106,6 +106,7 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+       <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -258,6 +259,10 @@
     <profiles>
         <profile>
             <id>release-seata</id>
+            <properties>
+                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+            </properties>
             <build>
                 <finalName>seata-server</finalName>
                 <plugins>
@@ -302,7 +307,31 @@
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <!--resolve slf4j-simple conflicts-->
                                     <includeScope>runtime</includeScope>
-                                    <excludeGroupIds>org.apache.logging.log4j,log4j</excludeGroupIds>
+                                    <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-mysql</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>mysql</groupId>
+                                            <artifactId>mysql-connector-java</artifactId>
+                                            <version>${mysql.jdbc.version}</version>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>mysql</groupId>
+                                            <artifactId>mysql-connector-java</artifactId>
+                                            <version>${mysql8.jdbc.version}</version>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>
+                                        ${project.build.directory}/lib/jdbc
+                                    </outputDirectory>
                                 </configuration>
                             </execution>
                         </executions>
