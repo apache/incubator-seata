@@ -91,6 +91,23 @@ public abstract class AbstractConfiguration implements Configuration {
         return getLong(dataId, DEFAULT_LONG);
     }
 
+
+    @Override
+    public float getFloat(String dataId, float defaultValue, long timeoutMills) {
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Float.parseFloat(result);
+    }
+
+    @Override
+    public float getFloat(String dataId, float defaultValue) {
+        return getFloat(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    @Override
+    public float getFloat(String dataId) {
+        return getFloat(dataId, DEFAULT_FLOAT);
+    }
+
     @Override
     public Duration getDuration(String dataId) {
         return getDuration(dataId, DEFAULT_DURATION);

@@ -29,8 +29,6 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
 
     private String transactionName;
 
-    private long lossTime;
-
     /**
      * Gets timeout.
      *
@@ -67,24 +65,6 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
         this.transactionName = transactionName;
     }
 
-    /**
-     * Gets loss time.
-     *
-     * @return the loss time
-     */
-    public long getLossTime() {
-        return lossTime;
-    }
-
-    /**
-     * Sets loss time.
-     *
-     * @param lossTime the loss time
-     */
-    public void setLossTime(long lossTime) {
-        this.lossTime = lossTime;
-    }
-
     @Override
     public short getTypeCode() {
         return MessageType.TYPE_GLOBAL_BEGIN;
@@ -104,9 +84,6 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
         result.append(",");
         result.append("transactionName=");
         result.append(transactionName);
-        result.append(",");
-        result.append("lossTime=");
-        result.append(lossTime);
 
         return result.toString();
     }

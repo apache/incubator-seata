@@ -74,7 +74,7 @@ public class GlobalTransactionContext {
     public static GlobalTransaction reload(String xid) throws TransactionException {
         return new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {
             @Override
-            public void begin(int timeout, String name, long lossTime) throws TransactionException {
+            public void begin(int timeout, String name) throws TransactionException {
                 throw new IllegalStateException("Never BEGIN on a RELOADED GlobalTransaction. ");
             }
         };

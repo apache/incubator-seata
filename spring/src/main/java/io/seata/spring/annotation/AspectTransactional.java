@@ -96,13 +96,13 @@ public class AspectTransactional {
      *
      * @return long
      */
-    long lossTime = 1L;
+    float lossTime = DefaultValues.DEFAULT_TM_LOSS_TIME;
 
     public AspectTransactional() {}
 
     public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
         String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
-        Propagation propagation, int lockRetryInterval, int lockRetryTimes, int lossTime) {
+        Propagation propagation, int lockRetryInterval, int lockRetryTimes, float lossTime) {
         this.timeoutMills = timeoutMills;
         this.name = name;
         this.rollbackFor = rollbackFor;
@@ -187,11 +187,11 @@ public class AspectTransactional {
         this.lockRetryTimes = lockRetryTimes;
     }
 
-    public long getLossTime() {
+    public float getLossTime() {
         return lossTime;
     }
 
-    public void setLossTime(long lossTime) {
+    public void setLossTime(float lossTime) {
         this.lossTime = lossTime;
     }
 

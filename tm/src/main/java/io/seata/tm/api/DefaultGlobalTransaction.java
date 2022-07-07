@@ -23,11 +23,11 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
-import static io.seata.common.DefaultValues.DEFAULT_TM_LOSS_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 
 /**
@@ -51,7 +51,14 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
-    private long createTime;
+    private final long createTime;
+
+    /**
+     * Used to calculate the timeout more accurately
+     *
+     * @see System#nanoTime()
+     */
+    private long createTimeOfNano;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
@@ -93,11 +100,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
-        begin(timeout, name, DEFAULT_TM_LOSS_TIME);
-    }
-
-    @Override
-    public void begin(int timeout, String name, long lossTime) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -111,12 +113,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException("Global transaction already exists," +
                 " can't begin a new global transaction, currentXid = " + currentXid);
         }
-        xid = transactionManager.begin(null, null, name, timeout, lossTime);
+        xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
+        this.createTimeOfNano = System.nanoTime();
     }
 
     @SuppressWarnings("lgtm[java/constant-comparison]")
@@ -262,6 +265,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public long getCreateTime() {
         return createTime;
+    }
+
+    @Override
+    public long getCreateTimeOfNano() {
+        return createTimeOfNano;
     }
 
     private void assertXIDNotNull() {

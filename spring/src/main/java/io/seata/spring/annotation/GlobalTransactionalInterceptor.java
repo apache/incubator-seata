@@ -225,9 +225,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     }
 
                     // reset the value of lossTime
-                    long lossTime = aspectTransactional.getLossTime();
+                    float lossTime = aspectTransactional.getLossTime();
                     if (lossTime <= 0 || lossTime == DEFAULT_TM_LOSS_TIME) {
-                        lossTime = ConfigurationFactory.getInstance().getLong(
+                        lossTime = ConfigurationFactory.getInstance().getFloat(
                                 ConfigurationKeys.DEFAULT_TM_LOSS_TIME,
                                 DEFAULT_TM_LOSS_TIME);
                     }
@@ -328,7 +328,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         executor.scheduleAtFixedRate(() -> {
             if (degradeCheck) {
                 try {
-                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000, DEFAULT_TM_LOSS_TIME);
+                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
                     TransactionManagerHolder.get().commit(xid);
                     EVENT_BUS.post(new DegradeCheckEvent(true));
                 } catch (Exception e) {

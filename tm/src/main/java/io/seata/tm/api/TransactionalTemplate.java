@@ -16,6 +16,7 @@
 package io.seata.tm.api;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -153,13 +154,18 @@ public class TransactionalTemplate {
 
     /**
      * Judge whether timeout occurs in case of IO delay and network communication delay
-     * @param beginTime the beginTime
+     * @param beginTimeOfNano the beginTime
      * @param txInfo the transaction info
      * @return is timeout
      */
-    private boolean isTimeoutWithLoss(long beginTime, TransactionInfo txInfo) {
+    private boolean isTimeoutWithLoss(long beginTimeOfNano, TransactionInfo txInfo) {
+        // 1 millisecond  =  1000 microsecond
+        final long conversionRate = TimeUnit.MILLISECONDS.toMicros(1);
+        final long timeOutOfMicros = txInfo.getTimeOut() * conversionRate;
+        final float lossTimeOfMicros = txInfo.getLossTime() * conversionRate;
+        final long beginOfMicros = beginTimeOfNano / TimeUnit.MICROSECONDS.toNanos(1);
 
-        return (System.currentTimeMillis() + txInfo.getLossTime()) - beginTime > txInfo.getTimeOut();
+        return (System.nanoTime() - beginOfMicros - lossTimeOfMicros) > timeOutOfMicros;
     }
 
 
@@ -204,7 +210,7 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
             throws TransactionalExecutor.ExecutionException {
-        if (isTimeoutWithLoss(tx.getCreateTime(), txInfo)) {
+        if (isTimeoutWithLoss(tx.getCreateTimeOfNano(), txInfo)) {
             // business execution timeout
             throw new TransactionalExecutor.ExecutionException(tx, new TimeoutException(),
                     TransactionalExecutor.Code.TimeoutRollback);

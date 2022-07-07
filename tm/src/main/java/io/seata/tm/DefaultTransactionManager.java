@@ -45,12 +45,11 @@ import io.seata.core.rpc.netty.TmNettyRemotingClient;
 public class DefaultTransactionManager implements TransactionManager {
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, long lossTime)
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
-        request.setLossTime(lossTime);
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());

@@ -65,11 +65,6 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public void begin(int timeout, String name, float lossTime) throws TransactionException {
-
-    }
-
-    @Override
     public void commit() throws TransactionException {
 
     }
@@ -121,4 +116,8 @@ public class MockGlobalTransaction implements GlobalTransaction {
         return createTime;
     }
 
+    @Override
+    public long getCreateTimeOfNano() {
+        return 0;
+    }
 }

@@ -46,8 +46,7 @@ class DefaultFailureHandlerImplTest {
 
         TransactionManagerHolder.set(new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name,
-                                int timeout, long lossTime)
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
                     throws TransactionException {
                 return DEFAULT_XID;
             }

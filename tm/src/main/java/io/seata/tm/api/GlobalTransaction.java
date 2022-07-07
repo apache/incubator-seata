@@ -54,17 +54,6 @@ public interface GlobalTransaction {
     void begin(int timeout, String name) throws TransactionException;
 
     /**
-     * Begin a new global transaction with given timeout and given name.
-     *
-     * @param timeout Given timeout in MILLISECONDS.
-     * @param name    Given name.
-     * @param lossTime Given loss time
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
-     */
-    void begin(int timeout, String name, long lossTime) throws TransactionException;
-
-    /**
      * Commit the global transaction.
      *
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
@@ -148,4 +137,11 @@ public interface GlobalTransaction {
      * @return create time
      */
     long getCreateTime();
+
+    /**
+     * get create time of nano
+     *
+     * @return create time of nano
+     */
+    long getCreateTimeOfNano();
 }
