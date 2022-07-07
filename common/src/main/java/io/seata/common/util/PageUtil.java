@@ -129,6 +129,7 @@ public class PageUtil {
             case "mysql":
             case "h2":
             case "postgresql":
+                return sourceSql.replaceAll("order by.*", "");
             case "oceanbase":
             case "oracle":
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
