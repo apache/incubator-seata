@@ -66,14 +66,14 @@ public class DefaultTransactionAutoProxy {
     }
 
     /**
-     * is transaction auto proxy ?
+     * is transaction auto proxy ? If it is, then return methodInterceptor, else null.
      *
      * @param bean               the bean
      * @param beanName           the beanName
      * @param applicationContext the applicationContext
      * @return the MethodInterceptor or null
      */
-    public MethodInterceptor isTransactionAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
+    public MethodInterceptor getMethodInterceptorIfTxProxy(Object bean, String beanName, ApplicationContext applicationContext) {
         for (TransactionAutoProxy proxy : ALL_TRANSACTION_AUTO_PROXIES) {
             MethodInterceptor methodInterceptor = proxy.isTransactionAutoProxy(bean, beanName, applicationContext);
             if (methodInterceptor != null) {

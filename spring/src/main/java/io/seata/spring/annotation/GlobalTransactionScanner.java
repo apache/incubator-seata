@@ -274,9 +274,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                interceptor = null;
                 //check Transaction proxy
-                interceptor = DefaultTransactionAutoProxy.get().isTransactionAutoProxy(bean, beanName, applicationContext);
+                interceptor = DefaultTransactionAutoProxy.get().getMethodInterceptorIfTxProxy(bean, beanName, applicationContext);
                 if (interceptor != null) {
                     ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                             (ConfigurationChangeListener) interceptor);
