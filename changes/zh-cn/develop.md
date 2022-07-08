@@ -5,6 +5,7 @@
 ### feature：
   - [[#4661](https://github.com/seata/seata/pull/4713)] 支持根据xid负载均衡算法
   - [[#4676](https://github.com/seata/seata/pull/4676)] 支持Nacos作为注册中心时，server通过挂载SLB暴露服务
+  - [[#4642](https://github.com/seata/seata/pull/4642)] 支持client批量请求并行处理
 
 
 ### bugfix：
@@ -48,5 +49,6 @@
 - [opelok-z](https://github.com/opelok-z)
 - [a364176773](https://github.com/a364176773)
 - [Smery-lxm](https://github.com/Smery-lxm)
+- [lvekee](https://github.com/lvekee)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
