@@ -20,19 +20,21 @@ import io.seata.common.util.StringUtils;
 /**
  * The type ExtensionDefinition
  *
+ * @param <S> type of serviceClass
  * @author haozhibei
  */
-final class ExtensionDefinition {
-    private String name;
-    private Class serviceClass;
-    private Integer order;
-    private Scope scope;
+final class ExtensionDefinition<S> {
+
+    private final String name;
+    private final Class<S> serviceClass;
+    private final Integer order;
+    private final Scope scope;
 
     public Integer getOrder() {
         return this.order;
     }
 
-    public Class getServiceClass() {
+    public Class<S> getServiceClass() {
         return this.serviceClass;
     }
 
@@ -40,7 +42,7 @@ final class ExtensionDefinition {
         return this.scope;
     }
 
-    public ExtensionDefinition(String name, Integer order, Scope scope, Class clazz) {
+    public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz) {
         this.name = name;
         this.order = order;
         this.scope = scope;
@@ -69,7 +71,8 @@ final class ExtensionDefinition {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ExtensionDefinition other = (ExtensionDefinition)obj;
+
+        ExtensionDefinition<?> other = (ExtensionDefinition<?>) obj;
         if (!StringUtils.equals(name, other.name)) {
             return false;
         }
