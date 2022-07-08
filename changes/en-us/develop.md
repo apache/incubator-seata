@@ -6,6 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 ### feature：
   - [[#4661](https://github.com/seata/seata/pull/4713)] support xid load balance
   - [[#4676](https://github.com/seata/seata/pull/4676)] support server to expose Nacos services by mounting SLB
+  - [[#4642](https://github.com/seata/seata/pull/4642)] support batch message parallel processing
  
 
 ### bugfix：
