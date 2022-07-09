@@ -28,6 +28,7 @@
   - [[#4720](https://github.com/seata/seata/pull/4720)] 优化pom描述
   - [[#4728](https://github.com/seata/seata/pull/4728)] 将logback版本依赖升级至1.2.9
   - [[#4750](https://github.com/seata/seata/pull/4750)] 优化AT分支释放全局锁不使用xid
+  - [[#4745](https://github.com/seata/seata/pull/4745)] 发行包中支持 mysql8 driver
 
 ### test：
   - [[#4544](https://github.com/seata/seata/pull/4544)] 优化TransactionContextFilterTest中jackson包依赖问题
