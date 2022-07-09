@@ -5,6 +5,7 @@
 ### feature：
   - [[#4661](https://github.com/seata/seata/pull/4713)] 支持根据xid负载均衡算法
   - [[#4676](https://github.com/seata/seata/pull/4676)] 支持Nacos作为注册中心时，server通过挂载SLB暴露服务
+  - [[#4642](https://github.com/seata/seata/pull/4642)] 支持client批量请求并行处理
 
 
 ### bugfix：
@@ -27,6 +28,7 @@
   - [[#4711](https://github.com/seata/seata/pull/4711)] 分离部署时 lib 依赖
   - [[#4720](https://github.com/seata/seata/pull/4720)] 优化pom描述
   - [[#4728](https://github.com/seata/seata/pull/4728)] 将logback版本依赖升级至1.2.9
+  - [[#4745](https://github.com/seata/seata/pull/4745)] 发行包中支持 mysql8 driver
 
 ### test：
   - [[#4544](https://github.com/seata/seata/pull/4544)] 优化TransactionContextFilterTest中jackson包依赖问题
@@ -47,5 +49,6 @@
 - [opelok-z](https://github.com/opelok-z)
 - [a364176773](https://github.com/a364176773)
 - [Smery-lxm](https://github.com/Smery-lxm)
+- [lvekee](https://github.com/lvekee)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
