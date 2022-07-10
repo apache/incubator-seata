@@ -26,6 +26,7 @@ import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.Version;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
@@ -41,8 +42,6 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxyXA.class);
 
-    private boolean shouldBeHeld = false;
-
     public DataSourceProxyXA(DataSource dataSource) {
         this(dataSource, DEFAULT_RESOURCE_GROUP_ID);
     }
@@ -56,6 +55,9 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
         if (dbType.equalsIgnoreCase(DBType.MYSQL.name())) {
+            ResourceManagerXA resourceManagerXA =
+                (ResourceManagerXA)DefaultResourceManager.get().getResourceManager(BranchType.XA);
+            resourceManagerXA.initXaTwoPhaseTimeoutChecker();
             try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
                 ResultSet versionResult = preparedStatement.executeQuery()) {
@@ -63,11 +65,11 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
                     long currentVersion = Version.convertVersion(versionResult.getString("VERSION()"));
                     long version = Version.convertVersion("8.0.29");
                     if (currentVersion < version) {
-                        this.shouldBeHeld = true;
+                        setShouldBeHeld(true);
                     }
                 }
             } catch (Exception e) {
-                this.shouldBeHeld = true;
+                setShouldBeHeld(true);
                 LOGGER.info("get mysql version fail error: {}", e.getMessage());
             }
         }
@@ -106,14 +108,6 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
-    }
-
-    public boolean isShouldBeHeld() {
-        return shouldBeHeld;
-    }
-
-    public void setShouldBeHeld(boolean shouldBeHeld) {
-        this.shouldBeHeld = shouldBeHeld;
     }
 
 }
