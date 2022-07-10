@@ -72,7 +72,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
                 setShouldBeHeld(true);
                 LOGGER.info("get mysql version fail error: {}", e.getMessage());
             }
-        }else if (DBType.MARIADB.name().equalsIgnoreCase(dbType)) {
+        } else if (DBType.MARIADB.name().equalsIgnoreCase(dbType)) {
             setShouldBeHeld(true);
         }
         //Set the default branch type to 'XA' in the RootContext.
