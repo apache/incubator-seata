@@ -112,7 +112,7 @@ public class Version {
         return isAboveOrEqualVersion150;
     }
 
-    private static long convertVersion(String version) throws IncompatibleVersionException {
+    public static long convertVersion(String version) throws IncompatibleVersionException {
         String[] parts = StringUtils.split(version, '.');
         long result = 0L;
         int i = 1;

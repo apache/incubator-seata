@@ -16,12 +16,16 @@
 package io.seata.rm.datasource.xa;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 
+import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
+import io.seata.core.protocol.Version;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
@@ -37,6 +41,8 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxyXA.class);
 
+    private boolean shouldBeHeld = false;
+
     public DataSourceProxyXA(DataSource dataSource) {
         this(dataSource, DEFAULT_RESOURCE_GROUP_ID);
     }
@@ -49,7 +55,22 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
-
+        if (dbType.equalsIgnoreCase(DBType.MYSQL.name())) {
+            try (Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                ResultSet versionResult = preparedStatement.executeQuery()) {
+                if (versionResult.next()) {
+                    long currentVersion = Version.convertVersion(versionResult.getString("VERSION()"));
+                    long version = Version.convertVersion("8.0.29");
+                    if (currentVersion < version) {
+                        this.shouldBeHeld = true;
+                    }
+                }
+            } catch (Exception e) {
+                this.shouldBeHeld = true;
+                LOGGER.info("get mysql version fail error: {}", e.getMessage());
+            }
+        }
         //Set the default branch type to 'XA' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
     }
@@ -85,6 +106,14 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
+    }
+
+    public boolean isShouldBeHeld() {
+        return shouldBeHeld;
+    }
+
+    public void setShouldBeHeld(boolean shouldBeHeld) {
+        this.shouldBeHeld = shouldBeHeld;
     }
 
 }

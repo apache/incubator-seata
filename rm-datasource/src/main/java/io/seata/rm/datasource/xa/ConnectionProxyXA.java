@@ -63,6 +63,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private volatile Long prepareTime = null;
 
     private volatile Integer timeout = null;
+    
+    private boolean shouldBeHeld = false;
 
     /**
      * Constructor of Connection Proxy for XA mode.
@@ -72,8 +74,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param resource The corresponding Resource(DataSource proxy) from which the connections was created.
      * @param xid Seata global transaction xid.
      */
-    public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource, String xid) {
+    public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource,
+        String xid) {
         super(originalConnection, xaConnection, resource, xid);
+        if (resource instanceof DataSourceProxyXA) {
+            this.shouldBeHeld = ((DataSourceProxyXA)resource).isShouldBeHeld();
+        }
     }
 
     public void init() {
@@ -328,8 +334,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public boolean shouldBeHeld() {
-        return JdbcConstants.MYSQL.equals(resource.getDbType()) || JdbcConstants.MARIADB.equals(resource.getDbType())
-               || StringUtils.isBlank(resource.getDbType());
+        return shouldBeHeld || StringUtils.isBlank(resource.getDbType());
     }
 
     public Long getPrepareTime() {
