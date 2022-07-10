@@ -275,9 +275,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 case RollbackRetrying:
                     failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
                     throw e.getOriginalException();
-                case TimeoutRollback:
-                    failureHandler.onTimeoutRollback(e.getTransaction(), e.getOriginalException());
-                    throw e.getOriginalException();
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }

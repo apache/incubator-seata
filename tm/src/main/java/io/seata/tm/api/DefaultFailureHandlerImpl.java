@@ -76,12 +76,6 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
             TimeUnit.SECONDS);
     }
 
-    @Override
-    public void onTimeoutRollback(GlobalTransaction tx, Throwable originalException) {
-        LOGGER.warn("Failed to commit transaction[" + tx.getXid() + "]", originalException);
-        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Committed), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
-    }
-
     protected class CheckTimerTask implements TimerTask {
 
         private final GlobalTransaction tx;

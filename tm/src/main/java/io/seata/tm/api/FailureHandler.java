@@ -54,11 +54,4 @@ public interface FailureHandler {
      */
     void onRollbackRetrying(GlobalTransaction tx, Throwable originalException);
 
-    /**
-     * On commit failure (business execution timeout)
-     *
-     * @param tx  the tx
-     * @param originalException the originalException
-     */
-    void onTimeoutRollback(GlobalTransaction tx, Throwable originalException);
 }
