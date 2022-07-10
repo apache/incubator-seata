@@ -120,7 +120,12 @@ public enum TransactionExceptionCode {
     /**
      * Lock key conflict fail fast transaction exception code.
      */
-    LockKeyConflictFailFast
+    LockKeyConflictFailFast,
+
+    /**
+     * Global transaction time out exception code
+     */
+    GlobalTransactionTimeOut
     ;
 
 

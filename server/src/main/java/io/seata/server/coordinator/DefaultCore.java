@@ -26,6 +26,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -149,10 +150,12 @@ public class DefaultCore implements Core {
             return GlobalStatus.Finished;
         }
 
-        if (isTimeout(globalSession)) {
+        if (globalSession.isTimeout()) {
             globalSession.closeAndClean();
-            return GlobalStatus.TransactionTimeout;
+            globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);
+            throw new TransactionException(TransactionExceptionCode.GlobalTransactionTimeOut);
         }
+
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
 
@@ -394,16 +397,4 @@ public class DefaultCore implements Core {
             return false;
         }
     }
-
-    /**
-     * Judge whether timeout occurs
-     * @param globalSession the globalSession
-     * @return is timeout
-     */
-    private boolean isTimeout(GlobalSession globalSession) {
-        final long beginTime = globalSession.getBeginTime();
-        final int timeout = globalSession.getTimeout();
-        return (beginTime + timeout) > System.currentTimeMillis();
-    }
-
 }

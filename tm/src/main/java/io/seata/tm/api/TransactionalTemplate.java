@@ -16,6 +16,7 @@
 package io.seata.tm.api;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -94,8 +95,8 @@ public class TransactionalTemplate {
                     // If transaction is existing, throw exception.
                     if (existingTransaction(tx)) {
                         throw new TransactionException(
-                            String.format("Existing transaction found for transaction marked with propagation 'never', xid = %s"
-                                    , tx.getXid()));
+                                String.format("Existing transaction found for transaction marked with propagation 'never', xid = %s"
+                                        , tx.getXid()));
                     } else {
                         // Execute without transaction and return.
                         return business.execute();
@@ -135,7 +136,17 @@ public class TransactionalTemplate {
                 }
 
                 // 4. everything is fine, commit.
-                commitTransaction(tx, txInfo);
+                try {
+                    commitTransaction(tx, txInfo);
+                } catch (TransactionalExecutor.ExecutionException e) {
+                    if (Objects.equals(e.getCode(), TransactionalExecutor.Code.TimeoutRollback)) {
+                        LOGGER.info(e.getMessage());
+                        // TC or TM Global transaction is timeout, to rollback
+                        rollbackTransaction(tx, e.getCause());
+                    } else {
+                        throw e;
+                    }
+                }
 
                 return rs;
             } finally {
@@ -154,18 +165,20 @@ public class TransactionalTemplate {
 
     /**
      * Judge whether timeout occurs in case of IO delay and network communication delay
+     *
      * @param beginTimeOfNano the beginTime
-     * @param txInfo the transaction info
+     * @param txInfo          the transaction info
      * @return is timeout
      */
     private boolean isTimeoutWithLoss(long beginTimeOfNano, TransactionInfo txInfo) {
         // 1 millisecond  =  1000 microsecond
         final long conversionRate = TimeUnit.MILLISECONDS.toMicros(1);
         final long timeOutOfMicros = txInfo.getTimeOut() * conversionRate;
-        final float lossTimeOfMicros = txInfo.getLossTime() * conversionRate;
+        final long lossTimeOfMicros = (long) txInfo.getLossTime() * conversionRate;
         final long beginOfMicros = beginTimeOfNano / TimeUnit.MICROSECONDS.toNanos(1);
+        final long currentMicros = System.nanoTime() / TimeUnit.MICROSECONDS.toNanos(1);
 
-        return (System.nanoTime() - beginOfMicros - lossTimeOfMicros) > timeOutOfMicros;
+        return (currentMicros - beginOfMicros - lossTimeOfMicros) > timeOutOfMicros;
     }
 
 
@@ -192,16 +205,11 @@ public class TransactionalTemplate {
         }
     }
 
-    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {
+    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException)
+            throws TransactionalExecutor.ExecutionException, TransactionException {
         //roll back
         if (txInfo != null && txInfo.rollbackOn(originalException)) {
-            try {
-                rollbackTransaction(tx, originalException);
-            } catch (TransactionException txe) {
-                // Failed to rollback
-                throw new TransactionalExecutor.ExecutionException(tx, txe,
-                        TransactionalExecutor.Code.RollbackFailure, originalException);
-            }
+            rollbackTransaction(tx, originalException);
         } else {
             // not roll back on this exception, so commit
             commitTransaction(tx, txInfo);
@@ -212,7 +220,8 @@ public class TransactionalTemplate {
             throws TransactionalExecutor.ExecutionException {
         if (isTimeoutWithLoss(tx.getCreateTimeOfNano(), txInfo)) {
             // business execution timeout
-            throw new TransactionalExecutor.ExecutionException(tx, new TimeoutException(),
+            throw new TransactionalExecutor.ExecutionException(tx,
+                    new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TM].", tx.getXid())),
                     TransactionalExecutor.Code.TimeoutRollback);
         }
 
@@ -225,15 +234,29 @@ public class TransactionalTemplate {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                     TransactionalExecutor.Code.CommitFailure);
         }
+
+        if (Objects.equals(tx.getLocalStatus(), GlobalStatus.TimeoutRollbacking)) {
+            throw new TransactionalExecutor.ExecutionException(tx,
+                    new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
+                    TransactionalExecutor.Code.TimeoutRollback);
+        }
     }
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable originalException) throws TransactionException, TransactionalExecutor.ExecutionException {
-        triggerBeforeRollback();
-        tx.rollback();
-        triggerAfterRollback();
+
+        try {
+            triggerBeforeRollback();
+            tx.rollback();
+            triggerAfterRollback();
+        } catch (TransactionException txe) {
+            // Failed to rollback
+            throw new TransactionalExecutor.ExecutionException(tx, txe,
+                    TransactionalExecutor.Code.RollbackFailure, originalException);
+        }
+
         // 3.1 Successfully rolled back
         throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
-            ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
+                ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
@@ -243,7 +266,7 @@ public class TransactionalTemplate {
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.BeginFailure);
+                    TransactionalExecutor.Code.BeginFailure);
 
         }
     }
