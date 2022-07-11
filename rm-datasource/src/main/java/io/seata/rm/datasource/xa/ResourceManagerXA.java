@@ -75,18 +75,20 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                         xaTwoPhaseTimeoutChecker.scheduleAtFixedRate(() -> {
                             for (Map.Entry<String, Resource> entry : dataSourceCache.entrySet()) {
                                 BaseDataSourceResource resource = (BaseDataSourceResource)entry.getValue();
-                                if (resource instanceof DataSourceProxyXA) {
-                                    Map<String, ConnectionProxyXA> keeper = resource.getKeeper();
-                                    for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
-                                        ConnectionProxyXA connection = connectionEntry.getValue();
-                                        long now = System.currentTimeMillis();
-                                        synchronized (connection) {
-                                            if (connection.getPrepareTime() != null
-                                                && now - connection.getPrepareTime() > TWO_PHASE_HOLD_TIMEOUT) {
-                                                try {
-                                                    connection.closeForce();
-                                                } catch (SQLException e) {
-                                                    LOGGER.info("Force close the xa physical connection fail", e);
+                                if (resource.isShouldBeHeld()) {
+                                    if (resource instanceof DataSourceProxyXA) {
+                                        Map<String, ConnectionProxyXA> keeper = resource.getKeeper();
+                                        for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
+                                            ConnectionProxyXA connection = connectionEntry.getValue();
+                                            long now = System.currentTimeMillis();
+                                            synchronized (connection) {
+                                                if (connection.getPrepareTime() != null
+                                                    && now - connection.getPrepareTime() > TWO_PHASE_HOLD_TIMEOUT) {
+                                                    try {
+                                                        connection.closeForce();
+                                                    } catch (SQLException e) {
+                                                        LOGGER.info("Force close the xa physical connection fail", e);
+                                                    }
                                                 }
                                             }
                                         }

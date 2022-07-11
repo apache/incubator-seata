@@ -56,11 +56,6 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
         if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
-            Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA)).ifPresent(resourceManager -> {
-                if (resourceManager instanceof ResourceManagerXA) {
-                    ((ResourceManagerXA)resourceManager).initXaTwoPhaseTimeoutChecker();
-                }
-            });
             try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
                 ResultSet versionResult = preparedStatement.executeQuery()) {
@@ -78,6 +73,11 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         } else if (DBType.MARIADB.name().equalsIgnoreCase(dbType)) {
             setShouldBeHeld(true);
         }
+        Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA)).ifPresent(resourceManager -> {
+            if (resourceManager instanceof ResourceManagerXA) {
+                ((ResourceManagerXA)resourceManager).initXaTwoPhaseTimeoutChecker();
+            }
+        });
         //Set the default branch type to 'XA' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
     }
