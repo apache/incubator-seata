@@ -26,7 +26,6 @@ import javax.sql.XAConnection;
 import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
-import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.Version;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.SeataDataSourceProxy;
