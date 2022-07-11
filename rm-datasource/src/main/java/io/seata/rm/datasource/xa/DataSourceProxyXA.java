@@ -19,12 +19,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 
 import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.Version;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.SeataDataSourceProxy;
@@ -55,9 +57,11 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
         if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
-            ResourceManagerXA resourceManagerXA =
-                (ResourceManagerXA)DefaultResourceManager.get().getResourceManager(BranchType.XA);
-            resourceManagerXA.initXaTwoPhaseTimeoutChecker();
+            Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA)).ifPresent(resourceManager -> {
+                if (resourceManager instanceof ResourceManagerXA) {
+                    ((ResourceManagerXA)resourceManager).initXaTwoPhaseTimeoutChecker();
+                }
+            });
             try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
                 ResultSet versionResult = preparedStatement.executeQuery()) {
