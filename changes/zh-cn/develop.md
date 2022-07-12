@@ -6,6 +6,7 @@
   - [[#4661](https://github.com/seata/seata/pull/4713)] 支持根据xid负载均衡算法
   - [[#4676](https://github.com/seata/seata/pull/4676)] 支持Nacos作为注册中心时，server通过挂载SLB暴露服务
   - [[#4642](https://github.com/seata/seata/pull/4642)] 支持client批量请求并行处理
+  - [[#4567](https://github.com/seata/seata/pull/4567)] 支持where条件中find_in_set函数
 
 
 ### bugfix：
@@ -18,6 +19,7 @@
   - [[#4696](https://github.com/seata/seata/pull/4696)] 修复 oracle 存储模式时的插入问题
   - [[#4726](https://github.com/seata/seata/pull/4726)] 修复批量发送消息时可能的NPE问题
   - [[#4729](https://github.com/seata/seata/pull/4729)] 修复AspectTransactional.rollbackForClassName设置错误
+  - [[#4653](https://github.com/seata/seata/pull/4653)] 修复 INSERT_ON_DUPLICATE 主键为非数值异常
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
@@ -29,6 +31,10 @@
   - [[#4720](https://github.com/seata/seata/pull/4720)] 优化pom描述
   - [[#4728](https://github.com/seata/seata/pull/4728)] 将logback版本依赖升级至1.2.9
   - [[#4745](https://github.com/seata/seata/pull/4745)] 发行包中支持 mysql8 driver
+  - [[#4626](https://github.com/seata/seata/pull/4626)] 使用 `easyj-maven-plugin` 插件代替 `flatten-maven-plugin`插件，以修复`shade` 插件与 `flatten` 插件不兼容的问题
+  - [[#4629](https://github.com/seata/seata/pull/4629)] 更新globalSession状态时检查更改前后的约束关系
+  - [[#4662](https://github.com/seata/seata/pull/4662)] 优化 EnhancedServiceLoader 可读性
+
 
 ### test：
   - [[#4544](https://github.com/seata/seata/pull/4544)] 优化TransactionContextFilterTest中jackson包依赖问题
@@ -50,5 +56,11 @@
 - [a364176773](https://github.com/a364176773)
 - [Smery-lxm](https://github.com/Smery-lxm)
 - [lvekee](https://github.com/lvekee)
+- [doubleDimple](https://github.com/doubleDimple)
+- [wangliang181230](https://github.com/wangliang181230)
+- [Bughue](https://github.com/Bughue)
+- [AYue-94](https://github.com/AYue-94)
+- [lingxiao-wu](https://github.com/lingxiao-wu)
+- [caohdgege](https://github.com/caohdgege)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
