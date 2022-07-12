@@ -26,7 +26,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-bom</artifactId>
-
     <packaging>pom</packaging>
 
     <name>Seata bom ${project.version}</name>
