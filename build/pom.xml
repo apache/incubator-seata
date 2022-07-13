@@ -121,6 +121,8 @@
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
         <image.tags>latest</image.tags>
+
+        <dependencies.copy.skip>true</dependencies.copy.skip>
     </properties>
 
     <build>
