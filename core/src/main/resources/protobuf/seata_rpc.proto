@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package io.seata.grpc;
+
+import "google/protobuf/empty.proto";
+import "protobuf/io/seata/protocol/transcation/registerRMRequest.proto";
+import "protobuf/io/seata/protocol/transcation/registerRMResponse.proto";
+import "protobuf/io/seata/protocol/transcation/globalBeginRequest.proto";
+import "protobuf/io/seata/protocol/transcation/globalBeginResponse.proto";
+import "protobuf/io/seata/protocol/transcation/globalCommitRequest.proto";
+import "protobuf/io/seata/protocol/transcation/globalCommitResponse.proto";
+import "protobuf/io/seata/protocol/transcation/globalRollbackRequest.proto";
+import "protobuf/io/seata/protocol/transcation/globalRollbackResponse.proto";
+import "protobuf/io/seata/protocol/transcation/globalReportRequest.proto";
+import "protobuf/io/seata/protocol/transcation/globalReportResponse.proto";
+import "protobuf/io/seata/protocol/transcation/globalStatusRequest.proto";
+import "protobuf/io/seata/protocol/transcation/globalStatusResponse.proto";
+import "protobuf/io/seata/protocol/transcation/heartbeatMessage.proto";
+
+import "protobuf/io/seata/protocol/transcation/branchRegisterRequest.proto";
+import "protobuf/io/seata/protocol/transcation/branchRegisterResponse.proto";
+import "protobuf/io/seata/protocol/transcation/branchReportRequest.proto";
+import "protobuf/io/seata/protocol/transcation/branchReportResponse.proto";
+import "protobuf/io/seata/protocol/transcation/globalLockQueryRequest.proto";
+import "protobuf/io/seata/protocol/transcation/globalLockQueryResponse.proto";
+
+import "protobuf/io/seata/protocol/transcation/branchCommitRequest.proto";
+import "protobuf/io/seata/protocol/transcation/branchCommitResponse.proto";
+import "protobuf/io/seata/protocol/transcation/branchRollbackRequest.proto";
+import "protobuf/io/seata/protocol/transcation/branchRollbackResponse.proto";
+import "protobuf/io/seata/protocol/transcation/undoLogDeleteRequest.proto";
+
+option java_package = "io.seata.core.rpc.grpc.generated";
+option java_outer_classname = "GrpcRemoting";
+
+service TransactionManagerService {
+  rpc RegisterTM(io.seata.protocol.protobuf.RegisterRMRequestProto) returns (io.seata.protocol.protobuf.RegisterRMResponseProto);
+  rpc GlobalBegin(io.seata.protocol.protobuf.GlobalBeginRequestProto) returns (io.seata.protocol.protobuf.GlobalBeginResponseProto);
+  rpc GlobalCommit(io.seata.protocol.protobuf.GlobalCommitRequestProto) returns (io.seata.protocol.protobuf.GlobalCommitResponseProto);
+  rpc GlobalRollback(io.seata.protocol.protobuf.GlobalRollbackRequestProto) returns (io.seata.protocol.protobuf.GlobalRollbackResponseProto);
+  rpc GlobalReport(io.seata.protocol.protobuf.GlobalReportRequestProto) returns (io.seata.protocol.protobuf.GlobalReportResponseProto);
+  rpc GetGlobalStatus(io.seata.protocol.protobuf.GlobalStatusRequestProto) returns (io.seata.protocol.protobuf.GlobalStatusResponseProto);
+  rpc HeartbeatChecker(io.seata.protocol.protobuf.HeartbeatMessageProto) returns (google.protobuf.Empty);
+}
+
+service ResourceManagerService {
+  rpc RegisterRM(io.seata.protocol.protobuf.RegisterRMRequestProto) returns (io.seata.protocol.protobuf.RegisterRMResponseProto);
+  rpc BranchRegister(io.seata.protocol.protobuf.BranchRegisterRequestProto) returns (io.seata.protocol.protobuf.BranchRegisterResponseProto);
+  rpc BranchReport(io.seata.protocol.protobuf.BranchReportRequestProto) returns (io.seata.protocol.protobuf.BranchReportResponseProto);
+  rpc LockQuery(io.seata.protocol.protobuf.GlobalLockQueryRequestProto) returns (io.seata.protocol.protobuf.GlobalLockQueryResponseProto);
+  rpc HeartbeatChecker(io.seata.protocol.protobuf.HeartbeatMessageProto) returns (google.protobuf.Empty);
+}
+
+service BranchTransactionService {
+  rpc BranchCommit(io.seata.protocol.protobuf.BranchCommitRequestProto) returns (io.seata.protocol.protobuf.BranchCommitResponseProto);
+  rpc BranchRollback(io.seata.protocol.protobuf.BranchRollbackRequestProto) returns (io.seata.protocol.protobuf.BranchRollbackResponseProto);
+  rpc RMUndoLogHandle(io.seata.protocol.protobuf.UndoLogDeleteRequestProto) returns (google.protobuf.Empty);
+}
