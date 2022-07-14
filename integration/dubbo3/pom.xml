@@ -24,14 +24,12 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-dubbo</artifactId>
+    <artifactId>seata-dubbo3</artifactId>
     <packaging>jar</packaging>
-    <name>seata-dubbo ${project.version}</name>
-    <description>apache dubbo integration for Seata built with Maven</description>
+    <name>seata-dubbo3 ${project.version}</name>
+    <description>apache dubbo3 integration for Seata built with Maven</description>
 
-    <properties>
-        <dubbo.version>2.7.4</dubbo.version>
-    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -41,7 +39,6 @@
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
-            <version>${dubbo.version}</version>
         </dependency>
     </dependencies>
 

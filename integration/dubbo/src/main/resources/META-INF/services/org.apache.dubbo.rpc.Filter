@@ -1,1 +1,1 @@
-io.seata.integration.dubbo.ApacheDubboTransactionPropagationFilter
+io.seata.integration.dubbo.ApacheDubbo3TransactionPropagationBaseFilter
