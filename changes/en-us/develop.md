@@ -6,6 +6,8 @@ Add changes here for all PR submitted to the develop branch.
 ### feature：
   - [[#4661](https://github.com/seata/seata/pull/4713)] support xid load balance
   - [[#4676](https://github.com/seata/seata/pull/4676)] support server to expose Nacos services by mounting SLB
+  - [[#4642](https://github.com/seata/seata/pull/4642)] support batch message parallel processing
+  - [[#4567](https://github.com/seata/seata/pull/4567)] support where method condition(find_in_set)
  
 
 ### bugfix：
@@ -18,6 +20,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4696](https://github.com/seata/seata/pull/4696)] fix oracle database insert value
   - [[#4726](https://github.com/seata/seata/pull/4726)] fix batch message send may return NullPointException
   - [[#4729](https://github.com/seata/seata/pull/4729)] fix set AspectTransactional.rollbackForClassName with wrong value
+  - [[#4653](https://github.com/seata/seata/pull/4653)] fix the sql exception when pk is non-numeric in INSERT_ON_DUPLICATE SQL
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities
@@ -28,6 +31,10 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4711](https://github.com/seata/seata/pull/4711)] separate lib dependencies for deployments
   - [[#4720](https://github.com/seata/seata/pull/4720)] optimize pom description
   - [[#4728](https://github.com/seata/seata/pull/4728)] upgrade logback dependency to 1.2.9
+  - [[#4745](https://github.com/seata/seata/pull/4745)] support mysql8 in release package
+  - [[#4626](https://github.com/seata/seata/pull/4626)] Replace `flatten-maven-plugin` with `easyj-maven-plugin` to fix the conflict between `shade` and `flatten`
+  - [[#4629](https://github.com/seata/seata/pull/4629)] check relation of before status and after status when updating global session
+  - [[#4662](https://github.com/seata/seata/pull/4662)] make EnhancedServiceLoader more readable
 
 ### test:
 
@@ -48,5 +55,12 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [a364176773](https://github.com/a364176773)
 - [2129zxl](https://github.com/2129zxl)
 - [Smery-lxm](https://github.com/Smery-lxm)
+- [doubleDimple](https://github.com/doubleDimple)
+- [wangliang181230](https://github.com/wangliang181230)
+- [Bughue](https://github.com/Bughue)
+- [AYue-94](https://github.com/AYue-94)
+- [lingxiao-wu](https://github.com/lingxiao-wu)
+- [caohdgege](https://github.com/caohdgege)
+
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
