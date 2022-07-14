@@ -27,6 +27,7 @@
     <artifactId>seata-sofa-rpc</artifactId>
     <packaging>jar</packaging>
     <name>seata-sofa-rpc ${project.version}</name>
+    <description>sofa-rpc integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -38,7 +39,16 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-all</artifactId>
         </dependency>
-        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
