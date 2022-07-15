@@ -66,6 +66,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.session.SessionStatusValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -331,6 +332,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
                 // transaction timeout and start rollbacking event
                 MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false, false);
+                // do rollback
+                core.doGlobalRollback(globalSession, false);
 
                 return true;
             });
@@ -357,8 +360,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
-                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking)
-                    && !rollbackingSession.isDeadSession()) {
+                if (SessionStatusValidator.isRollbackingStatus(rollbackingSession.getStatus())
+                        && !rollbackingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
                 }
