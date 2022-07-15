@@ -38,12 +38,11 @@ import java.sql.SQLException;
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 public class DataBaseHealthIndicator implements HealthIndicator {
 
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    protected static final String datasourceType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
 
     @Override
     public Health health() {
 
-        String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         try {
             Connection connection = logStoreDataSource.getConnection();

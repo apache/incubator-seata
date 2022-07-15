@@ -63,5 +63,6 @@
 - [AYue-94](https://github.com/AYue-94)
 - [lingxiao-wu](https://github.com/lingxiao-wu)
 - [caohdgege](https://github.com/caohdgege)
+- [l81893521](https://github.com/l81893521)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
