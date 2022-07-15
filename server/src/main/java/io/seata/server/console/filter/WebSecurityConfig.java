@@ -22,6 +22,10 @@ import org.springframework.core.env.Environment;
 
 /**
  * @description: Spring security config in server
+<<<<<<< HEAD
+=======
+ * @authorz: jameslcj wfnuser
+>>>>>>> 95a603b2 (feature: add filter for http request)
  * @author: Sher
  */
 @Configuration(proxyBeanMethods = false)
