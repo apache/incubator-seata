@@ -7,7 +7,6 @@
   - [[#4676](https://github.com/seata/seata/pull/4676)] 支持Nacos作为注册中心时，server通过挂载SLB暴露服务
   - [[#4642](https://github.com/seata/seata/pull/4642)] 支持client批量请求并行处理
   - [[#4567](https://github.com/seata/seata/pull/4567)] 支持where条件中find_in_set函数
-
   - [[#4737](https://github.com/seata/seata/pull/4737)] 支持Spring boot actuator
 
 ### bugfix：
