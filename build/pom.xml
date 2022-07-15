@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.5.2</revision>
+        <revision>1.6.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -121,6 +121,8 @@
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
         <image.tags>latest</image.tags>
+
+        <dependencies.copy.skip>true</dependencies.copy.skip>
     </properties>
 
     <build>
