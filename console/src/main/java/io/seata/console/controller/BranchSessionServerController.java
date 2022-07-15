@@ -20,8 +20,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * @descripiton: server inner http request of branch session
  * @author: Sher
- * @date: 2022/7/12
+ *
  */
 
 
@@ -50,6 +51,7 @@ public class BranchSessionServerController {
         String requesturl = request.getRequestURI();
         String queryString = request.getQueryString();
         // innner http request url
+        // http://localhost:7091/server/console/branchSession
         String url = "http://" + address + ":" + port + "/server" + requesturl + "?" + queryString;
         // get bearerToken
         String bearerToken = request.getHeader(WebSecurityConfig.AUTHORIZATION_HEADER);

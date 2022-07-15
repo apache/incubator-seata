@@ -45,7 +45,7 @@ seata:
       db-type: mysql
       driver-class-name: com.mysql.jdbc.Driver
       url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
-      user: mysql
+      user: root
       password: 123456
       min-conn: 5
       max-conn: 100

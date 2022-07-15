@@ -18,7 +18,7 @@ package io.seata.server.console.controller;
 import javax.annotation.Resource;
 
 import io.seata.server.console.param.GlobalLockParam;
-import io.seata.console.result.PageResult;
+import io.seata.server.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author: zhongxiang.wang
  */
 @RestController
-@RequestMapping("/api/v1/console/globalLock")
+@RequestMapping("server/api/v1/console/globalLock")
 public class GlobalLockController {
 
     @Resource(type = GlobalLockService.class)

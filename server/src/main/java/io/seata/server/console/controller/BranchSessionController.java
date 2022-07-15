@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author: zhongxiang.wang
  */
 @RestController
-@RequestMapping("console/branchSession")
+@RequestMapping("server/console/branchSession")
 public class BranchSessionController {
 
     @Resource(type = BranchSessionService.class)

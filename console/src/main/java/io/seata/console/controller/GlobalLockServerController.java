@@ -22,8 +22,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * @description: server inner http request of global lock
  * @author: Sher
- * @date: 2022/7/12
  */
 
 
@@ -34,6 +34,7 @@ public class GlobalLockServerController {
     RestTemplate restTemplate;
     @Resource
     HttpServletRequest request;
+    //server inner request port and host
     @Value("${seata.server.port}")
     private Integer port;
     @Value("${seata.server.address}")

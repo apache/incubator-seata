@@ -20,8 +20,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * @description: server inner http request of global session
  * @author: Sher
- * @date: 2022/7/12
  */
 
 
