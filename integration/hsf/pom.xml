@@ -27,6 +27,7 @@
     <artifactId>seata-hsf</artifactId>
     <packaging>jar</packaging>
     <name>seata-hsf ${project.version}</name>
+    <description>EDAS hsf integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

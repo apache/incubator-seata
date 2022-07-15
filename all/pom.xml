@@ -26,7 +26,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-all</artifactId>
-
     <name>Seata All-in-one ${project.version}</name>
     <description>Seata is an easy-to-use, high-performance, java based, open source distributed transaction solution.</description>
 

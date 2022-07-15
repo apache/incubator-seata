@@ -121,7 +121,7 @@ public interface DefaultValues {
 
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
-    String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    String DEFAULT_LOAD_BALANCE = "XID";
     int VIRTUAL_NODES_DEFAULT = 10;
 
     String SEATA_RAFT_GROUP = "default";
