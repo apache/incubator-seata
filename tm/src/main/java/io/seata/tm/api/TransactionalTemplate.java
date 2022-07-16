@@ -209,7 +209,7 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
             throws TransactionalExecutor.ExecutionException {
-        if (isTimeoutWithLoss(tx.getCreateTimeOfNano(), txInfo)) {
+        if (isTimeoutWithLoss(tx.getBeginTimeOfNano(), txInfo)) {
             // business execution timeout
             throw new TransactionalExecutor.ExecutionException(tx,
                     new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TM].", tx.getXid())),

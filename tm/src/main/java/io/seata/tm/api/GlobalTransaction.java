@@ -132,16 +132,9 @@ public interface GlobalTransaction {
     GlobalTransactionRole getGlobalTransactionRole();
 
     /**
-     * get create time
-     *
-     * @return create time
-     */
-    long getCreateTime();
-
-    /**
      * get create time of nano
      *
      * @return create time of nano
      */
-    long getCreateTimeOfNano();
+    long getBeginTimeOfNano();
 }

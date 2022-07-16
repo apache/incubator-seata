@@ -51,14 +51,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
-    private final long createTime;
-
     /**
      * Used to calculate the timeout more accurately
      *
      * @see System#nanoTime()
      */
-    private long createTimeOfNano;
+    private long beginTimeOfNano;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
@@ -85,7 +83,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         this.xid = xid;
         this.status = status;
         this.role = role;
-        this.createTime = System.currentTimeMillis();
     }
 
     @Override
@@ -100,7 +97,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
-        this.createTimeOfNano = System.nanoTime();
+        this.beginTimeOfNano = System.nanoTime();
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -263,13 +260,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public long getCreateTime() {
-        return createTime;
-    }
-
-    @Override
-    public long getCreateTimeOfNano() {
-        return createTimeOfNano;
+    public long getBeginTimeOfNano() {
+        return beginTimeOfNano;
     }
 
     private void assertXIDNotNull() {

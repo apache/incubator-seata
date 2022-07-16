@@ -112,12 +112,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public long getCreateTime() {
-        return createTime;
-    }
-
-    @Override
-    public long getCreateTimeOfNano() {
+    public long getBeginTimeOfNano() {
         return 0;
     }
 }
