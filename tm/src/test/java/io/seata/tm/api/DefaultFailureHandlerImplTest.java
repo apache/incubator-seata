@@ -16,21 +16,20 @@
 package io.seata.tm.api;
 
 
-import java.lang.reflect.Field;
-
+import io.netty.util.HashedWheelTimer;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.MyRuntimeException;
-
-import io.netty.util.HashedWheelTimer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
 
 /**
  * @author wangwei
