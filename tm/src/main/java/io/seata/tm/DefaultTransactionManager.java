@@ -15,8 +15,6 @@
  */
 package io.seata.tm;
 
-import java.util.concurrent.TimeoutException;
-
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -36,6 +34,8 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
+
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Default transaction manager.
