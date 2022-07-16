@@ -53,4 +53,11 @@ public interface FailureHandler {
      * @param originalException the originalException
      */
     void onRollbackRetrying(GlobalTransaction tx, Throwable originalException);
+
+    /**
+     * On timeout rollback
+     * @param tx                the tx
+     * @param originalException the originalException
+     */
+    void onTimeOutRollback(GlobalTransaction tx, Throwable originalException);
 }

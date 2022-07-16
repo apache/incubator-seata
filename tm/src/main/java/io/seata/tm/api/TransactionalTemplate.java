@@ -136,17 +136,7 @@ public class TransactionalTemplate {
                 }
 
                 // 4. everything is fine, commit.
-                try {
-                    commitTransaction(tx, txInfo);
-                } catch (TransactionalExecutor.ExecutionException e) {
-                    if (Objects.equals(e.getCode(), TransactionalExecutor.Code.TimeoutRollback)) {
-                        LOGGER.info(e.getMessage());
-                        // TC or TM Global transaction is timeout, to rollback
-                        rollbackTransaction(tx, e.getCause());
-                    } else {
-                        throw e;
-                    }
-                }
+                commitTransaction(tx, txInfo);
 
                 return rs;
             } finally {
@@ -173,12 +163,13 @@ public class TransactionalTemplate {
     private boolean isTimeoutWithLoss(long beginTimeOfNano, TransactionInfo txInfo) {
         // 1 millisecond  =  1000 microsecond
         final long conversionRate = TimeUnit.MILLISECONDS.toMicros(1);
+
         final long timeOutOfMicros = txInfo.getTimeOut() * conversionRate;
         final long lossTimeOfMicros = (long) txInfo.getLossTime() * conversionRate;
         final long beginOfMicros = beginTimeOfNano / TimeUnit.MICROSECONDS.toNanos(1);
         final long currentMicros = System.nanoTime() / TimeUnit.MICROSECONDS.toNanos(1);
 
-        return (currentMicros - beginOfMicros - lossTimeOfMicros) > timeOutOfMicros;
+        return (currentMicros - beginOfMicros - timeOutOfMicros) > lossTimeOfMicros;
     }
 
 

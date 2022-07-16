@@ -100,6 +100,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
+        this.createTimeOfNano = System.nanoTime();
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -119,7 +120,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
-        this.createTimeOfNano = System.nanoTime();
     }
 
     @SuppressWarnings("lgtm[java/constant-comparison]")
