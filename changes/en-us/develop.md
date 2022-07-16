@@ -21,6 +21,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4726](https://github.com/seata/seata/pull/4726)] fix batch message send may return NullPointException
   - [[#4729](https://github.com/seata/seata/pull/4729)] fix set AspectTransactional.rollbackForClassName with wrong value
   - [[#4653](https://github.com/seata/seata/pull/4653)] fix the sql exception when pk is non-numeric in INSERT_ON_DUPLICATE SQL
+  - [[#4653](https://github.com/seata/seata/pull/4780)] fix can‘t post TimeoutRollbacked event
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] fix some security vulnerabilities

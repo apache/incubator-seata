@@ -20,6 +20,7 @@
   - [[#4726](https://github.com/seata/seata/pull/4726)] 修复批量发送消息时可能的NPE问题
   - [[#4729](https://github.com/seata/seata/pull/4729)] 修复AspectTransactional.rollbackForClassName设置错误
   - [[#4653](https://github.com/seata/seata/pull/4653)] 修复 INSERT_ON_DUPLICATE 主键为非数值异常
+  - [[#4653](https://github.com/seata/seata/pull/4780)] 修复监控无法触发 TimeoutRollbacked 事件
 
 ### optimize：
   - [[#4650](https://github.com/seata/seata/pull/4650)] 修复安全漏洞
