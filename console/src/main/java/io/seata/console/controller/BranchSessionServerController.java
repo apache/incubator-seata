@@ -61,7 +61,7 @@ public class BranchSessionServerController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSessionServerController.class);
 
 
-    PageResult<BranchSessionVO> queryByXid(String xid) {
+    PageResult<BranchSessionVO> queryByXid() {
 
         // generate innner http request url
         String url = GenerateUrl(request);
