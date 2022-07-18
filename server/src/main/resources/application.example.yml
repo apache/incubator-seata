@@ -104,9 +104,10 @@ seata:
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
-    enableCheckAuth: true
-    retryDeadThreshold: 130000
-    xaerNotaRetryTimeout: 60000
+    enable-check-auth: true
+    enable-parallel-request-handle: true
+    retry-dead-threshold: 130000
+    xaer-nota-retry-timeout: 60000
     recovery:
       handle-all-session-period: 1000
     undo:
