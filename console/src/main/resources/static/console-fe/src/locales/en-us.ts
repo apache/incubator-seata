@@ -21,6 +21,7 @@ const enUs: ILocale = {
     overview: 'Overview',
     transactionInfo: 'TransactionInfo',
     globalLockInfo: 'GlobalLockInfo',
+    configurationInfo: "ConfigurationInfo",
   },
   Header: {
     home: 'HOME',
@@ -63,6 +64,14 @@ const enUs: ILocale = {
   },
   GlobalLockInfo: {
     title: 'GlobalLockInfo',
+    subTitle: 'list',
+    createTimeLabel: 'CreateTime',
+    inputFilterPlaceholder: 'Please enter filter criteria',
+    resetButtonLabel: 'Reset',
+    searchButtonLabel: 'Search',
+  },
+  ConfigurationInfo: {
+    title: 'ConfigurationInfo',
     subTitle: 'list',
     createTimeLabel: 'CreateTime',
     inputFilterPlaceholder: 'Please enter filter criteria',

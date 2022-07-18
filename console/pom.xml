@@ -54,6 +54,11 @@
             <artifactId>jjwt-jackson</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-config-core</artifactId>
+            <version>1.5.2-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>

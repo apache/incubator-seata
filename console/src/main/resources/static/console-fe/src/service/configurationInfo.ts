@@ -13,16 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import request from '@/utils/request';
+import {Dispatch} from "redux";
+import {SET_OVERVIEW} from "@/contants";
 
-export interface ILocaleMap {
-    [key: string]: string
-}
-export interface ILocale {
-  MenuRouter: ILocaleMap;
-  Header: ILocaleMap;
-  Login: ILocaleMap;
-  Overview: ILocaleMap;
-  TransactionInfo: ILocaleMap;
-  GlobalLockInfo: ILocaleMap;
-  ConfigurationInfo: ILocaleMap;
+export type GlobalConfigParam = {
+  xid?: string,
+  tableName?: string,
+  transactionId?: string,
+  branchId?: string,
+  pk?: string,
+  resourceId?: string,
+  pageSize: number,
+  pageNum: number,
+  timeStart?: number,
+  timeEnd?: number
+};
+
+
+export default async function fetchData():Promise<any> {
+  let result = await request('/editconfig/putconfig', {
+    method: 'post',
+  });
+
+  return result;
 }

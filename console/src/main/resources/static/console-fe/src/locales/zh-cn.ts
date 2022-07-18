@@ -69,6 +69,14 @@ const zhCn: ILocale = {
     resetButtonLabel: '重置',
     searchButtonLabel: '搜索',
   },
+  ConfigurationInfo: {
+    title: '配置信息',
+    subTitle: '基础列表页',
+    createTimeLabel: '创建时间',
+    inputFilterPlaceholder: '请输入筛选条件',
+    resetButtonLabel: '重置',
+    searchButtonLabel: '搜索',
+  },
 };
 
 export default zhCn;
