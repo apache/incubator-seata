@@ -61,7 +61,7 @@ public class GlobalLockServerController {
     @GetMapping("query")
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         // generate innner http request url
-        String url = GenerateUrl(request);
+        String url = generateUrl(request);
 
         // add token to header
         HttpEntity<String> httpEntity = getHttpEntity(request);
@@ -79,7 +79,7 @@ public class GlobalLockServerController {
     }
 
     // generate server http request url
-    private String GenerateUrl(HttpServletRequest request) {
+    private String generateUrl(HttpServletRequest request) {
         //requestUrl
         String requesturl = request.getRequestURI();
         //queryParam

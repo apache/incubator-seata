@@ -46,11 +46,10 @@ public class GlobalSessionServerController {
     RestTemplate restTemplate;
     @Resource
     HttpServletRequest request;
-//    @Value("${seata.server.port}")
+
 
     @Value("${seata.server.port}")
     private Integer port;
-//    private Integer port;
 
     @Value("${seata.server.address}")
     private String address;
@@ -83,7 +82,7 @@ public class GlobalSessionServerController {
     private String generateUrl(HttpServletRequest request) {
         String requesturl = request.getRequestURI();
         String queryString = request.getQueryString();
-        // http://localhost:7091/server//api/v1/console/globalLock
+        // http://localhost:7091/server/api/v1/console/globalSession
         String url = "http://" + address + ":" + port + "/server" + requesturl + "?" + queryString;
         return url;
     }

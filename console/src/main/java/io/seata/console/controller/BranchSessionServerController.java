@@ -64,7 +64,7 @@ public class BranchSessionServerController {
     PageResult<BranchSessionVO> queryByXid() {
 
         // generate innner http request url
-        String url = GenerateUrl(request);
+        String url = generateUrl(request);
 
         // add token to header
         HttpEntity<String> httpEntity = getHttpEntity(request);
@@ -82,10 +82,10 @@ public class BranchSessionServerController {
 
 
     // generate server http request url
-    private String GenerateUrl(HttpServletRequest request) {
+    private String generateUrl(HttpServletRequest request) {
         String requesturl = request.getRequestURI();
         String queryString = request.getQueryString();
-        // http://localhost:7091/server/console/branchSession
+
         String url = "http://" + address + ":" + port + "/server" + requesturl + "?" + queryString;
         return url;
     }
