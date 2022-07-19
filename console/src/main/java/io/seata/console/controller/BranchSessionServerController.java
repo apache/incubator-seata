@@ -75,7 +75,7 @@ public class BranchSessionServerController {
             ResponseEntity<PageResult> result = restTemplate.exchange(url, HttpMethod.GET, httpEntity, PageResult.class);
             response = result.getBody();
         } catch (Exception e) {
-            LOGGER.error("Server request error：", e);
+            LOGGER.error("Server request error:", e);
         }
         return response;
     }

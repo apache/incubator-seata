@@ -73,7 +73,7 @@ public class GlobalLockServerController {
             response = result.getBody();
 
         } catch (Exception e) {
-            LOGGER.error("Server request error：", e);
+            LOGGER.error("Server request error:", e);
         }
         return response;
     }
