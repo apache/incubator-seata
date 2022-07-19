@@ -2,7 +2,7 @@ name: "Publish To OSSRH"
 
 on:
   push:
-    branches: [ develop, master ]
+    branches: [ develop, 1.*.*, 2.*.* ]
     #tags: [ * ]
 
   #在此PR中先校验一遍，成功后，再删掉
