@@ -30,10 +30,10 @@ import java.io.IOException;
 
 /**
  * @description: filter in server
-<<<<<<< HEAD
-=======
+ * <<<<<<< HEAD
+ * =======
  * @author: jameslcj wfnuser
->>>>>>> 95a603b2 (feature: add filter for http request)
+ * >>>>>>> 95a603b2 (feature: add filter for http request)
  * @author: Sher
  */
 
@@ -55,19 +55,19 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws IOException, ServletException {
+            throws IOException, ServletException {
         String jwt = resolveToken(request);
 
-        if (jwt != null && !"".equals(jwt.trim()) ) {
+        if (jwt != null && !"".equals(jwt.trim())) {
             if (this.tokenProvider.validateToken(jwt)) {
 
                 chain.doFilter(request, response);
 //
-            }else {
+            } else {
                 LOGGER.error("validateToken error");
                 throw new RuntimeException("validateToken error");
             }
-        }else{
+        } else {
             LOGGER.error("jwt error");
             throw new RuntimeException("jwt error");
         }
