@@ -84,14 +84,4 @@ public class SessionStatusValidator {
         }
         return true;
     }
-
-    /**
-     * is rollbacking global status
-     *
-     * @param status the global session
-     */
-    public static boolean isRollbackingStatus(GlobalStatus status) {
-        return status == GlobalStatus.Rollbacking
-                || status == GlobalStatus.TimeoutRollbacking;
-    }
 }

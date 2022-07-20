@@ -180,6 +180,7 @@ public class SessionHelper {
                 beginTime, retryBranch);
         } else {
             if (SessionStatusValidator.isTimeoutGlobalStatus(globalSession.getStatus())) {
+                globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
                 MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
             } else {
                 MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);

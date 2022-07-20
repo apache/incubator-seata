@@ -66,7 +66,6 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.session.SessionStatusValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -332,8 +331,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
                 // transaction timeout and start rollbacking event
                 MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false, false);
-                // do rollback
-                core.doGlobalRollback(globalSession, false);
 
                 return true;
             });
@@ -360,8 +357,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
-                if (SessionStatusValidator.isRollbackingStatus(rollbackingSession.getStatus())
-                        && !rollbackingSession.isDeadSession()) {
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking)
+                    && !rollbackingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
                 }
@@ -382,7 +379,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-                core.doGlobalRollback(rollbackingSession, true);
+                core.doGlobalRollback(rollbackingSession, !rollbackingSession.getStatus().equals(GlobalStatus.TimeoutRollbacking));
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
