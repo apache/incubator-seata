@@ -30,10 +30,7 @@ import org.springframework.stereotype.Component;
 /**
  *
  * @description: Jwt token tool in server
-<<<<<<< HEAD
-=======
  * @author: jameslcj wfnuser
->>>>>>> 95a603b2 (feature: add filter for http request)
  * @author: Sher
  *
  */
@@ -56,19 +53,6 @@ public class JwtTokenUtils {
     @Value("${seata.security.tokenValidityInMilliseconds}")
     private long tokenValidityInMilliseconds;
 
-    /**
-     * Create token
-     *
-     * @param authentication auth info
-     * @return token string
-     */
-
-    /**
-     * Get auth Info
-     *
-     * @param token token
-     * @return auth info
-     */
     /**
      * validate token
      *
