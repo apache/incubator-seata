@@ -41,12 +41,12 @@ jobs:
       - name: "Package and Publish-To-OSSRH"
         uses: samuelmeuli/action-maven-publish@v1.4.0
         with:
-          #Command Template: mvn ${mavenGoalsPhases} --batch-mode --activate-profiles ${mavenProfiles} --settings ${mavenSettingsPath} ${mavenArgs}
-          #  see the source: https://github.com/samuelmeuli/action-maven-publish/blob/master/index.js#L84
-          #The following configurations will be spliced into the command template above
-          maven_goals_phases: -T 4C clean deploy -e -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-          maven_profiles: "release,release-by-github-actions"
           nexus_username: ${{ secrets.OSSRH_USER }}
           nexus_password: ${{ secrets.OSSRH_PASSWORD }}
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          #Command Template: mvn ${mavenGoalsPhases} --batch-mode --activate-profiles ${mavenProfiles} --settings ${mavenSettingsPath} ${mavenArgs}
+          #  see the source: https://github.com/samuelmeuli/action-maven-publish/blob/master/index.js#L84
+          #The following configurations will be spliced into the command template above
+          maven_goals_phases: -T 4C clean deploy -e -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+          maven_profiles: release,release-by-github-actions
