@@ -16,9 +16,9 @@ jobs:
     strategy:
       matrix:
         os: [
-          #macos-latest,  # unsuccessful
-          #ubuntu-latest, # unsuccessful
-          windows-latest  # successful
+          #macos-latest,  #unsuccessful
+          #ubuntu-latest, #unsuccessful
+          windows-latest  #successful
         ]
     steps:
       # step 1
