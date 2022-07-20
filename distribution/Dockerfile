@@ -1,5 +1,5 @@
 # https://hub.docker.com/orgs/seataio
-FROM openjdk:8u232-jre-stretch
+FROM openjdk:8u332-jre-slim
 
 # set label
 LABEL maintainer="Seata <seata.io>"
@@ -8,7 +8,9 @@ WORKDIR /$BASE_DIR
 
 # ADD FORM distribution
 ADD bin/ /seata-server/bin
+ADD ext/ /seata-server/ext
 ADD target/ /seata-server/target
+ADD lib/ /seata-server/lib
 ADD conf/ /seata-server/conf
 ADD LICENSE /seata-server/LICENSE
 
