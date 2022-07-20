@@ -5,10 +5,6 @@ on:
     branches: [ develop, 1.*.*, 2.*.* ]
     #tags: [ * ]
 
-  #在此PR中先校验一遍，成功后，再删掉
-  pull_request:
-    branches: [ develop ]
-
 jobs:
   publish:
     name: "Publish"
