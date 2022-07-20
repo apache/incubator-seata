@@ -176,8 +176,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         if (JdbcConstants.POSTGRESQL.equals(dbType)) {
             initPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
-            initDefaultResourceId();
-            resourceId = resourceId + "/" + userName;
+            initOracleResourceId();
         } else if (JdbcConstants.MYSQL.equals(dbType)) {
             initMysqlResourceId();
         } else {
@@ -193,6 +192,17 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
         } else {
             resourceId = jdbcUrl;
+        }
+    }
+
+    /**
+     * init the oracle resource id
+     */
+    private void initOracleResourceId() {
+        if (jdbcUrl.contains("?")) {
+            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?')) + "/" + userName;
+        } else {
+            resourceId = jdbcUrl + "/" + userName;
         }
     }
 
@@ -216,7 +226,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initDefaultResourceId();
         }
     }
-    
+
     /**
      * prevent pg sql url like
      * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
@@ -230,6 +240,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         if (jdbcUrl.contains("?")) {
             StringBuilder jdbcUrlBuilder = new StringBuilder();
             jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
+
             StringBuilder paramsBuilder = new StringBuilder();
             String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
             String[] urlParams = paramUrl.split("&");
