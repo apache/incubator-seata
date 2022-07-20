@@ -2,13 +2,13 @@ Add changes here for all PR submitted to the develop branch.
 
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
-### feature：
+### feature:
 
 
-### bugfix：
+### bugfix:
 
 
-### optimize：
+### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image 
 
 
