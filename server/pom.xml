@@ -303,24 +303,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Easyj -->
-            <plugin>
-                <groupId>icu.easyj.maven.plugins</groupId>
-                <artifactId>easyj-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>print-project</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>print-project</goal>
-                        </goals>
-                        <configuration>
-                            <printOriginalModel>false</printOriginalModel>
-                            <printDetail>true</printDetail>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 

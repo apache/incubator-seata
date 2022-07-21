@@ -290,6 +290,9 @@
         <!-- profile: release -->
         <profile>
             <id>release</id>
+            <properties>
+                <image.tags>${project.version},latest</image.tags>
+            </properties>
             <build>
                 <plugins>
                     <!-- Javadoc -->
