@@ -45,14 +45,19 @@ jobs:
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         run: ./mvnw -T 4C clean test -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
-      # step 4
+      # step 4.1
+      - name: "Print github.ref"
+        if: matrix.type == 'image'
+        run: echo "${{github.ref}}";
+
+      # step 4.2
       - name: "Package and Publish-Image-To-DockerHub"
         if: matrix.type == 'image'
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: if [ "${{github.ref}}" == "refs/heads/develop" ]; then
-               ./mvnw -T 4C clean test -Pimage               -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+               ./mvnw -T 4C clean test -Pimage,image-snapshot -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              else
-               ./mvnw -T 4C clean test -Pimage,image-release -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+               ./mvnw -T 4C clean test -Pimage,image-release  -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              fi
