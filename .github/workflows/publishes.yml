@@ -2,8 +2,12 @@ name: "Publishes"
 
 on:
   push:
-    branches: [ snapshot, 1.*.*, 2.*.* ]
+    branches: [ develop, snapshot, 1.*.*, 2.*.* ]
     #tags: [ "*" ]
+
+  #测试一下，观察一下两个type的step激活状况
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   publish:
@@ -31,7 +35,7 @@ jobs:
       # step 3.1
       - name: "Import GPG-SECRET-KEY"
         if: matrix.type == 'OSSRH'
-        run: cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
+        run: echo "MY_TEST=111" >> $GITHUB_ENV;
 
       # step 3.2
       - name: "Package and Publish-To-OSSRH"
@@ -39,7 +43,7 @@ jobs:
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USER }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-        run: ./mvnw -T 4C clean deploy -Prelease,release-by-github-actions -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+        run: ./mvnw -T 4C clean test -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
       # step 4
       - name: "Package and Publish-Image-To-DockerHub"
@@ -47,8 +51,8 @@ jobs:
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-        run: if [ "${{github.ref}}" == "refs/heads/snapshot" ]; then
-               ./mvnw -T 4C clean package -Pimage -Dimage.tags=latest -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+        run: if [ "${{github.ref}}" == "refs/heads/develop" ]; then
+               ./mvnw -T 4C clean test -Pimage -Dimage.tags=latest -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              else
-               ./mvnw -T 4C clean package -Pimage                     -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+               ./mvnw -T 4C clean test -Pimage                     -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              fi
