@@ -10,8 +10,8 @@
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
+- [[#4750](https://github.com/seata/seata/pull/4750)] 优化AT分支释放全局锁不使用xid
 - [[#4790](https://github.com/seata/seata/pull/4790)] 添加一个 github action，用于自动发布Seata到OSSRH
-
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -21,7 +21,7 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
-
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
