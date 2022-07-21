@@ -20,7 +20,7 @@ jobs:
           2.5.14,
           2.4.13,
           2.3.12.RELEASE,
-          2.2.13.RELEASE,
+          2.2.13.RELEASE -Dspring-framework.version=5.2.12.RELEASE,
           #2.1.18.RELEASE,
           #2.0.9.RELEASE,
           #1.5.22.RELEASE,
