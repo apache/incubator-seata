@@ -6,6 +6,7 @@
 
 
 ### bugfix：
+- [[#4800](https://github.com/seata/seata/pull/4800)] 按照 Apache 协议规范，添加 NOTICE 文件
 
 
 ### optimize：
@@ -24,5 +25,7 @@
 - [slievrly](https://github.com/slievrly)
 - [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
+- [a364176773](https://github.com/a364176773)
+- [AlexStocks](https://github.com/AlexStocks)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

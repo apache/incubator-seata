@@ -6,6 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### bugfix:
+- [[#4800](https://github.com/seata/seata/pull/4800)] Add NOTICE as Apache License V2
 
 
 ### optimize:
@@ -25,5 +26,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
+- [AlexStocks](https://github.com/AlexStocks)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
