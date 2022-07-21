@@ -2,8 +2,12 @@ name: "Publishes"
 
 on:
   push:
-    branches: [ snapshot, 1.*.*, 2.*.* ]
+    branches: [ develop, snapshot, 1.*.*, 2.*.* ]
     #tags: [ "*" ]
+
+  #测试一下，观察一下两个type的step激活状况
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   publish:
