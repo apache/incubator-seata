@@ -1,4 +1,4 @@
-name: "Publish"
+name: "Publishes"
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
       # step 3.1
       - name: "Import GPG-SECRET-KEY"
         if: matrix.type == 'OSSRH'
-        #run: cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
+        run: echo "MY_TEST=111" >> $GITHUB_ENV;
 
       # step 3.2
       - name: "Package and Publish-To-OSSRH"

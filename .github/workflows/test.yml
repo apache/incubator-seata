@@ -6,6 +6,7 @@ on:
 
 jobs:
   test:
+    name: "Test"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
