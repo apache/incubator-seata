@@ -53,8 +53,8 @@ jobs:
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: if [ "${{github.ref}}" == "refs/heads/develop" ]; then
                echo "./mvnw -T 4C clean test -Pimage,image-snapshot -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;";
-               ./mvnw -T 4C clean test -Pimage,image-release  -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+               ./mvnw -T 4C clean test -Pimage -Dimage.tags=t1 -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              else
                echo "./mvnw -T 4C clean test -Pimage,image-release  -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;";
-               ./mvnw -T 4C clean test -Pimage,image-snapshot -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+               ./mvnw -T 4C clean test -Pimage -Dimage.tags=t2 -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
              fi
