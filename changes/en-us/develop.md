@@ -9,7 +9,8 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### optimize:
-- [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image 
+- [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
+- [[#4790](https://github.com/seata/seata/pull/4790)] Add a github action to publish Seata to OSSRH
 
 
 ### test:
