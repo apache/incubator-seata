@@ -30,7 +30,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +62,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private volatile Long prepareTime = null;
 
     private volatile Integer timeout = null;
+    
+    private boolean shouldBeHeld = false;
 
     /**
      * Constructor of Connection Proxy for XA mode.
@@ -72,8 +73,10 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param resource The corresponding Resource(DataSource proxy) from which the connections was created.
      * @param xid Seata global transaction xid.
      */
-    public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource, String xid) {
+    public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource,
+        String xid) {
         super(originalConnection, xaConnection, resource, xid);
+        this.shouldBeHeld = resource.isShouldBeHeld();
     }
 
     public void init() {
@@ -95,14 +98,18 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void keepIfNecessary() {
-        resource.hold(xaBranchXid.toString(), this);
+        if (shouldBeHeld()) {
+            resource.hold(xaBranchXid.toString(), this);
+        }
     }
 
     private void releaseIfNecessary() {
-        if (this.xaBranchXid != null) {
-            String xaBranchXid = this.xaBranchXid.toString();
-            if (isHeld()) {
-                resource.release(xaBranchXid, this);
+        if (shouldBeHeld()) {
+            if (this.xaBranchXid != null) {
+                String xaBranchXid = this.xaBranchXid.toString();
+                if (isHeld()) {
+                    resource.release(xaBranchXid, this);
+                }
             }
         }
     }
@@ -328,8 +335,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public boolean shouldBeHeld() {
-        return JdbcConstants.MYSQL.equals(resource.getDbType()) || JdbcConstants.MARIADB.equals(resource.getDbType())
-               || StringUtils.isBlank(resource.getDbType());
+        return shouldBeHeld || StringUtils.isBlank(resource.getDbType());
     }
 
     public Long getPrepareTime() {
