@@ -126,8 +126,9 @@ JVM_XSS=$JVM_XSS
 JVM_MetaspaceSize=$JVM_MetaspaceSize
 JVM_MaxMetaspaceSize=$JVM_MaxMetaspaceSize
 JVM_MaxDirectMemorySize=$JVM_MaxDirectMemorySize
-JAVA_OPT="${JAVA_OPT} -server -Dloader.path=../lib -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xmn${JVM_XMN:="1024m"} -Xss${JVM_XSS:="512k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
-JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75"
+LOADER_PATH=$LOADER_PATH
+JAVA_OPT="${JAVA_OPT} -server -Dloader.path=${LOADER_PATH:="../lib"} -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xmn${JVM_XMN:="1024m"} -Xss${JVM_XSS:="512k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
+JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC "
 
 JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $2}')
 if [[ "$JAVA_MAJOR_VERSION" -ge "9" ]] ; then
