@@ -2,9 +2,7 @@ name: "test"
 
 on:
   push:
-    branches: [ develop, test*, 1.*.*, 2.*.* ]
-  pull_request:
-    branches: [ develop ]
+    branches: [ test*, 1.*.*, 2.*.* ]
 
 jobs:
   test:
