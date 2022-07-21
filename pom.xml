@@ -154,10 +154,17 @@
             <id>image</id>
             <properties>
                 <image.publish.skip>false</image.publish.skip>
-                <image.tags>${project.version},latest</image.tags>
+                <image.tags>latest</image.tags>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
                 <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+            </properties>
+        </profile>
+        <!-- profile: image-release -->
+        <profile>
+            <id>image-release</id>
+            <properties>
+                <image.tags>${project.version},latest</image.tags>
             </properties>
         </profile>
         <!-- profile: arrch64 -->
