@@ -28,7 +28,6 @@ jobs:
       - name: "Import GPG-SECRET-KEY"
         run: |
           cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
-          gpg --list-secret-keys --keyid-format LONG
 
       # step 4
       - name: "Package and Publish-To-OSSRH"
