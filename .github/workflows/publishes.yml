@@ -52,7 +52,6 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          echo "github.ref == ${{github.ref}};";
           if [ "${{github.ref}}" == "refs/heads/snapshot" ]; then
             ./mvnw -T 4C clean package -Pimage               -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
