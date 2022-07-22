@@ -28,22 +28,17 @@ jobs:
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
 
-      # step 3.1
-      - name: "Import GPG-SECRET-KEY"
-        if: matrix.type == 'OSSRH'
-        run: |
-          cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
-
-      # step 3.2
-      - name: "Package and Publish-To-OSSRH"
+      # step 3 for type=OSSRH
+      - name: "Import GPG-SECRET-KEY, Package and Publish-To-OSSRH"
         if: matrix.type == 'OSSRH'
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USER }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         run: |
+          cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import;
           ./mvnw -T 4C clean deploy -Prelease,release-by-github-actions -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
-      # step 4
+      # step 4 for type=image
       - name: "Package and Publish-Image-To-DockerHub"
         if: matrix.type == 'image'
         env:
