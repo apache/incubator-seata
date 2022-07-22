@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 1999-2019 Seata.io Group.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -128,7 +128,7 @@ JVM_MaxMetaspaceSize=$JVM_MaxMetaspaceSize
 JVM_MaxDirectMemorySize=$JVM_MaxDirectMemorySize
 LOADER_PATH=$LOADER_PATH
 JAVA_OPT="${JAVA_OPT} -server -Dloader.path=${LOADER_PATH:="../lib"} -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xmn${JVM_XMN:="1024m"} -Xss${JVM_XSS:="512k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
-JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC "
+JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75"
 
 JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $2}')
 if [[ "$JAVA_MAJOR_VERSION" -ge "9" ]] ; then
@@ -151,5 +151,10 @@ CMD_LINE_ARGS=$@
 
 # start
 echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
-nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
+IN_DOCKER_RUNNING=$( mount | grep '/ type' | egrep  '(overlay|aufs)' )
+if [[ "$IN_DOCKER_RUNNING" == "" ]] ; then
+  nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
+else
+  $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}
+fi
 echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
