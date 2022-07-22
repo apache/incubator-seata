@@ -24,7 +24,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 8
-          server-id: ossrh
+          server-id: oss_seata
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
 
