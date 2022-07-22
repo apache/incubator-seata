@@ -43,6 +43,12 @@ public class DataSourceProxyTest {
 
     @Test
     public void getResourceIdTest() throws SQLException, NoSuchFieldException, IllegalAccessException {
+        // Disable 'DataSourceProxy.tableMetaExecutor' to prevent unit tests from being affected
+        Field enableField = DataSourceProxy.class.getDeclaredField("ENABLE_TABLE_META_CHECKER_ENABLE");
+        enableField.setAccessible(true);
+        enableField.set(null, false);
+
+
         final MockDriver mockDriver = new MockDriver();
         final String username = "username";
         final String jdbcUrl = "jdbc:mock:xxx";
