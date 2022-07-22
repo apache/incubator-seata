@@ -2,11 +2,7 @@ name: "test"
 
 on:
   push:
-    branches: [ develop, test*, 1.*.*, 2.*.* ]
-
-  #启用一下测一下，等会儿删掉。
-  pull_request:
-    branches: [ develop ]
+    branches: [ test*, 1.*.*, 2.*.* ]
 
 jobs:
   test:
