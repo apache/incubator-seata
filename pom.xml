@@ -160,6 +160,13 @@
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
             </properties>
         </profile>
+        <!-- profile: release-image -->
+        <profile>
+            <id>release-image</id>
+            <properties>
+                <image.tags>${project.version},latest</image.tags>
+            </properties>
+        </profile>
         <!-- profile: arrch64 -->
         <profile>
             <id>arrch64</id>
