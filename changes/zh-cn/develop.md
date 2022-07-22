@@ -3,6 +3,7 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature：
+- [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
 
 
 ### bugfix：
