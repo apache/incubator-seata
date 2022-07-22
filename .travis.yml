@@ -20,11 +20,10 @@ before_script:
     fi
 
 script:
-  - if [ "$TRAVIS_JDK_VERSION" == "openjdk8" ]; then
-      travis_wait 30 ./mvnw clean test -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-    fi
-  - if [ "$TRAVIS_JDK_VERSION" == "openjdk11" ]; then
-      travis_wait 30 ./mvnw clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+  - if [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == false ]; then
+      travis_wait 30 ./mvnw clean test -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+    else
+      travis_wait 30 ./mvnw clean test -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
     fi
 after_success:
   - bash <(curl -s https://codecov.io/bash)
