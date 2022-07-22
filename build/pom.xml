@@ -291,7 +291,6 @@
         <profile>
             <id>release</id>
             <properties>
-                <image.publish.skip>false</image.publish.skip>
                 <image.tags>${project.version},latest</image.tags>
             </properties>
             <build>
@@ -372,9 +371,12 @@
             </properties>
         </profile>
 
-        <!-- profile: args-for-un-java8 -->
+        <!-- profile: args-for-test-by-jdk17 -->
         <profile>
-            <id>args-for-un-java8</id>
+            <id>args-for-test-by-jdk17</id>
+            <activation>
+                <jdk>17</jdk>
+            </activation>
             <properties>
                 <maven.surefire.argLine>
                     --add-opens java.base/java.lang=ALL-UNNAMED
