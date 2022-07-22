@@ -151,10 +151,5 @@ CMD_LINE_ARGS=$@
 
 # start
 echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
-IN_DOCKER_RUNNING=$( mount | grep '/ type' | egrep  '(overlay|aufs)' )
-if [[ "$IN_DOCKER_RUNNING" == "" ]] ; then
-  nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
-else
-  $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}
-fi
+nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
 echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
