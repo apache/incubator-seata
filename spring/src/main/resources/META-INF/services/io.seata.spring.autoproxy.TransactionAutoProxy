@@ -1,2 +1,2 @@
 io.seata.rm.tcc.autoproxy.TccTransactionAutoProxy
-io.seata.saga.autoproxy.SagaTransactionAutoProxy
+io.seata.saga.annotation.autoproxy.SagaTransactionAutoProxy
