@@ -16,7 +16,7 @@
 package io.seata.saga.rm.annotation;
 
 import io.seata.core.model.BranchType;
-import io.seata.saga.rm.SagaResource;
+import io.seata.core.model.Resource;
 
 import java.lang.reflect.Method;
 
@@ -25,7 +25,9 @@ import java.lang.reflect.Method;
  *
  * @author ruishansun
  */
-public class SagaAnnotationResource extends SagaResource {
+public class SagaAnnotationResource implements Resource {
+
+    private String resourceGroupId = "DEFAULT";
 
     private Object targetBean;
 
@@ -95,6 +97,26 @@ public class SagaAnnotationResource extends SagaResource {
 
     public void setPhaseTwoCompensationKeys(String[] phaseTwoCompensationKeys) {
         this.phaseTwoCompensationKeys = phaseTwoCompensationKeys;
+    }
+
+    @Override
+    public String getResourceGroupId() {
+        return resourceGroupId;
+    }
+
+    /**
+     * Sets resource group id.
+     *
+     * @param resourceGroupId the resource group id
+     */
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
+    }
+
+
+    @Override
+    public String getResourceId() {
+        return actionName;
     }
 
     /**

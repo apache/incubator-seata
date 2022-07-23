@@ -85,7 +85,8 @@ public class SagaTransactionAutoProxy implements TransactionAutoProxy {
                         // set phase two method's keys
                         sagaAnnotationResource.setPhaseTwoCompensationKeys(DefaultRemotingParser.get().getTwoPhaseArgs(sagaAnnotationResource.getCompensationMethod(),
                                 sagaTransactional.compensationArgsClasses()));
-                        //registry tcc resource
+                        //registry saga annotation resource
+                        sagaAnnotationResource.setResourceGroupId(sagaTransactional.name());
                         DefaultResourceManager.get().registerResource(sagaAnnotationResource);
                     }
                 }
