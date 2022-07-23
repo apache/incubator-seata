@@ -15,6 +15,7 @@
  */
 package io.seata.saga.rm.annotation;
 
+import io.seata.core.model.BranchType;
 import io.seata.saga.rm.SagaResource;
 
 import java.lang.reflect.Method;
@@ -94,5 +95,15 @@ public class SagaAnnotationResource extends SagaResource {
 
     public void setPhaseTwoCompensationKeys(String[] phaseTwoCompensationKeys) {
         this.phaseTwoCompensationKeys = phaseTwoCompensationKeys;
+    }
+
+    /**
+     * Gets get branch type.
+     *
+     * @return the get branch type
+     */
+    @Override
+    public BranchType getBranchType() {
+        return BranchType.SAGA_ANNOTATION;
     }
 }
