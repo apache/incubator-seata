@@ -85,6 +85,8 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
                 serviceBeanDesc.setUniqueId(uniqueId);
                 serviceBeanDesc.setGroup(group);
                 serviceBeanDesc.setProtocol(Protocols.HSF);
+                serviceBeanDesc.setReference(this.isReference(bean, beanName));
+                serviceBeanDesc.setService(this.isService(bean, beanName));
                 return serviceBeanDesc;
             } else if (isService(bean, beanName)) {
                 Object consumerBean = ReflectionUtil.getFieldValue(bean, "providerBean");
@@ -103,6 +105,8 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
                 Object targetBean = ReflectionUtil.getFieldValue(metadata, "target");
                 serviceBeanDesc.setTargetBean(targetBean);
                 serviceBeanDesc.setProtocol(Protocols.HSF);
+                serviceBeanDesc.setReference(this.isReference(bean, beanName));
+                serviceBeanDesc.setService(this.isService(bean, beanName));
                 return serviceBeanDesc;
             }
         } catch (Throwable t) {

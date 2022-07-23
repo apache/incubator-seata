@@ -26,6 +26,11 @@ public class RemotingDesc {
      * is referenc bean ?
      */
     private boolean isReference = false;
+    
+    /**
+     * is service bean ?
+     */
+    private boolean isService = false;
 
     /**
      * rpc target bean, the service bean has this property
@@ -181,5 +186,22 @@ public class RemotingDesc {
      */
     public void setReference(boolean reference) {
         isReference = reference;
+    }
+    
+    /**
+     * Is service boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isService() {
+        return isService;
+    }
+
+    /**
+     * Sets service.
+     * @param service the service
+     */
+    public void setService(boolean service) {
+        isService = service;
     }
 }

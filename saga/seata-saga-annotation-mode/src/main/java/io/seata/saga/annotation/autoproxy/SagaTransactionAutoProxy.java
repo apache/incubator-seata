@@ -64,7 +64,7 @@ public class SagaTransactionAutoProxy implements TransactionAutoProxy {
      * @param remotingDesc the remotingDesc
      */
     private void registryResource(RemotingDesc remotingDesc) {
-        if (!remotingDesc.isReference()) {
+        if (remotingDesc.isService()) {
             try {
                 Class<?> interfaceClass = remotingDesc.getInterfaceClass();
                 Method[] methods = interfaceClass.getMethods();

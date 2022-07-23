@@ -90,7 +90,7 @@ public class TccTransactionAutoProxy implements TransactionAutoProxy {
     }
 
     private void registryResource(RemotingDesc remotingDesc) {
-        if (!remotingDesc.isReference()) {
+        if (remotingDesc.isService()) {
             try {
                 Class<?> interfaceClass = remotingDesc.getInterfaceClass();
                 Method[] methods = interfaceClass.getMethods();

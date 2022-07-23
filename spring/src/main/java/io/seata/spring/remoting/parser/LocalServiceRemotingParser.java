@@ -46,7 +46,8 @@ public class LocalServiceRemotingParser extends AbstractedRemotingParser {
             return null;
         }
         RemotingDesc remotingDesc = new RemotingDesc();
-        remotingDesc.setReference(true);
+        remotingDesc.setReference(this.isReference(bean, beanName));
+        remotingDesc.setService(this.isService(bean, beanName));
         remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);

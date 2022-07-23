@@ -61,6 +61,8 @@ public class DubboRemotingParser extends AbstractedRemotingParser {
                 Object targetBean = ReflectionUtil.getFieldValue(bean, "ref");
                 serviceBeanDesc.setTargetBean(targetBean);
             }
+            serviceBeanDesc.setReference(this.isReference(bean, beanName));
+            serviceBeanDesc.setService(this.isService(bean, beanName));
             return serviceBeanDesc;
         } catch (Throwable t) {
             throw new FrameworkException(t);
