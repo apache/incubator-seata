@@ -256,6 +256,16 @@
                 <configuration>
                     <from>
                         <image>${IMAGE_NAME}</image>
+                        <platforms>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>amd64</architecture>
+                            </platform>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>arm64</architecture>
+                            </platform>
+                        </platforms>
                     </from>
                     <to>
                         <image>docker.io/seataio/seata-server</image>
@@ -282,7 +292,7 @@
                             <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
                             <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
                             <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
-                            <jvmFlag>-XX:MaxDirectMemorySize=1024m</jvmFlag>
+                            <jvmFlag>-XX:MaxDirectMemorySize=256m</jvmFlag>
                             <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
                             <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
                             <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
