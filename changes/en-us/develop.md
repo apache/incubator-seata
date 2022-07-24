@@ -3,6 +3,7 @@ Add changes here for all PR submitted to the develop branch.
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
 ### feature:
+- [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile support arm64
 
 
 ### bugfix:
@@ -14,6 +15,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4790](https://github.com/seata/seata/pull/4790)] Add a github action to publish Seata to OSSRH
 - [[#4765](https://github.com/seata/seata/pull/4765)] mysql 8.0.29 not should be hold for connection
 - [[#4750](https://github.com/seata/seata/pull/4750)] optimize unBranchLock romove xid
+- [[#4797](https://github.com/seata/seata/pull/4797)] optimize the github actions
+
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
