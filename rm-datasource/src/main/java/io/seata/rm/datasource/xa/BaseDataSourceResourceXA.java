@@ -34,8 +34,12 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
 
     private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
         CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
+
     protected XADataSource xaDataSource;
-    private Map<String, T> keeper = new ConcurrentHashMap<>();
+
+    private boolean shouldBeHeld = false;
+
+    private final Map<String, T> keeper = new ConcurrentHashMap<>();
 
     public static void setBranchStatus(String xaBranchXid, BranchStatus branchStatus) {
         BRANCH_STATUS_CACHE.put(xaBranchXid, branchStatus);
@@ -94,4 +98,11 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
         this.xaDataSource = xaDataSource;
     }
 
+    public boolean isShouldBeHeld() {
+        return shouldBeHeld;
+    }
+
+    public void setShouldBeHeld(boolean shouldBeHeld) {
+        this.shouldBeHeld = shouldBeHeld;
+    }
 }

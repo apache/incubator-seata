@@ -29,7 +29,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +61,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private volatile Long prepareTime = null;
 
     private volatile Integer timeout = null;
+    
+    private boolean shouldBeHeld = false;
 
     /**
      * Constructor of Connection Proxy for XA mode.
@@ -73,6 +74,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResourceXA resource, String xid) {
         super(originalConnection, xaConnection, resource, xid);
+        this.shouldBeHeld = resource.isShouldBeHeld();
     }
 
     public void init() {
@@ -95,6 +97,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private void keepIfNecessary() {
         resource.hold(xaBranchXid.toString(), this);
+        this.shouldBeHeld = true;
     }
 
     private void releaseIfNecessary() {
@@ -102,6 +105,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             String xaBranchXid = this.xaBranchXid.toString();
             if (isHeld()) {
                 resource.release(xaBranchXid, this);
+                this.shouldBeHeld = false;
             }
         }
     }
@@ -294,9 +298,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     @Override
     public synchronized void close() throws SQLException {
         rollBacked = false;
-        if (isHeld() && shouldBeHeld()) {
-            // if kept by a keeper, just hold the connection.
-            return;
+        if (isHeld()) {
+            if (shouldBeHeld()) {
+                // if kept by a keeper, just hold the connection.
+                return;
+            } else {
+                releaseIfNecessary();
+            }
         }
         cleanXABranchContext();
         originalConnection.close();
@@ -327,8 +335,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public boolean shouldBeHeld() {
-        return JdbcConstants.MYSQL.equals(resource.getDbType()) || JdbcConstants.MARIADB.equals(resource.getDbType())
-               || StringUtils.isBlank(resource.getDbType());
+        return shouldBeHeld || StringUtils.isBlank(resource.getDbType());
     }
 
     public Long getPrepareTime() {

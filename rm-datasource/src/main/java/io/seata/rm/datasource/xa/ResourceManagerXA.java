@@ -29,6 +29,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
+import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.datasource.AbstractDataSourceCacheResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,35 +52,55 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
     /**
      * The Timer check xa branch two phase hold timeout.
      */
-    protected final ScheduledExecutorService xaTwoPhaseTimeoutChecker = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("xaTwoPhaseTimeoutChecker", 1, true));
+    protected volatile ScheduledExecutorService xaTwoPhaseTimeoutChecker;
 
     @Override
     public void init() {
         LOGGER.info("ResourceManagerXA init ...");
-        xaTwoPhaseTimeoutChecker.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                for (Map.Entry<String, Resource> entry : dataSourceCache.entrySet()) {
-                    BaseDataSourceResourceXA resource = (BaseDataSourceResourceXA) entry.getValue();
-                    Map<String, ConnectionProxyXA> keeper = resource.getKeeper();
-                    for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
-                        ConnectionProxyXA connection = connectionEntry.getValue();
-                        long now = System.currentTimeMillis();
-                        synchronized (connection) {
-                            if (connection.getPrepareTime() != null &&
-                                    now - connection.getPrepareTime() > TWO_PHASE_HOLD_TIMEOUT) {
-                                try {
-                                    connection.closeForce();
-                                } catch (SQLException e) {
-                                    LOGGER.info("Force close the xa physical connection fail", e);
+    }
+
+    public void initXaTwoPhaseTimeoutChecker() {
+        if (xaTwoPhaseTimeoutChecker == null) {
+            synchronized (this) {
+                if (xaTwoPhaseTimeoutChecker == null) {
+                    boolean shouldBeHold = dataSourceCache.values().parallelStream().anyMatch(resource -> {
+                        if (resource instanceof DataSourceProxyXA) {
+                            return ((DataSourceProxyXA)resource).isShouldBeHeld();
+                        }
+                        return false;
+                    });
+                    if (shouldBeHold) {
+                        xaTwoPhaseTimeoutChecker = new ScheduledThreadPoolExecutor(1,
+                            new NamedThreadFactory("xaTwoPhaseTimeoutChecker", 1, true));
+                        xaTwoPhaseTimeoutChecker.scheduleAtFixedRate(() -> {
+                            for (Map.Entry<String, Resource> entry : dataSourceCache.entrySet()) {
+                                BaseDataSourceResource resource = (BaseDataSourceResource)entry.getValue();
+                                if (resource instanceof DataSourceProxyXA) {
+                                    BaseDataSourceResourceXA<ConnectionProxyXA> resourceXA = (BaseDataSourceResourceXA<ConnectionProxyXA>) resource;
+                                    if (resourceXA.isShouldBeHeld()) {
+                                        Map<String, ConnectionProxyXA> keeper = resourceXA.getKeeper();
+                                        for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
+                                            ConnectionProxyXA connection = connectionEntry.getValue();
+                                            long now = System.currentTimeMillis();
+                                            synchronized (connection) {
+                                                if (connection.getPrepareTime() != null
+                                                    && now - connection.getPrepareTime() > TWO_PHASE_HOLD_TIMEOUT) {
+                                                    try {
+                                                        connection.closeForce();
+                                                    } catch (SQLException e) {
+                                                        LOGGER.info("Force close the xa physical connection fail", e);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                        }
+                        }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
                     }
                 }
             }
-        }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
