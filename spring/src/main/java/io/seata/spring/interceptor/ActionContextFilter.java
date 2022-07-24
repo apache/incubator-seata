@@ -13,22 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.autoproxy;
+package io.seata.spring.interceptor;
 
-import io.seata.spring.remoting.RemotingDesc;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
- * The interface Transaction Auto Proxy. Proxied by tcc/saga with SPI.
+ * The interface Action context filter.
  *
- * @author ruishansun
+ * @author zhangsen
  */
-public interface TransactionAutoProxy {
+public interface ActionContextFilter {
 
     /**
-     * Whether it is transaction auto proxy? (tcc or saga)
+     * Need filter boolean.
      *
-     * @param remotingDesc the remotingDesc
-     * @return the IsTransactionProxyResult
+     * @param parameter the parameter
+     * @return the boolean
      */
-    IsTransactionProxyResult isTransactionProxyTargetBean(RemotingDesc remotingDesc);
+    boolean needFilter(BusinessActionContextParameter parameter);
+
 }

@@ -13,22 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.autoproxy;
+package io.seata.spring.remoting.parser;
 
-import io.seata.spring.remoting.RemotingDesc;
+import io.seata.common.exception.FrameworkException;
+import io.seata.spring.remoting.RemotingParser;
 
 /**
- * The interface Transaction Auto Proxy. Proxied by tcc/saga with SPI.
+ * The type Abstracted remoting parser.
  *
- * @author ruishansun
+ * @author zhangsen
  */
-public interface TransactionAutoProxy {
+public abstract class AbstractedRemotingParser implements RemotingParser {
 
-    /**
-     * Whether it is transaction auto proxy? (tcc or saga)
-     *
-     * @param remotingDesc the remotingDesc
-     * @return the IsTransactionProxyResult
-     */
-    IsTransactionProxyResult isTransactionProxyTargetBean(RemotingDesc remotingDesc);
+
+    @Override
+    public boolean isRemoting(Object bean, String beanName) throws FrameworkException {
+        return isReference(bean, beanName) || isService(bean, beanName);
+    }
+
 }

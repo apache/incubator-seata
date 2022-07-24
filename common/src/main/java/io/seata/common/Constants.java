@@ -69,7 +69,7 @@ public interface Constants {
     /**
      * Use TCC fence
      */
-    String USE_TCC_FENCE = "useTCCFence";
+    String USE_COMMON_FENCE = "useTCCFence";
 
     /**
      * phase one method name
@@ -94,7 +94,7 @@ public interface Constants {
     /**
      * branch context
      */
-    String TCC_ACTION_CONTEXT = "actionContext";
+    String TX_ACTION_CONTEXT = "actionContext";
 
     /**
      * default charset name
@@ -160,5 +160,10 @@ public interface Constants {
      * The constant SKIP_CHECK_LOCK
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
+
+    /**
+     * phase two compensation method name
+     */
+    String COMPENSATION_METHOD = "sys::compensation";
 
 }

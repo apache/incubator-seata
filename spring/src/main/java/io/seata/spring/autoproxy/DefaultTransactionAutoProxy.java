@@ -17,11 +17,12 @@ package io.seata.spring.autoproxy;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.context.ApplicationContext;
+import io.seata.spring.remoting.RemotingDesc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * the default transaction auto proxy
@@ -34,6 +35,10 @@ public class DefaultTransactionAutoProxy {
      * all the transaction auto proxy
      */
     protected static final List<TransactionAutoProxy> ALL_TRANSACTION_AUTO_PROXIES = new ArrayList<>();
+    /**
+     * method interceptor map, beanName -> IsTransactionProxyResult
+     */
+    private static final Map<String, IsTransactionProxyResult> METHOD_INTERCEPTOR_MAP = new ConcurrentHashMap<>();
 
     private static class SingletonHolder {
         private static final DefaultTransactionAutoProxy INSTANCE = new DefaultTransactionAutoProxy();
@@ -66,20 +71,31 @@ public class DefaultTransactionAutoProxy {
     }
 
     /**
-     * is transaction auto proxy ? If it is, then return methodInterceptor, else null.
+     * whether is transaction auto proxy
      *
-     * @param bean               the bean
-     * @param beanName           the beanName
-     * @param applicationContext the applicationContext
-     * @return the MethodInterceptor or null
+     * @param beanName     the beanName
+     * @param remotingDesc the remotingDesc
+     * @return true or false
      */
-    public MethodInterceptor getMethodInterceptorIfTxProxy(Object bean, String beanName, ApplicationContext applicationContext) {
+    public boolean isTransactionAutoProxy(String beanName, RemotingDesc remotingDesc) {
         for (TransactionAutoProxy proxy : ALL_TRANSACTION_AUTO_PROXIES) {
-            MethodInterceptor methodInterceptor = proxy.isTransactionAutoProxy(bean, beanName, applicationContext);
-            if (methodInterceptor != null) {
-                return methodInterceptor;
+            IsTransactionProxyResult result = proxy.isTransactionProxyTargetBean(remotingDesc);
+            if (result.isProxyTargetBean()) {
+                METHOD_INTERCEPTOR_MAP.put(beanName, result);
+                return true;
             }
         }
-        return null;
+        return false;
+    }
+
+    /**
+     * get the IsTransactionProxyResult
+     *
+     * @param beanName the beanName
+     * @return the IsTransactionProxyResult
+     */
+    public IsTransactionProxyResult getIsProxyTargetBeanResult(String beanName) {
+        IsTransactionProxyResult result = METHOD_INTERCEPTOR_MAP.get(beanName);
+        return result != null ? result : new IsTransactionProxyResult();
     }
 }

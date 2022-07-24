@@ -16,7 +16,7 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.common.holder.ObjectHolder;
-import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.spring.fence.config.CommonFenceConfig;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
@@ -64,7 +64,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(UNDO_PREFIX, UndoProperties.class);
         PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
         PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
-        PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, TCCFenceConfig.class);
+        PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, CommonFenceConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
     }

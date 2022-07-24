@@ -13,22 +13,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.autoproxy;
-
-import io.seata.spring.remoting.RemotingDesc;
+package io.seata.spring.remoting;
 
 /**
- * The interface Transaction Auto Proxy. Proxied by tcc/saga with SPI.
+ * remoting protocols enum
  *
- * @author ruishansun
+ * @author zhangsen
  */
-public interface TransactionAutoProxy {
+public interface Protocols {
 
     /**
-     * Whether it is transaction auto proxy? (tcc or saga)
-     *
-     * @param remotingDesc the remotingDesc
-     * @return the IsTransactionProxyResult
+     * sofa-rpc service
      */
-    IsTransactionProxyResult isTransactionProxyTargetBean(RemotingDesc remotingDesc);
+    short SOFA_RPC = 2;
+
+    /**
+     * dubbo service
+     */
+    short DUBBO = 3;
+
+    /**
+     * restful service
+     */
+    short RESTFUL = 4;
+
+    /**
+     * local bean
+     */
+    short IN_JVM = 5;
+
+    /**
+     * hsf service
+     */
+    short HSF = 8;
 }

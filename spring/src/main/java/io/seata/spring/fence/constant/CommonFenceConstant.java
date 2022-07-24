@@ -13,22 +13,36 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.autoproxy;
-
-import io.seata.spring.remoting.RemotingDesc;
+package io.seata.spring.fence.constant;
 
 /**
- * The interface Transaction Auto Proxy. Proxied by tcc/saga with SPI.
+ * Common Fence Constant
  *
- * @author ruishansun
+ * @author kaka2code
  */
-public interface TransactionAutoProxy {
+public class CommonFenceConstant {
+
+    private CommonFenceConstant() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
-     * Whether it is transaction auto proxy? (tcc or saga)
-     *
-     * @param remotingDesc the remotingDesc
-     * @return the IsTransactionProxyResult
+     * PHASE 1: The Commit tried.
      */
-    IsTransactionProxyResult isTransactionProxyTargetBean(RemotingDesc remotingDesc);
+    public static final int STATUS_TRIED = 1;
+
+    /**
+     * PHASE 2: The Committed.
+     */
+    public static final int STATUS_COMMITTED = 2;
+
+    /**
+     * PHASE 2: The Rollbacked.
+     */
+    public static final int STATUS_ROLLBACKED = 3;
+
+    /**
+     * Suspended status.
+     */
+    public static final int STATUS_SUSPENDED = 4;
 }

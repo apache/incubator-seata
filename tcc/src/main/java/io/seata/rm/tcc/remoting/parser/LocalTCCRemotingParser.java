@@ -20,8 +20,9 @@ import java.util.Set;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.tcc.api.LocalTCC;
-import io.seata.rm.tcc.remoting.Protocols;
-import io.seata.rm.tcc.remoting.RemotingDesc;
+import io.seata.spring.remoting.Protocols;
+import io.seata.spring.remoting.RemotingDesc;
+import io.seata.spring.remoting.parser.AbstractedRemotingParser;
 
 /**
  * local tcc bean parsing
@@ -46,7 +47,8 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
             return null;
         }
         RemotingDesc remotingDesc = new RemotingDesc();
-        remotingDesc.setReference(true);
+        remotingDesc.setReference(this.isReference(bean, beanName));
+        remotingDesc.setService(this.isService(bean, beanName));
         remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
