@@ -158,11 +158,11 @@ public class LogbackLoggingExtendLogstashAppenderProvider extends AbstractLogbac
         String destinations = propertyResolver.getProperty(DESTINATIONS);
         List<InetSocketAddress> parsedDestinations = DestinationParser.parse(destinations, DEFAULT_PORT);
         parsedDestinations.forEach(
-                destination -> {
-                    if (!logstashTcpSocketAppender.getDestinations().contains(destination)) {
-                        logstashTcpSocketAppender.addDestination(destinations);
-                    }
+            destination -> {
+                if (!logstashTcpSocketAppender.getDestinations().contains(destination)) {
+                    logstashTcpSocketAppender.addDestination(destinations);
                 }
+            }
         );
         String connectionStrategy = propertyResolver.getProperty(LOGSTASH_EXTEND_CONFIG_PREFIX + ".connection-strategy");
         if (!StringUtils.isNullOrEmpty(connectionStrategy)) {

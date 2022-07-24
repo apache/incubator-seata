@@ -175,7 +175,7 @@ public final class LogbackExtendConfigurator {
                                                               loggerContextListenerClass) {
         List<LoggerContextListener> listenerList = loggerContext.getCopyOfListenerList();
         return listenerList.stream().anyMatch(
-                loggerContextListener -> loggerContextListenerClass.equals(loggerContextListener.getClass())
+            loggerContextListener -> loggerContextListenerClass.equals(loggerContextListener.getClass())
         );
     }
 
