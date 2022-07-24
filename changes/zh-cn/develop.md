@@ -3,6 +3,7 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature：
+- [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
 
 
 ### bugfix：
@@ -13,6 +14,8 @@
 - [[#4750](https://github.com/seata/seata/pull/4750)] 优化AT分支释放全局锁不使用xid
 - [[#4790](https://github.com/seata/seata/pull/4790)] 添加一个 github action，用于自动发布Seata到OSSRH
 - [[#4765](https://github.com/seata/seata/pull/4765)] mysql8.0.29版本及以上XA模式不持connection至二阶段
+- [[#4797](https://github.com/seata/seata/pull/4797)] 优化所有github actions脚本
+
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -24,5 +27,6 @@
 - [slievrly](https://github.com/slievrly)
 - [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
+- [a364176773](https://github.com/a364176773)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
