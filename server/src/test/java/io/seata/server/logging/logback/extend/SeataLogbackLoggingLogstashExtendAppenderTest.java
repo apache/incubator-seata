@@ -53,8 +53,7 @@ public class SeataLogbackLoggingLogstashExtendAppenderTest extends SpringBootInt
 
     @Test
     public void defaultPatternTest() throws IOException {
-        final ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor.forClass(
-                LoggingEvent.class);
+        final ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor.forClass(LoggingEvent.class);
         final Appender<ILoggingEvent> mockAppender = spy(provider.getOrCreateLoggingExtendAppender());
 
         Logger rootLogger = this.provider.getRootLogger();
