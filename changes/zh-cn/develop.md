@@ -15,7 +15,7 @@
 - [[#4790](https://github.com/seata/seata/pull/4790)] 添加一个 github action，用于自动发布Seata到OSSRH
 - [[#4765](https://github.com/seata/seata/pull/4765)] mysql8.0.29版本及以上XA模式不持connection至二阶段
 - [[#4797](https://github.com/seata/seata/pull/4797)] 优化所有github actions脚本
-
+- [[#4800](https://github.com/seata/seata/pull/4800)] 按照 Apache 协议规范，添加 NOTICE 文件
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -28,5 +28,7 @@
 - [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
+- [AlexStocks](https://github.com/AlexStocks)
+
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
