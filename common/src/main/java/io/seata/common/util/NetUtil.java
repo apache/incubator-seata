@@ -25,7 +25,6 @@ import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -264,6 +263,12 @@ public class NetUtil {
         return false;
     }
 
+    /**
+     * check if the portStr is a real net port
+     *
+     * @param portStr
+     * @return true if the given portStr is a real net port
+     */
     public static boolean isPort(String portStr) {
         Matcher isNum = NUMBER_PATTERN.matcher(portStr);
         if (isNum.matches() && portStr.length() < 6 && Integer.valueOf(portStr) >= 1

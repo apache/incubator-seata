@@ -181,4 +181,18 @@ public class NetUtilTest {
 
     }
 
+    @Test
+    public void testIsCorrectFormatAddress() {
+        String address0 = "127.0.0.1:-1";
+        String address1 = "192.168.1.1:1";
+        String address2 = "192.168.1.2:65535";
+        String address3 = "192.168.1.3:65536";
+        String address4 = "172.1.1.1";
+        assertThat(NetUtil.isCorrectFormatAddress(address0)).isFalse();
+        assertThat(NetUtil.isCorrectFormatAddress(address1)).isTrue();
+        assertThat(NetUtil.isCorrectFormatAddress(address2)).isTrue();
+        assertThat(NetUtil.isCorrectFormatAddress(address3)).isFalse();
+        assertThat(NetUtil.isCorrectFormatAddress(address4)).isFalse();
+    }
+
 }
