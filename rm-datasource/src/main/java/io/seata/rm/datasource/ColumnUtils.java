@@ -217,34 +217,34 @@ public final class ColumnUtils {
             int dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
                 return new StringBuilder()
-                        .append(colName.substring(0, dotIndex + str.length()))
-                        .append(escape.value)
-                        .append(colName.substring(dotIndex + str.length()))
-                        .append(escape.value).toString();
+                    .append(colName.substring(0, dotIndex + str.length()))
+                    .append(escape.value)
+                    .append(colName.substring(dotIndex + str.length()))
+                    .append(escape.value).toString();
             }
             // like scheme."id" scheme.`id`
             str = DOT + escape.value;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
                 return new StringBuilder()
-                        .append(escape.value)
-                        .append(colName.substring(0, dotIndex))
-                        .append(escape.value)
-                        .append(colName.substring(dotIndex))
-                        .toString();
+                    .append(escape.value)
+                    .append(colName.substring(0, dotIndex))
+                    .append(escape.value)
+                    .append(colName.substring(dotIndex))
+                    .toString();
             }
 
             str = DOT;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
                 return new StringBuilder()
-                        .append(escape.value)
-                        .append(colName.substring(0, dotIndex))
-                        .append(escape.value)
-                        .append(DOT)
-                        .append(escape.value)
-                        .append(colName.substring(dotIndex + str.length()))
-                        .append(escape.value).toString();
+                    .append(escape.value)
+                    .append(colName.substring(0, dotIndex))
+                    .append(escape.value)
+                    .append(DOT)
+                    .append(escape.value)
+                    .append(colName.substring(dotIndex + str.length()))
+                    .append(escape.value).toString();
             }
         }
 
@@ -259,8 +259,9 @@ public final class ColumnUtils {
 
     private static boolean isMysqlSeries(String dbType) {
         return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
-                StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
-                StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
+            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
+            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB) ||
+            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.OCEANBASE);
     }
 
 }

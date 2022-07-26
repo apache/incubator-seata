@@ -30,4 +30,8 @@ public interface JdbcConstants {
     String MARIADB = "mariadb";
 
     String POSTGRESQL = "postgresql";
+
+    String OCEANBASE = "oceanbase"; // OceanBase MySQL mode
+
+    String OCEANBASE_ORACLE = "oceanbase_oracle"; // OceanBase Oracle mode
 }

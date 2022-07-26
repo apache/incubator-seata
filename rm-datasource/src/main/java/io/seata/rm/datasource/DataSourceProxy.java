@@ -15,17 +15,10 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
-
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
-import io.seata.common.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -35,6 +28,12 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
@@ -50,15 +49,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT";
 
-    private String resourceGroupId;
-
-    private String jdbcUrl;
-
-    private String resourceId;
-
-    private String dbType;
-
-    private String userName;
+    /**
+     * Table meta checker interval
+     */
+    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
+        ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
 
     /**
      * Enable the table meta checker
@@ -66,14 +61,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
 
-    /**
-     * Table meta checker interval
-     */
-    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
-            ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
-
     private final ScheduledExecutorService tableMetaExecutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("tableMetaChecker", 1, true));
+    private String resourceGroupId;
+    private String jdbcUrl;
+    private String resourceId;
+    private String dbType;
+    private String userName;
 
     /**
      * Instantiates a new Data source proxy.
@@ -103,16 +97,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         this.resourceGroupId = resourceGroupId;
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
-            dbType = JdbcUtils.getDbType(jdbcUrl);
+            dbType = checkDbTypeBefore(JdbcUtils.getDbType(jdbcUrl), connection);
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
-            } else if (JdbcConstants.MARIADB.equals(dbType)) {
-                dbType = JdbcConstants.MYSQL;
             }
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
         initResourceId();
+        dbType = checkDbTypeAfter(dbType);
+
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExecutor.scheduleAtFixedRate(() -> {
@@ -126,6 +120,50 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
         //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
+    }
+
+    /**
+     * Detect the compatibility mode of OceanBase based on the physical database name or validation query.
+     * <p>
+     * 1. For oceanbase-client 1.x: jdbc url starting with 'jdbc:oceanbase:' indicates that the running mode is MYSQL,
+     * while one starting with 'jdbc:oceanbase:oracle:' indicates ORACLE mode.
+     * 2. For oceanbase-client 2.x: The format of the jdbc url is 'jdbc:oceanbase:hamode:',
+     * where hamode is the high availability mode(optional: loadbalance etc.).
+     * <p>
+     * Note: db type parser of druid recognizes it by url prefix (only adapted to old version driver)
+     */
+    private String checkDbTypeBefore(String dbType, Connection conn) throws SQLException {
+        // determine the origin result from druid parser
+        if (JdbcConstants.OCEANBASE.equals(dbType) || JdbcConstants.OCEANBASE_ORACLE.equals(dbType)) {
+            DatabaseMetaData meta = conn.getMetaData();
+            String databaseName = meta.getDatabaseProductName();
+            if (databaseName.equalsIgnoreCase("mysql")) {
+                return JdbcConstants.OCEANBASE;
+            } else if (databaseName.equalsIgnoreCase("oracle")) {
+                return JdbcConstants.OCEANBASE_ORACLE;
+            } else {
+                try (Statement statement = conn.createStatement();
+                     ResultSet rs = statement.executeQuery("select * from dual")) {
+                    if (!rs.next()) {
+                        throw new SQLException("Validation query for OceanBase(Oracle mode) didn't return a row");
+                    }
+                    return JdbcConstants.OCEANBASE_ORACLE;
+                }
+            }
+        } else if (JdbcConstants.MARIADB.equals(dbType)) {
+            return JdbcConstants.MYSQL;
+        }
+        return dbType;
+    }
+
+    private String checkDbTypeAfter(String dbType) {
+        if (JdbcConstants.OCEANBASE.equals(dbType)) {
+            // the OceanBase in MySQL mode is directly delegated to MySQL
+            // in druid, the SQLStatementParser for generic SQL statements is returned when db type is OCEANBASE
+            // not specified for MySQL (called: io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl#create)
+            return JdbcConstants.MYSQL;
+        }
+        return dbType;
     }
 
     /**
@@ -179,6 +217,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initOracleResourceId();
         } else if (JdbcConstants.MYSQL.equals(dbType)) {
             initMysqlResourceId();
+        } else if (JdbcConstants.OCEANBASE.equals(dbType) || JdbcConstants.OCEANBASE_ORACLE.equals(dbType)) {
+            initOceanBaseResourceId();
         } else {
             initDefaultResourceId();
         }
@@ -261,6 +301,22 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             resourceId = jdbcUrlBuilder.toString();
         } else {
             resourceId = jdbcUrl;
+        }
+    }
+
+    /**
+     * For oceanbase-client-2.x, the supported jdbc URL format is:
+     * "jdbc:oceanbase:hamode://host:port/databasename?[username&password]&[opt1=val1&opt2=val2...]".
+     * Handling multiple addresses in URL for loadbalance mode.
+     */
+    private void initOceanBaseResourceId() {
+        String startsWith = "jdbc:oceanbase:loadbalance://";
+        if (jdbcUrl.startsWith(startsWith)) {
+            int qmIdx = jdbcUrl.indexOf('?');
+            String url = qmIdx > -1 ? jdbcUrl.substring(0, qmIdx) : jdbcUrl;
+            resourceId = url.replace(",", "|");
+        } else {
+            initDefaultResourceId();
         }
     }
 
