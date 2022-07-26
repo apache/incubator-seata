@@ -15,20 +15,20 @@
  */
 package io.seata.console.result;
 
+import io.seata.console.constant.Code;
+
 import java.io.Serializable;
 
 /**
  * @description: The basic result
  * @author: zhongxiang.wang
  */
-public class Result<T>  implements Serializable {
+public class Result<T> implements Serializable {
     private static final long serialVersionUID = 7761261124298767L;
 
-    public static final String SUCCESS_CODE = "200";
-    public static final String SUCCESS_MSG = "success";
 
-    private String code = SUCCESS_CODE;
-    private String message = SUCCESS_MSG;
+    private String code;
+    private String message;
 
     public Result() {
     }
@@ -38,8 +38,25 @@ public class Result<T>  implements Serializable {
         this.message = message;
     }
 
+    public Result(Code code) {
+        this.code = code.getCode();
+        this.message = code.getMsg();
+    }
+
+    public static Result error() {
+        return new Result(Code.SUCCESS);
+    }
+
+    public static Result ok() {
+        return new Result(Code.SUCCESS);
+    }
+
+    public static Result result(Code code) {
+        return new Result(code);
+    }
+
     public boolean isSuccess() {
-        return SUCCESS_CODE.equals(this.code);
+        return Code.SUCCESS.getCode().equals(this.code);
     }
 
     public String getCode() {

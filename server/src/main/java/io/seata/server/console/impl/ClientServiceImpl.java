@@ -1,11 +1,19 @@
 package io.seata.server.console.impl;
 
+import io.seata.common.Constants;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.console.constant.Code;
+import io.seata.console.exception.ConsoleException;
 import io.seata.console.result.PageResult;
+import io.seata.console.result.Result;
 import io.seata.core.rpc.ClientInfo;
 import io.seata.core.rpc.netty.ChannelManager;
+import io.seata.server.console.param.ClientOfflineParam;
 import io.seata.server.console.param.ClientQueryParam;
 import io.seata.server.console.service.ClientService;
 import io.seata.server.console.vo.ClientVO;
+import org.h2.tools.Console;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,23 +35,37 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public PageResult<ClientVO> query(ClientQueryParam param) {
         if (param.getPageSize() <= 0 || param.getPageNum() <= 0) {
-            throw new IllegalArgumentException("wrong pageSize or pageNum");
+            throw new ConsoleException(Code.WRONG_PAGE);
         }
         List<ClientVO> clientVOList;
-        if (param.getClientRole() == null || "".equals(param.getClientRole())) {
+        if (StringUtils.isNullOrEmpty(param.getClientRole())) {
             clientVOList = getAllClients();
-        } else if (ClientRole.RM_ROLE.getRole().equals(param.getClientRole())){
+        } else if (ClientRole.RM_ROLE.getRole().equals(param.getClientRole())) {
             clientVOList = getRMClients();
-        } else if (ClientRole.TM_ROLE.getRole().equals(param.getClientRole())){
+        } else if (ClientRole.TM_ROLE.getRole().equals(param.getClientRole())) {
             clientVOList = getTMClients();
         } else {
-            throw new IllegalArgumentException("wrong client role");
+            throw new ConsoleException(Code.WRONG_CLIENT_ROLE);
         }
         List<ClientVO> clientsFiltered = clientVOList.parallelStream()
                 .filter(obtainPredicate(param))
                 .collect(Collectors.toList());
         return PageResult.build(clientsFiltered, param.getPageNum(), param.getPageSize());
     }
+
+    @Override
+    public Result offline(ClientOfflineParam param) {
+        preCheckClientOfflineParam(param);
+        if (ClientRole.TM_ROLE.getRole().equals(param.getClientRole())) {
+            offlineTMClient(param.getClientId());
+        }else if (ClientRole.RM_ROLE.getRole().equals(param.getClientRole())) {
+            offlineRMClient(param.getResourceId(), param.getClientId());
+        }else{
+            throw new ConsoleException(Code.WRONG_CLIENT_ROLE);
+        }
+        return Result.ok();
+    }
+
 
     public enum ClientRole {
         TM_ROLE("TMROLE"),
@@ -58,6 +80,7 @@ public class ClientServiceImpl implements ClientService {
         public String getRole() {
             return role;
         }
+
     }
 
     private List<ClientVO> getTMClients() {
@@ -73,7 +96,16 @@ public class ClientServiceImpl implements ClientService {
         List<ClientInfo> allRMClients = ChannelManager.getAllRMClients();
         List<ClientVO> allClients = new ArrayList<>(allRMClients.size() + allTMClients.size());
         allClients.addAll(convertClientInfo2ClientVO(allRMClients));
+        allClients.addAll(convertClientInfo2ClientVO(allTMClients));
         return allClients;
+    }
+
+    private void offlineTMClient(String clientId) {
+        ChannelManager.offlineTMClient(clientId);
+    }
+
+    private void offlineRMClient(String resourceId, String clientId) {
+        ChannelManager.offlineRMClient(resourceId, clientId);
     }
 
     private Predicate<? super ClientVO> obtainPredicate(ClientQueryParam param) {
@@ -93,5 +125,31 @@ public class ClientServiceImpl implements ClientService {
         List<ClientVO> clientVOList = new ArrayList<>(clientInfos.size());
         clientInfos.forEach(x -> clientVOList.add(new ClientVO(x)));
         return clientVOList;
+    }
+
+    private void preCheckClientOfflineParam(ClientOfflineParam param) {
+        // need correct format clientId
+        if (!isCorrectClientId(param.getClientId())) {
+            throw new ConsoleException(Code.LACK_CLIENT_ID);
+        }
+        // need clientRole
+        if (StringUtils.isNullOrEmpty(param.getClientRole())) {
+            throw new ConsoleException(Code.LACK_CLIENT_ROLE);
+        }
+        // need resourceId for RM
+        if (ClientRole.RM_ROLE.getRole().equals(param.getClientRole()) && StringUtils.isNullOrEmpty(param.getResourceId())) {
+            throw new ConsoleException(Code.LACK_RESOURCE_ID);
+        }
+        // wrong clientRole
+        if (!ClientRole.RM_ROLE.getRole().equals(param.getClientRole()) && !ClientRole.TM_ROLE.getRole().equals(param.getClientRole())) {
+            throw new ConsoleException(Code.WRONG_CLIENT_ROLE);
+        }
+    }
+
+    // need format app:ip:port
+    private boolean isCorrectClientId(String clientId) {
+        return !StringUtils.isNullOrEmpty(clientId)
+                && clientId.split(":").length == 3
+                && NetUtil.isCorrectFormatAddress(clientId.split(":")[1] + Constants.CLIENT_ID_SPLIT_CHAR + clientId.split(":")[2]);
     }
 }

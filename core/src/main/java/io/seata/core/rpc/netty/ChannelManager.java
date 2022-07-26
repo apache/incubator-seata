@@ -496,4 +496,52 @@ public class ChannelManager {
         });
         return clientList;
     }
+
+    public static void offlineTMClient(String clientId) {
+        String[] appIpPort = clientId.split(":");
+        String appId = appIpPort[0];
+        String ip = appIpPort[1];
+        Integer port = Integer.valueOf(appIpPort[2]);
+        ConcurrentMap<Integer, RpcContext> portCxt = TM_CHANNELS.get(appId + Constants.CLIENT_ID_SPLIT_CHAR + ip);
+        if (portCxt != null) {
+            RpcContext rpcContext = portCxt.get(port);
+            if (rpcContext == null) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Release TMClient's rpcContext which doesn't exist, clientId: {}", clientId);
+                }
+                return;
+            }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Release TMClient's rpcContext: {} success", rpcContext);
+            }
+            rpcContext.release();
+        }
+    }
+
+    public static void offlineRMClient(String resourceId, String clientId) {
+        String[] appIpPort = clientId.split(":");
+        String appId = appIpPort[0];
+        String ip = appIpPort[1];
+        Integer port = Integer.valueOf(appIpPort[2]);
+
+        RpcContext rpcContext = null;
+        try {
+            rpcContext = RM_CHANNELS.get(resourceId).get(appId).get(ip).get(port);
+        } catch (NullPointerException e) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Release RMClient' rpcContext which doesn't exist, resourceId: {}, clientId: {}", resourceId, clientId);
+            }
+            return;
+        }
+        if (rpcContext == null) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Release RMClient' rpcContext which doesn't exist, resourceId: {}, clientId: {}", resourceId, clientId);
+            }
+            return;
+        }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Release RMClient' rpcContext: {} success", rpcContext);
+        }
+        rpcContext.release();
+    }
 }
