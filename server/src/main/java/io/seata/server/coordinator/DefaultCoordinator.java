@@ -401,7 +401,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
-                if (committingSession.getStatus().equals(GlobalStatus.Committing)
+                if (committingSession.getStatus() == GlobalStatus.Committing
                     && !committingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
