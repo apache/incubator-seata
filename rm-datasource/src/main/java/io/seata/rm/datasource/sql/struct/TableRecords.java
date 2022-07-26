@@ -301,7 +301,8 @@ public class TableRecords implements java.io.Serializable {
             synchronized (TableRecords.class) {
                 if (columnEmptyAndRefreshable(statementProxy, tmeta, columnName)) {
                     ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-                    try (Connection connection = statementProxy.getConnection()) {
+                    try {
+                        Connection connection = statementProxy.getConnection();
                         TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(connection,
                             connectionProxy.getDataSourceProxy().getResourceId());
                     } catch (Exception exp) {
