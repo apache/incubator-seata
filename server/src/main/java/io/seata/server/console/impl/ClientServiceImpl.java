@@ -72,9 +72,9 @@ public class ClientServiceImpl implements ClientService {
         preCheckClientOfflineParam(param);
         if (ClientRole.TM_ROLE.getRole().equals(param.getClientRole())) {
             offlineTMClient(param.getClientId());
-        }else if (ClientRole.RM_ROLE.getRole().equals(param.getClientRole())) {
+        } else if (ClientRole.RM_ROLE.getRole().equals(param.getClientRole())) {
             offlineRMClient(param.getResourceId(), param.getClientId());
-        }else{
+        } else {
             throw new ConsoleException(Code.WRONG_CLIENT_ROLE);
         }
         return Result.ok();

@@ -23,7 +23,7 @@ import io.seata.console.constant.Code;
  * @description Exception about console
  */
 
-public class ConsoleException extends RuntimeException{
+public class ConsoleException extends RuntimeException {
 
     private Code code;
 

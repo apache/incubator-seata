@@ -61,10 +61,10 @@ public class NetUtilTest {
      */
     @Test
     public void testToStringAddress1() {
-        assertThat(NetUtil.toStringAddress((SocketAddress)ipv4))
-            .isEqualTo(ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
-        assertThat(NetUtil.toStringAddress((SocketAddress)ipv6)).isEqualTo(
-            ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
+        assertThat(NetUtil.toStringAddress((SocketAddress) ipv4))
+                .isEqualTo(ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
+        assertThat(NetUtil.toStringAddress((SocketAddress) ipv6)).isEqualTo(
+                ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
     }
 
     /**
@@ -73,9 +73,9 @@ public class NetUtilTest {
     @Test
     public void testToStringAddress2() {
         assertThat(NetUtil.toStringAddress(ipv4)).isEqualTo(
-            ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
+                ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
         assertThat(NetUtil.toStringAddress(ipv6)).isEqualTo(
-            ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
+                ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
     }
 
     /**

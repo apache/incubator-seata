@@ -29,6 +29,7 @@ public class ClientInfo {
         this.transactionServiceGroup = transactionServiceGroup;
         this.resourceSets = resourceSets;
     }
+
     public ClientInfo(String resourceId, RpcContext rpcContext) {
         this.resourceId = resourceId;
         this.clientId = rpcContext.getClientId();

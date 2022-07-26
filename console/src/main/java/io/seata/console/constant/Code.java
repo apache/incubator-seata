@@ -56,8 +56,8 @@ public enum Code {
 
     /**
      * Wrong page_size or page_num
-      */
-    WRONG_PAGE("40005","wrong page_size or page_num"),
+     */
+    WRONG_PAGE("40005", "wrong page_size or page_num"),
 
     /**
      * lack param client_id
@@ -130,5 +130,5 @@ public enum Code {
         }
         return null;
     }
-    }
+}
 

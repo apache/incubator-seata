@@ -142,6 +142,7 @@ public class NetUtil {
      * not support ipv6
      * if match the preferredNetworks rule return the first
      * if all not match preferredNetworks rule return the first valid ip
+     *
      * @return the local address
      */
     public static InetAddress getLocalAddress(String... preferredNetworks) {
