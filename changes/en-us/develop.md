@@ -7,7 +7,7 @@ Add changes here for all PR submitted to the develop branch.
  
 
 ### bugfix：
-- [[#4780](https://github.com/seata/seata/pull/4780)] fix can‘t post TimeoutRollbacked event
+- [[#4780](https://github.com/seata/seata/pull/4780)] fix can't post TimeoutRollbacked event
 
 
 ### optimize：

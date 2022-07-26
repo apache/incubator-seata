@@ -6,7 +6,7 @@
 
 
 ### bugfix：
-- [[#4780](https://github.com/seata/seata/pull/4780)] 修复监控无法触发 TimeoutRollbacked 事件
+- [[#4780](https://github.com/seata/seata/pull/4780)] 修复超时回滚成功后无法发送TimeoutRollbacked事件
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
