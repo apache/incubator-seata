@@ -109,7 +109,7 @@ public class OceanBaseOracleInsertRecognizer extends BaseOceanBaseOracleRecogniz
             rows.add(row);
             for (int i = 0; i < exprList.size(); i++) {
                 SQLExpr expr = exprList.get(i);
-                // like:
+                // like: (null, 1, ?, sysdate(), default, seq.nextval)
                 if (expr instanceof SQLNullExpr) {
                     row.add(Null.get());
                 } else if (expr instanceof SQLValuableExpr) {
@@ -138,7 +138,15 @@ public class OceanBaseOracleInsertRecognizer extends BaseOceanBaseOracleRecogniz
 
     @Override
     public List<String> getInsertParamsValue() {
-        return null;
+        List<String> valuesClauses = new ArrayList<>();
+        for (SQLInsertStatement.ValuesClause clause : ast.getValuesList()) {
+            String values = clause.toString().replace("VALUES", "").trim();
+            if (values.length() > 1) {
+                values = values.substring(1, values.length() - 1);
+            }
+            valuesClauses.add(values);
+        }
+        return valuesClauses;
     }
 
     @Override
