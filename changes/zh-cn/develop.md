@@ -7,7 +7,7 @@
 
 
 ### bugfix：
-
+- [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -29,6 +29,6 @@
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
 - [AlexStocks](https://github.com/AlexStocks)
-
+- [liujunlin5168](https://github.com/liujunlin5168)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
