@@ -266,7 +266,7 @@
                             <executable>/bin/bash</executable>
                             <arguments>
                                 <argument>-c</argument>
-                                <argument>/seata-server/bin/seata-server.sh</argument>
+                                <argument>"/seata-server/bin/seata-server.sh"</argument>
                             </arguments>
                         </entrypoint>
                         <labels>
