@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -220,15 +221,17 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * default get generated keys.
-     * @return
-     * @throws SQLException
+     *
+     * @param pkKey the primary key
+     * @return value list of generated key
+     * @throws SQLException sql exception
      */
-    public List<Object> getGeneratedKeys() throws SQLException {
+    public List<Object> getGeneratedKeys(String pkKey) throws SQLException {
         // PK is just auto generated
         ResultSet genKeys = statementProxy.getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
-            Object v = genKeys.getObject(1);
+            Object v = StringUtils.isEmpty(pkKey) ? genKeys.getObject(1) : genKeys.getObject(pkKey);
             pkValues.add(v);
         }
         if (pkValues.isEmpty()) {
@@ -242,17 +245,22 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return pkValues;
     }
 
+    public List<Object> getGeneratedKeys() throws SQLException {
+        return getGeneratedKeys(null);
+    }
+
     /**
-     * the modify for test
+     * default get sequence value.
      *
-     * @param expr the expr
+     * @param expr the sequence expr
+     * @param pkKey the primary key
      * @return the pk values by sequence
      * @throws SQLException the sql exception
      */
-    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
+    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr, String pkKey) throws SQLException {
         List<Object> pkValues = null;
         try {
-            pkValues = getGeneratedKeys();
+            pkValues = getGeneratedKeys(pkKey);
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
@@ -275,6 +283,10 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
             return pkValues;
         }
+    }
+
+    public List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
+        return getPkValuesBySequence(expr,null);
     }
 
     /**
