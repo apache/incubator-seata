@@ -107,7 +107,7 @@
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "deprecation": {
         "level": "error",
-        "reason": "Please configure to  'seata.transport.rpcRmRequestTimeout'."
+        "reason": "Please configure to 'seata.transport.rpcRmRequestTimeout'."
       }
     },
     {
