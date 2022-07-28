@@ -5,6 +5,10 @@ on:
     branches: [ snapshot, 1.*.*, 2.*.* ]
     #tags: [ "*" ]
 
+  #This schedule only takes effect in the default branch
+  schedule:
+    - cron: '0 16 * * *' #GMT+0
+
 jobs:
   publish:
     name: "Publish"
