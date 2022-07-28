@@ -9,12 +9,11 @@ on:
 jobs:
   build:
     name: "build"
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         java: [ 8, 11 ]
-        os: [ ubuntu-18.04 ]
     steps:
       # step 1
       - name: "Checkout"
