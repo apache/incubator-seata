@@ -166,7 +166,7 @@ public class OceanBaseOracleInsertRecognizerTest extends AbstractRecognizerTest 
         String sql = "INSERT INTO t (id) VALUES (?)";
         SQLStatement ast = getSQLStatement(sql);
         OceanBaseOracleInsertRecognizer recognizer = new OceanBaseOracleInsertRecognizer(sql, ast);
-        Assertions.assertNull(recognizer.getInsertParamsValue());
+        Assertions.assertEquals(Collections.singletonList("?"), recognizer.getInsertParamsValue());
     }
 
     @Test
