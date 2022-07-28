@@ -7,7 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### bugfix:
-
+- [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -29,5 +29,5 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
 - [AlexStocks](https://github.com/AlexStocks)
-
+- [liujunlin5168](https://github.com/liujunlin5168)
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
