@@ -2,7 +2,7 @@ name: "Publishes"
 
 on:
   push:
-    branches: [ snapshot, 1.*.*, 2.*.* ]
+    branches: [ snapshot, "*.*.*" ]
     #tags: [ "*" ]
 
   #This schedule only takes effect in the default branch
