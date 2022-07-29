@@ -22,7 +22,12 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.struct.*;
+import io.seata.sqlparser.struct.Defaultable;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.Sequenceable;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.SQLException;
