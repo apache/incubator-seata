@@ -62,7 +62,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * Enable the table meta checker
      */
-    private static final boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
 
     private final ScheduledExecutorService tableMetaExecutor = new ScheduledThreadPoolExecutor(1,
