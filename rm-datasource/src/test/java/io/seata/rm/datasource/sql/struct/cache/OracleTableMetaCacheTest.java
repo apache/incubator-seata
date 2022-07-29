@@ -62,7 +62,7 @@ public class OracleTableMetaCacheTest {
     public void getTableMetaTest() throws SQLException {
         MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas);
         DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mock:xxx");
+        dataSource.setUrl("jdbc:mock:oracle");
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy proxy = new DataSourceProxy(dataSource);

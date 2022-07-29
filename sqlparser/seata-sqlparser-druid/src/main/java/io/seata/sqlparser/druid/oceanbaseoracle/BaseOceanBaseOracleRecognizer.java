@@ -100,7 +100,7 @@ public abstract class BaseOceanBaseOracleRecognizer extends BaseRecognizer {
                 if ("?".equals(x.getName())) {
                     ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
                     if (paramAppenderList.isEmpty()) {
-                        // assume that the list of values for each parameter has the same size
+                        // batch operations assume that the list of values for each parameter index has the same size
                         oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {

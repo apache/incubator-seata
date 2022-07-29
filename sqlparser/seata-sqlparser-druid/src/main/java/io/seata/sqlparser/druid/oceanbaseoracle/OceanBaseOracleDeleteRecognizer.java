@@ -99,13 +99,13 @@ public class OceanBaseOracleDeleteRecognizer extends BaseOceanBaseOracleRecogniz
 
     @Override
     public String getLimitCondition() {
-        // oracle does not support limit or rownum yet
+        // oracle does not support limit
         return null;
     }
 
     @Override
     public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        // oracle does not support limit or rownum yet
+        // oracle does not support limit
         return null;
     }
 

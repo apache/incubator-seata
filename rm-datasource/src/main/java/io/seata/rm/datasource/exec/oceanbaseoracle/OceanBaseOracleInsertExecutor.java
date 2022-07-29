@@ -56,7 +56,7 @@ public class OceanBaseOracleInsertExecutor<T, S extends Statement> extends BaseI
     public Map<String, List<Object>> getPkValues() throws SQLException {
         // table: test; columns: c1, c2, c3; pk: (c1, c2)
         // case1: all pks are filled.
-        //     like: insert into test values(null, null, 3)
+        //     like: insert into test values(null, seq.nextval, 3)
         // case2: some generated pks column value are not present, and other pks are present.
         //     like: insert into test(c2, c3) values(2, 3), c1 is generated key
         Map<String, List<Object>> pkValuesMap = getPkValuesByColumn();

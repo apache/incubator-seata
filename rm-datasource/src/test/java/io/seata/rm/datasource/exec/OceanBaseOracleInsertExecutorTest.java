@@ -227,8 +227,7 @@ public class OceanBaseOracleInsertExecutorTest {
         mockInsertRows(multiple);
         SqlSequenceExpr expr = mockParametersWithPkSeq(multiple, Collections.singletonList("null"));
 
-        // case1: throws NotSupportYetException
-        // when check pk values for multi Pk failed (at most one null per row & method is not allowed)
+        // case1: throws NotSupportYetException when #getGeneratedKeys return empty values
         // mock: pk = (id, user_id), values = (null, sequence, 'test', 'test'), throws from: #getGeneratedKeys
         ResultSet rs = mock(ResultSet.class);
         doReturn(rs).when(statementProxy).getGeneratedKeys();
@@ -240,7 +239,8 @@ public class OceanBaseOracleInsertExecutorTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> insertExecutor.getGeneratedKeys(ID_COLUMN));
         Assertions.assertThrows(NotSupportYetException.class, () -> insertExecutor.getPkValuesByColumn());
 
-        // case2: throws NotSupportYetException when #getGeneratedKeys return empty values
+        // case2: throws NotSupportYetException error on primary key check failure
+        // conditions: most one null per row & method is not allowed for multiple pks
         // mock: pk = (id, user_id), values = (null, null, 'test', 'test'), throws from: #checkPkValues
         mockParametersWithPkSeq(multiple, Arrays.asList("null", "null"));
         Assertions.assertThrows(NotSupportYetException.class, () -> insertExecutor.getPkValuesByColumn());

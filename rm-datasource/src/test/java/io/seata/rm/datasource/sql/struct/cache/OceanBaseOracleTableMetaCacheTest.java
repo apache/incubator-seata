@@ -67,22 +67,21 @@ public class OceanBaseOracleTableMetaCacheTest {
             () -> tableMetaCache.getTableMeta(null, null, null));
     }
 
-    /**
-     * The table meta fetch test.
-     */
     @Test
-    public void getTableMetaTest_0() throws SQLException {
+    public void testGetTableMeta() throws SQLException {
         MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas);
         DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mock:xxx");
+        dataSource.setUrl("jdbc:mock:oceanbase:oracle");
         dataSource.setDriver(mockDriver);
         DataSourceProxy proxy = new DataSourceProxy(dataSource);
 
+        String tableName = "\"m\".\"mt1\"";
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(),
-            "m.mt1", proxy.getResourceId());
+            tableName, proxy.getResourceId());
+
 
         // test table name, column meta, index meta etc.
-        Assertions.assertEquals("m.mt1", tableMeta.getTableName());
+        Assertions.assertEquals(tableName, tableMeta.getTableName());
         Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());

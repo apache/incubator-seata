@@ -49,7 +49,7 @@ public class OceanBaseOracleTableMetaCache extends AbstractTableMetaCache {
         // split `tableName` into schema name and table name
         String[] tableNameWithSchema = tableName.split("\\.");
         String defaultTableName = tableNameWithSchema[tableNameWithSchema.length - 1];
-        // get unique table name by sensitivity
+        // get unique table name by case-sensitivity
         cacheKey.append(getUniqueNameBySensitivity(defaultTableName));
         return cacheKey.toString();
     }
@@ -185,9 +185,9 @@ public class OceanBaseOracleTableMetaCache extends AbstractTableMetaCache {
     }
 
     private String getUniqueNameBySensitivity(String identifier) {
-        // in oracle, just support like: "table" "Table" table etc.
-        // (invalid: "ta"ble" "table'" etc.)
-        String escape = String.valueOf(ColumnUtils.Escape.STANDARD);
+        // in oracle, just support like: "table" "Table" table etc. (invalid: "ta"ble" "table"" etc.)
+        // ie. Test = TEST = "TEST", Test != "Test"
+        String escape = String.valueOf(ColumnUtils.Escape.STANDARD.value);
         if (identifier.contains(escape)) {
             // 1. with escapes(quotation marks): case-sensitive
             return identifier.replace(escape, "");

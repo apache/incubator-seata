@@ -94,7 +94,7 @@ public class PostgresqlInsertExecutorTest {
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
-        doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
+        doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys(null);
         Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
         //pk value = DEFAULT so getPkValuesByDefault
         doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault();
