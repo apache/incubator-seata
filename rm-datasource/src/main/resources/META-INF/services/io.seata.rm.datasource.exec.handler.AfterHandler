@@ -1,0 +1,2 @@
+io.seata.rm.datasource.exec.handler.after.InsertIgnoreHandler
+io.seata.rm.datasource.exec.handler.after.InsertOrUpdateHandler
