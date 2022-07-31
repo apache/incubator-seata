@@ -69,7 +69,7 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
-    public void testInsertGlobalSessionDataAndQuery() throws TransactionException {
+    public synchronized void testInsertGlobalSessionDataAndQuery() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
@@ -173,7 +173,12 @@ public class RedisTransactionStoreManagerTest {
         final List<GlobalSession> globalSessionStatus = redisTransactionStoreManager.readSessionStatusByPage(param);
         LOGGER.info("the  globalSessionStatus result is:[{}]", globalSessionStatus);
         LOGGER.info("the  globalSessionStatus result size is:[{}]", globalSessionStatus);
-
+        sessionManager.removeGlobalSession(session1);
+        sessionManager.removeGlobalSession(session2);
+        sessionManager.removeGlobalSession(session3);
+        sessionManager.removeGlobalSession(session4);
+        sessionManager.removeGlobalSession(session5);
+        sessionManager.removeGlobalSession(session);
     }
 
     @Test
@@ -208,7 +213,7 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
-    public void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
+    public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
         GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 10);
         String xid1 = XID.generateXID(session1.getTransactionId());
         session1.setXid(xid1);
