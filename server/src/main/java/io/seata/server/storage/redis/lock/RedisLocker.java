@@ -359,7 +359,7 @@ public class RedisLocker extends AbstractLocker {
                 Map<String, String> rowKeyMap = jedis.hgetAll(xidLockKey);
                 rowKeyMap.forEach((branch, rowKey) -> rowKeys.add(rowKey));
             } else {
-                rowKeys.addAll(jedis.hmget(xidLockKey, branchId.toString()));
+                rowKeys.add(jedis.hget(xidLockKey, branchId.toString()));
             }
             if (CollectionUtils.isNotEmpty(rowKeys)) {
                 Pipeline pipelined = jedis.pipelined();
