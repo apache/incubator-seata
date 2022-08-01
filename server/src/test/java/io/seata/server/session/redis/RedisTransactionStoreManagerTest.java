@@ -62,6 +62,7 @@ public class RedisTransactionStoreManagerTest {
     public static void start(ApplicationContext context) throws IOException {
         MockRedisServer.getInstance();
         EnhancedServiceLoader.unloadAll();
+        JedisPooledFactory.getJedisInstance().flushAll();
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
@@ -235,8 +236,8 @@ public class RedisTransactionStoreManagerTest {
         Thread.sleep(100);
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
         List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
-        Assertions.assertEquals(2, list.size());
         Assertions.assertEquals(2, list2.size());
+        Assertions.assertEquals(2, list.size());
         Assertions.assertEquals(xid1, list.get(0).getXid());
         Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
         sessionManager.removeGlobalSession(session1);
