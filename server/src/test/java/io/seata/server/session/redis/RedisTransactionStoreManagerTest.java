@@ -235,15 +235,15 @@ public class RedisTransactionStoreManagerTest {
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
         Thread.sleep(100);
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
+        for (GlobalSession globalSession : list) {
+            LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+        }
         List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
-        Assertions.assertEquals(2, list2.size());
         for (GlobalSession globalSession : list2) {
             LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
         }
+        Assertions.assertEquals(2, list2.size());
         Assertions.assertEquals(xid1, list.get(0).getXid());
-        for (GlobalSession globalSession : list) {
-            LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
-        }
         Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
         sessionManager.removeGlobalSession(session1);
         sessionManager.removeGlobalSession(session2);
