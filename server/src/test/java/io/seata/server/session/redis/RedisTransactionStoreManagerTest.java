@@ -237,7 +237,9 @@ public class RedisTransactionStoreManagerTest {
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
         List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
         Assertions.assertEquals(2, list2.size());
-        Assertions.assertEquals(2, list.size());
+        for (GlobalSession globalSession : list2) {
+            LOGGER.info("xid: {},status: {}", globalSession.getXid(), globalSession.getStatus());
+        }
         Assertions.assertEquals(xid1, list.get(0).getXid());
         Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
         sessionManager.removeGlobalSession(session1);
