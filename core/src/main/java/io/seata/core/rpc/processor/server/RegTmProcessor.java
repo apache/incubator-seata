@@ -69,8 +69,13 @@ public class RegTmProcessor implements RemotingProcessor {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{}",
+                    LOGGER.debug("TM checkAuth for client:{},vgroup:{},applicationId:{} is OK",
                         ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                }
+            } else {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("TM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL",
+                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
@@ -83,7 +88,7 @@ public class RegTmProcessor implements RemotingProcessor {
             response.setMsg(errorInfo);
         }
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
-        if (LOGGER.isInfoEnabled()) {
+        if (isSuccess && LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
         }

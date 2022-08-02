@@ -33,8 +33,10 @@ public class ServerProperties {
     private Duration maxRollbackRetryTimeout = DurationUtil.DEFAULT_DURATION;
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
     private Boolean enableCheckAuth = true;
+    private Boolean enableParallelRequestHandle = false;
     private Integer retryDeadThreshold = 130000;
     private Integer servicePort;
+    private Integer xaerNotaRetryTimeout = 60000;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -88,5 +90,21 @@ public class ServerProperties {
     public ServerProperties setServicePort(Integer servicePort) {
         this.servicePort = servicePort;
         return this;
+    }
+
+    public Integer getXaerNotaRetryTimeout() {
+        return xaerNotaRetryTimeout;
+    }
+
+    public void setXaerNotaRetryTimeout(Integer xaerNotaRetryTimeout) {
+        this.xaerNotaRetryTimeout = xaerNotaRetryTimeout;
+    }
+
+    public Boolean getEnableParallelRequestHandle() {
+        return enableParallelRequestHandle;
+    }
+
+    public void setEnableParallelRequestHandle(Boolean enableParallelRequestHandle) {
+        this.enableParallelRequestHandle = enableParallelRequestHandle;
     }
 }
