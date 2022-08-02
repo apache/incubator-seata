@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface AfterHandler {
     /**
-     * build after select SQL to append in the SQL when build in before image
+     * Build after select SQL to append in the SQL when build in before image
      *
      * @param beforeImage beforeImage
      * @return select SQL

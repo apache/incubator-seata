@@ -15,7 +15,7 @@ import java.util.Map;
  * @author: lyx
  */
 @LoadLevel(name = SQLTypeConstant.INSERT_IGNORE)
-public class InsertIgnoreHandler extends BaseAfterHandler{
+public class InsertIgnoreHandler extends BaseAfterHandler {
 
     @Override
     public Map<SQLType, List<Row>> buildUndoRow(TableRecords beforeImage, TableRecords afterImage) {
@@ -31,6 +31,6 @@ public class InsertIgnoreHandler extends BaseAfterHandler{
                 }
             }
         }
-        return Collections.singletonMap(SQLType.INSERT,afterImage.getRows());
+        return Collections.singletonMap(SQLType.INSERT, afterImage.getRows());
     }
 }

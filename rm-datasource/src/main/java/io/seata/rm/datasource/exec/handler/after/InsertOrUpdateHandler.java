@@ -35,9 +35,7 @@ public class InsertOrUpdateHandler extends BaseAfterHandler {
                 values.add(f.getValue());
             });
         });
-
         StringBuilder afterImageSql = new StringBuilder();
-        // 这里重新拼接是 因为 uk 可能被upadte，所以需要 pk 来继续拼接
         if (CollectionUtils.isNotEmpty(primaryValueMap)) {
             afterImageSql.append(" OR ").append("(").append(Joiner.on(",").join(primaryValueMap.keySet())).append(")");
             afterImageSql.append(" IN(");
@@ -46,7 +44,8 @@ public class InsertOrUpdateHandler extends BaseAfterHandler {
                     primaryIndexValueMap.computeIfAbsent(i, e -> new ArrayList<>()).add(v.get(i));
                 }
             });
-            primaryIndexValueMap.values().forEach(indexValue -> afterImageSql.append(Joiner.on(",").join(indexValue)));
+            primaryIndexValueMap.values().forEach(indexValue -> afterImageSql.append("(").append(Joiner.on(",").join(indexValue)).append(")").append(","));
+            afterImageSql.deleteCharAt(afterImageSql.length() - 1);
             afterImageSql.append(")");
         }
         return afterImageSql.toString();
