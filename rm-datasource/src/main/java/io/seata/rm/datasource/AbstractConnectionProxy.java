@@ -22,6 +22,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -111,7 +113,8 @@ public abstract class AbstractConnectionProxy implements Connection {
             List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
             if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
-                if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
+                if (sqlRecognizer != null && (sqlRecognizer.getSQLType() == SQLType.INSERT || sqlRecognizer.getSQLType() == SQLType.INSERT_IGNORE
+                        || (sqlRecognizer.getSQLType() == SQLType.INSERT_SELECT && JdbcConstants.MYSQL.equals(getDbType())))) {
                     TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
                             sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
                     String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
