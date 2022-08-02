@@ -211,7 +211,11 @@ public enum SQLType {
     /**
      * Insert on duplicate update sql type.
      */
-    INSERT_ON_DUPLICATE_UPDATE(102);
+    INSERT_ON_DUPLICATE_UPDATE(102),
+    /**
+     * Insert select sql type.
+     */
+    INSERT_SELECT(103);
 
     private int i;
 
@@ -242,4 +246,9 @@ public enum SQLType {
         }
         throw new IllegalArgumentException("Invalid SQLType:" + i);
     }
+
+    public String getName() {
+        return this.name();
+    }
+
 }
