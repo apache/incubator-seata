@@ -430,9 +430,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
+        List<String> delEscapeColumns = ColumnUtils.delEscape(insertColumns, getDbType());
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            columns.addAll(recognizer.getInsertColumns());
+            columns.addAll(delEscapeColumns);
             columns.addAll(pkColumnNameList);
             for (String columnName : columns) {
                 selectSQLJoin.add(columnName);
