@@ -15,8 +15,6 @@
  */
 package io.seata.sqlparser.druid;
 
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.sqlparser.SQLRecognizer;
@@ -66,9 +64,10 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POSTGRESQL));
 
         String sql6 = "insert into a select * from b";
-        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql6, JdbcConstants.MYSQL));
-        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql6, JdbcConstants.ORACLE));
-        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql6, JdbcConstants.POSTGRESQL));
+        recognizerFactory.create(sql6, JdbcConstants.MYSQL);
+        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.MYSQL));
+        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.ORACLE));
+        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POSTGRESQL));
 
         String sql7 = "delete from t where id = ?";
         Assertions.assertNotNull(recognizerFactory.create(sql7, JdbcConstants.MYSQL));
