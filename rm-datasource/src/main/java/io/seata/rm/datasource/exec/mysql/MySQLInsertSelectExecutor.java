@@ -54,7 +54,6 @@ public class MySQLInsertSelectExecutor extends MySQLInsertExecutor implements De
         createInsertRecognizer();
     }
 
-
     public void createInsertRecognizer() throws SQLException {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         // get the sql after insert
@@ -88,7 +87,7 @@ public class MySQLInsertSelectExecutor extends MySQLInsertExecutor implements De
             }
             return TableRecords.empty(tableMeta);
         }
-        return buildTableRecords2(tableMeta, selectSQL, new ArrayList<>(paramAppenderMap.values()));
+        return buildTableRecords2(tableMeta, selectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
     @Override
@@ -96,7 +95,7 @@ public class MySQLInsertSelectExecutor extends MySQLInsertExecutor implements De
         TableMeta tableMeta = getTableMeta();
         if (Objects.nonNull(afterHandler) && CollectionUtils.isNotEmpty(paramAppenderMap)) {
             String afterSelectSQL = afterHandler.buildAfterSelectSQL(beforeImage);
-            return buildTableRecords2(tableMeta, selectSQL + afterSelectSQL, new ArrayList<>(paramAppenderMap.values()));
+            return buildTableRecords2(tableMeta, selectSQL + afterSelectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
         }
         return super.afterImage(beforeImage);
     }

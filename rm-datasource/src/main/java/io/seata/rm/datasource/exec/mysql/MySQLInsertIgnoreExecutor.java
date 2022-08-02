@@ -55,7 +55,7 @@ public class MySQLInsertIgnoreExecutor extends MySQLInsertExecutor implements De
         if (CollectionUtils.isEmpty(paramAppenderMap)) {
             return TableRecords.empty(tableMeta);
         }
-        return buildTableRecords2(tableMeta, selectSQL, new ArrayList<>(paramAppenderMap.values()));
+        return buildTableRecords2(tableMeta, selectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class MySQLInsertIgnoreExecutor extends MySQLInsertExecutor implements De
         }
         TableMeta tableMeta = getTableMeta();
         return buildTableRecords2(tableMeta, selectSQL + afterHandler.buildAfterSelectSQL(beforeImage),
-                new ArrayList<>(paramAppenderMap.values()));
+                new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
     @Override

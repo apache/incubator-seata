@@ -47,13 +47,13 @@ public class OracleInsertIgnoreExecutor extends OracleInsertExecutor {
             throw new ShouldNeverHappenException("can not find unique param,may be you should add the unique key what you expect to ignore " +
                     "when you use the IGNORE_ROW_ON_DUPKEY_INDEX hint");
         }
-        return buildTableRecords2(tableMeta, selectSQL, new ArrayList<>(paramAppenderMap.values()));
+        return buildTableRecords2(tableMeta, selectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         return buildTableRecords2(getTableMeta(), selectSQL + afterHandler.buildAfterSelectSQL(beforeImage),
-                new ArrayList<>(paramAppenderMap.values()));
+                new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
     @Override
