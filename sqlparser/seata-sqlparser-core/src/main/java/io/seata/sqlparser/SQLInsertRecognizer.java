@@ -59,4 +59,25 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @return the duplicateKey columns
      */
     List<String> getDuplicateKeyUpdate();
+
+    /**
+     * Gets query sql
+     *
+     * @return the select sql after insert ; return null if not present
+     */
+    String getQuerySQL();
+
+    /**
+     * Gets hint column name
+     *
+     * @return the hint column name ; return null if not present
+     */
+    String getHintColumnName();
+
+    /**
+     * Gets if the sql is ignore
+     *
+     * @return true when the sql is ignore
+     */
+    boolean isIgnore();
 }
