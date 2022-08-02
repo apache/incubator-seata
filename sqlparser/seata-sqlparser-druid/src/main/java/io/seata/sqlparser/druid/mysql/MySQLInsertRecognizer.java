@@ -18,12 +18,16 @@ package io.seata.sqlparser.druid.mysql;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLObjectImpl;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
+import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
@@ -59,7 +63,9 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
 
     @Override
     public SQLType getSQLType() {
-        return CollectionUtils.isNotEmpty(ast.getDuplicateKeyUpdate()) ? SQLType.INSERT_ON_DUPLICATE_UPDATE : SQLType.INSERT;
+        return ast.getQuery() != null ? SQLType.INSERT_SELECT
+                : CollectionUtils.isNotEmpty(ast.getDuplicateKeyUpdate()) ? SQLType.INSERT_ON_DUPLICATE_UPDATE
+                : ast.isIgnore() ? SQLType.INSERT_IGNORE : SQLType.INSERT;
     }
 
     @Override
@@ -160,11 +166,29 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
             SQLExpr expr = ((SQLBinaryOpExpr)exprLeft).getLeft();
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
+            }
+            else if(expr instanceof SQLPropertyExpr) {
+                list.add(((SQLPropertyExpr) expr).getName());
             } else {
                 wrapSQLParsingException(expr);
             }
         }
         return list;
+    }
+
+    @Override
+    public String getQuerySQL() {
+        return Optional.ofNullable(ast.getQuery()).map(SQLObjectImpl::toString).orElse(null);
+    }
+
+    @Override
+    public String getHintColumnName() {
+        return null;
+    }
+
+    @Override
+    public boolean isIgnore() {
+        return ast.isIgnore();
     }
 
     @Override
