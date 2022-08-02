@@ -161,6 +161,21 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
+    public String getQuerySQL() {
+        return null;
+    }
+
+    @Override
+    public String getHintColumnName() {
+        return null;
+    }
+
+    @Override
+    public boolean isIgnore() {
+        return false;
+    }
+
+    @Override
     protected SQLStatement getAst() {
         return ast;
     }
