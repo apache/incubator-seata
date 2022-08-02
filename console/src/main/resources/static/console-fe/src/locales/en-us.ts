@@ -73,10 +73,6 @@ const enUs: ILocale = {
   ConfigurationInfo: {
     title: 'ConfigurationInfo',
     subTitle: 'list',
-    createTimeLabel: 'CreateTime',
-    inputFilterPlaceholder: 'Please enter filter criteria',
-    resetButtonLabel: 'Reset',
-    searchButtonLabel: 'Search',
   },
 };
 
