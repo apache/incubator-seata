@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 import request from '@/utils/request';
-import {Dispatch} from "redux";
-import {SET_OVERVIEW} from "@/contants";
-
-export type GlobalConfigParam = {
-  xid?: string,
-  tableName?: string,
-  transactionId?: string,
-  branchId?: string,
-  pk?: string,
-  resourceId?: string,
-  pageSize: number,
-  pageNum: number,
-  timeStart?: number,
-  timeEnd?: number
-};
 
 
 export default async function fetchData():Promise<any> {
-  let result = await request('/editconfig/putconfig', {
-    method: 'post',
+  let result = await request('/console/editconfig/getconfiglist', {
+    method: 'get',
   });
-
   return result;
 }

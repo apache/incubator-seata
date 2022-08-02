@@ -19,22 +19,17 @@ import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
-import styled, { css } from 'styled-components';
-import getData, { GlobalConfigParam } from '@/service/configurationInfo';
+import getData from '@/service/configurationInfo';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 
 import './index.scss';
 import {AppPropsType} from "@/app";
 
-const { RangePicker } = DatePicker;
-const FormItem = Form.Item;
 
 type GlobalConfigurationInfoState = {
   list: Array<any>;
   total: number;
   loading: boolean;
-  globalLockParam: GlobalConfigParam;
 }
 
 class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfigurationInfoState> {
@@ -47,15 +42,48 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
     history: PropTypes.object,
     location: PropTypes.object,
   };
+
+
   state: GlobalConfigurationInfoState = {
     list: [],
     total: 0,
     loading: true,
-    globalLockParam: {
-      pageSize: 10,
-      pageNum: 1,
-    },
   };
+  componentDidMount = () => {
+    // search once by default
+    this.search();
+  }
+
+  search = () => {
+    this.setState({ loading: true });
+    getData().then(data => {
+      // if the result set is empty, set the page number to go back to the first page
+      if (data.total === 0) {
+        this.setState({
+          list: [],
+          total: 0,
+          loading: false,
+        });
+        return;
+      }
+      // format time
+      this.setState({
+        list: data.data,
+        total: data.total,
+        loading: false,
+      });
+    }).catch(err => {
+      this.setState({ loading: false });
+    });
+  }
+
+  edit() {
+
+  }
+
+  save() {
+
+  }
   render() {
     const {locale = {} } = this.props;
     const {title, subTitle} = locale;
@@ -72,14 +100,18 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
           },
         ]}
       >
+
         <div>
-          <Button type="primary" className="ml-8" onClick={getData} color="red">编辑</Button>
-          <Button type="primary" className="ml-8" onClick={getData}>保存</Button>
+          <Button type="primary" className="ml-8" onClick={this.edit}>编辑</Button>
+          <Button type="primary" className="ml-8" onClick={this.save}>保存</Button>
         </div>
-        <Table className="mt-16">
+        <Table className="mt-16" dataSource={this.state.list} loading={this.state.loading}>
           <Table.Column title="id" dataIndex="id"/>
+          <Table.Column title="name" dataIndex="name"/>
           <Table.Column title="value" dataIndex="value"/>
-          <Table.Column title="decr" dataIndex="decr"/>
+          <Table.Column title="descr" dataIndex="descr">
+          </Table.Column>
+
         </Table>
       </Page>
     );
