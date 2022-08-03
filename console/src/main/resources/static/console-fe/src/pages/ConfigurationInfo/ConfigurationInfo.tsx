@@ -78,7 +78,7 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
   }
 
   edit() {
-
+    let a = ""
   }
 
   save() {
@@ -110,6 +110,7 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
           <Table.Column title="name" dataIndex="name"/>
           <Table.Column title="value" dataIndex="value"/>
           <Table.Column title="descr" dataIndex="descr">
+
           </Table.Column>
 
         </Table>
