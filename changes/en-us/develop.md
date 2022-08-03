@@ -16,6 +16,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4750](https://github.com/seata/seata/pull/4750)] optimize unBranchLock romove xid
 - [[#4797](https://github.com/seata/seata/pull/4797)] optimize the github actions
 - [[#4800](https://github.com/seata/seata/pull/4800)] Add NOTICE as Apache License V2
+- [[#4761](https://github.com/seata/seata/pull/4761)] use hget replace hmget because only one field
+- [[#4414](https://github.com/seata/seata/pull/4414)] exclude log4j dependencies
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -30,4 +32,5 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [a364176773](https://github.com/a364176773)
 - [AlexStocks](https://github.com/AlexStocks)
 - [liujunlin5168](https://github.com/liujunlin5168)
+- [pengten](https://github.com/pengten)
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
