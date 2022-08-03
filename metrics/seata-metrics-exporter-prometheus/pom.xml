@@ -26,28 +26,24 @@
 
     <artifactId>seata-metrics-exporter-prometheus</artifactId>
     <name>seata-metrics-exporter-prometheus ${project.version}</name>
-
-    <properties>
-        <prometheus.client.version>0.6.0</prometheus.client.version>
-    </properties>
+    <description>prometheus exporter for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-metrics-api</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_httpserver</artifactId>
-            <version>${prometheus.client.version}</version>
         </dependency>
     </dependencies>
 

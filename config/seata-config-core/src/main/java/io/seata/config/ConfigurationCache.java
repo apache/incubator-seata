@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
@@ -55,6 +56,22 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     if (!listenerHashSet.contains(listener)) {
                         listenerHashSet.add(listener);
                         ConfigurationFactory.getInstance().addConfigListener(dataId, listener);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void removeConfigListener(String dataId, ConfigurationChangeListener... listeners) {
+        if (StringUtils.isBlank(dataId)) {
+            return;
+        }
+        synchronized (ConfigurationCache.class) {
+            final HashSet<ConfigurationChangeListener> listenerSet = getInstance().configListenersMap.get(dataId);
+            if (CollectionUtils.isNotEmpty(listenerSet)) {
+                for (ConfigurationChangeListener listener : listeners) {
+                    if (listenerSet.remove(listener)) {
+                        ConfigurationFactory.getInstance().removeConfigListener(dataId, listener);
                     }
                 }
             }

@@ -35,17 +35,17 @@ import javax.sql.DataSource;
  *
  * @author kaka2code
  */
-@ConditionalOnExpression("${seata.enabled:true} && ${seata.tccFence.enabled:true} && ${seata.tcc-fence.enabled:true}")
-@AutoConfigureAfter({DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
+@ConditionalOnExpression("${seata.enabled:true}")
+@ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})
+@ConditionalOnMissingBean(TCCFenceConfig.class)
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class, DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 public class SeataTCCFenceAutoConfiguration {
 
     public static final String TCC_FENCE_DATA_SOURCE_BEAN_NAME = "seataTCCFenceDataSource";
     public static final String TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataTCCFenceTransactionManager";
 
     @Bean
-    @ConditionalOnMissingBean(TCCFenceConfig.class)
-    @ConditionalOnBean({DataSource.class, PlatformTransactionManager.class})
-    @ConfigurationProperties(StarterConstants.TCC_FENCE_CONFIG_PREFIX_KEBAB_STYLE)
+    @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
     public TCCFenceConfig tccFenceConfig(
             DataSource dataSource,
             PlatformTransactionManager transactionManager,

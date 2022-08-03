@@ -74,15 +74,18 @@ public class ShutdownHook extends Thread {
         if (disposables.isEmpty()) {
             return;
         }
-
-        LOGGER.debug("destoryAll starting");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("destroyAll starting");
+        }
 
         while (!disposables.isEmpty()) {
             Disposable disposable = disposables.poll();
             disposable.destroy();
         }
 
-        LOGGER.debug("destoryAll finish");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("destroyAll finish");
+        }
     }
 
     /**

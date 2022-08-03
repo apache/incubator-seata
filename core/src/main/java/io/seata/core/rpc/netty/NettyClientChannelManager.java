@@ -15,6 +15,22 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import io.seata.core.protocol.RegisterTMRequest;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.channel.Channel;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
@@ -26,17 +42,6 @@ import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Netty client pool manager.
@@ -100,7 +105,7 @@ class NettyClientChannelManager {
             }
         }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("will connect to " + serverAddress);
+            LOGGER.info("will connect to {}", serverAddress);
         }
         Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, serverAddress, key -> new Object());
         synchronized (lockObj) {
@@ -184,11 +189,27 @@ class NettyClientChannelManager {
             }
             return;
         }
-        for (String serverAddress : availList) {
-            try {
-                acquireChannel(serverAddress);
-            } catch (Exception e) {
-                LOGGER.error("{} can not connect to {} cause:{}",FrameworkErrorCode.NetConnect.getErrCode(), serverAddress, e.getMessage(), e);
+        Set<String> channelAddress = new HashSet<>(availList.size());
+        try {
+            for (String serverAddress : availList) {
+                try {
+                    acquireChannel(serverAddress);
+                    channelAddress.add(serverAddress);
+                } catch (Exception e) {
+                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                        serverAddress, e.getMessage(), e);
+                }
+            }
+        } finally {
+            if (CollectionUtils.isNotEmpty(channelAddress)) {
+                List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
+                for (String address : channelAddress) {
+                    String[] array = address.split(":");
+                    aliveAddress.add(new InetSocketAddress(array[0], Integer.parseInt(array[1])));
+                }
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
+            } else {
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
             }
         }
     }
@@ -213,15 +234,19 @@ class NettyClientChannelManager {
         Channel channelFromPool;
         try {
             NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
-            NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-            if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
-                RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
-                ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
+            if (currentPoolKey.getMessage() instanceof RegisterTMRequest) {
+                poolKeyMap.put(serverAddress, currentPoolKey);
+            } else {
+                NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
+                if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
+                    RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
+                    ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
+                }
             }
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
-            LOGGER.error("{} register RM failed.",FrameworkErrorCode.RegisterRM.getErrCode(), exx);
+            LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);
             throw new FrameworkException("can not register RM,err:" + exx.getMessage());
         }
         return channelFromPool;
@@ -229,14 +254,14 @@ class NettyClientChannelManager {
 
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
-                                                                            .lookup(transactionServiceGroup);
+                .lookup(transactionServiceGroup);
         if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
             return Collections.emptyList();
         }
 
         return availInetSocketAddressList.stream()
-                                         .map(NetUtil::toStringAddress)
-                                         .collect(Collectors.toList());
+                .map(NetUtil::toStringAddress)
+                .collect(Collectors.toList());
     }
 
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {

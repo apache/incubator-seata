@@ -26,15 +26,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-jackson-parser-oracle</artifactId>
+    <name>seata-jackson-parser-oracle ${project.version}</name>
+    <description>jackson-parser-oracle for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-rm-datasource</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.oracle.ojdbc</groupId>
             <artifactId>ojdbc8</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

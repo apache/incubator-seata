@@ -15,22 +15,22 @@
  */
 package io.seata.rm.tcc.store.db;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
-import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
 import io.seata.rm.tcc.store.TCCFenceStore;
 import io.seata.rm.tcc.store.db.sql.TCCFenceStoreSqls;
-import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 
 /**
@@ -43,7 +43,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     /**
      * TCC fence log table name
      */
-    private String logTableName = TCCFenceConstant.DEFAULT_LOG_TABLE_NAME;
+    private String logTableName = DefaultValues.DEFAULT_TCC_FENCE_LOG_TABLE_NAME;
 
     private static volatile TCCFenceStoreDataBaseDAO instance = null;
 
@@ -101,7 +101,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
             ps.setTimestamp(5, now);
             ps.setTimestamp(6, now);
             return ps.executeUpdate() > 0;
-        } catch (DuplicateKeyException e) {
+        } catch (SQLIntegrityConstraintViolationException e) {
             throw new TCCFenceException(String.format("Insert tcc fence record duplicate key exception. xid= %s, branchId= %s", tccFenceDO.getXid(), tccFenceDO.getBranchId()),
                     FrameworkErrorCode.DuplicateKeyException);
         } catch (SQLException e) {

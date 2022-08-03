@@ -209,7 +209,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         }
         if (pkValuesMap.isEmpty()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("pkValuesMap is empty");
         }
         boolean b = this.checkPkValues(pkValuesMap, ps);
         if (!b) {
@@ -288,7 +288,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     protected boolean checkPkValuesForMultiPk(Map<String, List<Object>> pkValues) {
         Set<String> pkNames = pkValues.keySet();
         if (pkNames.isEmpty()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("pkNames is empty");
         }
         int rowSize = pkValues.get(pkNames.iterator().next()).size();
         for (int i = 0; i < rowSize; i++) {
@@ -335,6 +335,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @param ps       true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
      */
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     protected boolean checkPkValuesForSinglePk(List<Object> pkValues, boolean ps) {
         /*
         ps = true

@@ -14,6 +14,24 @@
       "defaultValue": true
     },
     {
+      "name": "seata.transport.enable-tm-client-batch-send-request",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.transport.enable-rm-client-batch-send-request",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "seata.transport.enable-tc-server-batch-send-response",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": false
+    },
+    {
       "name": "seata.transport.shutdown.wait",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.ShutdownProperties",
@@ -82,6 +100,33 @@
         "replacement": "seata.log.exception-rate",
         "reason": "Please configure to 'seata.log.exception-rate'."
       }
+    },
+    {
+      "name": "seata.transport.rpc-rm-request-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "deprecation": {
+        "level": "error",
+        "reason": "Please configure to 'seata.transport.rpcRmRequestTimeout'."
+      }
+    },
+    {
+      "name": "seata.transport.rpc-tm-request-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "deprecation": {
+        "level": "error",
+        "reason": "Please configure to 'seata.transport.rpcTmRequestTimeout'."
+      }
+    },
+    {
+      "name": "seata.transport.rpc-tc-request-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "deprecation": {
+        "level": "error",
+        "reason": "Please configure to 'seata.transport.rpcTcRequestTimeout'."
+      }
     }
   ],
   "hints": [
@@ -92,6 +137,17 @@
           "name": "handle-as",
           "parameters": {
             "target": "io.seata.config.ConfigType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.config.data-type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.config.processor.ConfigDataType"
           }
         }
       ]

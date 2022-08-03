@@ -26,12 +26,13 @@
 
     <artifactId>seata-metrics-core</artifactId>
     <name>seata-metrics-core ${project.version}</name>
+    <description>metrics-core for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-metrics-api</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>

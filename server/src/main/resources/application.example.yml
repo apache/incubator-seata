@@ -1,5 +1,5 @@
 server:
-  port: 9091
+  port: 7091
 
 spring:
   application:
@@ -8,7 +8,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${user.home}/logs
+    path: ${user.home}/logs/seata
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
@@ -26,10 +26,14 @@ seata:
       group: SEATA_GROUP
       username:
       password:
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
       data-id: seataServer.properties
     consul:
       server-addr: 127.0.0.1:8500
       acl-token:
+      key: seata.properties
     apollo:
       appId: seata-server
       apollo-meta: http://192.168.1.204:8801
@@ -46,9 +50,11 @@ seata:
       node-path: /seata/seata.properties
     etcd3:
       server-addr: http://localhost:2379
+      key: seata.properties
   registry:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
+    preferred-networks: 30.240.*
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -57,6 +63,9 @@ seata:
       cluster: default
       username:
       password:
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
     eureka:
       service-url: http://localhost:8761/eureka
       application: default
@@ -91,19 +100,22 @@ seata:
       address-wait-time: 3000
 
   server:
+    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
-    enableCheckAuth: true
-    retryDeadThreshold: 130000
+    enable-check-auth: true
+    enable-parallel-request-handle: true
+    retry-dead-threshold: 130000
+    xaer-nota-retry-timeout: 60000
     recovery:
-      committing-retry-period: 1000
-      asyn-committing-retry-period: 1000
-      rollbacking-retry-period: 1000
-      timeout-retry-period: 1000
+      handle-all-session-period: 1000
     undo:
       log-save-days: 7
       log-delete-period: 86400000
+    session:
+      branch-async-queue-size: 5000 #branch async remove queue size
+      enable-branch-async-remove: false #enable to asynchronous remove branchSession
   store:
     # support: file 、 db 、 redis
     mode: file
@@ -130,6 +142,7 @@ seata:
       global-table: global_table
       branch-table: branch_table
       lock-table: lock_table
+      distributed-lock-table: distributed_lock
       query-limit: 100
       max-wait: 5000
     redis:
@@ -151,3 +164,12 @@ seata:
     registry-type: compact
     exporter-list: prometheus
     exporter-prometheus-port: 9898
+  transport:
+    rpc-tc-request-timeout: 30000
+    enable-tc-server-batch-send-response: false
+    shutdown:
+      wait: 3
+    thread-factory:
+      boss-thread-prefix: NettyBoss
+      worker-thread-prefix: NettyServerNIOWorker
+      boss-thread-size: 1

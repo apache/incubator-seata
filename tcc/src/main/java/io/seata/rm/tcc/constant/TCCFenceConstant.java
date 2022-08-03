@@ -22,6 +22,10 @@ package io.seata.rm.tcc.constant;
  */
 public class TCCFenceConstant {
 
+    private TCCFenceConstant() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * PHASE 1: The Commit tried.
      */
@@ -41,25 +45,4 @@ public class TCCFenceConstant {
      * Suspended status.
      */
     public static final int STATUS_SUSPENDED = 4;
-
-    /**
-     * Clean up the tcc fence log a few days ago by default
-     */
-    public static final int DEFAULT_CLEAN_DAY = 1;
-
-    /**
-     * Clean up the tcc fence log a few hours ago by default
-     */
-    public static final int DEFAULT_CLEAN_HOUR = 1;
-
-    /**
-     * Clean up the tcc fence log a few minutes ago by default
-     */
-    public static final int DEFAULT_CLEAN_MINUTE = 15;
-
-    /**
-     * Default tcc fence log table name
-     */
-    public static final String DEFAULT_LOG_TABLE_NAME = "tcc_fence_log";
-
 }

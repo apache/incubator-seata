@@ -15,10 +15,11 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.server;
 
+import java.time.Duration;
+
+import io.seata.common.util.DurationUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 
@@ -28,11 +29,14 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 @Component
 @ConfigurationProperties(prefix = SERVER_PREFIX)
 public class ServerProperties {
-    private Duration maxCommitRetryTimeout = Duration.ofMillis(-1);
-    private Duration maxRollbackRetryTimeout = Duration.ofMillis(-1);
+    private Duration maxCommitRetryTimeout = DurationUtil.DEFAULT_DURATION;
+    private Duration maxRollbackRetryTimeout = DurationUtil.DEFAULT_DURATION;
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
     private Boolean enableCheckAuth = true;
+    private Boolean enableParallelRequestHandle = false;
     private Integer retryDeadThreshold = 130000;
+    private Integer servicePort;
+    private Integer xaerNotaRetryTimeout = 60000;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -77,5 +81,30 @@ public class ServerProperties {
     public ServerProperties setRetryDeadThreshold(Integer retryDeadThreshold) {
         this.retryDeadThreshold = retryDeadThreshold;
         return this;
+    }
+
+    public Integer getServicePort() {
+        return servicePort;
+    }
+
+    public ServerProperties setServicePort(Integer servicePort) {
+        this.servicePort = servicePort;
+        return this;
+    }
+
+    public Integer getXaerNotaRetryTimeout() {
+        return xaerNotaRetryTimeout;
+    }
+
+    public void setXaerNotaRetryTimeout(Integer xaerNotaRetryTimeout) {
+        this.xaerNotaRetryTimeout = xaerNotaRetryTimeout;
+    }
+
+    public Boolean getEnableParallelRequestHandle() {
+        return enableParallelRequestHandle;
+    }
+
+    public void setEnableParallelRequestHandle(Boolean enableParallelRequestHandle) {
+        this.enableParallelRequestHandle = enableParallelRequestHandle;
     }
 }
