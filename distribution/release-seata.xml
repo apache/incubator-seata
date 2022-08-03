@@ -55,6 +55,21 @@
             <directory>../ext/apm-seata-skywalking-plugin/target/ext/skywalking-agent/</directory>
             <outputDirectory>ext/apm-skywalking/</outputDirectory>
         </fileSet>
+
+        <fileSet>
+            <directory>../server/target/lib/</directory>
+            <outputDirectory>lib</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>../script/</directory>
+            <outputDirectory>script</outputDirectory>
+            <includes>
+                <include>**/server/</include>
+                <include>**/logstash/</include>
+                <include>**/config-center/</include>
+            </includes>
+        </fileSet>
     </fileSets>
 
     <files>
