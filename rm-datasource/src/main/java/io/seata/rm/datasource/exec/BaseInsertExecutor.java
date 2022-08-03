@@ -82,6 +82,11 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return afterImage;
     }
 
+    @Override
+    protected boolean needUndoLog() throws Exception {
+        return true;
+    }
+
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
