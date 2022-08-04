@@ -113,11 +113,6 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         return pkValuesMap;
     }
 
-    @Override
-    protected boolean needUndoLog() throws Exception {
-        return true;
-    }
-
     /**
      * the modify for test
      */

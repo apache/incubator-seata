@@ -31,6 +31,11 @@ import io.seata.rm.datasource.exec.ExecuteTemplate;
 public class StatementProxy<T extends Statement> extends AbstractStatementProxy<T> {
 
     /**
+     * mark if Statement.executeBatch() has been used.
+     */
+    protected boolean executeBatchApiUsed;
+
+    /**
      * Instantiates a new Statement proxy.
      *
      * @param connectionWrapper the connection wrapper
@@ -126,6 +131,11 @@ public class StatementProxy<T extends Statement> extends AbstractStatementProxy<
 
     @Override
     public int[] executeBatch() throws SQLException {
+        this.executeBatchApiUsed = true;
         return ExecuteTemplate.execute(this, (statement, args) -> statement.executeBatch());
+    }
+
+    public boolean isExecuteBatchApiUsed() {
+        return executeBatchApiUsed;
     }
 }

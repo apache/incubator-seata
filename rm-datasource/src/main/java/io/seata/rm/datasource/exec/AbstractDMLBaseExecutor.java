@@ -98,15 +98,20 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         }
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        if (needUndoLog()) {
+        if (needUndoLog(statementProxy)) {
             TableRecords afterImage = afterImage(beforeImage);
             prepareUndoLog(beforeImage, afterImage);
         }
         return result;
     }
 
-    protected boolean needUndoLog() throws Exception {
-        int updateCount = statementProxy.getUpdateCount();
+    protected boolean needUndoLog(StatementProxy<S> statementProxy) throws SQLException {
+        // fix https://github.com/seata/seata/issues/4833
+        if(statementProxy.isExecuteBatchApiUsed()) {
+            return true;
+        }
+
+        int updateCount = this.statementProxy.getUpdateCount();
         return updateCount > 0;
     }
 
