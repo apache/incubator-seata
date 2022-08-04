@@ -17,6 +17,7 @@ package io.seata.core.protocol;
 
 import java.io.Serializable;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.NetUtil;
 import org.apache.commons.lang.StringUtils;
 
@@ -55,17 +56,17 @@ public class RegisterTMRequest extends AbstractIdentifyRequest implements Serial
         StringBuilder sb = new StringBuilder();
         if (null != extraData) {
             sb.append(extraData);
-            if (!extraData.endsWith(EXTRA_DATA_SPLIT_CHAR)) {
-                sb.append(EXTRA_DATA_SPLIT_CHAR);
+            if (!extraData.endsWith(ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR)) {
+                sb.append(ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
             }
         }
         if (transactionServiceGroup != null && !transactionServiceGroup.isEmpty()) {
             sb.append(String.format("%s=%s", UDATA_VGROUP, transactionServiceGroup));
-            sb.append(EXTRA_DATA_SPLIT_CHAR);
+            sb.append(ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
             String clientIP = NetUtil.getLocalIp();
             if (!StringUtils.isEmpty(clientIP)) {
                 sb.append(String.format("%s=%s", UDATA_IP, clientIP));
-                sb.append(EXTRA_DATA_SPLIT_CHAR);
+                sb.append(ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
             }
         }
         this.extraData = sb.toString();
