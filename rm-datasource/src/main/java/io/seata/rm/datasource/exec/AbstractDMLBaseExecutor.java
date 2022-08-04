@@ -107,7 +107,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
 
     protected boolean needUndoLog(StatementProxy<S> statementProxy) throws SQLException {
         // fix https://github.com/seata/seata/issues/4833
-        if(statementProxy.isExecuteBatchApiUsed()) {
+        if (statementProxy.isExecuteBatchApiUsed()) {
             return true;
         }
 
