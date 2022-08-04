@@ -278,7 +278,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
                     try {
                         pair.getSecond().execute(() -> {
                             try {
-                                pair.getFirst().process(ctx, rpcMessage);
+                                pair.getFirst().process(ctx, rpcMessage.getBody());
                             } catch (Throwable th) {
                                 LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                             } finally {

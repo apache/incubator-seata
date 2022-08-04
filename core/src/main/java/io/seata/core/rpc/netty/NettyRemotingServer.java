@@ -23,7 +23,7 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.server.RegRmProcessor;
 import io.seata.core.rpc.processor.server.RegTmProcessor;
 import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
-import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
+import io.seata.core.rpc.processor.server.MergedWarpMessageProcessor;
 import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,8 +95,8 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
 
     private void registerProcessor() {
         // 1. registry on request message processor
-        ServerOnRequestProcessor onRequestProcessor =
-            new ServerOnRequestProcessor(this, getHandler());
+        MergedWarpMessageProcessor onRequestProcessor =
+            new MergedWarpMessageProcessor(this, getHandler());
         ShutdownHook.getInstance().addDisposable(onRequestProcessor);
         super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestProcessor, messageExecutor);

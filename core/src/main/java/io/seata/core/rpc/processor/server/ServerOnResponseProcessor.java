@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ServerOnResponseProcessor implements RemotingProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MergedWarpMessageProcessor.class);
 
     /**
      * To handle the received RPC message on upper level.

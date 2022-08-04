@@ -23,6 +23,7 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class RmBranchRollbackProcessor implements RemotingProcessor {
+public class RmBranchRollbackProcessor implements RemotingProcessor<BranchRollbackRequest, BranchRollbackResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmBranchRollbackProcessor.class);
 
@@ -49,25 +50,19 @@ public class RmBranchRollbackProcessor implements RemotingProcessor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-        Object msg = rpcMessage.getBody();
+    public BranchRollbackResponse process(RpcMessageHandlerContext ctx, BranchRollbackRequest request) throws Exception {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("rm handle branch rollback process:" + msg);
+            LOGGER.info("rm handle branch rollback process:" + request);
         }
-        handleBranchRollback(rpcMessage, remoteAddress, (BranchRollbackRequest) msg);
+        return handleBranchRollback(request);
     }
 
-    private void handleBranchRollback(RpcMessage request, String serverAddress, BranchRollbackRequest branchRollbackRequest) {
+    private BranchRollbackResponse handleBranchRollback(BranchRollbackRequest branchRollbackRequest) {
         BranchRollbackResponse resultMessage;
         resultMessage = (BranchRollbackResponse) handler.onRequest(branchRollbackRequest, null);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("branch rollback result:" + resultMessage);
         }
-        try {
-            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
-        } catch (Throwable throwable) {
-            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
-        }
+        return resultMessage;
     }
 }

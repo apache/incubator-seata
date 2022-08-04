@@ -18,8 +18,8 @@ package io.seata.core.protocol;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.netty.channel.Channel;
 import io.seata.common.util.NetUtil;
+import io.seata.core.rpc.SeataChannel;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public class Version {
      * @param c the c
      * @param v the v
      */
-    public static void putChannelVersion(Channel c, String v) {
+    public static void putChannelVersion(SeataChannel c, String v) {
         VERSION_MAP.put(NetUtil.toStringAddress(c.remoteAddress()), v);
     }
 
@@ -75,7 +75,7 @@ public class Version {
      * @param c the c
      * @return the channel version
      */
-    public static String getChannelVersion(Channel c) {
+    public static String getChannelVersion(SeataChannel c) {
         return VERSION_MAP.get(NetUtil.toStringAddress(c.remoteAddress()));
     }
 

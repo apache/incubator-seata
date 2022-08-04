@@ -15,11 +15,10 @@
  */
 package io.seata.core.rpc.processor.server;
 
-import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class ServerHeartbeatProcessor implements RemotingProcessor {
+public class ServerHeartbeatProcessor implements RemotingProcessor<HeartbeatMessage, HeartbeatMessage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerHeartbeatProcessor.class);
 
@@ -43,15 +42,11 @@ public class ServerHeartbeatProcessor implements RemotingProcessor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        try {
-            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
-        } catch (Throwable throwable) {
-            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
-        }
+    public HeartbeatMessage process(RpcMessageHandlerContext ctx, HeartbeatMessage request) throws Exception {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("received PING from {}", ctx.channel().remoteAddress());
         }
+        return HeartbeatMessage.PONG;
     }
 
 }
