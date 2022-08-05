@@ -161,4 +161,9 @@ public interface Constants {
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
 
+    /**
+     * the constant ENABLE_EMPTY_ROLLBACK;
+     */
+    String ENABLE_EMPTY_ROLLBACK = "enableEmptyRollback";
+
 }

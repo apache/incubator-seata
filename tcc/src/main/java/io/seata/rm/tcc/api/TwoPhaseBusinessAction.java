@@ -75,6 +75,13 @@ public @interface TwoPhaseBusinessAction {
     boolean useTCCFence() default false;
 
     /**
+     * whether use TCC fence and enableEmptyRollback is true.
+     * seata will not intercept empty rollback
+     * @return the boolean
+     */
+    boolean enableEmptyRollback() default false;
+
+    /**
      * commit method's args
      *
      * @return the Class[]

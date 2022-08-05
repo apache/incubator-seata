@@ -237,6 +237,7 @@ public class ActionInterceptorHandler {
             context.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
             context.put(Constants.ACTION_NAME, businessAction.name());
             context.put(Constants.USE_TCC_FENCE, businessAction.useTCCFence());
+            context.put(Constants.ENABLE_EMPTY_ROLLBACK, businessAction.enableEmptyRollback());
         }
     }
 
