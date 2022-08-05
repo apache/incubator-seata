@@ -11,6 +11,7 @@
     <artifactId>seata-console</artifactId>
     <packaging>jar</packaging>
     <name>seata-console ${project.version}</name>
+    <description>console for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -54,4 +55,14 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/node_modules/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
 </project>
