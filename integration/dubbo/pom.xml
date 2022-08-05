@@ -30,18 +30,13 @@
     <description>apache dubbo integration for Seata built with Maven</description>
 
     <properties>
-        <dubbo.version>2.7.4</dubbo.version>
+        <dubbo-seata.version>1.0.0</dubbo-seata.version>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-tm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
-            <version>${dubbo.version}</version>
+            <groupId>org.apache.dubbo.extensions</groupId>
+            <artifactId>dubbo-filter-seata</artifactId>
+            <version>${dubbo-seata.version}</version>
         </dependency>
     </dependencies>
 

@@ -1,1 +1,0 @@
-seata-consumer=io.seata.integration.dubbo.ApacheDubbo3TransactionPropagationConsumerFilter
