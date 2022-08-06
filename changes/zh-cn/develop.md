@@ -8,6 +8,7 @@
 
 ### bugfix：
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
+- [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
