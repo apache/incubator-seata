@@ -8,6 +8,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### bugfix:
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
+- [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image

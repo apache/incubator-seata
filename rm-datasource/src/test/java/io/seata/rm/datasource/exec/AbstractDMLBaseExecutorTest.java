@@ -142,6 +142,8 @@ public class AbstractDMLBaseExecutorTest {
         Mockito.when(executor.getDbType()).thenReturn(JdbcConstants.ORACLE);
         Mockito.doReturn(tableMeta).when(executor).getTableMeta();
         Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
+        TableRecords tableRecords = Mockito.mock(TableRecords.class);
+        Mockito.doReturn(tableRecords).when(executor).afterImage(Mockito.any());
         Assertions.assertNull(executor.executeAutoCommitFalse(null));
     }
 
