@@ -17,7 +17,6 @@ package io.seata.server.session.redis;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,13 +231,13 @@ public class RedisTransactionStoreManagerTest {
         session2.setApplicationData("abc1=878s2");
         session2.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session2);
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
+        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
         Thread.sleep(100);
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
         for (GlobalSession globalSession : list) {
             LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
         }
-        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
         for (GlobalSession globalSession : list2) {
             LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
         }
