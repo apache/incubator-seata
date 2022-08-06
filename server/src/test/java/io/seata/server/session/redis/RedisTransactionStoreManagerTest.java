@@ -69,6 +69,42 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
+    public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
+        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 10);
+        String xid1 = XID.generateXID(session1.getTransactionId());
+        session1.setXid(xid1);
+        session1.setTransactionId(session1.getTransactionId());
+        session1.setBeginTime(System.currentTimeMillis());
+        session1.setApplicationData("abc=878s1");
+        session1.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session1);
+        Thread.sleep(10);
+        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 10);
+        String xid2 = XID.generateXID(session2.getTransactionId());
+        session2.setXid(xid2);
+        session2.setTransactionId(session2.getTransactionId());
+        session2.setBeginTime(System.currentTimeMillis());
+        session2.setApplicationData("abc1=878s2");
+        session2.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session2);
+        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
+        for (GlobalSession globalSession : list2) {
+            LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+        }
+        Thread.sleep(500);
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
+        List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
+        for (GlobalSession globalSession : list) {
+            LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+        }
+        Assertions.assertEquals(2, list2.size());
+        Assertions.assertEquals(xid1, list.get(0).getXid());
+        Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
+        sessionManager.removeGlobalSession(session1);
+        sessionManager.removeGlobalSession(session2);
+    }
+
+    @Test
     public synchronized void testInsertGlobalSessionDataAndQuery() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
@@ -210,42 +246,6 @@ public class RedisTransactionStoreManagerTest {
     public void testQueryGlobalslSession() {
         Long count = redisTransactionStoreManager.countByGlobalSessions(GlobalStatus.values());
         LOGGER.info("the count is:[{}]",count);
-    }
-
-    @Test
-    public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
-        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 10);
-        String xid1 = XID.generateXID(session1.getTransactionId());
-        session1.setXid(xid1);
-        session1.setTransactionId(session1.getTransactionId());
-        session1.setBeginTime(System.currentTimeMillis());
-        session1.setApplicationData("abc=878s1");
-        session1.setStatus(GlobalStatus.Begin);
-        sessionManager.addGlobalSession(session1);
-        Thread.sleep(10);
-        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 10);
-        String xid2 = XID.generateXID(session2.getTransactionId());
-        session2.setXid(xid2);
-        session2.setTransactionId(session2.getTransactionId());
-        session2.setBeginTime(System.currentTimeMillis());
-        session2.setApplicationData("abc1=878s2");
-        session2.setStatus(GlobalStatus.Begin);
-        sessionManager.addGlobalSession(session2);
-        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
-        for (GlobalSession globalSession : list2) {
-            LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
-        }
-        Thread.sleep(500);
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
-        List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
-        for (GlobalSession globalSession : list) {
-            LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
-        }
-        Assertions.assertEquals(2, list2.size());
-        Assertions.assertEquals(xid1, list.get(0).getXid());
-        Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
-        sessionManager.removeGlobalSession(session1);
-        sessionManager.removeGlobalSession(session2);
     }
 
     @Test
