@@ -15,6 +15,9 @@
  */
 package io.seata.server.session.redis;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
 import org.junit.jupiter.api.AfterAll;
@@ -24,9 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
-import java.io.IOException;
-import java.net.UnknownHostException;
-
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.StoreMode;

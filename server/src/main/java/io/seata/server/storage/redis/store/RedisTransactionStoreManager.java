@@ -804,9 +804,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 if (list.size() > 0) {
                     listList.add(list);
                 } else {
-                    if (list.size() == 0) {
-                        iterator.remove();
-                    }
+                    iterator.remove();
                 }
             }
         }
