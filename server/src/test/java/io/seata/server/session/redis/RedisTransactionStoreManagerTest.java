@@ -112,7 +112,7 @@ public class RedisTransactionStoreManagerTest {
             LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
         }
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
-        Thread.sleep(90);
+        Thread.sleep(100);
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
         for (GlobalSession globalSession : list) {
             LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
