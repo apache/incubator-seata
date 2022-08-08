@@ -71,50 +71,21 @@ public class RedisTransactionStoreManagerTest {
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
         sessionManager = redisSessionManager;
     }
-
-    @Test
-    public void testRedisSortedSet() throws TransactionException, InterruptedException {
-        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.zadd("test123", System.currentTimeMillis() + 10, "a");
-            }
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.zadd("test123", System.currentTimeMillis() + 11, "b");
-            }
-            Thread.sleep(15);
-            Set<String> values = jedis.zrangeByScore("test123", 0, System.currentTimeMillis(), 0, 100);
-            for (String value : values) {
-                LOGGER.info("sorted set test123 :{}", value);
-            }
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.lpush("test1234",  "a");
-            }
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.lpush("test1234", "b");
-            }
-            Thread.sleep(15);
-            List<String> values2 = jedis.lrange("test1234",  0, 100);
-            for (String value : values2) {
-                LOGGER.info("test1234 :{}", value);
-            }
-        }
-    }
     @Test
     public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
         GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 100);
         String xid1 = XID.generateXID(session1.getTransactionId());
         session1.setXid(xid1);
         session1.setTransactionId(session1.getTransactionId());
-        session1.setBeginTime(System.currentTimeMillis());
+        session1.setBeginTime(System.currentTimeMillis()-100);
         session1.setApplicationData("abc=878s1");
         session1.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session1);
-        Thread.sleep(10);
         GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 100);
         String xid2 = XID.generateXID(session2.getTransactionId());
         session2.setXid(xid2);
         session2.setTransactionId(session2.getTransactionId());
-        session2.setBeginTime(System.currentTimeMillis());
+        session2.setBeginTime(System.currentTimeMillis()-100);
         session2.setApplicationData("abc1=878s2");
         session2.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session2);
