@@ -84,7 +84,7 @@ public class RedisTransactionStoreManagerTest {
             Thread.sleep(15);
             Set<String> values = jedis.zrangeByScore("test123", 0, System.currentTimeMillis(), 0, 100);
             for (String value : values) {
-                LOGGER.info("test123 :{]", value);
+                LOGGER.info("test123 :{}", value);
             }
         }
     }
