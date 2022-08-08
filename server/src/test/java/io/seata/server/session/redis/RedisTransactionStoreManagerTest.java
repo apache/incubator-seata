@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -44,6 +45,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+
+
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
@@ -68,6 +72,22 @@ public class RedisTransactionStoreManagerTest {
         sessionManager = redisSessionManager;
     }
 
+    @Test
+    public void testRedisSortedSet() throws TransactionException, InterruptedException {
+        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
+            try (Pipeline pipeline = jedis.pipelined()) {
+                pipeline.zadd("test123", System.currentTimeMillis() + 10, "a");
+            }
+            try (Pipeline pipeline = jedis.pipelined()) {
+                pipeline.zadd("test123", System.currentTimeMillis() + 11, "b");
+            }
+            Thread.sleep(15);
+            Set<String> values = jedis.zrangeByScore("test123", 0, System.currentTimeMillis(), 0, 100);
+            for (String value : values) {
+                LOGGER.info("test123 :{]", value);
+            }
+        }
+    }
     @Test
     public void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
         GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 1500);
