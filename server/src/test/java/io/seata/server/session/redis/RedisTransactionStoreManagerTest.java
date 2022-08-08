@@ -87,15 +87,15 @@ public class RedisTransactionStoreManagerTest {
                 LOGGER.info("sorted set test123 :{}", value);
             }
             try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.lpush("test123",  "a");
+                pipeline.lpush("test1234",  "a");
             }
             try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.lpush("test123", "b");
+                pipeline.lpush("test1234", "b");
             }
             Thread.sleep(15);
-            List<String> values2 = jedis.lrange("test123",  0, 100);
+            List<String> values2 = jedis.lrange("test1234",  0, 100);
             for (String value : values2) {
-                LOGGER.info("test123 :{}", value);
+                LOGGER.info("test1234 :{}", value);
             }
         }
     }
