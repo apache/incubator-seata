@@ -84,6 +84,17 @@ public class RedisTransactionStoreManagerTest {
             Thread.sleep(15);
             Set<String> values = jedis.zrangeByScore("test123", 0, System.currentTimeMillis(), 0, 100);
             for (String value : values) {
+                LOGGER.info("sorted set test123 :{}", value);
+            }
+            try (Pipeline pipeline = jedis.pipelined()) {
+                pipeline.lpush("test123",  "a");
+            }
+            try (Pipeline pipeline = jedis.pipelined()) {
+                pipeline.lpush("test123", "b");
+            }
+            Thread.sleep(15);
+            List<String> values2 = jedis.lrange("test123",  0, 100);
+            for (String value : values2) {
                 LOGGER.info("test123 :{}", value);
             }
         }
