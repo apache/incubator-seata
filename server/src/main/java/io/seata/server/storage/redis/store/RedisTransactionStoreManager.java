@@ -483,6 +483,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             List<Map<String, String>> rep;
             try (Pipeline pipeline = jedis.pipelined()) {
                 for (String value : values) {
+                    LOGGER.info("sorted xid: {}",value);
                     pipeline.hgetAll(value);
                 }
                 rep = (List<Map<String, String>>) (List) pipeline.syncAndReturnAll();
