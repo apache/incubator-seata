@@ -17,17 +17,21 @@ package io.seata.discovery.registry.nacos;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.naming.NamingMaintainService;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.alibaba.nacos.api.naming.pojo.Service;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
@@ -38,6 +42,7 @@ import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * The type Nacos registry service.
@@ -61,15 +66,27 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
+    private static final String SLB_PATTERN = "slbPattern";
     private static final String USE_PARSE_RULE = "false";
+    private static final String PUBLIC_NAMING_ADDRESS_PREFIX = "public_";
+    private static final String PUBLIC_NAMING_SERVICE_META_IP_KEY = "publicIp";
+    private static final String PUBLIC_NAMING_SERVICE_META_PORT_KEY = "publicPort";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile NacosRegistryServiceImpl instance;
+    private static volatile NamingMaintainService namingMaintain;
     private static final Object LOCK_OBJ = new Object();
+    private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
+    private static volatile Boolean useSLBWay;
 
     private NacosRegistryServiceImpl() {
+        String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
+        Pattern patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
+                ? DEFAULT_SLB_REGISTRY_PATTERN
+                : Pattern.compile(configForNacosSLB);
+        useSLBWay = patternOfNacosRegistryForSLB.matcher(getNamingProperties().getProperty(PRO_SERVER_ADDR_KEY)).matches();
     }
 
     /**
@@ -129,6 +146,25 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         if (clusterName == null) {
             return null;
         }
+        if (useSLBWay) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("look up service address of SLB by nacos");
+            }
+            if (!CLUSTER_ADDRESS_MAP.containsKey(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName)) {
+                Service service = getNamingMaintainInstance().queryService(DEFAULT_APPLICATION, clusterName);
+                String pubnetIp = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_IP_KEY);
+                String pubnetPort = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_PORT_KEY);
+                if (StringUtils.isBlank(pubnetIp) || StringUtils.isBlank(pubnetPort)) {
+                    throw new Exception("cannot find service address from nacos naming mata-data");
+                }
+                InetSocketAddress publicAddress = new InetSocketAddress(pubnetIp,
+                        Integer.valueOf(pubnetPort));
+                List<InetSocketAddress> publicAddressList = Arrays.asList(publicAddress);
+                CLUSTER_ADDRESS_MAP.put(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName, publicAddressList);
+                return publicAddressList;
+            }
+            return CLUSTER_ADDRESS_MAP.get(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName);
+        }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             synchronized (LOCK_OBJ) {
                 if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
@@ -145,7 +181,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     subscribe(clusterName, event -> {
                         List<Instance> instances = ((NamingEvent) event).getInstances();
                         if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                            LOGGER.info("receive empty server list,cluster:{}",clusterName);
+                            LOGGER.info("receive empty server list,cluster:{}", clusterName);
                         } else {
                             List<InetSocketAddress> newAddressList = instances.stream()
                                     .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
@@ -180,6 +216,17 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             }
         }
         return naming;
+    }
+
+    public static NamingMaintainService getNamingMaintainInstance() throws Exception {
+        if (namingMaintain == null) {
+            synchronized (NacosRegistryServiceImpl.class) {
+                if (namingMaintain == null) {
+                    namingMaintain = NacosFactory.createMaintainService(getNamingProperties());
+                }
+            }
+        }
+        return namingMaintain;
     }
 
     private static Properties getNamingProperties() {
@@ -271,4 +318,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public static String getNacosSecretKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
     }
+
+    private static String getNacosUrlPatternOfSLB() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
+    }
+
 }

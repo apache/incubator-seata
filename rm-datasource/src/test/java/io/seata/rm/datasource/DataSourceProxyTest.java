@@ -18,6 +18,7 @@ package io.seata.rm.datasource;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import javax.sql.DataSource;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
@@ -42,43 +43,72 @@ public class DataSourceProxyTest {
 
     @Test
     public void getResourceIdTest() throws SQLException, NoSuchFieldException, IllegalAccessException {
-        MockDriver mockDriver = new MockDriver();
-        String username = "username";
+        // Disable 'DataSourceProxy.tableMetaExecutor' to prevent unit tests from being affected
+        Field enableField = DataSourceProxy.class.getDeclaredField("ENABLE_TABLE_META_CHECKER_ENABLE");
+        enableField.setAccessible(true);
+        enableField.set(null, false);
 
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mock:xxx");
+
+        final MockDriver mockDriver = new MockDriver();
+        final String username = "username";
+        final String jdbcUrl = "jdbc:mock:xxx";
+
+        // create data source
+        final DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl(jdbcUrl);
         dataSource.setDriver(mockDriver);
         dataSource.setUsername(username);
         dataSource.setPassword("password");
 
-        DataSourceProxy proxy = new DataSourceProxy(dataSource);
-        Field resourceId = proxy.getClass().getDeclaredField("resourceId");
-        resourceId.setAccessible(true);
-        resourceId.set(proxy, null);
+        // create data source proxy
+        final DataSourceProxy proxy = new DataSourceProxy(dataSource);
+
+        // get fields
+        Field resourceIdField = proxy.getClass().getDeclaredField("resourceId");
+        resourceIdField.setAccessible(true);
         Field dbTypeField = proxy.getClass().getDeclaredField("dbType");
         dbTypeField.setAccessible(true);
-        dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.ORACLE);
-
-        String userName = dataSource.getConnection().getMetaData().getUserName();
-        Assertions.assertEquals(userName, username);
         Field userNameField = proxy.getClass().getDeclaredField("userName");
         userNameField.setAccessible(true);
+        Field jdbcUrlField = proxy.getClass().getDeclaredField("jdbcUrl");
+        jdbcUrlField.setAccessible(true);
+
+
+        // set userName
+        String userNameFromMetaData = dataSource.getConnection().getMetaData().getUserName();
+        Assertions.assertEquals(userNameFromMetaData, username);
         userNameField.set(proxy, username);
 
-        Assertions.assertEquals(proxy.getResourceId(), "jdbc:mock:xxx/username");
 
-        dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.MYSQL);
-        resourceId.setAccessible(true);
-        resourceId.set(proxy, null);
-        Assertions.assertEquals(proxy.getResourceId(), "jdbc:mock:xxx");
-        resourceId.setAccessible(true);
-        resourceId.set(proxy, null);
-        Field jdbUrl = proxy.getClass().getDeclaredField("jdbcUrl");
-        jdbUrl.setAccessible(true);
-        jdbUrl.set(proxy, "jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.3:3306,192.168.100.1:3306/seata");
-        resourceId.setAccessible(true);
-        resourceId.set(proxy, null);
-        Assertions.assertEquals(proxy.getResourceId(), "jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata");
+        // case: dbType = oracle
+        {
+            resourceIdField.set(proxy, null);
+            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.ORACLE);
+            Assertions.assertEquals("jdbc:mock:xxx/username", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+        }
 
+        // case: dbType = postgresql
+        {
+            resourceIdField.set(proxy, null);
+            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.POSTGRESQL);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:postgresql://mock/postgresql?xxx=1111&currentSchema=schema1,schema2&yyy=1");
+            Assertions.assertEquals("jdbc:postgresql://mock/postgresql?currentSchema=schema1!schema2", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            jdbcUrlField.set(proxy, jdbcUrl);
+        }
+
+        // case: dbType = mysql
+        {
+            resourceIdField.set(proxy, null);
+            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.MYSQL);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.3:3306,192.168.100.1:3306/seata");
+            Assertions.assertEquals("jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            jdbcUrlField.set(proxy, jdbcUrl);
+        }
     }
 }
