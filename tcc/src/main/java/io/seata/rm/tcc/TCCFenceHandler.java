@@ -296,13 +296,11 @@ public class TCCFenceHandler {
         try {
             connection = DataSourceUtils.getConnection(dataSource);
             while (true) {
-                List<String> xids = new ArrayList<>();
                 Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(connection, datetime, LIMIT_DELETE);
-                xids.addAll(xidSet);
-                if (xids.isEmpty()) {
+                if (xidSet.isEmpty()) {
                     break;
                 }
-                total += TCC_FENCE_DAO.deleteTCCFenceDO(connection, xids);
+                total += TCC_FENCE_DAO.deleteTCCFenceDO(connection, new ArrayList<>(xidSet));
             }
         } catch (RuntimeException e) {
             LOGGER.error("delete fence log failed ", e);
