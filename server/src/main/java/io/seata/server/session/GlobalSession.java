@@ -745,23 +745,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void asyncCommit() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
-
-        SessionHolder.getAsyncCommittingSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
-        SessionHolder.getRetryCommittingSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         GlobalStatus currentStatus = this.getStatus();
         if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
-            SessionHolder.getRetryRollbackingSessionManager().updateGlobalSessionStatus(this,GlobalStatus.TimeoutRollbackRetrying);
+            SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.TimeoutRollbackRetrying);
         } else {
-            SessionHolder.getRetryRollbackingSessionManager().updateGlobalSessionStatus(this,GlobalStatus.RollbackRetrying);
+            SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.RollbackRetrying);
         }
     }
 
