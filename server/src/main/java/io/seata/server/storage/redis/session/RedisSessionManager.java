@@ -95,17 +95,10 @@ public class RedisSessionManager extends AbstractSessionManager
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        try {
-            //  set expected status threadlocal
-            session.setExpectedStatusFromCurrent();
-            session.setStatus(status);
-            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
-            if (!ret) {
-                throw new StoreException("updateGlobalSessionStatus failed.");
-            }
-        } finally {
-            //  remove expected status threadlocal
-            session.cleanExpectedStatus();
+        session.setStatus(status);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+        if (!ret) {
+            throw new StoreException("updateGlobalSessionStatus failed.");
         }
     }
 

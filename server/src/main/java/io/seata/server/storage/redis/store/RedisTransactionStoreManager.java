@@ -18,13 +18,13 @@ package io.seata.server.storage.redis.store;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 import java.util.Optional;
+import java.util.Collections;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import io.seata.config.Configuration;
@@ -131,10 +131,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    /*
-   Map for LogOperation Global Operation
-   */
-    public static volatile ImmutableMap<LogOperation, Function<RedisGlobalTransactionVO,Boolean>> globalMap;
+    /**
+     * Map for LogOperation Global Operation
+     */
+    public static volatile ImmutableMap<LogOperation, Function<GlobalTransactionDO, Boolean>> globalMap;
 
     /**
      * Map for LogOperation Branch Operation
@@ -148,8 +148,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return void
      */
     public void initGlobalMap() {
-        if (CollectionUtils.isEmpty(globalMap)) {
-            globalMap = ImmutableMap.<LogOperation, Function<RedisGlobalTransactionVO,Boolean>>builder()
+        if (CollectionUtils.isEmpty(branchMap)) {
+            globalMap = ImmutableMap.<LogOperation, Function<GlobalTransactionDO, Boolean>>builder()
                     .put(LogOperation.GLOBAL_ADD, this::insertGlobalTransactionDO)
                     .put(LogOperation.GLOBAL_UPDATE, this::updateGlobalTransactionDO)
                     .put(LogOperation.GLOBAL_REMOVE, this::deleteGlobalTransactionDO)
@@ -175,14 +175,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-        if (globalMap.containsKey(logOperation)) {
-            GlobalSession globalSession = (GlobalSession)session;
-            RedisGlobalTransactionVO vo = new RedisGlobalTransactionVO();
-            vo.setGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
-            vo.setExpectedStatus(globalSession.getStatus());
-            return globalMap.get(logOperation).apply(vo);
-        } else if (branchMap.containsKey(logOperation)) {
-            return branchMap.get(logOperation).apply(SessionConverter.convertBranchTransactionDO(session));
+        if (globalMap.containsKey(logOperation) || branchMap.containsKey(logOperation)) {
+            return globalMap.containsKey(logOperation) ?
+                    globalMap.get(logOperation).apply(SessionConverter.convertGlobalTransactionDO(session)) :
+                    branchMap.get(logOperation).apply(SessionConverter.convertBranchTransactionDO(session));
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
@@ -260,11 +256,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * Insert the global transaction.
-     * @param redisGlobalTransactionVO
+     * @param globalTransactionDO
      * @return
      */
-    private boolean insertGlobalTransactionDO(RedisGlobalTransactionVO redisGlobalTransactionVO) {
-        GlobalTransactionDO globalTransactionDO = redisGlobalTransactionVO.getGlobalTransactionDO();
+    private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             Date now = new Date();
@@ -285,17 +280,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      *  1.delete the global session map
      *  2.remove the xid from the global status list
      * If the operate failed,the succeed operates will rollback
-     * @param redisGlobalTransactionVO
+     * @param globalTransactionDO
      * @return
      */
-    private boolean deleteGlobalTransactionDO(RedisGlobalTransactionVO redisGlobalTransactionVO) {
-        GlobalTransactionDO globalTransactionDO = redisGlobalTransactionVO.getGlobalTransactionDO();
+    private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
             if (StringUtils.isEmpty(xid)) {
                 LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
-                        globalTransactionDO.getXid());
+                    globalTransactionDO.getXid());
                 return true;
             }
             try (Pipeline pipelined = jedis.pipelined()) {
@@ -315,11 +309,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      *  1.the global session map
      *  2.the global status list
      * If the update failed,the succeed operates will rollback
-     * @param redisGlobalTransactionVO
+     * @param globalTransactionDO
      * @return
      */
-    private boolean updateGlobalTransactionDO(RedisGlobalTransactionVO redisGlobalTransactionVO) {
-        GlobalTransactionDO globalTransactionDO = redisGlobalTransactionVO.getGlobalTransactionDO();
+    private boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String xid = globalTransactionDO.getXid();
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
@@ -330,10 +323,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (StringUtils.isEmpty(previousStatus)) {
                 jedis.unwatch();
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
-            }
-            if (redisGlobalTransactionVO.getExpectedStatus() != null && !previousStatus.equals(String.valueOf(redisGlobalTransactionVO.getExpectedStatus()))) {
-                jedis.unwatch();
-                throw new StoreException("Global transaction status is unexpected.");
             }
             if (previousStatus.equals(String.valueOf(globalTransactionDO.getStatus()))) {
                 jedis.unwatch();
