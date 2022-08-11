@@ -31,6 +31,9 @@ import io.seata.core.protocol.transaction.RMInboundHandler;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.rm.filter.RMFilter;
+import io.seata.rm.filter.RMFilterChain;
+import io.seata.rm.filter.RMFilterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +53,14 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         exceptionHandleTemplate(new AbstractCallback<BranchCommitRequest, BranchCommitResponse>() {
             @Override
             public void execute(BranchCommitRequest request, BranchCommitResponse response)
-                throws TransactionException {
-                doBranchCommit(request, response);
+                    throws TransactionException {
+                RMFilterManager.dispatchCommit(request, response, new RMFilter() {
+                    @Override
+                    public void commitFilter(BranchCommitRequest request, BranchCommitResponse response, RMFilterChain chain)
+                            throws TransactionException {
+                        doBranchCommit(request, response);
+                    }
+                });
             }
         }, request, response);
         return response;
@@ -63,8 +72,14 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         exceptionHandleTemplate(new AbstractCallback<BranchRollbackRequest, BranchRollbackResponse>() {
             @Override
             public void execute(BranchRollbackRequest request, BranchRollbackResponse response)
-                throws TransactionException {
-                doBranchRollback(request, response);
+                    throws TransactionException {
+                RMFilterManager.dispatchRollback(request, response, new RMFilter() {
+                    @Override
+                    public void rollbackFilter(BranchRollbackRequest request, BranchRollbackResponse response, RMFilterChain chain)
+                            throws TransactionException {
+                        doBranchRollback(request, response);
+                    }
+                });
             }
         }, request, response);
         return response;
