@@ -316,7 +316,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String xid = globalTransactionDO.getXid();
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            // Defensive watch to prevent other TC server operating concurrently,Fail fast
+            // Defensive watch to prevent other TC server operating concurrently,Fail fast. jedis.close() will unwatch.
             jedis.watch(globalKey);
             List<String> statusAndGmtModified = jedis.hmget(globalKey, REDIS_KEY_GLOBAL_STATUS, REDIS_KEY_GLOBAL_GMT_MODIFIED);
             String previousStatus = statusAndGmtModified.get(0);
