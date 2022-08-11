@@ -319,16 +319,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             // Defensive watch to prevent other TC server operating concurrently,Fail fast
             jedis.watch(globalKey);
             List<String> statusAndGmtModified = jedis.hmget(globalKey, REDIS_KEY_GLOBAL_STATUS, REDIS_KEY_GLOBAL_GMT_MODIFIED);
-            String previousStatus = statusAndGmtModified.get(0);
-            if (StringUtils.isEmpty(previousStatus)) {
-                jedis.unwatch();
+            String previousStatusStr = statusAndGmtModified.get(0);
+            if (StringUtils.isEmpty(previousStatusStr)) {
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
             }
-            if (previousStatus.equals(String.valueOf(globalTransactionDO.getStatus()))) {
-                jedis.unwatch();
+            int previousStatus = Integer.parseInt(previousStatusStr);
+            if (previousStatus == globalTransactionDO.getStatus()) {
                 return true;
             }
-            GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
+            GlobalStatus before = GlobalStatus.get(previousStatus);
             GlobalStatus after = GlobalStatus.get(globalTransactionDO.getStatus());
             if (!SessionStatusValidator.validateUpdateStatus(before, after)) {
                 throw new StoreException("Illegal changing of global status, update global transaction failed."
@@ -338,15 +337,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             String previousGmtModified = statusAndGmtModified.get(1);
             Transaction multi = jedis.multi();
             Map<String,String> map = new HashMap<>(2);
-            map.put(REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
-            map.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
-            multi.hmset(globalKey,map);
-            multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
+            map.put(REDIS_KEY_GLOBAL_STATUS, String.valueOf(globalTransactionDO.getStatus()));
+            map.put(REDIS_KEY_GLOBAL_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
+            multi.hmset(globalKey, map);
+            multi.lrem(buildGlobalStatus(previousStatus), 0, xid);
             multi.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
             List<Object> exec = multi.exec();
             if (CollectionUtils.isEmpty(exec)) {
                 //The data has changed by another tc, so we still think the modification is successful.
-                LOGGER.warn("The global transaction xid = {}, maybe changed by another TC. It does not affect the results",globalTransactionDO.getXid());
+                LOGGER.warn("The global transaction xid = {}, maybe changed by another TC. It does not affect the results",
+                    globalTransactionDO.getXid());
                 return true;
             }
             String hmset = exec.get(0).toString();
@@ -357,23 +357,24 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             } else {
                 // If someone failed, the succeed operations need rollback
                 if (OK.equalsIgnoreCase(hmset)) {
+                    LOGGER.warn("The global transaction xid = {}, update fail", globalTransactionDO.getXid());
                     // Defensive watch to prevent other TC server operating concurrently,give up this operate
                     jedis.watch(globalKey);
                     String xid2 = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
                     if (StringUtils.isNotEmpty(xid2)) {
                         Map<String,String> mapPrevious = new HashMap<>(2,1);
-                        mapPrevious.put(REDIS_KEY_GLOBAL_STATUS,previousStatus);
-                        mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_STATUS, previousStatusStr);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED, previousGmtModified);
                         Transaction multi2 = jedis.multi();
-                        multi2.hmset(globalKey,mapPrevious);
+                        multi2.hmset(globalKey, mapPrevious);
                         multi2.exec();
                     }
                 }
                 if (lrem > 0) {
-                    jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)),xid);
+                    jedis.rpush(buildGlobalStatus(previousStatus), xid);
                 }
                 if (rpush > 0) {
-                    jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()),0,xid);
+                    jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, xid);
                 }
                 return false;
             }
