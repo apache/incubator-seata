@@ -744,12 +744,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         this.setStatus(GlobalStatus.AsyncCommitting);
+        // todo [optimize-session-manager] --> root manager.update
         SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
     }
 
     public void queueToRetryCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
         this.setStatus(GlobalStatus.CommitRetrying);
+        // todo [optimize-session-manager] --> root manager.update
         SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
     }
 
@@ -761,6 +763,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         } else {
             this.setStatus(GlobalStatus.RollbackRetrying);
         }
+        // todo [optimize-session-manager] --> root manager.update
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
     }
 

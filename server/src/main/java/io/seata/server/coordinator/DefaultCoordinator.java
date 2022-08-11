@@ -327,6 +327,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 globalSession.setStatus(GlobalStatus.TimeoutRollbacking);
 
                 globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+                // todo [optimize-session-manager] --> root manager.update
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
@@ -348,6 +349,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void handleRetryRollbacking() {
         SessionCondition sessionCondition = new SessionCondition(rollbackingStatuses);
         sessionCondition.setLazyLoadBranch(true);
+        // todo [optimize-session-manager] --> root manager.findGlobalSessions
         Collection<GlobalSession> rollbackingSessions =
             SessionHolder.getRetryRollbackingSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
@@ -367,6 +369,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         rollbackingSession.clean();
                     }
                     // Prevent thread safety issues
+                    // todo [optimize-session-manager] --> root manager.removeGlobalSession
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.error("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
@@ -392,6 +395,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void handleRetryCommitting() {
         SessionCondition retryCommittingSessionCondition = new SessionCondition(retryCommittingStatuses);
         retryCommittingSessionCondition.setLazyLoadBranch(true);
+        // todo [optimize-session-manager] --> root manager.findGlobalSessions
         Collection<GlobalSession> committingSessions =
             SessionHolder.getRetryCommittingSessionManager().findGlobalSessions(retryCommittingSessionCondition);
         if (CollectionUtils.isEmpty(committingSessions)) {
@@ -408,6 +412,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     // Prevent thread safety issues
+                    // todo [optimize-session-manager] --> root manager.removeGlobalSession
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
@@ -430,6 +435,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void handleAsyncCommitting() {
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting);
+        // todo [optimize-session-manager] --> root manager.findGlobalSessions
         Collection<GlobalSession> asyncCommittingSessions =
                 SessionHolder.getAsyncCommittingSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
