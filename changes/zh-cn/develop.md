@@ -4,6 +4,7 @@
 
 ### feature：
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
+- [[#4862](https://github.com/seata/seata/pull/4862)] RM 二阶段运行 Filter
 
 
 ### bugfix：
@@ -35,5 +36,6 @@
 - [AlexStocks](https://github.com/AlexStocks)
 - [liujunlin5168](https://github.com/liujunlin5168)
 - [pengten](https://github.com/pengten)
+- [elrond-g](https://github.com/elrond-g)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
