@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-sofa</artifactId>
     <name>seata-discovery-sofa ${project.version}</name>
+    <description>discovery-sofa for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
