@@ -27,6 +27,7 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
@@ -109,6 +110,7 @@ public class AbstractDMLBaseExecutorTest {
     }
 
     @Test
+    @Disabled
     public void testOnlySupportMysqlWhenUseMultiPk() throws Exception {
         Mockito.when(connectionProxy.getContext())
                 .thenReturn(new ConnectionContext());
