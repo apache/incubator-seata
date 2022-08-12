@@ -4,7 +4,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### feature:
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile support arm64
-
+- [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 
 ### bugfix:
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard

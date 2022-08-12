@@ -4,7 +4,7 @@
 
 ### feature：
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
-
+- [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 
 ### bugfix：
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
