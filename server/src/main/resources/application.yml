@@ -38,3 +38,8 @@ seata:
     tokenValidityInMilliseconds: 1800000
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
+  metrics:
+    enabled: true
+    registry-type: compact
+    exporter-list: prometheus
+    exporter-prometheus-port: 9898

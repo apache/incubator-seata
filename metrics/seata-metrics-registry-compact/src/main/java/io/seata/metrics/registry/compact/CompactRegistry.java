@@ -44,25 +44,25 @@ public class CompactRegistry implements Registry {
 
     @Override
     public <T extends Number> Gauge<T> getGauge(Id id, Supplier<T> supplier) {
-        return (Gauge<T>)CollectionUtils.computeIfAbsent(METERS, id.toString(), key -> new CompactGauge<>(
+        return (Gauge<T>)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactGauge<>(
                 new Id(id.getName()).withTag(id.getTags()), supplier));
     }
 
     @Override
     public Counter getCounter(Id id) {
-        return (Counter)CollectionUtils.computeIfAbsent(METERS, id.toString(), key -> new CompactCounter(
+        return (Counter)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactCounter(
                 new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
     public Summary getSummary(Id id) {
-        return (Summary)CollectionUtils.computeIfAbsent(METERS, id.toString(), key -> new CompactSummary(
+        return (Summary)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactSummary(
                 new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
     public Timer getTimer(Id id) {
-        return (Timer)CollectionUtils.computeIfAbsent(METERS, id.toString(), key -> new CompactTimer(
+        return (Timer)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactTimer(
                 new Id(id.getName()).withTag(id.getTags())));
     }
 
