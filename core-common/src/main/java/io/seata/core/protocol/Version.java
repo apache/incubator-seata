@@ -36,7 +36,7 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    private static final String CURRENT = "1.5.2-SNAPSHOT";
+    private static final String CURRENT = "1.6.0-SNAPSHOT";
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final String VERSION_1_5_0 = "1.5.0";
     private static final int MAX_VERSION_DOT = 3;
@@ -112,7 +112,7 @@ public class Version {
         return isAboveOrEqualVersion150;
     }
 
-    private static long convertVersion(String version) throws IncompatibleVersionException {
+    public static long convertVersion(String version) throws IncompatibleVersionException {
         String[] parts = StringUtils.split(version, '.');
         long result = 0L;
         int i = 1;

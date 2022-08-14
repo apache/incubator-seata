@@ -15,14 +15,12 @@
  */
 package io.seata.core.protocol;
 
-import java.io.Serializable;
-
 /**
  * The type Heartbeat message.
  *
  * @author slievrly
  */
-public class HeartbeatMessage implements MessageTypeAware, Serializable {
+public class HeartbeatMessage extends AbstractMessage {
     private static final long serialVersionUID = -985316399527884899L;
     private boolean ping = true;
     /**

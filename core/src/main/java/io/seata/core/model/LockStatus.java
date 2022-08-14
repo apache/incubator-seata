@@ -16,8 +16,6 @@
 package io.seata.core.model;
 
 
-import io.seata.common.exception.ShouldNeverHappenException;
-
 /**
  * Status of lock.
  *
@@ -64,7 +62,7 @@ public enum LockStatus {
         try {
             value = LockStatus.values()[code];
         } catch (Exception e) {
-            throw new ShouldNeverHappenException("Unknown LockStatus[" + code + "]");
+            throw new IllegalArgumentException("Unknown LockStatus[" + code + "]");
         }
         return value;
     }

@@ -17,7 +17,6 @@ package io.seata.core.protocol.transaction;
 
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
 
 import java.io.Serializable;
 
@@ -63,12 +62,6 @@ public class UndoLogDeleteRequest extends AbstractTransactionRequestToRM impleme
 
     public void setBranchType(BranchType branchType) {
         this.branchType = branchType;
-    }
-
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        handler.handle(this);
-        return null;
     }
 
     @Override

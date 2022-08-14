@@ -16,22 +16,17 @@
 package io.seata.core.protocol.transaction;
 
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
 
 /**
- * The type Global status request.
+ * The type Global lock query request.
  *
  * @author slievrly
  */
-public class GlobalStatusRequest extends AbstractGlobalEndRequest {
+public class GlobalLockQueryRequest extends BranchRegisterRequest  {
 
     @Override
     public short getTypeCode() {
-        return MessageType.TYPE_GLOBAL_STATUS;
+        return MessageType.TYPE_GLOBAL_LOCK_QUERY;
     }
 
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
-    }
 }

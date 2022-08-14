@@ -16,8 +16,6 @@
 package io.seata.core.model;
 
 
-import io.seata.common.exception.ShouldNeverHappenException;
-
 /**
  * Status of branch transaction.
  *
@@ -140,7 +138,7 @@ public enum BranchStatus {
         try {
             value = BranchStatus.values()[code];
         } catch (Exception e) {
-            throw new ShouldNeverHappenException("Unknown BranchStatus[" + code + "]");
+            throw new IllegalArgumentException("Unknown BranchStatus[" + code + "]");
         }
         return value;
     }
