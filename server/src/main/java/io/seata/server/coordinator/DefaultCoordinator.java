@@ -19,9 +19,11 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
@@ -34,6 +36,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -172,6 +175,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final DefaultCore core;
 
+    private final Map<Short, BiFunction<AbstractMessage, RpcContext, ? extends AbstractResultMessage>> functionMap = new ConcurrentHashMap<>();
+
     private static volatile DefaultCoordinator instance;
 
     /**
@@ -185,6 +190,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         this.remotingServer = remotingServer;
         this.core = new DefaultCore(remotingServer);
+
+        initFunctionMap();
     }
 
     public static DefaultCoordinator getInstance(RemotingServer remotingServer) {
@@ -505,10 +512,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (!(request instanceof AbstractTransactionRequestToTC)) {
             throw new IllegalArgumentException();
         }
-        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
-        transactionRequest.setTCInboundHandler(this);
+        BiFunction<AbstractMessage, RpcContext, ? extends AbstractResultMessage> function = functionMap.get(request.getTypeCode());
+        if (null == function) {
+            throw new IllegalArgumentException("no available function for message type: " + request.getTypeCode());
+        }
 
-        return transactionRequest.handle(context);
+        return function.apply(request, context);
     }
 
     @Override
@@ -553,6 +562,60 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void setRemotingServer(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
+    }
+
+    /**
+     * init the handle function map
+     */
+    private void initFunctionMap() {
+        functionMap.put(MessageType.TYPE_GLOBAL_BEGIN, (request, context) -> {
+            if (!(request instanceof GlobalBeginRequest)) {
+                throw new IllegalArgumentException("GlobalBeginRequest is required, but is actually " + request.getClass());
+            }
+            return handle((GlobalBeginRequest) request, context);
+        });
+        functionMap.put(MessageType.TYPE_GLOBAL_COMMIT, (request, context) -> {
+            if (!(request instanceof GlobalCommitRequest)) {
+                throw new IllegalArgumentException("GlobalCommitRequest is required, but is actually " + request.getClass());
+            }
+            return handle((GlobalCommitRequest) request, context);
+        });
+        functionMap.put(MessageType.TYPE_GLOBAL_ROLLBACK, (request, context) -> {
+            if (!(request instanceof GlobalRollbackRequest)) {
+                throw new IllegalArgumentException("GlobalRollbackRequest is required, but is actually " + request.getClass());
+            }
+            return handle((GlobalRollbackRequest) request, context);
+        });
+        functionMap.put(MessageType.TYPE_BRANCH_REGISTER, (request, context) -> {
+            if (!(request instanceof BranchRegisterRequest)) {
+                throw new IllegalArgumentException("BranchRegisterRequest is required, but is actually " + request.getClass());
+            }
+            return handle((BranchRegisterRequest) request, context);
+        });
+        functionMap.put(MessageType.TYPE_BRANCH_STATUS_REPORT, (request, context) -> {
+            if (!(request instanceof BranchReportRequest)) {
+                throw new IllegalArgumentException("BranchReportRequest is required, but is actually " + request.getClass());
+            }
+            return handle((BranchReportRequest) request, context);
+        });
+        functionMap.put(MessageType.TYPE_GLOBAL_LOCK_QUERY, (request, context) -> {
+            if (!(request instanceof GlobalLockQueryRequest)) {
+                throw new IllegalArgumentException("GlobalLockQueryRequest is required, but is actually " + request.getClass());
+            }
+            return handle((GlobalLockQueryRequest) request, context);
+        });
+        functionMap.put(MessageType.TYPE_GLOBAL_STATUS, (request, context) -> {
+            if (!(request instanceof GlobalStatusRequest)) {
+                throw new IllegalArgumentException("GlobalStatusRequest is required, but is actually " + request.getClass());
+            }
+            return handle((GlobalStatusRequest) request, context);
+        });
+        functionMap.put(MessageType.TYPE_GLOBAL_REPORT, (request, context) -> {
+            if (!(request instanceof GlobalReportRequest)) {
+                throw new IllegalArgumentException("GlobalReportRequest is required, but is actually " + request.getClass());
+            }
+            return handle((GlobalReportRequest) request, context);
+        });
     }
 
     /**

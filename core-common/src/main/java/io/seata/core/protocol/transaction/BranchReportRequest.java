@@ -17,7 +17,6 @@ package io.seata.core.protocol.transaction;
 
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
-import io.seata.core.rpc.RpcContext;
 import io.seata.core.protocol.MessageType;
 
 /**
@@ -152,11 +151,6 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC {
         return MessageType.TYPE_BRANCH_STATUS_REPORT;
     }
 
-
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
-    }
 
     @Override
     public String toString() {

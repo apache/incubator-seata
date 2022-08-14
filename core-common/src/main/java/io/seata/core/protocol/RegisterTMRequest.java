@@ -21,8 +21,6 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.NetUtil;
 import org.apache.commons.lang.StringUtils;
 
-import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
-
 /**
  * The type Register tm request.
  *

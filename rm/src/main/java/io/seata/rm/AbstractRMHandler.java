@@ -15,6 +15,10 @@
  */
 package io.seata.rm;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -43,6 +47,8 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     implements RMInboundHandler, TransactionMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRMHandler.class);
+
+    protected final Map<Short, Function<AbstractMessage, ? extends AbstractResultMessage>> functionMap = new ConcurrentHashMap<>();
 
     @Override
     public BranchCommitResponse handle(BranchCommitRequest request) {
@@ -144,10 +150,12 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (!(request instanceof AbstractTransactionRequestToRM)) {
             throw new IllegalArgumentException();
         }
-        AbstractTransactionRequestToRM transactionRequest = (AbstractTransactionRequestToRM)request;
-        transactionRequest.setRMInboundMessageHandler(this);
+        Function<AbstractMessage, ? extends AbstractResultMessage> function = functionMap.get(request.getTypeCode());
+        if (null == function) {
+            throw new IllegalArgumentException("no available function for message type: " + request.getTypeCode());
+        }
 
-        return transactionRequest.handle(context);
+        return function.apply(request);
     }
 
     @Override

@@ -15,25 +15,16 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.MessageType;
 
 /**
- * The type Abstract transaction request to rm.
+ * The type Global rollback request.
  *
- * @author sharajava
+ * @author slievrly
  */
-public abstract class AbstractTransactionRequestToRM extends AbstractTransactionRequest {
-
-    /**
-     * The Handler.
-     */
-    protected RMInboundHandler handler;
-
-    /**
-     * Sets rm inbound message handler.
-     *
-     * @param handler the handler
-     */
-    public void setRMInboundMessageHandler(RMInboundHandler handler) {
-        this.handler = handler;
+public class GlobalRollbackRequest extends AbstractGlobalEndRequest {
+    @Override
+    public short getTypeCode() {
+        return MessageType.TYPE_GLOBAL_ROLLBACK;
     }
 }

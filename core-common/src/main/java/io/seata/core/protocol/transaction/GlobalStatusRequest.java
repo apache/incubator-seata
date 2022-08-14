@@ -15,25 +15,17 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.MessageType;
 
 /**
- * The type Abstract transaction request to tc.
+ * The type Global status request.
  *
- * @author sharajava
+ * @author slievrly
  */
-public abstract class AbstractTransactionRequestToTC extends AbstractTransactionRequest {
+public class GlobalStatusRequest extends AbstractGlobalEndRequest {
 
-    /**
-     * The Handler.
-     */
-    protected TCInboundHandler handler;
-
-    /**
-     * Sets tc inbound handler.
-     *
-     * @param handler the handler
-     */
-    public void setTCInboundHandler(TCInboundHandler handler) {
-        this.handler = handler;
+    @Override
+    public short getTypeCode() {
+        return MessageType.TYPE_GLOBAL_STATUS;
     }
 }

@@ -15,25 +15,11 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
 
 /**
- * The type Branch commit request.
+ * The type Abstract transaction request to tc.
  *
  * @author sharajava
  */
-public class BranchCommitRequest extends AbstractBranchEndRequest {
-
-    @Override
-    public short getTypeCode() {
-        return MessageType.TYPE_BRANCH_COMMIT;
-    }
-
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this);
-    }
-
-
+public abstract class AbstractTransactionRequestToTC extends AbstractTransactionRequest {
 }

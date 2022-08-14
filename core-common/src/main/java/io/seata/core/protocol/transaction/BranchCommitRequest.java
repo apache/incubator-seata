@@ -16,22 +16,17 @@
 package io.seata.core.protocol.transaction;
 
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
 
 /**
- * The type Branch rollback request.
+ * The type Branch commit request.
  *
- * @author slievrly
+ * @author sharajava
  */
-public class BranchRollbackRequest extends AbstractBranchEndRequest {
+public class BranchCommitRequest extends AbstractBranchEndRequest {
 
     @Override
     public short getTypeCode() {
-        return MessageType.TYPE_BRANCH_ROLLBACK;
+        return MessageType.TYPE_BRANCH_COMMIT;
     }
 
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this);
-    }
 }

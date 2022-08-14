@@ -17,7 +17,6 @@ package io.seata.core.protocol.transaction;
 
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
 
 /**
  * The type Branch register request.
@@ -129,11 +128,6 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
      */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
-    }
-
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
     }
 
     @Override

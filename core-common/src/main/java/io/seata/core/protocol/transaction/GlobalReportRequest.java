@@ -17,7 +17,6 @@ package io.seata.core.protocol.transaction;
 
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
 
 /**
  * The type Global report request.
@@ -34,11 +33,6 @@ public class GlobalReportRequest extends AbstractGlobalEndRequest {
     @Override
     public short getTypeCode() {
         return MessageType.TYPE_GLOBAL_REPORT;
-    }
-
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
     }
 
     /**

@@ -16,21 +16,16 @@
 package io.seata.core.protocol.transaction;
 
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
 
 /**
- * The type Global rollback request.
+ * The type Branch rollback request.
  *
  * @author slievrly
  */
-public class GlobalRollbackRequest extends AbstractGlobalEndRequest {
-    @Override
-    public short getTypeCode() {
-        return MessageType.TYPE_GLOBAL_ROLLBACK;
-    }
+public class BranchRollbackRequest extends AbstractBranchEndRequest {
 
     @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
+    public short getTypeCode() {
+        return MessageType.TYPE_BRANCH_ROLLBACK;
     }
 }

@@ -15,24 +15,13 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.RpcContext;
+
+import io.seata.core.protocol.AbstractMessage;
 
 /**
- * The type Global lock query request.
+ * The type Abstract transaction request.
  *
- * @author slievrly
+ * @author sharajava
  */
-public class GlobalLockQueryRequest extends BranchRegisterRequest  {
-
-    @Override
-    public short getTypeCode() {
-        return MessageType.TYPE_GLOBAL_LOCK_QUERY;
-    }
-
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
-    }
-
+public abstract class AbstractTransactionRequest extends AbstractMessage {
 }

@@ -16,21 +16,10 @@
 package io.seata.core.protocol.transaction;
 
 
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.rpc.RpcContext;
-
 /**
- * The type Abstract transaction request.
+ * The type Abstract transaction request to rm.
  *
  * @author sharajava
  */
-public abstract class AbstractTransactionRequest extends AbstractMessage {
-
-    /**
-     * Handle abstract transaction response.
-     *
-     * @param rpcContext the rpc context
-     * @return the abstract transaction response
-     */
-    public abstract AbstractTransactionResponse handle(RpcContext rpcContext);
+public abstract class AbstractTransactionRequestToRM extends AbstractTransactionRequest {
 }
