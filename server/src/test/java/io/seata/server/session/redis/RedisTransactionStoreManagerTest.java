@@ -73,34 +73,6 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
-    public void testRedisSortedSet() throws TransactionException, InterruptedException {
-        try(Jedis jedis = JedisPooledFactory.getJedisInstance()){
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.zadd("test123", System.currentTimeMillis() + 100, "a");
-            }
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.zadd("test123", System.currentTimeMillis() , "b");
-            }
-            Thread.sleep(111);
-            Set<String> values = jedis.zrangeByScore("test123", 0, System.currentTimeMillis(), 0, 100);
-            for (String value : values) {
-                LOGGER.info("sorted set test123 :{}", value);
-            }
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.rpush("test1234",  "a");
-            }
-            try (Pipeline pipeline = jedis.pipelined()) {
-                pipeline.rpush("test1234", "b");
-            }
-            Thread.sleep(15);
-            List<String> values2 = jedis.lrange("test1234",  0, 100);
-            for (String value : values2) {
-                LOGGER.info("test1234 :{}", value);
-            }
-        }
-    }
-
-    @Test
     public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
         GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 100);
         String xid1 = XID.generateXID(session1.getTransactionId());
