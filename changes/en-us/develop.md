@@ -4,6 +4,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### feature:
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile support arm64
+- [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
 
 
 ### bugfix:
@@ -35,4 +36,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [AlexStocks](https://github.com/AlexStocks)
 - [liujunlin5168](https://github.com/liujunlin5168)
 - [pengten](https://github.com/pengten)
+- [liuqiufeng](https://github.com/liuqiufeng)
+
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
