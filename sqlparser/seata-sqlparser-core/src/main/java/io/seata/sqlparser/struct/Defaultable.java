@@ -28,6 +28,14 @@ public interface Defaultable {
     /**
      * get primary key values by default keyword.
      *
+     * @return pk values by default
+     * @throws SQLException the sql exception
+     */
+    List<Object> getPkValuesByDefault() throws SQLException;
+
+    /**
+     * get primary key values by default keyword.
+     *
      * @param pkKey the pk key
      * @return pk values by default
      * @throws SQLException the sql exception

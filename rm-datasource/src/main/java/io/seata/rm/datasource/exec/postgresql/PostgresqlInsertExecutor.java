@@ -87,6 +87,27 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
 
     /**
      * get primary key values by default
+     * @return
+     * @throws SQLException
+     */
+    @Override
+    @Deprecated
+    public List<Object> getPkValuesByDefault() throws SQLException {
+        // current version 1.2 only support postgresql.
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
+        String columnDef = pkMeta.getColumnDef();
+        // sample: nextval('test_id_seq'::regclass)
+        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
+        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
+        if (StringUtils.isBlank(seq)) {
+            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
+        }
+        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
+    }
+
+    /**
+     * get primary key values by default
      *
      * @param pkKey the pk key
      * @return
