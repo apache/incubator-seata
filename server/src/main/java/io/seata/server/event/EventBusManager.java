@@ -25,7 +25,7 @@ import io.seata.core.event.GuavaEventBus;
  */
 public class EventBusManager {
     private static class SingletonHolder {
-        private static EventBus INSTANCE = new GuavaEventBus("tc",true);
+        private static EventBus INSTANCE = new GuavaEventBus("seata.metrics",true);
     }
 
     public static EventBus get() {
