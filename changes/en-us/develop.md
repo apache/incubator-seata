@@ -21,6 +21,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4761](https://github.com/seata/seata/pull/4761)] use hget replace hmget because only one field
 - [[#4414](https://github.com/seata/seata/pull/4414)] exclude log4j dependencies
 - [[#4836](https://github.com/seata/seata/pull/4836)] optimize BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) method more readable
+- [[#4865](https://github.com/seata/seata/pull/4865)] fix some security vulnerabilities in GGEditor
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
