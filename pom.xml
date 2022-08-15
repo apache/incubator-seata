@@ -28,7 +28,7 @@
     <artifactId>seata-parent</artifactId>
     <packaging>pom</packaging>
     <name>Seata Parent POM ${project.version}</name>
-    <description>top seata project pom.xml file</description>
+    <description>parent for Seata built with Maven</description>
 
     <modules>
         <module>build</module>
@@ -155,6 +155,23 @@
             <properties>
                 <image.publish.skip>false</image.publish.skip>
                 <image.tags>latest</image.tags>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+            </properties>
+        </profile>
+        <!-- profile: release-image -->
+        <profile>
+            <id>release-image</id>
+            <properties>
+                <image.tags>${project.version},latest</image.tags>
+            </properties>
+        </profile>
+        <!-- profile: arrch64 -->
+        <profile>
+            <id>arrch64</id>
+            <properties>
+                <os.detected.classifier>osx-x86_64</os.detected.classifier>
             </properties>
         </profile>
         <!-- profile: checkstyle -->

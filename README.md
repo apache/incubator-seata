@@ -82,7 +82,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>1.5.1</seata.version>
+<seata.version>1.5.2</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>

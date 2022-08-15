@@ -121,6 +121,7 @@ server.distributedLockExpireTime=10000
 server.xaerNotaRetryTimeout=60000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
+server.enableParallelRequestHandle=false
 
 #Metrics configuration, only for the server
 metrics.enabled=false
