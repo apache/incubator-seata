@@ -27,7 +27,9 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import io.seata.common.XID;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.console.result.PageResult;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -36,6 +38,7 @@ import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.storage.file.session.FileSessionManager;
+import io.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -46,7 +49,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
-
+import static io.seata.server.session.SessionHolder.CONFIG;
+import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 /**
  * The type File based session manager test.
  *
@@ -57,16 +61,21 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 public class FileSessionManagerTest {
 
 
-    private static List<SessionManager> sessionManagerList;
+    private static volatile List<SessionManager> sessionManagerList;
 
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
 
+    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+            DEFAULT_SESSION_STORE_FILE_DIR);
+
     @BeforeAll
     public static void setUp(ApplicationContext context) {
+        StoreUtil.deleteDataFile();
         try {
-            sessionManagerList = Arrays.asList(new FileSessionManager("root.data", "."),
-                    new FileSessionManager("test", null));
+            EnhancedServiceLoader.unloadAll();
+            sessionManagerList =
+                Arrays.asList(new FileSessionManager("root.data", "."), new FileSessionManager("test", null));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -383,7 +392,7 @@ public class FileSessionManagerTest {
     public void onBeginTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -399,7 +408,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -417,7 +426,7 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
             sessionManager.onBranchStatusChange(globalSession, branchSession, BranchStatus.PhaseTwo_Committed);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -434,7 +443,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -452,7 +461,7 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
             sessionManager.onRemoveBranch(globalSession, branchSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -468,7 +477,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onClose(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -483,7 +492,7 @@ public class FileSessionManagerTest {
     public void onEndTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onEnd(globalSession);
+            sessionManager.onSuccessEnd(globalSession);
         }
     }
 
@@ -575,4 +584,5 @@ public class FileSessionManagerTest {
                 Arguments.of(globalSession, branchSession)
         );
     }
+
 }

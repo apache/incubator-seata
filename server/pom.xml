@@ -26,12 +26,19 @@
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
+    <description>server for Seata built with Maven</description>
 
     <dependencies>
         <!-- springboot web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -59,6 +66,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-all</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -105,6 +118,7 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+       <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -154,6 +168,10 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
         <!-- logback appenders -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -175,12 +193,71 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <excludeTransitive>false</excludeTransitive>
+                            <stripVersion>false</stripVersion>
+                            <silent>true</silent>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <!--resolve slf4j-simple conflicts-->
+                            <includeScope>runtime</includeScope>
+                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
+                            <skip>${dependencies.copy.skip}</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-mysql</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>${mysql.jdbc.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>${mysql8.jdbc.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/lib/jdbc
+                            </outputDirectory>
+                            <skip>${dependencies.copy.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
                         <image>${IMAGE_NAME}</image>
+                        <platforms>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>amd64</architecture>
+                            </platform>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>arm64</architecture>
+                            </platform>
+                        </platforms>
                     </from>
                     <to>
                         <image>docker.io/seataio/seata-server</image>
@@ -196,6 +273,7 @@
                         <mainClass>io.seata.server.ServerApplication</mainClass>
                         <ports>
                             <port>8091</port>
+                            <port>7091</port>
                         </ports>
                         <jvmFlags>
                             <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
@@ -206,7 +284,7 @@
                             <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
                             <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
                             <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
-                            <jvmFlag>-XX:MaxDirectMemorySize=1024m</jvmFlag>
+                            <jvmFlag>-XX:MaxDirectMemorySize=256m</jvmFlag>
                             <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
                             <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
                             <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
@@ -253,6 +331,11 @@
     <profiles>
         <profile>
             <id>release-seata</id>
+            <properties>
+                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+            </properties>
             <build>
                 <finalName>seata-server</finalName>
                 <plugins>
@@ -263,6 +346,13 @@
                         <configuration>
                             <mainClass>io.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
+                            <attach>false</attach>
+                            <includes>
+                                <include>
+                                    <groupId>null</groupId>
+                                    <artifactId>null</artifactId>
+                                </include>
+                            </includes>
                         </configuration>
                         <executions>
                             <execution>

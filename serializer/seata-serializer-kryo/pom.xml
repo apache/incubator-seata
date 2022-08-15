@@ -11,6 +11,8 @@
     <artifactId>seata-serializer-kryo</artifactId>
     <packaging>jar</packaging>
     <name>seata-serializer-kryo ${project.version}</name>
+    <description>serializer-kryo for Seata built with Maven</description>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

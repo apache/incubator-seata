@@ -89,7 +89,7 @@ public class DataBaseLocker extends AbstractLocker {
     @Override
     public boolean releaseLock(String xid, Long branchId) {
         try {
-            return lockStore.unLock(xid, branchId);
+            return lockStore.unLock(branchId);
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {
