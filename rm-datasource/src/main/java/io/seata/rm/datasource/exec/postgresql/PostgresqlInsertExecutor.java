@@ -132,4 +132,5 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     public String getSequenceSql(SqlSequenceExpr expr) {
         return "SELECT currval(" + expr.getSequence() + ")";
     }
+
 }
