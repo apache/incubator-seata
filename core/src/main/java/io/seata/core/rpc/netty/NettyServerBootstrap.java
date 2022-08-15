@@ -37,7 +37,8 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
-import io.seata.discovery.registry.RegistryFactory;
+import io.seata.discovery.registry.MultiRegistryFactory;
+import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,7 +169,10 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.serverBootstrap.bind(getListenPort()).sync();
             XID.setPort(getListenPort());
             LOGGER.info("Server started, service listen port: {}", getListenPort());
-            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+            for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+                registryService.register(address);
+            }
             initialized.set(true);
         } catch (SocketException se) {
             throw new RuntimeException("Server start failed, the listen port: " + getListenPort(), se);
@@ -184,8 +188,11 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 LOGGER.info("Shutting server down, the listen port: {}", XID.getPort());
             }
             if (initialized.get()) {
-                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
-                RegistryFactory.getInstance().close();
+                InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+                for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+                    registryService.unregister(address);
+                    registryService.close();
+                }
                 //wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
             }
