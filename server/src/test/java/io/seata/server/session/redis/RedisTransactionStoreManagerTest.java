@@ -129,7 +129,7 @@ public class RedisTransactionStoreManagerTest {
             LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
         }
         Assertions.assertEquals(2, list2.size());
-        Assertions.assertEquals(xid1, list.get(0).getXid());
+        Assertions.assertEquals(xid1, list.get(1).getXid());
         Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
         sessionManager.removeGlobalSession(session1);
         sessionManager.removeGlobalSession(session2);
