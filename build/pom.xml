@@ -25,7 +25,7 @@
     <version>${revision}</version>
 
     <name>Seata Build ${project.version}</name>
-
+    <description>plugin management for Seata built with Maven</description>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.5.2-SNAPSHOT</revision>
+        <revision>1.6.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -78,7 +78,7 @@
 
         <!-- Maven plugin versions -->
         <!-- Build -->
-        <easyj-maven-plugin.version>0.5.6</easyj-maven-plugin.version>
+        <easyj-maven-plugin.version>1.0.5</easyj-maven-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <!-- Compiler -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -102,7 +102,7 @@
         <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
         <maven-dependency-plugin.version>3.0.2</maven-dependency-plugin.version>
         <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
-        <jib-maven-plugin.version>2.3.0</jib-maven-plugin.version>
+        <jib-maven-plugin.version>3.2.0</jib-maven-plugin.version>
         <!-- Deploy && GPG -->
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
@@ -117,10 +117,14 @@
         <maven.test.skip>false</maven.test.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
         <gpg.keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</gpg.keyname>
+        <gpg.arg1/>
+        <gpg.arg2/>
 
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
         <image.tags>latest</image.tags>
+
+        <dependencies.copy.skip>true</dependencies.copy.skip>
     </properties>
 
     <build>
@@ -181,6 +185,7 @@
                     </executions>
                     <configuration>
                         <simplifiedPomFileName>.flattened-pom.xml</simplifiedPomFileName>
+                        <useTabIndent>true</useTabIndent>
                     </configuration>
                 </plugin>
             </plugins>
@@ -286,7 +291,6 @@
         <profile>
             <id>release</id>
             <properties>
-                <image.publish.skip>false</image.publish.skip>
                 <image.tags>${project.version},latest</image.tags>
             </properties>
             <build>
@@ -335,6 +339,10 @@
                                 </goals>
                                 <configuration>
                                     <keyname>${gpg.keyname}</keyname>
+                                    <gpgArguments>
+                                        <arg>${gpg.arg1}</arg>
+                                        <arg>${gpg.arg2}</arg>
+                                    </gpgArguments>
                                 </configuration>
                             </execution>
                         </executions>
@@ -354,8 +362,21 @@
             </distributionManagement>
         </profile>
 
+        <!-- profile: release-by-github-actions -->
         <profile>
-            <id>args-for-un-java8</id>
+            <id>release-by-github-actions</id>
+            <properties>
+                <gpg.arg1>--pinentry-mode</gpg.arg1>
+                <gpg.arg2>loopback</gpg.arg2>
+            </properties>
+        </profile>
+
+        <!-- profile: args-for-test-by-jdk17 -->
+        <profile>
+            <id>args-for-test-by-jdk17</id>
+            <activation>
+                <jdk>17</jdk>
+            </activation>
             <properties>
                 <maven.surefire.argLine>
                     --add-opens java.base/java.lang=ALL-UNNAMED

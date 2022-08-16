@@ -167,7 +167,7 @@ public class SessionHelper {
             GlobalStatus currentStatus = globalSession.getStatus();
             boolean retryBranch =
                 currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
-            if (isTimeoutGlobalStatus(currentStatus)) {
+            if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
@@ -179,7 +179,11 @@ public class SessionHelper {
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
                 beginTime, retryBranch);
         } else {
-            MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+            if (SessionStatusValidator.isTimeoutGlobalStatus(globalSession.getStatus())) {
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
+            } else {
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
+            }
         }
     }
 
@@ -192,7 +196,7 @@ public class SessionHelper {
      */
     public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (isTimeoutGlobalStatus(currentStatus)) {
+        if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
@@ -200,13 +204,6 @@ public class SessionHelper {
         LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
         globalSession.end();
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
-    }
-
-    public static boolean isTimeoutGlobalStatus(GlobalStatus status) {
-        return status == GlobalStatus.TimeoutRollbacked
-                || status == GlobalStatus.TimeoutRollbackFailed
-                || status == GlobalStatus.TimeoutRollbacking
-                || status == GlobalStatus.TimeoutRollbackRetrying;
     }
 
     /**

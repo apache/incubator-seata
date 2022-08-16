@@ -105,6 +105,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
+    protected volatile boolean enableClientBatchSendRequest;
 
     @Override
     public void init() {
@@ -374,7 +375,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         for (Integer msgId : mergeMessage.msgIds) {
                             MessageFuture messageFuture = futures.remove(msgId);
                             if (messageFuture != null) {
-                                messageFuture.setResultMessage(null);
+                                messageFuture.setResultMessage(
+                                    new RuntimeException(String.format("%s is unreachable", address), e));
                             }
                         }
                         LOGGER.error("client merge call failed: {}", e.getMessage(), e);
