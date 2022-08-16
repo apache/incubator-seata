@@ -15,7 +15,6 @@
  */
 package io.seata.config;
 
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.StringUtils;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.implementation.InvocationHandlerAdapter;
+import net.bytebuddy.matcher.ElementMatchers;
 
 /**
  * @author funkye
@@ -34,7 +36,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
 
-    private static final ConcurrentHashMap<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
 
@@ -98,39 +100,34 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
     }
 
-    public Configuration proxy(Configuration originalConfiguration) {
+    public Configuration proxy(Configuration originalConfiguration) throws Exception {
         Class<?> clazz;
         if (originalConfiguration.getClass().getName().contains("$$")) {
             clazz = originalConfiguration.getClass().getSuperclass();
         } else {
             clazz = originalConfiguration.getClass();
         }
-        return (Configuration)Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
-            (proxy, method, args) -> {
-                if (method.getName().startsWith(METHOD_PREFIX)
-                    && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
-                    String rawDataId = (String)args[0];
-                    ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
-                    ObjectWrapper.ConfigType type =
-                        ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
-                    Object defaultValue = null;
-                    if (args.length > 1
-                        && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
-                        defaultValue = args[1];
-                    }
-                    if (null == wrapper
-                        || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
-                        Object result = method.invoke(originalConfiguration, args);
-                        // The wrapper.data only exists in the cache when it is not null.
-                        if (result != null) {
-                            wrapper = new ObjectWrapper(result, type, defaultValue);
-                            CONFIG_CACHE.put(rawDataId, wrapper);
-                        }
-                    }
-                    return wrapper == null ? null : wrapper.convertData(type);
+        return (Configuration)new ByteBuddy().subclass(clazz).method(ElementMatchers.named(METHOD_LATEST_CONFIG))
+            .intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
+                String rawDataId = (String)args[0];
+                ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
+                ObjectWrapper.ConfigType type =
+                    ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
+                Object defaultValue = null;
+                if (args.length > 1 && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
+                    defaultValue = args[1];
                 }
-                return method.invoke(originalConfiguration, args);
-            });
+                if (null == wrapper
+                    || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                    Object result = method.invoke(originalConfiguration, args);
+                    // The wrapper.data only exists in the cache when it is not null.
+                    if (result != null) {
+                        wrapper = new ObjectWrapper(result, type, defaultValue);
+                        CONFIG_CACHE.put(rawDataId, wrapper);
+                    }
+                }
+                return wrapper == null ? null : wrapper.convertData(type);
+            })).make().load(this.getClass().getClassLoader()).getLoaded().getDeclaredConstructor().newInstance();
     }
 
     private static class ConfigurationCacheInstance {
@@ -251,7 +248,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             }
 
             public static ConfigType fromCode(String code) {
-                return CODE_TO_VALUE.get(code.toUpperCase());
+                ConfigType configType = CODE_TO_VALUE.get(code.toUpperCase());
+                return configType == null ? ConfigType.STRING : configType;
             }
 
             public static ConfigType fromName(String name) {

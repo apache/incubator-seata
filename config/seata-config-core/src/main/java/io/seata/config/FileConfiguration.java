@@ -44,9 +44,8 @@ import org.slf4j.LoggerFactory;
  * The type FileConfiguration.
  *
  * @author slievrly
- * @author funkye
  */
-public class FileConfiguration implements Configuration {
+public class FileConfiguration extends AbstractConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfiguration.class);
 
