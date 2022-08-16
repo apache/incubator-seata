@@ -26,6 +26,7 @@
     <artifactId>seata-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
     <name>seata-spring-boot-starter ${project.version}</name>
+    <description>spring-boot-starter for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -38,6 +39,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-all</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--spring-->
         <dependency>
