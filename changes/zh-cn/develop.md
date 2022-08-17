@@ -5,6 +5,7 @@
 ### feature：
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
+- [[#4479](https://github.com/seata/seata/pull/4479)] TCC注解支持添加在实现类及其方法上也生效
 
 
 ### bugfix：
@@ -37,5 +38,6 @@
 - [liujunlin5168](https://github.com/liujunlin5168)
 - [pengten](https://github.com/pengten)
 - [liuqiufeng](https://github.com/liuqiufeng)
+- [yujianfei1986](https://github.com/yujianfei1986)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
