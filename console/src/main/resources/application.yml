@@ -5,16 +5,16 @@ spring:
   application:
     name: seata-console
 
-#logging:
-#  config: classpath:logback-spring.xml
-#  file:
-#    path: ${user.home}/logs/seata
-#  extend:
-#    logstash-appender:
-#      destination: 127.0.0.1:4560
-#    kafka-appender:
-#      bootstrap-servers: 127.0.0.1:9092
-#      topic: logback_to_logstash
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ${user.home}/logs/seata
+  extend:
+    logstash-appender:
+      destination: 127.0.0.1:4560
+    kafka-appender:
+      bootstrap-servers: 127.0.0.1:9092
+      topic: logback_to_logstash
 
 console:
   user:
@@ -24,51 +24,6 @@ console:
 
 
 seata:
-  config:
-    # support: nacos, consul, apollo, zk, etcd3
-    type: file
-  registry:
-    # support: nacos, eureka, redis, zk, consul, etcd3, sofa
-    type: file
-  store:
-    # support: file 、 db 、 redis
-    mode: db
-    file:
-      dir: sessionStore
-      max-branch-session-size: 16384
-      max-global-session-size: 512
-      file-write-buffer-cache-size: 16384
-      session-reload-read-size: 100
-      flush-disk-mode: async
-    db:
-      datasource: druid
-      db-type: mysql
-      driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
-      user: root
-      password: 123456
-      min-conn: 5
-      max-conn: 100
-      global-table: global_table
-      branch-table: branch_table
-      lock-table: lock_table
-      distributed-lock-table: distributed_lock
-      query-limit: 100
-      max-wait: 5000
-    redis:
-      mode: single
-      database: 0
-      min-conn: 1
-      max-conn: 10
-      password:
-      max-total: 100
-      query-limit: 100
-      single:
-        host: 127.0.0.1
-        port: 6379
-      sentinel:
-        master-name:
-        sentinel-hosts:
   server:
     port: 7091
     address: 127.0.0.1
