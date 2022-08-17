@@ -6,12 +6,11 @@
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC注解支持添加在实现类及其方法上也生效
-
+- [[#2667](https://github.com/seata/seata/pull/2923)] 添加管道处理线程池，主要处理编解码等非业务逻辑
 
 ### bugfix：
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
 - [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
-- [[#2667](https://github.com/seata/seata/pull/2923)] 添加管道处理线程池，主要处理编解码等非业务逻辑
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
