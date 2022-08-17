@@ -107,26 +107,27 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         } else {
             clazz = originalConfiguration.getClass();
         }
-        return (Configuration)new ByteBuddy().subclass(clazz).method(ElementMatchers.named(METHOD_LATEST_CONFIG))
+        return (Configuration)new ByteBuddy().subclass(clazz).method(ElementMatchers.nameStartsWith(METHOD_PREFIX))
             .intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
-                String rawDataId = (String)args[0];
-                ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
-                ObjectWrapper.ConfigType type =
-                    ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
-                Object defaultValue = null;
-                if (args.length > 1 && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
-                    defaultValue = args[1];
-                }
-                if (null == wrapper
-                    || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
-                    Object result = method.invoke(originalConfiguration, args);
-                    // The wrapper.data only exists in the cache when it is not null.
-                    if (result != null) {
-                        wrapper = new ObjectWrapper(result, type, defaultValue);
-                        CONFIG_CACHE.put(rawDataId, wrapper);
+                if (!method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                    String rawDataId = (String)args[0];
+                    ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
+                    ObjectWrapper.ConfigType type = ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
+                    Object defaultValue = null;
+                    if (args.length > 1 && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
+                        defaultValue = args[1];
                     }
+                    if (null == wrapper || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                        Object result = method.invoke(originalConfiguration, args);
+                        // The wrapper.data only exists in the cache when it is not null.
+                        if (result != null) {
+                            wrapper = new ObjectWrapper(result, type, defaultValue);
+                            CONFIG_CACHE.put(rawDataId, wrapper);
+                        }
+                    }
+                    return wrapper == null ? null : wrapper.convertData(type);
                 }
-                return wrapper == null ? null : wrapper.convertData(type);
+                return method.invoke(originalConfiguration, args);
             })).make().load(this.getClass().getClassLoader()).getLoaded().getDeclaredConstructor().newInstance();
     }
 
