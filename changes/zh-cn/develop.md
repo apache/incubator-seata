@@ -4,6 +4,7 @@
 
 ### feature：
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
+- [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
 
 
 ### bugfix：
@@ -19,6 +20,7 @@
 - [[#4800](https://github.com/seata/seata/pull/4800)] 按照 Apache 协议规范，添加 NOTICE 文件
 - [[#4761](https://github.com/seata/seata/pull/4761)] 使用 hget 代替 RedisLocker 中的 hmget, 因为只有一个 field
 - [[#4414](https://github.com/seata/seata/pull/4414)] 移除log4j依赖
+- [[#4836](https://github.com/seata/seata/pull/4836)] 优化 BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) 方法可读性
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -34,5 +36,6 @@
 - [AlexStocks](https://github.com/AlexStocks)
 - [liujunlin5168](https://github.com/liujunlin5168)
 - [pengten](https://github.com/pengten)
+- [liuqiufeng](https://github.com/liuqiufeng)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
