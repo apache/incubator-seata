@@ -15,90 +15,42 @@
  */
 package io.seata.console.controller;
 
-import io.seata.console.config.WebSecurityConfig;
 import io.seata.console.param.GlobalLockParam;
 import io.seata.console.result.GlobalLockVO;
 import io.seata.console.result.PageResult;
+import io.seata.console.utils.UrlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @description: inner server http request of global lock
  * @author: Sher
  */
-
-
 @RestController
 @RequestMapping("/api/v1/console/globalLock")
 public class GlobalLockServerController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionServerController.class);
     @Autowired
-    RestTemplate restTemplate;
-    @Resource
-    HttpServletRequest request;
+    private UrlUtils urlUtils;
 
-    //server inner request address and host
-    @Value("${seata.server.port}")
-    private Integer port;
-    @Value("${seata.server.address}")
-    private String address;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockServerController.class);
-
-
+    /**
+     * Query locks by param
+     *
+     * @param param the param
+     * @return the list of GlobalLockVO
+     */
     @GetMapping("query")
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
-        // generate innner http request url
-        String url = generateUrl(request);
-
-        // add token to header
-        HttpEntity<String> httpEntity = getHttpEntity(request);
-
-        PageResult response = new PageResult();
-
+        PageResult result = new PageResult();
         try {
-            ResponseEntity<PageResult> result = restTemplate.exchange(url, HttpMethod.GET, httpEntity, PageResult.class);
-            response = result.getBody();
-
+            result = urlUtils.getPageResult();
         } catch (Exception e) {
-            LOGGER.error("Server request error:", e);
+            LOGGER.error("query global lock information failed:", e);
         }
-        return response;
+        return result;
     }
-
-    // generate server http request url
-    private String generateUrl(HttpServletRequest request) {
-        //requestUrl
-        String requesturl = request.getRequestURI();
-        //queryParam
-        String queryString = request.getQueryString();
-        // http://localhost:7091/server//api/v1/console/globalLock
-        String url = "http://" + address + ":" + port + "/server" + requesturl + "?" + queryString;
-        return url;
-    }
-
-    // add token to header
-    private HttpEntity<String> getHttpEntity(HttpServletRequest request) {
-        // get bearerToken
-        String bearerToken = request.getHeader(WebSecurityConfig.AUTHORIZATION_HEADER);
-        // add beartoken to header
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(HttpHeaders.AUTHORIZATION, bearerToken);
-        HttpEntity<String> httpEntity = new HttpEntity(null, httpHeaders);
-        return httpEntity;
-    }
-
-
 }
