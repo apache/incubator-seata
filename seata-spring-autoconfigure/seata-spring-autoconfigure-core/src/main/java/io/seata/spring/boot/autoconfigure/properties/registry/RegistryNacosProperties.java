@@ -32,7 +32,10 @@ public class RegistryNacosProperties {
     private String cluster = "default";
     private String username = "";
     private String password = "";
+    private String accessKey = "";
+    private String secretKey = "";
     private String application = "seata-server";
+    private String slbPattern = "";
 
     public String getServerAddr() {
         return serverAddr;
@@ -68,6 +71,7 @@ public class RegistryNacosProperties {
         this.cluster = cluster;
         return this;
     }
+
     public String getUsername() {
         return username;
     }
@@ -94,4 +98,32 @@ public class RegistryNacosProperties {
         this.application = application;
         return this;
     }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public RegistryNacosProperties setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+        return this;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public RegistryNacosProperties setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+        return this;
+    }
+
+    public String getSlbPattern() {
+        return slbPattern;
+    }
+
+    public RegistryNacosProperties setSlbPattern(String slbPattern) {
+        this.slbPattern = slbPattern;
+        return this;
+    }
+
 }

@@ -20,9 +20,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.DataSource;
 import java.util.Objects;
-
+import javax.sql.DataSource;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
@@ -31,9 +30,9 @@ import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationChangeEvent;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.DistributedLockDO;
@@ -56,16 +55,16 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private final String datasourceType;
 
-    private String distributedLockTable;
+    private volatile String distributedLockTable;
 
     private DataSource distributedLockDataSource;
 
     /**
-     * weather the distribute lock demotion
+     * whether the distribute lock demotion
      * using for 1.5.0 only and will remove in 1.6.0
      */
     @Deprecated
-    private boolean demotion;
+    private volatile boolean demotion;
 
     /**
      * Instantiates a new Log store data base dao.
@@ -83,9 +82,10 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                 @Override
                 public void onChangeEvent(ConfigurationChangeEvent event) {
                     String newValue = event.getNewValue();
-                    if (StringUtils.isNotBlank(newValue) && newValue.equalsIgnoreCase(distributedLockTable)) {
+                    if (StringUtils.isNotBlank(newValue)) {
                         distributedLockTable = newValue;
                         init();
+                        demotion = false;
                         ConfigurationCache.removeConfigListener(DISTRIBUTED_LOCK_DB_TABLE, this);
                     }
                 }
@@ -249,6 +249,6 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private void init() {
         this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        demotion = true;
     }
+
 }

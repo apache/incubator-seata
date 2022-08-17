@@ -11,11 +11,13 @@
 
     <artifactId>seata-config-spring-cloud</artifactId>
     <name>seata-config-spring-cloud ${project.version}</name>
+    <description>config-spring-cloud for Seata built with Maven</description>
+
     <dependencies>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-config-core</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

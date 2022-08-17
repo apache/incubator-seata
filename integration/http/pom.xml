@@ -27,6 +27,7 @@
     <artifactId>seata-http</artifactId>
     <packaging>jar</packaging>
     <name>seata-http ${project.version}</name>
+    <description>http-client integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -41,8 +42,7 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

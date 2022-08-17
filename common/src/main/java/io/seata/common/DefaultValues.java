@@ -30,7 +30,7 @@ public interface DefaultValues {
     int DEFAULT_TM_DEGRADE_CHECK_PERIOD = 2000;
     int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
     boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
-    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = true;
     long DEFAULT_TABLE_META_CHECKER_INTERVAL = 60000L;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
@@ -51,6 +51,7 @@ public interface DefaultValues {
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
     boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
     boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
+    boolean DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = false;
 
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
@@ -113,7 +114,7 @@ public interface DefaultValues {
 
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
-    String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    String DEFAULT_LOAD_BALANCE = "XID";
     int VIRTUAL_NODES_DEFAULT = 10;
 
     /**
@@ -167,17 +168,32 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(2).toMillis();
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
 
     /**
      * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(10).toMillis();
+    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
 
     /**
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(5).toMillis();
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+
+    /**
+     * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
+     */
+    int DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
+
+    /**
+     * the constant DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT
+     */
+    int DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT = 60000;
+
+    /**
+     * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
+     */
+    int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
 
     String DEFAULT_SERVER_PIPELINE_THREAD_PREFIX = "NettyServerPipeline";
     int DEFAULT_SERVER_PIPELINE_THREAD_SIZE = 8;

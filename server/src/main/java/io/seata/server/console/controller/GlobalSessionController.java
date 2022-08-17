@@ -15,22 +15,23 @@
  */
 package io.seata.server.console.controller;
 
-import io.seata.core.store.db.vo.GlobalSessionVO;
-import io.seata.server.console.result.PageResult;
-import io.seata.server.console.result.SingleResult;
+import javax.annotation.Resource;
+
+import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.console.service.GlobalSessionService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * Global Session Controller
  * @author: zhongxiang.wang
  */
 @RestController
-@RequestMapping("console/globalSession")
+@RequestMapping("/api/v1/console/globalSession")
 public class GlobalSessionController {
 
     @Resource(type = GlobalSessionService.class)
@@ -38,27 +39,12 @@ public class GlobalSessionController {
 
     /**
      * Query all globalSession
-     * @return
+     * @param param param for query globalSession
+     * @return  the list of GlobalSessionVO
      */
-    @GetMapping("queryAll")
-    public PageResult<GlobalSessionVO> queryAll(String applicationId, boolean withBranch) {
-        return globalSessionService.queryAll(applicationId, withBranch);
+    @GetMapping("query")
+    public PageResult<GlobalSessionVO> query(@ModelAttribute GlobalSessionParam param) {
+        return globalSessionService.query(param);
     }
 
-    /**
-     * Query all globalSession by status
-     * @param applicationId
-     * @param status
-     * @param withBranch
-     * @return
-     */
-    @GetMapping("queryByStatus")
-    public PageResult<GlobalSessionVO> queryByStatus(String applicationId, Integer status, boolean withBranch) {
-        return globalSessionService.queryByStatus(applicationId, status, withBranch);
-    }
-
-    @GetMapping("queryByXid")
-    SingleResult<GlobalSessionVO> queryByXid(String xid, boolean withBranch) {
-        return globalSessionService.queryByXid(xid, withBranch);
-    }
 }

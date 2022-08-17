@@ -20,12 +20,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TreeSet;
+
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -344,7 +345,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         StringBuilder sb = new StringBuilder();
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
-        int filedSequence = 0;
+        int rowSequence = 0;
         List<Map<String, Field>> pksRows = rowsIncludingPK.pkRows();
         List<String> primaryKeysOnlyName = getTableMeta().getPrimaryKeyOnlyName();
         for (Map<String, Field> rowMap : pksRows) {
@@ -356,8 +357,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 sb.append(rowMap.get(pkName).getValue());
                 pkSplitIndex++;
             }
-            filedSequence++;
-            if (filedSequence < pksRows.size()) {
+            rowSequence++;
+            if (rowSequence < pksRows.size()) {
                 sb.append(",");
             }
         }
@@ -430,7 +431,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
-            Set<String> columns = new HashSet<>(recognizer.getInsertColumns());
+            Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+            columns.addAll(recognizer.getInsertColumns());
             columns.addAll(pkColumnNameList);
             for (String columnName : columns) {
                 selectSQLJoin.add(columnName);

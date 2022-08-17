@@ -24,22 +24,17 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-etcd3</artifactId>
     <name>seata-discovery-etcd3 ${project.version}</name>
+    <description>discovery-etcd3 for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-core</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
