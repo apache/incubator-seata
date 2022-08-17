@@ -13,19 +13,14 @@ public class RegistryMeterKeyTest {
     @Test
     public void testGetIdMeterKey() {
         Id id1 = COUNTER_ACTIVE.withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM);
+        String meterKey1 = id1.getMeterKey();
         Id id2 = COUNTER_ACTIVE.withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC);
+        String meterKey2 = id2.getMeterKey();
         Id id3 = COUNTER_ACTIVE.withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM);
+        String meterKey3 = id3.getMeterKey();
 
-        Assertions.assertNotEquals(id1.getMeterKey(), id2.getMeterKey());
-        Assertions.assertEquals(id1.getMeterKey(),id3.getMeterKey());
-
-        Counter c1 = RegistryFactory.getInstance().getCounter(id1);
-        Counter c2 = RegistryFactory.getInstance().getCounter(id2);
-        Counter c3 = RegistryFactory.getInstance().getCounter(id3);
-
-        Assertions.assertNotEquals(c1, c2);
-        Assertions.assertEquals(c2, c3);
-
+        Assertions.assertNotEquals(meterKey2, meterKey1);
+        Assertions.assertEquals(meterKey3, meterKey1);
     }
 
 }
