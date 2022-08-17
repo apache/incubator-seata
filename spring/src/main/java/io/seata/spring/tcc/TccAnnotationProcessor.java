@@ -90,10 +90,10 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
      * @param bean           the bean
      * @param beanName       the bean name
      * @param field          the field
-     * @param interfaceClass the interface class
+     * @param serviceClass   the serviceClass
      * @throws IllegalAccessException the illegal access exception
      */
-    public void addTccAdvise(Object bean, String beanName, Field field, Class interfaceClass) throws IllegalAccessException {
+    public void addTccAdvise(Object bean, String beanName, Field field, Class serviceClass) throws IllegalAccessException {
         Object fieldValue = field.get(bean);
         if (fieldValue == null) {
             return;
@@ -101,10 +101,10 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
         for (Method method : field.getType().getMethods()) {
             if (!Modifier.isStatic(method.getModifiers()) && (method.isAnnotationPresent(TwoPhaseBusinessAction.class))) {
                 RemotingDesc remotingDesc = new RemotingDesc();
-                remotingDesc.setInterfaceClass(interfaceClass);
+                remotingDesc.setServiceClass(serviceClass);
 
                 TccActionInterceptor actionInterceptor = new TccActionInterceptor(remotingDesc);
-                Object proxyBean = TCCBeanParserUtils.createProxy(interfaceClass, fieldValue, actionInterceptor);
+                Object proxyBean = TCCBeanParserUtils.createProxy(serviceClass, fieldValue, actionInterceptor);
                 field.setAccessible(true);
                 field.set(bean, proxyBean);
                 LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy [" + actionInterceptor.getClass().getName() + "]");
