@@ -80,8 +80,8 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
                 String group = (String) ReflectionUtil.invokeMethod(metadata, "getGroup");
 
                 RemotingDesc serviceBeanDesc = new RemotingDesc();
-                serviceBeanDesc.setInterfaceClass(interfaceClass);
-                serviceBeanDesc.setInterfaceClassName(interfaceClassName);
+                serviceBeanDesc.setServiceClass(interfaceClass);
+                serviceBeanDesc.setServiceClassName(interfaceClassName);
                 serviceBeanDesc.setUniqueId(uniqueId);
                 serviceBeanDesc.setGroup(group);
                 serviceBeanDesc.setProtocol(Protocols.HSF);
@@ -95,8 +95,8 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
                 String uniqueId = (String) ReflectionUtil.invokeMethod(metadata, "getVersion");
                 String group = (String) ReflectionUtil.invokeMethod(metadata, "getGroup");
                 RemotingDesc serviceBeanDesc = new RemotingDesc();
-                serviceBeanDesc.setInterfaceClass(interfaceClass);
-                serviceBeanDesc.setInterfaceClassName(interfaceClassName);
+                serviceBeanDesc.setServiceClass(interfaceClass);
+                serviceBeanDesc.setServiceClassName(interfaceClassName);
                 serviceBeanDesc.setUniqueId(uniqueId);
                 serviceBeanDesc.setGroup(group);
 

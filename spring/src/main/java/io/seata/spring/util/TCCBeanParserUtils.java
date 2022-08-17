@@ -113,8 +113,8 @@ public class TCCBeanParserUtils {
         }
         //check if it is TCC bean
         boolean isTccClazz = false;
-        Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-        Method[] methods = tccInterfaceClazz.getMethods();
+        Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+        Method[] methods = tccServiceClazz.getMethods();
         TwoPhaseBusinessAction twoPhaseBusinessAction;
         for (Method method : methods) {
             twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
@@ -151,8 +151,8 @@ public class TCCBeanParserUtils {
             if (tccFenceConfig == null || tccFenceConfig.getInitialized().get()) {
                 return;
             }
-            Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-            Method[] methods = tccInterfaceClazz.getMethods();
+            Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+            Method[] methods = tccServiceClazz.getMethods();
             for (Method method : methods) {
                 TwoPhaseBusinessAction twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
                 if (twoPhaseBusinessAction != null && twoPhaseBusinessAction.useTCCFence()) {
