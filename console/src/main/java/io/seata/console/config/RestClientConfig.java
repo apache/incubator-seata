@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.console.config;
 
 import org.springframework.context.annotation.Bean;
@@ -21,15 +20,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * restTemplate config
+ *
  * @author: Sher
- * @date: 2022/6/30
  */
 @Configuration
 public class RestClientConfig {
     @Bean
     public RestTemplate restTemplate() {
-
         return new RestTemplate();
     }
-
 }
