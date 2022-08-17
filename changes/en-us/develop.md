@@ -5,6 +5,7 @@ Add changes here for all PR submitted to the develop branch.
 ### feature:
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile support arm64
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
+- [[#2667](https://github.com/seata/seata/pull/2923)] add pipeline processing thread pool, mainly deal with non-business logic such as codec etc
 
 
 ### bugfix:
