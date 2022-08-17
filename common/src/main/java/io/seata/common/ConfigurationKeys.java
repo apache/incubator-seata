@@ -854,4 +854,23 @@ public interface ConfigurationKeys {
      */
     String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
 
+    /**
+     * The constant SERVER_PIPELINE_THREAD_PREFIX
+     */
+    String SERVER_PIPELINE_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "serverPipelineThreadPrefix";
+
+    /**
+     * The constant SERVER_PIPELINE_THREAD_SIZE
+     */
+    String SERVER_PIPELINE_THREAD_SIZE = THREAD_FACTORY_PREFIX + "serverPipelineThreadSize";
+
+    /**
+     * The constant CLIENT_PIPELINE_THREAD_PREFIX
+     */
+    String CLIENT_PIPELINE_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "clientPipelineThreadPrefix";
+
+    /**
+     * The constant CLIENT_PIPELINE_THREAD_SIZE
+     */
+    String CLIENT_PIPELINE_THREAD_SIZE = THREAD_FACTORY_PREFIX + "clientPipelineThreadSize";
 }
