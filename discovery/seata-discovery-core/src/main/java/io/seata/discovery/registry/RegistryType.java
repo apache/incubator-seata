@@ -54,6 +54,10 @@ public enum RegistryType {
      */
     Sofa,
     /**
+     * Tencent Polaris Registry type
+     */
+    Polaris,
+    /**
      * Custom registry type
      */
     Custom;

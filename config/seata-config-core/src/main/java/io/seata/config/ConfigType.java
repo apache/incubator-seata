@@ -50,6 +50,10 @@ public enum ConfigType {
      */
     SpringCloudConfig,
     /**
+     * Tencent Polaris config type
+     */
+    Polaris,
+    /**
      * Custom config type
      */
     Custom;
