@@ -58,6 +58,7 @@ public interface StarterConstants {
 
     String CONFIG_PREFIX = SEATA_PREFIX + ".config";
     String CONFIG_NACOS_PREFIX = CONFIG_PREFIX + ".nacos";
+    String CONFIG_POLARIS_PREFIX = CONFIG_PREFIX + ".polaris";
     String CONFIG_CONSUL_PREFIX = CONFIG_PREFIX + ".consul";
     String CONFIG_ETCD3_PREFIX = CONFIG_PREFIX + ".etcd3";
     String CONFIG_APOLLO_PREFIX = CONFIG_PREFIX + ".apollo";

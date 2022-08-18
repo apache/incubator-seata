@@ -15,7 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import io.seata.spring.boot.autoconfigure.properties.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
@@ -26,6 +25,7 @@ import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperti
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigPolarisProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
@@ -37,6 +37,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -48,6 +49,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_POLARIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
@@ -69,6 +71,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
  * @author xingfudeshi@gmail.com
  * @author wang.liang
  * @author funkye
+ * @author misselvexu
  */
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
@@ -91,6 +94,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, RegistryProperties.class);
 
             PROPERTY_BEAN_MAP.put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
+            PROPERTY_BEAN_MAP.put(CONFIG_POLARIS_PREFIX, ConfigPolarisProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_ZK_PREFIX, ConfigZooKeeperProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_APOLLO_PREFIX, ConfigApolloProperties.class);
