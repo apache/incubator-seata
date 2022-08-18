@@ -46,10 +46,10 @@ jobs:
       - name: "Package and Publish-Image-To-DockerHub"
         if: matrix.type == 'image'
         env:
+          IMAGE_NAME: openjdk:17.0.2
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          echo "IMAGE_NAME=openjdk:17.0.2" >> $GITHUB_ENV;
           if [ "${{github.ref}}" == "refs/heads/snapshot" ]; then
             ./mvnw -T 4C clean package -Pimage               -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
