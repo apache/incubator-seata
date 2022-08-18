@@ -291,10 +291,8 @@
                             <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
                             <!--gc-->
                             <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
-                            <jvmFlag>-XX:+CMSParallelRemarkEnabled</jvmFlag>
-                            <jvmFlag>-XX:+UseCMSInitiatingOccupancyOnly</jvmFlag>
-                            <jvmFlag>-XX:CMSInitiatingOccupancyFraction=75</jvmFlag>
-                            <jvmFlag>-Xloggc:/var/log/seata_gc.log</jvmFlag>
+                            <jvmFlag>-XX:+UseZGC</jvmFlag>
+                            <jvmFlag>-Xlog:gc=trace:file=/var/log/seata_gc.log:time,tags:filecount=10,filesize=10M</jvmFlag>
                             <jvmFlag>-verbose:gc</jvmFlag>
                             <!--netty-->
                             <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
