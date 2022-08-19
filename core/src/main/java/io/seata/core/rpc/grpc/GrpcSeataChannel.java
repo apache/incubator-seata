@@ -14,11 +14,11 @@ import io.seata.core.rpc.SeataChannel;
 public class GrpcSeataChannel implements SeataChannel {
     private Channel channel;
 
-    private StreamObserver<Message> streamObserver;
+    private StreamObserver<? extends Message> streamObserver;
 
     private String connectionId;
 
-    public GrpcSeataChannel(String connectionId, Channel channel, StreamObserver<Message> streamObserver) {
+    public GrpcSeataChannel(String connectionId, Channel channel, StreamObserver<? extends Message> streamObserver) {
         this.connectionId = connectionId;
         this.channel = channel;
         this.streamObserver = streamObserver;

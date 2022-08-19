@@ -165,7 +165,12 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             if (!(msg instanceof RpcMessage)) {
                 return;
             }
-            processMessage(ctx, (RpcMessage) msg);
+            RpcMessage rpcMessage = (RpcMessage) msg;
+            NettyRpcMessageHandleContext context = new NettyRpcMessageHandleContext(ctx, rpcMessage);
+            context.setMessageReply(response ->
+                    sendAsyncResponse(rpcMessage, ctx.channel(), response)
+            );
+            processMessage(context, rpcMessage.getBody());
         }
 
         @Override

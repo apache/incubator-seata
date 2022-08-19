@@ -15,15 +15,13 @@
  */
 package io.seata.core.rpc.processor.client;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.processor.MessageReply;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class RmBranchRollbackProcessor implements RemotingProcessor<BranchRollbackRequest, BranchRollbackResponse> {
+public class RmBranchRollbackProcessor implements RemotingProcessor<BranchRollbackRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmBranchRollbackProcessor.class);
 
@@ -50,11 +48,15 @@ public class RmBranchRollbackProcessor implements RemotingProcessor<BranchRollba
     }
 
     @Override
-    public BranchRollbackResponse process(RpcMessageHandlerContext ctx, BranchRollbackRequest request) throws Exception {
+    public void process(RpcMessageHandleContext ctx, BranchRollbackRequest request) throws Exception {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm handle branch rollback process:" + request);
         }
-        return handleBranchRollback(request);
+        BranchRollbackResponse branchRollbackResponse = handleBranchRollback(request);
+        MessageReply messageReply = ctx.getMessageReply();
+        if (null != messageReply) {
+            messageReply.reply(branchRollbackResponse);
+        }
     }
 
     private BranchRollbackResponse handleBranchRollback(BranchRollbackRequest branchRollbackRequest) {

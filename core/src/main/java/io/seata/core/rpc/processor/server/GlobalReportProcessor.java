@@ -5,7 +5,7 @@ import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 
 /**
  * @author goodboycoder
@@ -16,7 +16,7 @@ public class GlobalReportProcessor extends BaseServerOnRequestProcessor<GlobalRe
     }
 
     @Override
-    protected GlobalReportResponse onRequestMessage(RpcMessageHandlerContext ctx, GlobalReportRequest request) {
+    protected GlobalReportResponse onRequestMessage(RpcMessageHandleContext ctx, GlobalReportRequest request) {
         RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(ctx.channel());
         return (GlobalReportResponse) transactionMessageHandler.onRequest(request, rpcContext);
     }

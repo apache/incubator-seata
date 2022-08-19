@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.Channel;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -59,7 +60,7 @@ import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.NettyServerConfig;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,8 +123,13 @@ public class MergedWarpMessageProcessor extends BaseServerOnRequestProcessor<Mer
     }
 
     @Override
-    protected MergeResultMessage onRequestMessage(RpcMessageHandlerContext ctx, MergedWarpMessage message) {
+    protected MergeResultMessage onRequestMessage(RpcMessageHandleContext ctx, MergedWarpMessage message) {
         RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(ctx.channel());
+        if (null == rpcContext) {
+            LOGGER.error("fail to get rpcContext associated with channel:{}", ctx.channel());
+            return null;
+        }
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
                 NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
@@ -237,7 +243,7 @@ public class MergedWarpMessageProcessor extends BaseServerOnRequestProcessor<Mer
                     }
                     batchResultMessageMap.forEach((clientRequestRpcInfo, batchResultMessage) ->
                         remotingServer.sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo),
-                            channel, batchResultMessage));
+                                (Channel) channel.originChannel(), batchResultMessage));
                 });
                 isResponding = false;
             }
@@ -259,7 +265,7 @@ public class MergedWarpMessageProcessor extends BaseServerOnRequestProcessor<Mer
      * @param ctx ctx
      * @param rpcContext rpcContext
      */
-    private void handleRequestsByMergedWarpMessageBy150(AbstractMessage msg, int msgId, RpcMessageHandlerContext ctx, RpcContext rpcContext) {
+    private void handleRequestsByMergedWarpMessageBy150(AbstractMessage msg, int msgId, RpcMessageHandleContext ctx, RpcContext rpcContext) {
         AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(msg, rpcContext);
         BlockingQueue<QueueItem> msgQueue = computeIfAbsentMsgQueue(ctx.channel());
 
@@ -312,11 +318,11 @@ public class MergedWarpMessageProcessor extends BaseServerOnRequestProcessor<Mer
          */
         private Map<String, String> headMap;
 
-        public ClientRequestRpcInfo(RpcMessageHandlerContext ctx) {
-            this.rpcMessageId = ctx.getMessageId();
-            this.codec = ctx.getCodec();
-            this.compressor = ctx.getCompressor();
-            this.headMap = ctx.getHeadMap();
+        public ClientRequestRpcInfo(RpcMessageHandleContext ctx) {
+            this.rpcMessageId = ctx.getMessageMeta().getMessageId();
+            this.codec = ctx.getMessageMeta().getCodec();
+            this.compressor = ctx.getMessageMeta().getCompressor();
+            this.headMap = ctx.getMessageMeta().getHeadMap();
         }
 
         public int getRpcMessageId() {

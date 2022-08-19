@@ -1,19 +1,18 @@
 package io.seata.core.rpc.processor.server;
 
 import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.transaction.BranchRegisterRequest;
-import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.processor.MessageReply;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author goodboycoder
  */
-public abstract class BaseServerOnRequestProcessor<T, S> implements RemotingProcessor<T, S> {
+public abstract class BaseServerOnRequestProcessor<T, S> implements RemotingProcessor<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchRegisterProcessor.class);
 
     protected final TransactionMessageHandler transactionMessageHandler;
@@ -23,9 +22,13 @@ public abstract class BaseServerOnRequestProcessor<T, S> implements RemotingProc
     }
 
     @Override
-    public S process(RpcMessageHandlerContext ctx, T request) throws Exception {
+    public void process(RpcMessageHandleContext ctx, T request) throws Exception {
         if (SeataChannelServerManager.isRegistered(ctx.channel()) && request instanceof AbstractMessage) {
-            return onRequestMessage(ctx, request);
+            S response = onRequestMessage(ctx, request);
+            MessageReply messageReply = ctx.getMessageReply();
+            if (null != messageReply) {
+                messageReply.reply(response);
+            }
         } else {
             try {
                 if (LOGGER.isInfoEnabled()) {
@@ -40,8 +43,7 @@ public abstract class BaseServerOnRequestProcessor<T, S> implements RemotingProc
                 LOGGER.info(String.format("close a unhandled connection! [%s]", ctx.channel().toString()));
             }
         }
-        return null;
     }
 
-    protected abstract S onRequestMessage(RpcMessageHandlerContext ctx, T request);
+    protected abstract S onRequestMessage(RpcMessageHandleContext ctx, T request);
 }

@@ -5,7 +5,7 @@ import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 
 /**
  * @author goodboycoder
@@ -17,7 +17,7 @@ public class GlobalCommitProcessor extends BaseServerOnRequestProcessor<GlobalCo
     }
 
     @Override
-    protected GlobalCommitResponse onRequestMessage(RpcMessageHandlerContext ctx, GlobalCommitRequest request) {
+    protected GlobalCommitResponse onRequestMessage(RpcMessageHandleContext ctx, GlobalCommitRequest request) {
         RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(ctx.channel());
         return (GlobalCommitResponse) transactionMessageHandler.onRequest(request, rpcContext);
     }

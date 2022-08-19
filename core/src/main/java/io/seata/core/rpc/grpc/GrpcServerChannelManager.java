@@ -16,7 +16,7 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.Version;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannel;
-import io.seata.core.rpc.netty.ChannelUtil;
+import io.seata.core.rpc.SeataChannelUtil;
 import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class GrpcServerChannelManager {
     /**
      * connectionId -> rpcContext
      */
-    private static final Map<String, RpcContext> channelMap = new ConcurrentHashMap<>();
+    private static final Map<String, RpcContext> CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
      * resourceId -> applicationId -> ip -> port -> connectionId
@@ -59,10 +59,10 @@ public class GrpcServerChannelManager {
                 null, channel);
 //        rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         String connectionId = channel.getId();
-        channelMap.put(connectionId, rpcContext);
+        CHANNEL_MAP.put(connectionId, rpcContext);
 
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-                + ChannelUtil.getClientIpFromChannel(channel);
+                + SeataChannelUtil.getClientIpFromChannel(channel);
         ConcurrentMap<Integer, String> clientIdentifiedMap = CollectionUtils.computeIfAbsent(TM_CHANNELS,
                 clientIdentified, key -> new ConcurrentHashMap<>());
 //        rpcContext.holdInClientChannels(clientIdentifiedMap);
@@ -80,24 +80,24 @@ public class GrpcServerChannelManager {
         Version.checkVersion(request.getVersion());
         Set<String> dbKeySet = dbKeyToSet(request.getResourceIds());
         RpcContext rpcContext;
-        if (!channelMap.containsKey(channel.getId())) {
+        if (!CHANNEL_MAP.containsKey(channel.getId())) {
             rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, request.getVersion(),
                     request.getApplicationId(), request.getTransactionServiceGroup(),
                     request.getResourceIds(), channel);
 //            rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         } else {
-            rpcContext = channelMap.get(channel.getId());
+            rpcContext = CHANNEL_MAP.get(channel.getId());
             rpcContext.addResources(dbKeySet);
         }
 
         if (CollectionUtils.isEmpty(dbKeySet)) { return; }
         for (String resourceId : dbKeySet) {
             String clientIp;
-            ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
+            ConcurrentMap<Integer, String> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
                     .computeIfAbsent(request.getApplicationId(), key -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(clientIp = ChannelUtil.getClientIpFromChannel(channel), key -> new ConcurrentHashMap<>());
+                    .computeIfAbsent(clientIp = SeataChannelUtil.getClientIpFromChannel(channel), key -> new ConcurrentHashMap<>());
 
-            rpcContext.holdInResourceManagerChannels(resourceId, portMap);
+//            rpcContext.holdInResourceManagerChannels(resourceId, portMap);
 //            updateChannelsResource(resourceId, clientIp, request.getApplicationId());
         }
     }
@@ -115,12 +115,12 @@ public class GrpcServerChannelManager {
         holder.setApplicationId(applicationId);
         holder.setTransactionServiceGroup(txServiceGroup);
         holder.addResources(dbKeyToSet(dbkeys));
-        holder.setChannel(channel);
+//        holder.setChannel(channel);
         return holder;
     }
 
     private String buildClientId(String applicationId, SeataChannel channel) {
-        return applicationId + Constants.CLIENT_ID_SPLIT_CHAR + ChannelUtil.getAddressFromChannel(channel);
+        return applicationId + Constants.CLIENT_ID_SPLIT_CHAR + SeataChannelUtil.getAddressFromChannel(channel);
     }
 
     private static Set<String> dbKeyToSet(String dbKey) {

@@ -76,6 +76,6 @@ public interface RemotingServer {
      * @param processor   {@link RemotingProcessor}
      * @param executor    thread pool
      */
-    void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
+    void registerProcessor(final int messageType, final RemotingProcessor<?> processor, final ExecutorService executor);
 
 }

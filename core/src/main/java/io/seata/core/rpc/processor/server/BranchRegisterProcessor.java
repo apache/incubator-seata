@@ -5,7 +5,7 @@ import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ public class BranchRegisterProcessor extends BaseServerOnRequestProcessor<Branch
     }
 
     @Override
-    protected BranchRegisterResponse onRequestMessage(RpcMessageHandlerContext ctx, BranchRegisterRequest branchRegisterRequest) {
+    protected BranchRegisterResponse onRequestMessage(RpcMessageHandleContext ctx, BranchRegisterRequest branchRegisterRequest) {
         RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(ctx.channel());
         return (BranchRegisterResponse) transactionMessageHandler.onRequest(branchRegisterRequest, rpcContext);
     }

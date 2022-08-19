@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
 import io.seata.core.protocol.MergeMessage;
@@ -28,7 +28,6 @@ import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportResponse;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
@@ -38,6 +37,7 @@ import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class ClientOnResponseProcessor implements RemotingProcessor {
+public class ClientOnResponseProcessor implements RemotingProcessor<AbstractMessage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 
@@ -90,22 +90,22 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        if (rpcMessage.getBody() instanceof MergeResultMessage) {
-            MergeResultMessage results = (MergeResultMessage) rpcMessage.getBody();
-            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(rpcMessage.getId());
+    public void process(RpcMessageHandleContext ctx, AbstractMessage rpcMessage) throws Exception {
+        if (rpcMessage instanceof MergeResultMessage) {
+            MergeResultMessage results = (MergeResultMessage) rpcMessage;
+            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(ctx.getMessageMeta().getMessageId());
             for (int i = 0; i < mergeMessage.msgs.size(); i++) {
                 int msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
-                    LOGGER.error("msg: {} is not found in futures, result message: {}", msgId,results.getMsgs()[i]);
+                    LOGGER.error("msg: {} is not found in futures, result message: {}", msgId, results.getMsgs()[i]);
                 } else {
                     future.setResultMessage(results.getMsgs()[i]);
                 }
             }
-        } else if (rpcMessage.getBody() instanceof BatchResultMessage) {
+        } else if (rpcMessage instanceof BatchResultMessage) {
             try {
-                BatchResultMessage batchResultMessage = (BatchResultMessage) rpcMessage.getBody();
+                BatchResultMessage batchResultMessage = (BatchResultMessage) rpcMessage;
                 for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
                     int msgId = batchResultMessage.getMsgIds().get(i);
                     MessageFuture future = futures.remove(msgId);
@@ -122,13 +122,13 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                 mergeMsgMap.clear();
             }
         } else {
-            MessageFuture messageFuture = futures.remove(rpcMessage.getId());
+            MessageFuture messageFuture = futures.remove(ctx.getMessageMeta().getMessageId());
             if (messageFuture != null) {
-                messageFuture.setResultMessage(rpcMessage.getBody());
+                messageFuture.setResultMessage(rpcMessage);
             } else {
-                if (rpcMessage.getBody() instanceof AbstractResultMessage) {
+                if (rpcMessage instanceof AbstractResultMessage) {
                     if (transactionMessageHandler != null) {
-                        transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage.getBody(), null);
+                        transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage, null);
                     }
                 }
             }

@@ -23,8 +23,9 @@ import io.seata.core.protocol.Version;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.SeataChannelServerManager;
+import io.seata.core.rpc.processor.MessageReply;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class RegRmProcessor implements RemotingProcessor<RegisterRMRequest, RegisterRMResponse> {
+public class RegRmProcessor implements RemotingProcessor<RegisterRMRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegRmProcessor.class);
 
@@ -52,18 +53,22 @@ public class RegRmProcessor implements RemotingProcessor<RegisterRMRequest, Regi
     }
 
     @Override
-    public RegisterRMResponse process(RpcMessageHandlerContext ctx, RegisterRMRequest request) throws Exception {
-        return onRegRmMessage(ctx, request);
+    public void process(RpcMessageHandleContext ctx, RegisterRMRequest request) throws Exception {
+        RegisterRMResponse registerRMResponse = onRegRmMessage(ctx, request);
+        MessageReply messageReply = ctx.getMessageReply();
+        if (null != messageReply) {
+            messageReply.reply(registerRMResponse);
+        }
     }
 
-    private RegisterRMResponse onRegRmMessage(RpcMessageHandlerContext ctx, RegisterRMRequest message) {
+    private RegisterRMResponse onRegRmMessage(RpcMessageHandleContext ctx, RegisterRMRequest message) {
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 SeataChannelServerManager.registerRMChannel(message, ctx.channel());
-                Version.putChannelVersion(ctx.channel(), message.getVersion());
+                Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());

@@ -15,11 +15,11 @@
  */
 package io.seata.core.protocol;
 
+import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.SeataChannel;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,21 +62,21 @@ public class Version {
     /**
      * Put channel version.
      *
-     * @param c the c
+     * @param address the channel address
      * @param v the v
      */
-    public static void putChannelVersion(SeataChannel c, String v) {
-        VERSION_MAP.put(NetUtil.toStringAddress(c.remoteAddress()), v);
+    public static void putChannelVersion(SocketAddress address, String v) {
+        VERSION_MAP.put(NetUtil.toStringAddress(address), v);
     }
 
     /**
      * Gets channel version.
      *
-     * @param c the c
+     * @param address the channel address
      * @return the channel version
      */
-    public static String getChannelVersion(SeataChannel c) {
-        return VERSION_MAP.get(NetUtil.toStringAddress(c.remoteAddress()));
+    public static String getChannelVersion(SocketAddress address) {
+        return VERSION_MAP.get(NetUtil.toStringAddress(address));
     }
 
     /**

@@ -58,6 +58,7 @@ import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
@@ -416,7 +417,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             if (!(msg instanceof RpcMessage)) {
                 return;
             }
-            processMessage(ctx, (RpcMessage) msg);
+            RpcMessage rpcMessage = (RpcMessage) msg;
+            RpcMessageHandleContext context = new NettyRpcMessageHandleContext(ctx, rpcMessage);
+            context.setMessageReply(response -> {
+                sendAsyncResponse(NetUtil.toStringAddress(ctx.channel().remoteAddress()), rpcMessage, response);
+            });
+            processMessage(context, rpcMessage.getBody());
         }
 
         @Override

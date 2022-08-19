@@ -65,6 +65,7 @@
         <module>server</module>
         <module>ext/apm-seata-skywalking-plugin</module>
         <module>core-common</module>
+        <module>protobuf-lib</module>
         <!--<module>seata-plugin</module>-->
     </modules>
 

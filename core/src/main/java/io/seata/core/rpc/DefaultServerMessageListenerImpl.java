@@ -114,7 +114,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         try {
             if (checkAuthHandler == null || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
-                Version.putChannelVersion(ctx.channel(), message.getVersion());
+                Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
@@ -140,13 +140,13 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
         RegisterTMRequest message = (RegisterTMRequest)request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-        Version.putChannelVersion(ctx.channel(), message.getVersion());
+        Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
             if (checkAuthHandler == null || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
-                Version.putChannelVersion(ctx.channel(), message.getVersion());
+                Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());

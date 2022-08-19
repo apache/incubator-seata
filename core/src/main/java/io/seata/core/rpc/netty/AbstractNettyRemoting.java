@@ -23,6 +23,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.MessageTypeAware;
@@ -32,6 +33,7 @@ import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.hook.RpcHook;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -261,24 +263,23 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * Rpc message processing.
      *
      * @param ctx        Channel handler context.
-     * @param rpcMessage rpc message.
+     * @param message    rpc message.
      * @throws Exception throws exception process message error.
      * @since 1.3.0
      */
-    protected void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+    protected void processMessage(RpcMessageHandleContext ctx, Object message) throws Exception {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
+            LOGGER.debug(String.format("%s msgId:%s, body:%s", this, ctx.getMessageMeta().getMessageId(), message));
         }
-        Object body = rpcMessage.getBody();
-        if (body instanceof MessageTypeAware) {
-            MessageTypeAware messageTypeAware = (MessageTypeAware) body;
+        if (message instanceof AbstractMessage) {
+            MessageTypeAware messageTypeAware = (MessageTypeAware) message;
             final Pair<RemotingProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
             if (pair != null) {
                 if (pair.getSecond() != null) {
                     try {
                         pair.getSecond().execute(() -> {
                             try {
-                                pair.getFirst().process(ctx, rpcMessage.getBody());
+                                pair.getFirst().process(ctx, message);
                             } catch (Throwable th) {
                                 LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                             } finally {
@@ -304,7 +305,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
                     }
                 } else {
                     try {
-                        pair.getFirst().process(ctx, rpcMessage);
+                        pair.getFirst().process(ctx, message);
                     } catch (Throwable th) {
                         LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                     }
@@ -313,7 +314,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
                 LOGGER.error("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
             }
         } else {
-            LOGGER.error("This rpcMessage body[{}] is not MessageTypeAware type.", body);
+            LOGGER.error("This rpcMessage body[{}] is not AbstractMessage type.", message);
         }
     }
 

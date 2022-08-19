@@ -15,12 +15,9 @@
  */
 package io.seata.core.rpc.processor.client;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,17 +30,16 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class ClientHeartbeatProcessor implements RemotingProcessor<HeartbeatMessage, HeartbeatMessage> {
+public class ClientHeartbeatProcessor implements RemotingProcessor<HeartbeatMessage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientHeartbeatProcessor.class);
 
     @Override
-    public HeartbeatMessage process(RpcMessageHandlerContext ctx, HeartbeatMessage request) throws Exception {
+    public void process(RpcMessageHandleContext ctx, HeartbeatMessage request) throws Exception {
         if (request == HeartbeatMessage.PONG) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
             }
         }
-        return null;
     }
 }

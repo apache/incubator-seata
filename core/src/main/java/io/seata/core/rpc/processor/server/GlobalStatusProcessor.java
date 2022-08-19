@@ -5,7 +5,7 @@ import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.processor.RpcMessageHandlerContext;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 
 /**
  * @author goodboycoder
@@ -16,7 +16,7 @@ public class GlobalStatusProcessor extends BaseServerOnRequestProcessor<GlobalSt
     }
 
     @Override
-    protected GlobalStatusResponse onRequestMessage(RpcMessageHandlerContext ctx, GlobalStatusRequest request) {
+    protected GlobalStatusResponse onRequestMessage(RpcMessageHandleContext ctx, GlobalStatusRequest request) {
         RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(ctx.channel());
         return (GlobalStatusResponse) transactionMessageHandler.onRequest(request, rpcContext);
     }
