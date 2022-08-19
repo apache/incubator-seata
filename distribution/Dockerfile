@@ -9,7 +9,7 @@
 # 1. docker run --name=seata-server -d seata-server:1.6.0-dev
 #
 # https://hub.docker.com/orgs/seataio
-FROM openjdk:17.0.2
+FROM openjdk:8u342
 
 # set label
 LABEL maintainer="Seata <seata.io>"
@@ -26,5 +26,4 @@ ADD LICENSE /seata-server/LICENSE
 
 # set extra environment
 ENV LOADER_PATH="/seata-server/lib"
-ENV JVM_GC="-XX:+UseZGC"
 CMD ["bash","-c","/seata-server/bin/seata-server.sh && tail -f /dev/null"]

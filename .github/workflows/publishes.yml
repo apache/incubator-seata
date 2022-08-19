@@ -46,7 +46,7 @@ jobs:
       - name: "Package and Publish-Image-To-DockerHub"
         if: matrix.type == 'image'
         env:
-          IMAGE_NAME: openjdk:17.0.2
+          IMAGE_NAME: openjdk:8u342
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
