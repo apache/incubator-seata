@@ -4,10 +4,15 @@
 
 ### feature：
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
+- [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
+- [[#4479](https://github.com/seata/seata/pull/4479)] TCC注解支持添加在实现类及其方法上也生效
 
 
 ### bugfix：
 - [[#4780](https://github.com/seata/seata/pull/4780)] 修复超时回滚成功后无法发送TimeoutRollbacked事件
+- [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
+- [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
+
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -16,6 +21,9 @@
 - [[#4765](https://github.com/seata/seata/pull/4765)] mysql8.0.29版本及以上XA模式不持connection至二阶段
 - [[#4797](https://github.com/seata/seata/pull/4797)] 优化所有github actions脚本
 - [[#4800](https://github.com/seata/seata/pull/4800)] 按照 Apache 协议规范，添加 NOTICE 文件
+- [[#4761](https://github.com/seata/seata/pull/4761)] 使用 hget 代替 RedisLocker 中的 hmget, 因为只有一个 field
+- [[#4414](https://github.com/seata/seata/pull/4414)] 移除log4j依赖
+- [[#4836](https://github.com/seata/seata/pull/4836)] 优化 BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) 方法可读性
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -30,6 +38,9 @@
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
 - [AlexStocks](https://github.com/AlexStocks)
-
+- [liujunlin5168](https://github.com/liujunlin5168)
+- [pengten](https://github.com/pengten)
+- [liuqiufeng](https://github.com/liuqiufeng)
+- [yujianfei1986](https://github.com/yujianfei1986)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
