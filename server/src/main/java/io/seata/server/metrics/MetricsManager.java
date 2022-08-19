@@ -47,7 +47,7 @@ public class MetricsManager {
 
     public void init() {
         boolean enabled = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, false);
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, true);
         if (enabled) {
             registry = RegistryFactory.getInstance();
             if (registry != null) {
