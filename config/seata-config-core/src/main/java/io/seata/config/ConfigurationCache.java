@@ -25,7 +25,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.StringUtils;
 import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
@@ -102,17 +101,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
     }
 
-    public Configuration proxy(Configuration originalConfiguration) {
-        try {
-            Class<?> clazz;
-            if (originalConfiguration.getClass().getName().contains("$$")) {
-                clazz = originalConfiguration.getClass().getSuperclass();
-            } else {
-                clazz = originalConfiguration.getClass();
-            }
-            return (Configuration) new ByteBuddy().subclass(clazz)
-                .method(ElementMatchers.named(METHOD_LATEST_CONFIG))
-                .intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
+    public Configuration proxy(Configuration originalConfiguration) throws Exception {
+        return new ByteBuddy().subclass(Configuration.class).method(ElementMatchers.any())
+            .intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
+                String methodName = method.getName();
+                if (methodName.startsWith(METHOD_PREFIX) && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
                     ObjectWrapper.ConfigType type =
@@ -132,10 +125,10 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                         }
                     }
                     return wrapper == null ? null : wrapper.convertData(type);
-                })).make().load(this.getClass().getClassLoader()).getLoaded().getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+                }
+                return method.invoke(originalConfiguration, args);
+            })).make().load(originalConfiguration.getClass().getClassLoader()).getLoaded().getDeclaredConstructor()
+            .newInstance();
     }
 
     private static class ConfigurationCacheInstance {
