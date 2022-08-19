@@ -34,6 +34,7 @@
         <module>seata-metrics-core</module>
         <module>seata-metrics-registry-compact</module>
         <module>seata-metrics-exporter-prometheus</module>
+        <module>seata-metrics-service</module>
     </modules>
 
 </project>

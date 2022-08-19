@@ -13,17 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.metrics;
+package io.seata.metrics;
 
-import io.seata.metrics.IdConstants;
 import io.seata.metrics.Id;
+import io.seata.metrics.IdConstants;
 
 /**
  * Constants for meter id in tc
  *
  * @author zhengyangyong
  */
-public interface MeterIdConstants {
+public interface TCMeterIdConstants {
     Id COUNTER_ACTIVE = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)

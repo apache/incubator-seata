@@ -13,17 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.metrics;
-
-import java.util.List;
+package io.seata.metrics.service;
 
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.metrics.event.EventBusManager;
 import io.seata.metrics.exporter.Exporter;
 import io.seata.metrics.exporter.ExporterFactory;
 import io.seata.metrics.registry.Registry;
 import io.seata.metrics.registry.RegistryFactory;
-import io.seata.server.event.EventBusManager;
+
+import java.util.List;
 
 /**
  * Metrics manager for init
@@ -36,7 +36,7 @@ public class MetricsManager {
     }
 
     public static final MetricsManager get() {
-        return MetricsManager.SingletonHolder.INSTANCE;
+        return SingletonHolder.INSTANCE;
     }
 
     private Registry registry;
@@ -55,7 +55,7 @@ public class MetricsManager {
                 //only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
                 if (exporters.size() != 0) {
                     exporters.forEach(exporter -> exporter.setRegistry(registry));
-                    EventBusManager.get().register(new MetricsSubscriber(registry));
+                    EventBusManager.get().register(new TCMetricsSubscriber(registry));
                 }
             }
         }

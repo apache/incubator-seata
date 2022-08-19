@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.event;
+package io.seata.metrics.event;
 
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
