@@ -52,7 +52,8 @@ public class OracleInsertExecutorTest {
     private static final String USER_ID_COLUMN = "user_id";
     private static final String USER_NAME_COLUMN = "user_name";
     private static final String USER_STATUS_COLUMN = "user_status";
-    private static final Integer PK_VALUE = 100;
+    private static final Integer PK_VALUE_ID = 100;
+    private static final Integer PK_VALUE_USER_ID = 200;
 
     private ConnectionProxy connectionProxy;
 
@@ -66,8 +67,13 @@ public class OracleInsertExecutorTest {
 
     private OracleInsertExecutor insertExecutor;
 
-    private final int pkIndex = 0;
+    private final int pkIndexId = 0;
+
+    private final int pkIndexUserId = 1;
+
     private HashMap<String, Integer> pkIndexMap;
+
+    private HashMap<String, Integer> multiPkIndexMap;
 
     @BeforeEach
     public void init() {
@@ -83,7 +89,12 @@ public class OracleInsertExecutorTest {
         insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         pkIndexMap = new HashMap<String, Integer>() {{
-            put(ID_COLUMN, pkIndex);
+            put(ID_COLUMN, pkIndexId);
+        }};
+
+        multiPkIndexMap = new HashMap<String, Integer>() {{
+            put(ID_COLUMN, pkIndexId);
+            put(USER_ID_COLUMN, pkIndexUserId);
         }};
     }
 
@@ -94,14 +105,36 @@ public class OracleInsertExecutorTest {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         List<Object> pkValuesSeq = new ArrayList<>();
-        pkValuesSeq.add(PK_VALUE);
+        pkValuesSeq.add(PK_VALUE_ID);
 
-        doReturn(pkValuesSeq).when(insertExecutor).getPkValuesBySequence(expr);
+        doReturn(pkValuesSeq).when(insertExecutor).getPkValuesBySequence(expr, ID_COLUMN);
         doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
 
-        Map<String,List<Object>> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        verify(insertExecutor).getPkValuesBySequence(expr);
+        Map<String, List<Object>> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        verify(insertExecutor).getPkValuesBySequence(expr, ID_COLUMN);
         Assertions.assertEquals(pkValuesByColumn.get(ID_COLUMN), pkValuesSeq);
+    }
+
+    @Test
+    public void testMultiPkValue_sequence() throws Exception {
+        mockInsertColumns();
+        SqlSequenceExpr expr = mockParametersMultiPkWithSeq();
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN, USER_ID_COLUMN}));
+        List<Object> pkValuesSeqId = new ArrayList<>();
+        pkValuesSeqId.add(PK_VALUE_ID);
+        List<Object> pkValuesSeqUserId = new ArrayList<>();
+        pkValuesSeqUserId.add(PK_VALUE_USER_ID);
+
+        doReturn(pkValuesSeqId).when(insertExecutor).getPkValuesBySequence(expr, ID_COLUMN);
+        doReturn(pkValuesSeqUserId).when(insertExecutor).getPkValuesBySequence(expr, USER_ID_COLUMN);
+        doReturn(multiPkIndexMap).when(insertExecutor).getPkIndex();
+
+        Map<String, List<Object>> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        verify(insertExecutor).getPkValuesBySequence(expr, ID_COLUMN);
+        verify(insertExecutor).getPkValuesBySequence(expr, USER_ID_COLUMN);
+        Assertions.assertEquals(pkValuesByColumn.get(ID_COLUMN), pkValuesSeqId);
+        Assertions.assertEquals(pkValuesByColumn.get(USER_ID_COLUMN), pkValuesSeqUserId);
     }
 
     @Test
@@ -109,12 +142,27 @@ public class OracleInsertExecutorTest {
         mockInsertColumns();
         mockParametersPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));;
-        doReturn(Arrays.asList(new Object[]{PK_VALUE})).when(insertExecutor).getGeneratedKeys();
-        Map<String,List<Object>> pkValuesByAuto = insertExecutor.getPkValues();
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        doReturn(Arrays.asList(new Object[]{PK_VALUE_ID})).when(insertExecutor).getGeneratedKeys(ID_COLUMN);
+        Map<String, List<Object>> pkValuesByAuto = insertExecutor.getPkValues();
 
-        verify(insertExecutor).getGeneratedKeys();
-        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[]{PK_VALUE}));
+        verify(insertExecutor).getGeneratedKeys(ID_COLUMN);
+        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[]{PK_VALUE_ID}));
+    }
+
+    @Test
+    public void testMultiPkValue_auto() throws Exception {
+        mockInsertColumns();
+        mockParametersMultiPkWithAuto();
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        doReturn(multiPkIndexMap).when(insertExecutor).getPkIndex();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN, USER_ID_COLUMN}));
+        Assertions.assertThrows(NotSupportYetException.class, () -> {
+            insertExecutor.getPkValues();
+        });
+
+
     }
 
     @Test
@@ -139,7 +187,7 @@ public class OracleInsertExecutorTest {
         doReturn(false).when(rs).next();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
-            insertExecutor.getGeneratedKeys();
+            insertExecutor.getGeneratedKeys(ID_COLUMN);
         });
 
         doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
@@ -149,7 +197,6 @@ public class OracleInsertExecutorTest {
         });
 
     }
-
 
 
     private List<String> mockInsertColumns() {
@@ -164,7 +211,7 @@ public class OracleInsertExecutorTest {
 
     private SqlSequenceExpr mockParametersPkWithSeq() {
         SqlSequenceExpr expr = new SqlSequenceExpr("seq", "nextval");
-        Map<Integer,ArrayList<Object>> paramters = new HashMap(4);
+        Map<Integer, ArrayList<Object>> paramters = new HashMap(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(expr);
         ArrayList arrayList1 = new ArrayList<>();
@@ -187,8 +234,33 @@ public class OracleInsertExecutorTest {
         return expr;
     }
 
+    private SqlSequenceExpr mockParametersMultiPkWithSeq() {
+        SqlSequenceExpr expr = new SqlSequenceExpr("seq", "nextval");
+        Map<Integer, ArrayList<Object>> paramters = new HashMap(4);
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add(expr);
+        ArrayList arrayList1 = new ArrayList<>();
+        arrayList1.add(expr);
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(paramters);
+
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("?", "?"));
+        when(sqlInsertRecognizer.getInsertRows(multiPkIndexMap.values())).thenReturn(rows);
+
+        return expr;
+    }
+
     private void mockParametersPkWithAuto() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -207,6 +279,28 @@ public class OracleInsertExecutorTest {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
+    }
+
+    private void mockParametersMultiPkWithAuto() {
+        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add(Null.get());
+        ArrayList arrayList1 = new ArrayList<>();
+        arrayList1.add(Null.get());
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(paramters);
+
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("?", "?", "?", "?"));
+        when(sqlInsertRecognizer.getInsertRows(multiPkIndexMap.values())).thenReturn(rows);
     }
 
     private void mockStatementInsertRows() {
