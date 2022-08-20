@@ -30,6 +30,7 @@ import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
+import io.seata.core.rpc.MessageIdGeneratorHelper;
 import io.seata.core.rpc.hook.RpcHook;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
@@ -75,7 +76,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
     /**
      * Id generator of this remoting
      */
-    protected final PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
+    protected final PositiveAtomicCounter idGenerator = MessageIdGeneratorHelper.getIdGenerator();
 
     /**
      * Obtain the return result through MessageFuture blocking.

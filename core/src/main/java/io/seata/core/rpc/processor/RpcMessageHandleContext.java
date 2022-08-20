@@ -29,6 +29,10 @@ public class RpcMessageHandleContext {
         return messageMeta;
     }
 
+    public void setMessageMeta(MessageMeta messageMeta) {
+        this.messageMeta = messageMeta;
+    }
+
     public MessageReply getMessageReply() {
         return messageReply;
     }

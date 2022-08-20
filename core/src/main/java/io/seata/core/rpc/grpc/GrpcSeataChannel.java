@@ -12,13 +12,13 @@ import io.seata.core.rpc.SeataChannel;
  * @author goodboycoder
  */
 public class GrpcSeataChannel implements SeataChannel {
-    private Channel channel;
+    private final Channel channel;
 
-    private StreamObserver<? extends Message> streamObserver;
+    private final StreamObserver streamObserver;
 
-    private String connectionId;
+    private final String connectionId;
 
-    public GrpcSeataChannel(String connectionId, Channel channel, StreamObserver<? extends Message> streamObserver) {
+    public GrpcSeataChannel(String connectionId, Channel channel, StreamObserver streamObserver) {
         this.connectionId = connectionId;
         this.channel = channel;
         this.streamObserver = streamObserver;
@@ -47,5 +47,16 @@ public class GrpcSeataChannel implements SeataChannel {
     @Override
     public boolean isActive() {
         return channel.isActive();
+    }
+
+    @Override
+    public void sendMsg(Object msg) throws Exception{
+        synchronized (streamObserver) {
+            if (!(msg instanceof Message)) {
+                throw new IllegalArgumentException("not supported message type: " + msg.getClass());
+            }
+            Message toSend = (Message) msg;
+            streamObserver.onNext(toSend);
+        }
     }
 }

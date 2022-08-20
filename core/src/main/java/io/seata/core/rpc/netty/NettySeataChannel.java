@@ -43,6 +43,11 @@ public class NettySeataChannel implements SeataChannel {
     }
 
     @Override
+    public void sendMsg(Object msg) {
+        //do nothing
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

@@ -25,6 +25,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.Requester;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -73,6 +74,7 @@ public class Server {
         SessionHolder.init(parameterParser.getSessionStoreMode());
         LockerManagerFactory.init(parameterParser.getLockStoreMode());
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
+        Requester.getInstance().setRemotingServer(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
 

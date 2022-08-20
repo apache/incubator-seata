@@ -15,10 +15,12 @@ import io.seata.core.protocol.transaction.BranchReportResponse;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
 import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.grpc.BiStreamMessageTypeHelper;
 import io.seata.core.rpc.grpc.GrpcRemotingServer;
 import io.seata.core.rpc.grpc.GrpcSeataChannel;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
+import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import io.seata.serializer.protobuf.convertor.PbConvertor;
 import io.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
@@ -87,13 +89,13 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
                 } else if (isProcessable(messageType)) {
                     Message unpackMessage;
                     try {
-                        unpackMessage = message.unpack(MessageTypeHelper.getBiStreamMessageClassType(messageType));
+                        unpackMessage = message.unpack(BiStreamMessageTypeHelper.getBiStreamMessageClassType(messageType));
                     } catch (InvalidProtocolBufferException e) {
                         throw new RuntimeException(e);
                     }
                     final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(unpackMessage.getClass().getName());
                     requestModel = pbConvertor.convert2Model(unpackMessage);
-                    handleContext = buildHandleContext(responseObserver);
+                    handleContext = buildHandleContext(responseObserver, biStreamMessage);
                     remotingServer.processMessage(handleContext, requestModel);
                 } else {
                     LOGGER.warn("unprocessable message: {}", biStreamMessage);
@@ -180,31 +182,22 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
         remotingServer.processMessage(handleContext, requestModel);
     }
 
-    public RpcMessageHandleContext buildHandleContext(StreamObserver<? extends Message> responseObserver) {
+    public RpcMessageHandleContext buildHandleContext(StreamObserver<? extends Message> responseObserver, GrpcRemoting.BiStreamMessage message) {
         SeataChannel curChannel = new GrpcSeataChannel(CUR_CONNECT_ID.get(), CUR_CONNECTION.get(), responseObserver);
-        return new RpcMessageHandleContext(curChannel);
+        RpcMessageHandleContext ctx = new RpcMessageHandleContext(curChannel);
+        if (null != message) {
+            MessageMeta messageMeta = new MessageMeta();
+            messageMeta.setMessageId((int) message.getID());
+            ctx.setMessageMeta(messageMeta);
+        }
+        return ctx;
+    }
+    public RpcMessageHandleContext buildHandleContext(StreamObserver<? extends Message> responseObserver) {
+        return buildHandleContext(responseObserver, null);
     }
 
     private boolean isProcessable(GrpcRemoting.BiStreamMessageType messageType) {
         return GrpcRemoting.BiStreamMessageType.TypeBranchCommitResult == messageType
                 || GrpcRemoting.BiStreamMessageType.TypeBranchRollBackResult == messageType;
-    }
-
-    static class MessageTypeHelper {
-        private static final Map<GrpcRemoting.BiStreamMessageType, Class> MESSAGE_TYPE_CLASS_MAP = new HashMap<>();
-
-        static {
-            MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeBranchCommit, io.seata.serializer.protobuf.generated.BranchCommitRequestProto.class);
-            MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeBranchCommitResult, io.seata.serializer.protobuf.generated.BranchCommitResponseProto.class);
-            MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeBranchRollback, io.seata.serializer.protobuf.generated.BranchRollbackRequestProto.class);
-            MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeBranchRollBackResult, io.seata.serializer.protobuf.generated.BranchRollbackResponseProto.class);
-            MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TYPERegisterRMRequest, RegisterRMRequestProto.class);
-            MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse, RegisterRMResponseProto.class);
-            MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeRMUndoLogDelete, io.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto.class);
-        }
-
-        public static Class getBiStreamMessageClassType(GrpcRemoting.BiStreamMessageType messageType) {
-            return MESSAGE_TYPE_CLASS_MAP.get(messageType);
-        }
     }
 }

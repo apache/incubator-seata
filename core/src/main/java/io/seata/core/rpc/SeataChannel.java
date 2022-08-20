@@ -17,5 +17,7 @@ public interface SeataChannel {
 
     boolean isActive();
 
+    void sendMsg(Object msg) throws Exception;
+
 
 }

@@ -15,23 +15,31 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.processor.server.BranchRegisterProcessor;
+import io.seata.core.rpc.processor.server.BranchReportProcessor;
+import io.seata.core.rpc.processor.server.GlobalBeginProcessor;
+import io.seata.core.rpc.processor.server.GlobalCommitProcessor;
+import io.seata.core.rpc.processor.server.GlobalLockQueryProcessor;
+import io.seata.core.rpc.processor.server.GlobalReportProcessor;
+import io.seata.core.rpc.processor.server.GlobalRollbackProcessor;
+import io.seata.core.rpc.processor.server.GlobalStatusProcessor;
+import io.seata.core.rpc.processor.server.MergedWarpMessageProcessor;
 import io.seata.core.rpc.processor.server.RegRmProcessor;
 import io.seata.core.rpc.processor.server.RegTmProcessor;
 import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
-import io.seata.core.rpc.processor.server.MergedWarpMessageProcessor;
 import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The netty remoting server.
@@ -95,32 +103,36 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
 
     private void registerProcessor() {
         // 1. registry on request message processor
-        MergedWarpMessageProcessor onRequestProcessor =
-            new MergedWarpMessageProcessor(this, getHandler());
-        ShutdownHook.getInstance().addDisposable(onRequestProcessor);
-        super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_REGISTER, new BranchRegisterProcessor(getHandler()), messageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, new BranchReportProcessor(getHandler()), messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, new GlobalBeginProcessor(getHandler()), messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, new GlobalCommitProcessor(getHandler()), messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, new GlobalLockQueryProcessor(getHandler()), messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_REPORT, new GlobalReportProcessor(getHandler()), messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, new GlobalRollbackProcessor(getHandler()), messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_STATUS, new GlobalStatusProcessor(getHandler()), messageExecutor);
+        MergedWarpMessageProcessor mergedWarpMessageProcessor =
+                new MergedWarpMessageProcessor(this, getHandler());
+        ShutdownHook.getInstance().addDisposable(mergedWarpMessageProcessor);
+        registerProcessor(MessageType.TYPE_SEATA_MERGE, mergedWarpMessageProcessor, messageExecutor);
+
         // 2. registry on response message processor
         ServerOnResponseProcessor onResponseProcessor =
-            new ServerOnResponseProcessor(getHandler(), getFutures());
-        super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, branchResultMessageExecutor);
-        super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, branchResultMessageExecutor);
+                new ServerOnResponseProcessor(getHandler(), getFutures());
+        registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, branchResultMessageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, branchResultMessageExecutor);
+
         // 3. registry rm message processor
         RegRmProcessor regRmProcessor = new RegRmProcessor(this);
-        super.registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
+
         // 4. registry tm message processor
         RegTmProcessor regTmProcessor = new RegTmProcessor(this);
-        super.registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
+        registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
+
         // 5. registry heartbeat message processor
         ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
-        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
+        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
     }
 
     @Override
