@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-import io.netty.channel.Channel;
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.DurationUtil;
@@ -41,6 +40,8 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.Requester;
+import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.metrics.MetricsManager;
@@ -100,6 +101,8 @@ public class DefaultCoordinatorTest {
         defaultCoordinator =DefaultCoordinator.getInstance(remotingServer);
         defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
+
+        Requester.getInstance().setRemotingServer(remotingServer);
     }
 
     @BeforeEach
@@ -264,17 +267,17 @@ public class DefaultCoordinatorTest {
         }
 
         @Override
-        public Object sendSyncRequest(Channel clientChannel, Object message) throws TimeoutException {
+        public Object sendSyncRequest(SeataChannel clientChannel, Object message) throws TimeoutException {
             return null;
         }
 
         @Override
-        public void sendAsyncRequest(Channel channel, Object msg) {
+        public void sendAsyncRequest(SeataChannel channel, Object msg) {
 
         }
 
         @Override
-        public void sendAsyncResponse(RpcMessage request, Channel channel, Object msg) {
+        public void sendAsyncResponse(RpcMessage request, SeataChannel channel, Object msg) {
 
         }
 

@@ -20,13 +20,13 @@ public class ServerChannelInterceptor implements ServerInterceptor {
         Context ctx = Context.current();
         //get current connection ID from serverCall
         String connectionId = call.getAttributes().get(ContextKeyConstants.CONNECT_ID);
-        ctx.withValue(ContextKeyConstants.CUR_CONNECT_ID, connectionId);
+        ctx = ctx.withValue(ContextKeyConstants.CUR_CONNECT_ID, connectionId);
 
         //get internal channel from serverCall
         try {
             ServerStream stream = ReflectionUtil.getFieldValue(call, "stream");
             Channel channel = ReflectionUtil.getFieldValue(stream, "channel");
-            ctx.withValue(ContextKeyConstants.CUR_CONNECTION, channel);
+            ctx = ctx.withValue(ContextKeyConstants.CUR_CONNECTION, channel);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }

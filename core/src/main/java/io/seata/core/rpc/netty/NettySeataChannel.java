@@ -1,6 +1,7 @@
 package io.seata.core.rpc.netty;
 
 import java.net.SocketAddress;
+import java.util.Objects;
 
 import io.netty.channel.Channel;
 import io.seata.core.rpc.RpcType;
@@ -34,5 +35,27 @@ public class NettySeataChannel implements SeataChannel {
     @Override
     public SocketAddress remoteAddress() {
         return channel.remoteAddress();
+    }
+
+    @Override
+    public boolean isActive() {
+        return channel.isActive();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof NettySeataChannel)) {
+            return false;
+        }
+        NettySeataChannel channel1 = (NettySeataChannel) o;
+        return Objects.equals(channel, channel1.channel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(channel);
     }
 }

@@ -30,18 +30,18 @@ public class GrpcServerChannelManager {
     /**
      * connectionId -> rpcContext
      */
-    private static final Map<String, RpcContext> CHANNEL_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<SeataChannel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<>();
 
     /**
      * resourceId -> applicationId -> ip -> port -> connectionId
      */
     private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String,
-            ConcurrentMap<Integer, String>>>> RM_CHANNELS = new ConcurrentHashMap<>();
+            ConcurrentMap<Integer, RpcContext>>>> RM_CHANNELS = new ConcurrentHashMap<>();
 
     /**
      * applicationId+ip -> port -> connectionId
      */
-    private static final ConcurrentMap<String, ConcurrentMap<Integer, String>> TM_CHANNELS
+    private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
             = new ConcurrentHashMap<>();
 
     /**
@@ -57,15 +57,14 @@ public class GrpcServerChannelManager {
                 request.getApplicationId(),
                 request.getTransactionServiceGroup(),
                 null, channel);
-//        rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
-        String connectionId = channel.getId();
-        CHANNEL_MAP.put(connectionId, rpcContext);
+        rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
+        IDENTIFIED_CHANNELS.put(channel, rpcContext);
 
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
                 + SeataChannelUtil.getClientIpFromChannel(channel);
-        ConcurrentMap<Integer, String> clientIdentifiedMap = CollectionUtils.computeIfAbsent(TM_CHANNELS,
+        ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = CollectionUtils.computeIfAbsent(TM_CHANNELS,
                 clientIdentified, key -> new ConcurrentHashMap<>());
-//        rpcContext.holdInClientChannels(clientIdentifiedMap);
+        rpcContext.holdInClientChannels(clientIdentifiedMap);
     }
 
     /**
@@ -80,24 +79,24 @@ public class GrpcServerChannelManager {
         Version.checkVersion(request.getVersion());
         Set<String> dbKeySet = dbKeyToSet(request.getResourceIds());
         RpcContext rpcContext;
-        if (!CHANNEL_MAP.containsKey(channel.getId())) {
+        if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
             rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, request.getVersion(),
                     request.getApplicationId(), request.getTransactionServiceGroup(),
                     request.getResourceIds(), channel);
 //            rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         } else {
-            rpcContext = CHANNEL_MAP.get(channel.getId());
+            rpcContext = IDENTIFIED_CHANNELS.get(channel);
             rpcContext.addResources(dbKeySet);
         }
 
         if (CollectionUtils.isEmpty(dbKeySet)) { return; }
         for (String resourceId : dbKeySet) {
             String clientIp;
-            ConcurrentMap<Integer, String> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
+            ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
                     .computeIfAbsent(request.getApplicationId(), key -> new ConcurrentHashMap<>())
                     .computeIfAbsent(clientIp = SeataChannelUtil.getClientIpFromChannel(channel), key -> new ConcurrentHashMap<>());
 
-//            rpcContext.holdInResourceManagerChannels(resourceId, portMap);
+            rpcContext.holdInResourceManagerChannels(resourceId, portMap);
 //            updateChannelsResource(resourceId, clientIp, request.getApplicationId());
         }
     }

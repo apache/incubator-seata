@@ -18,7 +18,6 @@ package io.seata.core.rpc.processor.server;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.netty.channel.Channel;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -70,7 +69,7 @@ public class ServerOnResponseProcessor implements RemotingProcessor<AbstractMess
         if (messageFuture != null) {
             messageFuture.setResultMessage(rpcMessage);
         } else {
-            if (ChannelManager.isRegistered((Channel) ctx.channel().originChannel())) {
+            if (ChannelManager.isRegistered(ctx.channel())) {
                 onResponseMessage(ctx, rpcMessage);
             } else {
                 try {
@@ -93,18 +92,18 @@ public class ServerOnResponseProcessor implements RemotingProcessor<AbstractMess
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("server received:{},clientIp:{},vgroup:{}", rpcMessage,
                     NetUtil.toIpAddress(ctx.channel().remoteAddress()),
-                    ChannelManager.getContextFromIdentified((Channel) ctx.channel().originChannel()).getTransactionServiceGroup());
+                    ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
         } else {
             try {
                 BatchLogHandler.INSTANCE.getLogQueue()
                         .put(rpcMessage + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
-                                + ChannelManager.getContextFromIdentified((Channel) ctx.channel().originChannel()).getTransactionServiceGroup());
+                                + ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
             } catch (InterruptedException e) {
                 LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
             }
         }
         if (rpcMessage instanceof AbstractResultMessage) {
-            RpcContext rpcContext = ChannelManager.getContextFromIdentified((Channel) ctx.channel().originChannel());
+            RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
             transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage, rpcContext);
         }
     }

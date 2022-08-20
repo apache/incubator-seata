@@ -43,4 +43,9 @@ public class GrpcSeataChannel implements SeataChannel {
     public SocketAddress remoteAddress() {
         return this.channel.remoteAddress();
     }
+
+    @Override
+    public boolean isActive() {
+        return channel.isActive();
+    }
 }

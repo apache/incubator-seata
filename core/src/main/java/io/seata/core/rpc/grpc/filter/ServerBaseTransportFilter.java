@@ -1,13 +1,11 @@
 package io.seata.core.rpc.grpc.filter;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 import io.grpc.Attributes;
 import io.grpc.Grpc;
 import io.grpc.ServerTransportFilter;
 import io.seata.core.rpc.grpc.ContextKeyConstants;
-import io.seata.core.rpc.grpc.GrpcServerBootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,5 +15,7 @@ public interface SeataChannel {
 
     SocketAddress remoteAddress();
 
+    boolean isActive();
+
 
 }

@@ -49,26 +49,27 @@ public class Requester {
 
 
 
-    public Object sendSyncRequest(String resourceId, String clientId, Object msg) {
-        return null;
+    public Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException {
+        //get rpc type
+        return remotingServer.sendSyncRequest(resourceId, clientId, msg);
     }
 
     public Object sendSyncRequest(SeataChannel channel, Object msg) throws TimeoutException {
         if (RpcType.NETTY == channel.getType()) {
-            return remotingServer.sendSyncRequest((Channel) channel.originChannel(), msg);
+            return remotingServer.sendSyncRequest(channel, msg);
         }
         return null;
     }
 
     public void sendAsyncRequest(SeataChannel channel, Object msg) {
         if (RpcType.NETTY == channel.getType()) {
-            remotingServer.sendAsyncRequest((Channel) channel.originChannel(), msg);
+            remotingServer.sendAsyncRequest(channel, msg);
         }
     }
 
     public void sendAsyncResponse(RpcMessage rpcMessage, SeataChannel channel, Object msg) {
         if (RpcType.NETTY == channel.getType()) {
-            remotingServer.sendAsyncResponse(rpcMessage, (Channel) channel.originChannel(), msg);
+            remotingServer.sendAsyncResponse(rpcMessage, channel, msg);
         }
     }
 }
