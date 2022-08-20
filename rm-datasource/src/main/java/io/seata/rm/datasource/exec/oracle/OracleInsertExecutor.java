@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec.oracle;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.rm.datasource.StatementProxy;
@@ -31,9 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The type Oracle insert executor.
@@ -58,35 +57,27 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     }
 
     @Override
-    public Map<String,List<Object>> getPkValues() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = null;
-        boolean isContainsPk = containsPK();
-        //when there is only one pk in the table
-        if (isContainsPk) {
-            pkValuesMap = getPkValuesByColumn();
-        } else if (containsColumns()) {
-            String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
-            pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
-        } else {
-            pkValuesMap = getPkValuesByColumn();
-        }
-        return pkValuesMap;
+    public Map<String, List<Object>> getPkValues() throws SQLException {
+        return getPkValuesByColumn();
     }
 
     @Override
-    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
-        Map<String,List<Object>> pkValuesMap  = parsePkValuesFromStatement();
-        String pkKey = pkValuesMap.keySet().iterator().next();
-        List<Object> pkValues = pkValuesMap.get(pkKey);
-
-        if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValuesMap.put(pkKey, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
-        } else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValuesMap.put(pkKey, getGeneratedKeys());
-        } else if (pkValues.size() == 1 && pkValues.get(0) instanceof Null) {
-            throw new NotSupportYetException("oracle not support null");
+    public Map<String, List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = parsePkValuesFromStatement();
+        Set<String> keySet = pkValuesMap.keySet();
+        for (String pkKey : keySet) {
+            List<Object> pkValues = pkValuesMap.get(pkKey);
+            for (int i = 0; i < pkValues.size(); i++) {
+                if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlSequenceExpr) {
+                    pkValues.set(i, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(i), pkKey).get(0));
+                } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlMethodExpr) {
+                    pkValues.set(i, getGeneratedKeys(pkKey).get(0));
+                } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof Null) {
+                    pkValues.set(i, getGeneratedKeys(pkKey).get(0));
+                }
+            }
+            pkValuesMap.put(pkKey, pkValues);
         }
-
         return pkValuesMap;
     }
 
@@ -94,4 +85,5 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     public String getSequenceSql(SqlSequenceExpr expr) {
         return "SELECT " + expr.getSequence() + ".currval FROM DUAL";
     }
+
 }

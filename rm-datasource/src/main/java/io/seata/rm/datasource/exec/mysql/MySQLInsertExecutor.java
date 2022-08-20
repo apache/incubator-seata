@@ -199,9 +199,17 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         return pkValuesMap;
     }
 
+    @Deprecated
     @SuppressWarnings("lgtm[java/database-resource-leak]")
     @Override
     public List<Object> getPkValuesByDefault() throws SQLException {
+        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        throw new NotSupportYetException();
+    }
+
+    @SuppressWarnings("lgtm[java/database-resource-leak]")
+    @Override
+    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
         // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
         throw new NotSupportYetException();
     }
@@ -245,4 +253,5 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         }
         return false;
     }
+
 }
