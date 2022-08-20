@@ -7,7 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
-
+- [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
 
 ### bugfix:
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
