@@ -1,13 +1,9 @@
-package io.seata.server.metrics;
+package io.seata.metrics;
 
-import io.seata.metrics.Id;
-import io.seata.metrics.IdConstants;
-import io.seata.metrics.Counter;
-import io.seata.metrics.registry.RegistryFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static io.seata.server.metrics.MeterIdConstants.COUNTER_ACTIVE;
+import static io.seata.metrics.TCMeterIdConstants.COUNTER_ACTIVE;
 
 public class RegistryMeterKeyTest {
     @Test

@@ -35,6 +35,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
+import io.seata.metrics.service.MetricsManager;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.tcc.TccActionInterceptor;
@@ -225,6 +226,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         RMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
+        }
+
+        //init metrics exporter
+        MetricsManager.get().setRole(MetricsManager.ROLE_VALUE_CLIENT);
+        MetricsManager.get().init();
+        if (LOGGER.isInfoEnabled() && ConfigurationFactory.getInstance().getBoolean(
+                ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED)) {
+            LOGGER.info("Client MetricsManager is initialized");
         }
 
         if (LOGGER.isInfoEnabled()) {

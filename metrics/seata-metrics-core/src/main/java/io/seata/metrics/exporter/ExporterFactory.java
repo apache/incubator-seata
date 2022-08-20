@@ -37,7 +37,7 @@ public class ExporterFactory {
     public static List<Exporter> getInstanceList() {
         List<Exporter> exporters = new ArrayList<>();
         String exporterTypeNameList = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, null);
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, "prometheus");
         if (!StringUtils.isNullOrEmpty(exporterTypeNameList)) {
             String[] exporterTypeNames = exporterTypeNameList.split(",");
             for (String exporterTypeName : exporterTypeNames) {

@@ -40,6 +40,19 @@ public class MetricsManager {
     }
 
     private Registry registry;
+    public static final String ROLE_VALUE_SERVER = "server";
+    public static final String ROLE_VALUE_CLIENT = "client";
+
+    private static String role = ROLE_VALUE_SERVER;
+
+    public static void setRole(String role) {
+        MetricsManager.role = role;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
 
     public Registry getRegistry() {
         return registry;
@@ -55,7 +68,7 @@ public class MetricsManager {
                 //only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
                 if (exporters.size() != 0) {
                     exporters.forEach(exporter -> exporter.setRegistry(registry));
-                    EventBusManager.get().register(new TCMetricsSubscriber(registry));
+                    EventBusManager.get().register(new MetricsSubscriber(registry));
                 }
             }
         }

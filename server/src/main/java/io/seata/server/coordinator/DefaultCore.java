@@ -25,12 +25,14 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
+import io.seata.core.event.BranchEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.metrics.event.EventBusManager;
 import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -137,6 +139,9 @@ public class DefaultCore implements Core {
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);
+        EventBusManager.get().post(new BranchEvent(12, BranchEvent.ROLE_TM, "branch event", "app_id",
+                "svc_group", System.currentTimeMillis(), System.currentTimeMillis(), "resource_group_id",
+                "resource_id", "lockkey", BranchType.SAGA, "status", false, false));
 
         return session.getXid();
     }

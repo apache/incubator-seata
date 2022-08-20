@@ -15,6 +15,7 @@
  */
 package io.seata.tm;
 
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -34,6 +35,8 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
+import io.seata.metrics.service.MetricsPublisher;
+import io.seata.tm.api.transaction.TransactionInfo;
 
 import java.util.concurrent.TimeoutException;
 
@@ -50,10 +53,14 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
+        long beginTime = System.currentTimeMillis();
+        MetricsPublisher.postGlobalTransactionBegin(name, beginTime, beginTime, GlobalStatus.Begin.name());
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
+            MetricsPublisher.postGlobalTransactionBegin(name, beginTime, System.currentTimeMillis(), GlobalStatus.BeginFailed.name());
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
         }
+        MetricsPublisher.postGlobalTransactionBegin(name, beginTime, System.currentTimeMillis(), GlobalStatus.BeginSuccess.name());
         return response.getXid();
     }
 

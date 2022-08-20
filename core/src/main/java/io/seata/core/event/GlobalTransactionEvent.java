@@ -80,6 +80,18 @@ public class GlobalTransactionEvent implements Event {
 
     private boolean retryBranch;
 
+    public GlobalTransactionEvent(String role, String name, String applicationId, String group, Long beginTime, Long endTime, String status, boolean retryGlobal, boolean retryBranch) {
+        this.role = role;
+        this.name = name;
+        this.applicationId = applicationId;
+        this.group = group;
+        this.beginTime = beginTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.retryGlobal = retryGlobal;
+        this.retryBranch = retryBranch;
+    }
+
     /**
      * Instantiates a new Global transaction event.
      *

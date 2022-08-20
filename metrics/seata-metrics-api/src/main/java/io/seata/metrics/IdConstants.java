@@ -77,4 +77,8 @@ public interface IdConstants {
 
     String STATUS_VALUE_AFTER_ROLLBACKED_KEY = "AfterRollbacked";
 
+    String STATUS_VALUE_BEGIN = "begin";
+    String STATUS_VALUE_BEGIN_SUCCESS = "BeginSuccess";
+    String STATUS_VALUE_BEGIN_FAILED = "BeginFailed";
+
 }

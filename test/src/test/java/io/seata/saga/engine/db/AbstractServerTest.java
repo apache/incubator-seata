@@ -28,7 +28,7 @@ import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.ParameterParser;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.metrics.MetricsManager;
+import io.seata.metrics.service.MetricsManager;
 import io.seata.server.session.SessionHolder;
 
 /**
