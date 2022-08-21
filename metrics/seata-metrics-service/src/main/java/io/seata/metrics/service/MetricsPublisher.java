@@ -17,4 +17,11 @@ public class MetricsPublisher {
                 ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP),
                 beginTime,endTime,status, false, false));
     }
+
+    public static void postGlobalTransactionCommitted(String name, long beginTime, long endTime, String status) {
+        EVENT_BUS.post(new GlobalTransactionEvent(GlobalTransactionEvent.ROLE_TM, name,
+                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.APPLICATION_ID),
+                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP),
+                beginTime,endTime,status, false, false));
+    }
 }

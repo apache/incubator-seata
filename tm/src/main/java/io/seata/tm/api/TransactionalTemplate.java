@@ -19,6 +19,7 @@ import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalLockConfig;
 import io.seata.core.model.GlobalStatus;
@@ -53,6 +54,7 @@ public class TransactionalTemplate {
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
+        RootContext.setTxName(txInfo.getName());
         // 1.1 Get current transaction, if not null, the tx role is 'GlobalTransactionRole.Participant'.
         GlobalTransaction tx = GlobalTransactionContext.getCurrent();
 

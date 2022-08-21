@@ -20,10 +20,20 @@ public interface TMMeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_BEGIN_FAILED);
 
+    Id COUNTER_COMMITTING = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTING);
+
     Id COUNTER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTED);
+
+    Id COUNTER_COMMIT_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMIT_FAILED);
 
     Id COUNTER_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)

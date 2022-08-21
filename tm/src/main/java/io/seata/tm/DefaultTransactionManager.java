@@ -36,6 +36,7 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.metrics.service.MetricsPublisher;
+import io.seata.tm.api.DefaultGlobalTransaction;
 import io.seata.tm.api.transaction.TransactionInfo;
 
 import java.util.concurrent.TimeoutException;
@@ -54,7 +55,7 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         long beginTime = System.currentTimeMillis();
-        MetricsPublisher.postGlobalTransactionBegin(name, beginTime, beginTime, GlobalStatus.Begin.name());
+        MetricsPublisher.postGlobalTransactionBegin(name, beginTime, System.currentTimeMillis(), GlobalStatus.Begin.name());
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             MetricsPublisher.postGlobalTransactionBegin(name, beginTime, System.currentTimeMillis(), GlobalStatus.BeginFailed.name());
@@ -68,7 +69,10 @@ public class DefaultTransactionManager implements TransactionManager {
     public GlobalStatus commit(String xid) throws TransactionException {
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
         globalCommit.setXid(xid);
+        long beginTime = System.currentTimeMillis();
+        MetricsPublisher.postGlobalTransactionCommitted(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Committing.name());
         GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
+        MetricsPublisher.postGlobalTransactionCommitted(RootContext.getTxName(), beginTime, System.currentTimeMillis(), response.getGlobalStatus().name());
         return response.getGlobalStatus();
     }
 

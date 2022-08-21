@@ -75,6 +75,8 @@ public class RootContext {
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
     public static final Boolean VALUE_GLOBAL_LOCK_FLAG = true;
 
+    public static final String KEY_TX_NAME = "TRANSACTION_NAME";
+
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
     private static BranchType DEFAULT_BRANCH_TYPE;
@@ -128,6 +130,10 @@ public class RootContext {
     public static void setTimeout(Integer timeout) {
         CONTEXT_HOLDER.put(KEY_TIMEOUT,timeout);
     }
+
+    public static String getTxName() {return (String) CONTEXT_HOLDER.get(KEY_TX_NAME);}
+
+    public static void setTxName(String txName) {CONTEXT_HOLDER.put(KEY_TX_NAME, txName);}
 
     /**
      * declare local transactions will use global lock check for update/delete/insert/selectForUpdate SQL

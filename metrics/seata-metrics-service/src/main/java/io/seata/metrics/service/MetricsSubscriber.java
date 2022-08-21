@@ -73,7 +73,25 @@ public class MetricsSubscriber {
             consumers.put(GlobalStatus.BeginFailed.name(), this::processClientGlobalStatusBeginFailed);
             consumers.put(GlobalStatus.BeginSuccess.name(), this::processClientGlobalStatusBeginSuccess);
 
+            consumers.put(GlobalStatus.Committing.name(), this::processClientGlobalStatusCommitting);
+            consumers.put(GlobalStatus.CommitFailed.name(), this::processClientGlobalStatusCommitFailed);
+            consumers.put(GlobalStatus.Committed.name(), this::processClientGlobalStatusCommitted);
         }
+    }
+
+    private void processClientGlobalStatusCommitFailed(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_COMMIT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientGlobalStatusCommitted(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientGlobalStatusCommitting(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_COMMITTING.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientGlobalStatusBeginFailed(GlobalTransactionEvent event) {

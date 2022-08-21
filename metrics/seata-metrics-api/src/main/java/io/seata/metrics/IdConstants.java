@@ -63,7 +63,9 @@ public interface IdConstants {
 
     String STATUS_VALUE_ACTIVE = "active";
 
+    String STATUS_VALUE_COMMITTING = "committing";
     String STATUS_VALUE_COMMITTED = "committed";
+    String STATUS_VALUE_COMMIT_FAILED = "commitFailed";
 
     String STATUS_VALUE_ROLLBACKED = "rollbacked";
 
