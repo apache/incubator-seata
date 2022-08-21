@@ -76,7 +76,33 @@ public class MetricsSubscriber {
             consumers.put(GlobalStatus.Committing.name(), this::processClientGlobalStatusCommitting);
             consumers.put(GlobalStatus.CommitFailed.name(), this::processClientGlobalStatusCommitFailed);
             consumers.put(GlobalStatus.Committed.name(), this::processClientGlobalStatusCommitted);
+
+            consumers.put(GlobalStatus.Rollbacking.name(), this::processClientGlobalStatusRollbacking);
+            consumers.put(GlobalStatus.Rollbacked.name(), this::processClientGlobalStatusRollbacked);
+            consumers.put(GlobalStatus.RollbackFailed.name(), this::processClientGlobalStatusRollbackFailed);
+            
+            consumers.put(GlobalStatus.Report.name(), this::processClientGlobalStatusReport);
         }
+    }
+
+    private void processClientGlobalStatusReport(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_REPORT.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKFAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientGlobalStatusRollbacked(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientGlobalStatusRollbacking(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKING.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientGlobalStatusCommitFailed(GlobalTransactionEvent event) {

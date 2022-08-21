@@ -40,6 +40,21 @@ public interface TMMeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
 
+    Id COUNTER_ROLLBACKING = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKING);
+
+    Id COUNTER_REPORT = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_GLOBAL_REPORT);
+
+    Id COUNTER_ROLLBACKFAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKFAILED);
+
     Id COUNTER_AFTER_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
