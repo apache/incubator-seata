@@ -20,6 +20,10 @@ import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
+import io.seata.core.model.BranchStatus;
+import io.seata.metrics.IdConstants;
+import io.seata.metrics.service.MetricsPublisher;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
 import io.seata.rm.tcc.store.TCCFenceStore;
@@ -89,8 +93,9 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     @Override
     public boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO) {
         PreparedStatement ps = null;
+        Long startTime = System.currentTimeMillis();
         try {
-            Timestamp now = new Timestamp(System.currentTimeMillis());
+            Timestamp now = new Timestamp(startTime);
 
             String sql = TCCFenceStoreSqls.getInsertLocalTCCLogSQL(logTableName);
             ps = conn.prepareStatement(sql);
@@ -100,8 +105,13 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
             ps.setInt(4, tccFenceDO.getStatus());
             ps.setTimestamp(5, now);
             ps.setTimestamp(6, now);
-            return ps.executeUpdate() > 0;
+            int updateCount = ps.executeUpdate();
+            MetricsPublisher.postBranchEvent(Long.toString(tccFenceDO.getBranchId()), DefaultResourceManager.get().getBranchType(), startTime,
+                    System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_INSERT_TCC_FENCE_SUCCESS, BranchStatus.PhaseOne_InsertTCCFence.name());
+            return updateCount > 0;
         } catch (SQLIntegrityConstraintViolationException e) {
+            MetricsPublisher.postBranchEvent(Long.toString(tccFenceDO.getBranchId()), DefaultResourceManager.get().getBranchType(), startTime,
+                    System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_INSERT_TCC_FENCE_FAILED, BranchStatus.PhaseOne_InsertTCCFence.name());
             throw new TCCFenceException(String.format("Insert tcc fence record duplicate key exception. xid= %s, branchId= %s", tccFenceDO.getXid(), tccFenceDO.getBranchId()),
                     FrameworkErrorCode.DuplicateKeyException);
         } catch (SQLException e) {

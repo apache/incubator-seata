@@ -64,16 +64,67 @@ public interface RMMeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_FAILED);
 
-    Id COUNTER_COMMIT_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+    Id COUNTER_TCC_INSERT_FENCE_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_INSERT_TCC_FENCE_SUCCESS);
+
+    Id COUNTER_TCC_INSERT_FENCE_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_INSERT_TCC_FENCE_FAILED);
+
+    Id COUNTER_TCC_COMMIT_FENCE_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_SUCCESS);
 
-    Id COUNTER_COMMIT_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+    Id COUNTER_TCC_COMMIT_FENCE_SUCCESS_ON_ALREADY_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_SUCCESS_ON_ALREADY_COMMITTED);
+    Id COUNTER_TCC_COMMIT_FENCE_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_FAILED);
 
+    Id COUNTER_TCC_COMMIT_FENCE_FAILED_ON_ALREADY_ROLLBACK = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_FAILED_ON_ALREADY_ROLLBACK);
+    Id COUNTER_TCC_ROLLBACK_FENCE_FAILED_ON_ALREADY_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_ALREADY_COMMITTED);
+    Id COUNTER_TCC_ROLLBACK_FENCE_FAILED_ON_INSERT = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_INSERT);
+    Id COUNTER_TCC_ROLLBACK_FENCE_FAILED_ON_UPDATE = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_UPDATE);
+    Id COUNTER_TCC_ROLLBACK_FENCE_SUCCESS_ON_ALREADY_ROLLBACK = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_ALREADY_COMMITTED);
+    Id COUNTER_TCC_ROLLBACK_FENCE_SUCCESS_ON_INSERT = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_INSERT);
+    Id COUNTER_TCC_ROLLBACK_FENCE_SUCCESS_ON_UPDATE = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_UPDATE);
+
+    Id COUNTER_COMMIT_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_SUCCESS);
+    Id COUNTER_COMMIT_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_FAILED);
     Id COUNTER_ROLLBACK_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)

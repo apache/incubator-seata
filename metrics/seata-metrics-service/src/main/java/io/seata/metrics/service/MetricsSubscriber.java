@@ -69,17 +69,22 @@ public class MetricsSubscriber {
         }else if (MetricsManager.get().getRole().equals(MetricsManager.get().ROLE_VALUE_CLIENT)) {
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED, this::processClientGlobalStatusBeginFailed);
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS, this::processClientGlobalStatusBeginSuccess);
+
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_FAILED, this::processClientGlobalStatusCommitFailed);
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_SUCCESS, this::processClientGlobalStatusCommitted);
+
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_FAILED, this::processClientGlobalStatusRollbackFailed);
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_SUCCESS, this::processClientGlobalStatusRollbacked);
+
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED, this::processClientGlobalStatusReportFailed);
             consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_SUCCESS, this::processClientGlobalStatusReportSuccess);
 
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED, this::processClientBranchStatusRegisterFailed);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_SUCCESS, this::processClientBranchStatusRegistered);
+
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED, this::processClientBranchStatusReportFailed);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_SUCCESS, this::processClientBranchStatusReportSuccess);
+
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_FAILED, this::processClientBranchStatusUndologBatchDeleteFailed);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_SUCCESS, this::processClientBranchStatusUndologBatchDeleteSuccess);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_FAILED, this::processClientBranchStatusUndologDeleteFailed);
@@ -88,11 +93,110 @@ public class MetricsSubscriber {
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_SUCCESS, this::processClientBranchStatusUndologInsertSuccess);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_FAILED, this::processClientBranchStatusUndologExecuteFailed);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_SUCCESS, this::processClientBranchStatusUndologExecuteSuccess);
+
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_FAILED, this::processClientBranchStatusRollbackFailed);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_SUCCESS, this::processClientBranchStatusRollbackSuccess);
+
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_FAILED, this::processClientBranchStatusCommitFailed);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_SUCCESS, this::processClientBranchStatusCommitSuccess);
+
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_INSERT_TCC_FENCE_FAILED, this::processClientBranchStatusInsertTCCFenceFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_INSERT_TCC_FENCE_SUCCESS, this::processClientBranchStatusInsertTCCFenceSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_FAILED, this::processClientBranchStatusCommitTCCFenceFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_FAILED_ON_ALREADY_ROLLBACK, this::processClientBranchStatusCommitTCCFenceFailedOnRollback);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_SUCCESS, this::processClientBranchStatusCommitTCCFenceSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_SUCCESS_ON_ALREADY_COMMITTED, this::processClientBranchStatusCommitTCCFenceSuccessOnCommitted);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_ALREADY_COMMITTED, this::processClientBranchStatusTCCRollbackFenceFailedOnCommitted);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_INSERT, this::processClientBranchStatusTCCRollbackFenceFailedOnInsert);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_UPDATE, this::processClientBranchStatusTCCRollbackFenceFailedOnUpdate);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_ALREADY_ROLLBACK, this::processClientBranchStatusTCCRollbackFenceSuccessOnRollback);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_INSERT, this::processClientBranchStatusTCCRollbackFenceSuccessOnInsert);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_UPDATE, this::processClientBranchStatusTCCRollbackFenceSuccessOnUpdate);
         }
+    }
+
+    private void processClientBranchStatusTCCRollbackFenceSuccessOnUpdate(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_ROLLBACK_FENCE_SUCCESS_ON_UPDATE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCRollbackFenceSuccessOnInsert(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_ROLLBACK_FENCE_SUCCESS_ON_INSERT.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCRollbackFenceSuccessOnRollback(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_ROLLBACK_FENCE_SUCCESS_ON_ALREADY_ROLLBACK.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCRollbackFenceFailedOnUpdate(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_ROLLBACK_FENCE_FAILED_ON_UPDATE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCRollbackFenceFailedOnInsert(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_ROLLBACK_FENCE_FAILED_ON_INSERT.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCRollbackFenceFailedOnCommitted(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_ROLLBACK_FENCE_FAILED_ON_ALREADY_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusCommitTCCFenceSuccessOnCommitted(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_COMMIT_FENCE_SUCCESS_ON_ALREADY_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusCommitTCCFenceSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_COMMIT_FENCE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusCommitTCCFenceFailedOnRollback(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_COMMIT_FENCE_FAILED_ON_ALREADY_ROLLBACK.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusCommitTCCFenceFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_COMMIT_FENCE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusInsertTCCFenceSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_INSERT_FENCE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusInsertTCCFenceFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_TCC_INSERT_FENCE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientBranchStatusCommitSuccess(BranchEvent event) {
