@@ -43,5 +43,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [pengten](https://github.com/pengten)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
+- [Bughue](https://github.com/Bughue)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

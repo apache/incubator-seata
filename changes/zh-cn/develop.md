@@ -43,5 +43,6 @@
 - [pengten](https://github.com/pengten)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
+- [Bughue](https://github.com/Bughue)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
