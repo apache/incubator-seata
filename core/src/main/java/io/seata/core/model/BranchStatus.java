@@ -101,8 +101,11 @@ public enum BranchStatus {
      * The Phase two rollback failed retryable because of XAException.XAER_NOTA.
      * description:rollback logic is failed because of XAException.XAER_NOTA but retryable.
      */
-    PhaseTwo_RollbackFailed_XAER_NOTA_Retryable(12);
+    PhaseTwo_RollbackFailed_XAER_NOTA_Retryable(12),
 
+    RegisterFailed(13)
+
+    ;
     private int code;
 
     BranchStatus(int code) {

@@ -29,6 +29,7 @@ import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.BranchReportResponse;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.metrics.service.MetricsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,10 +65,13 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setBranchType(branchType);
             request.setApplicationData(applicationData);
 
+            long startTime = System.currentTimeMillis();
             BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
+                MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.RegisterFailed.name());
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.Registered.name());
             return response.getBranchId();
         } catch (TimeoutException toe) {
             throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);

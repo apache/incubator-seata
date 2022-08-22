@@ -55,7 +55,6 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         long beginTime = System.currentTimeMillis();
-        MetricsPublisher.postGlobalTransaction(name, beginTime, System.currentTimeMillis(), GlobalStatus.Begin.name());
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             MetricsPublisher.postGlobalTransaction(name, beginTime, System.currentTimeMillis(), GlobalStatus.BeginFailed.name());
@@ -70,9 +69,9 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
         globalCommit.setXid(xid);
         long beginTime = System.currentTimeMillis();
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Committing.name());
         GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
         MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), response.getGlobalStatus().name());
+        //todo: handle result
         return response.getGlobalStatus();
     }
 
@@ -81,9 +80,9 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalRollbackRequest globalRollback = new GlobalRollbackRequest();
         globalRollback.setXid(xid);
         long beginTime = System.currentTimeMillis();
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Rollbacking.name());
         GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
         MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), response.getGlobalStatus().name());
+        //todo: handle result
         return response.getGlobalStatus();
     }
 
@@ -101,9 +100,9 @@ public class DefaultTransactionManager implements TransactionManager {
         globalReport.setXid(xid);
         globalReport.setGlobalStatus(globalStatus);
         long beginTime = System.currentTimeMillis();
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Report.name());
         GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
-        //todo: handle report result
+        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), response.getGlobalStatus().name());
+        //todo: handle result
         return response.getGlobalStatus();
     }
 

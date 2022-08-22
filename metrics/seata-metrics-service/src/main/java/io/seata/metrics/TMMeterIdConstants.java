@@ -5,10 +5,6 @@ public interface TMMeterIdConstants {
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ACTIVE);
-    Id COUNTER_BEGIN = new Id(IdConstants.SEATA_TRANSACTION)
-            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
-            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
-            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_BEGIN);
 
     Id COUNTER_BEGIN_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
@@ -20,10 +16,6 @@ public interface TMMeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_BEGIN_FAILED);
 
-    Id COUNTER_COMMITTING = new Id(IdConstants.SEATA_TRANSACTION)
-            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
-            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
-            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTING);
 
     Id COUNTER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
@@ -40,10 +32,6 @@ public interface TMMeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
 
-    Id COUNTER_ROLLBACKING = new Id(IdConstants.SEATA_TRANSACTION)
-            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
-            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
-            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKING);
 
     Id COUNTER_REPORT = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)

@@ -26,6 +26,7 @@ public interface IdConstants {
     String APP_ID_KEY = "applicationId";
     
     String GROUP_KEY = "group";
+    String BRANCH_TYPE_KEY = "branchType";
 
     String NAME_KEY = "name";
 
@@ -63,12 +64,10 @@ public interface IdConstants {
 
     String STATUS_VALUE_ACTIVE = "active";
 
-    String STATUS_VALUE_COMMITTING = "committing";
     String STATUS_VALUE_COMMITTED = "committed";
     String STATUS_VALUE_COMMIT_FAILED = "commitFailed";
 
     String STATUS_VALUE_ROLLBACKED = "rollbacked";
-    String STATUS_VALUE_ROLLBACKING = "rollbacking";
     String STATUS_VALUE_ROLLBACKFAILED = "rollbackFailed";
 
     String STATUS_VALUE_GLOBAL_REPORT = "globalReport";
@@ -86,5 +85,7 @@ public interface IdConstants {
     String STATUS_VALUE_BEGIN = "begin";
     String STATUS_VALUE_BEGIN_SUCCESS = "BeginSuccess";
     String STATUS_VALUE_BEGIN_FAILED = "BeginFailed";
+    String STATUS_VALUE_BRANCH_REGISTER_SUCCESS = "BranchRegisterSuccess";
+    String STATUS_VALUE_BRANCH_REGISTER_FAILED = "BranchRegisterFailed";
 
 }

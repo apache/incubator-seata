@@ -54,6 +54,19 @@ public class BranchEvent implements Event {
 
     private boolean retryBranch;
 
+    public BranchEvent(String role, String name, String applicationId, String group, Long beginTime, Long endTime, BranchType branchType, String status, boolean retryGlobal, boolean retryBranch) {
+        this.role = role;
+        this.name = name;
+        this.applicationId = applicationId;
+        this.group = group;
+        this.beginTime = beginTime;
+        this.endTime = endTime;
+        this.branchType = branchType;
+        this.status = status;
+        this.retryGlobal = retryGlobal;
+        this.retryBranch = retryBranch;
+    }
+
     public BranchEvent(long id, String role, String name, String applicationId, String group,
                        Long beginTime, Long endTime, String resourceGroupId, String resourceId,
                        String lockKey, BranchType branchType, String status, boolean retryGlobal, boolean retryBranch) {

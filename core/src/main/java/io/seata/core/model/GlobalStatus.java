@@ -134,9 +134,8 @@ public enum GlobalStatus {
     BeginFailed(18),
 
     BeginSuccess(19),
-    Report(20),
-    ReportSuccess(21),
-    ReportFailed(22)
+    ReportSuccess(20),
+    ReportFailed(21)
 
     ;
 

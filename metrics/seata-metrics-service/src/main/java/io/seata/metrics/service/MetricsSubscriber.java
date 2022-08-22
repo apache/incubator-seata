@@ -19,7 +19,9 @@ import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.BranchEvent;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.metrics.RMMeterIdConstants;
 import io.seata.metrics.TCMeterIdConstants;
 import io.seata.metrics.TMMeterIdConstants;
 import io.seata.metrics.event.EventBusManager;
@@ -34,6 +36,7 @@ import java.util.function.Consumer;
 
 import static io.seata.metrics.IdConstants.APP_ID_KEY;
 import static io.seata.metrics.IdConstants.GROUP_KEY;
+import static io.seata.metrics.IdConstants.BRANCH_TYPE_KEY;
 import static io.seata.metrics.IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY;
 import static io.seata.metrics.IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY;
 
@@ -48,11 +51,11 @@ public class MetricsSubscriber {
     private final Registry registry;
 
     private final Map<String, Consumer<GlobalTransactionEvent>> consumers;
-    private final Map<String, Consumer<BranchEvent>> clientConsumers;
+    private final Map<String, Consumer<BranchEvent>> branchConsumers;
     public MetricsSubscriber(Registry registry) {
         this.registry = registry;
         consumers = new HashMap<>();
-        clientConsumers = new HashMap<>();
+        branchConsumers = new HashMap<>();
         if (MetricsManager.get().getRole().equals(MetricsManager.get().ROLE_VALUE_SERVER)) {
             consumers.put(GlobalStatus.Begin.name(), this::processGlobalStatusBegin);
             consumers.put(GlobalStatus.Committed.name(), this::processGlobalStatusCommitted);
@@ -69,20 +72,33 @@ public class MetricsSubscriber {
             consumers.put(STATUS_VALUE_AFTER_COMMITTED_KEY, this::processAfterGlobalCommitted);
             consumers.put(STATUS_VALUE_AFTER_ROLLBACKED_KEY, this::processAfterGlobalRollbacked);
         }else if (MetricsManager.get().getRole().equals(MetricsManager.get().ROLE_VALUE_CLIENT)) {
-            consumers.put(GlobalStatus.Begin.name(), this::processClientGlobalStatusBegin);
             consumers.put(GlobalStatus.BeginFailed.name(), this::processClientGlobalStatusBeginFailed);
             consumers.put(GlobalStatus.BeginSuccess.name(), this::processClientGlobalStatusBeginSuccess);
 
-            consumers.put(GlobalStatus.Committing.name(), this::processClientGlobalStatusCommitting);
             consumers.put(GlobalStatus.CommitFailed.name(), this::processClientGlobalStatusCommitFailed);
             consumers.put(GlobalStatus.Committed.name(), this::processClientGlobalStatusCommitted);
 
-            consumers.put(GlobalStatus.Rollbacking.name(), this::processClientGlobalStatusRollbacking);
             consumers.put(GlobalStatus.Rollbacked.name(), this::processClientGlobalStatusRollbacked);
             consumers.put(GlobalStatus.RollbackFailed.name(), this::processClientGlobalStatusRollbackFailed);
-            
-            consumers.put(GlobalStatus.Report.name(), this::processClientGlobalStatusReport);
+
+            branchConsumers.put(BranchStatus.Registered.name(), this::processClientBranchStatusRegistered);
+            branchConsumers.put(BranchStatus.RegisterFailed.name(), this::processClientBranchStatusRegisterFailed);
         }
+    }
+
+    private void processClientBranchStatusRegistered(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getCounter(RMMeterIdConstants.COUNTER_REGISTER_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusRegisterFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_REGISTER_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientGlobalStatusReport(GlobalTransactionEvent event) {
@@ -100,10 +116,6 @@ public class MetricsSubscriber {
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
-    private void processClientGlobalStatusRollbacking(GlobalTransactionEvent event) {
-        registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKING.withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-    }
 
     private void processClientGlobalStatusCommitFailed(GlobalTransactionEvent event) {
         registry.getCounter(TMMeterIdConstants.COUNTER_COMMIT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
@@ -115,10 +127,6 @@ public class MetricsSubscriber {
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
-    private void processClientGlobalStatusCommitting(GlobalTransactionEvent event) {
-        registry.getCounter(TMMeterIdConstants.COUNTER_COMMITTING.withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-    }
 
     private void processClientGlobalStatusBeginFailed(GlobalTransactionEvent event) {
         registry.getCounter(TMMeterIdConstants.COUNTER_BEGIN_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
@@ -126,22 +134,12 @@ public class MetricsSubscriber {
     }
 
     private void processClientGlobalStatusBeginSuccess(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
         registry.getCounter(TMMeterIdConstants.COUNTER_BEGIN_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
-    private void processClientGlobalStatusBegin(GlobalTransactionEvent event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("accept new event,xid:{},event:{}", event.getId(), event);
-            for (Object object : EventBusManager.get().getSubscribers()) {
-                LOGGER.debug("subscribe:{},threadName:{}", object.toString(), Thread.currentThread().getName());
-            }
-        }
-        registry.getCounter(TMMeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getCounter(TMMeterIdConstants.COUNTER_BEGIN.withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-    }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
         if (LOGGER.isDebugEnabled()) {
@@ -280,8 +278,8 @@ public class MetricsSubscriber {
 
     @Subscribe
     public void recordBranchEventForMetrics(BranchEvent event) {
-        if (registry != null && clientConsumers.containsKey(event.getStatus())) {
-            clientConsumers.get(event.getStatus()).accept(event);
+        if (registry != null && branchConsumers.containsKey(event.getStatus())) {
+            branchConsumers.get(event.getStatus()).accept(event);
         }
     }
 
