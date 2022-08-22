@@ -240,7 +240,6 @@ public class SessionHolder {
 
     private static void queueToAsyncCommitting(GlobalSession globalSession) {
         try {
-            globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
             getAsyncCommittingSessionManager().addGlobalSession(globalSession);
         } catch (TransactionException e) {
             throw new ShouldNeverHappenException(e);
@@ -259,7 +258,6 @@ public class SessionHolder {
 
     private static void queueToRetryCommit(GlobalSession globalSession) {
         try {
-            globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
             getRetryCommittingSessionManager().addGlobalSession(globalSession);
         } catch (TransactionException e) {
             throw new ShouldNeverHappenException(e);
@@ -268,7 +266,6 @@ public class SessionHolder {
 
     private static void queueToRetryRollback(GlobalSession globalSession) {
         try {
-            globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
             getRetryRollbackingSessionManager().addGlobalSession(globalSession);
         } catch (TransactionException e) {
             throw new ShouldNeverHappenException(e);

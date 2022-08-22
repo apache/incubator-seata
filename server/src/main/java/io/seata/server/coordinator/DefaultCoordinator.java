@@ -322,11 +322,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
                 LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
 
-                globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
                 globalSession.setStatus(GlobalStatus.TimeoutRollbacking);
 
-                globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
                 SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
@@ -378,7 +376,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     //The function of this 'return' is 'continue'.
                     return;
                 }
-                rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
@@ -417,7 +414,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     //The function of this 'return' is 'continue'.
                     return;
                 }
-                committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage());
@@ -437,7 +433,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
-                asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);

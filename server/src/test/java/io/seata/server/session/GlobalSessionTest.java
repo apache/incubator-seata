@@ -174,7 +174,6 @@ public class GlobalSessionTest {
     static Stream<Arguments> globalSessionProvider() throws IOException {
         GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
         globalSession.setActive(true);
-        globalSession.addSessionLifecycleListener(new FileSessionManager("default", null));
         return Stream.of(
                 Arguments.of(
                         globalSession)

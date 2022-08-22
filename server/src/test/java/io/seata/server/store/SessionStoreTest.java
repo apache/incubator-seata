@@ -92,7 +92,6 @@ public class SessionStoreTest {
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
 
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
@@ -133,7 +132,6 @@ public class SessionStoreTest {
             Assertions.assertTrue(lockManager.isLockable(xid, RESOURCE_ID, "tb:3"));
 
             //clear
-            reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             reloadSession.end();
         } finally {
             SessionHolder.destroy();
@@ -151,7 +149,6 @@ public class SessionStoreTest {
             SessionHolder.init("file");
             GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
 
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
             // Re-init SessionHolder: restore sessions from file
@@ -175,7 +172,6 @@ public class SessionStoreTest {
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
 
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
@@ -210,7 +206,6 @@ public class SessionStoreTest {
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
             //clear
-            reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             reloadSession.end();
         } finally {
             SessionHolder.destroy();
@@ -231,7 +226,6 @@ public class SessionStoreTest {
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
 
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
@@ -270,7 +264,6 @@ public class SessionStoreTest {
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
             //clear
-            reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             reloadSession.end();
         } finally {
             SessionHolder.destroy();
@@ -292,7 +285,6 @@ public class SessionStoreTest {
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
 
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
@@ -331,7 +323,6 @@ public class SessionStoreTest {
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
             //clear
-            reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             reloadSession.end();
         } finally {
             SessionHolder.destroy();
@@ -353,7 +344,6 @@ public class SessionStoreTest {
             String xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
 
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
             BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
