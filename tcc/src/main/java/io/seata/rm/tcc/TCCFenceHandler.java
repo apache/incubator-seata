@@ -299,13 +299,18 @@ public class TCCFenceHandler {
     public static boolean deleteFence(String xid, Long branchId) {
         return transactionTemplate.execute(status -> {
             boolean ret = false;
+            Long startTime = System.currentTimeMillis();
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
             } catch (RuntimeException e) {
+                MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                        System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_FAILED, BranchStatus.PhaseTwo_DeleteTCCFence.name());
                 status.setRollbackOnly();
                 LOGGER.error("delete fence log failed, xid: {}, branchId: {}", xid, branchId, e);
             }
+            MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                    System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_SUCCESS, BranchStatus.PhaseTwo_DeleteTCCFence.name());
             return ret;
         });
     }
@@ -318,13 +323,20 @@ public class TCCFenceHandler {
      */
     public static int deleteFenceByDate(Date datetime) {
         return transactionTemplate.execute(status -> {
+            int res;
+            Long startTime = System.currentTimeMillis();
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
+                res = TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
             } catch (RuntimeException e) {
+                MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime,
+                        System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_FAILED, BranchStatus.PhaseTwo_DeleteTCCFence.name());
                 status.setRollbackOnly();
                 throw e;
             }
+            MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime,
+                    System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_SUCCESS, BranchStatus.PhaseTwo_DeleteTCCFence.name());
+            return res;
         });
     }
 

@@ -112,7 +112,39 @@ public class MetricsSubscriber {
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_ALREADY_ROLLBACK, this::processClientBranchStatusTCCRollbackFenceSuccessOnRollback);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_INSERT, this::processClientBranchStatusTCCRollbackFenceSuccessOnInsert);
             branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_UPDATE, this::processClientBranchStatusTCCRollbackFenceSuccessOnUpdate);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_FAILED, this::processClientBranchStatusTCCDeleteFenceFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_SUCCESS, this::processClientBranchStatusTCCDeleteFenceSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_FAILED, this::processClientBranchStatusTCCDeleteFenceByDateFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_SUCCESS, this::processClientBranchStatusTCCDeleteFenceByDateSuccess);
         }
+    }
+
+    private void processClientBranchStatusTCCDeleteFenceByDateSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_DELETE_TCC_FENCE_BY_DATE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCDeleteFenceByDateFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_DELETE_TCC_FENCE_BY_DATE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCDeleteFenceFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_DELETE_TCC_FENCE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusTCCDeleteFenceSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_DELETE_TCC_FENCE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientBranchStatusTCCRollbackFenceSuccessOnUpdate(BranchEvent event) {

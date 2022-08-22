@@ -106,7 +106,9 @@ public enum BranchStatus {
     PhaseOne_InsertUndoLog(13),
     PhaseOne_InsertTCCFence(14),
     PhaseTwo_CommitTCCFence(15),
-    PhaseTwo_RollbackTCCFence(16)
+    PhaseTwo_RollbackTCCFence(16),
+    PhaseTwo_DeleteTCCFence(17)
+
 
     ;
     private int code;
