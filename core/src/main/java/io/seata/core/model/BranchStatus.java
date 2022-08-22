@@ -103,7 +103,10 @@ public enum BranchStatus {
      */
     PhaseTwo_RollbackFailed_XAER_NOTA_Retryable(12),
 
-    RegisterFailed(13)
+    RegisterFailed(13),
+
+    ReportSuccess(14),
+    ReportFailed(15)
 
     ;
     private int code;

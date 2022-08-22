@@ -81,9 +81,27 @@ public class MetricsSubscriber {
             consumers.put(GlobalStatus.Rollbacked.name(), this::processClientGlobalStatusRollbacked);
             consumers.put(GlobalStatus.RollbackFailed.name(), this::processClientGlobalStatusRollbackFailed);
 
+            consumers.put(GlobalStatus.ReportSuccess.name(), this::processClientGlobalStatusReportSuccess);
+            consumers.put(GlobalStatus.ReportFailed.name(), this::processClientGlobalStatusReportFailed);
+
             branchConsumers.put(BranchStatus.Registered.name(), this::processClientBranchStatusRegistered);
             branchConsumers.put(BranchStatus.RegisterFailed.name(), this::processClientBranchStatusRegisterFailed);
+
+            branchConsumers.put(BranchStatus.ReportSuccess.name(), this::processClientBranchStatusReportSuccess);
+            branchConsumers.put(BranchStatus.ReportFailed.name(), this::processClientBranchStatusReportFailed);
         }
+    }
+
+    private void processClientBranchStatusReportFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_REPORT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusReportSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_REPORT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientBranchStatusRegistered(BranchEvent event) {
@@ -101,8 +119,13 @@ public class MetricsSubscriber {
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
-    private void processClientGlobalStatusReport(GlobalTransactionEvent event) {
-        registry.getCounter(TMMeterIdConstants.COUNTER_REPORT.withTag(APP_ID_KEY, event.getApplicationId())
+    private void processClientGlobalStatusReportFailed(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_REPORT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientGlobalStatusReportSuccess(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_REPORT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 

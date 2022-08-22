@@ -33,10 +33,15 @@ public interface TMMeterIdConstants {
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
 
 
-    Id COUNTER_REPORT = new Id(IdConstants.SEATA_TRANSACTION)
+    Id COUNTER_REPORT_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
-            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_GLOBAL_REPORT);
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_GLOBAL_REPORT_SUCCESS);
+
+    Id COUNTER_REPORT_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_GLOBAL_REPORT_FAILED);
 
     Id COUNTER_ROLLBACKFAILED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)

@@ -57,6 +57,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
      */
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+        long startTime = System.currentTimeMillis();
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
@@ -65,7 +66,6 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setBranchType(branchType);
             request.setApplicationData(applicationData);
 
-            long startTime = System.currentTimeMillis();
             BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
                 MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.RegisterFailed.name());
@@ -74,8 +74,10 @@ public abstract class AbstractResourceManager implements ResourceManager {
             MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.Registered.name());
             return response.getBranchId();
         } catch (TimeoutException toe) {
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.RegisterFailed.name());
             throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.RegisterFailed.name());
             throw new RmTransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
         }
     }
@@ -92,6 +94,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
      */
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+        long startTime = System.currentTimeMillis();
         try {
             BranchReportRequest request = new BranchReportRequest();
             request.setXid(xid);
@@ -101,11 +104,15 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
             BranchReportResponse response = (BranchReportResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
+                MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportFailed.name());
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportSuccess.name());
         } catch (TimeoutException toe) {
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportFailed.name());
             throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportFailed.name());
             throw new RmTransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
         }
     }

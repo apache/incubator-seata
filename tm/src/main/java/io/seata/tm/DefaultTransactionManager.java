@@ -70,8 +70,10 @@ public class DefaultTransactionManager implements TransactionManager {
         globalCommit.setXid(xid);
         long beginTime = System.currentTimeMillis();
         GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), response.getGlobalStatus().name());
-        //todo: handle result
+        if (response.getResultCode() == ResultCode.Failed) {
+            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Committed.name());
+        }
+        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.CommitFailed.name());
         return response.getGlobalStatus();
     }
 
@@ -81,8 +83,10 @@ public class DefaultTransactionManager implements TransactionManager {
         globalRollback.setXid(xid);
         long beginTime = System.currentTimeMillis();
         GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), response.getGlobalStatus().name());
-        //todo: handle result
+        if (response.getResultCode() == ResultCode.Failed) {
+            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Rollbacked.name());
+        }
+        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.RollbackFailed.name());
         return response.getGlobalStatus();
     }
 
@@ -101,8 +105,10 @@ public class DefaultTransactionManager implements TransactionManager {
         globalReport.setGlobalStatus(globalStatus);
         long beginTime = System.currentTimeMillis();
         GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), response.getGlobalStatus().name());
-        //todo: handle result
+        if (response.getResultCode() == ResultCode.Failed) {
+            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.ReportFailed.name());
+        }
+        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.ReportSuccess.name());
         return response.getGlobalStatus();
     }
 

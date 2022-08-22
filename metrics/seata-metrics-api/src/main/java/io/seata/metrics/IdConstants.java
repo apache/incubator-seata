@@ -70,7 +70,8 @@ public interface IdConstants {
     String STATUS_VALUE_ROLLBACKED = "rollbacked";
     String STATUS_VALUE_ROLLBACKFAILED = "rollbackFailed";
 
-    String STATUS_VALUE_GLOBAL_REPORT = "globalReport";
+    String STATUS_VALUE_GLOBAL_REPORT_SUCCESS = "globalReportSuccess";
+    String STATUS_VALUE_GLOBAL_REPORT_FAILED = "globalReportFailed";
 
     String STATUS_VALUE_FAILED = "failed";
 
@@ -87,5 +88,6 @@ public interface IdConstants {
     String STATUS_VALUE_BEGIN_FAILED = "BeginFailed";
     String STATUS_VALUE_BRANCH_REGISTER_SUCCESS = "BranchRegisterSuccess";
     String STATUS_VALUE_BRANCH_REGISTER_FAILED = "BranchRegisterFailed";
-
+    String STATUS_VALUE_BRANCH_REPORT_SUCCESS = "BranchReportSuccess";
+    String STATUS_VALUE_BRANCH_REPORT_FAILED = "BranchReportFailed";
 }
