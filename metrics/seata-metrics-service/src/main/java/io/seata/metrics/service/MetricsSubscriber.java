@@ -67,28 +67,60 @@ public class MetricsSubscriber {
             consumers.put(STATUS_VALUE_AFTER_COMMITTED_KEY, this::processAfterGlobalCommitted);
             consumers.put(STATUS_VALUE_AFTER_ROLLBACKED_KEY, this::processAfterGlobalRollbacked);
         }else if (MetricsManager.get().getRole().equals(MetricsManager.get().ROLE_VALUE_CLIENT)) {
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED, this::processClientGlobalStatusBeginFailed);
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS, this::processClientGlobalStatusBeginSuccess);
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_FAILED, this::processClientGlobalStatusCommitFailed);
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_SUCCESS, this::processClientGlobalStatusCommitted);
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_FAILED, this::processClientGlobalStatusRollbackFailed);
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_SUCCESS, this::processClientGlobalStatusRollbacked);
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED, this::processClientGlobalStatusReportFailed);
-            consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_SUCCESS, this::processClientGlobalStatusReportSuccess);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED, this::processClientGlobalStatusBeginFailed);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS, this::processClientGlobalStatusBeginSuccess);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_FAILED, this::processClientGlobalStatusCommitFailed);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_SUCCESS, this::processClientGlobalStatusCommitted);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_FAILED, this::processClientGlobalStatusRollbackFailed);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_SUCCESS, this::processClientGlobalStatusRollbacked);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED, this::processClientGlobalStatusReportFailed);
+            consumers.put(METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_SUCCESS, this::processClientGlobalStatusReportSuccess);
 
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED, this::processClientBranchStatusRegisterFailed);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_SUCCESS, this::processClientBranchStatusRegistered);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED, this::processClientBranchStatusReportFailed);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_SUCCESS, this::processClientBranchStatusReportSuccess);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_FAILED, this::processClientBranchStatusUndologBatchDeleteFailed);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_SUCCESS, this::processClientBranchStatusUndologBatchDeleteSuccess);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_FAILED, this::processClientBranchStatusUndologDeleteFailed);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_SUCCESS, this::processClientBranchStatusUndologDeleteSuccess);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_FAILED, this::processClientBranchStatusUndologInsertFailed);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_SUCCESS, this::processClientBranchStatusUndologInsertSuccess);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_FAILED, this::processClientBranchStatusUndologExecuteFailed);
-            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_SUCCESS, this::processClientBranchStatusUndologExecuteSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED, this::processClientBranchStatusRegisterFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_SUCCESS, this::processClientBranchStatusRegistered);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED, this::processClientBranchStatusReportFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_SUCCESS, this::processClientBranchStatusReportSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_FAILED, this::processClientBranchStatusUndologBatchDeleteFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_SUCCESS, this::processClientBranchStatusUndologBatchDeleteSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_FAILED, this::processClientBranchStatusUndologDeleteFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_SUCCESS, this::processClientBranchStatusUndologDeleteSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_FAILED, this::processClientBranchStatusUndologInsertFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_SUCCESS, this::processClientBranchStatusUndologInsertSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_FAILED, this::processClientBranchStatusUndologExecuteFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_SUCCESS, this::processClientBranchStatusUndologExecuteSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_FAILED, this::processClientBranchStatusRollbackFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_SUCCESS, this::processClientBranchStatusRollbackSuccess);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_FAILED, this::processClientBranchStatusCommitFailed);
+            branchConsumers.put(METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_SUCCESS, this::processClientBranchStatusCommitSuccess);
         }
+    }
+
+    private void processClientBranchStatusCommitSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_COMMIT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusCommitFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_COMMIT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusRollbackFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_ROLLBACK_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusRollbackSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_ROLLBACK_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientBranchStatusUndologExecuteSuccess(BranchEvent event) {

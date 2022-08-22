@@ -33,6 +33,8 @@ import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.metrics.IdConstants;
+import io.seata.metrics.service.MetricsPublisher;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
@@ -118,17 +120,22 @@ public class DataSourceManager extends AbstractResourceManager {
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException(String.format("resource: %s not found",resourceId));
         }
+        Long startTime = System.currentTimeMillis();
         try {
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
+            MetricsPublisher.postBranchEvent(Long.toString(branchId), branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_SUCCESS, BranchStatus.PhaseTwo_Rollbacked.name());
         } catch (TransactionException te) {
+            BranchStatus branchStatus;
             StackTraceLogger.info(LOGGER, te,
                 "branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. reason:[{}]",
                 new Object[]{branchType, xid, branchId, resourceId, applicationData, te.getMessage()});
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
-                return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
+                 branchStatus = BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             } else {
-                return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+                branchStatus = BranchStatus.PhaseTwo_RollbackFailed_Retryable;
             }
+            MetricsPublisher.postBranchEvent(Long.toString(branchId), branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_FAILED, branchStatus.name());
+            return branchStatus;
         }
         return BranchStatus.PhaseTwo_Rollbacked;
 
