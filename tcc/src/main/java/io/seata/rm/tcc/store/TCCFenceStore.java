@@ -17,6 +17,8 @@ package io.seata.rm.tcc.store;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The TCC Fence Store
@@ -32,6 +34,14 @@ public interface TCCFenceStore {
      * @return the tcc fence do
      */
     TCCFenceDO queryTCCFenceDO(Connection conn, String xid, Long branchId);
+
+    /**
+     * Query xid.
+     * @param datetime the datetime
+     * @param limit the limit size
+     * @return the tcc fence do
+     */
+    Set<String> queryEndStatusXidsByDate(Connection conn, Date datetime, int limit);
 
     /**
      * Insert tcc fence do boolean.
@@ -58,11 +68,19 @@ public interface TCCFenceStore {
     boolean deleteTCCFenceDO(Connection conn, String xid, Long branchId);
 
     /**
+     * Delete tcc fence do boolean.
+     * @param xids the global transaction ids
+     * @return the boolean
+     */
+    int deleteTCCFenceDO(Connection conn, List<String> xids);
+
+    /**
      * Delete tcc fence by datetime.
      * @param datetime datetime
+     * @param limit limit
      * @return the deleted row count
      */
-    int deleteTCCFenceDOByDate(Connection conn, Date datetime);
+    int deleteTCCFenceDOByDate(Connection conn, Date datetime, int limit);
 
     /**
      * Set LogTable Name
