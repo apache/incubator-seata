@@ -232,8 +232,9 @@ public class DefaultCore implements Core {
                             }
                     }
                 } catch (Exception ex) {
-                    StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception: {}",
-                        new String[] {branchSession.toString()});
+                    String commitInfo = retrying ? "Global commit continue" : "Global commit failed";
+                    StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception: {},{}",
+                        new String[] {branchSession.toString(), commitInfo});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
                         throw new TransactionException(ex);
@@ -328,7 +329,7 @@ public class DefaultCore implements Core {
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex,
-                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
+                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}, global rollback failed",
                         new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
