@@ -18,8 +18,6 @@ package io.seata.metrics.service;
 import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.BranchEvent;
 import io.seata.core.event.GlobalTransactionEvent;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.IdConstants;
 import io.seata.metrics.RMMeterIdConstants;
@@ -71,22 +69,82 @@ public class MetricsSubscriber {
         }else if (MetricsManager.get().getRole().equals(MetricsManager.get().ROLE_VALUE_CLIENT)) {
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED, this::processClientGlobalStatusBeginFailed);
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS, this::processClientGlobalStatusBeginSuccess);
-
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_FAILED, this::processClientGlobalStatusCommitFailed);
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_SUCCESS, this::processClientGlobalStatusCommitted);
-
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_FAILED, this::processClientGlobalStatusRollbackFailed);
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_SUCCESS, this::processClientGlobalStatusRollbacked);
-
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED, this::processClientGlobalStatusReportFailed);
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_SUCCESS, this::processClientGlobalStatusReportSuccess);
 
             branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED, this::processClientBranchStatusRegisterFailed);
             branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_SUCCESS, this::processClientBranchStatusRegistered);
-
             branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED, this::processClientBranchStatusReportFailed);
             branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_SUCCESS, this::processClientBranchStatusReportSuccess);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_FAILED, this::processClientBranchStatusUndologBatchDeleteFailed);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_SUCCESS, this::processClientBranchStatusUndologBatchDeleteSuccess);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_FAILED, this::processClientBranchStatusUndologDeleteFailed);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_SUCCESS, this::processClientBranchStatusUndologDeleteSuccess);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_FAILED, this::processClientBranchStatusUndologInsertFailed);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_SUCCESS, this::processClientBranchStatusUndologInsertSuccess);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_FAILED, this::processClientBranchStatusUndologExecuteFailed);
+            branchConsumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_SUCCESS, this::processClientBranchStatusUndologExecuteSuccess);
         }
+    }
+
+    private void processClientBranchStatusUndologExecuteSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_EXECUTE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusUndologExecuteFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_EXECUTE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusUndologInsertSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_INSERT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusUndologInsertFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_INSERT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusUndologBatchDeleteSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_BATCH_DELETE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusUndologBatchDeleteFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_BATCH_DELETE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusUndologDeleteSuccess(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_DELETE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void processClientBranchStatusUndologDeleteFailed(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_UNDO_LOG_DELETE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processClientBranchStatusReportFailed(BranchEvent event) {
@@ -105,8 +163,6 @@ public class MetricsSubscriber {
 
     private void processClientBranchStatusRegistered(BranchEvent event) {
         registry.getCounter(RMMeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
-                .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
         registry.getCounter(RMMeterIdConstants.COUNTER_REGISTER_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
@@ -119,6 +175,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+
+    private void clientDecreaseBranchActive(BranchEvent event) {
+        registry.getCounter(RMMeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     private void processClientGlobalStatusReportFailed(GlobalTransactionEvent event) {
@@ -167,13 +228,17 @@ public class MetricsSubscriber {
 
     private void processClientGlobalStatusBeginSuccess(GlobalTransactionEvent event) {
         registry.getCounter(TMMeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
         registry.getCounter(TMMeterIdConstants.COUNTER_BEGIN_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
+
+    private void clientDecreaseGlobalActive(GlobalTransactionEvent event) {
+        registry.getCounter(TMMeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+    }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
         if (LOGGER.isDebugEnabled()) {

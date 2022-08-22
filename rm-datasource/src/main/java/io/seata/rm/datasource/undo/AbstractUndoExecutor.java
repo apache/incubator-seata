@@ -33,7 +33,11 @@ import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.Result;
+import io.seata.metrics.IdConstants;
+import io.seata.metrics.service.MetricsPublisher;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
@@ -118,6 +122,7 @@ public abstract class AbstractUndoExecutor {
             return;
         }
         PreparedStatement undoPST = null;
+        long startTime = System.currentTimeMillis();
         try {
             String undoSQL = buildUndoSQL();
             undoPST = conn.prepareStatement(undoSQL);
@@ -134,9 +139,13 @@ public abstract class AbstractUndoExecutor {
                 undoPrepare(undoPST, undoValues, pkValueList);
 
                 undoPST.executeUpdate();
+                MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime, System.currentTimeMillis(),
+                        IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_SUCCESS, BranchStatus.PhaseTwo_Rollbacked.name());
             }
 
         } catch (Exception ex) {
+            MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime, System.currentTimeMillis(),
+                    IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_FAILED, BranchStatus.PhaseTwo_Rollbacked.name());
             if (ex instanceof SQLException) {
                 throw (SQLException) ex;
             } else {

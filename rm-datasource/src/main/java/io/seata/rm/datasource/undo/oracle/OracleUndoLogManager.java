@@ -24,6 +24,10 @@ import java.util.Date;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
+import io.seata.core.model.BranchStatus;
+import io.seata.metrics.IdConstants;
+import io.seata.metrics.service.MetricsPublisher;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -83,6 +87,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
 
     private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
                                State state, Connection conn) throws SQLException {
+        long startTime = System.currentTimeMillis();
         try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchID);
             pst.setString(2, xid);
@@ -90,10 +95,14 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             pst.setBytes(4, undoLogContent);
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
+            MetricsPublisher.postBranchEvent(Long.toString(branchID), DefaultResourceManager.get().getBranchType(), startTime, System.currentTimeMillis(),
+                    IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_SUCCESS, BranchStatus.PhaseOne_InsertUndoLog.name());
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
+            MetricsPublisher.postBranchEvent(Long.toString(branchID), DefaultResourceManager.get().getBranchType(), startTime, System.currentTimeMillis(),
+                    IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_FAILED, BranchStatus.PhaseOne_InsertUndoLog.name());
             throw (SQLException) e;
         }
     }

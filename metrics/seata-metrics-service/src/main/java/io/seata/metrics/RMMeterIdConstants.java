@@ -26,6 +26,44 @@ public interface RMMeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED);
 
+    Id COUNTER_UNDO_LOG_BATCH_DELETE_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_SUCCESS);
+
+    Id COUNTER_UNDO_LOG_BATCH_DELETE_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_FAILED);
+    Id COUNTER_UNDO_LOG_DELETE_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_SUCCESS);
+
+    Id COUNTER_UNDO_LOG_DELETE_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_FAILED);
+
+    Id COUNTER_UNDO_LOG_INSERT_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_SUCCESS);
+
+    Id COUNTER_UNDO_LOG_INSERT_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_INSERT_FAILED);
+    Id COUNTER_UNDO_LOG_EXECUTE_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_SUCCESS);
+
+    Id COUNTER_UNDO_LOG_EXECUTE_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_EXECUTE_FAILED);
+
     Id COUNTER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
