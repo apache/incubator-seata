@@ -744,27 +744,28 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         this.setStatus(GlobalStatus.AsyncCommitting);
-        // todo [optimize-session-manager] --> root manager.update
-        SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+        // todo [optimize-session-manager-done] add--> root manager.update
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
         this.setStatus(GlobalStatus.CommitRetrying);
-        // todo [optimize-session-manager] --> root manager.update
-        SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
+        // todo [optimize-session-manager-done] add--> root manager.update
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         GlobalStatus currentStatus = this.getStatus();
+        GlobalStatus newStatus;
         if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
-            this.setStatus(GlobalStatus.TimeoutRollbackRetrying);
+            newStatus = GlobalStatus.TimeoutRollbackRetrying;
         } else {
-            this.setStatus(GlobalStatus.RollbackRetrying);
+            newStatus = GlobalStatus.RollbackRetrying;
         }
-        // todo [optimize-session-manager] --> root manager.update
-        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
+        // todo [optimize-session-manager-done] add--> root manager.update
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, newStatus);
     }
 
     @Override
