@@ -29,6 +29,7 @@ import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.BranchReportResponse;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.metrics.IdConstants;
 import io.seata.metrics.service.MetricsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,16 +69,16 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
             BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.RegisterFailed.name());
+                MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED, BranchStatus.PhaseOne_Failed.name());
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
-            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.Registered.name());
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(),IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_SUCCESS,  BranchStatus.Registered.name());
             return response.getBranchId();
         } catch (TimeoutException toe) {
-            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.RegisterFailed.name());
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(),IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED,  BranchStatus.PhaseOne_Failed.name());
             throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.RegisterFailed.name());
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(),IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED,  BranchStatus.PhaseOne_Failed.name());
             throw new RmTransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
         }
     }
@@ -104,15 +105,15 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
             BranchReportResponse response = (BranchReportResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportFailed.name());
+                MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED, status.name());
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
-            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportSuccess.name());
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_SUCCESS, status.name());
         } catch (TimeoutException toe) {
-            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportFailed.name());
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED, status.name());
             throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), BranchStatus.ReportFailed.name());
+            MetricsPublisher.postBranchEvent(xid, branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED, status.name());
             throw new RmTransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
         }
     }

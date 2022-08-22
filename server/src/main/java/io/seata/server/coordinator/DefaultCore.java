@@ -139,9 +139,6 @@ public class DefaultCore implements Core {
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);
-        EventBusManager.get().post(new BranchEvent(12, BranchEvent.ROLE_TM, "branch event", "app_id",
-                "svc_group", System.currentTimeMillis(), System.currentTimeMillis(), "resource_group_id",
-                "resource_id", "lockkey", BranchType.SAGA, "status", false, false));
 
         return session.getXid();
     }

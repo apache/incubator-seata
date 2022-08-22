@@ -35,6 +35,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
+import io.seata.metrics.IdConstants;
 import io.seata.metrics.service.MetricsPublisher;
 import io.seata.tm.api.DefaultGlobalTransaction;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -57,10 +58,10 @@ public class DefaultTransactionManager implements TransactionManager {
         long beginTime = System.currentTimeMillis();
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
-            MetricsPublisher.postGlobalTransaction(name, beginTime, System.currentTimeMillis(), GlobalStatus.BeginFailed.name());
+            MetricsPublisher.postGlobalTransaction(name, beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED, GlobalStatus.Begin.name());
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
         }
-        MetricsPublisher.postGlobalTransaction(name, beginTime, System.currentTimeMillis(), GlobalStatus.BeginSuccess.name());
+        MetricsPublisher.postGlobalTransaction(name, beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS, GlobalStatus.Begin.name());
         return response.getXid();
     }
 
@@ -71,9 +72,9 @@ public class DefaultTransactionManager implements TransactionManager {
         long beginTime = System.currentTimeMillis();
         GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
         if (response.getResultCode() == ResultCode.Failed) {
-            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Committed.name());
+            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_FAILED, response.getGlobalStatus().name());
         }
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.CommitFailed.name());
+        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_SUCCESS, response.getGlobalStatus().name());
         return response.getGlobalStatus();
     }
 
@@ -84,9 +85,9 @@ public class DefaultTransactionManager implements TransactionManager {
         long beginTime = System.currentTimeMillis();
         GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
         if (response.getResultCode() == ResultCode.Failed) {
-            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.Rollbacked.name());
+            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_FAILED, response.getGlobalStatus().name());
         }
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.RollbackFailed.name());
+        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_SUCCESS, response.getGlobalStatus().name());
         return response.getGlobalStatus();
     }
 
@@ -106,9 +107,9 @@ public class DefaultTransactionManager implements TransactionManager {
         long beginTime = System.currentTimeMillis();
         GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
         if (response.getResultCode() == ResultCode.Failed) {
-            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.ReportFailed.name());
+            MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED, response.getGlobalStatus().name());
         }
-        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), GlobalStatus.ReportSuccess.name());
+        MetricsPublisher.postGlobalTransaction(RootContext.getTxName(), beginTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_SUCCESS, response.getGlobalStatus().name());
         return response.getGlobalStatus();
     }
 

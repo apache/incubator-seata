@@ -75,12 +75,14 @@ public class GlobalTransactionEvent implements Event {
      * Transaction Status
      */
     private final String status;
+    private String metricEvent;
 
     private final boolean retryGlobal;
 
     private boolean retryBranch;
 
-    public GlobalTransactionEvent(String role, String name, String applicationId, String group, Long beginTime, Long endTime, String status, boolean retryGlobal, boolean retryBranch) {
+    public GlobalTransactionEvent(String role, String name, String applicationId, String group,
+                                  Long beginTime, Long endTime, String status, String metricEvent,boolean retryGlobal, boolean retryBranch) {
         this.role = role;
         this.name = name;
         this.applicationId = applicationId;
@@ -88,6 +90,7 @@ public class GlobalTransactionEvent implements Event {
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.status = status;
+        this.metricEvent = metricEvent;
         this.retryGlobal = retryGlobal;
         this.retryBranch = retryBranch;
     }
@@ -207,6 +210,10 @@ public class GlobalTransactionEvent implements Event {
      */
     public boolean isRetryBranch() {
         return retryBranch;
+    }
+
+    public String getMetricEvent() {
+        return metricEvent;
     }
 
     @Override

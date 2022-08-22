@@ -83,11 +83,18 @@ public interface IdConstants {
 
     String STATUS_VALUE_AFTER_ROLLBACKED_KEY = "AfterRollbacked";
 
-    String STATUS_VALUE_BEGIN = "begin";
-    String STATUS_VALUE_BEGIN_SUCCESS = "BeginSuccess";
-    String STATUS_VALUE_BEGIN_FAILED = "BeginFailed";
-    String STATUS_VALUE_BRANCH_REGISTER_SUCCESS = "BranchRegisterSuccess";
-    String STATUS_VALUE_BRANCH_REGISTER_FAILED = "BranchRegisterFailed";
-    String STATUS_VALUE_BRANCH_REPORT_SUCCESS = "BranchReportSuccess";
-    String STATUS_VALUE_BRANCH_REPORT_FAILED = "BranchReportFailed";
+    String METRICS_EVENT_STATUS_KEY = "metricsEventStatus";
+
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS = "globalBeginSuccess";
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED = "globalBeginFailed";
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_SUCCESS= "globalCommitSuccess";
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_FAILED = "globalCommitFailed";
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_SUCCESS= "globalRollbackSuccess";
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_FAILED = "globalRollbackFailed";
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_SUCCESS= "globalReportSuccess";
+    String METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED = "globalReportFailed";
+    String METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_SUCCESS = "branchRegisterSuccess";
+    String METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_FAILED = "branchRegisterFailed";
+    String METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_SUCCESS = "branchReportSuccess";
+    String METRICS_EVENT_STATUS_VALUE_BRANCH_REPORT_FAILED = "branchReportFailed";
 }
