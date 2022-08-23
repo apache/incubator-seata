@@ -358,18 +358,30 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_REPORT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_REPORT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientGlobalStatusReportSuccess(GlobalTransactionEvent event) {
         registry.getCounter(TMMeterIdConstants.COUNTER_REPORT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_REPORT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
         registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKFAILED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_ROLLBACKFAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseGlobalActive(event);
     }
 
@@ -377,6 +389,10 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseGlobalActive(event);
     }
 
@@ -385,6 +401,10 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_COMMIT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_COMMIT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseGlobalActive(event);
     }
 
@@ -392,6 +412,10 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseGlobalActive(event);
     }
 
@@ -400,6 +424,10 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_BEGIN_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_BEGIN_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientGlobalStatusBeginSuccess(GlobalTransactionEvent event) {
@@ -408,6 +436,10 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_BEGIN_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(TMMeterIdConstants.TIMER_BEGIN_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
 

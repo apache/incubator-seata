@@ -47,18 +47,44 @@ public interface TMMeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED);
 
+    Id TIMER_BEGIN_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS);
+
+    Id TIMER_BEGIN_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED);
+
+
     Id TIMER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
-            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTED);
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_SUCCESS);
 
-    Id TIMER_ROLLBACK = new Id(IdConstants.SEATA_TRANSACTION)
+    Id TIMER_COMMIT_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
-            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_COMMIT_FAILED);
 
-    Id TIMER_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+    Id TIMER_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
-            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.STATUS_VALUE_FAILED);
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_SUCCESS);
+
+    Id TIMER_ROLLBACKFAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_ROLLBACK_FAILED);
+
+    Id TIMER_REPORT_SUCCESS = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_SUCCESS);
+
+    Id TIMER_REPORT_FAILED = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.METRICS_EVENT_STATUS_KEY, IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_REPORT_FAILED);
 }
