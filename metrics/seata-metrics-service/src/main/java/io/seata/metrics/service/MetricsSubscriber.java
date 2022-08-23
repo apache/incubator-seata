@@ -124,6 +124,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_DELETE_TCC_FENCE_BY_DATE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCDeleteFenceByDateFailed(BranchEvent event) {
@@ -131,6 +136,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_DELETE_TCC_FENCE_BY_DATE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCDeleteFenceFailed(BranchEvent event) {
@@ -138,6 +148,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_DELETE_TCC_FENCE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCDeleteFenceSuccess(BranchEvent event) {
@@ -145,6 +160,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_DELETE_TCC_FENCE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCRollbackFenceSuccessOnUpdate(BranchEvent event) {
@@ -152,6 +172,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_ROLLBACK_FENCE_SUCCESS_ON_UPDATE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCRollbackFenceSuccessOnInsert(BranchEvent event) {
@@ -159,6 +184,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_ROLLBACK_FENCE_SUCCESS_ON_INSERT.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCRollbackFenceSuccessOnRollback(BranchEvent event) {
@@ -166,6 +196,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_ROLLBACK_FENCE_SUCCESS_ON_ALREADY_ROLLBACK.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCRollbackFenceFailedOnUpdate(BranchEvent event) {
@@ -173,6 +208,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_ROLLBACK_FENCE_FAILED_ON_UPDATE.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCRollbackFenceFailedOnInsert(BranchEvent event) {
@@ -180,6 +220,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_ROLLBACK_FENCE_FAILED_ON_INSERT.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusTCCRollbackFenceFailedOnCommitted(BranchEvent event) {
@@ -187,6 +232,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_ROLLBACK_FENCE_FAILED_ON_ALREADY_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusCommitTCCFenceSuccessOnCommitted(BranchEvent event) {
@@ -194,6 +244,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_COMMIT_FENCE_SUCCESS_ON_ALREADY_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusCommitTCCFenceSuccess(BranchEvent event) {
@@ -201,6 +256,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_COMMIT_FENCE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusCommitTCCFenceFailedOnRollback(BranchEvent event) {
@@ -208,6 +268,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_COMMIT_FENCE_FAILED_ON_ALREADY_ROLLBACK.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusCommitTCCFenceFailed(BranchEvent event) {
@@ -215,6 +280,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_COMMIT_FENCE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusInsertTCCFenceSuccess(BranchEvent event) {
@@ -222,6 +292,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_INSERT_FENCE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusInsertTCCFenceFailed(BranchEvent event) {
@@ -229,6 +304,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_TCC_INSERT_FENCE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusCommitSuccess(BranchEvent event) {
@@ -236,6 +316,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_COMMIT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseBranchActive(event);
     }
 
@@ -244,6 +329,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_COMMIT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseBranchActive(event);
     }
 
@@ -252,6 +342,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_ROLLBACK_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseBranchActive(event);
     }
 
@@ -260,6 +355,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_ROLLBACK_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
         clientDecreaseBranchActive(event);
     }
 
@@ -268,6 +368,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_EXECUTE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusUndologExecuteFailed(BranchEvent event) {
@@ -275,6 +380,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_EXECUTE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusUndologInsertSuccess(BranchEvent event) {
@@ -282,6 +392,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_INSERT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusUndologInsertFailed(BranchEvent event) {
@@ -289,6 +404,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_INSERT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusUndologBatchDeleteSuccess(BranchEvent event) {
@@ -296,6 +416,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_BATCH_DELETE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusUndologBatchDeleteFailed(BranchEvent event) {
@@ -303,6 +428,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_BATCH_DELETE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusUndologDeleteSuccess(BranchEvent event) {
@@ -310,6 +440,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_DELETE_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusUndologDeleteFailed(BranchEvent event) {
@@ -317,6 +452,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_UNDO_LOG_DELETE_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusReportFailed(BranchEvent event) {
@@ -324,6 +464,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_REPORT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusReportSuccess(BranchEvent event) {
@@ -331,6 +476,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_REPORT_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusRegistered(BranchEvent event) {
@@ -340,6 +490,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_REGISTER_SUCCESS.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processClientBranchStatusRegisterFailed(BranchEvent event) {
@@ -347,6 +502,11 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(RMMeterIdConstants.TIMER_REGISTER_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
+                .withTag(STATUS_KEY, event.getStatus())
+                .withTag(GROUP_KEY, event.getGroup()))
+                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void clientDecreaseBranchActive(BranchEvent event) {
