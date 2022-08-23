@@ -76,6 +76,7 @@ public abstract class AbstractSessionManager implements SessionManager {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_UPDATE);
         }
+        session.setStatus(status);
         if (GlobalStatus.Rollbacking == status) {
             session.getBranchSessions().forEach(i -> i.setLockStatus(LockStatus.Rollbacking));
         }
