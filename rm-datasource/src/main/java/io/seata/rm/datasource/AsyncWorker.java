@@ -181,7 +181,7 @@ public class AsyncWorker {
             branchIds.add(context.branchId);
         });
 
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         try {
             undoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
             if (!conn.getAutoCommit()) {

@@ -120,7 +120,7 @@ public class DataSourceManager extends AbstractResourceManager {
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException(String.format("resource: %s not found",resourceId));
         }
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         try {
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
             MetricsPublisher.postBranchEvent(Long.toString(branchId), branchType, startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_SUCCESS, BranchStatus.PhaseTwo_Rollbacked.name());

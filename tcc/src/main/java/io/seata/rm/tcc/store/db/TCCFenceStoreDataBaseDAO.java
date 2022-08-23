@@ -118,7 +118,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     @Override
     public boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO) {
         PreparedStatement ps = null;
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         try {
             Timestamp now = new Timestamp(startTime);
 

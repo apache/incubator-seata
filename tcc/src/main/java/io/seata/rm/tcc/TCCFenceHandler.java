@@ -147,7 +147,7 @@ public class TCCFenceHandler {
     public static boolean commitFence(Method commitMethod, Object targetTCCBean,
                                       String xid, Long branchId, Object[] args) {
         return transactionTemplate.execute(status -> {
-            Long startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
@@ -198,7 +198,7 @@ public class TCCFenceHandler {
     public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
                                         String xid, Long branchId, Object[] args, String actionName) {
         return transactionTemplate.execute(status -> {
-            Long startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
@@ -310,7 +310,7 @@ public class TCCFenceHandler {
     public static boolean deleteFence(String xid, Long branchId) {
         return transactionTemplate.execute(status -> {
             boolean ret = false;
-            Long startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
@@ -336,7 +336,7 @@ public class TCCFenceHandler {
         DataSource dataSource = TCCFenceHandler.getDataSource();
         Connection connection = null;
         int total = 0;
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         try {
             connection = DataSourceUtils.getConnection(dataSource);
             while (true) {
