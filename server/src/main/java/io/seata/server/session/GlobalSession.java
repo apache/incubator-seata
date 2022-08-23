@@ -26,12 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
