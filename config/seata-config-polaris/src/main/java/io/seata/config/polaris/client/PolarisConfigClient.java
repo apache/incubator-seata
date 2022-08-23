@@ -1087,7 +1087,7 @@ public final class PolarisConfigClient {
 			/**
 			 * Config=File All Listeners.
 			 */
-			private CopyOnWriteArrayList<PolarisConfigChangeListener> listeners = new CopyOnWriteArrayList<>();
+			private final CopyOnWriteArrayList<PolarisConfigChangeListener> listeners = new CopyOnWriteArrayList<>();
 
 			/**
 			 * Config-File Cache Data Constructor.
@@ -1143,11 +1143,11 @@ public final class PolarisConfigClient {
 			void onResponse(GetConfigFileResponse response) {
 
 				if(response != null) {
-					for (PolarisConfigChangeListener changeListener : listeners) {
+					for (PolarisConfigChangeListener listener : listeners) {
 						Runnable job = () -> {
 							try{
 								ConfigFile configFile = response.getConfigFile();
-								changeListener.receiveConfigInfo(configFile.getNamespace(), configFile.getGroup(), configFile.getFileName(), configFile.getContent());
+								listener.receiveConfigInfo(configFile.getNamespace(), configFile.getGroup(), configFile.getFileName(), configFile.getContent());
 							} catch (Throwable e) {
 								LOGGER.error("[Polaris Config Listener] client side execute result happen-ed exception, ignore", e);
 							}
@@ -1155,16 +1155,16 @@ public final class PolarisConfigClient {
 
 						final long startNotify = System.currentTimeMillis();
 						try {
-							if (null != changeListener.getExecutor()) {
-								changeListener.getExecutor().execute(job);
+							if (null != listener.getExecutor()) {
+								listener.getExecutor().execute(job);
 							} else {
 								job.run();
 							}
 						} catch (Throwable t) {
-							LOGGER.error("[Polaris Config Listener] [notify-error] , listener={} throwable={}", changeListener, t.getCause());
+							LOGGER.error("[Polaris Config Listener] [notify-error] , listener={} throwable={}", listener, t.getCause());
 						}
 						final long finishNotify = System.currentTimeMillis();
-						LOGGER.info("[Polaris Config Listener] [notify-listener] time cost={} ms in ClientWorker, listener={} ", (finishNotify - startNotify), changeListener);
+						LOGGER.info("[Polaris Config Listener] [notify-listener] time cost={} ms in ClientWorker, listener={} ", (finishNotify - startNotify), listener);
 					}
 				}
 			}
