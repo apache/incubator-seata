@@ -54,6 +54,8 @@ public interface StarterConstants {
     String REGISTRY_CONSUL_PREFIX = REGISTRY_PREFIX + ".consul";
     String REGISTRY_ETCD3_PREFIX = REGISTRY_PREFIX + ".etcd3";
     String REGISTRY_SOFA_PREFIX = REGISTRY_PREFIX + ".sofa";
+
+    String REGISTRY_POLARIS_PREFIX = REGISTRY_PREFIX + ".polaris";
     String REGISTRY_CUSTOM_PREFIX = REGISTRY_PREFIX + ".custom";
 
     String CONFIG_PREFIX = SEATA_PREFIX + ".config";
