@@ -236,6 +236,7 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseBranchActive(event);
     }
 
     private void processClientBranchStatusCommitFailed(BranchEvent event) {
@@ -243,6 +244,7 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseBranchActive(event);
     }
 
     private void processClientBranchStatusRollbackFailed(BranchEvent event) {
@@ -250,6 +252,7 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseBranchActive(event);
     }
 
     private void processClientBranchStatusRollbackSuccess(BranchEvent event) {
@@ -257,6 +260,7 @@ public class MetricsSubscriber {
                 .withTag(BRANCH_TYPE_KEY, event.getBranchType().name())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseBranchActive(event);
     }
 
     private void processClientBranchStatusUndologExecuteSuccess(BranchEvent event) {
@@ -366,12 +370,14 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKFAILED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseGlobalActive(event);
     }
 
     private void processClientGlobalStatusRollbacked(GlobalTransactionEvent event) {
         registry.getCounter(TMMeterIdConstants.COUNTER_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseGlobalActive(event);
     }
 
 
@@ -379,12 +385,14 @@ public class MetricsSubscriber {
         registry.getCounter(TMMeterIdConstants.COUNTER_COMMIT_FAILED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseGlobalActive(event);
     }
 
     private void processClientGlobalStatusCommitted(GlobalTransactionEvent event) {
         registry.getCounter(TMMeterIdConstants.COUNTER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(STATUS_KEY, event.getStatus())
                 .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        clientDecreaseGlobalActive(event);
     }
 
 
