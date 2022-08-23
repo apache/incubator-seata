@@ -4,6 +4,7 @@
 
 ### feature：
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
+- [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC注解支持添加在实现类及其方法上也生效
 
@@ -23,6 +24,8 @@
 - [[#4414](https://github.com/seata/seata/pull/4414)] 移除log4j依赖
 - [[#4836](https://github.com/seata/seata/pull/4836)] 优化 BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) 方法可读性
 - [[#4865](https://github.com/seata/seata/pull/4865)] 修复 Saga 可视化设计器 GGEditor 安全漏洞
+- [[#4590](https://github.com/seata/seata/pull/4590)] 自动降级支持开关支持动态配置
+- [[#4490](https://github.com/seata/seata/pull/4490)] tccfence 记录表优化成按索引删除
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -40,5 +43,6 @@
 - [pengten](https://github.com/pengten)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
+- [Bughue](https://github.com/Bughue)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

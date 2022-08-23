@@ -17,7 +17,9 @@ package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -66,6 +68,11 @@ public class TCCFenceHandler {
 
     private static final int MAX_QUEUE_SIZE = 500;
 
+    /**
+     * limit of delete record by date (per sql)
+     */
+    private static final int LIMIT_DELETE = 1000;
+
     private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
 
     private static FenceLogCleanRunnable fenceLogCleanRunnable;
@@ -78,6 +85,10 @@ public class TCCFenceHandler {
         } catch (Exception e) {
             LOGGER.error("init fence log clean executor error", e);
         }
+    }
+
+    public static DataSource getDataSource() {
+        return TCCFenceHandler.dataSource;
     }
 
     public static void setDataSource(DataSource dataSource) {
@@ -322,22 +333,32 @@ public class TCCFenceHandler {
      * @return the deleted row count
      */
     public static int deleteFenceByDate(Date datetime) {
-        return transactionTemplate.execute(status -> {
-            int res;
-            Long startTime = System.currentTimeMillis();
-            try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                res = TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
-            } catch (RuntimeException e) {
-                MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime,
-                        System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_FAILED, BranchStatus.PhaseTwo_DeleteTCCFence.name());
-                status.setRollbackOnly();
-                throw e;
+        DataSource dataSource = TCCFenceHandler.getDataSource();
+        Connection connection = null;
+        int total = 0;
+        Long startTime = System.currentTimeMillis();
+        try {
+            connection = DataSourceUtils.getConnection(dataSource);
+            while (true) {
+                Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(connection, datetime, LIMIT_DELETE);
+                if (xidSet.isEmpty()) {
+                    break;
+                }
+                total += TCC_FENCE_DAO.deleteTCCFenceDO(connection, new ArrayList<>(xidSet));
             }
             MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime,
                     System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_SUCCESS, BranchStatus.PhaseTwo_DeleteTCCFence.name());
-            return res;
-        });
+        } catch (RuntimeException e) {
+            MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime,
+                    System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_FAILED, BranchStatus.PhaseTwo_DeleteTCCFence.name());
+            LOGGER.error("delete fence log failed ", e);
+        } finally {
+            if (connection != null) {
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
+        }
+        return total;
+
     }
 
     private static void initLogCleanExecutor() {
