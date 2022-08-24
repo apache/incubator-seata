@@ -15,9 +15,25 @@
  */
 package io.seata.discovery.registry.polaris;
 
-import io.seata.discovery.registry.RegistryService;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
+
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryService;
+import io.seata.discovery.registry.polaris.client.PolarisInstance;
+import io.seata.discovery.registry.polaris.client.PolarisNamingClient;
+import io.seata.discovery.registry.polaris.client.PolarisNamingProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link PolarisRegistryServiceImpl} Definition .
@@ -26,8 +42,130 @@ import java.util.List;
  */
 public class PolarisRegistryServiceImpl implements RegistryService<PolarisListener> {
 
-    public static RegistryService getInstance() {
-        return new PolarisRegistryServiceImpl();
+    /**
+     * Logger Instance.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolarisRegistryServiceImpl.class);
+
+    /**
+     * Polaris Naming Client Instance of {@link PolarisNamingClient} .
+     */
+    private static volatile PolarisNamingClient client;
+
+    /**
+     * Polaris Registry Service Implements Instance of {@link PolarisRegistryServiceImpl}.
+     */
+    private static volatile PolarisRegistryServiceImpl instance;
+
+    /**
+     * Seata System Configs.
+     */
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+
+    /**
+     * Polaris Service Listener Map.
+     */
+    private static final ConcurrentMap<String, List<PolarisListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * Polaris Service Cluster Address Map.
+     */
+    private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * Sync Lock Object.
+     */
+    private static final Object LOCK_OBJ = new Object();
+
+    // ~~ Polaris Naming Config Properties Key ~~
+
+    /**
+     * Polaris Discovery Typo.
+     */
+    private static final String REGISTRY_TYPE = "polaris";
+
+    /**
+     * Default Application Name.
+     */
+    private static final String DEFAULT_APPLICATION = "seata-server";
+
+    /**
+     * Polaris Default Namespace.
+     */
+    private static final String DEFAULT_NAMESPACE = "default";
+
+    /**
+     * Default Cluster Name.
+     */
+    public static final String DEFAULT_CLUSTER = "default";
+
+    /**
+     * Polaris Namespace Config Key.
+     */
+    private static final String POLARIS_NAMESPACE_KEY = "namespace";
+
+    /**
+     * Polaris Application Config Key.
+     */
+    private static final String POLARIS_APPLICATION_KEY = "application";
+
+    /**
+     * Polaris Server-Addr Config Key.
+     */
+    private static final String POLARIS_SERVER_KEY = "serverAddr";
+
+    /**
+     * Polaris Token Config Key.
+     */
+    private static final String POLARIS_SERVER_ACCESS_TOKEN = "token";
+
+    /**
+     * Polaris Pull-Interval-Time Config Key.
+     */
+    private static final String POLARIS_SERVER_PULL_INTERVAL_TIME = "pullIntervalTime";
+
+    /**
+     * Polaris Connect-Timeout Config Key.
+     */
+    private static final String POLARIS_SERVER_CONNECT_TIME = "connectTimeout";
+
+    /**
+     * Polaris Read-Timeout Config Key.
+     */
+    private static final String POLARIS_SERVER_READ_TIME = "readTimeout";
+
+
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
+    static PolarisRegistryServiceImpl getInstance() {
+        if (instance == null) {
+            synchronized (PolarisRegistryServiceImpl.class) {
+                if (instance == null) {
+                    instance = new PolarisRegistryServiceImpl();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * Default private constructor for {@link PolarisRegistryServiceImpl}.
+     */
+    private PolarisRegistryServiceImpl() {
+        if (client == null) {
+            try {
+                // Read polaris center config properties
+                PolarisNamingProperties properties = getNamingProperties();
+                // build context
+                client = PolarisNamingClient.getClient(properties);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
@@ -36,8 +174,10 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      * @param address the address
      * @throws Exception the exception
      */
-    @Override public void register(InetSocketAddress address) throws Exception {
-
+    @Override
+    public void register(InetSocketAddress address) throws Exception {
+        NetUtil.validAddress(address);
+        client.registerInstance(getNamespaceName(), getApplicationServiceName(), address.getAddress().getHostAddress(), address.getPort(), DEFAULT_CLUSTER);
     }
 
     /**
@@ -46,8 +186,10 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      * @param address the address
      * @throws Exception the exception
      */
-    @Override public void unregister(InetSocketAddress address) throws Exception {
-
+    @Override
+    public void unregister(InetSocketAddress address) throws Exception {
+        NetUtil.validAddress(address);
+        client.deregisterInstance(getNamespaceName(), getApplicationServiceName(), address.getAddress().getHostAddress(), address.getPort(), DEFAULT_CLUSTER);
     }
 
     /**
@@ -57,8 +199,10 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      * @param listener the listener
      * @throws Exception the exception
      */
-    @Override public void subscribe(String cluster, PolarisListener listener) throws Exception {
-
+    @Override
+    public void subscribe(String cluster, PolarisListener listener) throws Exception {
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>()).add(listener);
+        client.subscribe(getNamespaceName(), getApplicationServiceName(), DEFAULT_CLUSTER, listener);
     }
 
     /**
@@ -68,8 +212,16 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      * @param listener the listener
      * @throws Exception the exception
      */
-    @Override public void unsubscribe(String cluster, PolarisListener listener) throws Exception {
-
+    @Override
+    public void unsubscribe(String cluster, PolarisListener listener) throws Exception {
+        List<PolarisListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
+        if (subscribeList != null) {
+            List<PolarisListener> newSubscribeList = subscribeList.stream()
+                .filter(eventListener -> !eventListener.equals(listener))
+                .collect(Collectors.toList());
+            LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
+        }
+        client.unsubscribe(getNamespaceName(), getApplicationServiceName(), DEFAULT_CLUSTER, listener);
     }
 
     /**
@@ -79,16 +231,154 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      * @return the list
      * @throws Exception the exception
      */
-    @Override public List<InetSocketAddress> lookup(String key) throws Exception {
-        return null;
+    @Override
+    public List<InetSocketAddress> lookup(String key) throws Exception {
+
+        String clusterName = getServiceGroup(key);
+        if (clusterName == null) {
+            return null;
+        }
+
+        // isolation with polaris service name
+        final String serviceName = getApplicationServiceName(clusterName);
+
+        if (!LISTENER_SERVICE_MAP.containsKey(serviceName)) {
+            synchronized (LOCK_OBJ) {
+                if (!LISTENER_SERVICE_MAP.containsKey(serviceName)) {
+                    List<PolarisInstance> firstAllInstances = client.getAllInstances(getNamespaceName(), serviceName, DEFAULT_CLUSTER);
+                    if (null != firstAllInstances) {
+                        List<InetSocketAddress> newAddressList = firstAllInstances.stream()
+                            .filter(PolarisInstance::isHealthy)
+                            .map(eachInstance -> new InetSocketAddress(eachInstance.getHost(), eachInstance.getPort()))
+                            .collect(Collectors.toList());
+                        CLUSTER_ADDRESS_MAP.put(serviceName, newAddressList);
+                    }
+                    subscribe(serviceName, event -> {
+                        List<PolarisInstance> instances = event.getInstances();
+                        if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(serviceName)) {
+                            LOGGER.info("receive empty server list, cluster:{}", serviceName);
+                        } else {
+                            List<InetSocketAddress> newAddressList = instances.stream()
+                                .filter(PolarisInstance::isHealthy)
+                                .map(eachInstance -> new InetSocketAddress(eachInstance.getHost(), eachInstance.getPort()))
+                                .collect(Collectors.toList());
+                            CLUSTER_ADDRESS_MAP.put(serviceName, newAddressList);
+                        }
+                    });
+                }
+            }
+        }
+        return CLUSTER_ADDRESS_MAP.get(serviceName);
     }
 
     /**
      * Close.
      *
-     * @throws Exception
+     * @throws Exception maybe thrown exception.
      */
-    @Override public void close() throws Exception {
+    @Override
+    public void close() throws Exception {
 
+    }
+    
+    // ~~ inner static methods
+
+
+    /**
+     * Build polaris naming properties from seata startup env.
+     *
+     * @return instance of {@link PolarisNamingProperties}
+     */
+    private static PolarisNamingProperties getNamingProperties() {
+        PolarisNamingProperties properties = new PolarisNamingProperties();
+
+        if (System.getProperty(POLARIS_SERVER_KEY) != null) {
+            properties.address(System.getProperty(POLARIS_SERVER_KEY));
+        } else {
+            String address = FILE_CONFIG.getConfig(getPolarisAddrFileKey());
+            if (StringUtils.isBlank(address)) {
+                throw new RuntimeException("Discovery server address is blank. Please check your config .");
+            }
+            properties.address(address);
+        }
+
+        if (System.getProperty(POLARIS_SERVER_ACCESS_TOKEN) != null) {
+            properties.address(System.getProperty(POLARIS_SERVER_ACCESS_TOKEN));
+        } else {
+            String token = FILE_CONFIG.getConfig(getPolarisAccessTokenKey());
+            if (StringUtils.isBlank(token)) {
+                throw new RuntimeException("Discovery server token is blank. Please check your config .");
+            }
+            properties.token(token);
+        }
+
+        if (System.getProperty(POLARIS_SERVER_PULL_INTERVAL_TIME) != null) {
+            properties.address(System.getProperty(POLARIS_SERVER_PULL_INTERVAL_TIME));
+        } else {
+            String pullIntervalTime = FILE_CONFIG.getConfig(getPolarisPullIntervalTimeKey());
+            if (StringUtils.isNotBlank(pullIntervalTime)) {
+                properties.pullIntervalTime(Long.parseLong(pullIntervalTime));
+            }
+        }
+
+        if (System.getProperty(POLARIS_SERVER_CONNECT_TIME) != null) {
+            properties.address(System.getProperty(POLARIS_SERVER_CONNECT_TIME));
+        } else {
+            String connectTimeout = FILE_CONFIG.getConfig(getPolarisConnectTimeoutKey());
+            if (StringUtils.isNotBlank(connectTimeout)) {
+                properties.connectTimeout(Integer.parseInt(connectTimeout));
+            }
+        }
+
+        if (System.getProperty(POLARIS_SERVER_READ_TIME) != null) {
+            properties.address(System.getProperty(POLARIS_SERVER_READ_TIME));
+        } else {
+            String readTimeout = FILE_CONFIG.getConfig(getPolarisReadTimeoutKey());
+            if (StringUtils.isNotBlank(readTimeout)) {
+                properties.readTimeout(Integer.parseInt(readTimeout));
+            }
+        }
+
+        return properties;
+    }
+
+    private static String getNamespaceName() {
+        return FILE_CONFIG.getConfig(getPolarisNameSpaceFileKey(), DEFAULT_NAMESPACE);
+    }
+
+    private static String getApplicationServiceName() {
+        return FILE_CONFIG.getConfig(getPolarisApplicationKey(), DEFAULT_APPLICATION);
+    }
+
+    private static String getApplicationServiceName(String key) {
+        return String.join("#", FILE_CONFIG.getConfig(getPolarisApplicationKey(), DEFAULT_APPLICATION), key);
+    }
+
+    public static String getPolarisNameSpaceFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_NAMESPACE_KEY);
+    }
+
+    public static String getPolarisAddrFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_KEY);
+    }
+
+    public static String getPolarisAccessTokenKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_ACCESS_TOKEN);
+    }
+
+    public static String getPolarisApplicationKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_APPLICATION_KEY);
+    }
+
+    public static String getPolarisConnectTimeoutKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_CONNECT_TIME);
+    }
+
+    public static String getPolarisPullIntervalTimeKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_PULL_INTERVAL_TIME);
+    }
+
+    public static String getPolarisReadTimeoutKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_READ_TIME);
     }
 }

@@ -52,11 +52,11 @@ seata:
 
     polaris:
       server-addr: http://183.47.111.80:8090
-      group: polaris-seata-group
+      namespace: polaris-seata
       application: seata-server
       token: yQPNKgn6JbPR+mHSQyhdREixFoLVTuuNsERNENspveErQaLRs8Xz
       connect-timeout: 6000
-      pull-interval-time: 5000
+      pull-interval-time: 2000
       read-timeout: 5000
 
     nacos:

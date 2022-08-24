@@ -1,7 +1,10 @@
 package io.seata.discovery.registry.polaris;
 
-import io.seata.discovery.registry.polaris.client.PolarisInstance;
 import java.util.List;
+
+import io.seata.discovery.registry.polaris.client.PolarisInstance;
+
+import static io.seata.discovery.registry.polaris.PolarisRegistryServiceImpl.DEFAULT_CLUSTER;
 
 /**
  * {@link PolarisNamingEvent} Definition .
@@ -12,9 +15,9 @@ public class PolarisNamingEvent {
 
     private String serviceName;
 
-    private String groupName;
+    private String namespace;
 
-    private String clusters;
+    private String cluster = DEFAULT_CLUSTER;
 
     private List<PolarisInstance> instances;
 
@@ -26,20 +29,20 @@ public class PolarisNamingEvent {
         this.serviceName = serviceName;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public String getNamespace() {
+        return namespace;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
-    public String getClusters() {
-        return clusters;
+    public String getCluster() {
+        return cluster;
     }
 
-    public void setClusters(String clusters) {
-        this.clusters = clusters;
+    public void setCluster(String cluster) {
+        this.cluster = cluster;
     }
 
     public List<PolarisInstance> getInstances() {
