@@ -115,7 +115,6 @@ public class SagaCore extends AbstractCore {
                 case PhaseTwo_RollbackFailed_Retryable:
                     LOGGER.error("By [{}], failed to rollback SAGA global [{}], will retry later.", branchStatus,
                             globalSession.getXid());
-                    // todo [optimize-session-manager-done] --> root manager.removeGlobalSession
                     SessionHolder.getRootSessionManager().removeGlobalSession(globalSession);
                     globalSession.queueToRetryRollback();
                     return false;
@@ -170,7 +169,6 @@ public class SagaCore extends AbstractCore {
                     LOGGER.error("Failed to rollback SAGA global[{}]", globalSession.getXid());
                     return false;
                 case PhaseTwo_CommitFailed_Retryable:
-                    // todo [optimize-session-manager-done] --> root manager.removeGlobalSession
                     SessionHolder.getRootSessionManager().removeGlobalSession(globalSession);
                     globalSession.queueToRetryCommit();
                     LOGGER.warn("Retry by custom recover strategy [Forward] on timeout, SAGA global[{}]", globalSession.getXid());
