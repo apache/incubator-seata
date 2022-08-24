@@ -63,6 +63,15 @@ public class PolarisNamingProperties {
 		this.token = token;
 	}
 
+	/**
+	 * {@link  PolarisNamingProperties} Constructor
+	 *
+	 * @param address server address
+	 * @param token   server api access token
+	 * @param connectTimeout request connect timeout
+	 * @param pullIntervalTime long pull interval time period
+	 * @param readTimeout response read timeout
+	 */
 	public PolarisNamingProperties(String address, String token, long pullIntervalTime, int connectTimeout,
 			int readTimeout) {
 		this.address = address;

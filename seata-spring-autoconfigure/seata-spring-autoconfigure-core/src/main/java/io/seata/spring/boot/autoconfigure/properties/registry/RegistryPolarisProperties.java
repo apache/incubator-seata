@@ -30,7 +30,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_POLAR
 public class RegistryPolarisProperties {
     private String serverAddr;
     private String namespace = "default";
-    private String group;
     private String application = "seata-server";
 
     /**
@@ -41,7 +40,7 @@ public class RegistryPolarisProperties {
     /**
      * Remote config pull interval, default value : 5000 (ms) .
      */
-    private int pullIntervalTime = 5000;
+    private int pullIntervalTime = 2000;
 
     /**
      * Request Connect Timeout , default value : 6000 (ms) .
@@ -68,15 +67,6 @@ public class RegistryPolarisProperties {
 
     public RegistryPolarisProperties setNamespace(String namespace) {
         this.namespace = namespace;
-        return this;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public RegistryPolarisProperties setGroup(String group) {
-        this.group = group;
         return this;
     }
 
