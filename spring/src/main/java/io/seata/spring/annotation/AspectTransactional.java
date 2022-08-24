@@ -74,18 +74,17 @@ public class AspectTransactional {
     int lockRetryTimes = -1;
 
     /**
-     * Whether to skip checking for lock owners
+     * Whether to skip first checking for lock owners
      * When you do not have resources to reent the scene, we recommend that you enable this
      * configuration, which can greatly improve performance
-     * skip check lock
      */
-    boolean skipCheckLock;
+    boolean skipFirstCheckLock;
 
     public AspectTransactional() {}
 
     public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
         String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
-        Propagation propagation, int lockRetryInterval, int lockRetryTimes, boolean skipCheckLock) {
+        Propagation propagation, int lockRetryInterval, int lockRetryTimes, boolean skipFirstCheckLock) {
         this.timeoutMills = timeoutMills;
         this.name = name;
         this.rollbackFor = rollbackFor;
@@ -95,7 +94,7 @@ public class AspectTransactional {
         this.propagation = propagation;
         this.lockRetryInterval = lockRetryInterval;
         this.lockRetryTimes = lockRetryTimes;
-        this.skipCheckLock = skipCheckLock;
+        this.skipFirstCheckLock = skipFirstCheckLock;
     }
 
     public int getTimeoutMills() {
@@ -170,12 +169,12 @@ public class AspectTransactional {
         this.lockRetryTimes = lockRetryTimes;
     }
 
-    public boolean isSkipCheckLock() {
-        return skipCheckLock;
+    public boolean isSkipFirstCheckLock() {
+        return skipFirstCheckLock;
     }
 
-    public void setSkipCheckLock(boolean skipCheckLock) {
-        this.skipCheckLock = skipCheckLock;
+    public void setSkipFirstCheckLock(boolean skipFirstCheckLock) {
+        this.skipFirstCheckLock = skipFirstCheckLock;
     }
 
     @Override

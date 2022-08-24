@@ -24,7 +24,7 @@ public class GlobalLockConfig {
 
     private int lockRetryTimes;
 
-    private boolean skipCheckLock;
+    private boolean skipFirstCheckLock;
 
     public int getLockRetryInterval() {
         return lockRetryInterval;
@@ -42,12 +42,12 @@ public class GlobalLockConfig {
         this.lockRetryTimes = lockRetryTimes;
     }
 
-    public boolean isSkipCheckLock() {
-        return skipCheckLock;
+    public boolean isSkipFirstCheckLock() {
+        return skipFirstCheckLock;
     }
 
-    public void setSkipCheckLock(boolean skipCheckLock) {
-        this.skipCheckLock = skipCheckLock;
+    public void setSkipFirstCheckLock(boolean skipFirstCheckLock) {
+        this.skipFirstCheckLock = skipFirstCheckLock;
     }
 
 }
