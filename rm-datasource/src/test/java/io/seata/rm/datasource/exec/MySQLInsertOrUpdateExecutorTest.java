@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -87,34 +88,34 @@ public class MySQLInsertOrUpdateExecutorTest {
     }
 
     @Test
-    public void TestBuildImageParamperters(){
+    public void TestBuildImageParameters(){
         mockParameters();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,?");
         insertParamsList.add("?,?,?,?");
         when(sqlInsertRecognizer.getInsertParamsValue()).thenReturn(insertParamsList);
         mockInsertColumns();
-        Map<String, ArrayList<Object>> imageParamperterMap = insertOrUpdateExecutor.buildImageParamperters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParamperterMap.toString(),mockImageParamperterMap().toString());
+        Map<String, ArrayList<Object>> imageParameterMap = insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
+        Assertions.assertEquals(imageParameterMap.toString(),mockImageParameterMap().toString());
     }
 
     @Test
-    public void TestBuildImageParamperters_contain_constant(){
-        mockImageParamperterMap_contain_constant();
+    public void TestBuildImageParameters_contain_constant(){
+        mockImageParameterMap_contain_constant();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,userStatus1");
         insertParamsList.add("?,?,?,userStatus2");
         when(sqlInsertRecognizer.getInsertParamsValue()).thenReturn(insertParamsList);
         mockInsertColumns();
-        Map<String, ArrayList<Object>> imageParamperterMap = insertOrUpdateExecutor.buildImageParamperters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParamperterMap.toString(),mockImageParamperterMap().toString());
+        Map<String, ArrayList<Object>> imageParameterMap = insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
+        Assertions.assertEquals(imageParameterMap.toString(),mockImageParameterMap().toString());
     }
 
     @Test
     public void testBuildImageSQL(){
         String selectSQLStr = "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? ) ";
         String paramAppenderListStr = "[[userId1, 100], [userId2, 101]]";
-        mockImageParamperterMap_contain_constant();
+        mockImageParameterMap_contain_constant();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,userStatus1");
         insertParamsList.add("?,?,?,userStatus2");
@@ -128,7 +129,7 @@ public class MySQLInsertOrUpdateExecutorTest {
 
     @Test
     public void testBeforeImage(){
-        mockImageParamperterMap_contain_constant();
+        mockImageParameterMap_contain_constant();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,userStatus1");
         insertParamsList.add("?,?,?,userStatus2");
@@ -140,7 +141,7 @@ public class MySQLInsertOrUpdateExecutorTest {
             TableRecords tableRecords = new TableRecords();
             String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
             ArrayList<List<Object>> paramAppenderList = insertOrUpdateExecutor.getParamAppenderList();
-            doReturn(tableRecords).when(insertOrUpdateExecutor).buildTableRecords2(tableMeta,selectSQL,paramAppenderList);
+            doReturn(tableRecords).when(insertOrUpdateExecutor).buildTableRecords2(tableMeta,selectSQL,paramAppenderList, Collections.emptyList());
             TableRecords tableRecordsResult = insertOrUpdateExecutor.beforeImage();
             Assertions.assertEquals(tableRecords,tableRecordsResult);
         } catch (SQLException throwables) {
@@ -216,7 +217,7 @@ public class MySQLInsertOrUpdateExecutorTest {
      * exist insert parms is constant
      * {1=[100], 2=[userId1], 3=[userName1], 4=[101], 5=[userId2], 6=[userName2]}
      */
-    private void mockImageParamperterMap_contain_constant() {
+    private void mockImageParameterMap_contain_constant() {
         Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(PK_VALUE);
@@ -240,25 +241,25 @@ public class MySQLInsertOrUpdateExecutorTest {
         when(psp.getParameters()).thenReturn(paramters);
     }
 
-    private Map<String, ArrayList<Object>> mockImageParamperterMap(){
-        Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
+    private Map<String, ArrayList<Object>> mockImageParameterMap(){
+        Map<String, ArrayList<Object>> imageParameterMap = new HashMap<>();
         ArrayList<Object> idList = new ArrayList<>();
         idList.add("100");
         idList.add("101");
-        imageParamperterMap.put("id",idList);
+        imageParameterMap.put("id",idList);
         ArrayList<Object> user_idList = new ArrayList<>();
         user_idList.add("userId1");
         user_idList.add("userId2");
-        imageParamperterMap.put("user_id",user_idList);
+        imageParameterMap.put("user_id",user_idList);
         ArrayList<Object> user_nameList = new ArrayList<>();
         user_nameList.add("userName1");
         user_nameList.add("userName2");
-        imageParamperterMap.put("user_name",user_nameList);
+        imageParameterMap.put("user_name",user_nameList);
         ArrayList<Object> user_statusList = new ArrayList<>();
         user_statusList.add("userStatus1");
         user_statusList.add("userStatus2");
-        imageParamperterMap.put("user_status",user_statusList);
-        return imageParamperterMap;
+        imageParameterMap.put("user_status",user_statusList);
+        return imageParameterMap;
     }
 
     private void mockParametersOfOnePk() {
