@@ -33,4 +33,13 @@ public interface Defaultable {
      */
     List<Object> getPkValuesByDefault() throws SQLException;
 
+    /**
+     * get primary key values by default keyword.
+     *
+     * @param pkKey the pk key
+     * @return pk values by default
+     * @throws SQLException the sql exception
+     */
+    List<Object> getPkValuesByDefault(String pkKey) throws SQLException;
+
 }

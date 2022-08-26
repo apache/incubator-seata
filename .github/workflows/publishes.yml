@@ -1,0 +1,57 @@
+name: "Publishes"
+
+on:
+  push:
+    branches: [ snapshot, "*.*.*" ]
+    #tags: [ "*" ]
+
+  #This schedule only takes effect in the default branch
+  schedule:
+    - cron: '0 16 * * *' #GMT+0
+
+jobs:
+  publish:
+    name: "Publish"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [ "OSSRH", "image" ]
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v2.4.0
+
+      # step 2
+      - name: "Setup Java JDK"
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: 'zulu'
+          java-version: 8
+          server-id: oss_seata
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_PASSWORD
+
+      # step 3 for type=OSSRH
+      - name: "Import GPG-SECRET-KEY, Package and Publish-To-OSSRH"
+        if: matrix.type == 'OSSRH'
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USER }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+        run: |
+          cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import;
+          ./mvnw -T 4C clean deploy -Prelease,release-by-github-actions -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+      # step 4 for type=image
+      - name: "Package and Publish-Image-To-DockerHub"
+        if: matrix.type == 'image'
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          echo "IMAGE_NAME=openjdk:8u332" >> $GITHUB_ENV;
+          if [ "${{github.ref}}" == "refs/heads/snapshot" ]; then
+            ./mvnw -T 4C clean package -Pimage               -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean package -Pimage,release-image -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
