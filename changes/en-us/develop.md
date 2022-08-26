@@ -24,6 +24,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4414](https://github.com/seata/seata/pull/4414)] exclude log4j dependencies
 - [[#4836](https://github.com/seata/seata/pull/4836)] optimize BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) method more readable
 - [[#4865](https://github.com/seata/seata/pull/4865)] fix some security vulnerabilities in GGEditor
+- [[#4590](https://github.com/seata/seata/pull/4590)] auto degrade enable to dynamic configure
+- [[#4490](https://github.com/seata/seata/pull/4490)] tccfence log table delete by index
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -41,5 +43,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [pengten](https://github.com/pengten)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
+- [Bughue](https://github.com/Bughue)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
