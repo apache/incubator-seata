@@ -20,10 +20,9 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.servicecomb.SeataServicecombKeys;
-import io.seata.config.servicecomb.client.EventManager;
-import io.seata.config.servicecomb.client.auth.AuthHeaderProviders;
 import io.seata.discovery.registry.RegistryService;
+import io.seata.discovery.registry.servicecomb.client.EventManager;
+import io.seata.discovery.registry.servicecomb.client.auth.AuthHeaderProviders;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.servicecomb.http.client.common.HttpConfiguration;
 import org.apache.servicecomb.service.center.client.AddressManager;
@@ -123,7 +122,6 @@ public class ServicecombRegistryServiceImpl implements RegistryService<Object> {
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
-        EventManager.unregister(this);
         serviceCenterRegistration.stop();
         if (!StringUtils.isEmpty(microserviceInstance.getInstanceId())) {
             try {
@@ -260,7 +258,8 @@ public class ServicecombRegistryServiceImpl implements RegistryService<Object> {
             FILE_CONFIG.getConfig(SeataServicecombKeys.KEY_REGISTRY_ADDRESS, SeataServicecombKeys.DEFAULT_REGISTRY_URL);
         String project = FILE_CONFIG.getConfig(SeataServicecombKeys.KEY_SERVICE_PROJECT, SeataServicecombKeys.DEFAULT);
         LOGGER.info("Using service center, address={}.", address);
-        return new AddressManager(project, Arrays.asList(address.split(SeataServicecombKeys.COMMA)));
+        return new AddressManager(project, Arrays.asList(address.split(SeataServicecombKeys.COMMA)),
+            EventManager.getEventBus());
     }
 
     private ServiceCenterRegistration createServiceCenterRegistration() {

@@ -31,6 +31,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.servicecomb.config.center.client.AddressManager;
 import org.apache.servicecomb.config.center.client.ConfigCenterClient;
 import org.apache.servicecomb.config.center.client.ConfigCenterManager;
+import org.apache.servicecomb.config.center.client.model.ConfigCenterConfiguration;
 import org.apache.servicecomb.config.center.client.model.QueryConfigurationsRequest;
 import org.apache.servicecomb.config.center.client.model.QueryConfigurationsResponse;
 import org.apache.servicecomb.config.common.ConfigConverter;
@@ -188,9 +189,9 @@ public class ServicecombConfiguration extends AbstractConfiguration {
             .equals(properties.getConfig(SeataServicecombKeys.KEY_CONFIG_ADDRESSTYPE, SeataServicecombKeys.KIE));
         RequestConfig.Builder config = HttpTransportFactory.defaultRequestConfig();
         if (isKie) {
-            String test =
+            String enableLongPolling =
                 properties.getConfig(SeataServicecombKeys.KEY_SERVICE_ENABLELONGPOLLING, SeataServicecombKeys.TRUE);
-            if (Boolean.parseBoolean(test)) {
+            if (Boolean.parseBoolean(enableLongPolling)) {
                 int pollingWaitInSeconds =
                     Integer.valueOf(properties.getConfig(SeataServicecombKeys.KEY_SERVICE_POLLINGWAITSEC,
                         SeataServicecombKeys.DEFAULT_SERVICE_POLLINGWAITSEC));
@@ -202,7 +203,7 @@ public class ServicecombConfiguration extends AbstractConfiguration {
                 AuthHeaderProviders.getRequestAuthHeaderProvider(), config.build());
 
         if (isKie) {
-            configKieClient(properties, httpTransport);
+            configKieClient(httpTransport);
         } else {
             configCenterClient(properties, httpTransport);
         }
@@ -237,13 +238,14 @@ public class ServicecombConfiguration extends AbstractConfiguration {
         } catch (Exception e) {
             LOGGER.warn("set up Servicesomb configuration failed at startup.", e);
         }
-        ConfigCenterManager configCenterManager =
-            new ConfigCenterManager(configCenterClient, EventManager.getEventBus(), configConverter);
+        ConfigCenterConfiguration configCenterConfiguration = new ConfigCenterConfiguration();
+        ConfigCenterManager configCenterManager = new ConfigCenterManager(configCenterClient,
+            EventManager.getEventBus(), configConverter, configCenterConfiguration);
         configCenterManager.setQueryConfigurationsRequest(queryConfigurationsRequest);
         configCenterManager.startConfigCenterManager();
     }
 
-    private void configKieClient(Configuration properties, HttpTransport httpTransport) {
+    private void configKieClient(HttpTransport httpTransport) {
 
         KieConfiguration kieConfiguration = createKieConfiguration();
 
@@ -268,7 +270,8 @@ public class ServicecombConfiguration extends AbstractConfiguration {
         }
         String project = properties.getConfig(SeataServicecombKeys.KEY_SERVICE_PROJECT, SeataServicecombKeys.DEFAULT);
         LOGGER.info("Using config center, address={}", address);
-        return new AddressManager(project, Arrays.asList(address.split(SeataServicecombKeys.COMMA)));
+        return new AddressManager(project, Arrays.asList(address.split(SeataServicecombKeys.COMMA)),
+            EventManager.getEventBus());
     }
 
     private QueryConfigurationsRequest createQueryConfigurationsRequest() {
@@ -293,7 +296,7 @@ public class ServicecombConfiguration extends AbstractConfiguration {
             return null;
         }
         KieAddressManager kieAddressManager =
-            new KieAddressManager(Arrays.asList(address.split(SeataServicecombKeys.COMMA)));
+            new KieAddressManager(Arrays.asList(address.split(SeataServicecombKeys.COMMA)), EventManager.getEventBus());
         LOGGER.info("Using kie, address={}", address);
         return kieAddressManager;
     }

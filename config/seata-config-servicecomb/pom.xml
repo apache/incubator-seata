@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-servicecomb</artifactId>
     <name>seata-config-servicecomb ${project.version}</name>
+    <description>config-servicecomb for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

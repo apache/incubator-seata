@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-servicecomb</artifactId>
     <name>seata-discovery-servicecomb ${project.version}</name>
+    <description>discovery-servicecomb for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -42,13 +43,7 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
-            <version>1.1.1</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-servicecomb</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

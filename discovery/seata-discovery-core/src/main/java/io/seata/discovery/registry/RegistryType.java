@@ -54,9 +54,9 @@ public enum RegistryType {
      */
     Sofa,
     /**
-     * Servicecomb registry type
+     * ServiceComb registry type
      */
-    Servicecomb,
+    ServiceComb,
     /**
      * Custom registry type
      */

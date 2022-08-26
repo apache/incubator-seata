@@ -23,7 +23,7 @@ import io.seata.discovery.registry.RegistryService;
 /**
  * @author zhaozhongwei22@163.com
  */
-@LoadLevel(name = "Servicecomb", order = 1)
+@LoadLevel(name = "ServiceComb", order = 1)
 public class ServicecombRegistryProvider implements RegistryProvider {
     @Override
     public RegistryService provide() {

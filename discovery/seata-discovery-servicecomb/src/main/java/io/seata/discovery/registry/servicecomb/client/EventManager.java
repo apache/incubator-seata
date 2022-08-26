@@ -14,19 +14,31 @@
  *  limitations under the License.
  */
 
-package io.seata.config.servicecomb;
+package io.seata.discovery.registry.servicecomb.client;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationProvider;
+import com.google.common.eventbus.EventBus;
 
 /**
+ * Event manager to post/register events.
+ *
  * @author zhaozhongwei22@163.com
  */
-@LoadLevel(name = "ServiceComb", order = 1)
-public class ServicecombConfigurationProvider implements ConfigurationProvider {
-    @Override
-    public Configuration provide() {
-        return ServicecombConfiguration.getInstance();
+public class EventManager {
+    private static EventBus eventBus = new EventBus();
+
+    public static EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public static void post(Object event) {
+        eventBus.post(event);
+    }
+
+    public static void register(Object subscriber) {
+        eventBus.register(subscriber);
+    }
+
+    public static void unregister(Object subscriber) {
+        eventBus.unregister(subscriber);
     }
 }

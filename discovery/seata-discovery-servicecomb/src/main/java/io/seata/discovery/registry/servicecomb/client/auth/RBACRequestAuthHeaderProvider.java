@@ -27,10 +27,8 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.servicecomb.SeataServicecombKeys;
-import io.seata.config.servicecomb.client.EventManager;
-import io.seata.config.servicecomb.client.auth.AuthHeaderProviders;
-
+import io.seata.discovery.registry.servicecomb.SeataServicecombKeys;
+import io.seata.discovery.registry.servicecomb.client.EventManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.servicecomb.foundation.auth.AuthHeaderProvider;
 import org.apache.servicecomb.http.client.common.HttpConfiguration;
@@ -43,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response.Status;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -117,7 +114,8 @@ public class RBACRequestAuthHeaderProvider implements AuthHeaderProvider {
             properties.getConfig(SeataServicecombKeys.KEY_REGISTRY_ADDRESS, SeataServicecombKeys.DEFAULT_REGISTRY_URL);
         String project = properties.getConfig(SeataServicecombKeys.KEY_SERVICE_PROJECT, SeataServicecombKeys.DEFAULT);
         LOGGER.info("Using service center, address={}.", address);
-        return new AddressManager(project, Arrays.asList(address.split(SeataServicecombKeys.COMMA)));
+        return new AddressManager(project, Arrays.asList(address.split(SeataServicecombKeys.COMMA)),
+            EventManager.getEventBus());
     }
 
     @Subscribe
