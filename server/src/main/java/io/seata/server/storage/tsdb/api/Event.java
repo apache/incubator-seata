@@ -28,17 +28,3 @@ public class Event {
     }
 }
 
-class UnDoEvent {
-    public String xid;
-    public long branchId;
-    public String rollbackCtx;
-    public byte[] undoLogContent;
-
-    public UnDoEvent(String xid, long branchId, String rollbackCtx, byte[] undoLogContent) {
-        this.xid = xid;
-        this.branchId = branchId;
-        this.rollbackCtx = rollbackCtx;
-        this.undoLogContent = undoLogContent;
-    }
-}
-

@@ -26,6 +26,9 @@
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
+    <properties>
+        <influxdb-java.version>2.21</influxdb-java.version>
+    </properties>
     <description>server for Seata built with Maven</description>
 
     <dependencies>
@@ -180,6 +183,12 @@
         <dependency>
             <groupId>com.github.danielwegener</groupId>
             <artifactId>logback-kafka-appender</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+            <version>${influxdb-java.version}</version>
         </dependency>
     </dependencies>
 
