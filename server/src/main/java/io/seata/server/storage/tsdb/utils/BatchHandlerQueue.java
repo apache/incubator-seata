@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author jun
+ */
 public class BatchHandlerQueue {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchHandlerQueue.class);
@@ -59,7 +62,7 @@ public class BatchHandlerQueue {
         }
     }
 
-    private void handle(ArrayList<Event> events){
+    private void handle(ArrayList<Event> events) {
         handler.handle(events);
     }
 
@@ -126,9 +129,9 @@ public class BatchHandlerQueue {
 
     private static class BatchHandlerQueueHolder {
 
-        //TODO use config
-        private static final BatchHandlerQueue INSTANCE = new BatchHandlerQueue(2000,20);
+        private static final BatchHandlerQueue INSTANCE = new BatchHandlerQueue(2000, 20);
 
-        private BatchHandlerQueueHolder() {}
+        private BatchHandlerQueueHolder() {
+        }
     }
 }
