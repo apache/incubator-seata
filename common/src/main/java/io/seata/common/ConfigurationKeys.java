@@ -275,7 +275,7 @@ public interface ConfigurationKeys {
     /**
      * The constant STORE_REDIS_PREFIX.
      */
-    String STORE_KAFKA_SERVERS= "store.kafka.servers";
+    String STORE_KAFKA_SERVERS = "store.kafka.servers";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
