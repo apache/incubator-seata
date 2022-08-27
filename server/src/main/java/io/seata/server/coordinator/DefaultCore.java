@@ -36,9 +36,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.tsdb.api.Event;
-import io.seata.server.storage.tsdb.api.EventTopic;
-import io.seata.server.storage.tsdb.utils.BatchHandlerQueue;
+import io.seata.server.storage.mq.session.kafka.KafkaSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -59,8 +57,6 @@ public class DefaultCore implements Core {
             DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT);
 
     private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
-
-    private final BatchHandlerQueue batchHandlerQueue = BatchHandlerQueue.getInstance();
 
     /**
      * get the Default core.
@@ -139,7 +135,8 @@ public class DefaultCore implements Core {
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
-        batchHandlerQueue.offer(new Event(session, EventTopic.GLOBAL_SESSION));
+
+        KafkaSessionManager.getInstance().publish(session);
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);
