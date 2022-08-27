@@ -15,6 +15,6 @@
  *  limitations under the License.
  */
 package io.seata.console.consumer;
-public interface ConsumerInterface {
+public interface MqConsumer {
     void consume();
 }

@@ -16,10 +16,10 @@
  */
 package io.seata.console.consumer.kafka;
 
-import io.seata.console.consumer.ConsumerInterface;
+import io.seata.console.consumer.MqConsumer;
 
 
-public class KafkaConsumer implements ConsumerInterface {
+public class KafkaConsumer implements MqConsumer {
 
     @Override
     public void consume() {

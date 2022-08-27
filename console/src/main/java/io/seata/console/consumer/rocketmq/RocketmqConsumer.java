@@ -16,9 +16,9 @@
  */
 package io.seata.console.consumer.rocketmq;
 
-import io.seata.console.consumer.ConsumerInterface;
+import io.seata.console.consumer.MqConsumer;
 
-public class RocketmqConsumer implements ConsumerInterface {
+public class RocketmqConsumer implements MqConsumer {
     @Override
     public void consume() {
         throw new UnsupportedOperationException();
