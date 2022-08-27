@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.TransportServerType;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
@@ -439,7 +440,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the tm dispatch thread prefix
      */
     public String getTmDispatchThreadPrefix() {
-        return RPC_DISPATCH_THREAD_PREFIX + "_" + NettyPoolKey.TransactionRole.TMROLE.name();
+        return RPC_DISPATCH_THREAD_PREFIX + "_" + RpcChannelPoolKey.TransactionRole.TMROLE.name();
     }
 
     /**
@@ -448,7 +449,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the rm dispatch thread prefix
      */
     public String getRmDispatchThreadPrefix() {
-        return RPC_DISPATCH_THREAD_PREFIX + "_" + NettyPoolKey.TransactionRole.RMROLE.name();
+        return RPC_DISPATCH_THREAD_PREFIX + "_" + RpcChannelPoolKey.TransactionRole.RMROLE.name();
     }
 
     @Deprecated

@@ -31,6 +31,7 @@ import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.Version;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelUtil;
@@ -75,7 +76,7 @@ public class ChannelManager {
      * @param channel the channel
      * @return the get role from channel
      */
-    public static NettyPoolKey.TransactionRole getRoleFromChannel(SeataChannel channel) {
+    public static RpcChannelPoolKey.TransactionRole getRoleFromChannel(SeataChannel channel) {
         RpcContext context = IDENTIFIED_CHANNELS.get(channel);
         if (context != null) {
             return context.getClientRole();
@@ -101,7 +102,7 @@ public class ChannelManager {
         return clientId.split(Constants.CLIENT_ID_SPLIT_CHAR);
     }
 
-    private static RpcContext buildChannelHolder(NettyPoolKey.TransactionRole clientRole, String version, String applicationId,
+    private static RpcContext buildChannelHolder(RpcChannelPoolKey.TransactionRole clientRole, String version, String applicationId,
                                                  String txServiceGroup, String dbkeys, SeataChannel channel) {
         RpcContext holder = new RpcContext();
         holder.setClientRole(clientRole);
@@ -124,7 +125,7 @@ public class ChannelManager {
     public static void registerTMChannel(RegisterTMRequest request, SeataChannel channel)
         throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
-        RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
+        RpcContext rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.TMROLE, request.getVersion(),
             request.getApplicationId(),
             request.getTransactionServiceGroup(),
             null, channel);
@@ -149,7 +150,7 @@ public class ChannelManager {
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
         RpcContext rpcContext;
         if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
-            rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, resourceManagerRequest.getVersion(),
+            rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.RMROLE, resourceManagerRequest.getVersion(),
                 resourceManagerRequest.getApplicationId(), resourceManagerRequest.getTransactionServiceGroup(),
                 resourceManagerRequest.getResourceIds(), channel);
             rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
@@ -231,8 +232,8 @@ public class ChannelManager {
             return rpcContext.getChannel();
         }
         Integer clientPort = SeataChannelUtil.getClientPortFromChannel(channel);
-        NettyPoolKey.TransactionRole clientRole = rpcContext.getClientRole();
-        if (clientRole == NettyPoolKey.TransactionRole.TMROLE) {
+        RpcChannelPoolKey.TransactionRole clientRole = rpcContext.getClientRole();
+        if (clientRole == RpcChannelPoolKey.TransactionRole.TMROLE) {
             String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
                 + SeataChannelUtil.getClientIpFromChannel(channel);
             if (!TM_CHANNELS.containsKey(clientIdentified)) {
@@ -240,7 +241,7 @@ public class ChannelManager {
             }
             ConcurrentMap<Integer, RpcContext> clientRpcMap = TM_CHANNELS.get(clientIdentified);
             return getChannelFromSameClientMap(clientRpcMap, clientPort);
-        } else if (clientRole == NettyPoolKey.TransactionRole.RMROLE) {
+        } else if (clientRole == RpcChannelPoolKey.TransactionRole.RMROLE) {
             for (Map<Integer, RpcContext> clientRmMap : rpcContext.getClientRMHolderMap().values()) {
                 SeataChannel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
                 if (sameClientChannel != null) {

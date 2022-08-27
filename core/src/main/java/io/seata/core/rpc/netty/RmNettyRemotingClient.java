@@ -33,7 +33,8 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
-import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
+import io.seata.core.rpc.RpcChannelPoolKey;
+import io.seata.core.rpc.RpcChannelPoolKey.TransactionRole;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
@@ -269,7 +270,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+    protected Function<String, RpcChannelPoolKey> getPoolKeyFunction() {
         return serverAddress -> {
             String resourceIds = getMergedResourceKeys();
             if (resourceIds != null && LOGGER.isInfoEnabled()) {
@@ -277,7 +278,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             }
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
             message.setResourceIds(resourceIds);
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.RMROLE, serverAddress, message);
+            return new RpcChannelPoolKey(RpcChannelPoolKey.TransactionRole.RMROLE, serverAddress, message);
         };
     }
 

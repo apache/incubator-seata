@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ public class RpcContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcContext.class);
 
-    private NettyPoolKey.TransactionRole clientRole;
+    private RpcChannelPoolKey.TransactionRole clientRole;
 
     private String version;
 
@@ -73,11 +72,11 @@ public class RpcContext {
         if (clientIDHolderMap != null) {
             clientIDHolderMap = null;
         }
-        if (clientRole == NettyPoolKey.TransactionRole.TMROLE && clientTMHolderMap != null) {
+        if (clientRole == RpcChannelPoolKey.TransactionRole.TMROLE && clientTMHolderMap != null) {
             clientTMHolderMap.remove(clientPort);
             clientTMHolderMap = null;
         }
-        if (clientRole == NettyPoolKey.TransactionRole.RMROLE && clientRMHolderMap != null) {
+        if (clientRole == RpcChannelPoolKey.TransactionRole.RMROLE && clientRMHolderMap != null) {
             for (Map<Integer, RpcContext> portMap : clientRMHolderMap.values()) {
                 portMap.remove(clientPort);
             }
@@ -232,7 +231,7 @@ public class RpcContext {
      *
      * @return the get client role
      */
-    public NettyPoolKey.TransactionRole getClientRole() {
+    public RpcChannelPoolKey.TransactionRole getClientRole() {
         return clientRole;
     }
 
@@ -241,7 +240,7 @@ public class RpcContext {
      *
      * @param clientRole the client role
      */
-    public void setClientRole(NettyPoolKey.TransactionRole clientRole) {
+    public void setClientRole(RpcChannelPoolKey.TransactionRole clientRole) {
         this.clientRole = clientRole;
     }
 

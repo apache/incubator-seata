@@ -18,7 +18,7 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.netty.NettyClientConfig;
-import io.seata.core.rpc.netty.NettyPoolKey;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.apache.commons.lang.StringUtils;
@@ -49,7 +49,7 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
     private String secretKey;
 
     public TmGrpcRemotingClient(ThreadPoolExecutor messageExecutor) {
-        super(messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+        super(messageExecutor, RpcChannelPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
     }
 
@@ -66,10 +66,10 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
     }
 
     @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+    protected Function<String, RpcChannelPoolKey> getPoolKeyFunction() {
         return severAddress -> {
             RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup, getExtraData());
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
+            return new RpcChannelPoolKey(RpcChannelPoolKey.TransactionRole.TMROLE, severAddress, message);
         };
     }
 

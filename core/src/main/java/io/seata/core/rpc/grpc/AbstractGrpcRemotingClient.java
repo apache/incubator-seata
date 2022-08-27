@@ -38,7 +38,7 @@ import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
-import io.seata.core.rpc.netty.NettyPoolKey;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
@@ -56,7 +56,7 @@ import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting implements RemotingClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGrpcRemotingClient.class);
 
-    private final NettyPoolKey.TransactionRole transactionRole;
+    private final RpcChannelPoolKey.TransactionRole transactionRole;
     private final GrpcClientChannelManager clientChannelManager;
     private TransactionMessageHandler transactionMessageHandler;
 
@@ -91,7 +91,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
 
     private static final Map<Short, GrpcStubFunction> STUB_FUNCTION_MAP = new ConcurrentHashMap<>();
 
-    public AbstractGrpcRemotingClient(ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
+    public AbstractGrpcRemotingClient(ThreadPoolExecutor messageExecutor, RpcChannelPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
         this.clientChannelManager = new GrpcClientChannelManager(new GrpcPoolableFactory(this), getPoolKeyFunction());
@@ -125,7 +125,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
         this.transactionMessageHandler = transactionMessageHandler;
     }
 
-    public NettyPoolKey.TransactionRole getTransactionRole() {
+    public RpcChannelPoolKey.TransactionRole getTransactionRole() {
         return transactionRole;
     }
 
@@ -373,7 +373,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
      *
      * @return lambda function
      */
-    protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
+    protected abstract Function<String, RpcChannelPoolKey> getPoolKeyFunction();
 
     /**
      * Get transaction service group.

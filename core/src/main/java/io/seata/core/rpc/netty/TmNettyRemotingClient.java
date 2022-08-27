@@ -39,6 +39,7 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.apache.commons.lang.StringUtils;
@@ -74,7 +75,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
                                   EventExecutorGroup eventExecutorGroup,
                                   ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+        super(nettyClientConfig, eventExecutorGroup, messageExecutor, RpcChannelPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
         // set enableClientBatchSendRequest
         this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
@@ -244,10 +245,10 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+    protected Function<String, RpcChannelPoolKey> getPoolKeyFunction() {
         return severAddress -> {
             RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup, getExtraData());
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
+            return new RpcChannelPoolKey(RpcChannelPoolKey.TransactionRole.TMROLE, severAddress, message);
         };
     }
 

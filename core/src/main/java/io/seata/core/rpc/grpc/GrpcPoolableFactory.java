@@ -17,7 +17,7 @@ import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
-import io.seata.core.rpc.netty.NettyPoolKey;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author goodboycoder
  */
-public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, SeataChannel> {
+public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChannelPoolKey, SeataChannel> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcPoolableFactory.class);
 
     private final AbstractGrpcRemotingClient rpcRemotingClient;
@@ -36,7 +36,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPool
     }
 
     @Override
-    public SeataChannel makeObject(NettyPoolKey key) {
+    public SeataChannel makeObject(RpcChannelPoolKey key) {
         InetSocketAddress address = NetUtil.toInetSocketAddress(key.getAddress());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[GRPC]NettyPool create channel to " + key);
@@ -53,7 +53,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPool
             throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
         }
 
-        if (NettyPoolKey.TransactionRole.RMROLE == key.getTransactionRole()) {
+        if (RpcChannelPoolKey.TransactionRole.RMROLE == key.getTransactionRole()) {
             ConcurrentHashMap<Integer, MessageFuture> futures = rpcRemotingClient.getFutures();
             StreamObserver<GrpcRemoting.BiStreamMessage> clientStreamObserver = ResourceManagerServiceGrpc.newStub(managedChannel).registerRM(new StreamObserver<GrpcRemoting.BiStreamMessage>() {
                 @Override
@@ -124,17 +124,17 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPool
         return channelToServer;
     }
 
-    private boolean isRegisterSuccess(Object response, NettyPoolKey.TransactionRole transactionRole) {
+    private boolean isRegisterSuccess(Object response, RpcChannelPoolKey.TransactionRole transactionRole) {
         if (response == null) {
             return false;
         }
-        if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
+        if (transactionRole.equals(RpcChannelPoolKey.TransactionRole.TMROLE)) {
             if (!(response instanceof RegisterTMResponse)) {
                 return false;
             }
             RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
             return registerTMResponse.isIdentified();
-        } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
+        } else if (transactionRole.equals(RpcChannelPoolKey.TransactionRole.RMROLE)) {
             if (!(response instanceof RegisterRMResponse)) {
                 return false;
             }
@@ -144,8 +144,8 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPool
         return false;
     }
 
-    private String getVersion(Object response, NettyPoolKey.TransactionRole transactionRole) {
-        if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
+    private String getVersion(Object response, RpcChannelPoolKey.TransactionRole transactionRole) {
+        if (transactionRole.equals(RpcChannelPoolKey.TransactionRole.TMROLE)) {
             return ((RegisterTMResponse) response).getVersion();
         } else {
             return ((RegisterRMResponse) response).getVersion();
@@ -153,7 +153,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPool
     }
 
     @Override
-    public void destroyObject(NettyPoolKey key, SeataChannel channel) {
+    public void destroyObject(RpcChannelPoolKey key, SeataChannel channel) {
         if (channel != null) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("will destroy channel:" + channel);
@@ -164,7 +164,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPool
     }
 
     @Override
-    public boolean validateObject(NettyPoolKey key, SeataChannel obj) {
+    public boolean validateObject(RpcChannelPoolKey key, SeataChannel obj) {
         if (obj != null && obj.isActive()) {
             return true;
         }
@@ -175,12 +175,12 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<NettyPool
     }
 
     @Override
-    public void activateObject(NettyPoolKey key, SeataChannel obj) {
+    public void activateObject(RpcChannelPoolKey key, SeataChannel obj) {
 
     }
 
     @Override
-    public void passivateObject(NettyPoolKey key, SeataChannel obj) {
+    public void passivateObject(RpcChannelPoolKey key, SeataChannel obj) {
 
     }
 }

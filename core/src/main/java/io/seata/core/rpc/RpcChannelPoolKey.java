@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package io.seata.core.rpc;
 
 import io.seata.core.protocol.AbstractMessage;
 
@@ -22,7 +22,7 @@ import io.seata.core.protocol.AbstractMessage;
  *
  * @author slievrly
  */
-public class NettyPoolKey {
+public class RpcChannelPoolKey {
 
     private TransactionRole transactionRole;
     private String address;
@@ -34,7 +34,7 @@ public class NettyPoolKey {
      * @param transactionRole the client role
      * @param address         the address
      */
-    public NettyPoolKey(TransactionRole transactionRole, String address) {
+    public RpcChannelPoolKey(TransactionRole transactionRole, String address) {
         this.transactionRole = transactionRole;
         this.address = address;
     }
@@ -46,7 +46,7 @@ public class NettyPoolKey {
      * @param address         the address
      * @param message         the message
      */
-    public NettyPoolKey(TransactionRole transactionRole, String address, AbstractMessage message) {
+    public RpcChannelPoolKey(TransactionRole transactionRole, String address, AbstractMessage message) {
         this.transactionRole = transactionRole;
         this.address = address;
         this.message = message;
@@ -67,7 +67,7 @@ public class NettyPoolKey {
      * @param transactionRole the client role
      * @return the client role
      */
-    public NettyPoolKey setTransactionRole(TransactionRole transactionRole) {
+    public RpcChannelPoolKey setTransactionRole(TransactionRole transactionRole) {
         this.transactionRole = transactionRole;
         return this;
     }
@@ -87,7 +87,7 @@ public class NettyPoolKey {
      * @param address the address
      * @return the address
      */
-    public NettyPoolKey setAddress(String address) {
+    public RpcChannelPoolKey setAddress(String address) {
         this.address = address;
         return this;
     }

@@ -22,7 +22,7 @@ import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.netty.NettyClientConfig;
-import io.seata.core.rpc.netty.NettyPoolKey;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -40,11 +40,11 @@ public class GrpcClientChannelManager {
 
     private final ConcurrentMap<String, Object> channelLocks = new ConcurrentHashMap<>();
 
-    private Function<String, NettyPoolKey> poolKeyFunction;
-    private final ConcurrentMap<String, NettyPoolKey> poolKeyMap = new ConcurrentHashMap<>();
-    private final GenericKeyedObjectPool<NettyPoolKey, SeataChannel> grpcClientKeyPool;
+    private Function<String, RpcChannelPoolKey> poolKeyFunction;
+    private final ConcurrentMap<String, RpcChannelPoolKey> poolKeyMap = new ConcurrentHashMap<>();
+    private final GenericKeyedObjectPool<RpcChannelPoolKey, SeataChannel> grpcClientKeyPool;
 
-    public GrpcClientChannelManager(KeyedPoolableObjectFactory<NettyPoolKey, SeataChannel> poolableObjectFactory, Function<String, NettyPoolKey> poolKeyFunction) {
+    public GrpcClientChannelManager(KeyedPoolableObjectFactory<RpcChannelPoolKey, SeataChannel> poolableObjectFactory, Function<String, RpcChannelPoolKey> poolKeyFunction) {
         grpcClientKeyPool = new GenericKeyedObjectPool<>(poolableObjectFactory);
         this.poolKeyFunction = poolKeyFunction;
     }
@@ -81,11 +81,11 @@ public class GrpcClientChannelManager {
         }
         SeataChannel channel;
         try {
-            NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
+            RpcChannelPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
             if (currentPoolKey.getMessage() instanceof RegisterTMRequest) {
                 poolKeyMap.put(serverAddress, currentPoolKey);
             } else {
-                NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
+                RpcChannelPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
                 if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
                     RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
                     ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());

@@ -19,7 +19,7 @@ import io.seata.core.protocol.Version;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelUtil;
-import io.seata.core.rpc.netty.NettyPoolKey;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class GrpcServerChannelManager {
      */
     public void registerTMChannel(RegisterTMRequest request, SeataChannel channel) throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
-        RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
+        RpcContext rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.TMROLE, request.getVersion(),
                 request.getApplicationId(),
                 request.getTransactionServiceGroup(),
                 null, channel);
@@ -82,7 +82,7 @@ public class GrpcServerChannelManager {
         Set<String> dbKeySet = dbKeyToSet(request.getResourceIds());
         RpcContext rpcContext;
         if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
-            rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, request.getVersion(),
+            rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.RMROLE, request.getVersion(),
                     request.getApplicationId(), request.getTransactionServiceGroup(),
                     request.getResourceIds(), channel);
             rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
@@ -325,8 +325,8 @@ public class GrpcServerChannelManager {
         return clientId.split(Constants.CLIENT_ID_SPLIT_CHAR);
     }
 
-    private RpcContext buildChannelHolder(NettyPoolKey.TransactionRole clientRole, String version, String applicationId,
-                                                 String txServiceGroup, String dbkeys, SeataChannel channel) {
+    private RpcContext buildChannelHolder(RpcChannelPoolKey.TransactionRole clientRole, String version, String applicationId,
+                                          String txServiceGroup, String dbkeys, SeataChannel channel) {
         RpcContext holder = new RpcContext();
         holder.setClientRole(clientRole);
         holder.setVersion(version);

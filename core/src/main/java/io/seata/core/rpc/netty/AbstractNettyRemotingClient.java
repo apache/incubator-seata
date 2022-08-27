@@ -54,6 +54,7 @@ import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
@@ -103,7 +104,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     private final NettyClientBootstrap clientBootstrap;
     private NettyClientChannelManager clientChannelManager;
-    private final NettyPoolKey.TransactionRole transactionRole;
+    private final RpcChannelPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
     protected volatile boolean enableClientBatchSendRequest;
@@ -129,7 +130,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     public AbstractNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
-                                       ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
+                                       ThreadPoolExecutor messageExecutor, RpcChannelPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
         clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
@@ -347,7 +348,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      *
      * @return lambda function
      */
-    protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
+    protected abstract Function<String, RpcChannelPoolKey> getPoolKeyFunction();
 
     /**
      * Get transaction service group.

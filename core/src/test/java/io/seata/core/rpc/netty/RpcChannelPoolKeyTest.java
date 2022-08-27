@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +24,11 @@ import org.junit.jupiter.api.Test;
 /**
  * @author: slievrly
  */
-public class NettyPoolKeyTest {
+public class RpcChannelPoolKeyTest {
 
-    private NettyPoolKey nettyPoolKey;
-    private static final NettyPoolKey.TransactionRole RM_ROLE = NettyPoolKey.TransactionRole.RMROLE;
-    private static final NettyPoolKey.TransactionRole TM_ROLE = NettyPoolKey.TransactionRole.TMROLE;
+    private RpcChannelPoolKey rpcChannelPoolKey;
+    private static final RpcChannelPoolKey.TransactionRole RM_ROLE = RpcChannelPoolKey.TransactionRole.RMROLE;
+    private static final RpcChannelPoolKey.TransactionRole TM_ROLE = RpcChannelPoolKey.TransactionRole.TMROLE;
     private static final String ADDRESS1 = "127.0.0.1:8091";
     private static final String ADDRESS2 = "127.0.0.1:8092";
     private static final RegisterRMRequest MSG1 = new RegisterRMRequest("applicationId1", "transactionServiceGroup1");
@@ -35,45 +36,45 @@ public class NettyPoolKeyTest {
 
     @BeforeEach
     public void init() {
-        nettyPoolKey = new NettyPoolKey(RM_ROLE, ADDRESS1, MSG1);
+        rpcChannelPoolKey = new RpcChannelPoolKey(RM_ROLE, ADDRESS1, MSG1);
     }
 
     @Test
     public void getTransactionRole() {
-        Assertions.assertEquals(nettyPoolKey.getTransactionRole(), RM_ROLE);
+        Assertions.assertEquals(rpcChannelPoolKey.getTransactionRole(), RM_ROLE);
     }
 
     @Test
     public void setTransactionRole() {
-        nettyPoolKey.setTransactionRole(TM_ROLE);
-        Assertions.assertEquals(nettyPoolKey.getTransactionRole(), TM_ROLE);
+        rpcChannelPoolKey.setTransactionRole(TM_ROLE);
+        Assertions.assertEquals(rpcChannelPoolKey.getTransactionRole(), TM_ROLE);
     }
 
     @Test
     public void getAddress() {
-        Assertions.assertEquals(nettyPoolKey.getAddress(), ADDRESS1);
+        Assertions.assertEquals(rpcChannelPoolKey.getAddress(), ADDRESS1);
     }
 
     @Test
     public void setAddress() {
-        nettyPoolKey.setAddress(ADDRESS2);
-        Assertions.assertEquals(nettyPoolKey.getAddress(), ADDRESS2);
+        rpcChannelPoolKey.setAddress(ADDRESS2);
+        Assertions.assertEquals(rpcChannelPoolKey.getAddress(), ADDRESS2);
     }
 
     @Test
     public void getMessage() {
-        Assertions.assertEquals(nettyPoolKey.getMessage(), MSG1);
+        Assertions.assertEquals(rpcChannelPoolKey.getMessage(), MSG1);
     }
 
     @Test
     public void setMessage() {
-        nettyPoolKey.setMessage(MSG2);
-        Assertions.assertEquals(nettyPoolKey.getMessage(), MSG2);
+        rpcChannelPoolKey.setMessage(MSG2);
+        Assertions.assertEquals(rpcChannelPoolKey.getMessage(), MSG2);
     }
 
     @Test
     public void testToString() {
         String expectStr = "transactionRole:RMROLE,address:127.0.0.1:8091,msg:< " + MSG1.toString() + " >";
-        Assertions.assertEquals(nettyPoolKey.toString(), expectStr);
+        Assertions.assertEquals(rpcChannelPoolKey.toString(), expectStr);
     }
 }

@@ -33,6 +33,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
@@ -58,11 +59,11 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     private EventExecutorGroup defaultEventExecutorGroup;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
-    private final NettyPoolKey.TransactionRole transactionRole;
+    private final RpcChannelPoolKey.TransactionRole transactionRole;
     private ChannelHandler[] channelHandlers;
 
     public NettyClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
-                                NettyPoolKey.TransactionRole transactionRole) {
+                                RpcChannelPoolKey.TransactionRole transactionRole) {
         if (nettyClientConfig == null) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
