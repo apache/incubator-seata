@@ -32,7 +32,6 @@
     <description>dependencies for Seata built with Maven</description>
 
     <properties>
-        <dubbo.version>3.0.9</dubbo.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
@@ -219,11 +218,6 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
                 <version>${protobuf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.baidu</groupId>
