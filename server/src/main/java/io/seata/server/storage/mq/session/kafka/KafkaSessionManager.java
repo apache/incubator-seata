@@ -56,8 +56,7 @@ public class KafkaSessionManager {
     }
 
     public void publish(String topic, byte[] sessionBytes) throws TransactionException {
-        Future<RecordMetadata> future =
-                sessionProducer.send(new ProducerRecord<>(topic, sessionBytes));
+        Future<RecordMetadata> future = sessionProducer.send(new ProducerRecord<>(topic, sessionBytes));
         try {
             future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
