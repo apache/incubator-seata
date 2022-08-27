@@ -25,7 +25,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-dubbo</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>seata-dubbo ${project.version}</name>
     <description>apache dubbo integration for Seata built with Maven</description>
 
@@ -36,7 +36,6 @@
         <dependency>
             <groupId>org.apache.dubbo.extensions</groupId>
             <artifactId>dubbo-filter-seata</artifactId>
-            <version>${dubbo-seata.version}</version>
         </dependency>
     </dependencies>
 
