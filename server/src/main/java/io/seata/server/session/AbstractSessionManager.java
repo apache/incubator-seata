@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -97,7 +98,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, branchSession, LogOperation.BRANCH_ADD);
         }
         writeSession(LogOperation.BRANCH_ADD, branchSession);
-        KafkaSessionManager.getInstance().publish(branchSession);
+        KafkaSessionManager.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
     }
 
     @Override

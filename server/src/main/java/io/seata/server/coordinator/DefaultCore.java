@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -136,7 +137,8 @@ public class DefaultCore implements Core {
 
         session.begin();
 
-        KafkaSessionManager.getInstance().publish(session);
+        // TODO need add config about enabling this feature
+        KafkaSessionManager.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, session.encode());
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);
