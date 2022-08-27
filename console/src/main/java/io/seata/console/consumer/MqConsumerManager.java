@@ -21,14 +21,13 @@ import org.springframework.stereotype.Component;
 import java.util.ServiceLoader;
 
 @Component
-public class MqConsumerManager implements MqConsumer {
+public class MqConsumerManager {
 
 
     public MqConsumerManager() {
         consume();
     }
 
-    @Override
     public void consume() {
         ServiceLoader<MqConsumer> consumers = ServiceLoader.load(MqConsumer.class);
         for (MqConsumer consumer : consumers) {
