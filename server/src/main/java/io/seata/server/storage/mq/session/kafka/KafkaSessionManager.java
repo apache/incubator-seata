@@ -15,6 +15,10 @@
  */
 package io.seata.server.storage.mq.session.kafka;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -40,9 +44,17 @@ public class KafkaSessionManager {
 
     private static KafkaSessionManager instance;
 
+    private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
+
+    private static String kafkaServers;
+
     private KafkaSessionManager() {
         Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS);
+        if (StringUtils.isBlank(kafkaServers)) {
+            kafkaServers = "localhost:9092";
+        }
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, BytesSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BytesSerializer.class);
         sessionProducer = new KafkaProducer<>(properties);
