@@ -1,4 +1,4 @@
-package io.seata.server.session.mq;
+package io.seata.server.storage.mq.kafka;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
