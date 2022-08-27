@@ -43,6 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import static io.seata.common.ConfigurationKeys.STORE_DB_BRANCH_TABLE;
+import static io.seata.common.ConfigurationKeys.STORE_DB_GLOBAL_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 import static io.seata.core.constants.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
 import static io.seata.server.session.BranchSessionHandler.CONTINUE;
 
@@ -139,7 +143,8 @@ public class DefaultCore implements Core {
         session.begin();
 
         // TODO need add config about enabling this feature
-        MqManagerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, session.encode());
+        String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_GLOBAL_TABLE, DEFAULT_STORE_DB_GLOBAL_TABLE);
+        MqManagerFactory.getInstance().publish(topic, session.encode());
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);
