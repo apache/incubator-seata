@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -22,9 +23,7 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
-import io.seata.server.storage.tsdb.api.Event;
-import io.seata.server.storage.tsdb.api.EventTopic;
-import io.seata.server.storage.tsdb.utils.BatchHandlerQueue;
+import io.seata.server.storage.mq.session.kafka.KafkaSessionManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
@@ -50,11 +49,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
      * The Name.
      */
     protected String name;
-
-    /**
-     * Process session event queue
-     */
-    private final BatchHandlerQueue batchHandlerQueue = BatchHandlerQueue.getInstance();
 
     /**
      * Instantiates a new Abstract session manager.
@@ -104,7 +98,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, branchSession, LogOperation.BRANCH_ADD);
         }
         writeSession(LogOperation.BRANCH_ADD, branchSession);
-        batchHandlerQueue.offer(new Event(session, EventTopic.BRANCH_SESSION));
+        KafkaSessionManager.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
     }
 
     @Override
