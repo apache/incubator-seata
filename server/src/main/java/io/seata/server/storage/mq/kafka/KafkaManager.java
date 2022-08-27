@@ -25,6 +25,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.BytesSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-//TODO modify name abstract
 public class KafkaManager implements MqManager {
     /**
      * The constant LOGGER.
@@ -50,23 +50,16 @@ public class KafkaManager implements MqManager {
 
     private static String kafkaServers;
 
-    private KafkaManager() {
+    public KafkaManager() {
         Properties properties = new Properties();
         kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS);
         if (StringUtils.isBlank(kafkaServers)) {
             kafkaServers = "localhost:9092";
         }
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, BytesSerializer.class);
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BytesSerializer.class);
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
         sessionProducer = new KafkaProducer<>(properties);
-    }
-
-    public static KafkaManager getInstance() {
-        if (instance == null) {
-            instance = new KafkaManager();
-        }
-        return instance;
     }
 
     public void publish(String topic, byte[] sessionBytes) {

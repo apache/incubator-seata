@@ -2,26 +2,24 @@ package io.seata.server.storage.mq.kafka;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
-import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.storage.mq.kafka.KafkaManager;
-import org.junit.jupiter.api.Assertions;
+import io.seata.server.storage.mq.MqManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 @SpringBootTest
-class KafkaManagerTest {
+class MqManagerFactoryTest {
 
     @Test
     void globalSessionPublishTest() {
         // TODO need mock a kafka server
         GlobalSession globalSession = GlobalSession.createGlobalSession("demo-app", "default_tx_group",
                 "tx-1", 3000);
-        KafkaManager.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, globalSession.encode());
+        MqManagerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, globalSession.encode());
     }
 
     @Test

@@ -1,0 +1,2 @@
+io.seata.console.consumer.kafka.KafkaConsumer
+io.seata.console.consumer.rocketmq.RocketmqConsumer

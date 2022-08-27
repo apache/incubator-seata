@@ -1,1 +1,2 @@
 io.seata.server.storage.mq.kafka.KafkaManager
+io.seata.server.storage.mq.rocketmq.RocketmqManager
