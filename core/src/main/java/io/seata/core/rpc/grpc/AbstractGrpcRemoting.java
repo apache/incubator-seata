@@ -14,8 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -30,13 +28,10 @@ import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.MessageIdGeneratorHelper;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelUtil;
-import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.hook.RpcHook;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.RpcMessageHandleContext;
-import io.seata.serializer.protobuf.convertor.PbConvertor;
-import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -69,7 +64,6 @@ public abstract class AbstractGrpcRemoting implements Disposable {
 
     /**
      * Obtain the return result through MessageFuture blocking.
-     *
      */
     protected final ConcurrentHashMap<Integer, MessageFuture> futures = new ConcurrentHashMap<>();
 
@@ -86,6 +80,7 @@ public abstract class AbstractGrpcRemoting implements Disposable {
      */
     protected volatile long nowMills = 0;
     private static final int TIMEOUT_CHECK_INTERVAL = 3000;
+
     public AbstractGrpcRemoting(ThreadPoolExecutor messageExecutor) {
         this.messageExecutor = messageExecutor;
     }
@@ -185,7 +180,7 @@ public abstract class AbstractGrpcRemoting implements Disposable {
      * @param rpcMessage    rpc message
      * @param timeoutMillis rpc communication timeout
      * @return response message
-     * @throws TimeoutException
+     * @throws TimeoutException timeout when waiting response too long
      */
     protected Object sendSync(SeataChannel channel, RpcMessage rpcMessage, long timeoutMillis) throws TimeoutException {
         if (timeoutMillis <= 0) {
@@ -196,17 +191,10 @@ public abstract class AbstractGrpcRemoting implements Disposable {
             return null;
         }
 
-        MessageFuture messageFuture = new MessageFuture();
-        messageFuture.setRequestMessage(rpcMessage);
-        messageFuture.setTimeout(timeoutMillis);
-        futures.put(rpcMessage.getId(), messageFuture);
-
         String remoteAddr = SeataChannelUtil.getAddressFromChannel(channel);
-
         doBeforeRpcHooks(remoteAddr, rpcMessage);
         try {
-            channel.sendMsg(convertToProtoMessage(rpcMessage));
-            Object result = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            Object result = doSyncSend(channel, rpcMessage, timeoutMillis);
             doAfterRpcHooks(remoteAddr, rpcMessage, result);
             return result;
         } catch (Exception exx) {
@@ -220,6 +208,8 @@ public abstract class AbstractGrpcRemoting implements Disposable {
         }
     }
 
+    protected abstract Object doSyncSend(SeataChannel channel, RpcMessage rpcMessage, long timeoutMillis) throws Exception;
+
     /**
      * rpc async request.
      *
@@ -232,32 +222,23 @@ public abstract class AbstractGrpcRemoting implements Disposable {
         }
         doBeforeRpcHooks(SeataChannelUtil.getAddressFromChannel(channel), rpcMessage);
         try {
-            channel.sendMsg(convertToProtoMessage(rpcMessage));
+            doAsyncSend(channel, rpcMessage);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    protected abstract void doAsyncSend(SeataChannel channel, RpcMessage rpcMessage);
+
     protected void doBeforeRpcHooks(String remoteAddress, RpcMessage request) {
-        for (RpcHook rpcHook: rpcHooks) {
+        for (RpcHook rpcHook : rpcHooks) {
             rpcHook.doBeforeRequest(remoteAddress, request);
         }
     }
 
     protected void doAfterRpcHooks(String remoteAddress, RpcMessage request, Object response) {
-        for (RpcHook rpcHook: rpcHooks) {
+        for (RpcHook rpcHook : rpcHooks) {
             rpcHook.doAfterResponse(remoteAddress, request, response);
         }
-    }
-
-    private Message convertToProtoMessage(RpcMessage rpcMessage) {
-        Object body = rpcMessage.getBody();
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(body.getClass().getName());
-        Message protoMessage = (Message) pbConvertor.convert2Proto(body);
-        return GrpcRemoting.BiStreamMessage.newBuilder()
-                .setID(rpcMessage.getId())
-                .setMessageType(BiStreamMessageTypeHelper.getBiStreamMessageTypeByClass(protoMessage.getClass()))
-                .setMessage(Any.pack(protoMessage))
-                .build();
     }
 }

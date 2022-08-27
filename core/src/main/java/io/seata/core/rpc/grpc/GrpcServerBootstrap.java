@@ -1,7 +1,6 @@
 package io.seata.core.rpc.grpc;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -82,11 +81,12 @@ public class GrpcServerBootstrap implements RemotingBootstrap {
         this.server = serverBuilder.build();
         try {
             this.server.start();
+            this.server.awaitTermination();
             LOGGER.info("Grpc server started, service listen port: {}", getListenPort());
 
             // RegistryFactory register service
             initialized.set(true);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Server start failed", e);
         }
     }

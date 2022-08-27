@@ -190,7 +190,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     }
 
-    @Override
+    /**
+     * client send sync request.
+     *
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @return server result message
+     * @throws TimeoutException TimeoutException
+     */
     public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
         if (channel == null) {
             LOGGER.warn("sendSyncRequest nothing, caused by null channel.");
@@ -200,7 +207,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return super.sendSync(channel, rpcMessage, this.getRpcRequestTimeout());
     }
 
-    @Override
+    /**
+     * client send async request.
+     *
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     */
     public void sendAsyncRequest(Channel channel, Object msg) {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequest nothing, caused by null channel.");
@@ -215,7 +227,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         super.sendAsync(channel, rpcMessage);
     }
 
-    @Override
+    /**
+     * client send async response.
+     *
+     * @param serverAddress server address
+     * @param rpcMessage    rpc message from server request
+     * @param msg           transaction message {@link io.seata.core.protocol}
+     */
     public void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg) {
         RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, ProtocolConstants.MSGTYPE_RESPONSE);
         Channel channel = clientChannelManager.acquireChannel(serverAddress);
@@ -303,6 +321,26 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private String getThreadPrefix() {
         return AbstractNettyRemotingClient.MERGE_THREAD_PREFIX + THREAD_PREFIX_SPLIT_CHAR + transactionRole.name();
     }
+
+    /**
+     * On register msg success.
+     *
+     * @param serverAddress  the server address
+     * @param channel        the channel
+     * @param response       the response
+     * @param requestMessage the request message
+     */
+    abstract void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response, AbstractMessage requestMessage);
+
+    /**
+     * On register msg fail.
+     *
+     * @param serverAddress  the server address
+     * @param channel        the channel
+     * @param response       the response
+     * @param requestMessage the request message
+     */
+    abstract void onRegisterMsgFail(String serverAddress, Channel channel, Object response, AbstractMessage requestMessage);
 
     /**
      * Get pool key function.

@@ -6,9 +6,9 @@ import io.seata.common.thread.PositiveAtomicCounter;
  * @author goodboycoder
  */
 public class MessageIdGeneratorHelper {
-    private static final PositiveAtomicCounter idGenerator= new PositiveAtomicCounter();
+    private static final PositiveAtomicCounter ID_GENERATOR = new PositiveAtomicCounter();
 
     public static PositiveAtomicCounter getIdGenerator() {
-        return idGenerator;
+        return ID_GENERATOR;
     }
 }

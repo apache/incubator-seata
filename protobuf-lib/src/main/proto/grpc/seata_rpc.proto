@@ -41,7 +41,7 @@ enum BiStreamMessageType {
 }
 
 message BiStreamMessage {
-  int64 ID = 1;
+  int32 ID = 1;
   BiStreamMessageType MessageType = 2;
   google.protobuf.Any Message = 3;
 }

@@ -1,8 +1,5 @@
 package io.seata.core.rpc.grpc.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
@@ -105,13 +102,13 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
             @Override
             public void onError(Throwable throwable) {
                 LOGGER.error("RM Bi stream on error, error: {}", throwable.toString());
-                //unregister channel
+                //TODO unregister channel
             }
 
             @Override
             public void onCompleted() {
                 LOGGER.info("RM Bi stream on completed");
-                //unregister channel
+                //TODO unregister channel
             }
         };
     }
@@ -187,7 +184,7 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
         RpcMessageHandleContext ctx = new RpcMessageHandleContext(curChannel);
         if (null != message) {
             MessageMeta messageMeta = new MessageMeta();
-            messageMeta.setMessageId((int) message.getID());
+            messageMeta.setMessageId(message.getID());
             ctx.setMessageMeta(messageMeta);
         }
         return ctx;

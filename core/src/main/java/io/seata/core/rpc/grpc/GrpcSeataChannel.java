@@ -2,11 +2,11 @@ package io.seata.core.rpc.grpc;
 
 import java.net.SocketAddress;
 
-import com.google.protobuf.Message;
 import io.grpc.netty.shaded.io.netty.channel.Channel;
 import io.grpc.stub.StreamObserver;
 import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 
 /**
  * @author goodboycoder
@@ -50,13 +50,22 @@ public class GrpcSeataChannel implements SeataChannel {
     }
 
     @Override
-    public void sendMsg(Object msg) throws Exception{
+    public void sendMsg(Object msg) {
         synchronized (streamObserver) {
-            if (!(msg instanceof Message)) {
-                throw new IllegalArgumentException("not supported message type: " + msg.getClass());
+            if (!(msg instanceof GrpcRemoting.BiStreamMessage)) {
+                throw new IllegalArgumentException("[GRPC]not supported message type: " + msg.getClass());
             }
-            Message toSend = (Message) msg;
-            streamObserver.onNext(toSend);
+            streamObserver.onNext(msg);
         }
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public void disconnect() {
+
     }
 }

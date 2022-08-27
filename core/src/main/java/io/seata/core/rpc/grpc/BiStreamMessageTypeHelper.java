@@ -3,15 +3,17 @@ package io.seata.core.rpc.grpc;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.protobuf.Message;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 
 /**
  * @author goodboycoder
  */
 public class BiStreamMessageTypeHelper {
-    private static final Map<GrpcRemoting.BiStreamMessageType, Class> MESSAGE_TYPE_CLASS_MAP = new HashMap<>();
+    private static final Map<GrpcRemoting.BiStreamMessageType, Class<? extends Message>> MESSAGE_TYPE_CLASS_MAP = new HashMap<>();
 
-    private static final Map<Class, GrpcRemoting.BiStreamMessageType> STREAM_MESSAGE_TYPE_MAP = new HashMap<>();
+    private static final Map<Class<? extends Message>, GrpcRemoting.BiStreamMessageType> STREAM_MESSAGE_TYPE_MAP = new HashMap<>();
+
     static {
         MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeBranchCommit, io.seata.serializer.protobuf.generated.BranchCommitRequestProto.class);
         MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeBranchCommitResult, io.seata.serializer.protobuf.generated.BranchCommitResponseProto.class);
@@ -30,11 +32,11 @@ public class BiStreamMessageTypeHelper {
         STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto.class, GrpcRemoting.BiStreamMessageType.TypeRMUndoLogDelete);
     }
 
-    public static Class getBiStreamMessageClassType(GrpcRemoting.BiStreamMessageType messageType) {
+    public static Class<? extends Message> getBiStreamMessageClassType(GrpcRemoting.BiStreamMessageType messageType) {
         return MESSAGE_TYPE_CLASS_MAP.get(messageType);
     }
 
-    public static GrpcRemoting.BiStreamMessageType getBiStreamMessageTypeByClass(Class clazz) {
+    public static GrpcRemoting.BiStreamMessageType getBiStreamMessageTypeByClass(Class<? extends Message> clazz) {
         return STREAM_MESSAGE_TYPE_MAP.get(clazz);
     }
 }

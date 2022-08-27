@@ -9,10 +9,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.grpc.ServerInterceptor;
 import io.grpc.ServerInterceptors;
 import io.grpc.util.MutableHandlerRegistry;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
@@ -159,8 +162,7 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
         if (channel == null || RpcType.GRPC != channel.getType()) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
-        GrpcSeataChannel grpcSeataChannel = (GrpcSeataChannel) channel;
-        return super.sendSync(grpcSeataChannel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), NettyServerConfig.getRpcRequestTimeout());
+        return super.sendSync(channel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), NettyServerConfig.getRpcRequestTimeout());
     }
 
     @Override
@@ -168,8 +170,7 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
         if (channel == null || RpcType.GRPC != channel.getType()) {
             throw new RuntimeException("client is not connected");
         }
-        GrpcSeataChannel grpcSeataChannel = (GrpcSeataChannel) channel;
-        return super.sendSync(grpcSeataChannel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), NettyServerConfig.getRpcRequestTimeout());
+        return super.sendSync(channel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), NettyServerConfig.getRpcRequestTimeout());
     }
 
     @Override
@@ -184,6 +185,62 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
     @Override
     public void sendAsyncResponse(RpcMessage rpcMessage, SeataChannel channel, Object msg) {
         //do nothing
+    }
+
+    @Override
+    protected Object doSyncSend(SeataChannel channel, RpcMessage rpcMessage, long timeoutMillis) throws Exception {
+        Object messageBody = rpcMessage.getBody();
+
+        Message protoRequest = ProtoTypeConvertHelper.convertToProto(messageBody);
+        io.seata.core.rpc.grpc.generated.GrpcRemoting.BiStreamMessageType biStreamMessageType = BiStreamMessageTypeHelper.getBiStreamMessageTypeByClass(protoRequest.getClass());
+        if (null == biStreamMessageType) {
+            LOGGER.warn("not supported message type: {}", messageBody.getClass());
+            throw new IllegalArgumentException("not supported message type" + messageBody.getClass());
+        }
+
+        io.seata.core.rpc.grpc.generated.GrpcRemoting.BiStreamMessage biStreamMessage = io.seata.core.rpc.grpc.generated.GrpcRemoting.BiStreamMessage.newBuilder()
+                .setID(rpcMessage.getId())
+                .setMessageType(biStreamMessageType)
+                .setMessage(Any.pack(protoRequest))
+                .build();
+
+        MessageFuture messageFuture = new MessageFuture();
+        messageFuture.setRequestMessage(rpcMessage);
+        messageFuture.setTimeout(timeoutMillis);
+        futures.put(rpcMessage.getId(), messageFuture);
+        try {
+            channel.sendMsg(biStreamMessage);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        Object response = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        if (response instanceof Message) {
+            response = ProtoTypeConvertHelper.convertToModel((Message) response);
+        }
+        return response;
+    }
+
+    @Override
+    protected void doAsyncSend(SeataChannel channel, RpcMessage rpcMessage) {
+        Object messageBody = rpcMessage.getBody();
+
+        Message protoRequest = ProtoTypeConvertHelper.convertToProto(messageBody);
+        //Try bidirectional streaming
+        io.seata.core.rpc.grpc.generated.GrpcRemoting.BiStreamMessageType biStreamMessageType = BiStreamMessageTypeHelper.getBiStreamMessageTypeByClass(protoRequest.getClass());
+        if (null == biStreamMessageType) {
+            LOGGER.warn("not supported message type: {}", messageBody.getClass());
+            throw new IllegalArgumentException("not supported message type" + messageBody.getClass());
+        }
+        io.seata.core.rpc.grpc.generated.GrpcRemoting.BiStreamMessage biStreamMessage = io.seata.core.rpc.grpc.generated.GrpcRemoting.BiStreamMessage.newBuilder()
+                .setID(rpcMessage.getId())
+                .setMessageType(biStreamMessageType)
+                .setMessage(Any.pack(protoRequest))
+                .build();
+        try {
+            channel.sendMsg(biStreamMessage);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private RpcMessage buildRpcMessage(Object msg, byte messageType) {

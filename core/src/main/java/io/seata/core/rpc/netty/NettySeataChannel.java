@@ -43,8 +43,18 @@ public class NettySeataChannel implements SeataChannel {
     }
 
     @Override
+    public void close() {
+
+    }
+
+    @Override
+    public void disconnect() {
+
+    }
+
+    @Override
     public void sendMsg(Object msg) {
-        //do nothing
+
     }
 
     @Override
