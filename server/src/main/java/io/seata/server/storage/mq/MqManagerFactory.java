@@ -16,6 +16,7 @@
 package io.seata.server.storage.mq;
 
 import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 
 import java.util.ServiceLoader;
 
@@ -39,11 +40,16 @@ public class MqManagerFactory {
         return instance;
     }
 
+
     private static MqManager buildMqManager() {
+        String defaultManagerName = "kafka";
+        String managerName = ConfigurationFactory.getInstance().getConfig("store.mq.mode",defaultManagerName).toLowerCase();
         ServiceLoader<MqManager> mqManagers = ServiceLoader.load(MqManager.class);
         for (MqManager mqManager : mqManagers) {
-            return mqManager;
+            String className = mqManager.getClass().getSimpleName();
+            if (className.substring(0, className.indexOf("Manager")).toLowerCase().equals(managerName)) {
+                return mqManager;
+            }
         }
         throw new IllegalArgumentException("don't load mqManager");
-    }
-}
+    }}

@@ -44,18 +44,12 @@ public class KafkaManager implements MqManager {
 
     private final KafkaProducer<byte[], byte[]> sessionProducer;
 
-    private static KafkaManager instance;
-
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
-
-    private static String kafkaServers;
 
     public KafkaManager() {
         Properties properties = new Properties();
-        kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS);
-        if (StringUtils.isBlank(kafkaServers)) {
-            kafkaServers = "localhost:9092";
-        }
+        String defaultKafkaServer = "localhost:9092";
+        String kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS, defaultKafkaServer);
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);

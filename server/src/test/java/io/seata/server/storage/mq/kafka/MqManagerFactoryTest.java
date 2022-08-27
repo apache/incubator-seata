@@ -35,6 +35,6 @@ class MqManagerFactoryTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        KafkaManager.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
+        MqManagerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
     }
 }
