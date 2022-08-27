@@ -20,18 +20,18 @@ import io.seata.config.ConfigurationFactory;
 
 import java.util.ServiceLoader;
 
-public class MqManagerFactory {
+public class MqProducerFactory {
 
-    private static volatile MqManager instance = null;
+    private static volatile MqProducer instance = null;
 
     /**
      * Gets instance.
      *
      * @return the instance
      */
-    public static MqManager getInstance() {
+    public static MqProducer getInstance() {
         if (instance == null) {
-            synchronized (MqManager.class) {
+            synchronized (MqProducer.class) {
                 if (instance == null) {
                     instance = buildMqManager();
                 }
@@ -41,14 +41,14 @@ public class MqManagerFactory {
     }
 
 
-    private static MqManager buildMqManager() {
+    private static MqProducer buildMqManager() {
         String defaultManagerName = "kafka";
         String managerName = ConfigurationFactory.getInstance().getConfig("store.mq.mode",defaultManagerName).toLowerCase();
-        ServiceLoader<MqManager> mqManagers = ServiceLoader.load(MqManager.class);
-        for (MqManager mqManager : mqManagers) {
-            String className = mqManager.getClass().getSimpleName();
+        ServiceLoader<MqProducer> mqManagers = ServiceLoader.load(MqProducer.class);
+        for (MqProducer mqProducer : mqManagers) {
+            String className = mqProducer.getClass().getSimpleName();
             if (className.substring(0, className.indexOf("Manager")).toLowerCase().equals(managerName)) {
-                return mqManager;
+                return mqProducer;
             }
         }
         throw new IllegalArgumentException("don't load mqManager");

@@ -15,7 +15,6 @@
  */
 package io.seata.server.session;
 
-import io.seata.common.ConfigurationKeys;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
@@ -24,8 +23,7 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
-import io.seata.server.storage.mq.MqManagerFactory;
-import io.seata.server.storage.mq.kafka.KafkaManager;
+import io.seata.server.storage.mq.MqProducerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
@@ -33,9 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.STORE_DB_BRANCH_TABLE;
-import static io.seata.common.ConfigurationKeys.STORE_DB_GLOBAL_TABLE;
 import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
-import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 
 /**
  * The type Abstract session manager.
@@ -107,7 +103,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         writeSession(LogOperation.BRANCH_ADD, branchSession);
 
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
-        MqManagerFactory.getInstance().publish(topic, branchSession.encode());
+        MqProducerFactory.getInstance().publish(topic, branchSession.encode());
     }
 
     @Override

@@ -5,21 +5,21 @@ import io.seata.common.XID;
 import io.seata.core.model.BranchType;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.storage.mq.MqManagerFactory;
+import io.seata.server.storage.mq.MqProducerFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 @SpringBootTest
-class MqManagerFactoryTest {
+class MqProducerFactoryTest {
 
     @Test
     void globalSessionPublishTest() {
         // TODO need mock a kafka server
         GlobalSession globalSession = GlobalSession.createGlobalSession("demo-app", "default_tx_group",
                 "tx-1", 3000);
-        MqManagerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, globalSession.encode());
+        MqProducerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, globalSession.encode());
     }
 
     @Test
@@ -35,6 +35,6 @@ class MqManagerFactoryTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        MqManagerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
+        MqProducerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
     }
 }

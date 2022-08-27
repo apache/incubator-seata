@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.ConfigurationKeys;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -37,15 +36,12 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.mq.MqManagerFactory;
-import io.seata.server.storage.mq.kafka.KafkaManager;
+import io.seata.server.storage.mq.MqProducerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.common.ConfigurationKeys.STORE_DB_BRANCH_TABLE;
 import static io.seata.common.ConfigurationKeys.STORE_DB_GLOBAL_TABLE;
-import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
 import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 import static io.seata.core.constants.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
 import static io.seata.server.session.BranchSessionHandler.CONTINUE;
@@ -144,7 +140,7 @@ public class DefaultCore implements Core {
 
         // TODO need add config about enabling this feature
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_GLOBAL_TABLE, DEFAULT_STORE_DB_GLOBAL_TABLE);
-        MqManagerFactory.getInstance().publish(topic, session.encode());
+        MqProducerFactory.getInstance().publish(topic, session.encode());
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);

@@ -16,17 +16,13 @@
 package io.seata.server.storage.mq.kafka;
 
 import io.seata.common.ConfigurationKeys;
-import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.exception.TransactionException;
-import io.seata.server.storage.mq.MqManager;
-import org.apache.kafka.clients.producer.KafkaProducer;
+import io.seata.server.storage.mq.MqProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
-import org.apache.kafka.common.serialization.BytesSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,24 +32,24 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class KafkaManager implements MqManager {
+public class KafkaProducer implements MqProducer {
     /**
      * The constant LOGGER.
      */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(KafkaManager.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(KafkaProducer.class);
 
-    private final KafkaProducer<byte[], byte[]> sessionProducer;
+    private final org.apache.kafka.clients.producer.KafkaProducer<byte[], byte[]> sessionProducer;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
-    public KafkaManager() {
+    public KafkaProducer() {
         Properties properties = new Properties();
         String defaultKafkaServer = "localhost:9092";
         String kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS, defaultKafkaServer);
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-        sessionProducer = new KafkaProducer<>(properties);
+        sessionProducer = new org.apache.kafka.clients.producer.KafkaProducer<>(properties);
     }
 
     public void publish(String topic, byte[] sessionBytes) {
