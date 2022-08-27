@@ -23,7 +23,8 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
-import io.seata.server.storage.mq.session.kafka.KafkaSessionManager;
+import io.seata.server.storage.mq.MqManagerFactory;
+import io.seata.server.storage.mq.kafka.KafkaManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
@@ -98,7 +99,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, branchSession, LogOperation.BRANCH_ADD);
         }
         writeSession(LogOperation.BRANCH_ADD, branchSession);
-        KafkaSessionManager.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
+        MqManagerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
     }
 
     @Override

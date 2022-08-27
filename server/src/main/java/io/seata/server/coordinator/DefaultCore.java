@@ -37,7 +37,8 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.mq.session.kafka.KafkaSessionManager;
+import io.seata.server.storage.mq.MqManagerFactory;
+import io.seata.server.storage.mq.kafka.KafkaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -66,7 +67,7 @@ public class DefaultCore implements Core {
      */
     public DefaultCore(RemotingServer remotingServer) {
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
-            new Class[] {RemotingServer.class}, new Object[] {remotingServer});
+                new Class[]{RemotingServer.class}, new Object[]{remotingServer});
         if (CollectionUtils.isNotEmpty(allCore)) {
             for (AbstractCore core : allCore) {
                 coreMap.put(core.getHandleBranchType(), core);
@@ -102,7 +103,7 @@ public class DefaultCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         return getCore(branchType).branchRegister(branchType, resourceId, clientId, xid,
-            applicationData, lockKeys);
+                applicationData, lockKeys);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class DefaultCore implements Core {
 
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-        throws TransactionException {
+            throws TransactionException {
         return getCore(branchType).lockQuery(branchType, resourceId, xid, lockKeys);
     }
 
@@ -129,16 +130,16 @@ public class DefaultCore implements Core {
 
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-        throws TransactionException {
+            throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name,
-            timeout);
+                timeout);
         MDC.put(RootContext.MDC_KEY_XID, session.getXid());
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
 
         // TODO need add config about enabling this feature
-        KafkaSessionManager.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, session.encode());
+        MqManagerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, session.encode());
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);
@@ -207,7 +208,7 @@ public class DefaultCore implements Core {
                 }
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
-                    if (isXaerNotaTimeout(globalSession,branchStatus)) {
+                    if (isXaerNotaTimeout(globalSession, branchStatus)) {
                         LOGGER.info("Commit branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                         branchStatus = BranchStatus.PhaseTwo_Committed;
                     }
@@ -228,17 +229,17 @@ public class DefaultCore implements Core {
                             }
                             if (globalSession.canBeCommittedAsync()) {
                                 LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
-                                    branchSession.getBranchId(), branchStatus);
+                                        branchSession.getBranchId(), branchStatus);
                                 return CONTINUE;
                             } else {
                                 LOGGER.error(
-                                    "Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.", globalSession.getXid(), branchSession.getBranchId());
+                                        "Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.", globalSession.getXid(), branchSession.getBranchId());
                                 return false;
                             }
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception: {}",
-                        new String[] {branchSession.toString()});
+                            new String[]{branchSession.toString()});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
                         throw new TransactionException(ex);
@@ -289,7 +290,7 @@ public class DefaultCore implements Core {
         if (!shouldRollBack) {
             return globalSession.getStatus();
         }
-        
+
         boolean rollbackSuccess = doGlobalRollback(globalSession, false);
         return rollbackSuccess ? GlobalStatus.Rollbacked : globalSession.getStatus();
     }
@@ -333,8 +334,8 @@ public class DefaultCore implements Core {
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex,
-                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
-                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
+                            "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
+                            new String[]{globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }

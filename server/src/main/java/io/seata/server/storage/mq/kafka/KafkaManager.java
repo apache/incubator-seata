@@ -13,13 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.mq.session.kafka;
+package io.seata.server.storage.mq.kafka;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
+import io.seata.server.storage.mq.MqManager;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -34,21 +35,22 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class KafkaSessionManager {
+//TODO modify name abstract
+public class KafkaManager implements MqManager {
     /**
      * The constant LOGGER.
      */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(KafkaSessionManager.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(KafkaManager.class);
 
     private final KafkaProducer<byte[], byte[]> sessionProducer;
 
-    private static KafkaSessionManager instance;
+    private static KafkaManager instance;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
     private static String kafkaServers;
 
-    private KafkaSessionManager() {
+    private KafkaManager() {
         Properties properties = new Properties();
         kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS);
         if (StringUtils.isBlank(kafkaServers)) {
@@ -60,19 +62,19 @@ public class KafkaSessionManager {
         sessionProducer = new KafkaProducer<>(properties);
     }
 
-    public static KafkaSessionManager getInstance() {
+    public static KafkaManager getInstance() {
         if (instance == null) {
-            instance = new KafkaSessionManager();
+            instance = new KafkaManager();
         }
         return instance;
     }
 
-    public void publish(String topic, byte[] sessionBytes) throws TransactionException {
+    public void publish(String topic, byte[] sessionBytes) {
         Future<RecordMetadata> future = sessionProducer.send(new ProducerRecord<>(topic, sessionBytes));
         try {
             future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new TransactionException(e);
+            e.printStackTrace();
         }
     }
 }
