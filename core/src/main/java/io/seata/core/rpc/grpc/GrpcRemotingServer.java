@@ -30,7 +30,6 @@ import io.seata.core.rpc.grpc.interceptor.ServerChannelInterceptor;
 import io.seata.core.rpc.grpc.service.HealthCheckService;
 import io.seata.core.rpc.grpc.service.ResourceManagerService;
 import io.seata.core.rpc.grpc.service.TransactionManagerService;
-import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.server.BranchRegisterProcessor;
@@ -62,15 +61,15 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    private ThreadPoolExecutor branchResultMessageExecutor = new ThreadPoolExecutor(NettyServerConfig.getMinBranchResultPoolSize(),
-            NettyServerConfig.getMaxBranchResultPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
-            new NamedThreadFactory("BranchResultHandlerThread", NettyServerConfig.getMaxBranchResultPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
+    private final ThreadPoolExecutor branchResultMessageExecutor = new ThreadPoolExecutor(GrpcServerConfig.getMinBranchResultPoolSize(),
+            GrpcServerConfig.getMaxBranchResultPoolSize(), GrpcServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(GrpcServerConfig.getMaxTaskQueueSize()),
+            new NamedThreadFactory("GrpcBranchResultHandlerThread", GrpcServerConfig.getMaxBranchResultPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
     public GrpcRemotingServer(ThreadPoolExecutor messageExecutor) {
         super(messageExecutor);
         this.mutableHandlerRegistry = new MutableHandlerRegistry();
-        this.grpcServerBootstrap = new GrpcServerBootstrap(this.mutableHandlerRegistry);
+        this.grpcServerBootstrap = new GrpcServerBootstrap(this.mutableHandlerRegistry, new GrpcServerConfig());
     }
 
     public void init() {
@@ -162,7 +161,7 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
         if (channel == null || RpcType.GRPC != channel.getType()) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
-        return super.sendSync(channel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), NettyServerConfig.getRpcRequestTimeout());
+        return super.sendSync(channel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), GrpcServerConfig.getRpcRequestTimeout());
     }
 
     @Override
@@ -170,7 +169,7 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
         if (channel == null || RpcType.GRPC != channel.getType()) {
             throw new RuntimeException("client is not connected");
         }
-        return super.sendSync(channel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), NettyServerConfig.getRpcRequestTimeout());
+        return super.sendSync(channel, buildRpcMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC), GrpcServerConfig.getRpcRequestTimeout());
     }
 
     @Override

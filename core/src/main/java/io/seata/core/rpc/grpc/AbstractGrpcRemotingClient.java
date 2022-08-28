@@ -91,10 +91,10 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
 
     private static final Map<Short, GrpcStubFunction> STUB_FUNCTION_MAP = new ConcurrentHashMap<>();
 
-    public AbstractGrpcRemotingClient(ThreadPoolExecutor messageExecutor, RpcChannelPoolKey.TransactionRole transactionRole) {
+    public AbstractGrpcRemotingClient(GrpcClientConfig clientConfig, ThreadPoolExecutor messageExecutor, RpcChannelPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
-        this.clientChannelManager = new GrpcClientChannelManager(new GrpcPoolableFactory(this), getPoolKeyFunction());
+        this.clientChannelManager = new GrpcClientChannelManager(new GrpcPoolableFactory(this), getPoolKeyFunction(), clientConfig);
     }
 
     @Override

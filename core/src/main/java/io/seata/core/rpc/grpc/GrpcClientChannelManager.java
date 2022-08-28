@@ -20,9 +20,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.rpc.SeataChannel;
-import io.seata.core.rpc.netty.NettyClientConfig;
 import io.seata.core.rpc.RpcChannelPoolKey;
+import io.seata.core.rpc.SeataChannel;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -44,9 +43,22 @@ public class GrpcClientChannelManager {
     private final ConcurrentMap<String, RpcChannelPoolKey> poolKeyMap = new ConcurrentHashMap<>();
     private final GenericKeyedObjectPool<RpcChannelPoolKey, SeataChannel> grpcClientKeyPool;
 
-    public GrpcClientChannelManager(KeyedPoolableObjectFactory<RpcChannelPoolKey, SeataChannel> poolableObjectFactory, Function<String, RpcChannelPoolKey> poolKeyFunction) {
+    public GrpcClientChannelManager(KeyedPoolableObjectFactory<RpcChannelPoolKey, SeataChannel> poolableObjectFactory,
+                                    Function<String, RpcChannelPoolKey> poolKeyFunction, final GrpcClientConfig clientConfig) {
         grpcClientKeyPool = new GenericKeyedObjectPool<>(poolableObjectFactory);
+        grpcClientKeyPool.setConfig(getGrpcPoolConfig(clientConfig));
         this.poolKeyFunction = poolKeyFunction;
+    }
+
+    private GenericKeyedObjectPool.Config getGrpcPoolConfig(final GrpcClientConfig clientConfig) {
+        GenericKeyedObjectPool.Config poolConfig = new GenericKeyedObjectPool.Config();
+        poolConfig.maxActive = clientConfig.getMaxPoolActive();
+        poolConfig.minIdle = clientConfig.getMinPoolIdle();
+        poolConfig.maxWait = clientConfig.getMaxAcquireConnMills();
+        poolConfig.testOnBorrow = clientConfig.isPoolTestBorrow();
+        poolConfig.testOnReturn = clientConfig.isPoolTestReturn();
+        poolConfig.lifo = clientConfig.isPoolLifo();
+        return poolConfig;
     }
 
     void registerChannel(final String serverAddress, final SeataChannel channel) {
@@ -106,9 +118,9 @@ public class GrpcClientChannelManager {
             return rmChannel;
         } else {
             int i = 0;
-            for (; i < NettyClientConfig.getMaxCheckAliveRetry(); i++) {
+            for (; i < GrpcClientConfig.getMaxCheckAliveRetry(); i++) {
                 try {
-                    Thread.sleep(NettyClientConfig.getCheckAliveInterval());
+                    Thread.sleep(GrpcClientConfig.getCheckAliveInterval());
                 } catch (InterruptedException exx) {
                     LOGGER.error(exx.getMessage());
                 }
@@ -117,7 +129,7 @@ public class GrpcClientChannelManager {
                     return rmChannel;
                 }
             }
-            if (i == NettyClientConfig.getMaxCheckAliveRetry()) {
+            if (i == GrpcClientConfig.getMaxCheckAliveRetry()) {
                 LOGGER.warn("channel {} is not active after long wait, close it.", rmChannel);
                 releaseChannel(rmChannel, serverAddress);
                 return null;
@@ -200,7 +212,7 @@ public class GrpcClientChannelManager {
      * @param transactionServiceGroup transaction service group
      */
     void reconnect(String transactionServiceGroup) {
-        List<String> availList = null;
+        List<String> availList;
         try {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception e) {

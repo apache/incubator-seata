@@ -41,7 +41,6 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 
 /**
@@ -130,8 +129,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             LOGGER.error("server service port set error:{}", exx.getMessage());
         }
         if (port <= 0) {
-            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT);
-            port = SERVICE_DEFAULT_PORT;
+            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, nettyServerConfig.getDefaultListenPort());
+            port = nettyServerConfig.getDefaultListenPort();
         }
         listenPort = port;
         return port;

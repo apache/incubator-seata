@@ -11,14 +11,10 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerTransportFilter;
 import io.grpc.util.MutableHandlerRegistry;
 import io.seata.common.util.CollectionUtils;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.grpc.filter.ServerBaseTransportFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
-import static io.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
 
 /**
  * @author goodboycoder
@@ -31,33 +27,23 @@ public class GrpcServerBootstrap implements RemotingBootstrap {
     private int listenPort;
 
     private MutableHandlerRegistry mutableHandlerRegistry;
+    private final GrpcServerConfig grpcServerConfig;
 
     private final List<ServerTransportFilter> transportFilters = new CopyOnWriteArrayList<>();
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    public GrpcServerBootstrap(MutableHandlerRegistry mutableHandlerRegistry) {
+    public GrpcServerBootstrap(MutableHandlerRegistry mutableHandlerRegistry, GrpcServerConfig grpcServerConfig) {
         this.mutableHandlerRegistry = mutableHandlerRegistry;
+        this.grpcServerConfig = grpcServerConfig;
         addServerTransportFilter(new ServerBaseTransportFilter());
     }
 
     public int getListenPort() {
-        if (listenPort > 0) {
-            return listenPort;
+        if (listenPort <= 0) {
+            listenPort = grpcServerConfig.getListenPort();
         }
-        String strPort = ConfigurationFactory.getInstance().getConfig(SERVER_SERVICE_PORT_CAMEL);
-        int port = 0;
-        try {
-            port = Integer.parseInt(strPort);
-        } catch (NumberFormatException exx) {
-            LOGGER.error("grpc server service port set error:{}", exx.getMessage());
-        }
-        if (port <= 0) {
-            LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT + 2000);
-            port = SERVICE_DEFAULT_PORT + 2000;
-        }
-        listenPort = port;
-        return port;
+        return listenPort;
     }
 
     public void addServerTransportFilter(ServerTransportFilter filter) {

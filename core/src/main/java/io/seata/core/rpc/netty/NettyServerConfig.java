@@ -33,10 +33,15 @@ import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
  *
  * @author slievrly
  */
-public class NettyServerConfig extends NettyBaseConfig {
+public class NettyServerConfig extends BaseNettyRpcConfig {
 
+    @Deprecated
     private int serverSelectorThreads = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverSelectorThreads", String.valueOf(WORKER_THREAD_SIZE)));
+
+    /**
+     * Netty Server optional config
+     */
     private int serverSocketSendBufSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize", String.valueOf(153600)));
     private int serverSocketResvBufSize = Integer.parseInt(System.getProperty(
@@ -49,11 +54,25 @@ public class NettyServerConfig extends NettyBaseConfig {
             ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark", String.valueOf(67108864)));
     private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
+
+    /**
+     * Netty Server listen port
+     */
     private static final int DEFAULT_LISTEN_PORT = 8091;
+
+    /**
+     * Server Rpc request timeout
+     */
     private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
+
+    @Deprecated
     private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
+
+    /**
+     * Configuration of the worker thread pool on the Seata server
+     */
     private static int minServerPoolSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
     private static int maxServerPoolSize = Integer.parseInt(System.getProperty(
@@ -62,17 +81,25 @@ public class NettyServerConfig extends NettyBaseConfig {
             ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000"));
     private static int keepAliveTime = Integer.parseInt(System.getProperty(
             ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
+
+    /**
+     * Batch result response thread pool configuration
+     */
     private static int minBranchResultPoolSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE)));
     private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE)));
+
+    /**
+     * Whether to enable the switch of batch response
+     */
     private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
-        DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
+            DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
 
     /**
      * The Server channel clazz.
      */
-    public static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
+    public static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = BaseNettyRpcConfig.SERVER_CHANNEL_CLAZZ;
 
 
     /**
@@ -99,8 +126,8 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the boolean
      */
     public static boolean enableEpoll() {
-        return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(EpollServerSocketChannel.class)
-            && Epoll.isAvailable();
+        return BaseNettyRpcConfig.SERVER_CHANNEL_CLAZZ.equals(EpollServerSocketChannel.class)
+                && Epoll.isAvailable();
 
     }
 
@@ -264,7 +291,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public String getWorkerThreadPrefix() {
         return CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX,
-            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
+                enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
     }
 
     /**
@@ -274,7 +301,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public String getExecutorThreadPrefix() {
         return CONFIG.getConfig(ConfigurationKeys.SERVER_EXECUTOR_THREAD_PREFIX,
-            DEFAULT_EXECUTOR_THREAD_PREFIX);
+                DEFAULT_EXECUTOR_THREAD_PREFIX);
     }
 
     /**
@@ -319,6 +346,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     public static int getMinBranchResultPoolSize() {
         return minBranchResultPoolSize;
     }
+
     /**
      * Get the max size for branch result thread pool
      *

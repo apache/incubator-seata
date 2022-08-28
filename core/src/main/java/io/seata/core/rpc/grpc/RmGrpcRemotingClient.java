@@ -8,19 +8,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationCache;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
-import io.seata.core.rpc.SeataChannel;
-import io.seata.core.rpc.netty.NettyClientConfig;
 import io.seata.core.rpc.RpcChannelPoolKey;
+import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
@@ -45,8 +46,17 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient {
     private String applicationId;
     private String transactionServiceGroup;
 
-    public RmGrpcRemotingClient(ThreadPoolExecutor messageExecutor) {
-        super(messageExecutor, RpcChannelPoolKey.TransactionRole.RMROLE);
+    public RmGrpcRemotingClient(GrpcClientConfig clientConfig, ThreadPoolExecutor messageExecutor) {
+        super(clientConfig, messageExecutor, RpcChannelPoolKey.TransactionRole.RMROLE);
+
+        this.enableClientBatchSendRequest = clientConfig.isEnableRmClientBatchSendRequest();
+        ConfigurationCache.addConfigListener(ConfigurationKeys.GRPC_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST, event -> {
+            String dataId = event.getDataId();
+            String newValue = event.getNewValue();
+            if (ConfigurationKeys.GRPC_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST.equals(dataId) && StringUtils.isNotBlank(newValue)) {
+                enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
+            }
+        });
     }
 
     @Override
@@ -95,13 +105,13 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient {
         if (instance == null) {
             synchronized (RmGrpcRemotingClient.class) {
                 if (instance == null) {
-                    NettyClientConfig nettyClientConfig = new NettyClientConfig();
+                    GrpcClientConfig grpcClientConfig = new GrpcClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
-                            nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
+                            grpcClientConfig.getClientWorkerThreads(), grpcClientConfig.getClientWorkerThreads(),
                             KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                            new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
-                                    nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
-                    instance = new RmGrpcRemotingClient(messageExecutor);
+                            new NamedThreadFactory(grpcClientConfig.getRmDispatchThreadPrefix(),
+                                    grpcClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
+                    instance = new RmGrpcRemotingClient(grpcClientConfig, messageExecutor);
                 }
             }
         }
@@ -160,7 +170,7 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient {
 
     @Override
     protected long getRpcRequestTimeout() {
-        return NettyClientConfig.getRpcRmRequestTimeout();
+        return GrpcClientConfig.getRpcRmRequestTimeout();
     }
 
     @Override

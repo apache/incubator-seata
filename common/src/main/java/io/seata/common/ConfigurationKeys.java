@@ -854,4 +854,81 @@ public interface ConfigurationKeys {
      */
     String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
 
+
+
+    /**
+     * The constant GRPC_SERVER_PREFIX
+     */
+    String GRPC_SERVER_PREFIX = SERVER_PREFIX + "grpc.";
+
+    /**
+     * The constant GRPC_TRANSPORT_PREFIX
+     */
+    String GRPC_TRANSPORT_PREFIX = TRANSPORT_PREFIX + "grpc.";
+
+    /**
+     * The constant GRPC_SERVER_SERVICE_PORT_CAMEL
+     */
+    String GRPC_SERVER_SERVICE_PORT_CAMEL = GRPC_SERVER_PREFIX + "servicePort";
+
+    /**
+     * The constant GRPC_TC_REQUEST_TIMEOUT
+     */
+    String GRPC_TC_REQUEST_TIMEOUT = GRPC_TRANSPORT_PREFIX + "rpcTcRequestTimeout";
+
+    /**
+     * The constant GRPC_MIN_SERVER_POOL_SIZE.
+     */
+    String GRPC_MIN_SERVER_POOL_SIZE = GRPC_TRANSPORT_PREFIX + "minServerPoolSize";
+
+    /**
+     * The constant GRPC_MAX_SERVER_POOL_SIZE.
+     */
+    String GRPC_MAX_SERVER_POOL_SIZE = GRPC_TRANSPORT_PREFIX + "maxServerPoolSize";
+
+    /**
+     * The constant GRPC_MAX_TASK_QUEUE_SIZE.
+     */
+    String GRPC_MAX_TASK_QUEUE_SIZE = GRPC_TRANSPORT_PREFIX + "maxTaskQueueSize";
+
+    /**
+     * The constant GRPC_KEEP_ALIVE_TIME.
+     */
+    String GRPC_KEEP_ALIVE_TIME = GRPC_TRANSPORT_PREFIX + "keepAliveTime";
+
+    /**
+     * The constant GRPC_MIN_BRANCH_RESULT_POOL_SIZE.
+     */
+    String GRPC_MIN_BRANCH_RESULT_POOL_SIZE = GRPC_TRANSPORT_PREFIX + "minBranchResultPoolSize";
+
+    /**
+     * The constant GRPC_MAX_BRANCH_RESULT_POOL_SIZE.
+     */
+    String GRPC_MAX_BRANCH_RESULT_POOL_SIZE = GRPC_TRANSPORT_PREFIX + "maxBranchResultPoolSize";
+
+    /**
+     * The constant GRPC_RM_REQUEST_TIMEOUT
+     */
+    String GRPC_RM_REQUEST_TIMEOUT = GRPC_TRANSPORT_PREFIX + "rpcRmRequestTimeout";
+
+    /**
+     * The constant GRPC_TM_REQUEST_TIMEOUT
+     */
+    String GRPC_TM_REQUEST_TIMEOUT = GRPC_TRANSPORT_PREFIX + "rpcTmRequestTimeout";
+
+    /**
+     * The constant GRPC_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST
+     */
+    String GRPC_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = GRPC_TRANSPORT_PREFIX + "enableTmClientBatchSendRequest";
+
+    /**
+     * The constant GRPC_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST
+     */
+    String GRPC_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = GRPC_TRANSPORT_PREFIX + "enableRmClientBatchSendRequest";
+
+    /**
+     * The constant GRPC_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE
+     */
+    String GRPC_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = GRPC_TRANSPORT_PREFIX + "enableTcServerBatchSendResponse";
+
 }

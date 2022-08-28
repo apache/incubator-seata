@@ -32,7 +32,7 @@ import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
  *
  * @author slievrly
  */
-public class NettyClientConfig extends NettyBaseConfig {
+public class NettyClientConfig extends BaseNettyRpcConfig {
 
     private int connectTimeoutMillis = 10000;
     private int clientSocketSndBufSize = 153600;
