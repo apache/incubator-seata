@@ -50,26 +50,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
-    public long getGlobalTransactionBeginTime() {
-        return globalTransactionBeginTime;
-    }
-
-    public void setGlobalTransactionBeginTime(long globalTransactionBeginTime) {
-        this.globalTransactionBeginTime = globalTransactionBeginTime;
-    }
-
-    private long globalTransactionBeginTime;
-
-    public long getGlobalTransactionEndTime() {
-        return GlobalTransactionEndTime;
-    }
-
-    public void setGlobalTransactionEndTime(long globalTransactionEndTime) {
-        GlobalTransactionEndTime = globalTransactionEndTime;
-    }
-
-    private long GlobalTransactionEndTime;
-
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
@@ -122,7 +102,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException("Global transaction already exists," +
                 " can't begin a new global transaction, currentXid = " + currentXid);
         }
-        this.setGlobalTransactionBeginTime(System.currentTimeMillis());
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
