@@ -34,12 +34,12 @@ import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.metrics.IdConstants;
 import io.seata.metrics.service.MetricsPublisher;
-import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -133,13 +133,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
-            MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(),
+            MetricsPublisher.postBranchEvent(Long.toString(branchId), RootContext.getBranchType(),
                     startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_SUCCESS, BranchStatus.PhaseTwo_Committed.name());
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(),
+            MetricsPublisher.postBranchEvent(Long.toString(branchId), RootContext.getBranchType(),
                     startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_DELETE_FAILED, BranchStatus.PhaseTwo_Committed.name());
             throw (SQLException) e;
         }
@@ -173,13 +173,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
-            MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(),
+            MetricsPublisher.postBranchEvent(null, RootContext.getBranchType(),
                     startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_SUCCESS, BranchStatus.PhaseTwo_Committed.name());
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(),
+            MetricsPublisher.postBranchEvent(null, RootContext.getBranchType(),
                     startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_UNDO_LOG_BATCH_DELETE_FAILED, BranchStatus.PhaseTwo_Committed.name());
             throw (SQLException) e;
         }

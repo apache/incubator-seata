@@ -31,9 +31,9 @@ import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
 import io.seata.metrics.IdConstants;
 import io.seata.metrics.service.MetricsPublisher;
-import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
@@ -152,19 +152,19 @@ public class TCCFenceHandler {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
                 if (tccFenceDO == null) {
-                    MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                    MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                             System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_FAILED, BranchStatus.PhaseTwo_CommitTCCFence.name());
                     throw new TCCFenceException(String.format("TCC fence record not exists, commit fence method failed. xid= %s, branchId= %s", xid, branchId),
                             FrameworkErrorCode.RecordAlreadyExists);
                 }
                 if (TCCFenceConstant.STATUS_COMMITTED == tccFenceDO.getStatus()) {
-                    MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                    MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                             System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_SUCCESS_ON_ALREADY_COMMITTED, BranchStatus.PhaseTwo_CommitTCCFence.name());
                     LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
                     return true;
                 }
                 if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
-                    MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                    MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                             System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_FAILED_ON_ALREADY_ROLLBACK, BranchStatus.PhaseTwo_CommitTCCFence.name());
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
@@ -172,11 +172,11 @@ public class TCCFenceHandler {
                     return false;
                 }
                 boolean res = updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status, args);
-                MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                         System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_SUCCESS, BranchStatus.PhaseTwo_CommitTCCFence.name());
                 return res;
             } catch (Throwable t) {
-                MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                         System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_TCC_FENCE_FAILED, BranchStatus.PhaseTwo_CommitTCCFence.name());
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -207,23 +207,23 @@ public class TCCFenceHandler {
                     boolean result = insertTCCFenceLog(conn, xid, branchId, actionName, TCCFenceConstant.STATUS_SUSPENDED);
                     LOGGER.info("Insert tcc fence record result: {}. xid: {}, branchId: {}", result, xid, branchId);
                     if (!result) {
-                        MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                        MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                                 System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_INSERT, BranchStatus.PhaseTwo_RollbackTCCFence.name());
                         throw new TCCFenceException(String.format("Insert tcc fence record error, rollback fence method failed. xid= %s, branchId= %s", xid, branchId),
                                 FrameworkErrorCode.InsertRecordError);
                     }
-                    MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                    MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                             System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_INSERT, BranchStatus.PhaseTwo_RollbackTCCFence.name());
                     return true;
                 } else {
                     if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
                         LOGGER.info("Branch transaction had already rollbacked before, idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
-                        MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                        MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                                 System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_ALREADY_ROLLBACK, BranchStatus.PhaseTwo_RollbackTCCFence.name());
                         return true;
                     }
                     if (TCCFenceConstant.STATUS_COMMITTED == tccFenceDO.getStatus()) {
-                        MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                        MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                                 System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_ALREADY_COMMITTED, BranchStatus.PhaseTwo_RollbackTCCFence.name());
                         if (LOGGER.isWarnEnabled()) {
                             LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
@@ -233,15 +233,15 @@ public class TCCFenceHandler {
                 }
                 boolean res = updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status, args);
                 if (res) {
-                    MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                    MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                             System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_SUCCESS_ON_UPDATE, BranchStatus.PhaseTwo_RollbackTCCFence.name());
                 } else {
-                    MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                    MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                             System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_UPDATE, BranchStatus.PhaseTwo_RollbackTCCFence.name());
                 }
                 return res;
             } catch (Throwable t) {
-                MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                         System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_ROLLBACK_TCC_FENCE_FAILED_ON_UPDATE, BranchStatus.PhaseTwo_RollbackTCCFence.name());
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -315,12 +315,12 @@ public class TCCFenceHandler {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
             } catch (RuntimeException e) {
-                MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+                MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                         System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_FAILED, BranchStatus.PhaseTwo_DeleteTCCFence.name());
                 status.setRollbackOnly();
                 LOGGER.error("delete fence log failed, xid: {}, branchId: {}", xid, branchId, e);
             }
-            MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(), startTime,
+            MetricsPublisher.postBranchEvent(Long.toString(branchId), BranchType.TCC, startTime,
                     System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_SUCCESS, BranchStatus.PhaseTwo_DeleteTCCFence.name());
             return ret;
         });
@@ -346,10 +346,10 @@ public class TCCFenceHandler {
                 }
                 total += TCC_FENCE_DAO.deleteTCCFenceDO(connection, new ArrayList<>(xidSet));
             }
-            MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime,
+            MetricsPublisher.postBranchEvent(null, BranchType.TCC, startTime,
                     System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_SUCCESS, BranchStatus.PhaseTwo_DeleteTCCFence.name());
         } catch (RuntimeException e) {
-            MetricsPublisher.postBranchEvent(null, DefaultResourceManager.get().getBranchType(), startTime,
+            MetricsPublisher.postBranchEvent(null, BranchType.TCC, startTime,
                     System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_DELETE_TCC_FENCE_BY_DATE_FAILED, BranchStatus.PhaseTwo_DeleteTCCFence.name());
             LOGGER.error("delete fence log failed ", e);
         } finally {

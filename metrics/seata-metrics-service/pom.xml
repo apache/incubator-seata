@@ -34,20 +34,5 @@
             <artifactId>seata-metrics-exporter-prometheus</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-test</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

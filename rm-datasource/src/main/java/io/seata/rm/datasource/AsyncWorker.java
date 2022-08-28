@@ -36,10 +36,10 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchStatus;
 import io.seata.metrics.IdConstants;
 import io.seata.metrics.service.MetricsPublisher;
-import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
@@ -188,13 +188,13 @@ public class AsyncWorker {
                 conn.commit();
             }
             for (Long branchId : branchIds) {
-                MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(),
+                MetricsPublisher.postBranchEvent(Long.toString(branchId), RootContext.getBranchType(),
                         startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_SUCCESS, BranchStatus.PhaseTwo_Committed.name());
             }
         } catch (SQLException e) {
             LOGGER.error("Failed to batch delete undo log", e);
             for (Long branchId : branchIds) {
-                MetricsPublisher.postBranchEvent(Long.toString(branchId), DefaultResourceManager.get().getBranchType(),
+                MetricsPublisher.postBranchEvent(Long.toString(branchId), RootContext.getBranchType(),
                         startTime, System.currentTimeMillis(), IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_COMMIT_FAILED, BranchStatus.PhaseTwo_Committed.name());
             }
             try {

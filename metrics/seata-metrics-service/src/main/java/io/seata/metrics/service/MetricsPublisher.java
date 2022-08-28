@@ -2,7 +2,6 @@ package io.seata.metrics.service;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.context.RootContext;
 import io.seata.core.event.BranchEvent;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
