@@ -16,9 +16,12 @@ public class GrpcClientSeataChannel implements SeataChannel {
 
     private StreamObserver streamObserver;
 
+    private SocketAddress remoteAddress;
 
-    public GrpcClientSeataChannel(ManagedChannel managedChannel) {
+
+    public GrpcClientSeataChannel(ManagedChannel managedChannel, SocketAddress remoteAddress) {
         this.managedChannel = managedChannel;
+        this.remoteAddress = remoteAddress;
     }
 
     public StreamObserver getStreamObserver() {
@@ -46,22 +49,26 @@ public class GrpcClientSeataChannel implements SeataChannel {
 
     @Override
     public SocketAddress remoteAddress() {
-        return null;
+        return remoteAddress;
     }
 
     @Override
     public boolean isActive() {
-        return true;
+        return !managedChannel.isTerminated() && !managedChannel.isShutdown();
     }
 
     @Override
     public void close() {
-
+        if (streamObserver != null) {
+            streamObserver.onCompleted();
+        }
     }
 
     @Override
     public void disconnect() {
-
+        if (null != managedChannel && !managedChannel.isShutdown()) {
+            managedChannel.shutdownNow();
+        }
     }
 
     @Override

@@ -48,7 +48,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         long start = System.currentTimeMillis();
         Object response;
         GrpcClientSeataChannel channelToServer = null;
-        GrpcClientSeataChannel tmpChannel = new GrpcClientSeataChannel(managedChannel);
+        GrpcClientSeataChannel tmpChannel = new GrpcClientSeataChannel(managedChannel, address);
         if (key.getMessage() == null) {
             throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
         }

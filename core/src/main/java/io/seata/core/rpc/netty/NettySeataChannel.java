@@ -44,17 +44,17 @@ public class NettySeataChannel implements SeataChannel {
 
     @Override
     public void close() {
-
+        channel.close();
     }
 
     @Override
     public void disconnect() {
-
+        channel.disconnect();
     }
 
     @Override
     public void sendMsg(Object msg) {
-
+        channel.writeAndFlush(msg);
     }
 
     @Override

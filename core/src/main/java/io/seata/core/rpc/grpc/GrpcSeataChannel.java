@@ -61,11 +61,11 @@ public class GrpcSeataChannel implements SeataChannel {
 
     @Override
     public void close() {
-
+        channel.close();
     }
 
     @Override
     public void disconnect() {
-
+        channel.disconnect();
     }
 }

@@ -1,6 +1,6 @@
 package io.seata.core.rpc.grpc;
 
-import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -10,9 +10,11 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerTransportFilter;
 import io.grpc.util.MutableHandlerRegistry;
+import io.seata.common.XID;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.grpc.filter.ServerBaseTransportFilter;
+import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,7 @@ public class GrpcServerBootstrap implements RemotingBootstrap {
     private ExecutorService messageExecutor;
     private int listenPort;
 
-    private MutableHandlerRegistry mutableHandlerRegistry;
+    private final MutableHandlerRegistry mutableHandlerRegistry;
     private final GrpcServerConfig grpcServerConfig;
 
     private final List<ServerTransportFilter> transportFilters = new CopyOnWriteArrayList<>();
@@ -71,23 +73,29 @@ public class GrpcServerBootstrap implements RemotingBootstrap {
             LOGGER.info("Grpc server started, service listen port: {}", getListenPort());
 
             // RegistryFactory register service
+            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), getListenPort()));
             initialized.set(true);
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Server start failed", e);
+        } catch (Exception e) {
+            throw new RuntimeException("GRPC Server start failed", e);
         }
     }
 
     @Override
     public void shutdown() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Shutting grpc server down, the listen port: {}", getListenPort());
-        }
-        if (initialized.get() && null != this.server) {
-            this.server.shutdown();
-        }
+        try {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Shutting grpc server down, the listen port: {}", getListenPort());
+            }
+            if (initialized.get() && null != this.server) {
+                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+                this.server.shutdown();
+            }
 
-        if (null != this.messageExecutor) {
-            this.messageExecutor.shutdown();
+            if (null != this.messageExecutor) {
+                this.messageExecutor.shutdown();
+            }
+        } catch (Exception e) {
+            LOGGER.error("grpc server shutdown execute error: {}", e.getMessage(), e);
         }
     }
 }
