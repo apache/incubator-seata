@@ -64,7 +64,7 @@ public class MetricsSubscriber {
 
             consumers.put(IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, this::processAfterGlobalCommitted);
             consumers.put(IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, this::processAfterGlobalRollbacked);
-        }else if (MetricsManager.get().getRole().equals(MetricsManager.ROLE_VALUE_CLIENT)) {
+        } else if (MetricsManager.get().getRole().equals(MetricsManager.ROLE_VALUE_CLIENT)) {
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_FAILED, this::processClientGlobalStatusBeginFailed);
             consumers.put(IdConstants.METRICS_EVENT_STATUS_VALUE_GLOBAL_BEGIN_SUCCESS, this::processClientGlobalStatusBeginSuccess);
 
