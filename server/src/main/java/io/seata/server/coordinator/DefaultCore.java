@@ -32,7 +32,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.metrics.event.EventBusManager;
 import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;

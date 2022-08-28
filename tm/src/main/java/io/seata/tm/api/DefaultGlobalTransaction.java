@@ -51,14 +51,14 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private GlobalTransactionRole role;
 
     public long getGlobalTransactionBeginTime() {
-        return GlobalTransactionBeginTime;
+        return globalTransactionBeginTime;
     }
 
     public void setGlobalTransactionBeginTime(long globalTransactionBeginTime) {
-        GlobalTransactionBeginTime = globalTransactionBeginTime;
+        this.globalTransactionBeginTime = globalTransactionBeginTime;
     }
 
-    private long GlobalTransactionBeginTime;
+    private long globalTransactionBeginTime;
 
     public long getGlobalTransactionEndTime() {
         return GlobalTransactionEndTime;

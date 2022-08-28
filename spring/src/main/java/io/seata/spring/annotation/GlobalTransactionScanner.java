@@ -229,7 +229,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
 
         //init metrics exporter
-        MetricsManager.get().setRole(MetricsManager.ROLE_VALUE_CLIENT);
+        MetricsManager.setRole(MetricsManager.ROLE_VALUE_CLIENT);
         MetricsManager.get().init();
         if (LOGGER.isInfoEnabled() && ConfigurationFactory.getInstance().getBoolean(
                 ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED)) {

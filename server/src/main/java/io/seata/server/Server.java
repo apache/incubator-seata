@@ -58,7 +58,7 @@ public class Server {
         ParameterParser parameterParser = new ParameterParser(args);
 
         //initialize the metrics
-        MetricsManager.get().setRole(MetricsManager.ROLE_VALUE_SERVER);
+        MetricsManager.setRole(MetricsManager.ROLE_VALUE_SERVER);
         MetricsManager.get().init();
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
