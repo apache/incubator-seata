@@ -104,13 +104,15 @@ public enum BranchStatus {
     PhaseTwo_RollbackFailed_XAER_NOTA_Retryable(12),
 
     PhaseOne_InsertUndoLog(13),
+
     PhaseOne_InsertTCCFence(14),
+
     PhaseTwo_CommitTCCFence(15),
+
     PhaseTwo_RollbackTCCFence(16),
-    PhaseTwo_DeleteTCCFence(17)
 
+    PhaseTwo_DeleteTCCFence(17);
 
-    ;
     private int code;
 
     BranchStatus(int code) {

@@ -131,9 +131,13 @@ public class RootContext {
         CONTEXT_HOLDER.put(KEY_TIMEOUT,timeout);
     }
 
-    public static String getTxName() {return (String) CONTEXT_HOLDER.get(KEY_TX_NAME);}
+    public static String getTxName() {
+        return (String) CONTEXT_HOLDER.get(KEY_TX_NAME);
+    }
 
-    public static void setTxName(String txName) {CONTEXT_HOLDER.put(KEY_TX_NAME, txName);}
+    public static void setTxName(String txName) {
+        CONTEXT_HOLDER.put(KEY_TX_NAME, txName);
+    }
 
     /**
      * declare local transactions will use global lock check for update/delete/insert/selectForUpdate SQL
