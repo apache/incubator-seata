@@ -19,6 +19,8 @@ public class PolarisNamingEvent {
 
     private String cluster = DEFAULT_CLUSTER;
 
+    private String revision;
+
     private List<PolarisInstance> instances;
 
     public String getServiceName() {
@@ -51,5 +53,13 @@ public class PolarisNamingEvent {
 
     public void setInstances(List<PolarisInstance> instances) {
         this.instances = instances;
+    }
+
+    public String getRevision() {
+        return revision;
+    }
+
+    public void setRevision(String revision) {
+        this.revision = revision;
     }
 }

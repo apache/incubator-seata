@@ -46,6 +46,26 @@ public class PolarisInstance {
 
     private String revision;
 
+    public PolarisInstance() {
+    }
+
+    public PolarisInstance(String namespace, String serviceName, String serviceId, String host, int port,
+        boolean healthy,
+        boolean enableHealthCheck, int healthCheckPeriod, Map<String, String> metadata, String cluster,
+        String revision) {
+        this.namespace = namespace;
+        this.serviceName = serviceName;
+        this.serviceId = serviceId;
+        this.host = host;
+        this.port = port;
+        this.healthy = healthy;
+        this.enableHealthCheck = enableHealthCheck;
+        this.healthCheckPeriod = healthCheckPeriod;
+        this.metadata = metadata;
+        this.cluster = cluster;
+        this.revision = revision;
+    }
+
     public String getNamespace() {
         return namespace;
     }

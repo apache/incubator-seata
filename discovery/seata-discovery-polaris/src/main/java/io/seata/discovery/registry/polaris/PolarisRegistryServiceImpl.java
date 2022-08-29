@@ -28,6 +28,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
 import io.seata.discovery.registry.polaris.client.PolarisInstance;
 import io.seata.discovery.registry.polaris.client.PolarisNamingClient;
@@ -134,6 +135,11 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      */
     private static final String POLARIS_SERVER_READ_TIME = "readTimeout";
 
+    /**
+     * Polaris Service Instance Refresh Period.
+     */
+    private static final long POLARIS_SERVICE_REFRESH_PERIOD = 2000L;
+
 
     /**
      * Gets instance.
@@ -177,6 +183,11 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
     @Override
     public void register(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
+        doRegister(address);
+        RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, POLARIS_SERVICE_REFRESH_PERIOD, this::doRegister);
+    }
+
+    private void doRegister(InetSocketAddress address) {
         client.registerInstance(getNamespaceName(), getApplicationServiceName(), address.getAddress().getHostAddress(), address.getPort(), DEFAULT_CLUSTER);
     }
 
@@ -245,24 +256,25 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
         if (!LISTENER_SERVICE_MAP.containsKey(serviceName)) {
             synchronized (LOCK_OBJ) {
                 if (!LISTENER_SERVICE_MAP.containsKey(serviceName)) {
-                    List<PolarisInstance> firstAllInstances = client.getAllInstances(getNamespaceName(), serviceName, DEFAULT_CLUSTER);
-                    if (null != firstAllInstances) {
-                        List<InetSocketAddress> newAddressList = firstAllInstances.stream()
-                            .filter(PolarisInstance::isHealthy)
-                            .map(eachInstance -> new InetSocketAddress(eachInstance.getHost(), eachInstance.getPort()))
-                            .collect(Collectors.toList());
-                        CLUSTER_ADDRESS_MAP.put(serviceName, newAddressList);
-                    }
+                    List<PolarisInstance> allInstances = client.getAllInstances(getNamespaceName(), serviceName, DEFAULT_CLUSTER);
+                    // map
+                    List<InetSocketAddress> newAddressList = allInstances.stream()
+                        .filter(PolarisInstance::isHealthy)
+                        .map(eachInstance -> new InetSocketAddress(eachInstance.getHost(), eachInstance.getPort()))
+                        .collect(Collectors.toList());
+                    CLUSTER_ADDRESS_MAP.put(serviceName, newAddressList);
+
+                    // Subscribe
                     subscribe(serviceName, event -> {
                         List<PolarisInstance> instances = event.getInstances();
                         if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(serviceName)) {
                             LOGGER.info("receive empty server list, cluster:{}", serviceName);
                         } else {
-                            List<InetSocketAddress> newAddressList = instances.stream()
+                            List<InetSocketAddress> newAddressList2 = instances.stream()
                                 .filter(PolarisInstance::isHealthy)
                                 .map(eachInstance -> new InetSocketAddress(eachInstance.getHost(), eachInstance.getPort()))
                                 .collect(Collectors.toList());
-                            CLUSTER_ADDRESS_MAP.put(serviceName, newAddressList);
+                            CLUSTER_ADDRESS_MAP.put(serviceName, newAddressList2);
                         }
                     });
                 }

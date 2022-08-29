@@ -15,6 +15,8 @@
  */
 package io.seata.discovery.registry.polaris;
 
+import java.util.concurrent.Executor;
+
 /**
  * {@link PolarisListener} Definition .
  *
@@ -28,4 +30,13 @@ public interface PolarisListener {
      * @param event event
      */
     void onEvent(PolarisNamingEvent event);
+
+    /**
+     * Get executor for execute this receive.
+     *
+     * @return Executor
+     */
+    default Executor getExecutor() {
+        return null;
+    }
 }
