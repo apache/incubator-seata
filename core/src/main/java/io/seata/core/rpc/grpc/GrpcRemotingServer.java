@@ -24,6 +24,7 @@ import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.grpc.interceptor.ServerChannelInterceptor;
@@ -70,6 +71,8 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
         super(messageExecutor);
         this.mutableHandlerRegistry = new MutableHandlerRegistry();
         this.grpcServerBootstrap = new GrpcServerBootstrap(this.mutableHandlerRegistry, new GrpcServerConfig());
+
+        SeataChannelServerManager.register(RpcType.GRPC, new GrpcServerChannelManager());
     }
 
     public void init() {
@@ -157,7 +160,7 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
 
     @Override
     public Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException {
-        SeataChannel channel = GrpcServerChannelManager.getChannel(resourceId, clientId);
+        SeataChannel channel = SeataChannelServerManager.getServerManager(RpcType.GRPC).getChannel(resourceId, clientId);
         if (channel == null || RpcType.GRPC != channel.getType()) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }

@@ -31,7 +31,7 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.Requester;
+import io.seata.core.rpc.ServerRequester;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
@@ -173,7 +173,7 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
                                             BranchSession branchSession) throws IOException, TimeoutException {
-        BranchCommitResponse response = (BranchCommitResponse) Requester.getInstance().sendSyncRequest(
+        BranchCommitResponse response = (BranchCommitResponse) ServerRequester.getInstance().sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request);
         return response.getBranchStatus();
     }
@@ -197,7 +197,7 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
                                               BranchSession branchSession) throws IOException, TimeoutException {
-        BranchRollbackResponse response = (BranchRollbackResponse) Requester.getInstance().sendSyncRequest(
+        BranchRollbackResponse response = (BranchRollbackResponse) ServerRequester.getInstance().sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request);
         return response.getBranchStatus();
     }

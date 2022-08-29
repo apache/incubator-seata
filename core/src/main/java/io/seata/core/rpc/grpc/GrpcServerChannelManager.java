@@ -16,17 +16,18 @@ import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.Version;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelUtil;
-import io.seata.core.rpc.RpcChannelPoolKey;
+import io.seata.core.rpc.ServerChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author goodboycoder
  */
-public class GrpcServerChannelManager {
+public class GrpcServerChannelManager implements ServerChannelManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcServerChannelManager.class);
 
     /**
@@ -46,13 +47,7 @@ public class GrpcServerChannelManager {
     private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
             = new ConcurrentHashMap<>();
 
-    /**
-     * Register tm channel.
-     *
-     * @param request the request
-     * @param channel the channel
-     * @throws IncompatibleVersionException the incompatible version exception
-     */
+    @Override
     public void registerTMChannel(RegisterTMRequest request, SeataChannel channel) throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
         RpcContext rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.TMROLE, request.getVersion(),
@@ -69,13 +64,7 @@ public class GrpcServerChannelManager {
         rpcContext.holdInClientChannels(clientIdentifiedMap);
     }
 
-    /**
-     * Register rm channel.
-     *
-     * @param request the resource manager request
-     * @param channel                the channel
-     * @throws IncompatibleVersionException the incompatible  version exception
-     */
+    @Override
     public void registerRMChannel(RegisterRMRequest request, SeataChannel channel)
             throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
@@ -91,7 +80,9 @@ public class GrpcServerChannelManager {
             rpcContext.addResources(dbKeySet);
         }
 
-        if (CollectionUtils.isEmpty(dbKeySet)) { return; }
+        if (CollectionUtils.isEmpty(dbKeySet)) {
+            return;
+        }
         for (String resourceId : dbKeySet) {
             String clientIp;
             ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
@@ -106,13 +97,19 @@ public class GrpcServerChannelManager {
         ConcurrentMap<Integer, RpcContext> sourcePortMap = RM_CHANNELS.get(resourceId).get(applicationId).get(clientIp);
         for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
                 RpcContext>>>> rmChannelEntry : RM_CHANNELS.entrySet()) {
-            if (rmChannelEntry.getKey().equals(resourceId)) { continue; }
+            if (rmChannelEntry.getKey().equals(resourceId)) {
+                continue;
+            }
             ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
                     RpcContext>>> applicationIdMap = rmChannelEntry.getValue();
-            if (!applicationIdMap.containsKey(applicationId)) { continue; }
+            if (!applicationIdMap.containsKey(applicationId)) {
+                continue;
+            }
             ConcurrentMap<String, ConcurrentMap<Integer,
                     RpcContext>> clientIpMap = applicationIdMap.get(applicationId);
-            if (!clientIpMap.containsKey(clientIp)) { continue; }
+            if (!clientIpMap.containsKey(clientIp)) {
+                continue;
+            }
             ConcurrentMap<Integer, RpcContext> portMap = clientIpMap.get(clientIp);
             for (ConcurrentMap.Entry<Integer, RpcContext> portMapEntry : portMap.entrySet()) {
                 Integer port = portMapEntry.getKey();
@@ -125,14 +122,8 @@ public class GrpcServerChannelManager {
         }
     }
 
-    /**
-     * Gets get channel.
-     *
-     * @param resourceId Resource ID
-     * @param clientId   Client ID - ApplicationId:IP:Port
-     * @return Corresponding channel, NULL if not found.
-     */
-    public static SeataChannel getChannel(String resourceId, String clientId) {
+    @Override
+    public SeataChannel getChannel(String resourceId, String clientId) {
         SeataChannel resultChannel = null;
 
         String[] clientIdInfo = readClientId(clientId);
@@ -148,7 +139,7 @@ public class GrpcServerChannelManager {
         ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
                 RpcContext>>> applicationIdMap = RM_CHANNELS.get(resourceId);
 
-        if (targetApplicationId == null || applicationIdMap == null ||  applicationIdMap.isEmpty()) {
+        if (targetApplicationId == null || applicationIdMap == null || applicationIdMap.isEmpty()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("No channel is available for resource[{}]", resourceId);
             }
@@ -207,7 +198,9 @@ public class GrpcServerChannelManager {
             if (resultChannel == null) {
                 for (ConcurrentMap.Entry<String, ConcurrentMap<Integer, RpcContext>> ipMapEntry : ipMap
                         .entrySet()) {
-                    if (ipMapEntry.getKey().equals(targetIP)) { continue; }
+                    if (ipMapEntry.getKey().equals(targetIP)) {
+                        continue;
+                    }
 
                     ConcurrentMap<Integer, RpcContext> portMapOnOtherIP = ipMapEntry.getValue();
                     if (portMapOnOtherIP == null || portMapOnOtherIP.isEmpty()) {
@@ -232,7 +225,9 @@ public class GrpcServerChannelManager {
                             }
                         }
                     }
-                    if (resultChannel != null) { break; }
+                    if (resultChannel != null) {
+                        break;
+                    }
                 }
             }
         }
@@ -289,20 +284,20 @@ public class GrpcServerChannelManager {
                         }
                     }
                 }
-                if (chosenChannel != null) { break; }
+                if (chosenChannel != null) {
+                    break;
+                }
             }
-            if (chosenChannel != null) { break; }
+            if (chosenChannel != null) {
+                break;
+            }
         }
         return chosenChannel;
 
     }
 
-    /**
-     * get rm channels
-     *
-     * @return Map<String, SeataChannel>
-     */
-    public static Map<String, SeataChannel> getRmChannels() {
+    @Override
+    public Map<String, SeataChannel> getRmChannels() {
         if (RM_CHANNELS.isEmpty()) {
             return null;
         }
@@ -317,8 +312,22 @@ public class GrpcServerChannelManager {
         return channels;
     }
 
-    public void unRegister(String connectionId) {
+    @Override
+    public boolean isRegistered(SeataChannel channel) {
+        return IDENTIFIED_CHANNELS.containsKey(channel);
+    }
 
+    @Override
+    public RpcContext getContextFromIdentified(SeataChannel channel) {
+        return IDENTIFIED_CHANNELS.get(channel);
+    }
+
+    @Override
+    public void releaseRpcContext(SeataChannel channel) {
+        RpcContext rpcContext = getContextFromIdentified(channel);
+        if (rpcContext != null) {
+            rpcContext.release();
+        }
     }
 
     private static String[] readClientId(String clientId) {

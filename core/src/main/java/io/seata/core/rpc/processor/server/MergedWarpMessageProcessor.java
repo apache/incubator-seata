@@ -31,7 +31,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.netty.channel.Channel;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -55,7 +54,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.Requester;
+import io.seata.core.rpc.ServerRequester;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelServerManager;
@@ -243,7 +242,7 @@ public class MergedWarpMessageProcessor extends BaseServerOnRequestProcessor<Mer
                         batchResultMessage.getMsgIds().add(item.getMsgId());
                     }
                     batchResultMessageMap.forEach((clientRequestRpcInfo, batchResultMessage) ->
-                        Requester.getInstance().sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo),
+                        ServerRequester.getInstance().sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo),
                                 channel, batchResultMessage));
                 });
                 isResponding = false;

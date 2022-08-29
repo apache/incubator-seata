@@ -37,6 +37,7 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
+import io.seata.core.rpc.grpc.GrpcServerChannelManager;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettySeataChannel;
 import org.apache.commons.lang.StringUtils;
@@ -73,7 +74,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     public void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx) {
         Object message = request.getBody();
         NettySeataChannel channel = new NettySeataChannel(ctx.channel());
-        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(channel);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
                 NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
@@ -116,7 +117,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         String errorInfo = StringUtils.EMPTY;
         try {
             if (checkAuthHandler == null || checkAuthHandler.regResourceManagerCheckAuth(message)) {
-                ChannelManager.registerRMChannel(message, channel);
+                SeataChannelServerManager.registerRMChannel(message, channel);
                 Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
@@ -149,7 +150,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         String errorInfo = StringUtils.EMPTY;
         try {
             if (checkAuthHandler == null || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
-                ChannelManager.registerTMChannel(message, channel);
+                SeataChannelServerManager.registerTMChannel(message, channel);
                 Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {

@@ -33,7 +33,9 @@ import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
+import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
@@ -61,11 +63,13 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         super(messageExecutor);
         serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
         serverBootstrap.setChannelHandlers(new ServerHandler());
+
+        SeataChannelServerManager.register(RpcType.NETTY, new ChannelManager());
     }
 
     @Override
     public Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException {
-        SeataChannel channel = ChannelManager.getChannel(resourceId, clientId);
+        SeataChannel channel = SeataChannelServerManager.getServerManager(RpcType.NETTY).getChannel(resourceId, clientId);
         if (channel == null) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
@@ -93,14 +97,16 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
     @Override
     public void sendAsyncResponse(RpcMessage rpcMessage, SeataChannel channel, Object msg) {
+        ChannelManager serverManager = (ChannelManager) SeataChannelServerManager.getServerManager(RpcType.NETTY);
+
         SeataChannel clientChannel = channel;
         if (!(msg instanceof HeartbeatMessage)) {
-            clientChannel = ChannelManager.getSameClientChannel(channel);
+            clientChannel = serverManager.getSameClientChannel(channel);
         }
         if (clientChannel != null) {
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
-                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
-                : ProtocolConstants.MSGTYPE_RESPONSE);
+                    ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
+                    : ProtocolConstants.MSGTYPE_RESPONSE);
             super.sendAsync((Channel) clientChannel.originChannel(), rpcMsg);
         } else {
             throw new RuntimeException("channel is error.");
@@ -131,7 +137,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     /**
      * Debug log.
      *
-     * @param format the info
+     * @param format    the info
      * @param arguments the arguments
      */
     protected void debugLog(String format, Object... arguments) {
@@ -202,7 +208,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
         private void handleDisconnect(ChannelHandlerContext ctx) {
             final String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-            RpcContext rpcContext = ChannelManager.getContextFromIdentified(new NettySeataChannel(ctx.channel()));
+            RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(new NettySeataChannel(ctx.channel()));
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(ipAndPort + " to server channel inactive.");
             }
@@ -229,13 +235,13 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             NettySeataChannel channel = new NettySeataChannel(ctx.channel());
             try {
-                if (cause instanceof DecoderException && null == ChannelManager.getContextFromIdentified(channel)) {
+                if (cause instanceof DecoderException && null == SeataChannelServerManager.getContextFromIdentified(channel)) {
                     return;
                 }
                 LOGGER.error("exceptionCaught:{}, channel:{}", cause.getMessage(), ctx.channel());
                 super.exceptionCaught(ctx, cause);
             } finally {
-                ChannelManager.releaseRpcContext(channel);
+                SeataChannelServerManager.releaseRpcContext(channel);
             }
         }
 

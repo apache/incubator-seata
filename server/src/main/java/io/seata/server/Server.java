@@ -25,7 +25,9 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.Requester;
+import io.seata.core.rpc.RpcType;
+import io.seata.core.rpc.ServerRequester;
+import io.seata.core.rpc.grpc.GrpcRemotingServer;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -68,13 +70,14 @@ public class Server {
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
                 new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
+        // init Netty remoting server
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        ServerRequester.getInstance().addRemotingServer(RpcType.NETTY, nettyRemotingServer);
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getSessionStoreMode());
         LockerManagerFactory.init(parameterParser.getLockStoreMode());
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
-        Requester.getInstance().setRemotingServer(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
 
@@ -93,5 +96,11 @@ public class Server {
             }
         }
         nettyRemotingServer.init();
+
+        // init grpc remoting server
+        GrpcRemotingServer grpcRemotingServer = new GrpcRemotingServer(workingThreads);
+        grpcRemotingServer.setHandler(coordinator);
+        grpcRemotingServer.init();
+        ServerRequester.getInstance().addRemotingServer(RpcType.GRPC, grpcRemotingServer);
     }
 }

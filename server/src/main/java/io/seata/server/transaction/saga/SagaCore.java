@@ -29,7 +29,7 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.Requester;
+import io.seata.core.rpc.ServerRequester;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.server.coordinator.AbstractCore;
@@ -74,7 +74,7 @@ public class SagaCore extends AbstractCore {
                     + ", cannot find channel by resourceId[" + sagaResourceId + "]");
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
-        BranchCommitResponse response = (BranchCommitResponse) Requester.getInstance().sendSyncRequest(sagaChannel, request);
+        BranchCommitResponse response = (BranchCommitResponse) ServerRequester.getInstance().sendSyncRequest(sagaChannel, request);
         return response.getBranchStatus();
     }
 
@@ -93,7 +93,7 @@ public class SagaCore extends AbstractCore {
                     + ", cannot find channel by resourceId[" + sagaResourceId + "]");
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
-        BranchRollbackResponse response = (BranchRollbackResponse) Requester.getInstance().sendSyncRequest(sagaChannel, request);
+        BranchRollbackResponse response = (BranchRollbackResponse) ServerRequester.getInstance().sendSyncRequest(sagaChannel, request);
         return response.getBranchStatus();
     }
 

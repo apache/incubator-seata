@@ -57,12 +57,11 @@ import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.Requester;
+import io.seata.core.rpc.ServerRequester;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.metrics.MetricsPublisher;
@@ -473,7 +472,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             deleteRequest.setResourceId(resourceId);
             deleteRequest.setSaveDays(saveDays > 0 ? saveDays : UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
             try {
-                Requester.getInstance().sendAsyncRequest(channelEntry.getValue(), deleteRequest);
+                ServerRequester.getInstance().sendAsyncRequest(channelEntry.getValue(), deleteRequest);
             } catch (Exception e) {
                 LOGGER.error("Failed to async delete undo log resourceId = {}, exception: {}", resourceId, e.getMessage());
             }
