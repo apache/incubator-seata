@@ -28,7 +28,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
-import io.seata.metrics.service.MetricsPublisher;
 
 /**
  * default resource manager, adapt all resource managers
