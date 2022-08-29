@@ -122,7 +122,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 byte b2 = frame.readByte();
                 frame.resetReaderIndex();
                 if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
-                        || ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
+                        && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
                     // seata message
                     if(b2 == ProtocolConstants.VERSION) {
                         try {
