@@ -737,9 +737,9 @@ public class MetricsSubscriber {
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
         if (registry != null) {
-            if (consumers.containsKey(event.getMetricEvent())){
+            if (consumers.containsKey(event.getMetricEvent())) {
                 consumers.get(event.getMetricEvent()).accept(event);
-            }else if (consumers.containsKey(event.getStatus())) {
+            } else if (consumers.containsKey(event.getStatus())) {
                 consumers.get(event.getStatus()).accept(event);
             }
         }
