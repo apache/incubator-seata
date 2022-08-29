@@ -3,6 +3,7 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature：
+- [[#4878](https://github.com/seata/seata/pull/4878)] 支持seata服务端与客户端的metrics可观测
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile 支持 arm64
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心

@@ -3,6 +3,7 @@ Add changes here for all PR submitted to the develop branch.
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
 ### feature:
+- [[#4878](https://github.com/seata/seata/pull/4878)] support for observing metrics collected on seata server side and client side
 - [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile support arm64
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
