@@ -112,7 +112,6 @@ public class DefaultResourceManager implements ResourceManager {
     @Override
     public void registerResource(Resource resource) {
         getResourceManager(resource.getBranchType()).registerResource(resource);
-
     }
 
     @Override
@@ -122,7 +121,7 @@ public class DefaultResourceManager implements ResourceManager {
 
     @Override
     public Map<String, Resource> getManagedResources() {
-        Map<String, Resource> allResource = new HashMap<>();
+        Map<String, Resource> allResource = new HashMap<>(0);
         for (ResourceManager rm : resourceManagers.values()) {
             Map<String, Resource> tempResources = rm.getManagedResources();
             if (tempResources != null) {

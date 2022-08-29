@@ -75,6 +75,7 @@ public class GlobalTransactionEvent implements Event {
      * Transaction Status
      */
     private final String status;
+
     private String metricEvent;
 
     private final boolean retryGlobal;
