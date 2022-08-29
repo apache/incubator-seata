@@ -137,5 +137,10 @@
             <artifactId>commons-logging</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-metrics-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

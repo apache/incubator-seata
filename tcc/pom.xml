@@ -52,5 +52,10 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-metrics-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

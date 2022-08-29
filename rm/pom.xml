@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-metrics-all</artifactId>
+            <artifactId>seata-metrics-service</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
