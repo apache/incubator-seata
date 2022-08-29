@@ -130,7 +130,7 @@ public class DataSourceManager extends AbstractResourceManager {
                 "branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. reason:[{}]",
                 new Object[]{branchType, xid, branchId, resourceId, applicationData, te.getMessage()});
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
-                 branchStatus = BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
+                branchStatus = BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             } else {
                 branchStatus = BranchStatus.PhaseTwo_RollbackFailed_Retryable;
             }
