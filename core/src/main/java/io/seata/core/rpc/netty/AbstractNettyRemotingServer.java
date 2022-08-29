@@ -36,6 +36,7 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelServerManager;
+import io.seata.core.rpc.ServerRequester;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
@@ -64,6 +65,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
         serverBootstrap.setChannelHandlers(new ServerHandler());
 
+        ServerRequester.getInstance().addRemotingServer(RpcType.NETTY, this);
         SeataChannelServerManager.register(RpcType.NETTY, new ChannelManager());
     }
 

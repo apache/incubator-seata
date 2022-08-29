@@ -40,8 +40,6 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.RpcType;
-import io.seata.core.rpc.ServerRequester;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
@@ -102,8 +100,6 @@ public class DefaultCoordinatorTest {
         defaultCoordinator =DefaultCoordinator.getInstance(remotingServer);
         defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
-
-        ServerRequester.getInstance().addRemotingServer(RpcType.NETTY, remotingServer);
     }
 
     @BeforeEach

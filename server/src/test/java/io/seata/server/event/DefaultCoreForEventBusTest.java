@@ -32,8 +32,6 @@ import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.RpcType;
-import io.seata.core.rpc.ServerRequester;
 import io.seata.core.store.StoreMode;
 import io.seata.metrics.registry.Registry;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -109,7 +107,6 @@ public class DefaultCoreForEventBusTest {
         }
         RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(remotingServer);
-        ServerRequester.getInstance().addRemotingServer(RpcType.NETTY, remotingServer);
         coordinator.init();
         GlobalTransactionEventSubscriber subscriber = null;
         try {

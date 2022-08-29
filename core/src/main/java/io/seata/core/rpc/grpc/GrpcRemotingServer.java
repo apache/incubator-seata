@@ -25,6 +25,7 @@ import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelServerManager;
+import io.seata.core.rpc.ServerRequester;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.grpc.interceptor.ServerChannelInterceptor;
@@ -72,6 +73,7 @@ public class GrpcRemotingServer extends AbstractGrpcRemoting implements Remoting
         this.mutableHandlerRegistry = new MutableHandlerRegistry();
         this.grpcServerBootstrap = new GrpcServerBootstrap(this.mutableHandlerRegistry, new GrpcServerConfig());
 
+        ServerRequester.getInstance().addRemotingServer(RpcType.GRPC, this);
         SeataChannelServerManager.register(RpcType.GRPC, new GrpcServerChannelManager());
     }
 
