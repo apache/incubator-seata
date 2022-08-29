@@ -195,4 +195,8 @@ public interface DefaultValues {
      */
     int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
 
+    /**
+     * the constant DEFAULT_CLIENT_RPC_TYPE
+     */
+    String DEFAULT_CLIENT_RPC_TYPE = "netty";
 }

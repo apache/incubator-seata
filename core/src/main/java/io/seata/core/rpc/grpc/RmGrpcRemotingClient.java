@@ -20,6 +20,7 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
+import io.seata.core.rpc.RmRemotingClient;
 import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
@@ -35,7 +36,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 /**
  * @author goodboycoder
  */
-public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient {
+public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient implements RmRemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmGrpcRemotingClient.class);
     private ResourceManager resourceManager;
@@ -228,6 +229,7 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient {
      * @param resourceGroupId the resource group id
      * @param resourceId      the db key
      */
+    @Override
     public void registerResource(String resourceGroupId, String resourceId) {
 
         // Resource registration cannot be performed until the RM client is initialized

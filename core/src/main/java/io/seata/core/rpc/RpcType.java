@@ -18,4 +18,19 @@ public enum RpcType {
     RpcType(String name) {
         this.name = name;
     }
+
+    /**
+     * Gets rpc type by name.
+     *
+     * @param name the name
+     * @return the type by name
+     */
+    public static RpcType getTypeByName(String name) {
+        for (RpcType rpcType : values()) {
+            if (rpcType.name().equalsIgnoreCase(name)) {
+                return rpcType;
+            }
+        }
+        throw new IllegalArgumentException("unknown rpc type:" + name);
+    }
 }

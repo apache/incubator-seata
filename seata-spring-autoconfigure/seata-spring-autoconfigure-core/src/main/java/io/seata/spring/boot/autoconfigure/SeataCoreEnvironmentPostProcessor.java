@@ -16,6 +16,8 @@
 package io.seata.spring.boot.autoconfigure;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import io.seata.spring.boot.autoconfigure.properties.GrpcProperties;
 import io.seata.spring.boot.autoconfigure.properties.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
@@ -50,6 +52,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.GRPC_TRANSPORT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSUL_PREFIX;
@@ -110,6 +113,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
             PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
             PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
+            PROPERTY_BEAN_MAP.put(GRPC_TRANSPORT_PREFIX, GrpcProperties.class);
         }
     }
 

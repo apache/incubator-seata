@@ -857,6 +857,15 @@ public interface ConfigurationKeys {
 
 
     /**
+     * The constant CLIENT_RPC_PREFIX
+     */
+    String CLIENT_RPC_PREFIX = CLIENT_PREFIX + "rpc.";
+    /**
+     * The constant CLIENT_RPC_TYPE
+     */
+    String CLIENT_RPC_TYPE = CLIENT_RPC_PREFIX + "type";
+
+    /**
      * The constant GRPC_SERVER_PREFIX
      */
     String GRPC_SERVER_PREFIX = SERVER_PREFIX + "grpc.";
@@ -870,11 +879,6 @@ public interface ConfigurationKeys {
      * The constant GRPC_SERVER_SERVICE_PORT_CAMEL
      */
     String GRPC_SERVER_SERVICE_PORT_CAMEL = GRPC_SERVER_PREFIX + "servicePort";
-
-    /**
-     * The constant GRPC_TC_REQUEST_TIMEOUT
-     */
-    String GRPC_TC_REQUEST_TIMEOUT = GRPC_TRANSPORT_PREFIX + "rpcTcRequestTimeout";
 
     /**
      * The constant GRPC_MIN_SERVER_POOL_SIZE.
@@ -905,6 +909,11 @@ public interface ConfigurationKeys {
      * The constant GRPC_MAX_BRANCH_RESULT_POOL_SIZE.
      */
     String GRPC_MAX_BRANCH_RESULT_POOL_SIZE = GRPC_TRANSPORT_PREFIX + "maxBranchResultPoolSize";
+
+    /**
+     * The constant GRPC_TC_REQUEST_TIMEOUT
+     */
+    String GRPC_TC_REQUEST_TIMEOUT = GRPC_TRANSPORT_PREFIX + "rpcTcRequestTimeout";
 
     /**
      * The constant GRPC_RM_REQUEST_TIMEOUT

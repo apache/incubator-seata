@@ -64,7 +64,7 @@ public class GrpcServerConfig extends BaseRpcConfig {
         try {
             port = Integer.parseInt(strPort);
         } catch (NumberFormatException exx) {
-            LOGGER.error("grpc server service port set error:{}", exx.getMessage());
+            LOGGER.error("grpc server service port set error:{}", exx.toString());
         }
         if (0 == port) {
             LOGGER.error("listen port: {} is invalid, will use default port:{}", port, getDefaultListenPort());

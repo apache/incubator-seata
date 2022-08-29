@@ -17,12 +17,18 @@ package io.seata.saga.tm;
 
 import java.util.List;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.grpc.RmGrpcRemotingClient;
+import io.seata.core.rpc.grpc.TmGrpcRemotingClient;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.RMClient;
@@ -246,8 +252,22 @@ public class DefaultSagaTransactionalTemplate
             ((ConfigurableApplicationContext)applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
-        ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+
+        String strRpcType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.CLIENT_RPC_TYPE, DefaultValues.DEFAULT_CLIENT_RPC_TYPE);
+        RpcType rpcType = RpcType.getTypeByName(strRpcType);
+        switch (rpcType) {
+            case NETTY:
+                ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+                ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+                break;
+            case GRPC:
+                ShutdownHook.getInstance().addDisposable(TmGrpcRemotingClient.getInstance(applicationId, txServiceGroup));
+                ShutdownHook.getInstance().addDisposable(RmGrpcRemotingClient.getInstance(applicationId, txServiceGroup));
+                break;
+            default:
+                LOGGER.warn("no match disposable ");
+        }
+
     }
 
     @Override

@@ -69,7 +69,6 @@ public class GrpcServerBootstrap implements RemotingBootstrap {
         this.server = serverBuilder.build();
         try {
             this.server.start();
-            this.server.awaitTermination();
             LOGGER.info("Grpc server started, service listen port: {}", getListenPort());
 
             // RegistryFactory register service

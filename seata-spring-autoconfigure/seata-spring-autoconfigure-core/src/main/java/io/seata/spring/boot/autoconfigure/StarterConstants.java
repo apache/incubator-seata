@@ -45,6 +45,10 @@ public interface StarterConstants {
     String SAGA_STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
     String SAGA_ASYNC_THREAD_POOL_PREFIX = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
 
+    String CLIENT_RPC_PREFIX = CLIENT_PREFIX + ".rpc";
+    String GRPC_TRANSPORT_PREFIX = TRANSPORT_PREFIX + ".grpc";
+
+
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_PREFERED_NETWORKS = ConfigurationKeys.FILE_ROOT_REGISTRY + ".preferredNetworks";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -82,6 +86,8 @@ public interface StarterConstants {
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
 
     String SESSION_PREFIX = SERVER_PREFIX + ".session";
+
+    String SERVER_GRPC_PREFIX = SERVER_PREFIX + ".grpc";
 
     String REGEX_SPLIT_CHAR = ";";
 
