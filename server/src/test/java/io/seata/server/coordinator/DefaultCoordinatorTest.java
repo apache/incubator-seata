@@ -16,6 +16,7 @@
 package io.seata.server.coordinator;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +41,9 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.ServerRequester;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.metrics.MetricsManager;
@@ -59,6 +62,8 @@ import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 /**
@@ -247,6 +252,24 @@ public class DefaultCoordinatorTest {
 
 
     public static class MockServerMessageSender implements RemotingServer {
+
+        public MockServerMessageSender() {
+            ServerRequester mock = Mockito.mock(ServerRequester.class);
+            Field instance;
+            try {
+                instance = ServerRequester.class.getDeclaredField("instance");
+                instance.setAccessible(true);
+                instance.set(null, mock);
+                Mockito.when(mock.sendSyncRequest(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.isA(BranchCommitRequest.class)))
+                        .thenReturn(this.sendSyncRequest(null, null, new BranchCommitRequest()));
+                Mockito.when(mock.sendSyncRequest(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.isA(BranchRollbackRequest.class)))
+                        .thenReturn(this.sendSyncRequest(null, null, new BranchRollbackRequest()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            ServerRequester.getInstance().addRemotingServer(RpcType.NETTY, this);
+        }
 
         @Override
         public Object sendSyncRequest(String resourceId, String clientId, Object message) throws TimeoutException {

@@ -14,9 +14,6 @@ public class ServerRequester {
 
     private final Map<RpcType, RemotingServer> remotingServerMap = new ConcurrentHashMap<>();
 
-    private ServerRequester() {
-    }
-
     public static ServerRequester getInstance() {
         if (null == instance) {
             synchronized (ServerRequester.class) {
