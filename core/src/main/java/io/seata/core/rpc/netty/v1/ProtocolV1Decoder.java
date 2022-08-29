@@ -99,7 +99,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     public ProtocolV1Decoder(int maxFrameLength) {
         /*
-        int maxFrameLength,      
+        int maxFrameLength,
         int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
         int lengthFieldLength,  FullLength is int(4B). so values is 4
         int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
@@ -119,23 +119,27 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 frame.markReaderIndex();
                 byte b0 = frame.readByte();
                 byte b1 = frame.readByte();
+                byte b2 = frame.readByte();
                 frame.resetReaderIndex();
-                // seata message
                 if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
                         || ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
-                    try {
-                        return decodeFrame(frame);
-                    } finally {
+                    // seata message
+                    if(b2 == ProtocolConstants.VERSION) {
+                        try {
+                            return decodeFrame(frame);
+                        } finally {
+                            frame.release();
+                        }
+                    } else if (b2 == (byte) 0) { // gts message
+                        try {
+                            decodeGts(ctx, frame);
+                        } finally {
+                            frame.release();
+                        }
+                    } else {
                         frame.release();
                     }
-                } else if(frame.readShort() == MAGIC) {  // gts message
-                    frame.resetReaderIndex();
-                    try {
-                        decodeGts(ctx, frame);
-                    } finally {
-                        frame.release();
-                    }
-                } else {
+                }  else {
                     frame.release();
                 }
             }
