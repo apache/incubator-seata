@@ -12,6 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
+- [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -44,5 +45,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
+- [AlbumenJ](https://github.com/AlbumenJ)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
