@@ -37,8 +37,6 @@ import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.metrics.IdConstants;
 import io.seata.metrics.service.MetricsPublisher;
-import io.seata.tm.api.DefaultGlobalTransaction;
-import io.seata.tm.api.transaction.TransactionInfo;
 
 import java.util.concurrent.TimeoutException;
 
