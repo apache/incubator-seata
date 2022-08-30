@@ -15,8 +15,6 @@
  */
 package io.seata.core.rpc.netty.v1;
 
-import com.taobao.txc.common.LoggerInit;
-import com.taobao.txc.common.LoggerWrap;
 import com.taobao.txc.common.exception.TxcException;
 import com.taobao.txc.common.message.*;
 import com.taobao.txc.rpc.impl.RegisterClientAppNameMessage;
@@ -79,11 +77,6 @@ import static com.taobao.txc.rpc.impl.TxcMessageCodec.hessianDeserialize;
 public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
-    private static final LoggerWrap logger;
-
-    static {
-        logger = LoggerInit.logger;
-    }
 
     private static short MAGIC = -9510;
     private static int HEAD_LENGHT = 14;
@@ -202,8 +195,8 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
     }
 
     public void decodeGts(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("channeL:" + ctx.channel());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("channel:" + ctx.channel());
         }
         int readableBytes = in.readableBytes();
         if (readableBytes >= HEAD_LENGHT) {
@@ -297,12 +290,11 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                             rpcMessage.setBody(bodyObject);
                         }
                     } catch (Exception var20) {
-                        logger.error("decode error", "", var20);
-                        throw var20;
+                        LOGGER.error("Gts Decode error, cause: {}", var20.getMessage());
+                        throw new DecodeException(var20);
                     }
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Receive:" + rpcMessage.getBody() + ",messageId:" + msgId);
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Receive: " + rpcMessage.getBody() + ",messageId: " + msgId);
                     }
 
                 }
