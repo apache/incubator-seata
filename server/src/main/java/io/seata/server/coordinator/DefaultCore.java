@@ -151,6 +151,7 @@ public class DefaultCore implements Core {
         }
 
         if (globalSession.isTimeout()) {
+            LOGGER.info("TC detected timeout, xid = {}", globalSession.getXid());
             return GlobalStatus.TimeoutRollbacking;
         }
 

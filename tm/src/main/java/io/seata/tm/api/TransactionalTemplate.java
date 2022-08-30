@@ -203,9 +203,9 @@ public class TransactionalTemplate {
             throws TransactionalExecutor.ExecutionException, TransactionException {
         if (isTimeout(tx.getCreateTime(), txInfo)) {
             // business execution timeout
-            throw new TransactionalExecutor.ExecutionException(tx,
-                    new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TM].", tx.getXid())),
-                    TransactionalExecutor.Code.TimeoutRollback);
+            LOGGER.info("TM detected timeout, xid = {}", tx.getXid());
+            tx.rollback();
+            return;
         }
 
         try {
