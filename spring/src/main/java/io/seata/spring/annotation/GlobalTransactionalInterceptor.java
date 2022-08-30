@@ -57,7 +57,6 @@ import org.springframework.util.ClassUtils;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
-import static io.seata.common.DefaultValues.DEFAULT_TM_LOSS_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
@@ -167,8 +166,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                             globalTransactionalAnnotation.noRollbackForClassName(),
                             globalTransactionalAnnotation.propagation(),
                             globalTransactionalAnnotation.lockRetryInterval(),
-                            globalTransactionalAnnotation.lockRetryTimes(),
-                                globalTransactionalAnnotation.lossTime());
+                            globalTransactionalAnnotation.lockRetryTimes());
                     } else {
                         transactional = this.aspectTransactional;
                     }
@@ -224,21 +222,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                         timeout = defaultGlobalTransactionTimeout;
                     }
 
-                    // reset the value of lossTime
-                    float lossTime = aspectTransactional.getLossTime();
-                    if (lossTime <= 0 || lossTime == DEFAULT_TM_LOSS_TIME) {
-                        lossTime = ConfigurationFactory.getInstance().getFloat(
-                                ConfigurationKeys.DEFAULT_TM_LOSS_TIME,
-                                DEFAULT_TM_LOSS_TIME);
-                    }
-
                     TransactionInfo transactionInfo = new TransactionInfo();
                     transactionInfo.setTimeOut(timeout);
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(aspectTransactional.getPropagation());
                     transactionInfo.setLockRetryInterval(aspectTransactional.getLockRetryInterval());
                     transactionInfo.setLockRetryTimes(aspectTransactional.getLockRetryTimes());
-                    transactionInfo.setLossTime(lossTime);
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : aspectTransactional.getRollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));
