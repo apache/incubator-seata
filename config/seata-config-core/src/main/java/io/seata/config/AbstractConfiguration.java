@@ -40,7 +40,6 @@ public abstract class AbstractConfiguration implements Configuration {
     public static final long DEFAULT_LONG = 0L;
     public static final Duration DEFAULT_DURATION = Duration.ZERO;
     public static final boolean DEFAULT_BOOLEAN = false;
-    public static final float DEFAULT_FLOAT = 0f;
 
 
     @Override
@@ -89,23 +88,6 @@ public abstract class AbstractConfiguration implements Configuration {
     @Override
     public long getLong(String dataId) {
         return getLong(dataId, DEFAULT_LONG);
-    }
-
-
-    @Override
-    public float getFloat(String dataId, float defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, timeoutMills);
-        return StringUtils.isBlank(result) ? defaultValue : Float.parseFloat(result);
-    }
-
-    @Override
-    public float getFloat(String dataId, float defaultValue) {
-        return getFloat(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public float getFloat(String dataId) {
-        return getFloat(dataId, DEFAULT_FLOAT);
     }
 
     @Override
