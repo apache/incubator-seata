@@ -23,11 +23,9 @@ import java.lang.annotation.Target;
 
 import io.seata.common.DefaultValues;
 import io.seata.tm.api.transaction.Propagation;
+
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AliasFor;
-
-import static io.seata.common.DefaultValues.DEFAULT_TM_LOSS_TIME;
-
 /**
  * The interface Global transactional.
  *
@@ -129,13 +127,4 @@ public @interface GlobalTransactional {
      * @return int
      */
     int lockRetryTimes() default -1;
-
-
-    /**
-     * customized loss time.
-     * time consumed by network IO or disk IO or other
-     *
-     * @return int
-     */
-    float lossTime() default DEFAULT_TM_LOSS_TIME;
 }
