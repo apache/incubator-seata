@@ -66,7 +66,6 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
         return new StreamObserver<GrpcRemoting.BiStreamMessage>() {
             @Override
             public void onNext(GrpcRemoting.BiStreamMessage biStreamMessage) {
-                //获取请求类型
                 GrpcRemoting.BiStreamMessageType messageType = biStreamMessage.getMessageType();
                 Any message = biStreamMessage.getMessage();
                 Object requestModel;

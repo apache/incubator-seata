@@ -37,8 +37,6 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
-import io.seata.core.rpc.grpc.GrpcServerChannelManager;
-import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettySeataChannel;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

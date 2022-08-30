@@ -140,7 +140,7 @@ public class RpcContext {
             this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
         ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(clientRMHolderMap, resourceId,
-                key -> new ConcurrentHashMap<>());
+            key -> new ConcurrentHashMap<>());
         portMap.put(clientPort, this);
     }
 

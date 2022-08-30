@@ -84,7 +84,7 @@ public class SeataChannelServerManager {
         RpcType rpcType;
         Map<String, RpcType> resourceIdMap = RM_RPC_TYPE_MAP.get(resourceId);
         if (null == resourceIdMap || null == (rpcType = resourceIdMap.get(clientId))) {
-            throw new RuntimeException("unknown resourceId/clientId, the corresponding channel may not be registered. resourceId[" + resourceId + "] clientId[" + clientId + "]" );
+            throw new RuntimeException("unknown resourceId/clientId, the corresponding channel may not be registered. resourceId[" + resourceId + "] clientId[" + clientId + "]");
         }
         return rpcType;
     }

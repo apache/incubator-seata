@@ -31,7 +31,7 @@ import io.seata.core.rpc.grpc.ContextKeyConstants;
  */
 public class ServerChannelInterceptor implements ServerInterceptor {
     @Override
-    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
+    public <R, S> ServerCall.Listener<R> interceptCall(ServerCall<R, S> call, Metadata headers, ServerCallHandler<R, S> next) {
         Context ctx = Context.current();
         //get current connection ID from serverCall
         String connectionId = call.getAttributes().get(ContextKeyConstants.CONNECT_ID);

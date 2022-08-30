@@ -153,7 +153,7 @@ public class MergedWarpMessageProcessor extends BaseServerOnRequestProcessor<Mer
                 int msgId = msgIds.get(i);
                 if (PARALLEL_REQUEST_HANDLE) {
                     CompletableFuture.runAsync(
-                            () -> handleRequestsByMergedWarpMessageBy150(msg, msgId, ctx, rpcContext));
+                        () -> handleRequestsByMergedWarpMessageBy150(msg, msgId, ctx, rpcContext));
                 } else {
                     handleRequestsByMergedWarpMessageBy150(msg, msgId, ctx, rpcContext);
                 }

@@ -40,7 +40,7 @@ public class ClientRequester {
      * If it is held by the Requester, it may lead to the acquisition in some cases. to an instance of an error state.
      * For example, when the RemotingClient is closed, the expired client will be obtained through the Requester.
      */
-    private final Map<RpcChannelPoolKey.TransactionRole, Supplier<RemotingClient>> REMOTING_CLIENT_MAP = new ConcurrentHashMap<>();
+    private final Map<RpcChannelPoolKey.TransactionRole, Supplier<RemotingClient>> remotingClientMap = new ConcurrentHashMap<>();
 
     private ClientRequester() {
     }
@@ -74,12 +74,12 @@ public class ClientRequester {
     }
 
     public void register(RpcChannelPoolKey.TransactionRole role, Supplier<RemotingClient> remotingClient) {
-        REMOTING_CLIENT_MAP.put(role, remotingClient);
+        remotingClientMap.put(role, remotingClient);
     }
 
 
     public RmRemotingClient getRmRemotingClient() {
-        Supplier<RemotingClient> remotingClientSupplier = REMOTING_CLIENT_MAP.get(RpcChannelPoolKey.TransactionRole.RMROLE);
+        Supplier<RemotingClient> remotingClientSupplier = remotingClientMap.get(RpcChannelPoolKey.TransactionRole.RMROLE);
         if (null == remotingClientSupplier) {
             throw new NotSupportYetException("No RM RemotingClient available");
         }
@@ -87,7 +87,7 @@ public class ClientRequester {
     }
 
     public RemotingClient getTmRemotingClient() {
-        Supplier<RemotingClient> remotingClientSupplier = REMOTING_CLIENT_MAP.get(RpcChannelPoolKey.TransactionRole.TMROLE);
+        Supplier<RemotingClient> remotingClientSupplier = remotingClientMap.get(RpcChannelPoolKey.TransactionRole.TMROLE);
         if (null == remotingClientSupplier) {
             throw new NotSupportYetException("No TM RemotingClient available");
         }

@@ -26,7 +26,7 @@ import io.seata.core.rpc.netty.NettyRemotingServer;
 /**
  * @author goodboycoder
  */
-public class ServerRequester implements Disposable{
+public class ServerRequester implements Disposable {
     private static volatile ServerRequester instance;
 
     private final Map<RpcType, RemotingServer> remotingServerMap = new ConcurrentHashMap<>();
@@ -74,12 +74,12 @@ public class ServerRequester implements Disposable{
 
     @Override
     public void destroy() {
-        remotingServerMap.forEach(((rpcType, remotingServer) -> {
+        remotingServerMap.forEach((rpcType, remotingServer) -> {
             if (remotingServer instanceof NettyRemotingServer) {
                 ((NettyRemotingServer) remotingServer).destroy();
             } else if (remotingServer instanceof GrpcRemotingServer) {
                 ((GrpcRemotingServer) remotingServer).destroy();
             }
-        }));
+        });
     }
 }
