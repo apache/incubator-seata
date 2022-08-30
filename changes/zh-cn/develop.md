@@ -13,6 +13,7 @@
 - [[#4780](https://github.com/seata/seata/pull/4780)] 修复超时回滚成功后无法发送TimeoutRollbacked事件
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
 - [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
+- [[#4779](https://github.com/seata/seata/pull/4779)] 修复支持 Apache Dubbo 3 版本
 
 
 ### optimize：
@@ -47,5 +48,6 @@
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
+- [AlbumenJ](https://github.com/AlbumenJ)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
