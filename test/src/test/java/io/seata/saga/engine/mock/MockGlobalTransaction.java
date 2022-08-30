@@ -44,7 +44,6 @@ public class MockGlobalTransaction implements GlobalTransaction {
     public MockGlobalTransaction(String xid, GlobalStatus status) {
         this.xid = xid;
         this.status = status;
-        this.createTime = System.currentTimeMillis();
     }
 
     @Override
@@ -54,6 +53,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout) throws TransactionException {
+        this.createTime = System.currentTimeMillis();
         status = GlobalStatus.Begin;
         xid = uuidSeqGenerator.generate(null).toString();
         RootContext.bind(xid);
@@ -112,7 +112,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public long getBeginTime() {
-        return 0;
+    public long getCreateTime() {
+        return createTime;
     }
 }

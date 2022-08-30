@@ -56,7 +56,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
      *
      * @see System#currentTimeMillis();
      */
-    private long beginTime;
+    private long createTime;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
@@ -97,7 +97,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
-        this.beginTime = System.currentTimeMillis();
+        this.createTime = System.currentTimeMillis();
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -260,8 +260,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public long getBeginTime() {
-        return beginTime;
+    public long getCreateTime() {
+        return createTime;
     }
 
     private void assertXIDNotNull() {

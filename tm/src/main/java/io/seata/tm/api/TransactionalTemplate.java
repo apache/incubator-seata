@@ -201,7 +201,7 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
             throws TransactionalExecutor.ExecutionException, TransactionException {
-        if (isTimeout(tx.getBeginTime(), txInfo)) {
+        if (isTimeout(tx.getCreateTime(), txInfo)) {
             // business execution timeout
             throw new TransactionalExecutor.ExecutionException(tx,
                     new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TM].", tx.getXid())),

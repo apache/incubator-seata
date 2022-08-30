@@ -136,5 +136,5 @@ public interface GlobalTransaction {
      *
      * @return create time
      */
-    long getBeginTime();
+    long getCreateTime();
 }
