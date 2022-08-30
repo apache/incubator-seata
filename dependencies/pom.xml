@@ -32,7 +32,7 @@
     <description>dependencies for Seata built with Maven</description>
 
     <properties>
-        <dubbo.version>2.7.4</dubbo.version>
+        <dubbo-seata.version>1.0.0</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
@@ -222,11 +222,6 @@
                 <version>${protobuf.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.baidu</groupId>
                 <artifactId>brpc-java</artifactId>
                 <version>${brpc.version}</version>
@@ -235,6 +230,11 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>dubbo</artifactId>
                 <version>${dubbo.alibaba.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.dubbo.extensions</groupId>
+                <artifactId>dubbo-filter-seata</artifactId>
+                <version>${dubbo-seata.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.edas</groupId>
