@@ -159,7 +159,7 @@ public class TransactionalTemplate {
      * @param txInfo          the transaction info
      * @return is timeout
      */
-    private boolean isTimeoutWithLoss(long beginTime, TransactionInfo txInfo) {
+    private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
 
         return (System.currentTimeMillis() - beginTime) > txInfo.getTimeOut();
     }
@@ -201,7 +201,7 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
             throws TransactionalExecutor.ExecutionException, TransactionException {
-        if (isTimeoutWithLoss(tx.getBeginTime(), txInfo)) {
+        if (isTimeout(tx.getBeginTime(), txInfo)) {
             // business execution timeout
             throw new TransactionalExecutor.ExecutionException(tx,
                     new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TM].", tx.getXid())),
