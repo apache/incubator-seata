@@ -32,7 +32,6 @@ seata:
       file: seata.properties
       token: yQPNKgn6JbPR+mHSQyhdREixFoLVTuuNsERNENspveErQaLRs8Xz
       connect-timeout: 6000
-      pull-interval-time: 5000
       read-timeout: 5000
 
     nacos:
@@ -56,8 +55,8 @@ seata:
       application: seata-server
       token: yQPNKgn6JbPR+mHSQyhdREixFoLVTuuNsERNENspveErQaLRs8Xz
       connect-timeout: 6000
-      pull-interval-time: 2000
       read-timeout: 5000
+      refresh-time: 2000
 
     nacos:
       application: seata-server

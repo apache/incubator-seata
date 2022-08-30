@@ -15,7 +15,6 @@
  */
 package io.seata.config.polaris.client;
 
-import io.seata.common.util.JacksonUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.util.concurrent.DefaultThreadFactory;
+import io.seata.common.util.JacksonUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.polaris.PolarisConfigChangeListener;
 import org.slf4j.Logger;

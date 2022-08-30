@@ -74,8 +74,6 @@ public class PolarisConfiguration extends AbstractConfiguration {
 
 	private static final String POLARIS_SERVER_ACCESS_TOKEN = "token";
 
-	private static final String POLARIS_SERVER_PULL_INTERVAL_TIME = "pullIntervalTime";
-
 	private static final String POLARIS_SERVER_CONNECT_TIME = "connectTimeout";
 
 	private static final String POLARIS_SERVER_READ_TIME = "readTimeout";
@@ -168,10 +166,6 @@ public class PolarisConfiguration extends AbstractConfiguration {
 		return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, POLARIS_SERVER_CONNECT_TIME);
 	}
 
-	public static String getPolarisPullIntervalTimeKey() {
-		return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, POLARIS_SERVER_PULL_INTERVAL_TIME);
-	}
-
 	public static String getPolarisReadTimeoutKey() {
 		return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, POLARIS_SERVER_READ_TIME);
 	}
@@ -218,18 +212,6 @@ public class PolarisConfiguration extends AbstractConfiguration {
 			polarisConfig.setProperty(POLARIS_SERVER_CONNECT_TIME, connectTimeout);
 			properties.connectTimeout(Integer.parseInt(connectTimeout));
 		}
-
-		// pullIntervalTime
-		String pullIntervalTime = System.getProperty(POLARIS_SERVER_PULL_INTERVAL_TIME);
-		if (StringUtils.isBlank(pullIntervalTime)) {
-			pullIntervalTime = FILE_CONFIG.getConfig(getPolarisPullIntervalTimeKey());
-		}
-
-		if (StringUtils.isNotBlank(pullIntervalTime)) {
-			polarisConfig.setProperty(POLARIS_SERVER_PULL_INTERVAL_TIME, pullIntervalTime);
-			properties.pullIntervalTime(Long.parseLong(pullIntervalTime));
-		}
-
 
 		// readTimeout
 		String readTimeout = System.getProperty(POLARIS_SERVER_READ_TIME);

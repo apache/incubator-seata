@@ -35,11 +35,6 @@ public class PolarisConfigProperties {
 	private String token;
 
 	/**
-	 * Remote config pull interval, default value : 5000 (ms) .
-	 */
-	private long pullIntervalTime = 5000L;
-
-	/**
 	 * Request Connect Timeout , default value : 6000 (ms) .
 	 */
 	private int connectTimeout = 6000;
@@ -63,11 +58,10 @@ public class PolarisConfigProperties {
 		this.token = token;
 	}
 
-	public PolarisConfigProperties(String address, String token, long pullIntervalTime, int connectTimeout,
+	public PolarisConfigProperties(String address, String token, int connectTimeout,
 			int readTimeout) {
 		this.address = address;
 		this.token = token;
-		this.pullIntervalTime = pullIntervalTime;
 		this.connectTimeout = connectTimeout;
 		this.readTimeout = readTimeout;
 	}
@@ -92,15 +86,6 @@ public class PolarisConfigProperties {
 
 	public PolarisConfigProperties token(String token) {
 		this.token = token;
-		return this;
-	}
-
-	public long pullIntervalTime() {
-		return pullIntervalTime;
-	}
-
-	public PolarisConfigProperties pullIntervalTime(long pullIntervalTime) {
-		this.pullIntervalTime = pullIntervalTime;
 		return this;
 	}
 

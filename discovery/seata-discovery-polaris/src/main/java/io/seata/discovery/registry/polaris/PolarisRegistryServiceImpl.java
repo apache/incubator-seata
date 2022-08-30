@@ -121,11 +121,6 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
     private static final String POLARIS_SERVER_ACCESS_TOKEN = "token";
 
     /**
-     * Polaris Pull-Interval-Time Config Key.
-     */
-    private static final String POLARIS_SERVER_PULL_INTERVAL_TIME = "pullIntervalTime";
-
-    /**
      * Polaris Connect-Timeout Config Key.
      */
     private static final String POLARIS_SERVER_CONNECT_TIME = "connectTimeout";
@@ -134,6 +129,11 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      * Polaris Read-Timeout Config Key.
      */
     private static final String POLARIS_SERVER_READ_TIME = "readTimeout";
+
+    /**
+     * Polaris Service Instance Refresh Time.
+     */
+    private static final String POLARIS_SERVER_REFRESH_TIME = "refreshTime";
 
     /**
      * Polaris Service Instance Refresh Period.
@@ -268,7 +268,7 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
                     subscribe(serviceName, event -> {
                         List<PolarisInstance> instances = event.getInstances();
                         if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(serviceName)) {
-                            LOGGER.info("receive empty server list, cluster:{}", serviceName);
+                            LOGGER.info("receive empty server list, service-name :{}", serviceName);
                         } else {
                             List<InetSocketAddress> newAddressList2 = instances.stream()
                                 .filter(PolarisInstance::isHealthy)
@@ -315,7 +315,7 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
         }
 
         if (System.getProperty(POLARIS_SERVER_ACCESS_TOKEN) != null) {
-            properties.address(System.getProperty(POLARIS_SERVER_ACCESS_TOKEN));
+            properties.token(System.getProperty(POLARIS_SERVER_ACCESS_TOKEN));
         } else {
             String token = FILE_CONFIG.getConfig(getPolarisAccessTokenKey());
             if (StringUtils.isBlank(token)) {
@@ -324,17 +324,8 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
             properties.token(token);
         }
 
-        if (System.getProperty(POLARIS_SERVER_PULL_INTERVAL_TIME) != null) {
-            properties.address(System.getProperty(POLARIS_SERVER_PULL_INTERVAL_TIME));
-        } else {
-            String pullIntervalTime = FILE_CONFIG.getConfig(getPolarisPullIntervalTimeKey());
-            if (StringUtils.isNotBlank(pullIntervalTime)) {
-                properties.pullIntervalTime(Long.parseLong(pullIntervalTime));
-            }
-        }
-
         if (System.getProperty(POLARIS_SERVER_CONNECT_TIME) != null) {
-            properties.address(System.getProperty(POLARIS_SERVER_CONNECT_TIME));
+            properties.connectTimeout(Integer.parseInt(System.getProperty(POLARIS_SERVER_CONNECT_TIME)));
         } else {
             String connectTimeout = FILE_CONFIG.getConfig(getPolarisConnectTimeoutKey());
             if (StringUtils.isNotBlank(connectTimeout)) {
@@ -343,11 +334,22 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
         }
 
         if (System.getProperty(POLARIS_SERVER_READ_TIME) != null) {
-            properties.address(System.getProperty(POLARIS_SERVER_READ_TIME));
+            properties.readTimeout(Integer.parseInt(System.getProperty(POLARIS_SERVER_READ_TIME)));
         } else {
             String readTimeout = FILE_CONFIG.getConfig(getPolarisReadTimeoutKey());
             if (StringUtils.isNotBlank(readTimeout)) {
                 properties.readTimeout(Integer.parseInt(readTimeout));
+            }
+        }
+
+        // Set Default Value
+        properties.refreshTime((int) POLARIS_SERVICE_REFRESH_PERIOD);
+        if (System.getProperty(POLARIS_SERVER_REFRESH_TIME) != null) {
+            properties.refreshTime(Integer.parseInt(System.getProperty(POLARIS_SERVER_REFRESH_TIME)));
+        } else {
+            String refreshTime = FILE_CONFIG.getConfig(getPolarisRefreshTimeKey());
+            if (StringUtils.isNotBlank(refreshTime)) {
+                properties.refreshTime(Integer.parseInt(refreshTime));
             }
         }
 
@@ -386,11 +388,11 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_CONNECT_TIME);
     }
 
-    public static String getPolarisPullIntervalTimeKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_PULL_INTERVAL_TIME);
-    }
-
     public static String getPolarisReadTimeoutKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_READ_TIME);
+    }
+
+    public static String getPolarisRefreshTimeKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_REFRESH_TIME);
     }
 }

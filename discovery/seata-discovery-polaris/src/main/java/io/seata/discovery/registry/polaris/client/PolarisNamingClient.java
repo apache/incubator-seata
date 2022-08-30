@@ -117,7 +117,7 @@ public final class PolarisNamingClient {
     }
 
     /**
-     * register a instance to service.
+     * register an instance to service.
      *
      * @param namespace   namespace of service
      * @param serviceName name of service
@@ -1335,11 +1335,6 @@ public final class PolarisNamingClient {
          */
         private final int preTaskListenerSize = 300;
 
-        /**
-         * Long-Pulling Re-Execute Time When Current-Executing Failed.
-         */
-        private static final int TASK_RETRY_TIME = 5000;
-
         private ServiceSubscribeListenerWorker() {
             this.executor =
                 new ScheduledThreadPoolExecutor(1, new DefaultThreadFactory("POLARIS-SERVICE-INSTANCE-CLIENT-WORKER-"));
@@ -1473,13 +1468,10 @@ public final class PolarisNamingClient {
                             }
                         }
                     }
-
-                    // execute
-                    executorService.execute(this);
-
                 } catch (Throwable e) {
                     LOGGER.error("[Polaris Discovery Client] long polling error .", e);
-                    executorService.schedule(this, TASK_RETRY_TIME, TimeUnit.MILLISECONDS);
+                } finally {
+                    executorService.schedule(this, properties.refreshTime(), TimeUnit.MILLISECONDS);
                 }
             }
         }

@@ -35,11 +35,6 @@ public class PolarisNamingProperties {
 	private String token;
 
 	/**
-	 * Remote config pull interval, default value : 5000 (ms) .
-	 */
-	private long pullIntervalTime = 5000L;
-
-	/**
 	 * Request Connect Timeout , default value : 6000 (ms) .
 	 */
 	private int connectTimeout = 6000;
@@ -48,6 +43,11 @@ public class PolarisNamingProperties {
 	 * Request's response read timeout , default value : 5000 (ms) .
 	 */
 	private int readTimeout = 5000;
+
+	/**
+	 * Remote Service Instance Refresh Time, default value : 2000 (ms).
+	 */
+	private int refreshTime = 2000;
 
 	public PolarisNamingProperties() {
 	}
@@ -69,14 +69,12 @@ public class PolarisNamingProperties {
 	 * @param address server address
 	 * @param token   server api access token
 	 * @param connectTimeout request connect timeout
-	 * @param pullIntervalTime long pull interval time period
 	 * @param readTimeout response read timeout
 	 */
-	public PolarisNamingProperties(String address, String token, long pullIntervalTime, int connectTimeout,
+	public PolarisNamingProperties(String address, String token, int connectTimeout,
 			int readTimeout) {
 		this.address = address;
 		this.token = token;
-		this.pullIntervalTime = pullIntervalTime;
 		this.connectTimeout = connectTimeout;
 		this.readTimeout = readTimeout;
 	}
@@ -104,15 +102,6 @@ public class PolarisNamingProperties {
 		return this;
 	}
 
-	public long pullIntervalTime() {
-		return pullIntervalTime;
-	}
-
-	public PolarisNamingProperties pullIntervalTime(long pullIntervalTime) {
-		this.pullIntervalTime = pullIntervalTime;
-		return this;
-	}
-
 	public int connectTimeout() {
 		return connectTimeout;
 	}
@@ -128,6 +117,15 @@ public class PolarisNamingProperties {
 
 	public PolarisNamingProperties readTimeout(int readTimeout) {
 		this.readTimeout = readTimeout;
+		return this;
+	}
+
+	public int refreshTime() {
+		return refreshTime;
+	}
+
+	public PolarisNamingProperties refreshTime(int refreshTime) {
+		this.refreshTime = refreshTime;
 		return this;
 	}
 }

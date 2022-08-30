@@ -39,11 +39,6 @@ public class ConfigPolarisProperties {
     private String token;
 
     /**
-     * Remote config pull interval, default value : 5000 (ms) .
-     */
-    private int pullIntervalTime = 5000;
-
-    /**
      * Request Connect Timeout , default value : 6000 (ms) .
      */
     private int connectTimeout = 6000;
@@ -95,15 +90,6 @@ public class ConfigPolarisProperties {
 
     public ConfigPolarisProperties setToken(String token) {
         this.token = token;
-        return this;
-    }
-
-    public int getPullIntervalTime() {
-        return pullIntervalTime;
-    }
-
-    public ConfigPolarisProperties setPullIntervalTime(int pullIntervalTime) {
-        this.pullIntervalTime = pullIntervalTime;
         return this;
     }
 

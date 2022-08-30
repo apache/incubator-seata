@@ -38,11 +38,6 @@ public class RegistryPolarisProperties {
     private String token;
 
     /**
-     * Remote config pull interval, default value : 5000 (ms) .
-     */
-    private int pullIntervalTime = 2000;
-
-    /**
      * Request Connect Timeout , default value : 6000 (ms) .
      */
     private int connectTimeout = 6000;
@@ -51,6 +46,11 @@ public class RegistryPolarisProperties {
      * Request's response read timeout , default value : 5000 (ms) .
      */
     private int readTimeout = 5000;
+
+    /**
+     * Remote Service Instance Refresh Time, default value : 2000 (ms).
+     */
+    private int refreshTime = 2000;
 
     public String getServerAddr() {
         return serverAddr;
@@ -88,15 +88,6 @@ public class RegistryPolarisProperties {
         return this;
     }
 
-    public int getPullIntervalTime() {
-        return pullIntervalTime;
-    }
-
-    public RegistryPolarisProperties setPullIntervalTime(int pullIntervalTime) {
-        this.pullIntervalTime = pullIntervalTime;
-        return this;
-    }
-
     public int getConnectTimeout() {
         return connectTimeout;
     }
@@ -112,6 +103,15 @@ public class RegistryPolarisProperties {
 
     public RegistryPolarisProperties setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
+        return this;
+    }
+
+    public int getRefreshTime() {
+        return refreshTime;
+    }
+
+    public RegistryPolarisProperties setRefreshTime(int refreshTime) {
+        this.refreshTime = refreshTime;
         return this;
     }
 }
