@@ -140,7 +140,6 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
      */
     private static final long POLARIS_SERVICE_REFRESH_PERIOD = 2000L;
 
-
     /**
      * Gets instance.
      *
@@ -167,8 +166,7 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
                 PolarisNamingProperties properties = getNamingProperties();
                 // build context
                 client = PolarisNamingClient.getClient(properties);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
@@ -292,9 +290,8 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
     public void close() throws Exception {
 
     }
-    
-    // ~~ inner static methods
 
+    // ~~ inner static methods
 
     /**
      * Build polaris naming properties from seata startup env.

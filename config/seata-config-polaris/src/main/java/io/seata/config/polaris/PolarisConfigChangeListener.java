@@ -36,10 +36,10 @@ public interface PolarisConfigChangeListener {
     /**
      * Receive config info.
      *
-     * @param namespace  config file namespace
-     * @param group config file group
-     * @param fileName config file name
-     * @param content config info
+     * @param namespace config file namespace
+     * @param group     config file group
+     * @param fileName  config file name
+     * @param content   config info
      */
     void receiveConfigInfo(final String namespace, final String group, final String fileName, final String content);
 }

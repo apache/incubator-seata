@@ -27,13 +27,13 @@ import io.seata.config.ConfigurationProvider;
 @LoadLevel(name = "Polaris", order = 1)
 public class PolarisConfigurationProvider implements ConfigurationProvider {
 
-	/**
-	 * provide a AbstractConfiguration implementation instance
-	 *
-	 * @return Configuration
-	 */
-	@Override
-	public Configuration provide() {
-		return PolarisConfiguration.getInstance();
-	}
+    /**
+     * provide a AbstractConfiguration implementation instance
+     *
+     * @return Configuration
+     */
+    @Override
+    public Configuration provide() {
+        return PolarisConfiguration.getInstance();
+    }
 }

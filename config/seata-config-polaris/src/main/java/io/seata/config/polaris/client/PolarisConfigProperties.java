@@ -24,86 +24,86 @@ import io.seata.common.util.StringUtils;
  */
 public class PolarisConfigProperties {
 
-	/**
-	 * Remote Polaris Config Server Address .
-	 */
-	private String address;
+    /**
+     * Remote Polaris Config Server Address .
+     */
+    private String address;
 
-	/**
-	 * Remote Polaris Config Server Access Token .
-	 */
-	private String token;
+    /**
+     * Remote Polaris Config Server Access Token .
+     */
+    private String token;
 
-	/**
-	 * Request Connect Timeout , default value : 6000 (ms) .
-	 */
-	private int connectTimeout = 6000;
+    /**
+     * Request Connect Timeout , default value : 6000 (ms) .
+     */
+    private int connectTimeout = 6000;
 
-	/**
-	 * Request's response read timeout , default value : 5000 (ms) .
-	 */
-	private int readTimeout = 5000;
+    /**
+     * Request's response read timeout , default value : 5000 (ms) .
+     */
+    private int readTimeout = 5000;
 
-	public PolarisConfigProperties() {
-	}
+    public PolarisConfigProperties() {
+    }
 
-	/**
-	 * {@link  PolarisConfigProperties} Constructor
-	 *
-	 * @param address server address
-	 * @param token   server api access token
-	 */
-	public PolarisConfigProperties(String address, String token) {
-		this.address = address;
-		this.token = token;
-	}
+    /**
+     * {@link  PolarisConfigProperties} Constructor
+     *
+     * @param address server address
+     * @param token   server api access token
+     */
+    public PolarisConfigProperties(String address, String token) {
+        this.address = address;
+        this.token = token;
+    }
 
-	public PolarisConfigProperties(String address, String token, int connectTimeout,
-			int readTimeout) {
-		this.address = address;
-		this.token = token;
-		this.connectTimeout = connectTimeout;
-		this.readTimeout = readTimeout;
-	}
+    public PolarisConfigProperties(String address, String token, int connectTimeout,
+        int readTimeout) {
+        this.address = address;
+        this.token = token;
+        this.connectTimeout = connectTimeout;
+        this.readTimeout = readTimeout;
+    }
 
-	public String address() {
-		if (StringUtils.isNotBlank(this.address)) {
-			if (this.address.endsWith("/")) {
-				this.address = this.address.substring(0, this.address.length() - 1);
-			}
-		}
-		return address;
-	}
+    public String address() {
+        if (StringUtils.isNotBlank(this.address)) {
+            if (this.address.endsWith("/")) {
+                this.address = this.address.substring(0, this.address.length() - 1);
+            }
+        }
+        return address;
+    }
 
-	public PolarisConfigProperties address(String address) {
-		this.address = address;
-		return this;
-	}
+    public PolarisConfigProperties address(String address) {
+        this.address = address;
+        return this;
+    }
 
-	public String token() {
-		return token;
-	}
+    public String token() {
+        return token;
+    }
 
-	public PolarisConfigProperties token(String token) {
-		this.token = token;
-		return this;
-	}
+    public PolarisConfigProperties token(String token) {
+        this.token = token;
+        return this;
+    }
 
-	public int connectTimeout() {
-		return connectTimeout;
-	}
+    public int connectTimeout() {
+        return connectTimeout;
+    }
 
-	public PolarisConfigProperties connectTimeout(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
-		return this;
-	}
+    public PolarisConfigProperties connectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+        return this;
+    }
 
-	public int readTimeout() {
-		return readTimeout;
-	}
+    public int readTimeout() {
+        return readTimeout;
+    }
 
-	public PolarisConfigProperties readTimeout(int readTimeout) {
-		this.readTimeout = readTimeout;
-		return this;
-	}
+    public PolarisConfigProperties readTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+        return this;
+    }
 }

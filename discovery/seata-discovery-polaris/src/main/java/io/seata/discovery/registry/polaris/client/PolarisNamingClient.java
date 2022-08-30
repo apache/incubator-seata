@@ -112,7 +112,8 @@ public final class PolarisNamingClient {
      * @param port        instance port
      * @throws PolarisNamingException polaris exception
      */
-    public void registerInstance(String namespace, String serviceName, String ip, int port) throws PolarisNamingException {
+    public void registerInstance(String namespace, String serviceName, String ip,
+        int port) throws PolarisNamingException {
         this.registerInstance(namespace, serviceName, ip, port, DEFAULT_CLUSTER);
     }
 
@@ -126,7 +127,8 @@ public final class PolarisNamingClient {
      * @param cluster     cluster of service
      * @throws PolarisNamingException polaris exception
      */
-    public void registerInstance(String namespace, String serviceName, String ip, int port, String cluster) throws PolarisNamingException {
+    public void registerInstance(String namespace, String serviceName, String ip, int port,
+        String cluster) throws PolarisNamingException {
         try {
             RegistryRequest registryRequest = new RegistryRequest();
             RegistryRequest.InstanceInfo instance = new RegistryRequest.InstanceInfo();
@@ -154,7 +156,8 @@ public final class PolarisNamingClient {
      * @param port        instance port
      * @throws PolarisNamingException polaris exception
      */
-    public void deregisterInstance(String namespace, String serviceName, String ip, int port) throws PolarisNamingException {
+    public void deregisterInstance(String namespace, String serviceName, String ip,
+        int port) throws PolarisNamingException {
         deregisterInstance(namespace, serviceName, ip, port, DEFAULT_CLUSTER);
     }
 
@@ -168,7 +171,8 @@ public final class PolarisNamingClient {
      * @param cluster     cluster of service
      * @throws PolarisNamingException polaris exception
      */
-    public void deregisterInstance(String namespace, String serviceName, String ip, int port, String cluster) throws PolarisNamingException {
+    public void deregisterInstance(String namespace, String serviceName, String ip, int port,
+        String cluster) throws PolarisNamingException {
         try {
             DeregistryRequest deregistryRequest = new DeregistryRequest();
             List<PolarisInstance> instances = new ArrayList<>();
@@ -214,7 +218,8 @@ public final class PolarisNamingClient {
      * @return A list of instance
      * @throws PolarisNamingException polaris exception
      */
-    public List<PolarisInstance> getAllInstances(String namespace, String serviceName, String cluster) throws PolarisNamingException {
+    public List<PolarisInstance> getAllInstances(String namespace, String serviceName,
+        String cluster) throws PolarisNamingException {
 
         List<PolarisInstance> ret = new ArrayList<>();
         try {
@@ -284,7 +289,8 @@ public final class PolarisNamingClient {
      * @param listener    event listener
      * @throws PolarisNamingException polaris exception
      */
-    public void subscribe(String namespace, String serviceName, String cluster, PolarisListener listener) throws PolarisNamingException {
+    public void subscribe(String namespace, String serviceName, String cluster,
+        PolarisListener listener) throws PolarisNamingException {
         LocalDiscoveryStorage.DiscoveryServiceKey serviceKey = new LocalDiscoveryStorage.DiscoveryServiceKey(namespace, cluster, serviceName);
         listenerWorker.addListener(serviceKey, listener);
     }
@@ -298,7 +304,8 @@ public final class PolarisNamingClient {
      * @param listener    event listener
      * @throws PolarisNamingException polaris exception
      */
-    public void unsubscribe(String namespace, String serviceName, String cluster, PolarisListener listener) throws PolarisNamingException {
+    public void unsubscribe(String namespace, String serviceName, String cluster,
+        PolarisListener listener) throws PolarisNamingException {
         LocalDiscoveryStorage.DiscoveryServiceKey serviceKey = new LocalDiscoveryStorage.DiscoveryServiceKey(namespace, cluster, serviceName);
         listenerWorker.removeListener(serviceKey, listener);
     }
@@ -1569,7 +1576,7 @@ public final class PolarisNamingClient {
                             LOGGER.error("[Polaris Service Subscribe Listener] [notify-error] , listener={} throwable={}", listener, t.getCause());
                         }
                         final long finishNotify = System.currentTimeMillis();
-                        LOGGER.info("[Polaris Service Subscribe Listener] [notify-listener] time cost={} ms in ClientWorker, listener={} ", (finishNotify - startNotify), listener);
+                        LOGGER.info("[Polaris Service Subscribe Listener] [notify-listener] time cost={} ms in ClientWorker, listener={} ", finishNotify - startNotify, listener);
                     }
                 }
             }
