@@ -5,11 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.grpc.GrpcRemotingServer;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 
 /**
  * @author goodboycoder
  */
-public class ServerRequester {
+public class ServerRequester implements Disposable{
     private static volatile ServerRequester instance;
 
     private final Map<RpcType, RemotingServer> remotingServerMap = new ConcurrentHashMap<>();
@@ -53,5 +55,16 @@ public class ServerRequester {
             throw new RuntimeException("Could not find RemoteServer corresponding to RpcType:" + rpcType.name);
         }
         return remotingServer;
+    }
+
+    @Override
+    public void destroy() {
+        remotingServerMap.forEach(((rpcType, remotingServer) -> {
+            if (remotingServer instanceof NettyRemotingServer) {
+                ((NettyRemotingServer) remotingServer).destroy();
+            } else if (remotingServer instanceof GrpcRemotingServer) {
+                ((GrpcRemotingServer) remotingServer).destroy();
+            }
+        }));
     }
 }

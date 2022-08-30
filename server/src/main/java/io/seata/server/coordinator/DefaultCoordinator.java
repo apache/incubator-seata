@@ -548,10 +548,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         } catch (InterruptedException ignore) {
 
         }
-        // 2. second close netty flow
-        if (remotingServer instanceof NettyRemotingServer) {
-            ((NettyRemotingServer) remotingServer).destroy();
-        }
+        // 2. second close netty/grpc flow
+        ServerRequester.getInstance().destroy();
         // 3. third destroy SessionHolder
         SessionHolder.destroy();
         instance = null;
