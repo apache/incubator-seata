@@ -59,5 +59,5 @@ public interface FailureHandler {
      * @param tx                the tx
      * @param originalException the originalException
      */
-    void onTimeOutRollback(GlobalTransaction tx, Throwable originalException);
+    void onTimeoutRollback(GlobalTransaction tx, Throwable originalException);
 }

@@ -77,7 +77,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     }
 
     @Override
-    public void onTimeOutRollback(GlobalTransaction tx, Throwable originalException) {
+    public void onTimeoutRollback(GlobalTransaction tx, Throwable originalException) {
         StackTraceLogger.warn(LOGGER, originalException, "Transaction timeout rollback[{}]", new String[] {tx.getXid()});
     }
 
