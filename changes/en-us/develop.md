@@ -7,7 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
-
+- [[#4894](https://github.com/seata/seata/pull/4894)] Add tencent polaris discovery support
 
 ### bugfix:
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
@@ -44,5 +44,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
+- [misselvexu](https://github.com/misselvexu)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

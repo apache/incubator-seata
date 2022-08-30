@@ -7,6 +7,7 @@
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC注解支持添加在实现类及其方法上也生效
+- [[#4894](https://github.com/seata/seata/pull/4894)] 添加北极星注册中心的支持
 
 
 ### bugfix：
@@ -44,5 +45,6 @@
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
+- [misselvexu](https://github.com/misselvexu)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

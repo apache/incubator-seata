@@ -51,6 +51,15 @@ seata:
     etcd3:
       server-addr: http://localhost:2379
       key: seata.properties
+    polaris:
+      server-addr: http://183.47.111.80:8090
+      namespace: polaris-seata
+      group: polaris-seata-group
+      file: seata.properties
+      token: yQPNKgn6JbPR+mHSQyhdREixFoLVTuuNsERNENspveErQaLRs8Xz
+      connect-timeout: 6000
+      read-timeout: 5000
+
   registry:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
@@ -98,6 +107,14 @@ seata:
       cluster: default
       group: SEATA_GROUP
       address-wait-time: 3000
+    polaris:
+      server-addr: http://183.47.111.80:8090
+      namespace: polaris-seata
+      application: seata-server
+      token: yQPNKgn6JbPR+mHSQyhdREixFoLVTuuNsERNENspveErQaLRs8Xz
+      connect-timeout: 6000
+      read-timeout: 5000
+      refresh-time: 2000
 
   server:
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
