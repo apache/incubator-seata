@@ -84,33 +84,6 @@ public interface Configuration {
     int getInt(String dataId);
 
     /**
-     * Gets float.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the float
-     */
-    float getFloat(String dataId, float defaultValue, long timeoutMills);
-
-    /**
-     * Gets float.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the float
-     */
-    float getFloat(String dataId, float defaultValue);
-
-    /**
-     * Gets int.
-     *
-     * @param dataId the data id
-     * @return the int
-     */
-    float getFloat(String dataId);
-
-    /**
      * Gets long.
      *
      * @param dataId       the data id
