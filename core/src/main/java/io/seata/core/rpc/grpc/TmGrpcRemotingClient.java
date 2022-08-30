@@ -237,7 +237,7 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
-//        getClientChannelManager().registerChannel(serverAddress, channel);
+        getClientChannelManager().registerChannel(serverAddress, channel);
     }
 
     @Override

@@ -42,7 +42,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
             LOGGER.info("[GRPC]NettyPool create channel to " + key);
         }
         ManagedChannel managedChannel = ManagedChannelBuilder
-                .forAddress(address.getHostName(), address.getPort())
+                .forAddress(address.getAddress().getHostAddress(), address.getPort())
                 .directExecutor()
                 .build();
         long start = System.currentTimeMillis();
@@ -104,7 +104,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         }
 
         try {
-            response = rpcRemotingClient.sendSyncRequest(key.getMessage());
+            response = rpcRemotingClient.sendSyncRequest(tmpChannel, key.getMessage());
             if (!isRegisterSuccess(response, key.getTransactionRole())) {
                 rpcRemotingClient.onRegisterMsgFail(key.getAddress(), tmpChannel, response, key.getMessage());
             } else {
@@ -112,9 +112,10 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
                 rpcRemotingClient.onRegisterMsgSuccess(key.getAddress(), tmpChannel, response, key.getMessage());
             }
         } catch (Exception exx) {
+            String errMessage = exx.getMessage();
             tmpChannel.close();
             throw new FrameworkException(
-                    "register " + key.getTransactionRole().name() + " error, errMsg:" + exx.getMessage());
+                    "register " + key.getTransactionRole().name() + " error, errMsg:" + errMessage);
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register success, cost " + (System.currentTimeMillis() - start) + " ms, version:" + getVersion(

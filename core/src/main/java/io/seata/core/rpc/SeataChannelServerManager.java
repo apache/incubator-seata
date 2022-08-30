@@ -41,7 +41,10 @@ public class SeataChannelServerManager {
         Map<String, SeataChannel> resultMap = new HashMap<>();
         for (Map.Entry<RpcType, ServerChannelManager> managerEntry : SERVER_CHANNEL_MANAGER_MAP.entrySet()) {
             ServerChannelManager channelManager = managerEntry.getValue();
-            resultMap.putAll(channelManager.getRmChannels());
+            Map<String, SeataChannel> rmChannels = channelManager.getRmChannels();
+            if (null != rmChannels) {
+                resultMap.putAll(rmChannels);
+            }
         }
         return resultMap;
     }

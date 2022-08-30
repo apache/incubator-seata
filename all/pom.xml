@@ -232,7 +232,7 @@
             <artifactId>seata-serializer-protobuf</artifactId>
             <version>${project.version}</version>
             <!-- Slimming down for 'seata-all.jar' -->
-            <scope>provided</scope>
+<!--            <scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>

@@ -153,6 +153,23 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
     }
 
     /**
+     * client send sync request.
+     *
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @return server result message
+     * @throws TimeoutException TimeoutException
+     */
+    public Object sendSyncRequest(SeataChannel channel, Object msg) throws TimeoutException {
+        if (channel == null) {
+            LOGGER.warn("[GRPC]sendSyncRequest nothing, caused by null channel.");
+            return null;
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return super.sendSync(channel, rpcMessage, this.getRpcRequestTimeout());
+    }
+
+    /**
      * client send async request.
      *
      * @param channel client channel

@@ -881,6 +881,11 @@ public interface ConfigurationKeys {
     String GRPC_SERVER_SERVICE_PORT_CAMEL = GRPC_SERVER_PREFIX + "servicePort";
 
     /**
+     * The constant GRPC_SERVER_SERVICE_PORT_CONFIG
+     */
+    String GRPC_SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + GRPC_SERVER_PREFIX + "service-port";
+
+    /**
      * The constant GRPC_MIN_SERVER_POOL_SIZE.
      */
     String GRPC_MIN_SERVER_POOL_SIZE = GRPC_TRANSPORT_PREFIX + "minServerPoolSize";

@@ -30,10 +30,13 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+import static io.seata.common.ConfigurationKeys.GRPC_SERVER_SERVICE_PORT_CAMEL;
+import static io.seata.common.ConfigurationKeys.GRPC_SERVER_SERVICE_PORT_CONFIG;
 import static io.seata.common.ConfigurationKeys.STORE_LOCK_MODE;
 import static io.seata.common.ConfigurationKeys.STORE_MODE;
 import static io.seata.common.ConfigurationKeys.STORE_SESSION_MODE;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static io.seata.common.DefaultValues.GRPC_SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
@@ -110,6 +113,9 @@ public class ServerApplicationListener implements GenericApplicationListener {
         }
         String servicePort = String.valueOf(Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT);
         setTargetPort(environment, servicePort, true);
+
+        String grpcServerPort = String.valueOf(Integer.parseInt(serverPort) + GRPC_SERVICE_OFFSET_SPRING_BOOT);
+        setGrpcTargetPort(environment, grpcServerPort, true);
     }
 
     private void setTargetPort(ConfigurableEnvironment environment, String port, boolean needAddPropertySource) {
@@ -121,6 +127,18 @@ public class ServerApplicationListener implements GenericApplicationListener {
             Properties pro = new Properties();
             pro.setProperty(SERVER_SERVICE_PORT_CONFIG, port);
             environment.getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", pro));
+        }
+    }
+
+    private void setGrpcTargetPort(ConfigurableEnvironment environment, String port, boolean needAddPropertySource) {
+        // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
+        System.setProperty(GRPC_SERVER_SERVICE_PORT_CAMEL, port);
+
+        if (needAddPropertySource) {
+            // add property source to the first position
+            Properties pro = new Properties();
+            pro.setProperty(GRPC_SERVER_SERVICE_PORT_CONFIG, port);
+            environment.getPropertySources().addFirst(new PropertiesPropertySource("serverGrpcProperties", pro));
         }
     }
 

@@ -17,7 +17,7 @@ public class GrpcServerConfig extends BaseRpcConfig {
     /**
      * Netty Server listen port
      */
-    private static final int DEFAULT_LISTEN_PORT = 8790;
+    private static final int DEFAULT_LISTEN_PORT = 8591;
 
     /**
      * Server Rpc request timeout
@@ -66,7 +66,7 @@ public class GrpcServerConfig extends BaseRpcConfig {
         } catch (NumberFormatException exx) {
             LOGGER.error("grpc server service port set error:{}", exx.toString());
         }
-        if (0 == port) {
+        if (0 >= port) {
             LOGGER.error("listen port: {} is invalid, will use default port:{}", port, getDefaultListenPort());
             port = getDefaultListenPort();
         }
