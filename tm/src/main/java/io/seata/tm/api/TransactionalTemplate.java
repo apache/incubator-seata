@@ -219,8 +219,6 @@ public class TransactionalTemplate {
         }
 
         if (Objects.equals(tx.getLocalStatus(), GlobalStatus.TimeoutRollbacking)) {
-            // timeout to rollback
-            tx.rollback();
             throw new TransactionalExecutor.ExecutionException(tx,
                     new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
                     TransactionalExecutor.Code.TimeoutRollback);
