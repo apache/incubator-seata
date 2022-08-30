@@ -1,6 +1,7 @@
 package io.seata.core.rpc.grpc;
 
 import java.net.SocketAddress;
+import java.util.Objects;
 
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
@@ -67,7 +68,7 @@ public class GrpcClientSeataChannel implements SeataChannel {
     @Override
     public void disconnect() {
         if (null != managedChannel && !managedChannel.isShutdown()) {
-            managedChannel.shutdownNow();
+            managedChannel.shutdown();
         }
     }
 
@@ -77,5 +78,22 @@ public class GrpcClientSeataChannel implements SeataChannel {
             throw new IllegalArgumentException("[GRPC]not supported message type: " + msg.getClass());
         }
         streamObserver.onNext(msg);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GrpcClientSeataChannel)) {
+            return false;
+        }
+        GrpcClientSeataChannel that = (GrpcClientSeataChannel) o;
+        return Objects.equals(managedChannel, that.managedChannel) && Objects.equals(remoteAddress, that.remoteAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(managedChannel, remoteAddress);
     }
 }

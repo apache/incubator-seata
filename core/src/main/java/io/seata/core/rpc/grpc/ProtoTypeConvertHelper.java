@@ -17,7 +17,7 @@ public class ProtoTypeConvertHelper {
 
     @SuppressWarnings("unchecked")
     public static Object convertToModel(Message protoMsg) {
-        PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(protoMsg.getClass().getName());
+        PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(protoMsg.getClass().getName());
         return pbConvertor.convert2Model(protoMsg);
     }
 }

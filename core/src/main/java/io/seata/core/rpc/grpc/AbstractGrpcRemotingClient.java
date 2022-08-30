@@ -293,10 +293,6 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
 
     protected void registerDefaultClientStub() {
         //TransactionManagerService
-        STUB_FUNCTION_MAP.put(MessageType.TYPE_REG_CLT, (GrpcStubFunction<io.seata.serializer.protobuf.generated.RegisterTMRequestProto, io.seata.serializer.protobuf.generated.RegisterTMResponseProto>) (channel, req) -> {
-            io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc.TransactionManagerServiceFutureStub futureStub = io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc.newFutureStub((io.grpc.Channel) channel.originChannel());
-            return futureStub.registerTM(req);
-        });
         STUB_FUNCTION_MAP.put(MessageType.TYPE_GLOBAL_BEGIN, (GrpcStubFunction<io.seata.serializer.protobuf.generated.GlobalBeginRequestProto, io.seata.serializer.protobuf.generated.GlobalBeginResponseProto>) (channel, req) -> {
             io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc.TransactionManagerServiceFutureStub futureStub = io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc.newFutureStub((io.grpc.Channel) channel.originChannel());
             return futureStub.globalBegin(req);

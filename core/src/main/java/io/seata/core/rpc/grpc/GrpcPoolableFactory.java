@@ -18,6 +18,7 @@ import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
 import io.seata.core.rpc.RpcChannelPoolKey;
+import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         }
         ManagedChannel managedChannel = ManagedChannelBuilder
                 .forAddress(address.getAddress().getHostAddress(), address.getPort())
+                .usePlaintext()
                 .directExecutor()
                 .build();
         long start = System.currentTimeMillis();
@@ -82,6 +84,9 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
                         Object modelRequest = ProtoTypeConvertHelper.convertToModel(unpackMessage);
                         //handle request
                         RpcMessageHandleContext handleContext = new RpcMessageHandleContext(tmpChannel);
+                        MessageMeta messageMeta = new MessageMeta();
+                        messageMeta.setMessageId(messageId);
+                        handleContext.setMessageMeta(messageMeta);
                         handleContext.setMessageReply(response -> rpcRemotingClient.sendAsyncResponse(NetUtil.toStringAddress(tmpChannel.remoteAddress()),
                                 handleContext.getMessageMeta(), response));
                         rpcRemotingClient.processMessage(handleContext, modelRequest);
@@ -91,13 +96,64 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
                 @Override
                 public void onError(Throwable throwable) {
                     //TODO client streamObserver on error
-                    LOGGER.warn("Request stream error: {}", throwable.toString());
+                    LOGGER.warn("RM Request stream error: {}", throwable.toString());
                 }
 
                 @Override
                 public void onCompleted() {
                     //TODO client streamObserver on completed
-                    LOGGER.info("Request stream onCompleted");
+                    LOGGER.info("RM Request stream onCompleted");
+                }
+            });
+            tmpChannel.setStreamObserver(clientStreamObserver);
+        } else if (RpcChannelPoolKey.TransactionRole.TMROLE == key.getTransactionRole()) {
+            ConcurrentHashMap<Integer, MessageFuture> futures = rpcRemotingClient.getFutures();
+            StreamObserver<GrpcRemoting.BiStreamMessage> clientStreamObserver = io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc.newStub(managedChannel).registerTM(new StreamObserver<GrpcRemoting.BiStreamMessage>() {
+                @Override
+                public void onNext(GrpcRemoting.BiStreamMessage message) {
+                    int messageId = message.getID();
+                    GrpcRemoting.BiStreamMessageType messageType = message.getMessageType();
+                    Any body = message.getMessage();
+                    if (GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse == messageType) {
+                        io.seata.serializer.protobuf.generated.RegisterTMResponseProto registerTMResponseProto;
+                        try {
+                            registerTMResponseProto = body.unpack(io.seata.serializer.protobuf.generated.RegisterTMResponseProto.class);
+                        } catch (InvalidProtocolBufferException e) {
+                            throw new RuntimeException(e);
+                        }
+                        MessageFuture messageFuture = futures.get(messageId);
+                        if (null != messageFuture) {
+                            messageFuture.setResultMessage(ProtoTypeConvertHelper.convertToModel(registerTMResponseProto));
+                        }
+                    } else {
+                        Message unpackMessage;
+                        try {
+                            unpackMessage = body.unpack(BiStreamMessageTypeHelper.getBiStreamMessageClassType(messageType));
+                        } catch (InvalidProtocolBufferException e) {
+                            throw new RuntimeException(e);
+                        }
+                        Object modelRequest = ProtoTypeConvertHelper.convertToModel(unpackMessage);
+                        //handle request
+                        RpcMessageHandleContext handleContext = new RpcMessageHandleContext(tmpChannel);
+                        MessageMeta messageMeta = new MessageMeta();
+                        messageMeta.setMessageId(messageId);
+                        handleContext.setMessageMeta(messageMeta);
+                        handleContext.setMessageReply(response -> rpcRemotingClient.sendAsyncResponse(NetUtil.toStringAddress(tmpChannel.remoteAddress()),
+                                handleContext.getMessageMeta(), response));
+                        rpcRemotingClient.processMessage(handleContext, modelRequest);
+                    }
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    //TODO client streamObserver on error
+                    LOGGER.warn("TM Request stream error: {}", throwable.getMessage());
+                }
+
+                @Override
+                public void onCompleted() {
+                    //TODO client streamObserver on completed
+                    LOGGER.info("TM Request stream onCompleted");
                 }
             });
             tmpChannel.setStreamObserver(clientStreamObserver);
@@ -113,7 +169,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
             }
         } catch (Exception exx) {
             String errMessage = exx.getMessage();
-            tmpChannel.close();
+//            tmpChannel.close();
             throw new FrameworkException(
                     "register " + key.getTransactionRole().name() + " error, errMsg:" + errMessage);
         }

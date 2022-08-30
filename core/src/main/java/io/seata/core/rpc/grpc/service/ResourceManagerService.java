@@ -15,11 +15,11 @@ import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.grpc.BiStreamMessageTypeHelper;
 import io.seata.core.rpc.grpc.GrpcRemotingServer;
 import io.seata.core.rpc.grpc.GrpcSeataChannel;
+import io.seata.core.rpc.grpc.ProtoTypeConvertHelper;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
 import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.RpcMessageHandleContext;
-import io.seata.serializer.protobuf.convertor.PbConvertor;
 import io.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
 import io.seata.serializer.protobuf.generated.BranchRegisterResponseProto;
 import io.seata.serializer.protobuf.generated.BranchReportRequestProto;
@@ -28,7 +28,6 @@ import io.seata.serializer.protobuf.generated.GlobalLockQueryRequestProto;
 import io.seata.serializer.protobuf.generated.GlobalLockQueryResponseProto;
 import io.seata.serializer.protobuf.generated.RegisterRMRequestProto;
 import io.seata.serializer.protobuf.generated.RegisterRMResponseProto;
-import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,6 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
         this.remotingServer = remotingServer;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public StreamObserver<GrpcRemoting.BiStreamMessage> registerRM(StreamObserver<GrpcRemoting.BiStreamMessage> responseObserver) {
         return new StreamObserver<GrpcRemoting.BiStreamMessage>() {
@@ -65,17 +63,19 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
                     } catch (InvalidProtocolBufferException e) {
                         throw new RuntimeException(e);
                     }
-                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(registerRMRequestProto.getClass().getName());
-                    requestModel = pbConvertor.convert2Model(registerRMRequestProto);
+                    requestModel = ProtoTypeConvertHelper.convertToModel(registerRMRequestProto);
                     handleContext = buildHandleContext(responseObserver);
                     handleContext.setMessageReply(response -> {
                         if (!(response instanceof RegisterRMResponse)) {
                             LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", RegisterRMResponse.class, response.getClass());
                             return;
                         }
-                        PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(RegisterRMResponse.class.getName());
-                        RegisterRMResponseProto responseProto = (RegisterRMResponseProto) convertor.convert2Proto(response);
-                        GrpcRemoting.BiStreamMessage responseMessage = GrpcRemoting.BiStreamMessage.newBuilder().setID(biStreamMessage.getID()).setMessageType(GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse).setMessage(Any.pack(responseProto)).build();
+                        RegisterRMResponseProto responseProto = (RegisterRMResponseProto) ProtoTypeConvertHelper.convertToProto(response);
+                        GrpcRemoting.BiStreamMessage responseMessage = GrpcRemoting.BiStreamMessage.newBuilder()
+                                .setID(biStreamMessage.getID())
+                                .setMessageType(GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse)
+                                .setMessage(Any.pack(responseProto))
+                                .build();
                         try {
                             responseObserver.onNext(responseMessage);
                         } catch (Exception e) {
@@ -90,8 +90,7 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
                     } catch (InvalidProtocolBufferException e) {
                         throw new RuntimeException(e);
                     }
-                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(unpackMessage.getClass().getName());
-                    requestModel = pbConvertor.convert2Model(unpackMessage);
+                    requestModel = ProtoTypeConvertHelper.convertToModel(unpackMessage);
                     handleContext = buildHandleContext(responseObserver, biStreamMessage);
                     remotingServer.processMessage(handleContext, requestModel);
                 } else {
@@ -113,20 +112,17 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
         };
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void branchRegister(BranchRegisterRequestProto request, StreamObserver<BranchRegisterResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        BranchRegisterRequest requestModel = (BranchRegisterRequest) pbConvertor.convert2Model(request);
+        BranchRegisterRequest requestModel = (BranchRegisterRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof BranchRegisterResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", BranchRegisterResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(BranchRegisterResponse.class.getName());
             try {
-                responseObserver.onNext((BranchRegisterResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((BranchRegisterResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
@@ -135,20 +131,17 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
         remotingServer.processMessage(handleContext, requestModel);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void branchReport(BranchReportRequestProto request, StreamObserver<BranchReportResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        BranchReportRequest requestModel = (BranchReportRequest) pbConvertor.convert2Model(request);
+        BranchReportRequest requestModel = (BranchReportRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof BranchReportResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", BranchReportResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(BranchReportResponse.class.getName());
             try {
-                responseObserver.onNext((BranchReportResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((BranchReportResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
@@ -157,20 +150,17 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
         remotingServer.processMessage(handleContext, requestModel);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void lockQuery(GlobalLockQueryRequestProto request, StreamObserver<GlobalLockQueryResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        GlobalLockQueryRequest requestModel = (GlobalLockQueryRequest) pbConvertor.convert2Model(request);
+        GlobalLockQueryRequest requestModel = (GlobalLockQueryRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof GlobalLockQueryResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", GlobalLockQueryResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(GlobalLockQueryResponse.class.getName());
             try {
-                responseObserver.onNext((GlobalLockQueryResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((GlobalLockQueryResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);

@@ -21,6 +21,8 @@ public class BiStreamMessageTypeHelper {
         MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeBranchRollBackResult, io.seata.serializer.protobuf.generated.BranchRollbackResponseProto.class);
         MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TYPERegisterRMRequest, io.seata.serializer.protobuf.generated.RegisterRMRequestProto.class);
         MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse, io.seata.serializer.protobuf.generated.RegisterRMResponseProto.class);
+        MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TYPERegisterTMRequest, io.seata.serializer.protobuf.generated.RegisterTMRequestProto.class);
+        MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse, io.seata.serializer.protobuf.generated.RegisterTMResponseProto.class);
         MESSAGE_TYPE_CLASS_MAP.put(GrpcRemoting.BiStreamMessageType.TypeRMUndoLogDelete, io.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto.class);
 
         STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.BranchCommitRequestProto.class, GrpcRemoting.BiStreamMessageType.TypeBranchCommit);
@@ -29,6 +31,8 @@ public class BiStreamMessageTypeHelper {
         STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.BranchRollbackResponseProto.class, GrpcRemoting.BiStreamMessageType.TypeBranchRollBackResult);
         STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.RegisterRMRequestProto.class, GrpcRemoting.BiStreamMessageType.TYPERegisterRMRequest);
         STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.RegisterRMResponseProto.class, GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse);
+        STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.RegisterTMRequestProto.class, GrpcRemoting.BiStreamMessageType.TYPERegisterTMRequest);
+        STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.RegisterTMResponseProto.class, GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse);
         STREAM_MESSAGE_TYPE_MAP.put(io.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto.class, GrpcRemoting.BiStreamMessageType.TypeRMUndoLogDelete);
     }
 

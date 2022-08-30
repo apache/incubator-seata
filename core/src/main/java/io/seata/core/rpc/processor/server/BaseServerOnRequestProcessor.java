@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * @author goodboycoder
  */
 public abstract class BaseServerOnRequestProcessor<T, S> implements RemotingProcessor<T> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BranchRegisterProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseServerOnRequestProcessor.class);
 
     protected final TransactionMessageHandler transactionMessageHandler;
 

@@ -166,7 +166,7 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient implements 
 
     @Override
     protected boolean isEnableClientBatchSendRequest() {
-        return enableClientBatchSendRequest;
+        return false;
     }
 
     @Override

@@ -1,8 +1,9 @@
 package io.seata.core.rpc.grpc.service;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
@@ -15,11 +16,14 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.grpc.BiStreamMessageTypeHelper;
 import io.seata.core.rpc.grpc.GrpcRemotingServer;
 import io.seata.core.rpc.grpc.GrpcSeataChannel;
+import io.seata.core.rpc.grpc.ProtoTypeConvertHelper;
+import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc;
+import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.RpcMessageHandleContext;
-import io.seata.serializer.protobuf.convertor.PbConvertor;
 import io.seata.serializer.protobuf.generated.GlobalBeginRequestProto;
 import io.seata.serializer.protobuf.generated.GlobalBeginResponseProto;
 import io.seata.serializer.protobuf.generated.GlobalCommitRequestProto;
@@ -30,9 +34,6 @@ import io.seata.serializer.protobuf.generated.GlobalRollbackRequestProto;
 import io.seata.serializer.protobuf.generated.GlobalRollbackResponseProto;
 import io.seata.serializer.protobuf.generated.GlobalStatusRequestProto;
 import io.seata.serializer.protobuf.generated.GlobalStatusResponseProto;
-import io.seata.serializer.protobuf.generated.RegisterTMRequestProto;
-import io.seata.serializer.protobuf.generated.RegisterTMResponseProto;
-import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,43 +52,83 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
         this.remotingServer = remotingServer;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void registerTM(RegisterTMRequestProto request, StreamObserver<RegisterTMResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        RegisterTMRequest requestModel = (RegisterTMRequest) pbConvertor.convert2Model(request);
+    public StreamObserver<GrpcRemoting.BiStreamMessage> registerTM(StreamObserver<GrpcRemoting.BiStreamMessage> responseObserver) {
+        return new StreamObserver<GrpcRemoting.BiStreamMessage>() {
+            @Override
+            public void onNext(GrpcRemoting.BiStreamMessage biStreamMessage) {
+                //获取请求类型
+                GrpcRemoting.BiStreamMessageType messageType = biStreamMessage.getMessageType();
+                Any message = biStreamMessage.getMessage();
+                Object requestModel;
+                RpcMessageHandleContext handleContext;
+                if (GrpcRemoting.BiStreamMessageType.TYPERegisterTMRequest == messageType) {
+                    io.seata.serializer.protobuf.generated.RegisterTMRequestProto registerTMRequestProto;
+                    try {
+                        registerTMRequestProto = message.unpack(io.seata.serializer.protobuf.generated.RegisterTMRequestProto.class);
+                    } catch (InvalidProtocolBufferException e) {
+                        throw new RuntimeException(e);
+                    }
+                    requestModel = ProtoTypeConvertHelper.convertToModel(registerTMRequestProto);
+                    handleContext = buildHandleContext(responseObserver);
+                    handleContext.setMessageReply(response -> {
+                        if (!(response instanceof RegisterTMResponse)) {
+                            LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", RegisterTMResponse.class, response.getClass());
+                            return;
+                        }
+                        io.seata.serializer.protobuf.generated.RegisterTMResponseProto responseProto = (io.seata.serializer.protobuf.generated.RegisterTMResponseProto) ProtoTypeConvertHelper.convertToProto(response);
+                        GrpcRemoting.BiStreamMessage responseMessage = GrpcRemoting.BiStreamMessage.newBuilder()
+                                .setID(biStreamMessage.getID())
+                                .setMessageType(GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse)
+                                .setMessage(Any.pack(responseProto))
+                                .build();
+                        try {
+                            responseObserver.onNext(responseMessage);
+                        } catch (Exception e) {
+                            LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", registerTMRequestProto, response);
+                        }
+                    });
+                    remotingServer.processMessage(handleContext, requestModel);
+                } else if (isProcessable(messageType)) {
+                    Message unpackMessage;
+                    try {
+                        unpackMessage = message.unpack(BiStreamMessageTypeHelper.getBiStreamMessageClassType(messageType));
+                    } catch (InvalidProtocolBufferException e) {
+                        throw new RuntimeException(e);
+                    }
+                    requestModel = ProtoTypeConvertHelper.convertToModel(unpackMessage);
+                    handleContext = buildHandleContext(responseObserver, biStreamMessage);
+                    remotingServer.processMessage(handleContext, requestModel);
+                } else {
+                    LOGGER.warn("unprocessable message: {}", biStreamMessage);
+                }
+            }
 
-        RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
-        handleContext.setMessageReply(response -> {
-            if (!(response instanceof RegisterTMResponse)) {
-                LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", RegisterTMResponse.class, response.getClass());
-                return;
+            @Override
+            public void onError(Throwable throwable) {
+                LOGGER.error("TM Bi stream on error, error: {}", throwable.toString());
+                //TODO unregister channel
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(RegisterTMResponse.class.getName());
-            try {
-                responseObserver.onNext((RegisterTMResponseProto) convertor.convert2Proto(response));
-                responseObserver.onCompleted();
-            } catch (Exception e) {
-                LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
+
+            @Override
+            public void onCompleted() {
+                LOGGER.info("TM Bi stream on completed");
+                //TODO unregister channel
             }
-        });
-        remotingServer.processMessage(handleContext, requestModel);
+        };
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void globalBegin(GlobalBeginRequestProto request, StreamObserver<GlobalBeginResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        GlobalBeginRequest requestModel = (GlobalBeginRequest) pbConvertor.convert2Model(request);
+        GlobalBeginRequest requestModel = (GlobalBeginRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof GlobalBeginResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", GlobalBeginResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(GlobalBeginResponse.class.getName());
             try {
-                responseObserver.onNext((GlobalBeginResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((GlobalBeginResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
@@ -96,20 +137,17 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
         remotingServer.processMessage(handleContext, requestModel);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void globalCommit(GlobalCommitRequestProto request, StreamObserver<GlobalCommitResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        GlobalCommitRequest requestModel = (GlobalCommitRequest) pbConvertor.convert2Model(request);
+        GlobalCommitRequest requestModel = (GlobalCommitRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof GlobalCommitResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", GlobalCommitResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(GlobalCommitResponse.class.getName());
             try {
-                responseObserver.onNext((GlobalCommitResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((GlobalCommitResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
@@ -118,20 +156,17 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
         remotingServer.processMessage(handleContext, requestModel);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void globalRollback(GlobalRollbackRequestProto request, StreamObserver<GlobalRollbackResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        GlobalRollbackRequest requestModel = (GlobalRollbackRequest) pbConvertor.convert2Model(request);
+        GlobalRollbackRequest requestModel = (GlobalRollbackRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof GlobalRollbackResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", GlobalRollbackResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(GlobalRollbackResponse.class.getName());
             try {
-                responseObserver.onNext((GlobalRollbackResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((GlobalRollbackResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
@@ -140,20 +175,17 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
         remotingServer.processMessage(handleContext, requestModel);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void globalReport(GlobalReportRequestProto request, StreamObserver<GlobalReportResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        GlobalReportRequest requestModel = (GlobalReportRequest) pbConvertor.convert2Model(request);
+        GlobalReportRequest requestModel = (GlobalReportRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof GlobalReportResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", GlobalReportResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(GlobalReportResponse.class.getName());
             try {
-                responseObserver.onNext((GlobalReportResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((GlobalReportResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
@@ -162,20 +194,17 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
         remotingServer.processMessage(handleContext, requestModel);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void getGlobalStatus(GlobalStatusRequestProto request, StreamObserver<GlobalStatusResponseProto> responseObserver) {
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(request.getClass().getName());
-        GlobalStatusRequest requestModel = (GlobalStatusRequest) pbConvertor.convert2Model(request);
+        GlobalStatusRequest requestModel = (GlobalStatusRequest) ProtoTypeConvertHelper.convertToModel(request);
         RpcMessageHandleContext handleContext = buildHandleContext(responseObserver);
         handleContext.setMessageReply(response -> {
             if (!(response instanceof GlobalStatusResponse)) {
                 LOGGER.warn("[GRPC]wrong response type, need {} but actually {}", GlobalStatusResponse.class, response.getClass());
                 return;
             }
-            PbConvertor convertor = ProtobufConvertManager.getInstance().fetchConvertor(GlobalStatusResponse.class.getName());
             try {
-                responseObserver.onNext((GlobalStatusResponseProto) convertor.convert2Proto(response));
+                responseObserver.onNext((GlobalStatusResponseProto) ProtoTypeConvertHelper.convertToProto(response));
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.warn("[GRPC]fail to send response, req:{}, resp:{}", request, response);
@@ -184,8 +213,22 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
         remotingServer.processMessage(handleContext, requestModel);
     }
 
+    public RpcMessageHandleContext buildHandleContext(StreamObserver<? extends Message> responseObserver, GrpcRemoting.BiStreamMessage message) {
+        RpcMessageHandleContext ctx = buildHandleContext(responseObserver);
+        if (null != message) {
+            MessageMeta messageMeta = new MessageMeta();
+            messageMeta.setMessageId(message.getID());
+            ctx.setMessageMeta(messageMeta);
+        }
+        return ctx;
+    }
+
     public RpcMessageHandleContext buildHandleContext(StreamObserver<? extends Message> responseObserver) {
         SeataChannel curChannel = new GrpcSeataChannel(CUR_CONNECT_ID.get(), CUR_CONNECTION.get(), responseObserver);
         return new RpcMessageHandleContext(curChannel);
+    }
+
+    private boolean isProcessable(GrpcRemoting.BiStreamMessageType messageType) {
+        return true;
     }
 }

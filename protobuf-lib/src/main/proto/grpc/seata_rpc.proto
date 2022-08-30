@@ -38,6 +38,8 @@ enum BiStreamMessageType {
 
   TYPERegisterRMRequest = 5;
   TYPERegisterRMResponse = 6;
+  TYPERegisterTMRequest = 7;
+  TYPERegisterTMResponse = 8;
 }
 
 message BiStreamMessage {
@@ -47,7 +49,7 @@ message BiStreamMessage {
 }
 
 service TransactionManagerService {
-  rpc RegisterTM(io.seata.protocol.protobuf.RegisterTMRequestProto) returns (io.seata.protocol.protobuf.RegisterTMResponseProto);
+  rpc RegisterTM(stream BiStreamMessage) returns (stream BiStreamMessage);
   rpc GlobalBegin(io.seata.protocol.protobuf.GlobalBeginRequestProto) returns (io.seata.protocol.protobuf.GlobalBeginResponseProto);
   rpc GlobalCommit(io.seata.protocol.protobuf.GlobalCommitRequestProto) returns (io.seata.protocol.protobuf.GlobalCommitResponseProto);
   rpc GlobalRollback(io.seata.protocol.protobuf.GlobalRollbackRequestProto) returns (io.seata.protocol.protobuf.GlobalRollbackResponseProto);

@@ -1,6 +1,7 @@
 package io.seata.core.rpc.grpc;
 
 import java.net.SocketAddress;
+import java.util.Objects;
 
 import io.grpc.netty.shaded.io.netty.channel.Channel;
 import io.grpc.stub.StreamObserver;
@@ -67,5 +68,22 @@ public class GrpcSeataChannel implements SeataChannel {
     @Override
     public void disconnect() {
         channel.disconnect();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GrpcSeataChannel)) {
+            return false;
+        }
+        GrpcSeataChannel that = (GrpcSeataChannel) o;
+        return Objects.equals(channel, that.channel) && Objects.equals(connectionId, that.connectionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(channel, connectionId);
     }
 }

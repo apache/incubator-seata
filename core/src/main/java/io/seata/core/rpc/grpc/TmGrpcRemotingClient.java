@@ -222,7 +222,7 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
 
     @Override
     protected boolean isEnableClientBatchSendRequest() {
-        return this.enableClientBatchSendRequest;
+        return false;
     }
 
     @Override

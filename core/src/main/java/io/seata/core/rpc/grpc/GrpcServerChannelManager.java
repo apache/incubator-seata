@@ -314,6 +314,8 @@ public class GrpcServerChannelManager implements ServerChannelManager {
 
     @Override
     public boolean isRegistered(SeataChannel channel) {
+        IDENTIFIED_CHANNELS.forEach((k, v) -> System.out.println(k + "-" + v));
+        System.out.println(channel);
         return IDENTIFIED_CHANNELS.containsKey(channel);
     }
 

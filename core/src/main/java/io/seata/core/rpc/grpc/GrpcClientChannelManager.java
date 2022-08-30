@@ -88,6 +88,8 @@ public class GrpcClientChannelManager {
 
     private SeataChannel doConnect(String serverAddress) {
         SeataChannel channelToServer = channels.get(serverAddress);
+        System.out.println(serverAddress);
+        System.out.println(channelToServer);
         if (channelToServer != null && channelToServer.isActive()) {
             return channelToServer;
         }
