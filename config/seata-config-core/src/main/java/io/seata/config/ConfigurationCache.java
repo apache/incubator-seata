@@ -223,12 +223,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             /**
              * getConfig
              */
-            STRING("Config"),
-
-            /**
-             * getLong
-             */
-            FLOAT("Float");
+            STRING("Config");
 
             private static final Map<String, ConfigType> CODE_TO_VALUE = new HashMap<>();
 
