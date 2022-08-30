@@ -90,8 +90,6 @@ public interface DefaultValues {
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
-    float DEFAULT_TM_LOSS_TIME = 1L;
-
     String DEFAULT_TX_GROUP = "default_tx_group";
     @Deprecated
     String DEFAULT_TX_GROUP_OLD = "my_test_tx_group";
