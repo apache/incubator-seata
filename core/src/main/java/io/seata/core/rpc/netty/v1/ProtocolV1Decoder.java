@@ -15,12 +15,6 @@
  */
 package io.seata.core.rpc.netty.v1;
 
-import com.taobao.txc.common.exception.TxcException;
-import com.taobao.txc.common.message.*;
-import com.taobao.txc.rpc.impl.RegisterClientAppNameMessage;
-import com.taobao.txc.rpc.impl.RegisterClientAppNameResultMessage;
-import com.taobao.txc.rpc.impl.RegisterRmMessage;
-import com.taobao.txc.rpc.impl.RegisterRmResultMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,6 +24,8 @@ import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.rpc.netty.gts.exception.TxcException;
+import io.seata.core.rpc.netty.gts.message.*;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
@@ -44,8 +40,6 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.taobao.txc.rpc.impl.TxcMessageCodec.hessianDeserialize;
 
 /**
  * <pre>
@@ -221,27 +215,27 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 }
 
                 long msgId = byteBuffer.getLong();
-                com.taobao.txc.rpc.impl.RpcMessage rpcMessage;
+                GtsRpcMessage gtsRpcMessage;
                 if (isHeartbeat) {
-                    rpcMessage = new com.taobao.txc.rpc.impl.RpcMessage();
-                    rpcMessage.setId(msgId);
-                    rpcMessage.setAsync(true);
-                    rpcMessage.setHeartbeat(isHeartbeat);
-                    rpcMessage.setRequest(isRequest);
+                    gtsRpcMessage = new GtsRpcMessage();
+                    gtsRpcMessage.setId(msgId);
+                    gtsRpcMessage.setAsync(true);
+                    gtsRpcMessage.setHeartbeat(isHeartbeat);
+                    gtsRpcMessage.setRequest(isRequest);
                     if (isRequest) {
-                        rpcMessage.setBody(com.taobao.txc.rpc.impl.HeartbeatMessage.PING);
+                        gtsRpcMessage.setBody(HeartbeatMessage.PING);
                     } else {
-                        rpcMessage.setBody(com.taobao.txc.rpc.impl.HeartbeatMessage.PONG);
+                        gtsRpcMessage.setBody(HeartbeatMessage.PONG);
                     }
 
                 } else if (bodyLength > 0 && in.readableBytes() < bodyLength) {
                     in.readerIndex(begin);
                 } else {
-                    rpcMessage = new com.taobao.txc.rpc.impl.RpcMessage();
-                    rpcMessage.setId(msgId);
-                    rpcMessage.setAsync((64 & flag) > 0);
-                    rpcMessage.setHeartbeat(false);
-                    rpcMessage.setRequest(isRequest);
+                    gtsRpcMessage = new GtsRpcMessage();
+                    gtsRpcMessage.setId(msgId);
+                    gtsRpcMessage.setAsync((64 & flag) > 0);
+                    gtsRpcMessage.setHeartbeat(false);
+                    gtsRpcMessage.setRequest(isRequest);
 
                     //Seata protocal head
                     ByteBuf seataOut = ByteBufAllocator.DEFAULT.buffer(128);
@@ -281,20 +275,19 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                             seataOut.writeInt(fullLength);
                             seataOut.writeShort(headLength);
                             seataOut.writerIndex(writeIndex);
-                            rpcMessage.setBody(codec);
+                            gtsRpcMessage.setBody(codec);
                             this.decode(ctx, seataOut);
                         } else {
                             byte[] body = new byte[bodyLength];
                             in.readBytes(body);
-                            Object bodyObject = hessianDeserialize(body);
-                            rpcMessage.setBody(bodyObject);
+                            throw new TxcException("hessianDeserialize error");
                         }
                     } catch (Exception var20) {
                         LOGGER.error("Gts Decode error, cause: {}", var20.getMessage());
                         throw new DecodeException(var20);
                     }
                     if(LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Receive: " + rpcMessage.getBody() + ",messageId: " + msgId);
+                        LOGGER.debug("Receive: " + gtsRpcMessage.getBody() + ",messageId: " + msgId);
                     }
 
                 }
