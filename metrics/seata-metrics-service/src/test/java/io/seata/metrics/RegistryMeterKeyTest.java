@@ -81,5 +81,4 @@ public class RegistryMeterKeyTest {
         Assertions.assertEquals(1, globalMeasurements.get("seata.transaction(applicationId=null,group=null,meter=timer,metricsEventStatus=globalBeginSuccess,role=tm,statistic=average,status=Begin)")
                 .getValue(), 0);
     }
-
 }
