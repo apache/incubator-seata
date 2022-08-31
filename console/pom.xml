@@ -56,7 +56,8 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
