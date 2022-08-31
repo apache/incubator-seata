@@ -29,22 +29,22 @@ public class MetricsPublisher {
 
     public static void postGlobalTransaction(String name, long beginTime, long endTime, String metricEvent, String status) {
         EVENT_BUS.post(new GlobalTransactionEvent(GlobalTransactionEvent.ROLE_TM, name,
-                getApplicationId(), getTxServiceGroup(), beginTime,endTime,status, metricEvent,false, false));
+                getApplicationId(), getTxServiceGroup(), beginTime, endTime, status, metricEvent,false, false));
     }
 
-    public static void postBranchEvent(String name,BranchType branchType, long beginTime, long endTime,String metricEvent, String status) {
+    public static void postBranchEvent(String name, BranchType branchType, long beginTime, long endTime, String metricEvent, String status) {
         if (branchType == null) {
             branchType = BranchType.AT;
         }
         EVENT_BUS.post(new BranchEvent(GlobalTransactionEvent.ROLE_TM, name,
-                getApplicationId(), getTxServiceGroup(), beginTime,endTime, branchType, status,metricEvent ,false, false));
+                getApplicationId(), getTxServiceGroup(), beginTime, endTime, branchType, status, metricEvent ,false, false));
     }
     private static String getApplicationId() {
-        return ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.APPLICATION_ID) == null ? "null":
+        return ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.APPLICATION_ID) == null ? "null" :
                 ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.APPLICATION_ID);
     }
     private static String getTxServiceGroup() {
-        return ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP) == null ? "null":
+        return ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP) == null ? "null" :
                 ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
     }
 }
