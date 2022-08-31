@@ -40,6 +40,8 @@ public class ServerChannelInterceptor implements ServerInterceptor {
         //get internal channel from serverCall
         try {
             ServerStream stream = ReflectionUtil.getFieldValue(call, "stream");
+            // grpc-netty-shaded removed the "channel" field in version 1.31.0,
+            // which means that the method cannot get the channel in version 1.31.0 and above
             Channel channel = ReflectionUtil.getFieldValue(stream, "channel");
             ctx = ctx.withValue(ContextKeyConstants.CUR_CONNECTION, channel);
         } catch (NoSuchFieldException e) {

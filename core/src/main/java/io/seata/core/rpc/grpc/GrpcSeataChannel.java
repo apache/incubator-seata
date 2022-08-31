@@ -19,6 +19,7 @@ import java.net.SocketAddress;
 import java.util.Objects;
 
 import io.grpc.netty.shaded.io.netty.channel.Channel;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
@@ -62,7 +63,11 @@ public class GrpcSeataChannel implements SeataChannel {
 
     @Override
     public boolean isActive() {
-        return channel.isActive();
+        boolean streamIsReady = true;
+        if (null != streamObserver && streamObserver instanceof ServerCallStreamObserver) {
+            streamIsReady = ((ServerCallStreamObserver<?>) streamObserver).isReady();
+        }
+        return channel.isActive() && streamIsReady;
     }
 
     @Override
@@ -77,13 +82,15 @@ public class GrpcSeataChannel implements SeataChannel {
 
     @Override
     public void close() {
+        if (streamObserver instanceof ServerCallStreamObserver) {
+            ServerCallStreamObserver<?> serverCallStreamObserver = ((ServerCallStreamObserver<?>) streamObserver);
+            if (!serverCallStreamObserver.isCancelled()) {
+                serverCallStreamObserver.onCompleted();
+            }
+        }
         channel.close();
     }
 
-    @Override
-    public void disconnect() {
-        channel.disconnect();
-    }
 
     @Override
     public boolean equals(Object o) {

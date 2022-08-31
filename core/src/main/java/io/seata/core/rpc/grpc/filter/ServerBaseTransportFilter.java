@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import io.grpc.Attributes;
 import io.grpc.Grpc;
 import io.grpc.ServerTransportFilter;
+import io.seata.common.util.StringUtils;
 import io.seata.core.rpc.grpc.ContextKeyConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,11 @@ public class ServerBaseTransportFilter extends ServerTransportFilter {
 
     @Override
     public void transportTerminated(Attributes transportAttrs) {
+        String connectionId = transportAttrs.get(ContextKeyConstants.CONNECT_ID);
+        if (StringUtils.isNotBlank(connectionId)) {
+            //TODO unregister connection
+
+        }
         super.transportTerminated(transportAttrs);
     }
 }

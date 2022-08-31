@@ -110,14 +110,15 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
 
                 @Override
                 public void onError(Throwable throwable) {
-                    //TODO client streamObserver on error
-                    LOGGER.warn("RM Request stream error: {}", throwable.toString());
+                    LOGGER.error("RM Request stream on error: {}. Client channel was cancelled and the stream will be closed", throwable.toString());
+                    tmpChannel.close();
                 }
 
                 @Override
                 public void onCompleted() {
-                    //TODO client streamObserver on completed
-                    LOGGER.info("RM Request stream onCompleted");
+                    LOGGER.info("RM Request stream on completed. The stream will be closed after server message to be sent completely");
+                    //it will wait for the server message to be sent completely
+                    tmpChannel.close();
                 }
             });
             tmpChannel.setStreamObserver(clientStreamObserver);
@@ -161,14 +162,15 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
 
                 @Override
                 public void onError(Throwable throwable) {
-                    //TODO client streamObserver on error
-                    LOGGER.warn("TM Request stream error: {}", throwable.getMessage());
+                    LOGGER.warn("TM Request stream error: {}. Client channel was cancelled and the stream will be closed", throwable.getMessage());
+                    tmpChannel.close();
                 }
 
                 @Override
                 public void onCompleted() {
-                    //TODO client streamObserver on completed
-                    LOGGER.info("TM Request stream onCompleted");
+                    LOGGER.info("TM Request stream onCompleted. The stream will be closed after server message to be sent completely");
+                    //it will wait for the server message to be sent completely
+                    tmpChannel.close();
                 }
             });
             tmpChannel.setStreamObserver(clientStreamObserver);
@@ -230,7 +232,6 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("will destroy channel:" + channel);
             }
-            channel.disconnect();
             channel.close();
         }
     }

@@ -18,6 +18,7 @@ package io.seata.core.rpc.grpc.service;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
@@ -120,14 +121,28 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
 
             @Override
             public void onError(Throwable throwable) {
-                LOGGER.error("TM Bi stream on error, error: {}", throwable.toString());
-                //TODO unregister channel
+                LOGGER.error("TM Bi stream on error, error: {}, will close the responseObserve", throwable.toString());
+                if (responseObserver instanceof ServerCallStreamObserver) {
+                    ServerCallStreamObserver<?> serverCallStreamObserver = (ServerCallStreamObserver<?>) responseObserver;
+                    if (!serverCallStreamObserver.isCancelled()) {
+                        serverCallStreamObserver.onCompleted();
+                    }
+                } else {
+                    responseObserver.onCompleted();
+                }
             }
 
             @Override
             public void onCompleted() {
                 LOGGER.info("TM Bi stream on completed");
-                //TODO unregister channel
+                if (responseObserver instanceof ServerCallStreamObserver) {
+                    ServerCallStreamObserver<?> serverCallStreamObserver = (ServerCallStreamObserver<?>) responseObserver;
+                    if (!serverCallStreamObserver.isCancelled()) {
+                        serverCallStreamObserver.onCompleted();
+                    }
+                } else {
+                    responseObserver.onCompleted();
+                }
             }
         };
     }

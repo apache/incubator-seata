@@ -58,11 +58,6 @@ public interface SeataChannel {
     void close();
 
     /**
-     * Request to disconnect from the remote peer
-     */
-    void disconnect();
-
-    /**
      * send message to remote peer with no ack
      * @param msg message to be sent
      */

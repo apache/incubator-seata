@@ -59,12 +59,8 @@ public class NettySeataChannel implements SeataChannel {
 
     @Override
     public void close() {
-        channel.close();
-    }
-
-    @Override
-    public void disconnect() {
         channel.disconnect();
+        channel.close();
     }
 
     @Override

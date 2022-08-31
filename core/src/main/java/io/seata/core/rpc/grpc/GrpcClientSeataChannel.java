@@ -19,6 +19,7 @@ import java.net.SocketAddress;
 import java.util.Objects;
 
 import io.grpc.ManagedChannel;
+import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.SeataChannel;
@@ -70,7 +71,11 @@ public class GrpcClientSeataChannel implements SeataChannel {
 
     @Override
     public boolean isActive() {
-        return !managedChannel.isTerminated() && !managedChannel.isShutdown();
+        boolean streamIsReady = true;
+        if (null != streamObserver && streamObserver instanceof ClientCallStreamObserver) {
+            streamIsReady = ((ClientCallStreamObserver<?>) streamObserver).isReady();
+        }
+        return !managedChannel.isTerminated() && !managedChannel.isShutdown() && streamIsReady;
     }
 
     @Override
@@ -78,10 +83,6 @@ public class GrpcClientSeataChannel implements SeataChannel {
         if (streamObserver != null) {
             streamObserver.onCompleted();
         }
-    }
-
-    @Override
-    public void disconnect() {
         if (null != managedChannel && !managedChannel.isShutdown()) {
             managedChannel.shutdown();
         }
