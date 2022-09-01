@@ -135,7 +135,7 @@ if [[ "$JAVA_MAJOR_VERSION" -eq "1" ]] ; then
   JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $2}')
 fi
 if [[ "$JAVA_MAJOR_VERSION" -ge "9" ]] ; then
-  JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${BASEDIR}/logs/seata_gc.log:time,tags:filecount=10,filesize=102400 --add-opens java.        base/java.lang=ALL-UNNAMED --add-opens java.base/sun.net.util=ALL-UNNAMED"
+  JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${BASEDIR}/logs/seata_gc.log:time,tags:filecount=10,filesize=102400"
 else
   JAVA_OPT="${JAVA_OPT} -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75"
 fi
