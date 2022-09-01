@@ -31,6 +31,7 @@ import java.util.function.Function;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
@@ -49,11 +50,11 @@ import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
-import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
@@ -430,5 +431,5 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
     public abstract void onRegisterMsgFail(String serverAddress, SeataChannel channel, Object response,
                                            AbstractMessage requestMessage);
 
-
+    public abstract StreamObserver<GrpcRemoting.BiStreamMessage> bindBiStream(SeataChannel channel);
 }

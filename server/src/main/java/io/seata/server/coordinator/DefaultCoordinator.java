@@ -62,7 +62,6 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.session.BranchSession;

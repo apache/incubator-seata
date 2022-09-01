@@ -354,7 +354,7 @@ public class GrpcServerChannelManager implements ServerChannelManager {
         if (null != seataChannel) {
             releaseRpcContext(seataChannel);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("remove unused channel, connectionId:{} channel:{}", connectionId, seataChannel);
+                LOGGER.info("remove closed channel, connectionId:{} channel:{}", connectionId, seataChannel);
             }
         }
     }

@@ -15,12 +15,18 @@
  */
 package io.seata.core.rpc.grpc;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import io.grpc.Channel;
+import io.grpc.stub.StreamObserver;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -30,11 +36,15 @@ import io.seata.common.util.NetUtil;
 import io.seata.config.ConfigurationCache;
 import io.seata.core.auth.AuthSigner;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.grpc.generated.GrpcRemoting;
+import io.seata.core.rpc.processor.MessageMeta;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.apache.commons.lang.StringUtils;
@@ -262,5 +272,59 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
         String errMsg = String.format(
                 "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
+    }
+
+    @Override
+    public StreamObserver<GrpcRemoting.BiStreamMessage> bindBiStream(SeataChannel channel) {
+        ConcurrentHashMap<Integer, MessageFuture> futures = getFutures();
+        return io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc.newStub((Channel) channel.originChannel()).registerTM(new StreamObserver<GrpcRemoting.BiStreamMessage>() {
+            @Override
+            public void onNext(GrpcRemoting.BiStreamMessage message) {
+                int messageId = message.getID();
+                GrpcRemoting.BiStreamMessageType messageType = message.getMessageType();
+                Any body = message.getMessage();
+                if (GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse == messageType) {
+                    io.seata.serializer.protobuf.generated.RegisterTMResponseProto registerTMResponseProto;
+                    try {
+                        registerTMResponseProto = body.unpack(io.seata.serializer.protobuf.generated.RegisterTMResponseProto.class);
+                    } catch (InvalidProtocolBufferException e) {
+                        throw new RuntimeException(e);
+                    }
+                    MessageFuture messageFuture = futures.get(messageId);
+                    if (null != messageFuture) {
+                        messageFuture.setResultMessage(ProtoTypeConvertHelper.convertToModel(registerTMResponseProto));
+                    }
+                } else {
+                    Message unpackMessage;
+                    try {
+                        unpackMessage = body.unpack(BiStreamMessageTypeHelper.getBiStreamMessageClassType(messageType));
+                    } catch (InvalidProtocolBufferException e) {
+                        throw new RuntimeException(e);
+                    }
+                    Object modelRequest = ProtoTypeConvertHelper.convertToModel(unpackMessage);
+                    //handle request
+                    RpcMessageHandleContext handleContext = new RpcMessageHandleContext(channel);
+                    MessageMeta messageMeta = new MessageMeta();
+                    messageMeta.setMessageId(messageId);
+                    handleContext.setMessageMeta(messageMeta);
+                    handleContext.setMessageReply(response -> sendAsyncResponse(NetUtil.toStringAddress(channel.remoteAddress()),
+                            handleContext.getMessageMeta(), response));
+                    processMessage(handleContext, modelRequest);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                LOGGER.warn("TM Request stream error: {}. Client channel was cancelled and the stream will be closed", throwable.getMessage());
+                channel.close();
+            }
+
+            @Override
+            public void onCompleted() {
+                LOGGER.info("TM Request stream onCompleted. The stream will be closed after server message to be sent completely");
+                //it will wait for the server message to be sent completely
+                channel.close();
+            }
+        });
     }
 }

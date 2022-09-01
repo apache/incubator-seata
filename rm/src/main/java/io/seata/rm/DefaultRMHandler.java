@@ -103,19 +103,19 @@ public class DefaultRMHandler extends AbstractRMHandler {
     }
 
     protected void initFunctionMap() {
-        functionMap.put(MessageType.TYPE_BRANCH_COMMIT, (request) -> {
+        functionMap.put(MessageType.TYPE_BRANCH_COMMIT, request -> {
             if (!(request instanceof BranchCommitRequest)) {
                 throw new IllegalArgumentException("BranchCommitRequest is required, but is actually " + request.getClass());
             }
             return handle((BranchCommitRequest) request);
         });
-        functionMap.put(MessageType.TYPE_BRANCH_ROLLBACK, (request) -> {
+        functionMap.put(MessageType.TYPE_BRANCH_ROLLBACK, request -> {
             if (!(request instanceof BranchRollbackRequest)) {
                 throw new IllegalArgumentException("BranchRollbackRequest is required, but is actually " + request.getClass());
             }
             return handle((BranchRollbackRequest) request);
         });
-        functionMap.put(MessageType.TYPE_RM_DELETE_UNDOLOG, (request) -> {
+        functionMap.put(MessageType.TYPE_RM_DELETE_UNDOLOG, request -> {
             if (!(request instanceof UndoLogDeleteRequest)) {
                 throw new IllegalArgumentException("UndoLogDeleteRequest is required, but is actually " + request.getClass());
             }

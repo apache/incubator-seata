@@ -83,7 +83,7 @@ public class GrpcSeataChannel implements SeataChannel {
     @Override
     public void close() {
         if (streamObserver instanceof ServerCallStreamObserver) {
-            ServerCallStreamObserver<?> serverCallStreamObserver = ((ServerCallStreamObserver<?>) streamObserver);
+            ServerCallStreamObserver<?> serverCallStreamObserver = (ServerCallStreamObserver<?>) streamObserver;
             if (!serverCallStreamObserver.isCancelled()) {
                 serverCallStreamObserver.onCompleted();
             }

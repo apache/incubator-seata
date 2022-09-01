@@ -16,25 +16,17 @@
 package io.seata.core.rpc.grpc;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
-import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
-import io.seata.core.rpc.RpcChannelPoolKey;
-import io.seata.core.rpc.processor.MessageMeta;
-import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +49,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[GRPC]NettyPool create channel to " + key);
         }
-        ManagedChannel managedChannel = ManagedChannelBuilder
-                .forAddress(address.getAddress().getHostAddress(), address.getPort())
-                .usePlaintext()
-                .directExecutor()
-                .build();
+        ManagedChannel managedChannel = creatNewChannel(address);
         long start = System.currentTimeMillis();
         Object response;
         GrpcClientSeataChannel channelToServer = null;
@@ -69,113 +57,10 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         if (key.getMessage() == null) {
             throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
         }
-
-        if (RpcChannelPoolKey.TransactionRole.RMROLE == key.getTransactionRole()) {
-            ConcurrentHashMap<Integer, MessageFuture> futures = rpcRemotingClient.getFutures();
-            StreamObserver<GrpcRemoting.BiStreamMessage> clientStreamObserver = ResourceManagerServiceGrpc.newStub(managedChannel).registerRM(new StreamObserver<GrpcRemoting.BiStreamMessage>() {
-                @Override
-                public void onNext(GrpcRemoting.BiStreamMessage message) {
-                    int messageId = message.getID();
-                    GrpcRemoting.BiStreamMessageType messageType = message.getMessageType();
-                    Any body = message.getMessage();
-                    if (GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse == messageType) {
-                        io.seata.serializer.protobuf.generated.RegisterRMResponseProto registerRMResponseProto;
-                        try {
-                            registerRMResponseProto = body.unpack(io.seata.serializer.protobuf.generated.RegisterRMResponseProto.class);
-                        } catch (InvalidProtocolBufferException e) {
-                            throw new RuntimeException(e);
-                        }
-                        MessageFuture messageFuture = futures.get(messageId);
-                        if (null != messageFuture) {
-                            messageFuture.setResultMessage(ProtoTypeConvertHelper.convertToModel(registerRMResponseProto));
-                        }
-                    } else {
-                        Message unpackMessage;
-                        try {
-                            unpackMessage = body.unpack(BiStreamMessageTypeHelper.getBiStreamMessageClassType(messageType));
-                        } catch (InvalidProtocolBufferException e) {
-                            throw new RuntimeException(e);
-                        }
-                        Object modelRequest = ProtoTypeConvertHelper.convertToModel(unpackMessage);
-                        //handle request
-                        RpcMessageHandleContext handleContext = new RpcMessageHandleContext(tmpChannel);
-                        MessageMeta messageMeta = new MessageMeta();
-                        messageMeta.setMessageId(messageId);
-                        handleContext.setMessageMeta(messageMeta);
-                        handleContext.setMessageReply(response -> rpcRemotingClient.sendAsyncResponse(NetUtil.toStringAddress(tmpChannel.remoteAddress()),
-                                handleContext.getMessageMeta(), response));
-                        rpcRemotingClient.processMessage(handleContext, modelRequest);
-                    }
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    LOGGER.error("RM Request stream on error: {}. Client channel was cancelled and the stream will be closed", throwable.toString());
-                    tmpChannel.close();
-                }
-
-                @Override
-                public void onCompleted() {
-                    LOGGER.info("RM Request stream on completed. The stream will be closed after server message to be sent completely");
-                    //it will wait for the server message to be sent completely
-                    tmpChannel.close();
-                }
-            });
-            tmpChannel.setStreamObserver(clientStreamObserver);
-        } else if (RpcChannelPoolKey.TransactionRole.TMROLE == key.getTransactionRole()) {
-            ConcurrentHashMap<Integer, MessageFuture> futures = rpcRemotingClient.getFutures();
-            StreamObserver<GrpcRemoting.BiStreamMessage> clientStreamObserver = io.seata.core.rpc.grpc.generated.TransactionManagerServiceGrpc.newStub(managedChannel).registerTM(new StreamObserver<GrpcRemoting.BiStreamMessage>() {
-                @Override
-                public void onNext(GrpcRemoting.BiStreamMessage message) {
-                    int messageId = message.getID();
-                    GrpcRemoting.BiStreamMessageType messageType = message.getMessageType();
-                    Any body = message.getMessage();
-                    if (GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse == messageType) {
-                        io.seata.serializer.protobuf.generated.RegisterTMResponseProto registerTMResponseProto;
-                        try {
-                            registerTMResponseProto = body.unpack(io.seata.serializer.protobuf.generated.RegisterTMResponseProto.class);
-                        } catch (InvalidProtocolBufferException e) {
-                            throw new RuntimeException(e);
-                        }
-                        MessageFuture messageFuture = futures.get(messageId);
-                        if (null != messageFuture) {
-                            messageFuture.setResultMessage(ProtoTypeConvertHelper.convertToModel(registerTMResponseProto));
-                        }
-                    } else {
-                        Message unpackMessage;
-                        try {
-                            unpackMessage = body.unpack(BiStreamMessageTypeHelper.getBiStreamMessageClassType(messageType));
-                        } catch (InvalidProtocolBufferException e) {
-                            throw new RuntimeException(e);
-                        }
-                        Object modelRequest = ProtoTypeConvertHelper.convertToModel(unpackMessage);
-                        //handle request
-                        RpcMessageHandleContext handleContext = new RpcMessageHandleContext(tmpChannel);
-                        MessageMeta messageMeta = new MessageMeta();
-                        messageMeta.setMessageId(messageId);
-                        handleContext.setMessageMeta(messageMeta);
-                        handleContext.setMessageReply(response -> rpcRemotingClient.sendAsyncResponse(NetUtil.toStringAddress(tmpChannel.remoteAddress()),
-                                handleContext.getMessageMeta(), response));
-                        rpcRemotingClient.processMessage(handleContext, modelRequest);
-                    }
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    LOGGER.warn("TM Request stream error: {}. Client channel was cancelled and the stream will be closed", throwable.getMessage());
-                    tmpChannel.close();
-                }
-
-                @Override
-                public void onCompleted() {
-                    LOGGER.info("TM Request stream onCompleted. The stream will be closed after server message to be sent completely");
-                    //it will wait for the server message to be sent completely
-                    tmpChannel.close();
-                }
-            });
+        StreamObserver<GrpcRemoting.BiStreamMessage> clientStreamObserver = rpcRemotingClient.bindBiStream(tmpChannel);
+        if (null != clientStreamObserver) {
             tmpChannel.setStreamObserver(clientStreamObserver);
         }
-
         try {
             response = rpcRemotingClient.sendSyncRequest(tmpChannel, key.getMessage());
             if (!isRegisterSuccess(response, key.getTransactionRole())) {
@@ -186,7 +71,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
             }
         } catch (Exception exx) {
             String errMessage = exx.getMessage();
-//            tmpChannel.close();
+            tmpChannel.close();
             LOGGER.error("can not connect to server with grpc, maybe the server:{} does not support grpc protocol communication", address);
             throw new FrameworkException(
                     "register " + key.getTransactionRole().name() + " error, errMsg:" + errMessage);
@@ -225,6 +110,14 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         } else {
             return ((RegisterRMResponse) response).getVersion();
         }
+    }
+
+    private ManagedChannel creatNewChannel(InetSocketAddress address) {
+        return ManagedChannelBuilder
+                .forAddress(address.getAddress().getHostAddress(), address.getPort())
+                .usePlaintext()
+                .directExecutor()
+                .build();
     }
 
     @Override
