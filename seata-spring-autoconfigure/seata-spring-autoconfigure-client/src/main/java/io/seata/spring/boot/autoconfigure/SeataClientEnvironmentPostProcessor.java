@@ -34,7 +34,19 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_METRICS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MACHINE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 
 /**
  * @author xingfudeshi@gmail.com

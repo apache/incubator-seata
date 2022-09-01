@@ -18,7 +18,8 @@ package io.seata.spring.boot.autoconfigure.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_METRICS_PREFIX;
+
 
 /**
  * @author spilledyear@outlook.com
