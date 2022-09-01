@@ -26,14 +26,4 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_GRPC_PR
 @Component
 @ConfigurationProperties(prefix = SERVER_GRPC_PREFIX)
 public class ServerGrpcProperties {
-    private Integer servicePort;
-
-    public Integer getServicePort() {
-        return servicePort;
-    }
-
-    public ServerGrpcProperties setServicePort(Integer servicePort) {
-        this.servicePort = servicePort;
-        return this;
-    }
 }

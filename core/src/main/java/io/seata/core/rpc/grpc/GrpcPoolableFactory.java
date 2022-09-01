@@ -187,6 +187,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         } catch (Exception exx) {
             String errMessage = exx.getMessage();
 //            tmpChannel.close();
+            LOGGER.error("can not connect to server with grpc, maybe the server:{} does not support grpc protocol communication", address);
             throw new FrameworkException(
                     "register " + key.getTransactionRole().name() + " error, errMsg:" + errMessage);
         }

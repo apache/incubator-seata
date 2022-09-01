@@ -16,11 +16,13 @@
 package io.seata.core.rpc.grpc;
 
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.BaseRpcConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.ConfigurationKeys.GRPC_SERVER_SERVICE_PORT_CAMEL;
+import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
 
 /**
@@ -32,7 +34,7 @@ public class GrpcServerConfig extends BaseRpcConfig {
     /**
      * Netty Server listen port
      */
-    private static final int DEFAULT_LISTEN_PORT = 8591;
+    private static final int DEFAULT_LISTEN_PORT = 10091;
 
     /**
      * Server Rpc request timeout
@@ -74,10 +76,10 @@ public class GrpcServerConfig extends BaseRpcConfig {
      * @return the listen port
      */
     public int getListenPort() {
-        String strPort = CONFIG.getConfig(GRPC_SERVER_SERVICE_PORT_CAMEL);
+        String serverPort = ConfigurationFactory.getInstance().getConfig(SERVER_SERVICE_PORT_CAMEL);
         int port = 0;
         try {
-            port = Integer.parseInt(strPort);
+            port = Integer.parseInt(serverPort) + DefaultValues.GRPC_SERVICE_PORT_OFFSET;
         } catch (NumberFormatException exx) {
             LOGGER.error("grpc server service port set error:{}", exx.toString());
         }

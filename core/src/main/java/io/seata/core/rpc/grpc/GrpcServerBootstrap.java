@@ -86,8 +86,6 @@ public class GrpcServerBootstrap implements RemotingBootstrap {
             this.server.start();
             LOGGER.info("Grpc server started, service listen port: {}", getListenPort());
 
-            // RegistryFactory register service
-            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), getListenPort()));
             initialized.set(true);
         } catch (Exception e) {
             throw new RuntimeException("GRPC Server start failed", e);

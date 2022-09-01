@@ -27,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
@@ -161,7 +162,7 @@ public class GrpcClientChannelManager {
         }
 
         return availInetSocketAddressList.stream()
-                .map(NetUtil::toStringAddress)
+                .map(address -> NetUtil.toStringAddress(new InetSocketAddress(address.getAddress().getHostAddress(), address.getPort() + DefaultValues.GRPC_SERVICE_PORT_OFFSET)))
                 .collect(Collectors.toList());
     }
 

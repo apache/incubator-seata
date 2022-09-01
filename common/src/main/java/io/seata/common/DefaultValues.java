@@ -106,7 +106,7 @@ public interface DefaultValues {
 
     int SERVICE_OFFSET_SPRING_BOOT = 1000;
 
-    int GRPC_SERVICE_OFFSET_SPRING_BOOT = 1500;
+    int GRPC_SERVICE_PORT_OFFSET = 2000;
 
     String SERVER_PORT = "seata.server.port";
 

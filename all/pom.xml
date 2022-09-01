@@ -337,13 +337,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>io.seata</groupId>
-            <artifactId>protobuf-lib</artifactId>
-            <version>${project.version}</version>
-            <!-- Slimming down for 'seata-all.jar' -->
-            <scope>provided</scope>
-        </dependency>
 
         <!-- spring  -->
         <dependency>
