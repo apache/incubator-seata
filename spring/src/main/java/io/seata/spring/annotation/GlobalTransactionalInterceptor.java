@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.eventbus.Subscribe;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -78,14 +79,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private int order;
     protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
-    private static volatile boolean degradeCheck;
+    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
     private static final EventBus EVENT_BUS = new GuavaEventBus("degradeCheckEventBus", true);
-    private static ScheduledThreadPoolExecutor executor =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
-
+    private static volatile ScheduledThreadPoolExecutor executor;
     //region DEFAULT_GLOBAL_TRANSACTION_TIMEOUT
 
     private static int defaultGlobalTransactionTimeout = 0;
@@ -127,19 +126,17 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
         this.order =
             ConfigurationFactory.getInstance().getInt(ConfigurationKeys.TM_INTERCEPTOR_ORDER, TM_INTERCEPTOR_ORDER);
-        degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
+        boolean degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
-        if (degradeCheck) {
-            ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
-            degradeCheckPeriod = ConfigurationFactory.getInstance()
+        degradeCheckPeriod = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
-            degradeCheckAllowTimes = ConfigurationFactory.getInstance()
+        degradeCheckAllowTimes = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
-            EVENT_BUS.register(this);
-            if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                startDegradeCheck();
-            }
+        EVENT_BUS.register(this);
+        if (degradeCheck && degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+            startDegradeCheck();
         }
+        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
         this.initDefaultGlobalTransactionTimeout();
     }
 
@@ -153,7 +150,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-            boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
+            boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
                     AspectTransactional transactional;
@@ -267,7 +264,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            if (degradeCheck) {
+            if (ATOMIC_DEGRADE_CHECK.get()) {
                 EVENT_BUS.post(new DegradeCheckEvent(succeed));
             }
         }
@@ -296,13 +293,28 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     public void onChangeEvent(ConfigurationChangeEvent event) {
         if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                disable, event.getNewValue());
+                    disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
-            degradeCheck = Boolean.parseBoolean(event.getNewValue());
+            boolean degradeCheck = Boolean.parseBoolean(event.getNewValue());
             if (!degradeCheck) {
                 degradeNum = 0;
+                stopDegradeCheck();
+            } else if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+                startDegradeCheck();
             }
+        }
+    }
+
+    /**
+     * stop auto degrade
+     */
+    private static void stopDegradeCheck() {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(true, false)) {
+            return;
+        }
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
         }
     }
 
@@ -310,8 +322,15 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * auto upgrade service detection
      */
     private static void startDegradeCheck() {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(false, true)) {
+            return;
+        }
+        if (executor != null && !executor.isShutdown()) {
+            return;
+        }
+        executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
         executor.scheduleAtFixedRate(() -> {
-            if (degradeCheck) {
+            if (ATOMIC_DEGRADE_CHECK.get()) {
                 try {
                     String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
                     TransactionManagerHolder.get().commit(xid);

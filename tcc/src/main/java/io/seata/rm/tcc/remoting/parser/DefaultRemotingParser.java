@@ -170,8 +170,8 @@ public class DefaultRemotingParser {
         }
         remotingServiceMap.put(beanName, remotingBeanDesc);
 
-        Class<?> interfaceClass = remotingBeanDesc.getInterfaceClass();
-        Method[] methods = interfaceClass.getMethods();
+        Class<?> serviceClass = remotingBeanDesc.getServiceClass();
+        Method[] methods = serviceClass.getMethods();
         if (remotingParser.isService(bean, beanName)) {
             try {
                 //service bean, registry resource
@@ -184,10 +184,10 @@ public class DefaultRemotingParser {
                         tccResource.setTargetBean(targetBean);
                         tccResource.setPrepareMethod(m);
                         tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                        tccResource.setCommitMethod(interfaceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                        tccResource.setCommitMethod(serviceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
                                 twoPhaseBusinessAction.commitArgsClasses()));
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                        tccResource.setRollbackMethod(interfaceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                        tccResource.setRollbackMethod(serviceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
                                 twoPhaseBusinessAction.rollbackArgsClasses()));
                         // set argsClasses
                         tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
