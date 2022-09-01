@@ -110,6 +110,11 @@ public class OceanBaseOracleInsertExecutor<T, S extends Statement> extends BaseI
 
     @Override
     public List<Object> getPkValuesByDefault() {
+        return getPkValuesByDefault(null);
+    }
+
+    @Override
+    public List<Object> getPkValuesByDefault(String pkKey) {
         throw new NotSupportYetException("Default value is not supported yet");
     }
 }
