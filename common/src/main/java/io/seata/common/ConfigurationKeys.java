@@ -425,7 +425,8 @@ public interface ConfigurationKeys {
     /**
      * The constant METRICS_PREFIX.
      */
-    String METRICS_PREFIX = "metrics.";
+    String SERVER_METRICS_PREFIX = "server.metrics.";
+    String CLIENT_METRICS_PREFIX = "client.metrics.";
 
     /**
      * The constant METRICS_ENABLED.

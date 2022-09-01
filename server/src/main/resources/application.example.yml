@@ -108,6 +108,11 @@ seata:
     enable-parallel-request-handle: true
     retry-dead-threshold: 130000
     xaer-nota-retry-timeout: 60000
+    metrics:
+      enabled: true
+      registry-type: compact
+      exporter-list: prometheus
+      exporter-prometheus-port: 9898
     recovery:
       handle-all-session-period: 1000
     undo:
@@ -159,11 +164,6 @@ seata:
       sentinel:
         master-name:
         sentinel-hosts:
-  metrics:
-    enabled: false
-    registry-type: compact
-    exporter-list: prometheus
-    exporter-prometheus-port: 9898
   transport:
     rpc-tc-request-timeout: 30000
     enable-tc-server-batch-send-response: false

@@ -25,6 +25,8 @@ import io.seata.metrics.registry.RegistryFactory;
 
 import java.util.List;
 
+import static io.seata.metrics.IdConstants.ROLE_VALUE_SERVER;
+
 /**
  * Metrics manager for init
  *
@@ -40,8 +42,6 @@ public class MetricsManager {
     }
 
     private Registry registry;
-    public static final String ROLE_VALUE_SERVER = "server";
-    public static final String ROLE_VALUE_CLIENT = "client";
 
     private static String role = ROLE_VALUE_SERVER;
 
@@ -59,12 +59,14 @@ public class MetricsManager {
     }
 
     public void init() {
-        boolean enabled = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, true);
+        boolean enabled = getRole().equals(ROLE_VALUE_SERVER) ? ConfigurationFactory.getInstance().getBoolean(
+                ConfigurationKeys.SERVER_METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, true) :
+                ConfigurationFactory.getInstance().getBoolean(
+                        ConfigurationKeys.CLIENT_METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, true);
         if (enabled) {
-            registry = RegistryFactory.getInstance();
+            registry = RegistryFactory.getInstance(this.getRole());
             if (registry != null) {
-                List<Exporter> exporters = ExporterFactory.getInstanceList();
+                List<Exporter> exporters = ExporterFactory.getInstanceList(this.getRole());
                 //only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
                 if (exporters.size() != 0) {
                     exporters.forEach(exporter -> exporter.setRegistry(registry));

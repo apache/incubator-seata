@@ -23,16 +23,20 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
+import static io.seata.metrics.IdConstants.ROLE_VALUE_SERVER;
+
 /**
  * Registry Factory for load configured metrics registry
  *
  * @author zhengyangyong
  */
 public class RegistryFactory {
-    public static Registry getInstance() {
+    public static Registry getInstance(String role) {
         RegistryType registryType;
-        String registryTypeName = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE, "compact");
+        String registryTypeName = role.equals(ROLE_VALUE_SERVER) ? ConfigurationFactory.getInstance().getConfig(
+                    ConfigurationKeys.SERVER_METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE, "compact") :
+                ConfigurationFactory.getInstance().getConfig(
+                    ConfigurationKeys.CLIENT_METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE, "compact");
         if (!StringUtils.isNullOrEmpty(registryTypeName)) {
             try {
                 registryType = RegistryType.getType(registryTypeName);

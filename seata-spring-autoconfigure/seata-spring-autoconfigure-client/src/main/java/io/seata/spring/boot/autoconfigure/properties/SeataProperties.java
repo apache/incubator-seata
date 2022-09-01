@@ -78,6 +78,9 @@ public class SeataProperties {
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
 
+    @Autowired
+    private ClientMetricsProperties clientMetricsProperties;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -180,5 +183,13 @@ public class SeataProperties {
     public SeataProperties setSecretKey(String secretKey) {
         this.secretKey = secretKey;
         return this;
+    }
+
+    public ClientMetricsProperties getClientMetricsProperties() {
+        return clientMetricsProperties;
+    }
+
+    public void setClientMetricsProperties(ClientMetricsProperties clientMetricsProperties) {
+        this.clientMetricsProperties = clientMetricsProperties;
     }
 }

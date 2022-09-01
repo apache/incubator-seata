@@ -70,7 +70,8 @@ public interface StarterConstants {
     String SERVER_UNDO_PREFIX = SERVER_PREFIX + ".undo";
     String SERVER_RECOVERY_PREFIX = SERVER_PREFIX + ".recovery";
 
-    String METRICS_PREFIX = SEATA_PREFIX + ".metrics";
+    String SERVER_METRICS_PREFIX = SERVER_PREFIX + ".metrics";
+    String CLIENT_METRICS_PREFIX = CLIENT_PREFIX + ".metrics";
 
     String STORE_PREFIX = SEATA_PREFIX + ".store";
     String STORE_SESSION_PREFIX = STORE_PREFIX + ".session";

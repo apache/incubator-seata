@@ -123,8 +123,8 @@ server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
 server.enableParallelRequestHandle=false
 
-#Metrics configuration, only for the server
-metrics.enabled=true
-metrics.registryType=compact
-metrics.exporterList=prometheus
-metrics.exporterPrometheusPort=9898
+#server's metrics configuration
+server.metrics.enabled=true
+server.metrics.registryType=compact
+server.metrics.exporterList=prometheus
+server.metrics.exporterPrometheusPort=9898

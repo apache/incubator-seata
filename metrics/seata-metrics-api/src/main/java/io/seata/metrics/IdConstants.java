@@ -44,6 +44,8 @@ public interface IdConstants {
     String ROLE_VALUE_TM = "tm";
 
     String ROLE_VALUE_RM = "rm";
+    String ROLE_VALUE_SERVER = "server";
+    String ROLE_VALUE_CLIENT = "client";
 
     String METER_VALUE_GAUGE = "gauge";
 

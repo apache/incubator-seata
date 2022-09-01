@@ -68,6 +68,7 @@ import org.springframework.core.Ordered;
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
+import static io.seata.metrics.IdConstants.ROLE_VALUE_CLIENT;
 
 /**
  * The type Global transaction scanner.
@@ -229,10 +230,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
 
         //init metrics exporter
-        MetricsManager.setRole(MetricsManager.ROLE_VALUE_CLIENT);
+        MetricsManager.setRole(ROLE_VALUE_CLIENT);
         MetricsManager.get().init();
         if (LOGGER.isInfoEnabled() && ConfigurationFactory.getInstance().getBoolean(
-                ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED)) {
+                ConfigurationKeys.CLIENT_METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED)) {
             LOGGER.info("Client MetricsManager is initialized");
         }
 

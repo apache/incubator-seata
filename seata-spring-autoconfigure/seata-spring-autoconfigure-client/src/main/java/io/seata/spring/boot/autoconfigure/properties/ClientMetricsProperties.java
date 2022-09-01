@@ -18,25 +18,24 @@ package io.seata.spring.boot.autoconfigure.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
 
 /**
  * @author spilledyear@outlook.com
  */
 @Component
-@ConfigurationProperties(prefix = METRICS_PREFIX)
-public class MetricsProperties {
-    private Boolean enabled = true;
-    private String registryType = "compact";
-    private String exporterList = "prometheus";
-    private Integer exporterPrometheusPort = 9898;
-
+@ConfigurationProperties(prefix = CLIENT_METRICS_PREFIX)
+public class ClientMetricsProperties {
+    protected Boolean enabled = true;
+    protected String registryType = "compact";
+    protected String exporterList = "prometheus";
+    protected Integer exporterPrometheusPort = 9899;
 
     public Boolean getEnabled() {
         return enabled;
     }
 
-    public MetricsProperties setEnabled(Boolean enabled) {
+    public ClientMetricsProperties setEnabled(Boolean enabled) {
         this.enabled = enabled;
         return this;
     }
@@ -45,7 +44,7 @@ public class MetricsProperties {
         return registryType;
     }
 
-    public MetricsProperties setRegistryType(String registryType) {
+    public ClientMetricsProperties setRegistryType(String registryType) {
         this.registryType = registryType;
         return this;
     }
@@ -54,7 +53,7 @@ public class MetricsProperties {
         return exporterList;
     }
 
-    public MetricsProperties setExporterList(String exporterList) {
+    public ClientMetricsProperties setExporterList(String exporterList) {
         this.exporterList = exporterList;
         return this;
     }
@@ -63,8 +62,9 @@ public class MetricsProperties {
         return exporterPrometheusPort;
     }
 
-    public MetricsProperties setExporterPrometheusPort(Integer exporterPrometheusPort) {
+    public ClientMetricsProperties setExporterPrometheusPort(Integer exporterPrometheusPort) {
         this.exporterPrometheusPort = exporterPrometheusPort;
         return this;
     }
+
 }

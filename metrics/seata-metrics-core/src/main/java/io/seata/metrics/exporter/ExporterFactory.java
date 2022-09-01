@@ -26,6 +26,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.metrics.IdConstants.ROLE_VALUE_SERVER;
+
 /**
  * Exporter Factory for load all configured exporters
  *
@@ -34,10 +36,12 @@ import org.slf4j.LoggerFactory;
 public class ExporterFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExporterFactory.class);
 
-    public static List<Exporter> getInstanceList() {
+    public static List<Exporter> getInstanceList(String role) {
+        String exporterTypeNameList = role.equals(ROLE_VALUE_SERVER) ? ConfigurationFactory.getInstance().getConfig(
+                ConfigurationKeys.SERVER_METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, "prometheus") :
+                ConfigurationFactory.getInstance().getConfig(
+                        ConfigurationKeys.CLIENT_METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, "prometheus");
         List<Exporter> exporters = new ArrayList<>();
-        String exporterTypeNameList = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, "prometheus");
         if (!StringUtils.isNullOrEmpty(exporterTypeNameList)) {
             String[] exporterTypeNames = exporterTypeNameList.split(",");
             for (String exporterTypeName : exporterTypeNames) {
@@ -45,7 +49,7 @@ public class ExporterFactory {
                 try {
                     exporterType = ExporterType.getType(exporterTypeName);
                     exporters.add(
-                        EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).getName()));
+                        EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).getName(), new String[]{role}));
                 } catch (Exception exx) {
                     LOGGER.error("not support metrics exporter type: {}",exporterTypeName, exx);
                 }

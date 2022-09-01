@@ -34,6 +34,7 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.metrics.IdConstants.ROLE_VALUE_SERVER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
@@ -58,7 +59,7 @@ public class Server {
         ParameterParser parameterParser = new ParameterParser(args);
 
         //initialize the metrics
-        MetricsManager.setRole(MetricsManager.ROLE_VALUE_SERVER);
+        MetricsManager.setRole(ROLE_VALUE_SERVER);
         MetricsManager.get().init();
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());

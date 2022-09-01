@@ -18,6 +18,7 @@ package io.seata.spring.boot.autoconfigure;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.rm.tcc.config.TCCFenceConfig;
 import io.seata.saga.engine.StateMachineConfig;
+import io.seata.spring.boot.autoconfigure.properties.ClientMetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
@@ -33,18 +34,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MACHINE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -55,6 +45,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+        PROPERTY_BEAN_MAP.put(CLIENT_METRICS_PREFIX, ClientMetricsProperties.class);
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
 
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, RmProperties.class);

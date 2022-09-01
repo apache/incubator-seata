@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.seata.metrics.IdConstants.ROLE_VALUE_CLIENT;
 import static io.seata.metrics.TCMeterIdConstants.COUNTER_ACTIVE;
 
 public class RegistryMeterKeyTest {
@@ -29,7 +30,7 @@ public class RegistryMeterKeyTest {
 
     @Test
     public void testClientMetrics() {
-        MetricsManager.setRole(MetricsManager.ROLE_VALUE_CLIENT);
+        MetricsManager.setRole(ROLE_VALUE_CLIENT);
         MetricsManager.get().init();
         MetricsPublisher.postBranchEvent("gtx", BranchType.XA, 0, 1, IdConstants.METRICS_EVENT_STATUS_VALUE_BRANCH_REGISTER_SUCCESS, BranchStatus.Registered.name());
         Map<String, Measurement> branchMeasurements = new HashMap<>();

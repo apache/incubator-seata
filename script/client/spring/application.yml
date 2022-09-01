@@ -46,6 +46,11 @@ seata:
     load-balance:
       type: RandomLoadBalance
       virtual-nodes: 10
+    metrics:
+      enabled: true
+      registry-type: compact
+      exporter-list: prometheus
+      exporter-prometheus-port: 9899
   service:
     vgroup-mapping:
       default_tx_group: default

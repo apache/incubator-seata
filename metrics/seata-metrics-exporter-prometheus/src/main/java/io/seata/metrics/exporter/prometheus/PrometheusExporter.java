@@ -31,6 +31,7 @@ import io.seata.metrics.exporter.Exporter;
 import io.seata.metrics.registry.Registry;
 
 import static io.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETHEUS_PORT;
+import static io.seata.metrics.IdConstants.ROLE_VALUE_SERVER;
 
 /**
  * Exporter for Prometheus
@@ -44,9 +45,11 @@ public class PrometheusExporter extends Collector implements Collector.Describab
 
     private Registry registry;
 
-    public PrometheusExporter() throws IOException {
-        int port = ConfigurationFactory.getInstance().getInt(
-            ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, 9898);
+    public PrometheusExporter(String role) throws IOException {
+        int port = role.equals(ROLE_VALUE_SERVER) ? ConfigurationFactory.getInstance().getInt(
+                ConfigurationKeys.SERVER_METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, 9898) :
+                ConfigurationFactory.getInstance().getInt(
+                        ConfigurationKeys.CLIENT_METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, 9899);
         this.server = new HTTPServer(port, true);
         this.register();
     }

@@ -15,7 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.spring.boot.autoconfigure.properties.MetricsProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.ServerMetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerUndoProperties;
@@ -62,7 +62,7 @@ public class ServerPropertiesTest {
 
     @Test
     public void testMetricsProperties() {
-        assertEquals(context.getBean(MetricsProperties.class).getExporterList(), "prometheus");
+        assertEquals(context.getBean(ServerMetricsProperties.class).getExporterList(), "prometheus");
     }
 
     @Test
