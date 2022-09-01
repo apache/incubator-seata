@@ -164,27 +164,27 @@ public class SessionHelper {
     public static void endRollbacked(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
         if (retryGlobal || !DELAY_HANDLE_SESSION) {
             long beginTime = System.currentTimeMillis();
+            boolean timeoutDone = false;
             GlobalStatus currentStatus = globalSession.getStatus();
+            if (currentStatus == GlobalStatus.TimeoutRollbacking) {
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
+                timeoutDone = true;
+            }
             boolean retryBranch =
-                currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
+                    currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
             if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
             }
             globalSession.end();
-            if (!DELAY_HANDLE_SESSION) {
+            if (!DELAY_HANDLE_SESSION && !timeoutDone) {
                 MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
-                beginTime, retryBranch);
+                    beginTime, retryBranch);
         } else {
-            if (SessionStatusValidator.isTimeoutGlobalStatus(globalSession.getStatus())) {
-                globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
-                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
-            } else {
-                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
-            }
+            MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
         }
     }
 
