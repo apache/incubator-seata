@@ -129,6 +129,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
         if (mergeSendExecutorService != null) {
             mergeSendExecutorService.shutdown();
         }
+        clientChannelManager.closeAllChannel();
         super.destroy();
     }
 
@@ -159,7 +160,6 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
         }
 
         if (this.isEnableClientBatchSendRequest()) {
-            //TODO batch request send
             throw new NotSupportYetException("batch message send is not yet supported now");
         } else {
             SeataChannel channel = clientChannelManager.acquireChannel(serverAddress);

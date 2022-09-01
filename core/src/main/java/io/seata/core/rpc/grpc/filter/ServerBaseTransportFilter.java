@@ -20,8 +20,12 @@ import java.net.InetSocketAddress;
 import io.grpc.Attributes;
 import io.grpc.Grpc;
 import io.grpc.ServerTransportFilter;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.core.rpc.RpcType;
+import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.grpc.ContextKeyConstants;
+import io.seata.core.rpc.grpc.GrpcServerChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +41,15 @@ public class ServerBaseTransportFilter extends ServerTransportFilter {
     public Attributes transportReady(Attributes transportAttrs) {
         InetSocketAddress remoteAddress = (InetSocketAddress) transportAttrs.get(Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
         if (null == remoteAddress) {
-            throw new IllegalStateException("can not get remoteAddress from transportAttrs");
+            throw new ShouldNeverHappenException("can not get remoteAddress from transportAttrs");
         }
 
         //Generate connection ID based on remote address and current time
         String connectionId = remoteAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR +
                 remoteAddress.getPort() + "_" + System.currentTimeMillis();
-        LOGGER.info("Transport ready for connection:" + connectionId);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Transport ready for connection:" + connectionId);
+        }
         return transportAttrs.toBuilder().set(ContextKeyConstants.CONNECT_ID, connectionId).build();
     }
 
@@ -51,8 +57,11 @@ public class ServerBaseTransportFilter extends ServerTransportFilter {
     public void transportTerminated(Attributes transportAttrs) {
         String connectionId = transportAttrs.get(ContextKeyConstants.CONNECT_ID);
         if (StringUtils.isNotBlank(connectionId)) {
-            //TODO unregister connection
-
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Transport terminated for connection:" + connectionId);
+            }
+            GrpcServerChannelManager serverManager = (GrpcServerChannelManager) SeataChannelServerManager.getServerManager(RpcType.GRPC);
+            serverManager.unregister(connectionId);
         }
         super.transportTerminated(transportAttrs);
     }

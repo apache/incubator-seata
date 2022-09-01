@@ -275,4 +275,19 @@ public class GrpcClientChannelManager {
             }
         }
     }
+
+    public void closeAllChannel() {
+        channels.forEach((serverAddress, channel) -> {
+            try {
+                synchronized (channelLocks.get(serverAddress)) {
+                    channel.close();
+                    LOGGER.info("close server channel, address:{}, channel:{}", serverAddress, channel);
+                }
+            } catch (Exception exx) {
+                LOGGER.error(exx.getMessage());
+            }
+        });
+        channels.clear();
+        channelLocks.clear();
+    }
 }

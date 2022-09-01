@@ -45,6 +45,8 @@ import org.slf4j.LoggerFactory;
 public class GrpcServerChannelManager implements ServerChannelManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcServerChannelManager.class);
 
+    private final Map<String, SeataChannel> channelMap = new ConcurrentHashMap<>();
+
     /**
      * connectionId -> rpcContext
      */
@@ -71,6 +73,7 @@ public class GrpcServerChannelManager implements ServerChannelManager {
                 null, channel);
         rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         IDENTIFIED_CHANNELS.put(channel, rpcContext);
+        channelMap.put(channel.getId(), channel);
 
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
                 + SeataChannelUtil.getClientIpFromChannel(channel);
@@ -94,6 +97,7 @@ public class GrpcServerChannelManager implements ServerChannelManager {
             rpcContext = IDENTIFIED_CHANNELS.get(channel);
             rpcContext.addResources(dbKeySet);
         }
+        channelMap.put(channel.getId(), channel);
 
         if (CollectionUtils.isEmpty(dbKeySet)) {
             return;
@@ -342,6 +346,16 @@ public class GrpcServerChannelManager implements ServerChannelManager {
         RpcContext rpcContext = getContextFromIdentified(channel);
         if (rpcContext != null) {
             rpcContext.release();
+        }
+    }
+
+    public void unregister(String connectionId) {
+        SeataChannel seataChannel = channelMap.get(connectionId);
+        if (null != seataChannel) {
+            releaseRpcContext(seataChannel);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("remove unused channel, connectionId:{} channel:{}", connectionId, seataChannel);
+            }
         }
     }
 
