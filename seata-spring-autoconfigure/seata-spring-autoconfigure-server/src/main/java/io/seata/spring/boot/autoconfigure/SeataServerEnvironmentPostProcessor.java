@@ -30,7 +30,20 @@ import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_METRICS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SESSION_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 
 /**
  * @author xingfudeshi@gmail.com
