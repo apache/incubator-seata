@@ -45,7 +45,6 @@ public class KafkaProducer implements MqProducer {
     public KafkaProducer() {
         Properties properties = new Properties();
         String defaultKafkaServer = "localhost:9092";
-        //TODO 没有前缀，会报错
         String kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS, defaultKafkaServer);
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);

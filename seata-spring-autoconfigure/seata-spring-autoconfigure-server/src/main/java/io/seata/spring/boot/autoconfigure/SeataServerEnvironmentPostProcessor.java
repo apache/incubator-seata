@@ -23,6 +23,8 @@ import io.seata.spring.boot.autoconfigure.properties.server.ServerUndoProperties
 import io.seata.spring.boot.autoconfigure.properties.server.session.SessionProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreMqKafkaProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreMqProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
 import org.springframework.boot.SpringApplication;
@@ -39,6 +41,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SESSION_PREFIX
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_MQ_KAFKA_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_MQ_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
@@ -74,6 +78,8 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
             PROPERTY_BEAN_MAP.put(STORE_LOCK_PREFIX, StoreProperties.Lock.class);
             PROPERTY_BEAN_MAP.put(STORE_FILE_PREFIX, StoreFileProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_DB_PREFIX, StoreDBProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_MQ_PREFIX, StoreMqProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_MQ_KAFKA_PREFIX, StoreMqKafkaProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_REDIS_PREFIX, StoreRedisProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_REDIS_SINGLE_PREFIX, StoreRedisProperties.Single.class);
             PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);

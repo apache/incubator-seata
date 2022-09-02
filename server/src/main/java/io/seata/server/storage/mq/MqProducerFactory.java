@@ -15,7 +15,7 @@
  */
 package io.seata.server.storage.mq;
 
-import io.seata.config.Configuration;
+import io.seata.common.ConfigurationKeys;
 import io.seata.config.ConfigurationFactory;
 
 import java.util.ServiceLoader;
@@ -33,7 +33,7 @@ public class MqProducerFactory {
         if (instance == null) {
             synchronized (MqProducer.class) {
                 if (instance == null) {
-                    instance = buildMqManager();
+                    instance = loadProducer();
                 }
             }
         }
@@ -41,15 +41,17 @@ public class MqProducerFactory {
     }
 
 
-    private static MqProducer buildMqManager() {
-        String defaultManagerName = "kafka";
-        String managerName = ConfigurationFactory.getInstance().getConfig("store.mq.mode",defaultManagerName).toLowerCase();
-        ServiceLoader<MqProducer> mqManagers = ServiceLoader.load(MqProducer.class);
-        for (MqProducer mqProducer : mqManagers) {
+    private static MqProducer loadProducer() {
+        String defaultProducerName = "kafka";
+        String producerName = ConfigurationFactory.getInstance()
+                .getConfig(ConfigurationKeys.STORE_MQ_MODE, defaultProducerName).toLowerCase();
+        ServiceLoader<MqProducer> mqProducers = ServiceLoader.load(MqProducer.class);
+        for (MqProducer mqProducer : mqProducers) {
             String className = mqProducer.getClass().getSimpleName();
-            if (className.substring(0, className.indexOf("Manager")).toLowerCase().equals(managerName)) {
+            if (className.substring(0, className.indexOf("Producer")).toLowerCase().equals(producerName)) {
                 return mqProducer;
             }
         }
-        throw new IllegalArgumentException("don't load mqManager");
-    }}
+        throw new IllegalArgumentException("Load MqProducer fail.");
+    }
+}

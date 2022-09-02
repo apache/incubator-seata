@@ -81,6 +81,9 @@ public interface StarterConstants {
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
 
+    String STORE_MQ_PREFIX = STORE_PREFIX + ".mq";
+    String STORE_MQ_KAFKA_PREFIX = STORE_MQ_PREFIX + ".kafka";
+
     String SESSION_PREFIX = SERVER_PREFIX + ".session";
 
     String REGEX_SPLIT_CHAR = ";";

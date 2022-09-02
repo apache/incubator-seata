@@ -273,9 +273,24 @@ public interface ConfigurationKeys {
     String STORE_REDIS_PREFIX = "store.redis.";
 
     /**
-     * The constant STORE_REDIS_PREFIX.
+     * The constant STORE_MQ_PREFIX
      */
-    String STORE_KAFKA_SERVERS = "store.kafka.servers";
+    String STORE_MQ_PREFIX = STORE_PREFIX + "mq";
+
+    /**
+     * The constant STORE_MQ_MODE
+     */
+    String STORE_MQ_MODE = STORE_MQ_PREFIX + ".mode";
+
+    /**
+     * The constant STORE_MQ_KAFKA_PREFIX
+     */
+    String STORE_MQ_KAFKA_PREFIX = STORE_MQ_PREFIX + ".kafka";
+
+    /**
+     * The constant STORE_MQ_KAFKA_SERVERS.
+     */
+    String STORE_KAFKA_SERVERS = STORE_MQ_KAFKA_PREFIX + ".servers";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
