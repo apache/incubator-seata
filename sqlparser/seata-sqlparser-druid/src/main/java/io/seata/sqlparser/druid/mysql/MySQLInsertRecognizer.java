@@ -167,7 +167,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
             }
-            else if(expr instanceof SQLPropertyExpr) {
+            else if (expr instanceof SQLPropertyExpr) {
                 list.add(((SQLPropertyExpr) expr).getName());
             } else {
                 wrapSQLParsingException(expr);
