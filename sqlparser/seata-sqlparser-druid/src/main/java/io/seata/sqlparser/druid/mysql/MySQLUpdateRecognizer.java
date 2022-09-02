@@ -192,7 +192,7 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
                 tableNames.append(MULTI_TABLE_NAME_SEPERATOR);
                 String tableName = visitTableName((SQLExprTableSource) right);
                 tableNames.append(tableName);
-                tableName2AliasMap.put(tableName, left.getAlias());
+                tableName2AliasMap.put(tableName, right.getAlias());
             }
         } else {
             tableNames.append(MULTI_TABLE_NAME_SEPERATOR);
