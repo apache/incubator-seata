@@ -39,6 +39,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
@@ -64,7 +65,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Base Insert Executor.
- *
  * @author jsbxyyx
  */
 public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> implements InsertExecutor<T> {
@@ -94,7 +94,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     public void setParamAppenderMap(HashMap<List<String>, List<Object>> paramAppenderMap) {
         this.paramAppenderMap = paramAppenderMap;
     }
-
     /**
      * Instantiates a new Abstract dml base executor.
      *
@@ -369,6 +368,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @return
      * @throws SQLException
      */
+    @Deprecated
     public List<Object> getGeneratedKeys() throws SQLException {
         // PK is just auto generated
         ResultSet genKeys = statementProxy.getGeneratedKeys();
@@ -389,16 +389,78 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     }
 
     /**
+     * default get generated keys.
+     * @param pkKey the pk key
+     * @return
+     * @throws SQLException
+     */
+    public List<Object> getGeneratedKeys(String pkKey) throws SQLException {
+        // PK is just auto generated
+        ResultSet genKeys = statementProxy.getGeneratedKeys();
+        List<Object> pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = StringUtils.isEmpty(pkKey) ? genKeys.getObject(1) : genKeys.getObject(pkKey);
+            pkValues.add(v);
+        }
+        if (pkValues.isEmpty()) {
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
+        }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
+        }
+        return pkValues;
+    }
+
+    /**
      * the modify for test
      *
      * @param expr the expr
      * @return the pk values by sequence
      * @throws SQLException the sql exception
      */
+    @Deprecated
     protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
         List<Object> pkValues = null;
         try {
             pkValues = getGeneratedKeys();
+        } catch (NotSupportYetException | SQLException ignore) {
+        }
+
+        if (!CollectionUtils.isEmpty(pkValues)) {
+            return pkValues;
+        }
+
+        Sequenceable sequenceable = (Sequenceable) this;
+        final String sql = sequenceable.getSequenceSql(expr);
+        LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+
+        Connection conn = statementProxy.getConnection();
+        try (Statement ps = conn.createStatement();
+             ResultSet genKeys = ps.executeQuery(sql)) {
+
+            pkValues = new ArrayList<>();
+            while (genKeys.next()) {
+                Object v = genKeys.getObject(1);
+                pkValues.add(v);
+            }
+            return pkValues;
+        }
+    }
+
+    /**
+     * the modify for test
+     *
+     * @param expr  the expr
+     * @param pkKey the pk key
+     * @return the pk values by sequence
+     * @throws SQLException the sql exception
+     */
+    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr, String pkKey) throws SQLException {
+        List<Object> pkValues = null;
+        try {
+            pkValues = getGeneratedKeys(pkKey);
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
