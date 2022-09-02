@@ -15,10 +15,30 @@
  */
 package io.seata.consumer.kafka;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.consumer.MqConsumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
+
+import java.util.Properties;
 
 
 public class KafkaConsumer implements MqConsumer {
+
+    private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
+
+    public KafkaConsumer() {
+        Properties properties = new Properties();
+        String defaultKafkaServer = "localhost:9092";
+        String kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS, defaultKafkaServer);
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+
+    }
 
     @Override
     public void consume() {
