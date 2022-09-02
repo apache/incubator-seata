@@ -36,6 +36,6 @@ public class AfterHandlerFactory {
      */
     public static AfterHandler getAfterHandler(String sqlType) {
         return CollectionUtils.computeIfAbsent(AFTER_HANDLER_MAP, sqlType,
-                key -> EnhancedServiceLoader.load(AfterHandler.class, sqlType));
+            key -> EnhancedServiceLoader.load(AfterHandler.class, sqlType));
     }
 }
