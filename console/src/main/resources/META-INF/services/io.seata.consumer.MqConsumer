@@ -1,0 +1,2 @@
+io.seata.consumer.kafka.KafkaConsumer
+io.seata.consumer.rocketmq.RocketmqConsumer

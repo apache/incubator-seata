@@ -13,13 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.console.consumer.rocketmq;
-
-import io.seata.console.consumer.MqConsumer;
-
-public class RocketmqConsumer implements MqConsumer {
-    @Override
-    public void consume() {
-        throw new UnsupportedOperationException();
-    }
+package io.seata.consumer;
+public interface MqConsumer {
+    void consume();
 }
