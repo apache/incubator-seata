@@ -37,6 +37,7 @@
         <module>common</module>
         <module>config</module>
         <module>console</module>
+        <module>consumer</module>
         <module>core</module>
         <module>dependencies</module>
         <module>discovery</module>
