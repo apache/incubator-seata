@@ -70,7 +70,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         TableMeta tmeta = getTableMeta();
         String afterSelectSQL = afterHandler.buildAfterSelectSQL(beforeImage);
-        return buildTableRecords2(tmeta, selectSQL + afterSelectSQL, new ArrayList<>(paramAppenderMap.values()));
+        return buildTableRecords2(tmeta, selectSQL + afterSelectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             throw new ShouldNeverHappenException("can not find unique param,may be you should add unique key when use the sqlType of " +
                     "on duplicate key update ");
         }
-        return buildTableRecords2(tmeta, selectSQL, new ArrayList<>(paramAppenderMap.values()));
+        return buildTableRecords2(tmeta, selectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
 

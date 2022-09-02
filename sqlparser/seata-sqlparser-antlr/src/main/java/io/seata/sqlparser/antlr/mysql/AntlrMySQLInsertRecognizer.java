@@ -105,4 +105,19 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
     public List<String> getDuplicateKeyUpdate() {
         return null;
     }
+
+    @Override
+    public String getQuerySQL() {
+        return null;
+    }
+
+    @Override
+    public String getHintColumnName() {
+        return null;
+    }
+
+    @Override
+    public boolean isIgnore() {
+        return false;
+    }
 }
