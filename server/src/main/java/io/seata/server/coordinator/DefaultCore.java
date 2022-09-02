@@ -394,7 +394,7 @@ public class DefaultCore implements Core {
 
     private Boolean concurrentHandleBranchRollback(GlobalSession globalSession) {
         Map<String/*resourceId*/, List<BranchSession>> branchMap = new ConcurrentHashMap<>();
-        globalSession.getSortedBranches()
+        globalSession.getSortedBranches().parallelStream()
             .forEach(branch -> branchMap.computeIfAbsent(branch.getResourceId(), k -> new ArrayList<>()).add(branch));
         Collection<List<BranchSession>> branchSessionLists = branchMap.values();
         AtomicBoolean finalSuccess = new AtomicBoolean(true);

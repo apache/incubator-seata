@@ -13,6 +13,7 @@
     <artifactId>seata-brpc</artifactId>
     <packaging>jar</packaging>
     <name>seata-brpc ${project.version}</name>
+    <description>brpc integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

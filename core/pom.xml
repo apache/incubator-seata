@@ -27,6 +27,7 @@
     <artifactId>seata-core</artifactId>
     <packaging>jar</packaging>
     <name>seata-core ${project.version}</name>
+    <description>core for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
