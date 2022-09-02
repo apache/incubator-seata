@@ -156,7 +156,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             return;
         }
         Map<SQLType, List<Row>> undoRowMap = buildUndoRow(beforeImage, afterImage);
-        undoRowMap.forEach(((sqlType, rows) -> {
+        undoRowMap.forEach((sqlType, rows) -> {
             if (CollectionUtils.isNotEmpty(rows)) {
                 TableRecords partAfterImage = new TableRecords(afterImage.getTableMeta());
                 partAfterImage.setRows(rows);
@@ -167,7 +167,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                     connectionProxy.appendUndoLog(buildUndoItem(sqlType, beforeImage, partAfterImage));
                 }
             }
-        }));
+        });
     }
 
     /**
@@ -730,7 +730,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                     paramIndex++;
                 } else if (params instanceof String) {
                     // params is characterstring constant
-                    if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
+                    if (params.trim().startsWith("'") && params.trim().endsWith("'") || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
                         params = params.trim();
                         params = params.substring(1, params.length() - 1);
                     }
