@@ -45,6 +45,7 @@ public class KafkaProducer implements MqProducer {
     public KafkaProducer() {
         Properties properties = new Properties();
         String defaultKafkaServer = "localhost:9092";
+        //TODO 没有前缀，会报错
         String kafkaServers = CONFIGURATION.getConfig(ConfigurationKeys.STORE_KAFKA_SERVERS, defaultKafkaServer);
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
@@ -52,6 +53,8 @@ public class KafkaProducer implements MqProducer {
         sessionProducer = new org.apache.kafka.clients.producer.KafkaProducer<>(properties);
     }
 
+    //TODO 数据结构 json再转byte
+    //TODO undo 在client publish
     public void publish(String topic, byte[] sessionBytes) {
         Future<RecordMetadata> future = sessionProducer.send(new ProducerRecord<>(topic, sessionBytes));
         try {

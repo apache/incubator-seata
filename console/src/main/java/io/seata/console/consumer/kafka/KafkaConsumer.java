@@ -22,6 +22,8 @@ public class KafkaConsumer implements MqConsumer {
 
     @Override
     public void consume() {
+        //TODO 构造消费者，进行消费 使用console的配置文件，类库没法引用
+        //TODO 调用influxdb插入函数
 
     }
 }
