@@ -34,19 +34,19 @@ final class ExtensionDefinition<S> {
         return this.order;
     }
 
-    public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz) {
-        this.name = name;
-        this.order = order;
-        this.scope = scope;
-        this.serviceClass = clazz;
+    public Class<S> getServiceClass() {
+        return this.serviceClass;
     }
 
     public Scope getScope() {
         return this.scope;
     }
 
-    public Class<S> getServiceClass() {
-        return this.serviceClass;
+    public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz) {
+        this.name = name;
+        this.order = order;
+        this.scope = scope;
+        this.serviceClass = clazz;
     }
 
     @Override

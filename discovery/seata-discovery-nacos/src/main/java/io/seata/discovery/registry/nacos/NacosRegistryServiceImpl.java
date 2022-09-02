@@ -76,9 +76,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile NacosRegistryServiceImpl instance;
-    private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
-    private static final Object LOCK_OBJ = new Object();
     private static volatile NamingMaintainService namingMaintain;
+    private static final Object LOCK_OBJ = new Object();
+    private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
     private static volatile Boolean useSLBWay;
 
     private NacosRegistryServiceImpl() {
@@ -140,15 +140,60 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         getNamingInstance().unsubscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 
-    public static NamingMaintainService getNamingMaintainInstance() throws Exception {
-        if (namingMaintain == null) {
-            synchronized (NacosRegistryServiceImpl.class) {
-                if (namingMaintain == null) {
-                    namingMaintain = NacosFactory.createMaintainService(getNamingProperties());
+    @Override
+    public List<InetSocketAddress> lookup(String key) throws Exception {
+        String clusterName = getServiceGroup(key);
+        if (clusterName == null) {
+            return null;
+        }
+        if (useSLBWay) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("look up service address of SLB by nacos");
+            }
+            if (!CLUSTER_ADDRESS_MAP.containsKey(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName)) {
+                Service service = getNamingMaintainInstance().queryService(DEFAULT_APPLICATION, clusterName);
+                String pubnetIp = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_IP_KEY);
+                String pubnetPort = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_PORT_KEY);
+                if (StringUtils.isBlank(pubnetIp) || StringUtils.isBlank(pubnetPort)) {
+                    throw new Exception("cannot find service address from nacos naming mata-data");
+                }
+                InetSocketAddress publicAddress = new InetSocketAddress(pubnetIp,
+                        Integer.valueOf(pubnetPort));
+                List<InetSocketAddress> publicAddressList = Arrays.asList(publicAddress);
+                CLUSTER_ADDRESS_MAP.put(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName, publicAddressList);
+                return publicAddressList;
+            }
+            return CLUSTER_ADDRESS_MAP.get(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName);
+        }
+        if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+            synchronized (LOCK_OBJ) {
+                if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+                    List<String> clusters = new ArrayList<>();
+                    clusters.add(clusterName);
+                    List<Instance> firstAllInstances = getNamingInstance().getAllInstances(getServiceName(), getServiceGroup(), clusters);
+                    if (null != firstAllInstances) {
+                        List<InetSocketAddress> newAddressList = firstAllInstances.stream()
+                                .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
+                                .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
+                                .collect(Collectors.toList());
+                        CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                    }
+                    subscribe(clusterName, event -> {
+                        List<Instance> instances = ((NamingEvent) event).getInstances();
+                        if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
+                            LOGGER.info("receive empty server list,cluster:{}", clusterName);
+                        } else {
+                            List<InetSocketAddress> newAddressList = instances.stream()
+                                    .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
+                                    .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
+                                    .collect(Collectors.toList());
+                            CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                        }
+                    });
                 }
             }
         }
-        return namingMaintain;
+        return CLUSTER_ADDRESS_MAP.get(clusterName);
     }
 
     @Override
@@ -173,8 +218,15 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return naming;
     }
 
-    private static String getNacosUrlPatternOfSLB() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
+    public static NamingMaintainService getNamingMaintainInstance() throws Exception {
+        if (namingMaintain == null) {
+            synchronized (NacosRegistryServiceImpl.class) {
+                if (namingMaintain == null) {
+                    namingMaintain = NacosFactory.createMaintainService(getNamingProperties());
+                }
+            }
+        }
+        return namingMaintain;
     }
 
     private static Properties getNamingProperties() {
@@ -267,60 +319,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
     }
 
-    @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
-        String clusterName = getServiceGroup(key);
-        if (clusterName == null) {
-            return null;
-        }
-        if (useSLBWay) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("look up service address of SLB by nacos");
-            }
-            if (!CLUSTER_ADDRESS_MAP.containsKey(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName)) {
-                Service service = getNamingMaintainInstance().queryService(DEFAULT_APPLICATION, clusterName);
-                String pubnetIp = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_IP_KEY);
-                String pubnetPort = service.getMetadata().get(PUBLIC_NAMING_SERVICE_META_PORT_KEY);
-                if (StringUtils.isBlank(pubnetIp) || StringUtils.isBlank(pubnetPort)) {
-                    throw new Exception("cannot find service address from nacos naming mata-data");
-                }
-                InetSocketAddress publicAddress = new InetSocketAddress(pubnetIp,
-                        Integer.valueOf(pubnetPort));
-                List<InetSocketAddress> publicAddressList = Arrays.asList(publicAddress);
-                CLUSTER_ADDRESS_MAP.put(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName, publicAddressList);
-                return publicAddressList;
-            }
-            return CLUSTER_ADDRESS_MAP.get(PUBLIC_NAMING_ADDRESS_PREFIX + clusterName);
-        }
-        if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
-            synchronized (LOCK_OBJ) {
-                if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
-                    List<String> clusters = new ArrayList<>();
-                    clusters.add(clusterName);
-                    List<Instance> firstAllInstances = getNamingInstance().getAllInstances(getServiceName(), getServiceGroup(), clusters);
-                    if (null != firstAllInstances) {
-                        List<InetSocketAddress> newAddressList = firstAllInstances.stream()
-                                .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
-                                .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
-                                .collect(Collectors.toList());
-                        CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
-                    }
-                    subscribe(clusterName, event -> {
-                        List<Instance> instances = ((NamingEvent) event).getInstances();
-                        if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                            LOGGER.info("receive empty server list,cluster:{}", clusterName);
-                        } else {
-                            List<InetSocketAddress> newAddressList = instances.stream()
-                                    .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
-                                    .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
-                                    .collect(Collectors.toList());
-                            CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
-                        }
-                    });
-                }
-            }
-        }
-        return CLUSTER_ADDRESS_MAP.get(clusterName);
+    private static String getNacosUrlPatternOfSLB() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
     }
 
 }
