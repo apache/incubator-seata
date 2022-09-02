@@ -52,7 +52,6 @@ public class KafkaProducer implements MqProducer {
         sessionProducer = new org.apache.kafka.clients.producer.KafkaProducer<>(properties);
     }
 
-    //TODO 数据结构 json再转byte
     //TODO undo 在client publish
     public void publish(String topic, byte[] sessionBytes) {
         Future<RecordMetadata> future = sessionProducer.send(new ProducerRecord<>(topic, sessionBytes));

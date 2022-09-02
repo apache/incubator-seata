@@ -15,10 +15,12 @@
  */
 package io.seata.server.coordinator;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.alibaba.fastjson.JSON;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -140,7 +142,7 @@ public class DefaultCore implements Core {
 
         // TODO need add config about enabling this feature
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_GLOBAL_TABLE, DEFAULT_STORE_DB_GLOBAL_TABLE);
-        MqProducerFactory.getInstance().publish(topic, session.encode());
+        MqProducerFactory.getInstance().publish(topic, JSON.toJSONString(session).getBytes(StandardCharsets.UTF_8));
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);

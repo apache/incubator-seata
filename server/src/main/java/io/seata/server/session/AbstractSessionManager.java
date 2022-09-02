@@ -15,6 +15,9 @@
  */
 package io.seata.server.session;
 
+import java.nio.charset.StandardCharsets;
+
+import com.alibaba.fastjson.JSON;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
@@ -103,7 +106,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         writeSession(LogOperation.BRANCH_ADD, branchSession);
 
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
-        MqProducerFactory.getInstance().publish(topic, branchSession.encode());
+        MqProducerFactory.getInstance().publish(topic, JSON.toJSONString(branchSession).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
