@@ -17,14 +17,17 @@ public class ReportStatusResultMessage extends AbstractResultMessage {
         this.branchId = branchId;
     }
 
+    @Override
     public String toString() {
         return "ReportStatusResultMessage branchId:" + this.branchId + ",result:" + this.result;
     }
 
+    @Override
     public short getTypeCode() {
         return 14;
     }
 
+    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.flip();
@@ -33,6 +36,7 @@ public class ReportStatusResultMessage extends AbstractResultMessage {
         return content;
     }
 
+    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
     }

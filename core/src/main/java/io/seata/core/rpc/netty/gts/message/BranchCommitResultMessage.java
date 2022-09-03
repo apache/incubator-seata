@@ -36,6 +36,7 @@ public class BranchCommitResultMessage extends AbstractResultMessage {
         this.branchIds = branchIds;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("BranchCommitResultMessage ");
         if (this.branchIds.size() > 0) {
@@ -46,14 +47,17 @@ public class BranchCommitResultMessage extends AbstractResultMessage {
         return sb.toString();
     }
 
+    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
+    @Override
     public short getTypeCode() {
         return 4;
     }
 
+    @Override
     public byte[] encode() {
         int i;
         if (this.tranIds.size() > 32) {
@@ -76,6 +80,7 @@ public class BranchCommitResultMessage extends AbstractResultMessage {
         return content;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         if (!super.decode(in)) {
             return false;

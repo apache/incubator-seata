@@ -28,6 +28,7 @@ public abstract class AbstractResultMessage extends TxcMessage implements Merged
         this.msg = msg;
     }
 
+    @Override
     public byte[] encode() {
         this.byteBuffer.put((byte)this.result);
         if (this.result != 1) {
@@ -57,6 +58,7 @@ public abstract class AbstractResultMessage extends TxcMessage implements Merged
         return null;
     }
 
+    @Override
     public void decode(ByteBuffer byteBuffer) {
         this.setResult(byteBuffer.get());
         if (this.result != 1) {
@@ -70,6 +72,7 @@ public abstract class AbstractResultMessage extends TxcMessage implements Merged
 
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 1) {

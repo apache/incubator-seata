@@ -77,10 +77,12 @@ public class RegisterClientAppNameMessage extends TxcMessage implements Serializ
         return this.txcInsts;
     }
 
+    @Override
     public short getTypeCode() {
         return 101;
     }
 
+    @Override
     public byte[] encode() {
         byte[] bs;
         if (this.clientAppName != null) {
@@ -129,6 +131,7 @@ public class RegisterClientAppNameMessage extends TxcMessage implements Serializ
         return bs;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 8) {

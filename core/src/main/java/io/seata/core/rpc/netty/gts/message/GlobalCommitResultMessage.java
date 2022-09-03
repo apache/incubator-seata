@@ -17,14 +17,17 @@ public class GlobalCommitResultMessage extends AbstractResultMessage {
         this.tranId = tranId;
     }
 
+    @Override
     public String toString() {
         return "GlobalCommitResultMessage tranId:" + this.tranId + ",result:" + this.result + ",msg:" + this.getMsg();
     }
 
+    @Override
     public short getTypeCode() {
         return 8;
     }
 
+    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.flip();
@@ -33,6 +36,7 @@ public class GlobalCommitResultMessage extends AbstractResultMessage {
         return content;
     }
 
+    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
     }

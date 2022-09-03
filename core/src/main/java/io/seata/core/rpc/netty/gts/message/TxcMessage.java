@@ -89,13 +89,16 @@ public abstract class TxcMessage implements TxcMsgVisitor, Serializable, TxcCode
         bytes[offset + 3] = (byte)(i & 255);
     }
 
+    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
     }
 
+    @Override
     public void setChannelHandlerContext(ChannelHandlerContext ctx) {
         this.ctx = ctx;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         return false;
     }

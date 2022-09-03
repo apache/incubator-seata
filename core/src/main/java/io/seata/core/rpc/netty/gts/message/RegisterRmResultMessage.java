@@ -37,10 +37,12 @@ public class RegisterRmResultMessage extends TxcMessage implements Serializable 
         this.result = result;
     }
 
+    @Override
     public short getTypeCode() {
         return 104;
     }
 
+    @Override
     public byte[] encode() {
         this.byteBuffer.put((byte)(this.result ? 1 : 0));
         byte[] bs;
@@ -60,6 +62,7 @@ public class RegisterRmResultMessage extends TxcMessage implements Serializable 
         return bs;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 3) {

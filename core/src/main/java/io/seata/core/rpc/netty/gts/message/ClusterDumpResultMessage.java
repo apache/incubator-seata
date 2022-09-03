@@ -29,14 +29,17 @@ public class ClusterDumpResultMessage extends TxcMessage implements Serializable
         this.msg = msg;
     }
 
+    @Override
     public short getTypeCode() {
         return 114;
     }
 
+    @Override
     public String toString() {
         return "ClusterDumpResultMessage msg:" + this.msg;
     }
 
+    @Override
     public byte[] encode() {
         this.byteBuffer.put((byte)(this.result ? 1 : 0));
         byte[] bs;
@@ -56,6 +59,7 @@ public class ClusterDumpResultMessage extends TxcMessage implements Serializable
         return bs;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 5) {
