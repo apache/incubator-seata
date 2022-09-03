@@ -55,7 +55,7 @@ public class NettyServerConfig extends NettyBaseConfig {
             ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
     private static int minServerPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MIN_SERVER_POOL_SIZE, "32"));
+            ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
     private static int maxServerPoolSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500"));
     private static int maxTaskQueueSize = Integer.parseInt(System.getProperty(
