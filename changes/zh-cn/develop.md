@@ -12,6 +12,7 @@
 ### bugfix：
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
 - [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
+- [[#4779](https://github.com/seata/seata/pull/4779)] 修复支持 Apache Dubbo 3 版本
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -25,6 +26,7 @@
 - [[#4836](https://github.com/seata/seata/pull/4836)] 优化 BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) 方法可读性
 - [[#4865](https://github.com/seata/seata/pull/4865)] 修复 Saga 可视化设计器 GGEditor 安全漏洞
 - [[#4590](https://github.com/seata/seata/pull/4590)] 自动降级支持开关支持动态配置
+- [[#4490](https://github.com/seata/seata/pull/4490)] tccfence 记录表优化成按索引删除
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -42,5 +44,7 @@
 - [pengten](https://github.com/pengten)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
+- [Bughue](https://github.com/Bughue)
+- [AlbumenJ](https://github.com/AlbumenJ)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

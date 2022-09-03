@@ -12,6 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
+- [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -25,6 +26,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4836](https://github.com/seata/seata/pull/4836)] optimize BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) method more readable
 - [[#4865](https://github.com/seata/seata/pull/4865)] fix some security vulnerabilities in GGEditor
 - [[#4590](https://github.com/seata/seata/pull/4590)] auto degrade enable to dynamic configure
+- [[#4490](https://github.com/seata/seata/pull/4490)] tccfence log table delete by index
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -42,5 +44,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [pengten](https://github.com/pengten)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
+- [Bughue](https://github.com/Bughue)
+- [AlbumenJ](https://github.com/AlbumenJ)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
