@@ -17,14 +17,15 @@ package io.seata.server.session;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.LockStatus;
+import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.server.store.SessionStorable;
@@ -71,8 +72,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private LockStatus lockStatus = Locked;
 
-    private ConcurrentMap<FileLocker.BucketLockMap, Set<String>> lockHolder
-        = new ConcurrentHashMap<>();
+    private Map<FileLocker.BucketLockMap, Set<String>> lockHolder
+        = Collections.emptyMap();
+
+    private final LockManager lockManager = LockerManagerFactory.getLockManager();
 
     /**
      * Gets application data.
@@ -273,8 +276,16 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @return the lock holder
      */
-    public ConcurrentMap<FileLocker.BucketLockMap, Set<String>> getLockHolder() {
+    public Map<FileLocker.BucketLockMap, Set<String>> getLockHolder() {
         return lockHolder;
+    }
+
+    /**
+     * Set lock holder.
+     *
+     */
+    public void setLockHolder(Map<FileLocker.BucketLockMap, Set<String>> lockHolder) {
+        this.lockHolder = lockHolder;
     }
 
     @Override
@@ -283,16 +294,16 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     public boolean lock(boolean autoCommit, boolean skipCheckLock) throws TransactionException {
-        if (this.getBranchType().equals(BranchType.AT)) {
-            return LockerManagerFactory.getLockManager().acquireLock(this, autoCommit, skipCheckLock);
+        if (this.branchType.equals(BranchType.AT)) {
+            return lockManager.acquireLock(this, autoCommit, skipCheckLock);
         }
         return true;
     }
 
     @Override
     public boolean unlock() throws TransactionException {
-        if (this.getBranchType() == BranchType.AT) {
-            return LockerManagerFactory.getLockManager().releaseLock(this);
+        if (this.branchType == BranchType.AT) {
+            return lockManager.releaseLock(this);
         }
         return true;
     }
