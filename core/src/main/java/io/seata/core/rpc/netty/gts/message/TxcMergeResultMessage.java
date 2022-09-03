@@ -23,12 +23,10 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
         this.msgs = msgs;
     }
 
-    @Override
     public short getTypeCode() {
         return 20;
     }
 
-    @Override
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(this.msgs.length * 1024);
         byteBuffer.putShort((short)this.msgs.length);
@@ -55,7 +53,6 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
         return content;
     }
 
-    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 4) {
@@ -135,7 +132,6 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
 
     }
 
-    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("TxcMergeResultMessage ");
         AbstractResultMessage[] var2 = this.msgs;

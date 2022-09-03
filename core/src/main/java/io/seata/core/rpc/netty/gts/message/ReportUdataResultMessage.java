@@ -8,17 +8,14 @@ public class ReportUdataResultMessage extends AbstractResultMessage {
     public ReportUdataResultMessage() {
     }
 
-    @Override
     public String toString() {
         return "ReportUdataResultMessage result:" + this.result;
     }
 
-    @Override
     public short getTypeCode() {
         return 18;
     }
 
-    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.flip();
@@ -27,7 +24,6 @@ public class ReportUdataResultMessage extends AbstractResultMessage {
         return content;
     }
 
-    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
     }

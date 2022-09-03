@@ -26,17 +26,14 @@ public class BeginResultMessage extends AbstractResultMessage {
         this.nextSvrAddr = nextSvrAddr;
     }
 
-    @Override
     public String toString() {
         return "BeginResultMessage result:" + this.result + " xid:" + this.xid;
     }
 
-    @Override
     public short getTypeCode() {
         return 2;
     }
 
-    @Override
     public byte[] encode() {
         super.encode();
         byte[] bs;
@@ -66,7 +63,6 @@ public class BeginResultMessage extends AbstractResultMessage {
         return bs;
     }
 
-    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
         short len = byteBuffer.getShort();

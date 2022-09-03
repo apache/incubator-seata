@@ -17,17 +17,14 @@ public class GlobalRollbackResultMessage extends AbstractResultMessage {
         this.tranId = tranId;
     }
 
-    @Override
     public String toString() {
         return "GlobalRollbackResultMessage tranId:" + this.tranId + ",result:" + this.result + ",msg:" + this.getMsg();
     }
 
-    @Override
     public short getTypeCode() {
         return 10;
     }
 
-    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.flip();
@@ -36,7 +33,6 @@ public class GlobalRollbackResultMessage extends AbstractResultMessage {
         return content;
     }
 
-    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
     }

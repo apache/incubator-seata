@@ -36,22 +36,18 @@ public class QueryLockMessage extends TxcMessage implements MergedMessage {
         this.businessKey = businessKey;
     }
 
-    @Override
     public String toString() {
         return "QueryLockMessage tranId:" + this.tranId + ",key:" + this.key + ",business key:" + this.businessKey;
     }
 
-    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
-    @Override
     public short getTypeCode() {
         return 21;
     }
 
-    @Override
     public byte[] encode() {
         this.byteBuffer.putLong(this.tranId);
         byte[] bs;
@@ -81,7 +77,6 @@ public class QueryLockMessage extends TxcMessage implements MergedMessage {
         return bs;
     }
 
-    @Override
     public void decode(ByteBuffer byteBuffer) {
         this.tranId = byteBuffer.getLong();
         short len = byteBuffer.getShort();

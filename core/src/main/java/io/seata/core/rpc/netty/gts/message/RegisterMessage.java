@@ -45,7 +45,6 @@ public class RegisterMessage extends TxcMessage implements MergedMessage {
         this.businessKey = businessKey;
     }
 
-    @Override
     public String toString() {
         String s = this.businessKey;
         if (this.businessKey != null && this.businessKey.length() > 1024) {
@@ -55,17 +54,14 @@ public class RegisterMessage extends TxcMessage implements MergedMessage {
         return "RegisterMessage key:" + this.key + " tranId:" + this.tranId + " Commit mode:" + this.commitMode + " business key:" + s;
     }
 
-    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
-    @Override
     public short getTypeCode() {
         return 11;
     }
 
-    @Override
     public byte[] encode() {
         byte[] businessKeyBs = null;
         if (this.businessKey != null) {
@@ -103,7 +99,6 @@ public class RegisterMessage extends TxcMessage implements MergedMessage {
         return content;
     }
 
-    @Override
     public void decode(ByteBuffer byteBuffer) {
         this.tranId = byteBuffer.getLong();
         this.commitMode = byteBuffer.get();

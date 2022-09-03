@@ -1,5 +1,8 @@
 package io.seata.rm.gts.message;
 
+import com.taobao.txc.common.message.BeginMessage;
+import com.taobao.txc.common.message.TxcCodec;
+import com.taobao.txc.rpc.impl.RpcMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.seata.core.compressor.Compressor;

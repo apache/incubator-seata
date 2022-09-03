@@ -19,12 +19,10 @@ public class RedressMessage extends TxcMessage {
         this.msg = msg;
     }
 
-    @Override
     public short getTypeCode() {
         return 121;
     }
 
-    @Override
     public byte[] encode() {
         byte[] bs;
         if (this.msg != null) {
@@ -43,7 +41,6 @@ public class RedressMessage extends TxcMessage {
         return bs;
     }
 
-    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 4) {
@@ -66,7 +63,6 @@ public class RedressMessage extends TxcMessage {
         }
     }
 
-    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }

@@ -83,17 +83,14 @@ public class BranchRollbackMessage extends TxcMessage implements Serializable {
         this.serverAddr = serverAddr;
     }
 
-    @Override
     public String toString() {
         return this.tranId + ":" + this.branchId + " BranchRollbackMessage DBname:" + this.dbName + ",appName:" + this.appName + ",commitMode:" + this.commitMode + ",isDelLock:" + this.isDelLock + ",udata:" + this.udata;
     }
 
-    @Override
     public short getTypeCode() {
         return 5;
     }
 
-    @Override
     public byte[] encode() {
         this.byteBuffer.putLong(this.tranId);
         this.byteBuffer.putLong(this.branchId);
@@ -146,7 +143,6 @@ public class BranchRollbackMessage extends TxcMessage implements Serializable {
         return bs;
     }
 
-    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 26) {

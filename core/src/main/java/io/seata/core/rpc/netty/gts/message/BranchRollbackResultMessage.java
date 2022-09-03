@@ -26,22 +26,18 @@ public class BranchRollbackResultMessage extends AbstractResultMessage {
         this.branchId = branchId;
     }
 
-    @Override
     public String toString() {
         return this.tranId + ":" + this.branchId + " BranchRollbackResultMessage result:" + this.result;
     }
 
-    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
-    @Override
     public short getTypeCode() {
         return 6;
     }
 
-    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.putLong(this.tranId);
@@ -52,7 +48,6 @@ public class BranchRollbackResultMessage extends AbstractResultMessage {
         return content;
     }
 
-    @Override
     public boolean decode(ByteBuf in) {
         if (!super.decode(in)) {
             return false;

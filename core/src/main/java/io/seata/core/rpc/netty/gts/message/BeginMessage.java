@@ -19,22 +19,18 @@ public class BeginMessage extends TxcMessage implements MergedMessage {
         this.timeout = timeout;
     }
 
-    @Override
     public String toString() {
         return "BeginMessage timeout:" + this.timeout + " appname:" + this.appname + " txcInst:" + this.txcInst;
     }
 
-    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
-    @Override
     public short getTypeCode() {
         return 1;
     }
 
-    @Override
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
         byteBuffer.putLong(this.timeout);
@@ -65,7 +61,6 @@ public class BeginMessage extends TxcMessage implements MergedMessage {
         return bs;
     }
 
-    @Override
     public void decode(ByteBuffer byteBuffer) {
         this.timeout = byteBuffer.getLong();
         short len = byteBuffer.getShort();

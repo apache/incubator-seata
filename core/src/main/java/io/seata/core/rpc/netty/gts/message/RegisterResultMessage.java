@@ -27,17 +27,14 @@ public class RegisterResultMessage extends AbstractResultMessage implements Seri
         this.branchId = branchId;
     }
 
-    @Override
     public String toString() {
         return "RegisterResultMessage result:" + this.result + ",tranId:" + this.tranId + ",branchId:" + this.branchId;
     }
 
-    @Override
     public short getTypeCode() {
         return 12;
     }
 
-    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.putLong(this.tranId);
@@ -48,7 +45,6 @@ public class RegisterResultMessage extends AbstractResultMessage implements Seri
         return content;
     }
 
-    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
         this.tranId = byteBuffer.getLong();
