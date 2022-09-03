@@ -26,14 +26,17 @@ public class BeginRetryBranchResultMessage extends AbstractResultMessage {
         this.branchId = branchId;
     }
 
+    @Override
     public String toString() {
         return "BeginRetryBranchResultMessage result:" + this.result + ",xid:" + this.xid + ",branchId:" + this.branchId;
     }
 
+    @Override
     public short getTypeCode() {
         return 16;
     }
 
+    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.putLong(this.branchId);
@@ -54,6 +57,7 @@ public class BeginRetryBranchResultMessage extends AbstractResultMessage {
         return bs;
     }
 
+    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
         this.branchId = byteBuffer.getLong();

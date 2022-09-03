@@ -44,18 +44,22 @@ public class BeginRetryBranchMessage extends TxcMessage implements MergedMessage
         this.sql = sql;
     }
 
+    @Override
     public String toString() {
         return "BeginRetryBranchMessage dbName:" + this.dbName + ",Commit mode:" + this.commitMode + ",effectiveTime:" + this.effectiveTime + ",sql:" + this.sql;
     }
 
+    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
+    @Override
     public short getTypeCode() {
         return 15;
     }
 
+    @Override
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(1048576);
         byteBuffer.putLong(this.effectiveTime);
@@ -87,6 +91,7 @@ public class BeginRetryBranchMessage extends TxcMessage implements MergedMessage
         return bs;
     }
 
+    @Override
     public void decode(ByteBuffer byteBuffer) {
         this.effectiveTime = byteBuffer.getLong();
         this.commitMode = byteBuffer.get();

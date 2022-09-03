@@ -55,10 +55,12 @@ public class RegisterRmMessage extends TxcMessage implements Serializable {
         this.appName = appName;
     }
 
+    @Override
     public short getTypeCode() {
         return 103;
     }
 
+    @Override
     public byte[] encode() {
         byte[] bs;
         if (this.dbKeys != null) {
@@ -100,6 +102,7 @@ public class RegisterRmMessage extends TxcMessage implements Serializable {
         return bs;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 6) {
@@ -155,6 +158,7 @@ public class RegisterRmMessage extends TxcMessage implements Serializable {
         }
     }
 
+    @Override
     public String toString() {
         return "RegisterRmMessage dbkey:" + this.dbKeys + ",appname:" + this.appName;
     }

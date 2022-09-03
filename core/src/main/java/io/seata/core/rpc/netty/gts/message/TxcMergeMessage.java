@@ -20,10 +20,12 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
     public TxcMergeMessage() {
     }
 
+    @Override
     public short getTypeCode() {
         return 19;
     }
 
+    @Override
     public byte[] encode() {
         int bufferSize = this.msgs.size() * 1024;
         Iterator var2 = this.msgs.iterator();
@@ -64,6 +66,7 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
         return content;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 4) {
@@ -138,6 +141,7 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
 
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("TxcMergeMessage ");
         Iterator var2 = this.msgs.iterator();
@@ -150,6 +154,7 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
         return sb.toString();
     }
 
+    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }

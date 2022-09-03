@@ -54,18 +54,22 @@ public class ReportStatusMessage extends TxcMessage implements MergedMessage {
         this.branchId = branchId;
     }
 
+    @Override
     public String toString() {
         return this.tranId + ":" + this.branchId + " ReportStatusMessage:" + this.success + ",key:" + this.key;
     }
 
+    @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
         ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
+    @Override
     public short getTypeCode() {
         return 13;
     }
 
+    @Override
     public byte[] encode() {
         this.byteBuffer.putLong(this.tranId);
         this.byteBuffer.putLong(this.branchId);
@@ -97,6 +101,7 @@ public class ReportStatusMessage extends TxcMessage implements MergedMessage {
         return bs;
     }
 
+    @Override
     public void decode(ByteBuffer byteBuffer) {
         this.tranId = byteBuffer.getLong();
         this.branchId = byteBuffer.getLong();

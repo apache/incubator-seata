@@ -124,6 +124,7 @@ public enum TxcErrCode {
         this.errDispose = errDispose;
     }
 
+    @Override
     public String toString() {
         return String.format("[%s] [%s] [%s]", this.errCode, this.errMessage, this.errDispose);
     }

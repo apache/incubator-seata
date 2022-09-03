@@ -27,14 +27,17 @@ public class QueryLockResultMessage extends AbstractResultMessage implements Ser
         this.businessKey = businessKey;
     }
 
+    @Override
     public String toString() {
         return "QueryLockResultMessage result:" + this.result + ",message:" + this.getMsg();
     }
 
+    @Override
     public short getTypeCode() {
         return 22;
     }
 
+    @Override
     public byte[] encode() {
         super.encode();
         this.byteBuffer.flip();
@@ -43,6 +46,7 @@ public class QueryLockResultMessage extends AbstractResultMessage implements Ser
         return content;
     }
 
+    @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
     }

@@ -36,10 +36,12 @@ public class RegisterClientAppNameResultMessage extends TxcMessage implements Se
         this.result = result;
     }
 
+    @Override
     public short getTypeCode() {
         return 102;
     }
 
+    @Override
     public byte[] encode() {
         this.byteBuffer.put((byte)(this.result ? 1 : 0));
         byte[] bs;
@@ -59,6 +61,7 @@ public class RegisterClientAppNameResultMessage extends TxcMessage implements Se
         return bs;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 3) {

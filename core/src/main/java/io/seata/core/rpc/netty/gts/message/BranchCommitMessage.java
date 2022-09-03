@@ -102,6 +102,7 @@ public class BranchCommitMessage extends TxcMessage implements Serializable {
         this.serverAddr = serverAddr;
     }
 
+    @Override
     public String toString() {
         return this.toString(false);
     }
@@ -120,10 +121,12 @@ public class BranchCommitMessage extends TxcMessage implements Serializable {
         return sb.toString();
     }
 
+    @Override
     public short getTypeCode() {
         return 3;
     }
 
+    @Override
     public byte[] encode() {
         int i;
         if (this.tranIds.size() > 32) {
@@ -197,6 +200,7 @@ public class BranchCommitMessage extends TxcMessage implements Serializable {
         return bs;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         int i = in.readableBytes();
         if (i < 15) {

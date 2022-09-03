@@ -1,4 +1,4 @@
-package io.seata.rm.gts.message;
+package io.seata.core.rpc.netty.gts;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -7,6 +7,7 @@ import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.rpc.netty.gts.message.*;
 import io.seata.core.rpc.netty.v1.HeadMapSerializer;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
@@ -35,21 +36,21 @@ public class BeginMessageTest {
         msg.setTxcInst("GTS instance");
         System.out.println(msg.toString());
         byte[] bs = msg.encode();
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setId(1L);
-        rpcMessage.setBody(msg);
+        GtsRpcMessage gtsRpcMessage = new GtsRpcMessage();
+        gtsRpcMessage.setId(1L);
+        gtsRpcMessage.setBody(msg);
         TxcCodec txcCodec = null;
         ByteBuffer byteBuffer = ByteBuffer.allocate(128);
-        if (rpcMessage.getBody() instanceof TxcCodec) {
-            txcCodec = (TxcCodec)rpcMessage.getBody();
+        if (gtsRpcMessage.getBody() instanceof TxcCodec) {
+            txcCodec = (TxcCodec)gtsRpcMessage.getBody();
         }
         byteBuffer.putShort(MAGIC);
-        int flag = (rpcMessage.isAsync() ? 64 : 0) | (rpcMessage.isHeartbeat() ? 32 : 0) | (rpcMessage.isRequest() ? 128 : 0) | (txcCodec != null ? 16 : 0);
+        int flag = (gtsRpcMessage.isAsync() ? 64 : 0) | (gtsRpcMessage.isHeartbeat() ? 32 : 0) | (gtsRpcMessage.isRequest() ? 128 : 0) | (txcCodec != null ? 16 : 0);
         byteBuffer.putShort((short) flag);
         byte[] content;
         ByteBuf out = ByteBufAllocator.DEFAULT.buffer(128);
         byteBuffer.putShort(txcCodec.getTypeCode());
-        byteBuffer.putLong(rpcMessage.getId());
+        byteBuffer.putLong(gtsRpcMessage.getId());
         byteBuffer.flip();
         content = new byte[byteBuffer.limit()];
         byteBuffer.get(content);
@@ -93,17 +94,17 @@ public class BeginMessageTest {
                 }
 
                 long msgId = byteBuffer.getLong();
-                RpcMessage rpcMessage;
+                GtsRpcMessage gtsRpcMessage;
                 if (isHeartbeat) {
 
                 } else if (bodyLength > 0 && in.readableBytes() < bodyLength) {
                     in.readerIndex(begin);
                 } else {
-                    rpcMessage = new RpcMessage();
-                    rpcMessage.setId(msgId);
-                    rpcMessage.setAsync((64 & flag) > 0);
-                    rpcMessage.setHeartbeat(false);
-                    rpcMessage.setRequest(isRequest);
+                    gtsRpcMessage = new GtsRpcMessage();
+                    gtsRpcMessage.setId(msgId);
+                    gtsRpcMessage.setAsync((64 & flag) > 0);
+                    gtsRpcMessage.setHeartbeat(false);
+                    gtsRpcMessage.setRequest(isRequest);
                     try {
                         if (isTxcCodec) {
                             TxcCodec codec = new BeginMessage();
@@ -114,14 +115,14 @@ public class BeginMessageTest {
                                 byte[] bytes = new byte[len];
                                 in.readBytes(bytes);
                                 beginMessage.decode(ByteBuffer.wrap(bytes));
-                                rpcMessage.setBody(beginMessage);
+                                gtsRpcMessage.setBody(beginMessage);
                                 return;
                             }
                         }
                     } catch (Exception var20) {
                         throw var20;
                     }
-                    out.add(rpcMessage);
+                    out.add(gtsRpcMessage);
                 }
             }
         }

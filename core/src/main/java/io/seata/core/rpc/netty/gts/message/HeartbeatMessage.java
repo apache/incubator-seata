@@ -13,6 +13,7 @@ public class HeartbeatMessage implements Serializable {
         this.pingOrPong = pingOrPong;
     }
 
+    @Override
     public String toString() {
         return this.pingOrPong ? "TXC ping" : "TXC pong";
     }

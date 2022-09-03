@@ -18,10 +18,12 @@ public class ClusterDumpMessage extends TxcMessage {
         this.verbose = verbose;
     }
 
+    @Override
     public short getTypeCode() {
         return 113;
     }
 
+    @Override
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(16);
         byteBuffer.put((byte)(this.verbose ? 1 : 0));
@@ -31,6 +33,7 @@ public class ClusterDumpMessage extends TxcMessage {
         return content;
     }
 
+    @Override
     public boolean decode(ByteBuf in) {
         if (in.readableBytes() < 1) {
             return false;
