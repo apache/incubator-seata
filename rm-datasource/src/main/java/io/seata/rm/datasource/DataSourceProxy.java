@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
@@ -49,6 +50,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT";
+
+    /**
+     * The seata data source.
+     */
+    private DataSource seataDataSource;
 
     private String resourceGroupId;
 
@@ -96,6 +102,26 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             targetDataSource = ((SeataDataSourceProxy) targetDataSource).getTargetDataSource();
         }
         this.targetDataSource = targetDataSource;
+        if (targetDataSource instanceof DruidDataSource) {
+            DruidDataSource druidDataSource = (DruidDataSource)targetDataSource;
+            DruidDataSource seataDataSource = new DruidDataSource();
+            seataDataSource.setMaxActive(druidDataSource.getMaxActive());
+            seataDataSource.setPassword(druidDataSource.getPassword());
+            seataDataSource.setUsername(druidDataSource.getUsername());
+            seataDataSource.setMinIdle(druidDataSource.getMinIdle());
+            seataDataSource.setMaxWait(druidDataSource.getMaxWait());
+            seataDataSource.setKeepAlive(druidDataSource.isKeepAlive());
+            seataDataSource.setKeepAliveBetweenTimeMillis(druidDataSource.getKeepAliveBetweenTimeMillis());
+            seataDataSource.setDbType(druidDataSource.getDbType());
+            seataDataSource.setUrl(druidDataSource.getUrl());
+            try {
+                seataDataSource.init();
+            } catch (SQLException e) {
+                LOGGER.info("create seata at mode datasource fail error: {}", e.getMessage());
+                seataDataSource.close();
+            }
+            this.seataDataSource = seataDataSource;
+        }
         init(targetDataSource, resourceGroupId);
     }
 
@@ -136,6 +162,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      */
     public Connection getPlainConnection() throws SQLException {
         return targetDataSource.getConnection();
+    }
+
+    /**
+     * Gets seata connection.
+     *
+     * @return the seata connection
+     * @throws SQLException the sql exception
+     */
+    public Connection getSeataConnection() throws SQLException {
+        return seataDataSource != null ? seataDataSource.getConnection() : getPlainConnection();
     }
 
     /**

@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -396,7 +397,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
+        
+        try (Connection connection = statementProxy.getConnectionProxy().getDataSourceProxy().getSeataConnection();
+            PreparedStatement ps = connection.prepareStatement(selectSQL)) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
                     List<Object> paramAppender = paramAppenderList.get(i);
