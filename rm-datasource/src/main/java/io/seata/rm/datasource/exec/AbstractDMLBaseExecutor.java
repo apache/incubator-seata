@@ -96,7 +96,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && isMultiPk()) {
             throw new NotSupportYetException("multi pk only support mysql!");
         }
-        boolean beforeDml = statementProxy.getConnectionProxy().getDataSourceProxy().getSeataDataSource() == null;
+        // mock connectionProxy#getDataSourceProxy is empty
+        boolean beforeDml = statementProxy.getConnectionProxy().getDataSourceProxy() == null
+                            || statementProxy.getConnectionProxy().getDataSourceProxy().getSeataDataSource() == null;
         TableRecords beforeImage = null;
         if (beforeDml) {
             beforeImage = beforeImage();
