@@ -26,7 +26,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-all</artifactId>
-
     <name>Seata All-in-one ${project.version}</name>
     <description>Seata is an easy-to-use, high-performance, java based, open source distributed transaction solution.</description>
 
@@ -142,11 +141,6 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-brpc</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.seata</groupId>
-            <artifactId>seata-dubbo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -398,13 +392,12 @@
             <artifactId>commons-pool</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.dubbo.extensions</groupId>
+            <artifactId>dubbo-filter-seata</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

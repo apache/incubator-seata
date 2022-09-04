@@ -346,7 +346,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         StringBuilder sb = new StringBuilder();
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
-        int filedSequence = 0;
+        int rowSequence = 0;
         List<Map<String, Field>> pksRows = rowsIncludingPK.pkRows();
         List<String> primaryKeysOnlyName = getTableMeta().getPrimaryKeyOnlyName();
         for (Map<String, Field> rowMap : pksRows) {
@@ -358,8 +358,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 sb.append(rowMap.get(pkName).getValue());
                 pkSplitIndex++;
             }
-            filedSequence++;
-            if (filedSequence < pksRows.size()) {
+            rowSequence++;
+            if (rowSequence < pksRows.size()) {
                 sb.append(",");
             }
         }

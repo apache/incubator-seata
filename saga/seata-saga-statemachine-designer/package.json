@@ -51,7 +51,7 @@
     "@antv/g6": "^2.2.6",
     "codemirror": "^5.55.0",
     "core-js": "^3.6.5",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.21",
     "react-codemirror": "^1.0.0"
   },
   "devDependencies": {
