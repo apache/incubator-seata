@@ -16,12 +16,14 @@
 package io.seata.rm.datasource;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
+import com.alibaba.druid.mock.MockDriver;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
@@ -100,29 +102,40 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         if (targetDataSource instanceof SeataDataSourceProxy) {
             LOGGER.info("Unwrap the target data source, because the type is: {}", targetDataSource.getClass().getName());
             targetDataSource = ((SeataDataSourceProxy) targetDataSource).getTargetDataSource();
+        } else {
+            initSeataDataSource(targetDataSource);
         }
         this.targetDataSource = targetDataSource;
+        init(targetDataSource, resourceGroupId);
+    }
+
+    private void initSeataDataSource(DataSource targetDataSource) {
         if (targetDataSource instanceof DruidDataSource) {
             DruidDataSource druidDataSource = (DruidDataSource)targetDataSource;
-            DruidDataSource seataDataSource = new DruidDataSource();
-            seataDataSource.setMaxActive(druidDataSource.getMaxActive());
-            seataDataSource.setPassword(druidDataSource.getPassword());
-            seataDataSource.setUsername(druidDataSource.getUsername());
-            seataDataSource.setMinIdle(druidDataSource.getMinIdle());
-            seataDataSource.setMaxWait(druidDataSource.getMaxWait());
-            seataDataSource.setKeepAlive(druidDataSource.isKeepAlive());
-            seataDataSource.setKeepAliveBetweenTimeMillis(druidDataSource.getKeepAliveBetweenTimeMillis());
-            seataDataSource.setDbType(druidDataSource.getDbType());
-            seataDataSource.setUrl(druidDataSource.getUrl());
-            try {
-                seataDataSource.init();
-            } catch (SQLException e) {
-                LOGGER.info("create seata at mode datasource fail error: {}", e.getMessage());
-                seataDataSource.close();
+            Driver driver = druidDataSource.getDriver();
+            if (!(driver instanceof MockDriver)) {
+                DruidDataSource seataDataSource = new DruidDataSource();
+                seataDataSource.setDriver(driver);
+                seataDataSource.setDriverClassName(druidDataSource.getDriverClassName());
+                seataDataSource.setDriverClassLoader(druidDataSource.getDriverClassLoader());
+                seataDataSource.setMaxActive(druidDataSource.getMaxActive());
+                seataDataSource.setPassword(druidDataSource.getPassword());
+                seataDataSource.setUsername(druidDataSource.getUsername());
+                seataDataSource.setMinIdle(druidDataSource.getMinIdle());
+                seataDataSource.setMaxWait(druidDataSource.getMaxWait());
+                seataDataSource.setKeepAlive(druidDataSource.isKeepAlive());
+                seataDataSource.setKeepAliveBetweenTimeMillis(druidDataSource.getKeepAliveBetweenTimeMillis());
+                seataDataSource.setDbType(druidDataSource.getDbType());
+                seataDataSource.setUrl(druidDataSource.getUrl());
+                try {
+                    seataDataSource.init();
+                } catch (SQLException e) {
+                    LOGGER.info("create seata at mode datasource fail error: {}", e.getMessage());
+                    seataDataSource.close();
+                }
+                this.seataDataSource = seataDataSource;
             }
-            this.seataDataSource = seataDataSource;
         }
-        init(targetDataSource, resourceGroupId);
     }
 
     private void init(DataSource dataSource, String resourceGroupId) {
@@ -304,4 +317,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     public BranchType getBranchType() {
         return BranchType.AT;
     }
+
+    public DataSource getSeataDataSource() {
+        return seataDataSource;
+    }
+
+    public void setSeataDataSource(DataSource seataDataSource) {
+        this.seataDataSource = seataDataSource;
+    }
+
 }
