@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.SizeUtil;
@@ -36,6 +38,7 @@ import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
+import io.seata.producer.MqProducerFactory;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -241,6 +244,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             undoLogContent = CompressorFactory.getCompressor(compressorType.getCode()).compress(undoLogContent);
         }
 
+        MqProducerFactory.getInstance().publish(xid, JSON.toJSONString(branchUndoLog).getBytes(StandardCharsets.UTF_8));
         insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
     }
 
