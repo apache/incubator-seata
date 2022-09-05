@@ -240,27 +240,6 @@ public class LockStoreDataBaseDAO implements LockStore {
     }
 
     @Override
-    public boolean unLock(String xid, Long branchId) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = lockStoreDataSource.getConnection();
-            conn.setAutoCommit(true);
-            //batch release lock by branch
-            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranch(lockTable);
-            ps = conn.prepareStatement(batchDeleteSQL);
-            ps.setString(1, xid);
-            ps.setLong(2, branchId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, conn);
-        }
-        return true;
-    }
-
-    @Override
     public boolean unLock(String xid) {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -271,6 +250,26 @@ public class LockStoreDataBaseDAO implements LockStore {
             String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByXid(lockTable);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unLock(Long branchId) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = lockStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            //batch release lock by branchId
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranchId(lockTable);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setLong(1, branchId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
