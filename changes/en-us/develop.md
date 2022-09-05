@@ -47,5 +47,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
 - [AlbumenJ](https://github.com/AlbumenJ)
+- [doubleDimple](https://github.com/doubleDimple)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
