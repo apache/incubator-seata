@@ -1384,10 +1384,6 @@ final class SimpleHttpRequest {
      * Get reader to response body using given character set.
      *
      * <p>This will fall back to using the UTF-8 character set if the given charset is null
-     *
-     * @param charset
-     * @return reader
-     * @throws HttpRequestException
      */
     public InputStreamReader reader(final String charset) throws HttpRequestException {
         try {
@@ -1399,9 +1395,6 @@ final class SimpleHttpRequest {
 
     /**
      * Get reader to response body using the character set returned from {@link #charset()}
-     *
-     * @return reader
-     * @throws HttpRequestException
      */
     public InputStreamReader reader() throws HttpRequestException {
         return reader(charset());
@@ -1410,10 +1403,6 @@ final class SimpleHttpRequest {
     /**
      * Get buffered reader to response body using the given character set r and the configured buffer
      * size
-     *
-     * @param charset
-     * @return reader
-     * @throws HttpRequestException
      * @see #bufferSize(int)
      */
     public BufferedReader bufferedReader(final String charset) throws HttpRequestException {
@@ -1423,9 +1412,6 @@ final class SimpleHttpRequest {
     /**
      * Get buffered reader to response body using the character set returned from {@link #charset()}
      * and the configured buffer size
-     *
-     * @return reader
-     * @throws HttpRequestException
      * @see #bufferSize(int)
      */
     public BufferedReader bufferedReader() throws HttpRequestException {
@@ -1434,10 +1420,6 @@ final class SimpleHttpRequest {
 
     /**
      * Stream response body to file
-     *
-     * @param file
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest receive(final File file) throws HttpRequestException {
         final OutputStream output;
@@ -1457,10 +1439,6 @@ final class SimpleHttpRequest {
 
     /**
      * Stream response to given output stream
-     *
-     * @param output
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest receive(final OutputStream output) throws HttpRequestException {
         try {
@@ -1472,10 +1450,6 @@ final class SimpleHttpRequest {
 
     /**
      * Stream response to given print stream
-     *
-     * @param output
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest receive(final PrintStream output) throws HttpRequestException {
         return receive((OutputStream) output);
@@ -1483,10 +1457,6 @@ final class SimpleHttpRequest {
 
     /**
      * Receive response into the given appendable
-     *
-     * @param appendable
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest receive(final Appendable appendable) throws HttpRequestException {
         final BufferedReader reader = bufferedReader();
@@ -1508,10 +1478,6 @@ final class SimpleHttpRequest {
 
     /**
      * Receive response into the given writer
-     *
-     * @param writer
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest receive(final Writer writer) throws HttpRequestException {
         final BufferedReader reader = bufferedReader();
@@ -1633,11 +1599,6 @@ final class SimpleHttpRequest {
     /**
      * Get a date header from the response falling back to returning the given default value if the
      * header is missing or parsing fails
-     *
-     * @param name
-     * @param defaultValue
-     * @return date, default value on failures
-     * @throws HttpRequestException
      */
     public long dateHeader(final String name, final long defaultValue) throws HttpRequestException {
         closeOutputQuietly();
@@ -1659,11 +1620,6 @@ final class SimpleHttpRequest {
     /**
      * Get an integer header value from the response falling back to the given default value if the
      * header is missing or if parsing fails
-     *
-     * @param name
-     * @param defaultValue
-     * @return header value as an integer, default value when missing or parsing fails
-     * @throws HttpRequestException
      */
     public int intHeader(final String name, final int defaultValue) throws HttpRequestException {
         closeOutputQuietly();
@@ -2075,9 +2031,6 @@ final class SimpleHttpRequest {
 
     /**
      * Set the 'Content-Length' request header to the given value
-     *
-     * @param contentLength
-     * @return this request
      */
     public SimpleHttpRequest contentLength(final int contentLength) {
         getConnection().setFixedLengthStreamingMode(contentLength);
@@ -2179,10 +2132,6 @@ final class SimpleHttpRequest {
 
     /**
      * Close output stream
-     *
-     * @return this request
-     * @throws HttpRequestException
-     * @throws IOException
      */
     protected SimpleHttpRequest closeOutput() throws IOException {
         progress(null);
@@ -2222,9 +2171,6 @@ final class SimpleHttpRequest {
 
     /**
      * Open output stream
-     *
-     * @return this request
-     * @throws IOException
      */
     protected SimpleHttpRequest openOutput() throws IOException {
         if (output != null) {
@@ -2239,9 +2185,6 @@ final class SimpleHttpRequest {
 
     /**
      * Start part of a multipart
-     *
-     * @return this request
-     * @throws IOException
      */
     protected SimpleHttpRequest startPart() throws IOException {
         if (!multipart) {
@@ -2256,11 +2199,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part header
-     *
-     * @param name
-     * @param filename
-     * @return this request
-     * @throws IOException
      */
     protected SimpleHttpRequest writePartHeader(final String name, final String filename)
         throws IOException {
@@ -2269,12 +2207,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part header
-     *
-     * @param name
-     * @param filename
-     * @param contentType
-     * @return this request
-     * @throws IOException
      */
     protected SimpleHttpRequest writePartHeader(
         final String name, final String filename, final String contentType) throws IOException {
@@ -2293,10 +2225,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param part
-     * @return this request
      */
     public SimpleHttpRequest part(final String name, final String part) {
         return part(name, null, part);
@@ -2304,12 +2232,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param filename
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(final String name, final String filename, final String part)
         throws HttpRequestException {
@@ -2318,13 +2240,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param filename
-     * @param contentType value of the Content-Type part header
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(
         final String name, final String filename, final String contentType, final String part)
@@ -2341,11 +2256,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(final String name, final Number part) throws HttpRequestException {
         return part(name, null, part);
@@ -2353,12 +2263,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param filename
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(final String name, final String filename, final Number part)
         throws HttpRequestException {
@@ -2367,11 +2271,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(final String name, final File part) throws HttpRequestException {
         return part(name, null, part);
@@ -2379,12 +2278,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param filename
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(final String name, final String filename, final File part)
         throws HttpRequestException {
@@ -2393,13 +2286,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param filename
-     * @param contentType value of the Content-Type part header
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(
         final String name, final String filename, final String contentType, final File part)
@@ -2416,11 +2302,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(final String name, final InputStream part) throws HttpRequestException {
         return part(name, null, null, part);
@@ -2428,13 +2309,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write part of a multipart request to the request body
-     *
-     * @param name
-     * @param filename
-     * @param contentType value of the Content-Type part header
-     * @param part
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest part(
         final String name, final String filename, final String contentType, final InputStream part)
@@ -2451,11 +2325,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write a multipart header to the response body
-     *
-     * @param name
-     * @param value
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest partHeader(final String name, final String value) throws HttpRequestException {
         return send(name).send(": ").send(value).send(CRLF);
@@ -2463,10 +2332,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write contents of file to request body
-     *
-     * @param input
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest send(final File input) throws HttpRequestException {
         final InputStream stream;
@@ -2481,10 +2346,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write byte array to request body
-     *
-     * @param input
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest send(final byte[] input) throws HttpRequestException {
         if (input != null) {
@@ -2497,10 +2358,6 @@ final class SimpleHttpRequest {
      * Write stream to request body
      *
      * <p>The given stream will be closed once sending completes
-     *
-     * @param input
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest send(final InputStream input) throws HttpRequestException {
         try {
@@ -2516,10 +2373,6 @@ final class SimpleHttpRequest {
      * Write reader to request body
      *
      * <p>The given reader will be closed once sending completes
-     *
-     * @param input
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest send(final Reader input) throws HttpRequestException {
         try {
@@ -2542,10 +2395,6 @@ final class SimpleHttpRequest {
      *
      * <p>The charset configured via {@link #contentType(String)} will be used and UTF-8 will be used
      * if it is unset.
-     *
-     * @param value
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest send(final CharSequence value) throws HttpRequestException {
         try {
@@ -2559,9 +2408,6 @@ final class SimpleHttpRequest {
 
     /**
      * Create writer to request output stream
-     *
-     * @return writer
-     * @throws HttpRequestException
      */
     public OutputStreamWriter writer() throws HttpRequestException {
         try {
@@ -2577,10 +2423,6 @@ final class SimpleHttpRequest {
      *
      * <p>The pairs specified will be URL-encoded in UTF-8 and sent with the
      * 'application/x-www-form-urlencoded' content-type
-     *
-     * @param values
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest form(final Map<?, ?> values) throws HttpRequestException {
         return form(values, CHARSET_UTF8);
@@ -2591,10 +2433,6 @@ final class SimpleHttpRequest {
      *
      * <p>The pair specified will be URL-encoded in UTF-8 and sent with the
      * 'application/x-www-form-urlencoded' content-type
-     *
-     * @param entry
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest form(final Entry<?, ?> entry) throws HttpRequestException {
         return form(entry, CHARSET_UTF8);
@@ -2605,11 +2443,6 @@ final class SimpleHttpRequest {
      *
      * <p>The pair specified will be URL-encoded and sent with the 'application/x-www-form-urlencoded'
      * content-type
-     *
-     * @param entry
-     * @param charset
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest form(final Entry<?, ?> entry, final String charset)
         throws HttpRequestException {
@@ -2621,11 +2454,6 @@ final class SimpleHttpRequest {
      *
      * <p>The pair specified will be URL-encoded in UTF-8 and sent with the
      * 'application/x-www-form-urlencoded' content-type
-     *
-     * @param name
-     * @param value
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest form(final Object name, final Object value) throws HttpRequestException {
         return form(name, value, CHARSET_UTF8);
@@ -2636,12 +2464,6 @@ final class SimpleHttpRequest {
      *
      * <p>The values specified will be URL-encoded and sent with the
      * 'application/x-www-form-urlencoded' content-type
-     *
-     * @param name
-     * @param value
-     * @param charset
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest form(final Object name, final Object value, String charset)
         throws HttpRequestException {
@@ -2669,11 +2491,6 @@ final class SimpleHttpRequest {
 
     /**
      * Write the values in the map as encoded form data to the request body
-     *
-     * @param values
-     * @param charset
-     * @return this request
-     * @throws HttpRequestException
      */
     public SimpleHttpRequest form(final Map<?, ?> values, final String charset)
         throws HttpRequestException {
@@ -2738,10 +2555,6 @@ final class SimpleHttpRequest {
     /**
      * Configure an HTTP proxy on this connection. Use {{@link #proxyBasic(String, String)} if this
      * proxy requires basic authentication.
-     *
-     * @param proxyHost
-     * @param proxyPort
-     * @return this request
      */
     public SimpleHttpRequest useProxy(final String proxyHost, final int proxyPort) {
         if (connection != null) {
@@ -2802,11 +2615,10 @@ final class SimpleHttpRequest {
      * Callback interface for reporting upload progress for a request.
      */
     public interface UploadProgress {
-        UploadProgress DEFAULT =
-            new UploadProgress() {
-                public void onUpload(long uploaded, long total) {
-                }
-            };
+        UploadProgress DEFAULT = new UploadProgress() {
+            @Override public void onUpload(long uploaded, long total) {
+            }
+        };
 
         /**
          * Callback invoked as data is uploaded by the request.
@@ -2845,70 +2657,14 @@ final class SimpleHttpRequest {
          * The 64 valid Base64 values.
          */
         private static final byte[] STANDARD_ALPHABET = {
-            (byte) 'A',
-            (byte) 'B',
-            (byte) 'C',
-            (byte) 'D',
-            (byte) 'E',
-            (byte) 'F',
-            (byte) 'G',
-            (byte) 'H',
-            (byte) 'I',
-            (byte) 'J',
-            (byte) 'K',
-            (byte) 'L',
-            (byte) 'M',
-            (byte) 'N',
-            (byte) 'O',
-            (byte) 'P',
-            (byte) 'Q',
-            (byte) 'R',
-            (byte) 'S',
-            (byte) 'T',
-            (byte) 'U',
-            (byte) 'V',
-            (byte) 'W',
-            (byte) 'X',
-            (byte) 'Y',
-            (byte) 'Z',
-            (byte) 'a',
-            (byte) 'b',
-            (byte) 'c',
-            (byte) 'd',
-            (byte) 'e',
-            (byte) 'f',
-            (byte) 'g',
-            (byte) 'h',
-            (byte) 'i',
-            (byte) 'j',
-            (byte) 'k',
-            (byte) 'l',
-            (byte) 'm',
-            (byte) 'n',
-            (byte) 'o',
-            (byte) 'p',
-            (byte) 'q',
-            (byte) 'r',
-            (byte) 's',
-            (byte) 't',
-            (byte) 'u',
-            (byte) 'v',
-            (byte) 'w',
-            (byte) 'x',
-            (byte) 'y',
-            (byte) 'z',
-            (byte) '0',
-            (byte) '1',
-            (byte) '2',
-            (byte) '3',
-            (byte) '4',
-            (byte) '5',
-            (byte) '6',
-            (byte) '7',
-            (byte) '8',
-            (byte) '9',
-            (byte) '+',
-            (byte) '/'
+            (byte) 'A', (byte) 'B', (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F', (byte) 'G', (byte) 'H',
+            (byte) 'I', (byte) 'J', (byte) 'K', (byte) 'L', (byte) 'M', (byte) 'N', (byte) 'O', (byte) 'P',
+            (byte) 'Q', (byte) 'R', (byte) 'S', (byte) 'T', (byte) 'U', (byte) 'V', (byte) 'W', (byte) 'X',
+            (byte) 'Y', (byte) 'Z', (byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f',
+            (byte) 'g', (byte) 'h', (byte) 'i', (byte) 'j', (byte) 'k', (byte) 'l', (byte) 'm', (byte) 'n',
+            (byte) 'o', (byte) 'p', (byte) 'q', (byte) 'r', (byte) 's', (byte) 't', (byte) 'u', (byte) 'v',
+            (byte) 'w', (byte) 'x', (byte) 'y', (byte) 'z', (byte) '0', (byte) '1', (byte) '2', (byte) '3',
+            (byte) '4', (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) '+', (byte) '/'
         };
 
         /**
@@ -3119,10 +2875,6 @@ final class SimpleHttpRequest {
 
         /**
          * Run operation
-         *
-         * @return result
-         * @throws HttpRequestException
-         * @throws IOException
          */
         protected abstract V run() throws HttpRequestException, IOException;
 
@@ -3168,9 +2920,6 @@ final class SimpleHttpRequest {
 
         /**
          * Create closer for operation
-         *
-         * @param closeable
-         * @param ignoreCloseExceptions
          */
         protected AbstractCloseOperation(final Closeable closeable, final boolean ignoreCloseExceptions) {
             this.closeable = closeable;
@@ -3205,8 +2954,6 @@ final class SimpleHttpRequest {
 
         /**
          * Create flush operation
-         *
-         * @param flushable
          */
         protected AbstractFlushOperation(final Flushable flushable) {
             this.flushable = flushable;
@@ -3227,10 +2974,6 @@ final class SimpleHttpRequest {
 
         /**
          * Create request output stream
-         *
-         * @param stream
-         * @param charset
-         * @param bufferSize
          */
         public RequestOutputStream(
             final OutputStream stream, final String charset, final int bufferSize) {
@@ -3241,10 +2984,6 @@ final class SimpleHttpRequest {
 
         /**
          * Write string to stream
-         *
-         * @param value
-         * @return this stream
-         * @throws IOException
          */
         public RequestOutputStream write(final String value) throws IOException {
             final ByteBuffer bytes = encoder.encode(CharBuffer.wrap(value));
