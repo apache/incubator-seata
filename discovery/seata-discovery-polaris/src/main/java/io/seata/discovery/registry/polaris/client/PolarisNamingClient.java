@@ -336,7 +336,7 @@ public final class PolarisNamingClient {
                             .header(ACCESS_TOKEN_HEADER, properties.token())
                             .contentType(CONTENT_TYPE_JSON, CHARSET_UTF8)
                             // trust all certs & hosts
-                            .trustAllCerts().trustAllHosts()
+                            //.trustAllCerts().trustAllHosts()
                             .connectTimeout(properties.connectTimeout())
                             .readTimeout(properties.readTimeout())
                             .send(JacksonUtils.serialize2Json(registryRequest.getInstances()));
@@ -383,7 +383,7 @@ public final class PolarisNamingClient {
                             .header(ACCESS_TOKEN_HEADER, properties.token())
                             .contentType(CONTENT_TYPE_JSON, CHARSET_UTF8)
                             // trust all certs & hosts
-                            .trustAllCerts().trustAllHosts()
+                            //.trustAllCerts().trustAllHosts()
                             .connectTimeout(properties.connectTimeout())
                             .readTimeout(properties.readTimeout())
                             .send(JacksonUtils.serialize2Json(deregistryRequest.getServiceIds()));
@@ -430,7 +430,7 @@ public final class PolarisNamingClient {
                             .header(ACCESS_TOKEN_HEADER, properties.token())
                             .contentType(CONTENT_TYPE_JSON, CHARSET_UTF8)
                             // trust all certs & hosts
-                            .trustAllCerts().trustAllHosts()
+                            //.trustAllCerts().trustAllHosts()
                             .connectTimeout(properties.connectTimeout())
                             .readTimeout(properties.readTimeout())
                             .send(JacksonUtils.serialize2Json(heartbeatRequest));
@@ -477,7 +477,7 @@ public final class PolarisNamingClient {
                             .header(ACCESS_TOKEN_HEADER, properties.token())
                             .contentType(CONTENT_TYPE_JSON, CHARSET_UTF8)
                             // trust all certs & hosts
-                            .trustAllCerts().trustAllHosts()
+                            //.trustAllCerts().trustAllHosts()
                             .connectTimeout(properties.connectTimeout())
                             .readTimeout(properties.readTimeout())
                             .send(JacksonUtils.serialize2Json(getAllServiceInstancesRequest));

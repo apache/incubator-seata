@@ -2948,21 +2948,21 @@ final class SimpleHttpRequest {
 
             switch (numSigBytes) {
                 case 3:
-                    destination[destOffset] = alphabet[(inBuff >>> 18)];
+                    destination[destOffset] = alphabet[inBuff >>> 18];
                     destination[destOffset + 1] = alphabet[(inBuff >>> 12) & 0x3f];
                     destination[destOffset + 2] = alphabet[(inBuff >>> 6) & 0x3f];
-                    destination[destOffset + 3] = alphabet[(inBuff) & 0x3f];
+                    destination[destOffset + 3] = alphabet[inBuff & 0x3f];
                     return destination;
 
                 case 2:
-                    destination[destOffset] = alphabet[(inBuff >>> 18)];
+                    destination[destOffset] = alphabet[inBuff >>> 18];
                     destination[destOffset + 1] = alphabet[(inBuff >>> 12) & 0x3f];
                     destination[destOffset + 2] = alphabet[(inBuff >>> 6) & 0x3f];
                     destination[destOffset + 3] = EQUALS_SIGN;
                     return destination;
 
                 case 1:
-                    destination[destOffset] = alphabet[(inBuff >>> 18)];
+                    destination[destOffset] = alphabet[inBuff >>> 18];
                     destination[destOffset + 1] = alphabet[(inBuff >>> 12) & 0x3f];
                     destination[destOffset + 2] = EQUALS_SIGN;
                     destination[destOffset + 3] = EQUALS_SIGN;

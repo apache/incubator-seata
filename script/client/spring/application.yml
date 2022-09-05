@@ -103,6 +103,14 @@ seata:
       username: ""
       password: ""
       node-path: /seata/seata.properties
+    polaris:
+      server-addr: http://127.0.0.1:8090
+      namespace: polaris-seata
+      group: polaris-seata-group
+      file: seata.properties
+      token: ""
+      connect-timeout: 6000
+      read-timeout: 5000
     custom:
       name: ""
   registry:
@@ -147,6 +155,14 @@ seata:
       connect-timeout: 2000
       username: ""
       password: ""
+    polaris:
+      server-addr: http://127.0.0.1:8090
+      namespace: polaris-seata
+      application: seata-server
+      token: ""
+      connect-timeout: 6000
+      read-timeout: 5000
+      refresh-time: 2000
     custom:
       name: ""
   log:

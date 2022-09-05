@@ -266,7 +266,8 @@ public final class PolarisConfigClient {
                         }
 
                         SimpleHttpRequest simpleHttpRequest = SimpleHttpRequest.get(GET_CONFIG_FILE.uri(), params, true)
-                            .header(ACCESS_TOKEN_HEADER, properties.token()).trustAllCerts().trustAllHosts()
+                            .header(ACCESS_TOKEN_HEADER, properties.token())
+                            //.trustAllCerts().trustAllHosts()
                             .connectTimeout(properties.connectTimeout())
                             .readTimeout(readTimeout);
 
@@ -313,7 +314,7 @@ public final class PolarisConfigClient {
                         SimpleHttpRequest simpleHttpRequest = SimpleHttpRequest.post(WATCH_CONFIG_FILE.uri())
                             .header(ACCESS_TOKEN_HEADER, properties.token())
                             .contentType(CONTENT_TYPE_JSON, CHARSET_UTF8)
-                            .trustAllCerts().trustAllHosts()
+                            //.trustAllCerts().trustAllHosts()
                             .connectTimeout(properties.connectTimeout())
                             .readTimeout(readTimeout)
                             .send(JacksonUtils.serialize2Json(configFileRequest));
