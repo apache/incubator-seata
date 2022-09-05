@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty.gts.message;
 
 import io.netty.buffer.ByteBuf;
+
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -125,7 +126,7 @@ public class BranchCommitMessage extends TxcMessage implements Serializable {
     public String toString(boolean verbose) {
         StringBuilder sb = new StringBuilder("BranchCommitMessage ");
         if (verbose) {
-            for(int i = 0; i < this.tranIds.size(); ++i) {
+            for (int i = 0; i < this.tranIds.size(); ++i) {
                 sb.append(this.branchIds.get(i)).append("\t");
             }
         } else if (this.branchIds.size() > 0) {
@@ -152,61 +153,61 @@ public class BranchCommitMessage extends TxcMessage implements Serializable {
 
         this.byteBuffer.putInt(this.tranIds.size());
 
-        for(i = 0; i < this.tranIds.size(); ++i) {
-            this.byteBuffer.putLong((Long)this.tranIds.get(i));
-            this.byteBuffer.putLong((Long)this.branchIds.get(i));
+        for (i = 0; i < this.tranIds.size(); ++i) {
+            this.byteBuffer.putLong((Long) this.tranIds.get(i));
+            this.byteBuffer.putLong((Long) this.branchIds.get(i));
         }
 
         this.byteBuffer.put(this.commitMode);
         byte[] bs;
         if (this.serverAddr != null) {
             bs = this.serverAddr.getBytes(UTF8);
-            this.byteBuffer.putShort((short)bs.length);
+            this.byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 this.byteBuffer.put(bs);
             }
         } else {
-            this.byteBuffer.putShort((short)0);
+            this.byteBuffer.putShort((short) 0);
         }
 
         if (this.appName != null) {
             bs = this.appName.getBytes(UTF8);
-            this.byteBuffer.putShort((short)bs.length);
+            this.byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 this.byteBuffer.put(bs);
             }
         } else {
-            this.byteBuffer.putShort((short)0);
+            this.byteBuffer.putShort((short) 0);
         }
 
         if (this.dbName != null) {
             bs = this.dbName.getBytes(UTF8);
-            this.byteBuffer.putShort((short)bs.length);
+            this.byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 this.byteBuffer.put(bs);
             }
         } else {
-            this.byteBuffer.putShort((short)0);
+            this.byteBuffer.putShort((short) 0);
         }
 
         if (this.udata != null) {
             bs = this.udata.getBytes(UTF8);
-            this.byteBuffer.putShort((short)bs.length);
+            this.byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 this.byteBuffer.put(bs);
             }
         } else {
-            this.byteBuffer.putShort((short)0);
+            this.byteBuffer.putShort((short) 0);
         }
 
         if (this.retrySql != null) {
             bs = this.retrySql.getBytes(UTF8);
-            this.byteBuffer.putShort((short)bs.length);
+            this.byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 this.byteBuffer.put(bs);
             }
         } else {
-            this.byteBuffer.putShort((short)0);
+            this.byteBuffer.putShort((short) 0);
         }
 
         this.byteBuffer.flip();
@@ -228,7 +229,7 @@ public class BranchCommitMessage extends TxcMessage implements Serializable {
             } else {
                 i -= 16 * size;
 
-                for(int idx = 0; idx < size; ++idx) {
+                for (int idx = 0; idx < size; ++idx) {
                     this.tranIds.add(in.readLong());
                     this.branchIds.add(in.readLong());
                 }

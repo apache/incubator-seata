@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty.gts.message;
 
 import io.netty.buffer.ByteBuf;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public class BranchCommitResultMessage extends AbstractResultMessage {
 
     @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
-        ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
+        ((TxcMsgHandler) this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
     @Override
@@ -84,9 +85,9 @@ public class BranchCommitResultMessage extends AbstractResultMessage {
         super.encode();
         this.byteBuffer.putInt(this.tranIds.size());
 
-        for(i = 0; i < this.tranIds.size(); ++i) {
-            this.byteBuffer.putLong((Long)this.tranIds.get(i));
-            this.byteBuffer.putLong((Long)this.branchIds.get(i));
+        for (i = 0; i < this.tranIds.size(); ++i) {
+            this.byteBuffer.putLong((Long) this.tranIds.get(i));
+            this.byteBuffer.putLong((Long) this.branchIds.get(i));
         }
 
         this.byteBuffer.flip();
@@ -111,7 +112,7 @@ public class BranchCommitResultMessage extends AbstractResultMessage {
                 } else {
                     int var10000 = i - 16 * size;
 
-                    for(int idx = 0; idx < size; ++idx) {
+                    for (int idx = 0; idx < size; ++idx) {
                         this.tranIds.add(in.readLong());
                         this.branchIds.add(in.readLong());
                     }

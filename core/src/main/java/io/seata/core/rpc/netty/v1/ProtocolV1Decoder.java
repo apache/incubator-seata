@@ -124,8 +124,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                             decodeGts(ctx, frame);
                         }
                     }
-                }
-                finally {
+                } finally {
                     frame.release();
                 }
             }
@@ -247,7 +246,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                     try {
                         if (isTxcCodec) {
                             TxcCodec codec = this.getTxcCodecInstance(typeCode);
-                            if(!MergedMessage.class.isAssignableFrom(codec.getClass())) {
+                            if (!MergedMessage.class.isAssignableFrom(codec.getClass())) {
                                 if (!codec.decode(in)) {
                                     in.readerIndex(begin);
                                     throw new Exception("gts message format exception");
@@ -263,7 +262,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                             msgOut = this.changetoSeataCodec(typeCode, codec, seataOut);
 
                             // Request ID
-                            seataOut.writeInt((int)msgId);
+                            seataOut.writeInt((int) msgId);
 
                             Map<String, String> headMap = new HashMap<>();
                             headMap.put("protocol", "GtsToSeata");
@@ -293,7 +292,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                         LOGGER.error("Gts Decode error, cause: {}", var20.getMessage());
                         throw new DecodeException(var20);
                     }
-                    if(LOGGER.isDebugEnabled()) {
+                    if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Receive: " + gtsRpcMessage.getBody() + ",messageId: " + msgId);
                     }
 
@@ -305,8 +304,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
     public byte[] changetoSeataCodec(short typeCode, TxcCodec gtsCodec, ByteBuf out) {
         byte[] msgOut = null;
         switch (typeCode) {
-            case 1:
-            {
+            case 1: {
                 GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
                 BeginMessage beginMessage = (BeginMessage) gtsCodec;
                 int timeout = (int) beginMessage.getTimeout();
@@ -323,8 +321,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 out.writeByte(0);
                 return msgOut;
             }
-            case 2:
-            {
+            case 2: {
                 GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
                 BeginResultMessage beginResultMessage = (BeginResultMessage) gtsCodec;
                 String xid = beginResultMessage.getXid();
@@ -339,8 +336,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 out.writeByte(0);
                 return msgOut;
             }
-            case 3:
-            {
+            case 3: {
                 BranchCommitRequest branchCommitRequest = new BranchCommitRequest();
                 BranchCommitMessage branchCommitMessage = (BranchCommitMessage) gtsCodec;
                 String serverAddr = branchCommitMessage.getServerAddr();
@@ -554,7 +550,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 codec = new RedressResultMessage();
                 break;
             default:
-                String className = (String)TxcMessage.typeMap.get(typeCode);
+                String className = (String) TxcMessage.TYPE_MAP.get(typeCode);
                 throw new TxcException("unknown class:" + className + " in txc message codec.");
         }
         return codec;

@@ -16,20 +16,20 @@
 package io.seata.core.rpc.netty.gts.message;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.core.rpc.netty.gts.exception.*;
+import io.seata.core.rpc.netty.gts.exception.TxcException;
+import io.seata.core.rpc.netty.gts.exception.TxcErrCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMessage {
     private static final long serialVersionUID = -5758802337446717090L;
-    public List<TxcMessage> msgs = new ArrayList();
-    public List<Long> msgIds = new ArrayList();
+    public List<TxcMessage> msgs = new ArrayList<>();
+    public List<Long> msgIds = new ArrayList<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(TxcMergeMessage.class);
 
     public TxcMergeMessage() {
@@ -43,12 +43,10 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
     @Override
     public byte[] encode() {
         int bufferSize = this.msgs.size() * 1024;
-        Iterator var2 = this.msgs.iterator();
 
-        while(var2.hasNext()) {
-            TxcMessage msg = (TxcMessage)var2.next();
+        for (TxcMessage msg : this.msgs) {
             if (msg instanceof RegisterMessage) {
-                String key = ((RegisterMessage)msg).getBusinessKey();
+                String key = ((RegisterMessage) msg).getBusinessKey();
                 if (key != null && key.length() > 512) {
                     int i = key.getBytes(UTF8).length;
                     LOGGER.info("get one huge registermessage, businesskey bytes:" + i);
@@ -58,11 +56,9 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
         }
 
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
-        byteBuffer.putShort((short)this.msgs.size());
-        Iterator var7 = this.msgs.iterator();
+        byteBuffer.putShort((short) this.msgs.size());
 
-        while(var7.hasNext()) {
-            TxcMessage msg = (TxcMessage)var7.next();
+        for (TxcMessage msg : this.msgs) {
             msg.setChannelHandlerContext(this.ctx);
             byte[] data = msg.encode();
             byteBuffer.putShort(msg.getTypeCode());
@@ -103,11 +99,10 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
 
     public void decode(ByteBuffer byteBuffer) {
         short msgNum = byteBuffer.getShort();
-
-        for(int idx = 0; idx < msgNum; ++idx) {
+        for (int idx = 0; idx < msgNum; ++idx) {
             short typeCode = byteBuffer.getShort();
             MergedMessage message = null;
-            switch(typeCode) {
+            switch (typeCode) {
                 case 1:
                     message = new BeginMessage();
                     break;
@@ -146,13 +141,13 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
                     message = new QueryLockMessage();
                     break;
                 default:
-                    String className = (String) typeMap.get(typeCode);
+                    String className = (String) TYPE_MAP.get(typeCode);
                     throw new TxcException("unknown class:" + className + " in txc merge message.", TxcErrCode.MergeMessageError);
             }
 
-            ((TxcMessage)message).setChannelHandlerContext(this.ctx);
-            ((MergedMessage)message).decode(byteBuffer);
-            this.msgs.add((TxcMessage)message);
+            ((TxcMessage) message).setChannelHandlerContext(this.ctx);
+            ((MergedMessage) message).decode(byteBuffer);
+            this.msgs.add((TxcMessage) message);
         }
 
     }
@@ -160,10 +155,8 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("TxcMergeMessage ");
-        Iterator var2 = this.msgs.iterator();
 
-        while(var2.hasNext()) {
-            TxcMessage msg = (TxcMessage)var2.next();
+        for (TxcMessage msg : this.msgs) {
             sb.append(msg.toString()).append("\n");
         }
 
@@ -172,7 +165,7 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
 
     @Override
     public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
-        ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
+        ((TxcMsgHandler) this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
     }
 
 }

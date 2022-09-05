@@ -16,7 +16,8 @@
 package io.seata.core.rpc.netty.gts.message;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.core.rpc.netty.gts.exception.*;
+import io.seata.core.rpc.netty.gts.exception.TxcException;
+import io.seata.core.rpc.netty.gts.exception.TxcErrCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +139,7 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
                     message = new QueryLockResultMessage();
                     break;
                 default:
-                    String className = (String) typeMap.get(typeCode);
+                    String className = (String) TYPE_MAP.get(typeCode);
                     throw new TxcException("unknown class:" + className + " in txc merge result message.", TxcErrCode.MergeResultMessageError);
 
             }
