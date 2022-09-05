@@ -101,7 +101,6 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         Object decoded;
         in.markReaderIndex();
         try {
-//            decoded = super.decode(ctx, in);
             if (in instanceof ByteBuf) {
                 ByteBuf frame = (ByteBuf) in;
                 frame.markReaderIndex();
@@ -113,11 +112,17 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                         && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
                     // seata message
                     if(b2 == ProtocolConstants.VERSION) {
-                        try {
-                            return decodeFrame(frame);
-                        } finally {
-                            frame.release();
+                        // need LengthFieldBasedFrameDecoder check
+                        decoded = super.decode(ctx, in);
+                        if (decoded instanceof ByteBuf) {
+                            frame = (ByteBuf) decoded;
+                            try {
+                                return decodeFrame(frame);
+                            } finally {
+                                frame.release();
+                            }
                         }
+
                     } else if (b2 == (byte) 0) { // gts message
                         try {
                             decodeGts(ctx, frame);
@@ -267,9 +272,6 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                             // Request ID
                             seataOut.writeInt((int)msgId);
 
-
-//                            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
-//                            msgOut = serializer.serialize(seataCodec);
                             Map<String, String> headMap = new HashMap<>();
                             headMap.put("protocal", "GtsToSeata");
                             int headMapBytesLength = HeadMapSerializer.getInstance().encode(headMap, seataOut);
