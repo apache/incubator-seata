@@ -100,9 +100,9 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         Object decoded;
         in.markReaderIndex();
         try {
-            decoded = super.decode(ctx, in);
-            if (decoded instanceof ByteBuf) {
-                ByteBuf frame = (ByteBuf) decoded;
+//            decoded = super.decode(ctx, in);
+            if (in instanceof ByteBuf) {
+                ByteBuf frame = (ByteBuf) in;
                 frame.markReaderIndex();
                 byte b0 = frame.readByte();
                 byte b1 = frame.readByte();
@@ -134,7 +134,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
             LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
             throw new DecodeException(exx);
         }
-        return decoded;
+        return in;
     }
 
     public Object decodeFrame(ByteBuf frame) {
@@ -238,7 +238,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                     gtsRpcMessage.setRequest(isRequest);
 
                     //Seata protocal head
-                    ByteBuf seataOut = ByteBufAllocator.DEFAULT.buffer(128);
+                    ByteBuf seataOut = ByteBufAllocator.DEFAULT.buffer(256);
                     int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
                     int headLength = ProtocolConstants.V1_HEAD_LENGTH;
                     seataOut.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
@@ -247,17 +247,28 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
                     try {
                         if (isTxcCodec) {
-                            TxcCodec codec = this.getTxcCodecInstance(typeCode);
-                            codec.setChannelHandlerContext(ctx);
-                            if (!codec.decode(in)) {
-                                in.readerIndex(begin);
-                                throw new Exception("gts message format exception");
+                            TxcCodec codec;
+                            TxcCodec code1 = this.getTxcCodecInstance(typeCode);
+                            code1.setChannelHandlerContext(ctx);
+                            if(!MergedMessage.class.isAssignableFrom(code1.getClass())) {
+                                if (!code1.decode(in)) {
+                                    in.readerIndex(begin);
+                                    throw new Exception("gts message format exception");
+                                }
+                                codec = code1;
+                            } else {
+                                BeginMessage code2 = (BeginMessage) code1;
+                                code2.decode(in.nioBuffer());
+                                codec = code2;
                             }
 
                             // 转换协议
                             byte[] msgOut = null;
                             Object seataCodec = this.changetoSeataCodec(typeCode, codec, seataOut, msgOut);
+                            // id
                             seataOut.writeInt((int)msgId);
+                            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                            msgOut = serializer.serialize(seataCodec);
                             Map<String, String> headMap = new HashMap<>();
                             headMap.put("protocal", "GtsToSeata");
                             int headMapBytesLength = HeadMapSerializer.getInstance().encode(headMap, seataOut);
@@ -301,15 +312,15 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
             {
                 GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
                 BeginMessage beginMessage = (BeginMessage) gtsCodec;
-                short timeout = (short) beginMessage.getTimeout();
+                int timeout = (int) beginMessage.getTimeout();
                 globalBeginRequest.setTimeout(timeout);
                 String transactionName = beginMessage.getTxcInst();
                 globalBeginRequest.setTransactionName(transactionName);
                 // message type
                 out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
                 // Serializer (default: seata)
-                out.writeByte(2);
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(2));
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(globalBeginRequest);
                 // Compress
                 out.writeByte(0);
