@@ -261,15 +261,15 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                             codec.setChannelHandlerContext(ctx);
 
                             // switch protocol
-                            byte[] msgOut = null;
-                            Object seataCodec = this.changetoSeataCodec(typeCode, codec, seataOut, msgOut);
+                            byte[] msgOut;
+                            msgOut = this.changetoSeataCodec(typeCode, codec, seataOut);
 
                             // Request ID
                             seataOut.writeInt((int)msgId);
 
 
-                            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
-                            msgOut = serializer.serialize(seataCodec);
+//                            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+//                            msgOut = serializer.serialize(seataCodec);
                             Map<String, String> headMap = new HashMap<>();
                             headMap.put("protocal", "GtsToSeata");
                             int headMapBytesLength = HeadMapSerializer.getInstance().encode(headMap, seataOut);
@@ -307,7 +307,8 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         }
     }
 
-    public Object changetoSeataCodec(short typeCode, TxcCodec gtsCodec, ByteBuf out, byte[] msgOut) {
+    public byte[] changetoSeataCodec(short typeCode, TxcCodec gtsCodec, ByteBuf out) {
+        byte[] msgOut = null;
         switch (typeCode) {
             case 1:
             {
@@ -325,7 +326,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 msgOut = serializer.serialize(globalBeginRequest);
                 // Compress
                 out.writeByte(0);
-                return globalBeginRequest;
+                return msgOut;
             }
             case 2:
             {
@@ -341,7 +342,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 msgOut = serializer.serialize(globalBeginResponse);
                 // Compress
                 out.writeByte(0);
-                return globalBeginResponse;
+                return msgOut;
             }
             case 3:
             {
@@ -365,7 +366,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 msgOut = serializer.serialize(branchCommitRequest);
                 // Compress
                 out.writeByte(0);
-                return branchCommitRequest;
+                return msgOut;
             }
             case 4:
             {
