@@ -13,17 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.producer.kafka;
+package io.seata.consumer.handler;
 
-import io.seata.producer.MqProducerFactory;
-import org.junit.jupiter.api.Test;
-
-import java.nio.charset.StandardCharsets;
-
-class KafkaProducerTest {
-
-    @Test
-    void publish() {
-        MqProducerFactory.getInstance().publish("test", "key".getBytes(StandardCharsets.UTF_8),"value".getBytes(StandardCharsets.UTF_8));
-    }
+public interface Handler {
+    void handle(String topic, byte[] key, byte[] value);
 }

@@ -52,12 +52,14 @@ public class KafkaProducer implements MqProducer {
         sessionProducer = new org.apache.kafka.clients.producer.KafkaProducer<>(properties);
     }
 
-    public void publish(String topic, byte[] sessionBytes) {
-        Future<RecordMetadata> future = sessionProducer.send(new ProducerRecord<>(topic, sessionBytes));
+    @Override
+    public void publish(String topic, byte[] key, byte[] value) {
+        Future<RecordMetadata> future = sessionProducer.send(new ProducerRecord<>(topic, key, value));
         try {
             future.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
         }
+
     }
 }

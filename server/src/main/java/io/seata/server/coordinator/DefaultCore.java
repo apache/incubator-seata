@@ -142,7 +142,7 @@ public class DefaultCore implements Core {
 
         // TODO need add config about enabling this feature
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_GLOBAL_TABLE, DEFAULT_STORE_DB_GLOBAL_TABLE);
-        MqProducerFactory.getInstance().publish(topic, JSON.toJSONString(session).getBytes(StandardCharsets.UTF_8));
+        MqProducerFactory.getInstance().publish(topic, session.getXid().getBytes(StandardCharsets.UTF_8), JSON.toJSONString(session).getBytes(StandardCharsets.UTF_8));
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);

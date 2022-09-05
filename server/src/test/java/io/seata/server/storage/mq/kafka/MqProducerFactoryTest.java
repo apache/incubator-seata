@@ -9,6 +9,8 @@ import io.seata.producer.MqProducerFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.nio.charset.StandardCharsets;
+
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 @SpringBootTest
@@ -19,7 +21,7 @@ class MqProducerFactoryTest {
         // TODO need mock a kafka server
         GlobalSession globalSession = GlobalSession.createGlobalSession("demo-app", "default_tx_group",
                 "tx-1", 3000);
-        MqProducerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, globalSession.encode());
+        MqProducerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, globalSession.getXid().getBytes(StandardCharsets.UTF_8), globalSession.encode());
     }
 
     @Test
@@ -35,6 +37,6 @@ class MqProducerFactoryTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        MqProducerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.encode());
+        MqProducerFactory.getInstance().publish(ConfigurationKeys.STORE_DB_BRANCH_TABLE, branchSession.getXid().getBytes(StandardCharsets.UTF_8), branchSession.encode());
     }
 }

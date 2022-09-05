@@ -78,6 +78,8 @@ public interface StarterConstants {
     String STORE_FILE_PREFIX = STORE_PREFIX + ".file";
     String STORE_DB_PREFIX = STORE_PREFIX + ".db";
     String STORE_REDIS_PREFIX = STORE_PREFIX + ".redis";
+
+    String STORE_INFLUXDB_PREFIX = STORE_PREFIX + ".influxdb";
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
 

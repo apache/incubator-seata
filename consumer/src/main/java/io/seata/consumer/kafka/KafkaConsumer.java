@@ -18,17 +18,27 @@ package io.seata.consumer.kafka;
 import io.seata.common.ConfigurationKeys;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.consumer.Constants;
 import io.seata.consumer.MqConsumer;
+import io.seata.consumer.handler.InfluxDBHandler;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Properties;
+
 
 
 public class KafkaConsumer implements MqConsumer {
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
+
+    private final org.apache.kafka.clients.consumer.KafkaConsumer<byte[], byte[]> kafkaConsumer;
+
+    private InfluxDBHandler influxDBHandler = new InfluxDBHandler();
 
     public KafkaConsumer() {
         Properties properties = new Properties();
@@ -37,13 +47,27 @@ public class KafkaConsumer implements MqConsumer {
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-
+        kafkaConsumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(properties);
+        ArrayList<String> topics = new ArrayList<>();
+        topics.add(Constants.globalSessionTopic);
+        topics.add(Constants.branchSessionTopic);
+        topics.add(Constants.undoTopic);
+        kafkaConsumer.subscribe(topics);
     }
 
     @Override
     public void consume() {
-        //TODO 构造消费者，进行消费 使用console的配置文件，类库没法引用
-        //TODO 调用influxdb插入函数
-
+        try {
+            while (true) {
+                ConsumerRecords<byte[], byte[]> records = kafkaConsumer.poll(Duration.ofMillis(1000));
+                for (ConsumerRecord<byte[], byte[]> record : records) {
+                    influxDBHandler.handle(record.topic(), record.key(), record.value());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            kafkaConsumer.close();
+        }
     }
 }

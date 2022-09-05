@@ -273,6 +273,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_PREFIX = "store.redis.";
 
     /**
+     * The constant STORE_INFLUXDB.PREFIX.
+     */
+    String STORE_INFLUXDB_PREFIX = "store.influxdb.";
+
+    /**
      * The constant STORE_MQ_PREFIX
      */
     String STORE_MQ_PREFIX = STORE_PREFIX + "mq";
@@ -301,6 +306,11 @@ public interface ConfigurationKeys {
      * The constant STORE_DB_BRANCH_TABLE.
      */
     String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
+
+    /**
+     * The constant STORE_DB_UNDO.
+     */
+    String STORE_DB_UNDO = STORE_DB_PREFIX + "undo";
 
     /**
      * The constant DISTRIBUTED_LOCK_DB_TABLE.
@@ -710,6 +720,26 @@ public interface ConfigurationKeys {
      * The constant STORE_REDIS_PASSWORD.
      */
     String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
+
+    /**
+     * The constant STORE_INFLUXDB_USERNAME.
+     */
+    String STORE_INFLUXDB_USERNAME = STORE_INFLUXDB_PREFIX + "username";
+
+    /**
+     * The constant STORE_INFLUXDB_PASSWORD.
+     */
+    String STORE_INFLUXDB_PASSWORD = STORE_INFLUXDB_PREFIX + "password";
+
+    /**
+     * The constant STORE_INFLUXDB_OPENURL.
+     */
+    String STORE_INFLUXDB_OPENURL = STORE_INFLUXDB_PREFIX + "openurl";
+
+    /**
+     * The constant STORE_INFLUXDB_DATABASE.
+     */
+    String STORE_INFLUXDB_DATABASE = STORE_INFLUXDB_PREFIX + "database";
 
     /**
      * The constant STORE_REDIS_QUERY_LIMIT.

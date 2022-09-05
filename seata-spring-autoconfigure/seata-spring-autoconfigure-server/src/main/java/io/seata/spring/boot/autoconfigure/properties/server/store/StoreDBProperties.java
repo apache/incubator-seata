@@ -36,6 +36,8 @@ public class StoreDBProperties {
     private Integer maxConn = 100;
     private String globalTable = "global_table";
     private String branchTable = "branch_table";
+
+    private String undo = "undo";
     private String lockTable = "lock_table";
     private String distributedLockTable = "distributed_lock";
     private Integer queryLimit = 100;
@@ -128,6 +130,15 @@ public class StoreDBProperties {
 
     public StoreDBProperties setBranchTable(String branchTable) {
         this.branchTable = branchTable;
+        return this;
+    }
+
+    public String getUndo() {
+        return undo;
+    }
+
+    public StoreDBProperties setUndo(String undo) {
+        this.undo= undo;
         return this;
     }
 
