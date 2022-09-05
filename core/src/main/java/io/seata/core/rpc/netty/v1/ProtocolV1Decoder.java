@@ -37,6 +37,7 @@ import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -237,7 +238,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                     gtsRpcMessage.setHeartbeat(false);
                     gtsRpcMessage.setRequest(isRequest);
 
-                    //Seata protocal head
+                    //Seata protocol head
                     ByteBuf seataOut = ByteBufAllocator.DEFAULT.buffer(256);
                     int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
                     int headLength = ProtocolConstants.V1_HEAD_LENGTH;
@@ -247,26 +248,26 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
                     try {
                         if (isTxcCodec) {
-                            TxcCodec codec;
-                            TxcCodec code1 = this.getTxcCodecInstance(typeCode);
-                            code1.setChannelHandlerContext(ctx);
-                            if(!MergedMessage.class.isAssignableFrom(code1.getClass())) {
-                                if (!code1.decode(in)) {
+                            TxcCodec codec = this.getTxcCodecInstance(typeCode);
+                            if(!MergedMessage.class.isAssignableFrom(codec.getClass())) {
+                                if (!codec.decode(in)) {
                                     in.readerIndex(begin);
                                     throw new Exception("gts message format exception");
                                 }
-                                codec = code1;
                             } else {
-                                BeginMessage code2 = (BeginMessage) code1;
-                                code2.decode(in.nioBuffer());
-                                codec = code2;
+                                Method method = codec.getClass().getMethod("decode", ByteBuffer.class);
+                                method.invoke(codec, in.nioBuffer());
                             }
+                            codec.setChannelHandlerContext(ctx);
 
-                            // 转换协议
+                            // switch protocol
                             byte[] msgOut = null;
                             Object seataCodec = this.changetoSeataCodec(typeCode, codec, seataOut, msgOut);
-                            // id
+
+                            // Request ID
                             seataOut.writeInt((int)msgId);
+
+
                             Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                             msgOut = serializer.serialize(seataCodec);
                             Map<String, String> headMap = new HashMap<>();
