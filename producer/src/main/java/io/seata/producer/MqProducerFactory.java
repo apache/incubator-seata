@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.mq;
+package io.seata.producer;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.config.ConfigurationFactory;
@@ -39,7 +39,6 @@ public class MqProducerFactory {
         }
         return instance;
     }
-
 
     private static MqProducer loadProducer() {
         String defaultProducerName = "kafka";

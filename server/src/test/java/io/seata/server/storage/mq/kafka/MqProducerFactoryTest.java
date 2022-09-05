@@ -5,7 +5,7 @@ import io.seata.common.XID;
 import io.seata.core.model.BranchType;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.storage.mq.MqProducerFactory;
+import io.seata.producer.MqProducerFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

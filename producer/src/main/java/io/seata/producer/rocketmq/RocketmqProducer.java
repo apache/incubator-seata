@@ -1,6 +1,6 @@
-package io.seata.server.storage.mq.rocketmq;
+package io.seata.producer.rocketmq;
 
-import io.seata.server.storage.mq.MqProducer;
+import io.seata.producer.MqProducer;
 
 public class RocketmqProducer implements MqProducer {
     @Override

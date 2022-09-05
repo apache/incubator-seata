@@ -1,2 +1,0 @@
-io.seata.server.storage.mq.kafka.KafkaProducer
-io.seata.server.storage.mq.rocketmq.RocketmqProducer

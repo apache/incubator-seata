@@ -1,4 +1,4 @@
-package io.seata.server.storage.mq;
+package io.seata.producer;
 
 
 public interface MqProducer {

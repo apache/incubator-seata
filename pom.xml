@@ -57,6 +57,7 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
+        <module>producer</module>
         <module>serializer</module>
         <module>seata-spring-boot-starter</module>
         <module>seata-spring-autoconfigure</module>
