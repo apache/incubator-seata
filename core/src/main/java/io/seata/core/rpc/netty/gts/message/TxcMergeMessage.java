@@ -109,9 +109,6 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
                 case 18:
                 case 19:
                 case 20:
-                default:
-                    String className = (String) typeMap.get(typeCode);
-                    throw new TxcException("unknown class:" + className + " in txc merge message.", TxcErrCode.MergeMessageError);
                 case 7:
                     message = new GlobalCommitMessage();
                     break;
@@ -132,6 +129,10 @@ public class TxcMergeMessage extends TxcMessage implements Serializable, MergeMe
                     break;
                 case 21:
                     message = new QueryLockMessage();
+                    break;
+                default:
+                    String className = (String) typeMap.get(typeCode);
+                    throw new TxcException("unknown class:" + className + " in txc merge message.", TxcErrCode.MergeMessageError);
             }
 
             ((TxcMessage)message).setChannelHandlerContext(this.ctx);

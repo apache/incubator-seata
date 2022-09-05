@@ -2,7 +2,7 @@ package io.seata.core.rpc.netty.gts.message;
 
 
 import io.netty.buffer.ByteBuf;
-// TODO 对接gts和seata的version
+// TODO transform version between gts and seata
 import io.seata.core.protocol.Version;
 import java.io.Serializable;
 import java.nio.ByteBuffer;

@@ -108,31 +108,24 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 byte b1 = frame.readByte();
                 byte b2 = frame.readByte();
                 frame.resetReaderIndex();
-                if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
-                        && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
-                    // seata message
-                    if(b2 == ProtocolConstants.VERSION) {
-                        // need LengthFieldBasedFrameDecoder check
-                        decoded = super.decode(ctx, in);
-                        if (decoded instanceof ByteBuf) {
-                            frame = (ByteBuf) decoded;
-                            try {
+                try {
+                    if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
+                            && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
+                        // seata message
+                        if (b2 == ProtocolConstants.VERSION) {
+                            // need LengthFieldBasedFrameDecoder check
+                            decoded = super.decode(ctx, in);
+                            if (decoded instanceof ByteBuf) {
+                                frame = (ByteBuf) decoded;
                                 return decodeFrame(frame);
-                            } finally {
-                                frame.release();
                             }
-                        }
-
-                    } else if (b2 == (byte) 0) { // gts message
-                        try {
+                        } else if (b2 == (byte) 0) {
+                            // gts message
                             decodeGts(ctx, frame);
-                        } finally {
-                            frame.release();
                         }
-                    } else {
-                        frame.release();
                     }
-                }  else {
+                }
+                finally {
                     frame.release();
                 }
             }
@@ -273,7 +266,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                             seataOut.writeInt((int)msgId);
 
                             Map<String, String> headMap = new HashMap<>();
-                            headMap.put("protocal", "GtsToSeata");
+                            headMap.put("protocol", "GtsToSeata");
                             int headMapBytesLength = HeadMapSerializer.getInstance().encode(headMap, seataOut);
                             headLength += headMapBytesLength;
                             fullLength += headMapBytesLength;
@@ -370,12 +363,9 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 out.writeByte(0);
                 return msgOut;
             }
-            case 4:
-            {
-
-            }
+            default:
+                return null;
         }
-        return null;
     }
 
     public TxcCodec getTxcCodecInstance(short typeCode) {
@@ -539,9 +529,6 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
             case 118:
             case 119:
             case 120:
-            default:
-                String className = (String)TxcMessage.typeMap.get(typeCode);
-                throw new TxcException("unknown class:" + className + " in txc message codec.");
             case 101:
                 codec = new RegisterClientAppNameMessage();
                 break;
@@ -565,8 +552,11 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 break;
             case 122:
                 codec = new RedressResultMessage();
+                break;
+            default:
+                String className = (String)TxcMessage.typeMap.get(typeCode);
+                throw new TxcException("unknown class:" + className + " in txc message codec.");
         }
-
         return codec;
     }
 }

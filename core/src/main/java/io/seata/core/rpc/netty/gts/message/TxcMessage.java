@@ -2,6 +2,7 @@ package io.seata.core.rpc.netty.gts.message;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -74,7 +75,7 @@ public abstract class TxcMessage implements TxcMsgVisitor, Serializable, TxcCode
     public static int bytesToInt(byte[] bytes, int offset) {
         int ret = 0;
 
-        for(int i = 0; i < 4 && i + offset < bytes.length; ++i) {
+        for (int i = 0; i < 4 && i + offset < bytes.length; ++i) {
             ret <<= 8;
             ret |= bytes[i + offset] & 255;
         }
@@ -83,10 +84,10 @@ public abstract class TxcMessage implements TxcMsgVisitor, Serializable, TxcCode
     }
 
     public static void intToBytes(int i, byte[] bytes, int offset) {
-        bytes[offset] = (byte)(i >> 24 & 255);
-        bytes[offset + 1] = (byte)(i >> 16 & 255);
-        bytes[offset + 2] = (byte)(i >> 8 & 255);
-        bytes[offset + 3] = (byte)(i & 255);
+        bytes[offset] = (byte) (i >> 24 & 255);
+        bytes[offset + 1] = (byte) (i >> 16 & 255);
+        bytes[offset + 2] = (byte) (i >> 8 & 255);
+        bytes[offset + 3] = (byte) (i & 255);
     }
 
     @Override
@@ -104,51 +105,51 @@ public abstract class TxcMessage implements TxcMsgVisitor, Serializable, TxcCode
     }
 
     static {
-        typeMap.put(Short.valueOf((short)1), BeginMessage.class.getName());
-        typeMap.put(Short.valueOf((short)2), BeginResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)3), BranchCommitMessage.class.getName());
-        typeMap.put(Short.valueOf((short)4), BranchCommitResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)5), BranchRollbackMessage.class.getName());
-        typeMap.put(Short.valueOf((short)6), BranchRollbackResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)7), GlobalCommitMessage.class.getName());
-        typeMap.put(Short.valueOf((short)8), GlobalCommitResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)9), GlobalRollbackMessage.class.getName());
-        typeMap.put(Short.valueOf((short)10), GlobalRollbackResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)11), RegisterMessage.class.getName());
-        typeMap.put(Short.valueOf((short)12), RegisterResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)13), ReportStatusMessage.class.getName());
-        typeMap.put(Short.valueOf((short)14), ReportStatusResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)15), BeginRetryBranchMessage.class.getName());
-        typeMap.put(Short.valueOf((short)16), BeginRetryBranchResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)17), ReportUdataMessage.class.getName());
-        typeMap.put(Short.valueOf((short)18), ReportUdataResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)19), TxcMergeMessage.class.getName());
-        typeMap.put(Short.valueOf((short)20), TxcMergeResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)21), QueryLockMessage.class.getName());
-        typeMap.put(Short.valueOf((short)22), QueryLockResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)101), "com.taobao.txc.rpc.impl.RegisterClientAppNameMessage");
-        typeMap.put(Short.valueOf((short)102), "com.taobao.txc.rpc.impl.RegisterClientAppNameResultMessage");
-        typeMap.put(Short.valueOf((short)103), "com.taobao.txc.rpc.impl.RegisterRmMessage");
-        typeMap.put(Short.valueOf((short)104), "com.taobao.txc.rpc.impl.RegisterRmResultMessage");
-        typeMap.put(Short.valueOf((short)105), "com.taobao.txc.cluster.message.RegisterClusterNodeMessage");
-        typeMap.put(Short.valueOf((short)106), "com.taobao.txc.cluster.message.RegisterClusterNodeResultMessage");
-        typeMap.put(Short.valueOf((short)107), "com.taobao.txc.cluster.message.ClusterBranchMessage");
-        typeMap.put(Short.valueOf((short)108), "com.taobao.txc.cluster.message.ClusterBranchResultMessage");
-        typeMap.put(Short.valueOf((short)109), "com.taobao.txc.cluster.message.ClusterGlobalMessage");
-        typeMap.put(Short.valueOf((short)110), "com.taobao.txc.cluster.message.ClusterGlobalResultMessage");
-        typeMap.put(Short.valueOf((short)111), "com.taobao.txc.cluster.message.ClusterSyncMessage");
-        typeMap.put(Short.valueOf((short)112), "com.taobao.txc.cluster.message.ClusterSyncResultMessage");
-        typeMap.put(Short.valueOf((short)113), "com.taobao.txc.message.ClusterDumpMessage");
-        typeMap.put(Short.valueOf((short)114), "com.taobao.txc.message.ClusterDumpResultMessage");
-        typeMap.put(Short.valueOf((short)115), "com.taobao.txc.cluster.message.ClusterMergeMessage");
-        typeMap.put(Short.valueOf((short)116), "com.taobao.txc.cluster.message.ClusterMergeResultMessage");
-        typeMap.put(Short.valueOf((short)117), "com.taobao.txc.cluster.message.ClusterQueryLockMessage");
-        typeMap.put(Short.valueOf((short)118), "com.taobao.txc.cluster.message.ClusterQueryLockResultMessage");
-        typeMap.put(Short.valueOf((short)119), "com.taobao.txc.cluster.message.ClusterAlarmMessage");
-        typeMap.put(Short.valueOf((short)120), "com.taobao.txc.cluster.message.ClusterAlarmResultMessage");
-        typeMap.put(Short.valueOf((short)121), RedressMessage.class.getName());
-        typeMap.put(Short.valueOf((short)122), RedressResultMessage.class.getName());
-        typeMap.put(Short.valueOf((short)123), "com.taobao.txc.cluster.message.ClusterBkupMessage");
-        typeMap.put(Short.valueOf((short)124), "com.taobao.txc.cluster.message.ClusterBkupResultMessage");
+        typeMap.put((short) 1, BeginMessage.class.getName());
+        typeMap.put((short) 2, BeginResultMessage.class.getName());
+        typeMap.put((short) 3, BranchCommitMessage.class.getName());
+        typeMap.put((short) 4, BranchCommitResultMessage.class.getName());
+        typeMap.put((short) 5, BranchRollbackMessage.class.getName());
+        typeMap.put((short) 6, BranchRollbackResultMessage.class.getName());
+        typeMap.put((short) 7, GlobalCommitMessage.class.getName());
+        typeMap.put((short) 8, GlobalCommitResultMessage.class.getName());
+        typeMap.put((short) 9, GlobalRollbackMessage.class.getName());
+        typeMap.put((short) 10, GlobalRollbackResultMessage.class.getName());
+        typeMap.put((short) 11, RegisterMessage.class.getName());
+        typeMap.put((short) 12, RegisterResultMessage.class.getName());
+        typeMap.put((short) 13, ReportStatusMessage.class.getName());
+        typeMap.put((short) 14, ReportStatusResultMessage.class.getName());
+        typeMap.put((short) 15, BeginRetryBranchMessage.class.getName());
+        typeMap.put((short) 16, BeginRetryBranchResultMessage.class.getName());
+        typeMap.put((short) 17, ReportUdataMessage.class.getName());
+        typeMap.put((short) 18, ReportUdataResultMessage.class.getName());
+        typeMap.put((short) 19, TxcMergeMessage.class.getName());
+        typeMap.put((short) 20, TxcMergeResultMessage.class.getName());
+        typeMap.put((short) 21, QueryLockMessage.class.getName());
+        typeMap.put((short) 22, QueryLockResultMessage.class.getName());
+        typeMap.put((short) 101, "com.taobao.txc.rpc.impl.RegisterClientAppNameMessage");
+        typeMap.put((short) 102, "com.taobao.txc.rpc.impl.RegisterClientAppNameResultMessage");
+        typeMap.put((short) 103, "com.taobao.txc.rpc.impl.RegisterRmMessage");
+        typeMap.put((short) 104, "com.taobao.txc.rpc.impl.RegisterRmResultMessage");
+        typeMap.put((short) 105, "com.taobao.txc.cluster.message.RegisterClusterNodeMessage");
+        typeMap.put((short) 106, "com.taobao.txc.cluster.message.RegisterClusterNodeResultMessage");
+        typeMap.put((short) 107, "com.taobao.txc.cluster.message.ClusterBranchMessage");
+        typeMap.put((short) 108, "com.taobao.txc.cluster.message.ClusterBranchResultMessage");
+        typeMap.put((short) 109, "com.taobao.txc.cluster.message.ClusterGlobalMessage");
+        typeMap.put((short) 110, "com.taobao.txc.cluster.message.ClusterGlobalResultMessage");
+        typeMap.put((short) 111, "com.taobao.txc.cluster.message.ClusterSyncMessage");
+        typeMap.put((short) 112, "com.taobao.txc.cluster.message.ClusterSyncResultMessage");
+        typeMap.put((short) 113, "com.taobao.txc.message.ClusterDumpMessage");
+        typeMap.put((short) 114, "com.taobao.txc.message.ClusterDumpResultMessage");
+        typeMap.put((short) 115, "com.taobao.txc.cluster.message.ClusterMergeMessage");
+        typeMap.put((short) 116, "com.taobao.txc.cluster.message.ClusterMergeResultMessage");
+        typeMap.put((short) 117, "com.taobao.txc.cluster.message.ClusterQueryLockMessage");
+        typeMap.put((short) 118, "com.taobao.txc.cluster.message.ClusterQueryLockResultMessage");
+        typeMap.put((short) 119, "com.taobao.txc.cluster.message.ClusterAlarmMessage");
+        typeMap.put((short) 120, "com.taobao.txc.cluster.message.ClusterAlarmResultMessage");
+        typeMap.put((short) 121, RedressMessage.class.getName());
+        typeMap.put((short) 122, RedressResultMessage.class.getName());
+        typeMap.put((short) 123, "com.taobao.txc.cluster.message.ClusterBkupMessage");
+        typeMap.put((short) 124, "com.taobao.txc.cluster.message.ClusterBkupResultMessage");
     }
 }

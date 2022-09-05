@@ -31,12 +31,10 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
     @Override
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(this.msgs.length * 1024);
-        byteBuffer.putShort((short)this.msgs.length);
-        AbstractResultMessage[] var2 = this.msgs;
-        int var3 = var2.length;
+        byteBuffer.putShort((short) this.msgs.length);
+        AbstractResultMessage[] abstractResultMessages = this.msgs;
 
-        for(int var4 = 0; var4 < var3; ++var4) {
-            TxcMessage msg = var2[var4];
+        for (TxcMessage msg : abstractResultMessages) {
             msg.setChannelHandlerContext(this.ctx);
             byte[] data = msg.encode();
             byteBuffer.putShort(msg.getTypeCode());
@@ -79,10 +77,10 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
         short msgNum = byteBuffer.getShort();
         this.msgs = new AbstractResultMessage[msgNum];
 
-        for(int idx = 0; idx < msgNum; ++idx) {
+        for (int idx = 0; idx < msgNum; ++idx) {
             short typeCode = byteBuffer.getShort();
             MergedMessage message = null;
-            switch(typeCode) {
+            switch (typeCode) {
                 case 2:
                     message = new BeginResultMessage();
                     break;
@@ -97,9 +95,6 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
                 case 19:
                 case 20:
                 case 21:
-                default:
-                    String className = (String) typeMap.get(typeCode);
-                    throw new TxcException("unknown class:" + className + " in txc merge result message.", TxcErrCode.MergeResultMessageError);
                 case 4:
                     message = new BranchCommitResultMessage();
                     break;
@@ -126,11 +121,16 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
                     break;
                 case 22:
                     message = new QueryLockResultMessage();
+                    break;
+                default:
+                    String className = (String) typeMap.get(typeCode);
+                    throw new TxcException("unknown class:" + className + " in txc merge result message.", TxcErrCode.MergeResultMessageError);
+
             }
 
-            ((TxcMessage)message).setChannelHandlerContext(this.ctx);
-            ((MergedMessage)message).decode(byteBuffer);
-            this.msgs[idx] = (AbstractResultMessage)message;
+            ((TxcMessage) message).setChannelHandlerContext(this.ctx);
+            ((MergedMessage) message).decode(byteBuffer);
+            this.msgs[idx] = (AbstractResultMessage) message;
         }
 
     }
@@ -138,11 +138,8 @@ public class TxcMergeResultMessage extends TxcMessage implements MergeMessage {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("TxcMergeResultMessage ");
-        AbstractResultMessage[] var2 = this.msgs;
-        int var3 = var2.length;
-
-        for(int var4 = 0; var4 < var3; ++var4) {
-            TxcMessage msg = var2[var4];
+        AbstractResultMessage[] abstractResultMessages = this.msgs;
+        for (TxcMessage msg : abstractResultMessages) {
             sb.append(msg.toString()).append("\n");
         }
 
