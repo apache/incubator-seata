@@ -15,8 +15,8 @@
  */
 package io.seata.tm.api;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -218,7 +218,7 @@ public class TransactionalTemplate {
                     TransactionalExecutor.Code.CommitFailure);
         }
 
-        if (Objects.equals(tx.getLocalStatus(), GlobalStatus.TimeoutRollbacking)) {
+        if (Arrays.asList(GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbacked).contains(tx.getLocalStatus())) {
             throw new TransactionalExecutor.ExecutionException(tx,
                     new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
                     TransactionalExecutor.Code.TimeoutRollback);
