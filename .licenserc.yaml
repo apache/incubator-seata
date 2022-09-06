@@ -77,7 +77,7 @@ header:
 
 
   comment: on-failure
-  dependency:
-    files:
-      - pom.xml
-      - package.json
+dependency:
+  files:
+    - pom.xml
+    - package.json
