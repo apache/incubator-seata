@@ -45,8 +45,9 @@ header:
     - 'NOTICE'
     - '**/*.md'
     - '.github/**'
-    - '*/src/test/resources/META-INF/services/*'
-    - '*/src/main/resources/META-INF/services/*'
+    #SPI、spring.factories、spring-configuration-metadata.json、additional-spring-configuration-metadata.json
+    - '**/src/test/resources/META-INF/**'
+    - '**/src/main/resources/META-INF/**'
     - '**/target/**'
     - '**/*.iml'
     - 'mvnw'
@@ -63,6 +64,9 @@ header:
     - 'test/src/test/resources/**'
     - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/io/seata/protocol/transcation/*.proto'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
+    - 'node_modules/**'
+    - 'saga/seata-saga-statemachine-designer/**'
+    - '**/src/test/resources/*.conf'
 
 
   comment: on-failure
