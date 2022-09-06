@@ -1,7 +1,7 @@
 ### TCC
 
 
-#### TCC 简介
+#### 简介
 
 在2PC（两阶段提交）协议中，事务管理器分两阶段协调资源管理，资源管理器对外提供了3个操作，分别是一阶段的准备操作，二阶段的提交操作和回滚操作；
 
@@ -53,9 +53,9 @@ seata-tcc 包含TCC主要代码：
 
 - interceptor：TCC 动态代理；
 
-- remoting：TCC微服务扫描、RPC协议解析、TCC资源注册；
+- remoting：TCC微服务扫描、RPC协议解析、TCC资源注册； 
 
-- TccResourceManager、RMHandlerTCC： TCC资源管理器；
+- TccResourceManager、RMHandlerTCC： TCC资源管理器； 
 
 
 
