@@ -45,8 +45,8 @@ header:
     - 'NOTICE'
     - '**/*.md'
     - '.github/**'
-    - '*/src/test/resources/META-INF/service/*'
-    - '*/src/main/resources/META-INF/service/*'
+    - '*/src/test/resources/META-INF/services/*'
+    - '*/src/main/resources/META-INF/services/*'
     - '**/target/**'
     - '**/*.iml'
     - 'mvnw'
@@ -60,6 +60,9 @@ header:
     - 'sessionStore/**'
     - 'distribution/LICENSE-BIN'
     - 'distribution/NOTICE-BIN'
+    - 'test/src/test/resources/**'
+    - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/io/seata/protocol/transcation/*.proto'
+    - 'saga/seata-saga-statemachine-designer/node_modules/**'
 
 
   comment: on-failure
