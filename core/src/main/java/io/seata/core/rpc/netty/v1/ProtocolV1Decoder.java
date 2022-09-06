@@ -107,24 +107,28 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 byte b1 = frame.readByte();
                 byte b2 = frame.readByte();
                 frame.resetReaderIndex();
-                try {
-                    if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
-                            && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
-                        // seata message
-                        if (b2 == ProtocolConstants.VERSION) {
-                            // need LengthFieldBasedFrameDecoder check
-                            decoded = super.decode(ctx, in);
-                            if (decoded instanceof ByteBuf) {
-                                frame = (ByteBuf) decoded;
+                if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
+                        && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
+                    // seata message
+                    if (b2 == ProtocolConstants.VERSION) {
+                        // need LengthFieldBasedFrameDecoder check
+                        decoded = super.decode(ctx, in);
+                        if (decoded instanceof ByteBuf) {
+                            frame = (ByteBuf) decoded;
+                            try {
                                 return decodeFrame(frame);
+                            } finally {
+                                frame.release();
                             }
-                        } else if (b2 == (byte) 0) {
-                            // gts message
+                        }
+                    } else if (b2 == (byte) 0) {
+                        // gts message
+                        try {
                             decodeGts(ctx, frame);
+                        } finally {
+                            frame.release();
                         }
                     }
-                } finally {
-                    frame.release();
                 }
             }
         } catch (Exception exx) {

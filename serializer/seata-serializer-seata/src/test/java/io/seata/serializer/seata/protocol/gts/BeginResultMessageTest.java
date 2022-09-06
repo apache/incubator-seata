@@ -36,7 +36,6 @@ public class BeginResultMessageTest {
         msg.setNextSvrAddr("aliyun-txc-server011193082125.nu29:9091");
         msg.setResult(1);
         System.out.println(msg.toString());
-//        byte[] bs = msg.encode();
         GtsRpcMessage rpcMessage = new GtsRpcMessage();
         rpcMessage.setId(1L);
         rpcMessage.setBody(msg);
