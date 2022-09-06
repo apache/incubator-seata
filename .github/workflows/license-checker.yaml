@@ -17,4 +17,4 @@ jobs:
         with:
           log: info
           config: .licenserc.yaml
-          mode: check
+          mode: resolve
