@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExecutor;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author: yangyicong
  */
-public class MySQLInsertOrUpdateExecutorTest {
+public class MySQLInsertOnDuplicateUpdateExecutorTest {
 
     private static final String ID_COLUMN = "id";
     private static final String USER_ID_COLUMN = "user_id";
@@ -62,7 +62,7 @@ public class MySQLInsertOrUpdateExecutorTest {
 
     private TableMeta tableMeta;
 
-    private MySQLInsertOrUpdateExecutor insertOrUpdateExecutor;
+    private MySQLInsertOnDuplicateUpdateExecutor insertOrUpdateExecutor;
 
     private final int pkIndex = 0;
     private HashMap<String,Integer> pkIndexMap;
@@ -78,7 +78,7 @@ public class MySQLInsertOrUpdateExecutorTest {
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertOrUpdateExecutor = Mockito.spy(new MySQLInsertOrUpdateExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertOrUpdateExecutor = Mockito.spy(new MySQLInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         pkIndexMap = new HashMap<String,Integer>(){
             {

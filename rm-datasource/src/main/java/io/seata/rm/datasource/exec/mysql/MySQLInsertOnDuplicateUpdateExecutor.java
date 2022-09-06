@@ -52,10 +52,10 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author: yangyicong
+ * @author yangyicong
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
-public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
+public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
 
 
     private static final String COLUMN_SEPARATOR = "|";
@@ -83,7 +83,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     private ArrayList<List<Object>> paramAppenderList;
 
-    public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    public MySQLInsertOnDuplicateUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
