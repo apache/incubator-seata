@@ -204,4 +204,10 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
     public int hashCode() {
         return Objects.hash(targetMap);
     }
+
+    @Override
+    public String toString() {
+        return targetMap.toString();
+    }
+
 }

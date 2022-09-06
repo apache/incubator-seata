@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
@@ -242,7 +243,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
     }
 
     private Map<String, ArrayList<Object>> mockImageParameterMap(){
-        Map<String, ArrayList<Object>> imageParameterMap = new HashMap<>();
+        Map<String, ArrayList<Object>> imageParameterMap = new LinkedHashMap<>();
         ArrayList<Object> idList = new ArrayList<>();
         idList.add("100");
         idList.add("101");

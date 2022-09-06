@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Collections;
 import java.util.StringJoiner;
-import java.util.TreeMap;
 
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
