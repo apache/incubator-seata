@@ -66,7 +66,12 @@ header:
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
+    - '**/src/test/resources/statelang/**'
     - '**/src/test/resources/*.conf'
+    - 'console/src/main/resources/static/console-fe/**'
+    - '**/io/seata/sqlparser/antlr/**/*.g4'
+    - '**/io/seata/sqlparser/antlr/mysql/parser/*'
+    - '**/integration/**/*.proto'
 
 
   comment: on-failure
