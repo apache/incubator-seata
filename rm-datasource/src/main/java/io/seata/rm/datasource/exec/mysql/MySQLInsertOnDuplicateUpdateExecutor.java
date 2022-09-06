@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Collections;
 import java.util.StringJoiner;
-
+import java.util.TreeMap;
 
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
@@ -33,6 +33,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
+import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -356,7 +357,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                 }
             });
         }
-        Map<String, ArrayList<Object>> imageParameterMap = new HashMap<>();
+        Map<String, ArrayList<Object>> imageParameterMap = new LowerCaseLinkHashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         List<String> insertParamsList = recognizer.getInsertParamsValue();
@@ -367,7 +368,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             for (int i = 0; i < insertColumns.size(); i++) {
                 String m = insertColumns.get(i);
                 String params = insertParamsArray[i];
-                ArrayList<Object> imageListTemp = imageParameterMap.computeIfAbsent(m.toLowerCase(), k -> new ArrayList<>());
+                ArrayList<Object> imageListTemp = imageParameterMap.computeIfAbsent(m, k -> new ArrayList<>());
                 if ("?".equals(params.trim())) {
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
@@ -380,7 +381,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                     }
                     imageListTemp.add(params);
                 }
-                imageParameterMap.put(m.toLowerCase(), imageListTemp);
+                imageParameterMap.put(m, imageListTemp);
             }
         }
         return imageParameterMap;
