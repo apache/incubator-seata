@@ -52,7 +52,7 @@ header:
     - '**/*.iml'
     - 'mvnw'
     - 'mvnw.cmd'
-    - 'changeVersion.sh'
+    - '*.sh'
     - 'changes/**'
     - 'style/**'
     - 'script/**'
@@ -67,11 +67,13 @@ header:
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
     - '**/src/test/resources/statelang/**'
-    - '**/src/test/resources/*.conf'
     - 'console/src/main/resources/static/console-fe/**'
     - '**/io/seata/sqlparser/antlr/**/*.g4'
     - '**/io/seata/sqlparser/antlr/mysql/parser/*'
     - '**/integration/**/*.proto'
+    - 'console/src/main/resources/static/**'
+    - 'ext/apm-seata-skywalking-plugin/config/agent.config'
+    - 'server/src/main/resources/lua/redislocker/redislock.lua'
 
 
   comment: on-failure
