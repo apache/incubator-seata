@@ -29,6 +29,7 @@ import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
+import io.seata.common.dto.mq.BranchUndoLogDTO;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.SizeUtil;
 import io.seata.config.ConfigurationFactory;
@@ -249,7 +250,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         }
 
         String topic = ConfigurationFactory.getInstance().getConfig(TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
-        MqProducerFactory.getInstance().publish(topic, xid.getBytes(StandardCharsets.UTF_8), JSON.toJSONString(branchUndoLog).getBytes(StandardCharsets.UTF_8));
+        BranchUndoLogDTO branchUndoLogDTO = new BranchUndoLogDTO(branchUndoLog.getXid(), branchUndoLog.getBranchId(), branchUndoLog.getSqlUndoLogs().toString());
+        MqProducerFactory.getInstance().publish(topic, xid.getBytes(StandardCharsets.UTF_8), JSON.toJSONString(branchUndoLogDTO).getBytes(StandardCharsets.UTF_8));
         insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
     }
 

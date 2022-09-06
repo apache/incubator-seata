@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.DefaultValues;
+import io.seata.common.dto.mq.GlobalSessionDTO;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
@@ -140,9 +141,9 @@ public class DefaultCore implements Core {
 
         session.begin();
 
-        // TODO need add config about enabling this feature
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_GLOBAL_TABLE, DEFAULT_STORE_DB_GLOBAL_TABLE);
-        MqProducerFactory.getInstance().publish(topic, session.getXid().getBytes(StandardCharsets.UTF_8), JSON.toJSONString(session).getBytes(StandardCharsets.UTF_8));
+        GlobalSessionDTO globalSessionDTO = new GlobalSessionDTO(session.getXid(), session.getTransactionId(), session.getStatus().getCode(), session.getApplicationId(), session.getTransactionServiceGroup(), session.getTransactionName(), session.getTimeout(), session.getBeginTime(), session.getApplicationData());
+        MqProducerFactory.getInstance().publish(topic, session.getXid().getBytes(StandardCharsets.UTF_8), JSON.toJSONString(globalSessionDTO).getBytes(StandardCharsets.UTF_8));
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);

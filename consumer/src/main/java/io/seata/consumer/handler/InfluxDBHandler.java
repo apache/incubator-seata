@@ -17,11 +17,11 @@ package io.seata.consumer.handler;
 
 
 import com.alibaba.fastjson.JSONObject;
+import io.seata.common.dto.mq.BranchSessionDTO;
+import io.seata.common.dto.mq.BranchUndoLogDTO;
+import io.seata.common.dto.mq.GlobalSessionDTO;
 import io.seata.consumer.Constants;
 import io.seata.consumer.utils.InfluxDBUtils;
-import io.seata.rm.datasource.undo.BranchUndoLog;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,35 +35,35 @@ public class InfluxDBHandler implements Handler {
         long timestamp;
         String valueString = new String(value);
         if (topic.equals(Constants.globalSessionTopic)) {
-            GlobalSession globalSession = JSONObject.parseObject(valueString, GlobalSession.class);
-            tags.put("xid", globalSession.getXid());
-            tags.put("applicationId", globalSession.getApplicationId());
-            tags.put("transactionServiceGroup", globalSession.getTransactionServiceGroup());
-            tags.put("transactionName", globalSession.getTransactionName());
-            tags.put("applicationData", globalSession.getApplicationData());
+            GlobalSessionDTO globalSessionDTO = JSONObject.parseObject(valueString, GlobalSessionDTO.class);
+            tags.put("xid", globalSessionDTO.getXid());
+            tags.put("applicationId", globalSessionDTO.getApplicationId());
+            tags.put("transactionServiceGroup", globalSessionDTO.getTransactionServiceGroup());
+            tags.put("transactionName", globalSessionDTO.getTransactionName());
+            tags.put("applicationData", globalSessionDTO.getApplicationData());
 
-            fields.put("transactionId", globalSession.getTransactionId());
-            fields.put("status", globalSession.getStatus());
-            fields.put("timeout", globalSession.getTimeout());
-            fields.put("beginTime", globalSession.getBeginTime());
+            fields.put("transactionId", globalSessionDTO.getTransactionId());
+            fields.put("status", globalSessionDTO.getStatus());
+            fields.put("timeout", globalSessionDTO.getTimeout());
+            fields.put("beginTime", globalSessionDTO.getBeginTime());
         } else if (topic.equals(Constants.branchSessionTopic)) {
-            BranchSession branchSession = JSONObject.parseObject(valueString, BranchSession.class);
-            tags.put("xid", branchSession.getXid());
-            tags.put("resourceGroupId", branchSession.getResourceGroupId());
-            tags.put("resourceId", branchSession.getResourceId());
-            tags.put("branchType", branchSession.getBranchType().name());
-            tags.put("clientId", branchSession.getClientId());
-            tags.put("applicationData", branchSession.getApplicationData());
+            BranchSessionDTO branchSessionDTO = JSONObject.parseObject(valueString, BranchSessionDTO.class);
+            tags.put("xid", branchSessionDTO.getXid());
+            tags.put("resourceGroupId", branchSessionDTO.getResourceGroupId());
+            tags.put("resourceId", branchSessionDTO.getResourceId());
+            tags.put("branchType", branchSessionDTO.getBranchType());
+            tags.put("clientId", branchSessionDTO.getClientId());
+            tags.put("applicationData", branchSessionDTO.getApplicationData());
 
-            fields.put("branchId", branchSession.getBranchId());
-            fields.put("transactionId", branchSession.getTransactionId());
-            fields.put("status", branchSession.getStatus());
+            fields.put("branchId", branchSessionDTO.getBranchId());
+            fields.put("transactionId", branchSessionDTO.getTransactionId());
+            fields.put("status", branchSessionDTO.getStatus());
         } else if (topic.equals(Constants.undoTopic)) {
-            BranchUndoLog branchUndoLog = JSONObject.parseObject(valueString, BranchUndoLog.class);
-            tags.put("xid", branchUndoLog.getXid());
+            BranchUndoLogDTO branchUndoLogDTO = JSONObject.parseObject(valueString, BranchUndoLogDTO.class);
+            tags.put("xid", branchUndoLogDTO.getXid());
 
-            fields.put("branchId", branchUndoLog.getBranchId());
-            fields.put("sqlUndoLogs", branchUndoLog.getSqlUndoLogs().toString());
+            fields.put("branchId", branchUndoLogDTO.getBranchId());
+            fields.put("sqlUndoLogs", branchUndoLogDTO.getSqlUndoLogs());
 
         } else {
             throw new IllegalArgumentException("not support topic:" + topic);
