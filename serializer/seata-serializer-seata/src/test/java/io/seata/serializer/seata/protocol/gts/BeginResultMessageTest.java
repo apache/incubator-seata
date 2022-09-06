@@ -18,6 +18,7 @@ package io.seata.serializer.seata.protocol.gts;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.seata.core.rpc.netty.gts.message.BeginMessage;
+import io.seata.core.rpc.netty.gts.message.BeginResultMessage;
 import io.seata.core.rpc.netty.gts.message.GtsRpcMessage;
 import io.seata.core.rpc.netty.gts.message.TxcCodec;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
@@ -25,19 +26,17 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-/**
- * @author cj3
- */
-public class BeginMessageTest {
+public class BeginResultMessageTest {
     private static short MAGIC = -9510;
 
     @Test
-    public void testBeginMessage(){
-        BeginMessage msg = new BeginMessage();
-        msg.setAppname("default");
-        msg.setTxcInst("com.taobao.txc.sample.BizService.doTransfer");
+    public void testBeginResultMessage(){
+        BeginResultMessage msg = new BeginResultMessage();
+        msg.setXid("11.193.82.119:8091:547683630");
+        msg.setNextSvrAddr("aliyun-txc-server011193082125.nu29:9091");
+        msg.setResult(1);
         System.out.println(msg.toString());
-        byte[] bs = msg.encode();
+//        byte[] bs = msg.encode();
         GtsRpcMessage rpcMessage = new GtsRpcMessage();
         rpcMessage.setId(1L);
         rpcMessage.setBody(msg);

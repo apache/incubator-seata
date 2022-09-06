@@ -18,6 +18,7 @@ package io.seata.core.rpc.netty.gts.message;
 import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
@@ -246,12 +247,14 @@ public class TxcMessageCodec {
                 GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
                 BeginResultMessage beginResultMessage = (BeginResultMessage) gtsCodec;
                 String xid = beginResultMessage.getXid();
+                int result = beginResultMessage.getResult();
                 globalBeginResponse.setXid(xid);
+                globalBeginResponse.setResultCode(ResultCode.get(result));
                 // message type
                 out.writeByte(ProtocolConstants.MSGTYPE_RESPONSE);
                 // Serializer (default: seata)
-                out.writeByte(2);
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(2));
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(globalBeginResponse);
                 // Compress
                 out.writeByte(0);
