@@ -15,6 +15,7 @@
  */
 package io.seata.common.util;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -110,7 +111,7 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
     @Override
     public Set<String> keySet() {
-        return lowerKeyToOriginMap.values().stream().collect(Collectors.toSet());
+        return new HashSet<>(lowerKeyToOriginMap.values());
     }
 
     @Override
