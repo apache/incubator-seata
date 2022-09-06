@@ -172,7 +172,7 @@ public abstract class AbstractUndoExecutor {
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
-            } else if (type == JDBCType.CLOB.getVendorTypeNumber()) {
+            } else if (type == JDBCType.CLOB.getVendorTypeNumber() || type == JDBCType.NCLOB.getVendorTypeNumber()) {
                 SerialClob serialClob = (SerialClob) value;
                 if (serialClob != null) {
                     undoPST.setClob(undoIndex, serialClob.getCharacterStream());
