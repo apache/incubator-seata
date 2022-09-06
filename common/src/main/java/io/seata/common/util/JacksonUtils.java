@@ -15,12 +15,12 @@
  */
 package io.seata.common.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,6 +115,7 @@ public class JacksonUtils {
      */
     public static <T> T json2JavaBean(String content, Class<T> valueType) {
         try {
+            OM.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             return OM.readValue(content, valueType);
         } catch (Exception e) {
             LOG.error("json {} to class {} failed. ", content, valueType, e);

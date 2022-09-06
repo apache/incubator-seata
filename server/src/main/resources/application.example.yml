@@ -18,7 +18,7 @@ logging:
 
 seata:
   config:
-    # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
+    # support: nacos 、 consul 、 apollo 、 zk  、 etcd3、polaris
     type: file
     nacos:
       server-addr: 127.0.0.1:8848
@@ -52,16 +52,16 @@ seata:
       server-addr: http://localhost:2379
       key: seata.properties
     polaris:
-      server-addr: http://183.47.111.80:8090
+      server-addr: http://127.0.0.1:8090
       namespace: polaris-seata
       group: polaris-seata-group
       file: seata.properties
-      token: yQPNKgn6JbPR+mHSQyhdREixFoLVTuuNsERNENspveErQaLRs8Xz
+      token: ""
       connect-timeout: 6000
       read-timeout: 5000
 
   registry:
-    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
+    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa、 polaris
     type: file
     preferred-networks: 30.240.*
     nacos:
@@ -108,10 +108,10 @@ seata:
       group: SEATA_GROUP
       address-wait-time: 3000
     polaris:
-      server-addr: http://183.47.111.80:8090
+      server-addr: http://127.0.0.1:8090
       namespace: polaris-seata
       application: seata-server
-      token: yQPNKgn6JbPR+mHSQyhdREixFoLVTuuNsERNENspveErQaLRs8Xz
+      token: ""
       connect-timeout: 6000
       read-timeout: 5000
       refresh-time: 2000

@@ -48,10 +48,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.security.AccessController;
-import java.security.GeneralSecurityException;
 import java.security.PrivilegedAction;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,13 +61,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPInputStream;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
@@ -247,10 +237,6 @@ final class SimpleHttpRequest {
     private static final String CRLF = "\r\n";
 
     private static final String[] EMPTY_STRINGS = new String[0];
-
-    private static SSLSocketFactory TRUSTED_FACTORY;
-
-    private static HostnameVerifier TRUSTED_VERIFIER;
     private static ConnectionFactory CONNECTION_FACTORY = ConnectionFactory.DEFAULT;
     private final URL url;
     private final String requestMethod;
@@ -302,54 +288,6 @@ final class SimpleHttpRequest {
             return CHARSET_UTF8;
         }
     }
-
-    private static SSLSocketFactory getTrustedFactory() throws HttpRequestException {
-        if (TRUSTED_FACTORY == null) {
-            final TrustManager[] trustAllCerts =
-                new TrustManager[] {
-                    new X509TrustManager() {
-
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-
-                        public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                            // Intentionally left blank
-                        }
-
-                        public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                            // Intentionally left blank
-                        }
-                    }
-                };
-            try {
-                SSLContext context = SSLContext.getInstance("TLS");
-                context.init(null, trustAllCerts, new SecureRandom());
-                TRUSTED_FACTORY = context.getSocketFactory();
-            } catch (GeneralSecurityException e) {
-                IOException ioException = new IOException("Security exception configuring SSL context");
-                ioException.initCause(e);
-                throw new HttpRequestException(ioException);
-            }
-        }
-
-        return TRUSTED_FACTORY;
-    }
-
-    private static HostnameVerifier getTrustedVerifier() {
-        if (TRUSTED_VERIFIER == null) {
-            TRUSTED_VERIFIER =
-                new HostnameVerifier() {
-
-                    public boolean verify(String hostname, SSLSession session) {
-                        return true;
-                    }
-                };
-        }
-
-        return TRUSTED_VERIFIER;
-    }
-
     private static StringBuilder addPathSeparator(final String baseUrl, final StringBuilder result) {
         // Add trailing slash if the base URL doesn't have any path segments.
         //
@@ -2497,38 +2435,6 @@ final class SimpleHttpRequest {
             for (Entry<?, ?> entry : values.entrySet()) {
                 form(entry, charset);
             }
-        }
-        return this;
-    }
-
-    /**
-     * Configure HTTPS connection to trust all certificates
-     *
-     * <p>This method does nothing if the current request is not a HTTPS request
-     *
-     * @return this request
-     * @throws HttpRequestException
-     */
-    public SimpleHttpRequest trustAllCerts() throws HttpRequestException {
-        final HttpURLConnection connection = getConnection();
-        if (connection instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) connection).setSSLSocketFactory(getTrustedFactory());
-        }
-        return this;
-    }
-
-    /**
-     * Configure HTTPS connection to trust all hosts using a custom {@link HostnameVerifier} that
-     * always returns <code>true</code> for each host verified
-     *
-     * <p>This method does nothing if the current request is not a HTTPS request
-     *
-     * @return this request
-     */
-    public SimpleHttpRequest trustAllHosts() {
-        final HttpURLConnection connection = getConnection();
-        if (connection instanceof HttpsURLConnection) {
-            ((HttpsURLConnection) connection).setHostnameVerifier(getTrustedVerifier());
         }
         return this;
     }

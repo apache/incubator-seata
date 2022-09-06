@@ -366,30 +366,30 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
     }
 
     public static String getPolarisNameSpaceFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_NAMESPACE_KEY);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, POLARIS_NAMESPACE_KEY);
     }
 
     public static String getPolarisAddrFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_KEY);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, POLARIS_SERVER_KEY);
     }
 
     public static String getPolarisAccessTokenKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_ACCESS_TOKEN);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, POLARIS_SERVER_ACCESS_TOKEN);
     }
 
     public static String getPolarisApplicationKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_APPLICATION_KEY);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, POLARIS_APPLICATION_KEY);
     }
 
     public static String getPolarisConnectTimeoutKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_CONNECT_TIME);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, POLARIS_SERVER_CONNECT_TIME);
     }
 
     public static String getPolarisReadTimeoutKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_READ_TIME);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, POLARIS_SERVER_READ_TIME);
     }
 
     public static String getPolarisRefreshTimeKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE, POLARIS_SERVER_REFRESH_TIME);
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, POLARIS_SERVER_REFRESH_TIME);
     }
 }
