@@ -21,6 +21,7 @@ import io.seata.common.loader.Scope;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
@@ -50,6 +51,16 @@ public class OceanBaseOracleInsertExecutor<T, S extends Statement> extends BaseI
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
+    @Override
+    protected TableRecords beforeImage() throws SQLException {
+        return super.beforeImage();
+    }
+
+    @Override
+    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        return super.afterImage(beforeImage);
+    }
+
     /**
      * Support for multiple primary keys, and adapt to the case that contains partial pks in the inserted columns
      * Note: Oracle only supports a single value list for `values` clause in `insert`(without `all`).
@@ -61,9 +72,9 @@ public class OceanBaseOracleInsertExecutor<T, S extends Statement> extends BaseI
     public Map<String, List<Object>> getPkValues() throws SQLException {
         // table: test; columns: c1, c2, c3; pk: (c1, c2)
         // case1: all pks are filled.
-        //     like: insert into test values(null, seq.nextval, 3)
+        //     e.g. insert into test values(null, seq.nextval, 3)
         // case2: some generated pks column value are not present, and other pks are present.
-        //     like: insert into test(c2, c3) values(2, 3), c1 is generated key
+        //     e.g. insert into test(c2, c3) values(2, 3), c1 is generated key
         Map<String, List<Object>> pkValuesMap = getPkValuesByColumn();
         List<String> pkColumnNames = getTableMeta().getPrimaryKeyOnlyName();
         for (String pkName : pkColumnNames) {

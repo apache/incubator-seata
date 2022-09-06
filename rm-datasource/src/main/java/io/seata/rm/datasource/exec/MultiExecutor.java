@@ -16,11 +16,12 @@
 package io.seata.rm.datasource.exec;
 
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.oceanbaseoracle.OceanBaseOracleMultiInsertExecutor;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,99 +31,79 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * The type MultiSql executor. now just support same type
- * ex.
- * <pre>
- *  jdbcTemplate.update("update account_tbl set money = money - ? where user_id = ?;update account_tbl set money = money - ? where user_id = ?", new Object[] {money, userId,"U10000",money,"U1000"});
- *  </pre>
+ * Multi operations executor
+ * NOTE: Only multiple operations of the same type are supported for now
  *
- * @param <T> the type parameter
- * @param <S> the type parameter
  * @author wangwei.ying
+ * @author hsien999
  */
 public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
-    private Map<String, List<SQLRecognizer>> multiSqlGroup = new HashMap<>(4);
-    private Map<SQLRecognizer, TableRecords> beforeImagesMap = new HashMap<>(4);
-    private Map<SQLRecognizer, TableRecords> afterImagesMap = new HashMap<>(4);
+    private final Map<String, List<SQLRecognizer>> multiSqlGroup;
+    private final Map<SQLRecognizer, TableRecords> beforeImagesMap;
+    private final Map<SQLRecognizer, TableRecords> afterImagesMap;
 
-    /**
-     * Instantiates a new Abstract dml base executor.
-     *
-     * @param statementProxy    the statement proxy
-     * @param statementCallback the statement callback
-     * @param sqlRecognizers    the sql recognizers
-     */
     public MultiExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {
         super(statementProxy, statementCallback, sqlRecognizers);
+        multiSqlGroup = sqlRecognizers.stream().collect(Collectors.groupingBy(SQLRecognizer::getTableName));
+        beforeImagesMap = new HashMap<>(3, 1.f);
+        afterImagesMap = new HashMap<>(3, 1.f);
     }
 
     /**
-     * Before image table records.  only support update or deleted
+     * Unlike a single executor, this function uses {@link #beforeImagesMap}
+     * to associate different table sources with the before image records, which is used to prepare undo log.
      *
-     * @return the table records
+     * @return always returns null
      * @throws SQLException the sql exception
-     * @see io.seata.rm.datasource.sql.SQLVisitorFactory#get(String, String) validate sqlType
      */
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        //group by sqlType
-        multiSqlGroup = sqlRecognizers.stream().collect(Collectors.groupingBy(t -> t.getTableName()));
-        AbstractDMLBaseExecutor<T, S> executor = null;
-        for (List<SQLRecognizer> value : multiSqlGroup.values()) {
-            switch (value.get(0).getSQLType()) {
-                case UPDATE:
-                    executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
-                    break;
-                case DELETE:
-                    executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
-            }
+        AbstractDMLBaseExecutor<T, S> executor;
+        for (List<SQLRecognizer> recognizers : multiSqlGroup.values()) {
+            executor = getExecutor(recognizers);
             TableRecords beforeImage = executor.beforeImage();
-            beforeImagesMap.put(value.get(0), beforeImage);
+            beforeImagesMap.put(recognizers.get(0), beforeImage);
         }
         return null;
     }
 
+    /**
+     * As with {@link #beforeImage()}, this function uses {@link #beforeImagesMap} and {@link #afterImagesMap}
+     * to associate different table sources with the before image records, which is used to prepare undo log.
+     *
+     * @param beforeImage the before image (accepts null)
+     * @return always returns null
+     * @throws SQLException the sql exception
+     * @see #beforeImage()
+     */
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        AbstractDMLBaseExecutor<T, S> executor = null;
-        for (List<SQLRecognizer> value : multiSqlGroup.values()) {
-            switch (value.get(0).getSQLType()) {
-                case UPDATE:
-                    executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
-                    break;
-                case DELETE:
-                    executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
-            }
-            beforeImage = beforeImagesMap.get(value.get(0));
+        AbstractDMLBaseExecutor<T, S> executor;
+        for (List<SQLRecognizer> recognizers : multiSqlGroup.values()) {
+            executor = getExecutor(recognizers);
+            beforeImage = beforeImagesMap.get(recognizers.get(0));
             TableRecords afterImage = executor.afterImage(beforeImage);
-            afterImagesMap.put(value.get(0), afterImage);
+            afterImagesMap.put(recognizers.get(0), afterImage);
         }
         return null;
     }
 
-
+    /**
+     * Function that adds undo log to the context of the current connection based on the before image in
+     * {@link #beforeImagesMap} and the after image in {@link #afterImagesMap} of the different table sources.
+     *
+     * @param beforeImage the before image(accepts null)
+     * @param afterImage  the after image(accepts null)
+     * @throws SQLException the sql exception
+     */
     @Override
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if (beforeImagesMap == null || afterImagesMap == null) {
-            throw new IllegalStateException("images can not be null");
-        }
         SQLRecognizer recognizer;
         for (Map.Entry<SQLRecognizer, TableRecords> entry : beforeImagesMap.entrySet()) {
             sqlRecognizer = recognizer = entry.getKey();
             beforeImage = entry.getValue();
             afterImage = afterImagesMap.get(recognizer);
-            if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
-                if (beforeImage.getRows().size() != afterImage.getRows().size()) {
-                    throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
-                }
-            }
             super.prepareUndoLog(beforeImage, afterImage);
         }
     }
@@ -137,5 +118,22 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
 
     public Map<SQLRecognizer, TableRecords> getAfterImagesMap() {
         return afterImagesMap;
+    }
+
+    private AbstractDMLBaseExecutor<T, S> getExecutor(List<SQLRecognizer> recognizers) {
+        SQLRecognizer recognizer0 = recognizers.get(0);
+        switch (recognizer0.getSQLType()) {
+            case UPDATE:
+                return new MultiUpdateExecutor<>(statementProxy, statementCallback, recognizers);
+            case DELETE:
+                return new MultiDeleteExecutor<>(statementProxy, statementCallback, recognizers);
+            case INSERT: {
+                if (JdbcConstants.OCEANBASE_ORACLE.equals(statementProxy.getConnectionProxy().getDbType())) {
+                    return new OceanBaseOracleMultiInsertExecutor<>(statementProxy, statementCallback, recognizers);
+                }
+            }
+            default:
+                throw new NotSupportYetException("Not supported sql: " + recognizer0.getOriginalSQL());
+        }
     }
 }

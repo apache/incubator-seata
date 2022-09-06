@@ -19,16 +19,19 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
 import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectJoin;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectSubqueryTableSource;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleASTVisitor;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleASTVisitorAdapter;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
@@ -49,51 +52,48 @@ public abstract class BaseOceanBaseOracleRecognizer extends BaseRecognizer {
         super(originalSql);
     }
 
-    public String getWhereCondition(SQLExpr where) {
+    protected String getWhereCondition(SQLExpr where) {
         if (Objects.isNull(where)) {
             return StringUtils.EMPTY;
         }
-
-        StringBuilder sb = new StringBuilder();
-        executeVisit(where, new OracleOutputVisitor(sb));
-        return sb.toString();
+        StringBuilder whereStr = new StringBuilder();
+        executeVisit(where, new OracleOutputVisitor(whereStr));
+        return whereStr.toString();
     }
 
-    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+    protected String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
+                                       final ArrayList<List<Object>> paramAppenderList) {
         if (Objects.isNull(where)) {
             return StringUtils.EMPTY;
         }
-
-        StringBuilder sb = new StringBuilder();
-        executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
-        return sb.toString();
+        StringBuilder whereStr = new StringBuilder();
+        executeVisit(where, createParameterVisitor(parametersHolder, paramAppenderList, whereStr));
+        return whereStr.toString();
     }
 
-    public String getOrderByCondition(SQLOrderBy sqlOrderBy) {
-        if (Objects.isNull(sqlOrderBy)) {
+    protected String getOrderByCondition(SQLOrderBy orderBy) {
+        if (Objects.isNull(orderBy)) {
             return StringUtils.EMPTY;
         }
-
-        StringBuilder sb = new StringBuilder();
-        executeOrderBy(sqlOrderBy, new OracleOutputVisitor(sb));
-        return sb.toString();
+        StringBuilder orderByStr = new StringBuilder();
+        executeOrderBy(orderBy, new OracleOutputVisitor(orderByStr));
+        return orderByStr.toString();
     }
 
-    public String getOrderByCondition(SQLOrderBy sqlOrderBy, final ParametersHolder parametersHolder,
-                                      final ArrayList<List<Object>> paramAppenderList) {
-        if (Objects.isNull(sqlOrderBy)) {
+    protected String getOrderByCondition(SQLOrderBy orderBy, final ParametersHolder parametersHolder,
+                                         final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(orderBy)) {
             return StringUtils.EMPTY;
         }
-
-        StringBuilder sb = new StringBuilder();
-        executeOrderBy(sqlOrderBy, createOutputVisitor(parametersHolder, paramAppenderList, sb));
-        return sb.toString();
+        StringBuilder orderByStr = new StringBuilder();
+        executeOrderBy(orderBy, createParameterVisitor(parametersHolder, paramAppenderList, orderByStr));
+        return orderByStr.toString();
     }
 
-    protected OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
-                                                      final ArrayList<List<Object>> paramAppenderList,
-                                                      final StringBuilder sb) {
+    protected OracleOutputVisitor createParameterVisitor(final ParametersHolder parametersHolder,
+                                                         final ArrayList<List<Object>> paramAppenderList,
+                                                         final StringBuilder sb) {
+        // visit variant reference to construct parameter object list
         return new OracleOutputVisitor(sb) {
             @Override
             public boolean visit(SQLVariantRefExpr x) {
@@ -114,51 +114,82 @@ public abstract class BaseOceanBaseOracleRecognizer extends BaseRecognizer {
     }
 
     @Override
+    public String getTableAlias() {
+        SQLTableSource tableSource = getTableSource();
+        if (tableSource == null) {
+            throw new ShouldNeverHappenException("Unable to recognize table source: " + getOriginalSQL());
+        }
+        return tableSource.getAlias();
+    }
+
+    @Override
+    public String getTableName() {
+        SQLTableSource tableSource = getTableSource();
+        if (tableSource == null) {
+            throw new ShouldNeverHappenException("Unable to recognize table source: " + getOriginalSQL());
+        }
+        StringBuilder tableName = new StringBuilder();
+        if (tableSource instanceof SQLExprTableSource) {
+            OracleOutputVisitor visitor = new OracleOutputVisitor(tableName) {
+                @Override
+                public boolean visit(SQLExprTableSource x) {
+                    printTableSourceExpr(x.getExpr());
+                    return false;
+                }
+            };
+            visitor.visit((SQLExprTableSource) tableSource);
+        } else {
+            throw new NotSupportYetException("Not supported syntax with table source: " +
+                tableSource.getClass().getName());
+        }
+        return tableName.toString();
+    }
+
+    @Override
     public boolean isSqlSyntaxSupports() {
-        String prefix = "No support for the sql syntax with ";
+        String prefix = "Not supported sql syntax with ";
         String suffix = "\nPlease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html";
         OracleASTVisitor visitor = new OracleASTVisitorAdapter() {
             @Override
             public boolean visit(OracleSelectJoin x) {
-                // just like: select * from a inner join b on a.id = b.id ...
+                // e.g. SELECT * FROM a INNER JOIN b ON a.id = b.id ...
                 throw new NotSupportYetException(prefix + "'select joined table':" + x + suffix);
             }
 
             @Override
             public boolean visit(OracleSelectSubqueryTableSource x) {
-                // just like: select * from (select * from a)
+                // e.g. SELECT * FROM (SELECT * FROM a) ...
                 throw new NotSupportYetException(prefix + "'select sub query':" + x + suffix);
             }
 
             @Override
             public boolean visit(SQLJoinTableSource x) {
-                // just like: ... from a inner join b on a.id = b.id ...
+                // e.g. ... FROM a INNER JOIN b ON a.id = b.id ...
                 throw new NotSupportYetException(prefix + "'joined table source':" + x + suffix);
             }
 
             @Override
             public boolean visit(SQLInSubQueryExpr x) {
-                // just like: ... where id in (select id from a)
+                // e.g. ... WHERE id IN (SELECT id FROM a) ...
                 throw new NotSupportYetException(prefix + "'in sub query':" + x + suffix);
             }
 
             @Override
             public boolean visit(SQLReplaceStatement x) {
-                // just like: replace into a(id, num) values (1,'2')
+                // e.g. REPLACE INTO a(id) VALUES (1) ...
                 throw new NotSupportYetException(prefix + "'replace':" + x + suffix);
             }
 
             @Override
             public boolean visit(SQLMergeStatement x) {
-                // just like: merge into a using b on ... when matched then update set ...
-                // when not matched then insert ...
+                // e.g. MERGE INTO a USING b ON ... WHEN MATCHED THEN UPDATE SET ... WHEN NOT MATCHED THEN INSERT ...
                 throw new NotSupportYetException(prefix + "'merge':" + x + suffix);
             }
 
             @Override
             public boolean visit(SQLInsertStatement x) {
                 if (null != x.getQuery()) {
-                    // just like: insert into a select * from b
+                    // e.g. INSERT INTO a SELECT * FROM b
                     throw new NotSupportYetException(prefix + "'insert into sub query':" + x + suffix);
                 }
                 return true;
@@ -167,4 +198,6 @@ public abstract class BaseOceanBaseOracleRecognizer extends BaseRecognizer {
         getAst().accept(visitor);
         return true;
     }
+
+    protected abstract SQLTableSource getTableSource();
 }

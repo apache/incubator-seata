@@ -32,7 +32,14 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Test cases for update recognizer of OceanBaseOracle
@@ -153,10 +160,10 @@ public class OceanBaseOracleUpdateRecognizerTest extends AbstractRecognizerTest 
         Assertions.assertEquals(sql, recognizer.getOriginalSQL());
 
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        ParametersHolder parametersHolder = () -> new HashMap<Integer, ArrayList<Object>>() {{
-            put(1, new ArrayList<>(Collections.singletonList("test")));
-            put(2, new ArrayList<>(Collections.singletonList(1)));
-        }};
+        ParametersHolder parametersHolder = () -> Stream.of(
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(1, new ArrayList<>(Collections.singletonList("test"))),
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(2, new ArrayList<>(Collections.singletonList(1))))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         String whereCondition = recognizer.getWhereCondition(parametersHolder, paramAppenderList);
         Assertions.assertEquals(Collections.singletonList(Collections.singletonList(1)), paramAppenderList);
         Assertions.assertEquals("id = ?", whereCondition);
@@ -171,10 +178,10 @@ public class OceanBaseOracleUpdateRecognizerTest extends AbstractRecognizerTest 
         Assertions.assertEquals(sql, recognizer.getOriginalSQL());
 
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        ParametersHolder parametersHolder = () -> new HashMap<Integer, ArrayList<Object>>() {{
-            put(1, new ArrayList<>(Collections.singletonList(1)));
-            put(2, new ArrayList<>(Collections.singletonList(2)));
-        }};
+        ParametersHolder parametersHolder = () -> Stream.of(
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(1, new ArrayList<>(Collections.singletonList(1))),
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(2, new ArrayList<>(Collections.singletonList(2))))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         String whereCondition = recognizer.getWhereCondition(parametersHolder, paramAppenderList);
         Assertions.assertEquals(Collections.singletonList(Arrays.asList(1, 2)), paramAppenderList);
         Assertions.assertEquals("id IN (?, ?)", whereCondition);
@@ -189,11 +196,11 @@ public class OceanBaseOracleUpdateRecognizerTest extends AbstractRecognizerTest 
         Assertions.assertEquals(sql, recognizer.getOriginalSQL());
 
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        ParametersHolder parametersHolder = () -> new HashMap<Integer, ArrayList<Object>>() {{
-            put(1, new ArrayList<>(Collections.singletonList("test")));
-            put(2, new ArrayList<>(Collections.singletonList(1)));
-            put(3, new ArrayList<>(Collections.singletonList(2)));
-        }};
+        ParametersHolder parametersHolder = () -> Stream.of(
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(1, new ArrayList<>(Collections.singletonList("test"))),
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(2, new ArrayList<>(Collections.singletonList(1))),
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(3, new ArrayList<>(Collections.singletonList(2))))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         String whereCondition = recognizer.getWhereCondition(parametersHolder, paramAppenderList);
         Assertions.assertEquals(Collections.singletonList(Arrays.asList(1, 2)), paramAppenderList);
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);

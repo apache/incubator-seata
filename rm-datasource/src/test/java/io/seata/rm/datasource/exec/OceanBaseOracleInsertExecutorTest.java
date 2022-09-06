@@ -34,9 +34,18 @@ import org.mockito.Mockito;
 import org.opentest4j.TestAbortedException;
 
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Test cases for insert executor of OceanBaseOracle
@@ -82,20 +91,17 @@ public class OceanBaseOracleInsertExecutorTest {
         tableMeta = mock(TableMeta.class);
 
         // single pk
-        pkIndexMap = new HashMap<String, Integer>() {{
-            put(ID_COLUMN, pkIndexId);
-        }};
+        pkIndexMap = new HashMap<>();
+        pkIndexMap.put(ID_COLUMN, pkIndexId);
 
         // multiple pks
-        multiPkIndexMap = new HashMap<String, Integer>() {{
-            put(ID_COLUMN, pkIndexId);
-            put(USER_ID_COLUMN, pkIndexUserId);
-        }};
+        multiPkIndexMap = new HashMap<>();
+        multiPkIndexMap.put(ID_COLUMN, pkIndexId);
+        multiPkIndexMap.put(USER_ID_COLUMN, pkIndexUserId);
 
         // multiple pks without full values
-        partialIndexMap = new HashMap<String, Integer>() {{
-            put(USER_ID_COLUMN, pkIndexUserId - 1);
-        }};
+        partialIndexMap = new HashMap<>();
+        partialIndexMap.put(USER_ID_COLUMN, pkIndexUserId - 1);
     }
 
     @Test
@@ -310,14 +316,12 @@ public class OceanBaseOracleInsertExecutorTest {
     private SqlSequenceExpr mockParametersWithPkSeq(boolean multiple, boolean partial, List<String> autoTypes) {
         // mock #getParameters returns(called in #parsePkValuesFromStatement)
         SqlSequenceExpr expr = new SqlSequenceExpr("seq", "nextval");
-        Map<Integer, ArrayList<Object>> parameters = new HashMap<Integer, ArrayList<Object>>() {
-            {
-                put(1, new ArrayList<>(Collections.singletonList(expr)));
-                put(2, new ArrayList<>(Collections.singletonList("test")));
-                put(3, new ArrayList<>(Collections.singletonList("test")));
-                put(4, new ArrayList<>(Collections.singletonList("test")));
-            }
-        };
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>();
+        parameters.put(1, new ArrayList<>(Collections.singletonList(expr)));
+        parameters.put(2, new ArrayList<>(Collections.singletonList("test")));
+        parameters.put(3, new ArrayList<>(Collections.singletonList("test")));
+        parameters.put(4, new ArrayList<>(Collections.singletonList("test")));
+
         if (multiple) {
             // simply use the same sequence with no adverse effects
             parameters.get(2).set(0, expr);

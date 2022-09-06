@@ -25,12 +25,9 @@ import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
-import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -66,30 +63,8 @@ public class OceanBaseOracleUpdateRecognizer extends BaseOceanBaseOracleRecogniz
     }
 
     @Override
-    public String getTableAlias() {
-        return ast.getTableSource().getAlias();
-    }
-
-    @Override
-    public String getTableName() {
-        StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLExprTableSource x) {
-                printTableSourceExpr(x.getExpr());
-                return false;
-            }
-        };
-
-        SQLTableSource tableSource = ast.getTableSource();
-        if (tableSource instanceof SQLExprTableSource) {
-            visitor.visit((SQLExprTableSource) tableSource);
-        } else {
-            throw new NotSupportYetException("No support for syntax with the table reference: " +
-                tableSource.getClass().getName());
-        }
-        return sb.toString();
+    protected SQLTableSource getTableSource() {
+        return ast.getTableSource();
     }
 
     @Override
@@ -105,10 +80,10 @@ public class OceanBaseOracleUpdateRecognizer extends BaseOceanBaseOracleRecogniz
                 SQLPropertyExpr propertyExpr = (SQLPropertyExpr) expr;
                 SQLExpr owner = propertyExpr.getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    // table alias case, like: update test t set t.id = 1 where ...
+                    // table alias case, e.g. update test t set t.id = 1 where ...
                     updateColumns.add(((SQLIdentifierExpr) owner).getName() + "." + propertyExpr.getName());
                 } else if (propertyExpr.getOwnerName().contains(".")) {
-                    // full table source case, like: update d.t set d.t.id = 1 where ...
+                    // full table source case, e.g. update d.t set d.t.id = 1 where ...
                     updateColumns.add(propertyExpr.getOwnerName() + "." + propertyExpr.getName());
                 }
             } else {
@@ -148,15 +123,13 @@ public class OceanBaseOracleUpdateRecognizer extends BaseOceanBaseOracleRecogniz
 
     @Override
     public String getWhereCondition() {
-        SQLExpr where = ast.getWhere();
-        return super.getWhereCondition(where);
+        return super.getWhereCondition(ast.getWhere());
     }
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
                                     final ArrayList<List<Object>> paramAppenderList) {
-        SQLExpr where = ast.getWhere();
-        return super.getWhereCondition(where, parametersHolder, paramAppenderList);
+        return super.getWhereCondition(ast.getWhere(), parametersHolder, paramAppenderList);
     }
 
     @Override

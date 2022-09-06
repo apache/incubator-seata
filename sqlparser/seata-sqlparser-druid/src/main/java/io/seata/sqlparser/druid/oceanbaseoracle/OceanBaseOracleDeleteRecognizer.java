@@ -16,13 +16,9 @@
 package io.seata.sqlparser.druid.oceanbaseoracle;
 
 
-import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleDeleteStatement;
-import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLType;
@@ -55,46 +51,19 @@ public class OceanBaseOracleDeleteRecognizer extends BaseOceanBaseOracleRecogniz
     }
 
     @Override
-    public String getTableAlias() {
-        return ast.getTableSource().getAlias();
-    }
-
-    @Override
-    public String getTableName() {
-        StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLExprTableSource x) {
-                printTableSourceExpr(x.getExpr());
-                return false;
-            }
-        };
-
-        SQLTableSource tableSource = ast.getFrom();
-        if (tableSource == null) {
-            tableSource = ast.getTableSource();
-        }
-        if (tableSource instanceof SQLExprTableSource) {
-            visitor.visit((SQLExprTableSource) tableSource);
-        } else {
-            throw new NotSupportYetException("No support for syntax with the table reference: " +
-                tableSource.getClass().getName());
-        }
-        return sb.toString();
+    protected SQLTableSource getTableSource() {
+        return ast.getTableSource();
     }
 
     @Override
     public String getWhereCondition() {
-        SQLExpr where = ast.getWhere();
-        return super.getWhereCondition(where);
+        return super.getWhereCondition(ast.getWhere());
     }
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
                                     final ArrayList<List<Object>> paramAppenderList) {
-        SQLExpr where = ast.getWhere();
-        return super.getWhereCondition(where, parametersHolder, paramAppenderList);
+        return super.getWhereCondition(ast.getWhere(), parametersHolder, paramAppenderList);
     }
 
     @Override

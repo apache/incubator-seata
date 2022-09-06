@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 @LoadLevel(name = JdbcConstants.OCEANBASE_ORACLE)
 public class OceanBaseOracleKeywordChecker implements KeywordChecker {
 
-    private final Set<String> keywordSet = Arrays.stream(OceanBaseOracleKeywordChecker.ReservedKeyword.values()).
-        map(OceanBaseOracleKeywordChecker.ReservedKeyword::name).collect(Collectors.toSet());
+    private final Set<String> keywordSet = Arrays.stream(ReservedKeyword.values()).
+        map(ReservedKeyword::name).collect(Collectors.toSet());
 
 
     /**
@@ -57,7 +57,7 @@ public class OceanBaseOracleKeywordChecker implements KeywordChecker {
      */
     @Override
     public boolean checkEscape(String fieldOrTableName) {
-        // like: "in" Table.in "TABLE".In etc.
+        // e.g. "in" Table.in "TABLE".In etc.
         return check(fieldOrTableName) || !isAllUpperCase(fieldOrTableName);
     }
 

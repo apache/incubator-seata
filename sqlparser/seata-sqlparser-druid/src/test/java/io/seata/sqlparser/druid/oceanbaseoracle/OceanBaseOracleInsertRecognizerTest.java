@@ -22,7 +22,11 @@ import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.AbstractRecognizerTest;
-import io.seata.sqlparser.struct.*;
+import io.seata.sqlparser.struct.NotPlaceholderExpr;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,8 +53,8 @@ public class OceanBaseOracleInsertRecognizerTest extends AbstractRecognizerTest 
         String sql = "INSERT INTO t (id) VALUES (?)";
         SQLStatement ast = getSQLStatement(sql);
 
-        OceanBaseOracleInsertRecognizer deleteRecognizer = new OceanBaseOracleInsertRecognizer(sql, ast);
-        Assertions.assertEquals(deleteRecognizer.getSQLType(), SQLType.INSERT);
+        OceanBaseOracleInsertRecognizer recognizer = new OceanBaseOracleInsertRecognizer(sql, ast);
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.INSERT);
     }
 
     @Test
@@ -74,14 +78,14 @@ public class OceanBaseOracleInsertRecognizerTest extends AbstractRecognizerTest 
         String sql = "INSERT INTO t (id, name) VALUES (1, 'test')";
         SQLStatement statement = getSQLStatement(sql);
 
-        OceanBaseOracleInsertRecognizer insertRecognizer = new OceanBaseOracleInsertRecognizer(sql, statement);
+        OceanBaseOracleInsertRecognizer recognizer = new OceanBaseOracleInsertRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, insertRecognizer.getOriginalSQL());
-        Assertions.assertFalse(insertRecognizer.insertColumnsIsEmpty());
+        Assertions.assertEquals(sql, recognizer.getOriginalSQL());
+        Assertions.assertFalse(recognizer.insertColumnsIsEmpty());
 
-        Assertions.assertEquals(Arrays.asList("id", "name"), insertRecognizer.getInsertColumns());
+        Assertions.assertEquals(Arrays.asList("id", "name"), recognizer.getInsertColumns());
 
-        List<List<Object>> insertRows = insertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(Collections.singletonList(Arrays.asList(1, "test")), insertRows);
     }
 
@@ -90,14 +94,14 @@ public class OceanBaseOracleInsertRecognizerTest extends AbstractRecognizerTest 
         String sql = "INSERT INTO t (id, name) VALUES (?, ?)";
         SQLStatement statement = getSQLStatement(sql);
 
-        OceanBaseOracleInsertRecognizer insertRecognizer = new OceanBaseOracleInsertRecognizer(sql, statement);
+        OceanBaseOracleInsertRecognizer recognizer = new OceanBaseOracleInsertRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, insertRecognizer.getOriginalSQL());
-        Assertions.assertFalse(insertRecognizer.insertColumnsIsEmpty());
+        Assertions.assertEquals(sql, recognizer.getOriginalSQL());
+        Assertions.assertFalse(recognizer.insertColumnsIsEmpty());
 
-        Assertions.assertEquals(Arrays.asList("id", "name"), insertRecognizer.getInsertColumns());
+        Assertions.assertEquals(Arrays.asList("id", "name"), recognizer.getInsertColumns());
 
-        List<List<Object>> insertRows = insertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(Collections.singletonList(Arrays.asList("?", "?")), insertRows);
     }
 
@@ -109,7 +113,7 @@ public class OceanBaseOracleInsertRecognizerTest extends AbstractRecognizerTest 
 
         OceanBaseOracleInsertRecognizer recognizer = new OceanBaseOracleInsertRecognizer(sql, ast);
         List<String> insertColumns = recognizer.getInsertColumns();
-        Assertions.assertNull(insertColumns);
+        Assertions.assertTrue(insertColumns.isEmpty());
 
         // case2: multi columns
         sql = "INSERT INTO t (id, name) VALUES (1, 'test')";

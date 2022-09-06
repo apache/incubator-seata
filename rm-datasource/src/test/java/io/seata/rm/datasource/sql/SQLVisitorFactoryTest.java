@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
@@ -46,140 +47,100 @@ public class SQLVisitorFactoryTest {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("", JdbcConstants.MYSQL));
 
         //test for mysql insert
-        String sql = "insert into t(id) values (1)";
-        List<SQLRecognizer> recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        List<SQLRecognizer> recognizer = SQLVisitorFactory.get("insert into t(id) values (1)", JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLInsertRecognizer.class.getName());
 
         //test for mysql delete
-        sql = "delete from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        recognizer = SQLVisitorFactory.get("delete from t", JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLDeleteRecognizer.class.getName());
 
         //test for mysql update
-        sql = "update t set a = a";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        recognizer = SQLVisitorFactory.get("update t set a = a", JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLUpdateRecognizer.class.getName());
 
         //test for mysql select
-        sql = "select * from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertNull(recognizer);
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.MYSQL));
 
         //test for mysql select for update
-        sql = "select * from t for update";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        recognizer = SQLVisitorFactory.get("select * from t for update", JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
 
         //test for oracle insert
-        sql = "insert into t(id) values (1)";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get("insert into t(id) values (1)", JdbcConstants.ORACLE);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleInsertRecognizer.class.getName());
 
         //test for oracle delete
-        sql = "delete from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get("delete from t", JdbcConstants.ORACLE);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleDeleteRecognizer.class.getName());
 
         //test for oracle update
-        sql = "update t set a = a";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get("update t set a = a", JdbcConstants.ORACLE);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleUpdateRecognizer.class.getName());
 
         //test for oracle select
-        sql = "select * from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertNull(recognizer);
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.ORACLE));
 
         //test for oracle select for update
-        sql = "select * from t for update";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get("select * from t for update", JdbcConstants.ORACLE);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
 
         //test for do not support db
-        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
-            SQLVisitorFactory.get("select * from t", JdbcConstants.DB2);
-        });
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
 
 
         //TEST FOR Multi-SQL
 
-        List<SQLRecognizer> sqlRecognizers = null;
+        List<SQLRecognizer> sqlRecognizers;
         //test for mysql insert
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.MYSQL));
         //test for mysql insert and update
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.MYSQL));
         //test for mysql insert and deleted
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.MYSQL));
         //test for mysql delete
-        sql = "delete from t where id =1 ; delete from t where id = 2";
-        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        sqlRecognizers = SQLVisitorFactory.get("delete from t where id =1 ; delete from t where id = 2", JdbcConstants.MYSQL);
         for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
             Assertions.assertEquals(sqlRecognizer.getClass().getName(), MySQLDeleteRecognizer.class.getName());
         }
         //test for mysql update
-        sql = "update t set a = a;update t set a = c;";
-        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        sqlRecognizers = SQLVisitorFactory.get("update t set a = a;update t set a = c;", JdbcConstants.MYSQL);
         for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
             Assertions.assertEquals(sqlRecognizer.getClass().getName(), MySQLUpdateRecognizer.class.getName());
         }
         //test for mysql update and deleted
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1", JdbcConstants.MYSQL));
         //test for mysql select
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.MYSQL));
 
         //test for mysql select for update
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.MYSQL));
 
         //test for oracle insert
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.ORACLE);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.ORACLE));
 
         //test for oracle delete and deleted
-        sql = "delete from t where id =1 ; delete from t where id = 2";
-        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        sqlRecognizers = SQLVisitorFactory.get("delete from t where id =1 ; delete from t where id = 2", JdbcConstants.ORACLE);
         for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
             Assertions.assertEquals(sqlRecognizer.getClass().getName(), OracleDeleteRecognizer.class.getName());
         }
 
         //test for oracle update
-        sql = "update t set a = b where id =1 ;update t set a = c where id = 1;";
-        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        sqlRecognizers = SQLVisitorFactory.get("update t set a = b where id =1 ;update t set a = c where id = 1;", JdbcConstants.ORACLE);
         for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
             Assertions.assertEquals(sqlRecognizer.getClass().getName(), OracleUpdateRecognizer.class.getName());
         }
 
         //test for oracle select
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("select * from b ; select * from t where id = 2", JdbcConstants.ORACLE);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("select * from b ; select * from t where id = 2", JdbcConstants.ORACLE));
 
         //test for oracle select for update
         //test for mysql select for update
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.ORACLE);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.ORACLE));
 
         //test for oracle insert and update
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.ORACLE);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.ORACLE));
         //test for oracle insert and deleted
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE);
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE));
     }
 
     @Test

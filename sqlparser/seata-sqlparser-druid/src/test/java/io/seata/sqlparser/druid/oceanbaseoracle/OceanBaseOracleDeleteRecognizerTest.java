@@ -23,7 +23,14 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Test cases for delete recognizer of OceanBaseOracle
@@ -42,8 +49,8 @@ public class OceanBaseOracleDeleteRecognizerTest extends AbstractRecognizerTest 
         String sql = "DELETE FROM t WHERE id = ?";
         SQLStatement ast = getSQLStatement(sql);
 
-        OceanBaseOracleDeleteRecognizer deleteRecognizer = new OceanBaseOracleDeleteRecognizer(sql, ast);
-        Assertions.assertEquals(deleteRecognizer.getSQLType(), SQLType.DELETE);
+        OceanBaseOracleDeleteRecognizer recognizer = new OceanBaseOracleDeleteRecognizer(sql, ast);
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.DELETE);
     }
 
     @Test
@@ -67,10 +74,10 @@ public class OceanBaseOracleDeleteRecognizerTest extends AbstractRecognizerTest 
         String sql = "DELETE FROM t WHERE id = 1";
 
         SQLStatement statement = getSQLStatement(sql);
-        OceanBaseOracleDeleteRecognizer deleteRecognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
+        OceanBaseOracleDeleteRecognizer recognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, deleteRecognizer.getOriginalSQL());
-        Assertions.assertEquals("id = 1", deleteRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, recognizer.getOriginalSQL());
+        Assertions.assertEquals("id = 1", recognizer.getWhereCondition());
     }
 
     @Test
@@ -78,21 +85,19 @@ public class OceanBaseOracleDeleteRecognizerTest extends AbstractRecognizerTest 
         String sql = "DELETE FROM t WHERE id in (?, ?)";
 
         SQLStatement statement = getSQLStatement(sql);
-        OceanBaseOracleDeleteRecognizer deleteRecognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
+        OceanBaseOracleDeleteRecognizer recognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
 
-        ParametersHolder parametersHolder = () ->
-            new HashMap<Integer, ArrayList<Object>>() {
-                {
-                    put(1, new ArrayList<>(Collections.singletonList(1)));
-                    put(2, new ArrayList<>(Collections.singletonList(2)));
-                }
-            };
+        ParametersHolder parametersHolder = () -> Stream.of(
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(1, new ArrayList<>(Collections.singletonList(1))),
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(2, new ArrayList<>(Collections.singletonList(2))))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
 
-        Assertions.assertEquals(sql, deleteRecognizer.getOriginalSQL());
-        Assertions.assertEquals("id IN (?, ?)", deleteRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, recognizer.getOriginalSQL());
+        Assertions.assertEquals("id IN (?, ?)", recognizer.getWhereCondition());
 
-        String whereCondition = deleteRecognizer.getWhereCondition(parametersHolder, paramAppenderList);
+        String whereCondition = recognizer.getWhereCondition(parametersHolder, paramAppenderList);
         Assertions.assertEquals("id IN (?, ?)", whereCondition);
         Assertions.assertEquals(Collections.singletonList(Arrays.asList(1, 2)), paramAppenderList);
     }
@@ -102,21 +107,18 @@ public class OceanBaseOracleDeleteRecognizerTest extends AbstractRecognizerTest 
         String sql = "DELETE FROM t WHERE id BETWEEN ? AND ?";
 
         SQLStatement statement = getSQLStatement(sql);
-        OceanBaseOracleDeleteRecognizer deleteRecognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
+        OceanBaseOracleDeleteRecognizer recognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
 
-        ParametersHolder parametersHolder = () ->
-            new HashMap<Integer, ArrayList<Object>>() {
-                {
-                    put(1, new ArrayList<>(Collections.singletonList(1)));
-                    put(2, new ArrayList<>(Collections.singletonList(2)));
-                }
-            };
+        ParametersHolder parametersHolder = () -> Stream.of(
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(1, new ArrayList<>(Collections.singletonList(1))),
+                new AbstractMap.SimpleEntry<Integer, ArrayList<Object>>(2, new ArrayList<>(Collections.singletonList(2))))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
 
-        Assertions.assertEquals(sql, deleteRecognizer.getOriginalSQL());
-        Assertions.assertEquals("id BETWEEN ? AND ?", deleteRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, recognizer.getOriginalSQL());
+        Assertions.assertEquals("id BETWEEN ? AND ?", recognizer.getWhereCondition());
 
-        String whereCondition = deleteRecognizer.getWhereCondition(parametersHolder, paramAppenderList);
+        String whereCondition = recognizer.getWhereCondition(parametersHolder, paramAppenderList);
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
         Assertions.assertEquals(Collections.singletonList(Arrays.asList(1, 2)), paramAppenderList);
     }
@@ -126,14 +128,14 @@ public class OceanBaseOracleDeleteRecognizerTest extends AbstractRecognizerTest 
         String sql = "DELETE FROM t1 WHERE EXISTS (SELECT * FROM t2)";
 
         SQLStatement statement = getSQLStatement(sql);
-        OceanBaseOracleDeleteRecognizer deleteRecognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
+        OceanBaseOracleDeleteRecognizer recognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, deleteRecognizer.getOriginalSQL());
-        Assertions.assertEquals("t1", deleteRecognizer.getTableName());
+        Assertions.assertEquals(sql, recognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", recognizer.getTableName());
         Assertions.assertEquals("EXISTS (\n" +
             "\tSELECT *\n" +
             "\tFROM t2\n" +
-            ")", deleteRecognizer.getWhereCondition());
+            ")", recognizer.getWhereCondition());
     }
 
     @Test
@@ -141,9 +143,9 @@ public class OceanBaseOracleDeleteRecognizerTest extends AbstractRecognizerTest 
         String sql = "DELETE FROM t WHERE id in (SELECT id FROM t)";
 
         SQLStatement statement = getSQLStatement(sql);
-        OceanBaseOracleDeleteRecognizer deleteRecognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
+        OceanBaseOracleDeleteRecognizer recognizer = new OceanBaseOracleDeleteRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, deleteRecognizer.getOriginalSQL());
-        Assertions.assertThrows(IllegalArgumentException.class, deleteRecognizer::getWhereCondition);
+        Assertions.assertEquals(sql, recognizer.getOriginalSQL());
+        Assertions.assertThrows(IllegalArgumentException.class, recognizer::getWhereCondition);
     }
 }

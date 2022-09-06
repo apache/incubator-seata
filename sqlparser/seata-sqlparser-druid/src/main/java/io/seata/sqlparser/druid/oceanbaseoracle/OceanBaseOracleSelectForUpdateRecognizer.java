@@ -15,15 +15,11 @@
  */
 package io.seata.sqlparser.druid.oceanbaseoracle;
 
-import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLSelectRecognizer;
@@ -56,42 +52,19 @@ public class OceanBaseOracleSelectForUpdateRecognizer extends BaseOceanBaseOracl
     }
 
     @Override
-    public String getTableAlias() {
-        SQLSelectQueryBlock selectQueryBlock = getSelect();
-        SQLTableSource tableSource = selectQueryBlock.getFrom();
-        return tableSource.getAlias();
-    }
-
-    @Override
-    public String getTableName() {
-        StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLExprTableSource x) {
-                printTableSourceExpr(x.getExpr());
-                return false;
-            }
-        };
-
-        SQLTableSource tableSource = getSelect().getFrom();
-        visitor.visit((SQLExprTableSource) tableSource);
-        return sb.toString();
+    protected SQLTableSource getTableSource() {
+        return getSelect().getFrom();
     }
 
     @Override
     public String getWhereCondition() {
-        SQLSelectQueryBlock selectQueryBlock = getSelect();
-        SQLExpr where = selectQueryBlock.getWhere();
-        return super.getWhereCondition(where);
+        return super.getWhereCondition(getSelect().getWhere());
     }
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
                                     final ArrayList<List<Object>> paramAppenderList) {
-        SQLSelectQueryBlock selectQueryBlock = getSelect();
-        SQLExpr where = selectQueryBlock.getWhere();
-        return super.getWhereCondition(where, parametersHolder, paramAppenderList);
+        return super.getWhereCondition(getSelect().getWhere(), parametersHolder, paramAppenderList);
     }
 
     @Override
@@ -108,24 +81,22 @@ public class OceanBaseOracleSelectForUpdateRecognizer extends BaseOceanBaseOracl
 
     @Override
     public String getOrderByCondition() {
-        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
-        return super.getOrderByCondition(sqlOrderBy);
+        return super.getOrderByCondition(getSelect().getOrderBy());
     }
 
     @Override
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
-        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
+        return super.getOrderByCondition(getSelect().getOrderBy(), parametersHolder, paramAppenderList);
     }
 
     private SQLSelectQueryBlock getSelect() {
         SQLSelect select = ast.getSelect();
         if (select == null) {
-            throw new SQLParsingException("Null select statement");
+            throw new SQLParsingException("Empty select statement: " + getOriginalSQL());
         }
         SQLSelectQueryBlock selectQueryBlock = select.getQueryBlock();
         if (selectQueryBlock == null) {
-            throw new SQLParsingException("Null select query block");
+            throw new SQLParsingException("Empty select query block: " + getOriginalSQL());
         }
         return selectQueryBlock;
     }

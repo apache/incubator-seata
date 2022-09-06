@@ -19,7 +19,8 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement.InsertIntoClause;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,16 +28,26 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Insert recognizer for OceanBaseOracle
+ * Multi insert item recognizer for OceanBaseOracle
  *
  * @author hsien999
  */
-public class OceanBaseOracleInsertRecognizer extends BaseOceanBaseOracleInsertRecognizer {
-    private final OracleInsertStatement ast;
+public class OceanBaseOracleMultiInsertItemRecognizer extends BaseOceanBaseOracleInsertRecognizer {
+    private final OracleMultiInsertStatement ast;
+    private final InsertIntoClause item;
+    private final String conditionSQL;
 
-    public OceanBaseOracleInsertRecognizer(String originalSQL, SQLStatement ast) {
+    public OceanBaseOracleMultiInsertItemRecognizer(String originalSQL, SQLStatement ast,
+                                                    InsertIntoClause item, String conditionSQL) {
         super(originalSQL);
-        this.ast = (OracleInsertStatement) ast;
+        this.ast = (OracleMultiInsertStatement) ast;
+        this.item = item;
+        this.conditionSQL = conditionSQL;
+    }
+
+    @Override
+    public String getConditionSQL() {
+        return conditionSQL;
     }
 
     @Override
@@ -46,20 +57,20 @@ public class OceanBaseOracleInsertRecognizer extends BaseOceanBaseOracleInsertRe
 
     @Override
     protected SQLTableSource getTableSource() {
-        return ast.getTableSource();
+        return item.getTableSource();
     }
 
     @Override
     protected List<SQLExpr> getColumnsExprList() {
-        return ast.getColumns();
+        return item.getColumns();
     }
 
     @Override
     protected List<String> handleEmptyColumns(List<SQLExpr> columnExprList) {
         // TODO support insert into sub-query
-        if (ast.getQuery() != null) {
+        if (item.getQuery() != null) {
             List<String> columns = new ArrayList<>();
-            getInsertSelectColumns(ast.getQuery().getQuery(), columns);
+            getInsertSelectColumns(item.getQuery().getQuery(), columns);
             return columns;
         } else {
             return Collections.emptyList();
@@ -68,7 +79,7 @@ public class OceanBaseOracleInsertRecognizer extends BaseOceanBaseOracleInsertRe
 
     @Override
     protected List<SQLInsertStatement.ValuesClause> getValuesClauses() {
-        return ast.getValuesList();
+        return item.getValuesList();
     }
 
     @Override
@@ -76,5 +87,4 @@ public class OceanBaseOracleInsertRecognizer extends BaseOceanBaseOracleInsertRe
                                                    Collection<Integer> primaryKeyIndex) {
         return Collections.emptyList();
     }
-
 }
