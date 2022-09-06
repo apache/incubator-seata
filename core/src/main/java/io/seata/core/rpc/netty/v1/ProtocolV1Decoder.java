@@ -97,7 +97,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        Object decoded;
+        Object decoded = null;
         in.markReaderIndex();
         try {
             if (in instanceof ByteBuf) {
@@ -135,7 +135,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
             LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
             throw new DecodeException(exx);
         }
-        return in;
+        return decoded;
     }
 
     public Object decodeFrame(ByteBuf frame) {
