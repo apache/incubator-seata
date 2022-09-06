@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # step 1
-      - name: "Checkout"
+      - name: Checkout
         uses: actions/checkout@v2.4.0
       # step 2
       - name: Check License Header
