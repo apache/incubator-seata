@@ -48,10 +48,7 @@ import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.ConfigurationKeys.STORE_DB_GLOBAL_TABLE;
-import static io.seata.common.ConfigurationKeys.STORE_DB_UNDO;
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE;
-import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_TYPE;

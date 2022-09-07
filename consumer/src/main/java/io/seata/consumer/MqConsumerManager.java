@@ -17,11 +17,15 @@ package io.seata.consumer;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.DefaultValues;
+import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 
 import java.util.ServiceLoader;
+import java.util.concurrent.*;
 
 public class MqConsumerManager {
+    private final ExecutorService executorService =
+            new ThreadPoolExecutor(1, 1, 3, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1), new NamedThreadFactory("MqConsumer", 1));
 
     public MqConsumerManager() {
         consume();
@@ -29,8 +33,7 @@ public class MqConsumerManager {
 
     public void consume() {
         MqConsumer mqConsumer = loadConsumer();
-        Thread t = new Thread(mqConsumer, "MqConsumerThread");
-        t.start();
+        executorService.submit(mqConsumer);
     }
 
     private MqConsumer loadConsumer() {
