@@ -1,6 +1,6 @@
 [English](README.md) | 简体中文
 
-# Seata Saga StateMachine Designer
+# Seata Saga 状态机可视化图形设计器
 
 Seata Saga 状态机可视化图形设计器, 基于 [GGEditor](https://github.com/alibaba/GGEditor)
 
