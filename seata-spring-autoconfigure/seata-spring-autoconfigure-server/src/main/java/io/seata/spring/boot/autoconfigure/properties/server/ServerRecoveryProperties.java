@@ -27,15 +27,44 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVER
 @ConfigurationProperties(prefix = SERVER_RECOVERY_PREFIX)
 public class ServerRecoveryProperties {
 
-    private Integer handleAllSessionPeriod = 1000;
+    private int committingRetryPeriod = 1000;
+    private int asyncCommittingRetryPeriod = 1000;
+    private int rollbackingRetryPeriod = 1000;
+    private int timeoutRetryPeriod = 1000;
 
-    public Integer getHandleAllSessionPeriod() {
-        return handleAllSessionPeriod;
+    public int getCommittingRetryPeriod() {
+        return committingRetryPeriod;
     }
 
-    public ServerRecoveryProperties setHandleAllSessionPeriod(Integer handleAllSessionPeriod) {
-        this.handleAllSessionPeriod = handleAllSessionPeriod;
+    public ServerRecoveryProperties setCommittingRetryPeriod(int committingRetryPeriod) {
+        this.committingRetryPeriod = committingRetryPeriod;
         return this;
     }
 
+    public int getAsyncCommittingRetryPeriod() {
+        return asyncCommittingRetryPeriod;
+    }
+
+    public ServerRecoveryProperties setAsyncCommittingRetryPeriod(int asyncCommittingRetryPeriod) {
+        this.asyncCommittingRetryPeriod = asyncCommittingRetryPeriod;
+        return this;
+    }
+
+    public int getRollbackingRetryPeriod() {
+        return rollbackingRetryPeriod;
+    }
+
+    public ServerRecoveryProperties setRollbackingRetryPeriod(int rollbackingRetryPeriod) {
+        this.rollbackingRetryPeriod = rollbackingRetryPeriod;
+        return this;
+    }
+
+    public Integer getTimeoutRetryPeriod() {
+        return timeoutRetryPeriod;
+    }
+
+    public ServerRecoveryProperties setTimeoutRetryPeriod(int timeoutRetryPeriod) {
+        this.timeoutRetryPeriod = timeoutRetryPeriod;
+        return this;
+    }
 }

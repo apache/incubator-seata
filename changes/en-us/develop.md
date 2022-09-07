@@ -15,6 +15,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
 - [[#4912](https://github.com/seata/seata/pull/4912)] fix mysql InsertOnDuplicateUpdate column case is different and cannot be matched
 - [[#4543](https://github.com/seata/seata/pull/4543)] fix support Oracle nclob types
+- [[#4915](https://github.com/seata/seata/pull/4915)] fix failed to get server recovery properties
 
 
 ### optimize:
@@ -30,6 +31,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4865](https://github.com/seata/seata/pull/4865)] fix some security vulnerabilities in GGEditor
 - [[#4590](https://github.com/seata/seata/pull/4590)] auto degrade enable to dynamic configure
 - [[#4490](https://github.com/seata/seata/pull/4490)] tccfence log table delete by index
+- [[#4911](https://github.com/seata/seata/pull/4911)] add license checker workflow
+- [[#4917](https://github.com/seata/seata/pull/4917)] upgrade package-lock.json fix vulnerabilities
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
