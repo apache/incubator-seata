@@ -29,16 +29,15 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
-
-public class KafkaConsumer implements MqConsumer {
-
+public class KafkaConsumer extends MqConsumer {
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
     private final org.apache.kafka.clients.consumer.KafkaConsumer<byte[], byte[]> kafkaConsumer;
-
-    private InfluxDBHandler influxDBHandler = new InfluxDBHandler();
+    private final InfluxDBHandler influxDBHandler = new InfluxDBHandler();
+    private final AtomicBoolean started = new AtomicBoolean(true);
 
     public KafkaConsumer() {
         Properties properties = new Properties();
@@ -58,7 +57,7 @@ public class KafkaConsumer implements MqConsumer {
     @Override
     public void consume() {
         try {
-            while (true) {
+            while (started.get()) {
                 ConsumerRecords<byte[], byte[]> records = kafkaConsumer.poll(Duration.ofMillis(1000));
                 for (ConsumerRecord<byte[], byte[]> record : records) {
                     influxDBHandler.handle(record.topic(), record.key(), record.value());
@@ -69,5 +68,17 @@ public class KafkaConsumer implements MqConsumer {
         } finally {
             kafkaConsumer.close();
         }
+    }
+
+    public boolean isStarted() {
+        return started.get();
+    }
+
+    public void start() {
+        started.compareAndSet(false, true);
+    }
+
+    public void stop() {
+        started.compareAndSet(true, false);
     }
 }

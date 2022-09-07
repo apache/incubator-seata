@@ -29,7 +29,9 @@ public class GlobalSessionDTO {
     private long beginTime;
     private String applicationData;
 
-    public GlobalSessionDTO(String xid, long transactionId, int status, String applicationId, String transactionServiceGroup, String transactionName, int timeout, long beginTime, String applicationData) {
+    public GlobalSessionDTO(String xid, long transactionId, int status, String applicationId,
+                            String transactionServiceGroup, String transactionName, int timeout,
+                            long beginTime, String applicationData) {
         this.xid = xid;
         this.transactionId = transactionId;
         this.status = status;

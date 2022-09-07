@@ -106,9 +106,13 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         }
         writeSession(LogOperation.BRANCH_ADD, branchSession);
 
-        BranchSessionDTO branchSessionDTO = new BranchSessionDTO(branchSession.getXid(), branchSession.getTransactionId(), branchSession.getBranchId(), branchSession.getResourceGroupId(), branchSession.getResourceId(), branchSession.getBranchType().name(), branchSession.getStatus().getCode(), branchSession.getClientId(), branchSession.getApplicationData());
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
-        MqProducerFactory.getInstance().publish(topic, branchSession.getXid().getBytes(StandardCharsets.UTF_8), JSON.toJSONString(branchSessionDTO).getBytes(StandardCharsets.UTF_8));
+        BranchSessionDTO branchSessionDTO = new BranchSessionDTO(branchSession.getXid(), branchSession.getTransactionId(),
+                branchSession.getBranchId(), branchSession.getResourceGroupId(), branchSession.getResourceId(),
+                branchSession.getBranchType().name(), branchSession.getStatus().getCode(), branchSession.getClientId(),
+                branchSession.getApplicationData());
+        MqProducerFactory.getInstance().publish(topic, branchSession.getXid().getBytes(StandardCharsets.UTF_8),
+                JSON.toJSONString(branchSessionDTO).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

@@ -142,8 +142,11 @@ public class DefaultCore implements Core {
         session.begin();
 
         String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_GLOBAL_TABLE, DEFAULT_STORE_DB_GLOBAL_TABLE);
-        GlobalSessionDTO globalSessionDTO = new GlobalSessionDTO(session.getXid(), session.getTransactionId(), session.getStatus().getCode(), session.getApplicationId(), session.getTransactionServiceGroup(), session.getTransactionName(), session.getTimeout(), session.getBeginTime(), session.getApplicationData());
-        MqProducerFactory.getInstance().publish(topic, session.getXid().getBytes(StandardCharsets.UTF_8), JSON.toJSONString(globalSessionDTO).getBytes(StandardCharsets.UTF_8));
+        GlobalSessionDTO globalSessionDTO = new GlobalSessionDTO(session.getXid(), session.getTransactionId(),
+                session.getStatus().getCode(), session.getApplicationId(), session.getTransactionServiceGroup(),
+                session.getTransactionName(), session.getTimeout(), session.getBeginTime(), session.getApplicationData());
+        MqProducerFactory.getInstance().publish(topic, session.getXid().getBytes(StandardCharsets.UTF_8),
+                JSON.toJSONString(globalSessionDTO).getBytes(StandardCharsets.UTF_8));
 
         // transaction start event
         MetricsPublisher.postSessionDoingEvent(session, false);

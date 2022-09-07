@@ -14,6 +14,21 @@
  *  limitations under the License.
  */
 package io.seata.consumer;
-public interface MqConsumer {
-    void consume();
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MqConsumer implements Runnable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqConsumer.class);
+
+    public void consume() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public final void run() {
+        LOGGER.info("MqConsumer start.");
+        consume();
+        LOGGER.info("MqConsumer done.");
+    }
 }

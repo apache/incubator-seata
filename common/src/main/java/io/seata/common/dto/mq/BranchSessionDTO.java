@@ -26,7 +26,9 @@ public class BranchSessionDTO {
     private String clientId;
     private String applicationData;
 
-    public BranchSessionDTO(String xid, long transactionId, long branchId, String resourceGroupId, String resourceId, String branchType, int status, String clientId, String applicationData) {
+    public BranchSessionDTO(String xid, long transactionId, long branchId, String resourceGroupId,
+                            String resourceId, String branchType, int status, String clientId,
+                            String applicationData) {
         this.xid = xid;
         this.transactionId = transactionId;
         this.branchId = branchId;

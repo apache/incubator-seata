@@ -250,8 +250,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         }
 
         String topic = ConfigurationFactory.getInstance().getConfig(TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
-        BranchUndoLogDTO branchUndoLogDTO = new BranchUndoLogDTO(branchUndoLog.getXid(), branchUndoLog.getBranchId(), branchUndoLog.getSqlUndoLogs().toString());
-        MqProducerFactory.getInstance().publish(topic, xid.getBytes(StandardCharsets.UTF_8), JSON.toJSONString(branchUndoLogDTO).getBytes(StandardCharsets.UTF_8));
+        BranchUndoLogDTO branchUndoLogDTO = new BranchUndoLogDTO(branchUndoLog.getXid(),
+                branchUndoLog.getBranchId(), branchUndoLog.getSqlUndoLogs().toString());
+        MqProducerFactory.getInstance().publish(topic, xid.getBytes(StandardCharsets.UTF_8),
+                JSON.toJSONString(branchUndoLogDTO).getBytes(StandardCharsets.UTF_8));
         insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
     }
 

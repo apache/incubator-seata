@@ -17,7 +17,7 @@ package io.seata.consumer.rocketmq;
 
 import io.seata.consumer.MqConsumer;
 
-public class RocketmqConsumer implements MqConsumer {
+public class RocketmqConsumer extends MqConsumer {
     @Override
     public void consume() {
         throw new UnsupportedOperationException();

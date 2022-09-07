@@ -15,22 +15,34 @@
  */
 package io.seata.consumer;
 
-import org.springframework.stereotype.Component;
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.config.ConfigurationFactory;
 
 import java.util.ServiceLoader;
 
-@Component
 public class MqConsumerManager {
-
 
     public MqConsumerManager() {
         consume();
     }
 
     public void consume() {
-        ServiceLoader<MqConsumer> consumers = ServiceLoader.load(MqConsumer.class);
-        for (MqConsumer consumer : consumers) {
-            consumer.consume();
+        MqConsumer mqConsumer = loadConsumer();
+        Thread t = new Thread(mqConsumer, "MqConsumerThread");
+        t.start();
+    }
+
+    private MqConsumer loadConsumer() {
+        String consumerName = ConfigurationFactory.getInstance()
+                .getConfig(ConfigurationKeys.STORE_MQ_MODE, DefaultValues.DEFAULT_STORE_MQ_MODE).toLowerCase();
+        ServiceLoader<MqConsumer> mqConsumers = ServiceLoader.load(MqConsumer.class);
+        for (MqConsumer mqConsumer : mqConsumers) {
+            String className = mqConsumer.getClass().getSimpleName();
+            if (className.substring(0, className.indexOf("Consumer")).toLowerCase().equals(consumerName)) {
+                return mqConsumer;
+            }
         }
+        throw new RuntimeException(String.format("Load consumer[%s] fail.", consumerName));
     }
 }

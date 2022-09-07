@@ -19,10 +19,12 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.producer.MqProducer;
+
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

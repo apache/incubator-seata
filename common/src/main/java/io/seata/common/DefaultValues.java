@@ -77,6 +77,11 @@ public interface DefaultValues {
     String DEFAULT_STORE_DB_BRANCH_TABLE = "branch_table";
 
     /**
+     * The constant DEFAULT_STORE_MQ_MODE
+     */
+    String DEFAULT_STORE_MQ_MODE = "kafka";
+
+    /**
      * The constant DEFAULT_LOCK_DB_TABLE.
      */
     String DEFAULT_LOCK_DB_TABLE = "lock_table";

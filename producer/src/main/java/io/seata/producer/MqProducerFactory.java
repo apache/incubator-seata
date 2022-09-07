@@ -16,6 +16,7 @@
 package io.seata.producer;
 
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationFactory;
 
 import java.util.ServiceLoader;
@@ -41,9 +42,8 @@ public class MqProducerFactory {
     }
 
     private static MqProducer loadProducer() {
-        String defaultProducerName = "kafka";
         String producerName = ConfigurationFactory.getInstance()
-                .getConfig(ConfigurationKeys.STORE_MQ_MODE, defaultProducerName).toLowerCase();
+                .getConfig(ConfigurationKeys.STORE_MQ_MODE, DefaultValues.DEFAULT_STORE_MQ_MODE).toLowerCase();
         ServiceLoader<MqProducer> mqProducers = ServiceLoader.load(MqProducer.class);
         for (MqProducer mqProducer : mqProducers) {
             String className = mqProducer.getClass().getSimpleName();
