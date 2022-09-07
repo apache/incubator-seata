@@ -16,14 +16,16 @@
 package io.seata.producer.kafka;
 
 import io.seata.producer.MqProducerFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
+@Disabled
 class KafkaProducerTest {
 
     @Test
     void publish() {
-        MqProducerFactory.getInstance().publish("test", "key".getBytes(StandardCharsets.UTF_8),"value".getBytes(StandardCharsets.UTF_8));
+        MqProducerFactory.getInstance().publish("test", "key".getBytes(StandardCharsets.UTF_8), "value".getBytes(StandardCharsets.UTF_8));
     }
 }
