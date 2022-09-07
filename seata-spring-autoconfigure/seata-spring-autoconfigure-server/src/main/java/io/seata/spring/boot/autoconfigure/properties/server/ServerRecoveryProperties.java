@@ -27,34 +27,34 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVER
 @ConfigurationProperties(prefix = SERVER_RECOVERY_PREFIX)
 public class ServerRecoveryProperties {
 
-    private Integer committingRetryPeriod = 1000;
-    private Integer asyncCommittingRetryPeriod = 1000;
-    private Integer rollbackingRetryPeriod = 1000;
-    private Integer timeoutRetryPeriod = 1000;
+    private int committingRetryPeriod = 1000;
+    private int asyncCommittingRetryPeriod = 1000;
+    private int rollbackingRetryPeriod = 1000;
+    private int timeoutRetryPeriod = 1000;
 
-    public Integer getCommittingRetryPeriod() {
+    public int getCommittingRetryPeriod() {
         return committingRetryPeriod;
     }
 
-    public ServerRecoveryProperties setCommittingRetryPeriod(Integer committingRetryPeriod) {
+    public ServerRecoveryProperties setCommittingRetryPeriod(int committingRetryPeriod) {
         this.committingRetryPeriod = committingRetryPeriod;
         return this;
     }
 
-    public Integer getAsyncCommittingRetryPeriod() {
+    public int getAsyncCommittingRetryPeriod() {
         return asyncCommittingRetryPeriod;
     }
 
-    public ServerRecoveryProperties setAsyncCommittingRetryPeriod(Integer asyncCommittingRetryPeriod) {
+    public ServerRecoveryProperties setAsyncCommittingRetryPeriod(int asyncCommittingRetryPeriod) {
         this.asyncCommittingRetryPeriod = asyncCommittingRetryPeriod;
         return this;
     }
 
-    public Integer getRollbackingRetryPeriod() {
+    public int getRollbackingRetryPeriod() {
         return rollbackingRetryPeriod;
     }
 
-    public ServerRecoveryProperties setRollbackingRetryPeriod(Integer rollbackingRetryPeriod) {
+    public ServerRecoveryProperties setRollbackingRetryPeriod(int rollbackingRetryPeriod) {
         this.rollbackingRetryPeriod = rollbackingRetryPeriod;
         return this;
     }
@@ -63,7 +63,7 @@ public class ServerRecoveryProperties {
         return timeoutRetryPeriod;
     }
 
-    public ServerRecoveryProperties setTimeoutRetryPeriod(Integer timeoutRetryPeriod) {
+    public ServerRecoveryProperties setTimeoutRetryPeriod(int timeoutRetryPeriod) {
         this.timeoutRetryPeriod = timeoutRetryPeriod;
         return this;
     }
