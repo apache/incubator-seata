@@ -254,7 +254,7 @@ public class PolarisRegistryServiceImpl implements RegistryService<PolarisListen
         if (!LISTENER_SERVICE_MAP.containsKey(serviceName)) {
             synchronized (LOCK_OBJ) {
                 if (!LISTENER_SERVICE_MAP.containsKey(serviceName)) {
-                    List<PolarisInstance> allInstances = client.getAllInstances(getNamespaceName(), serviceName, DEFAULT_CLUSTER);
+                    List<PolarisInstance> allInstances = client.getAllInstances(getNamespaceName(), getApplicationServiceName(), DEFAULT_CLUSTER);
                     // map
                     List<InetSocketAddress> newAddressList = allInstances.stream()
                         .filter(PolarisInstance::isHealthy)

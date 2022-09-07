@@ -473,7 +473,7 @@ public final class PolarisNamingClient {
                     if (request instanceof GetAllServiceInstancesRequest) {
                         GetAllServiceInstancesRequest getAllServiceInstancesRequest = (GetAllServiceInstancesRequest) request;
 
-                        SimpleHttpRequest simpleHttpRequest = SimpleHttpRequest.post(REGISTER_INSTANCE.uri())
+                        SimpleHttpRequest simpleHttpRequest = SimpleHttpRequest.post(GET_ALL_INSTANCES.uri())
                             .header(ACCESS_TOKEN_HEADER, properties.token())
                             .contentType(CONTENT_TYPE_JSON, CHARSET_UTF8)
                             // trust all certs & hosts
