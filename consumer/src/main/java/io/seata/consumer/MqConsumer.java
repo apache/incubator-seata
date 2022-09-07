@@ -25,10 +25,14 @@ public class MqConsumer implements Runnable {
         throw new UnsupportedOperationException();
     }
 
+    protected String name() {
+        return "MqConsumer";
+    }
+
+
     @Override
     public final void run() {
-        LOGGER.info("MqConsumer start.");
+        LOGGER.info(name() + " start.");
         consume();
-        LOGGER.info("MqConsumer done.");
     }
 }

@@ -69,6 +69,12 @@ public class KafkaConsumer extends MqConsumer {
         }
     }
 
+    @Override
+    protected String name() {
+        return "KafkaConsumer";
+    }
+
+
     public boolean isStarted() {
         return started.get();
     }
