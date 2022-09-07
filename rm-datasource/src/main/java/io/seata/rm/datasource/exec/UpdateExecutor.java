@@ -155,7 +155,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         int itemTableIndex = tableItems.length == 1 ? 0 : 1; // if length > 1,consider update join sql
         String unionTable = tableItems[0];
         for (int i = itemTableIndex; i < tableItems.length; i++) {
-            TableRecords tableBeforeImage = beforeImagesMap.get(tableItems[i]);
+            //consider MultiUpdateExecutor regenerates updateExecutor object every time when doing afterImage
+            TableRecords tableBeforeImage = beforeImagesMap.get(tableItems[i]) == null ? beforeImage : beforeImagesMap.get(tableItems[i]);
             String selectSQL = buildAfterImageSQL(unionTable, tableItems[i], tableBeforeImage);
             ResultSet rs = null;
             try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
