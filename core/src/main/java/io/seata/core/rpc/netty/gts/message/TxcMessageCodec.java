@@ -276,8 +276,8 @@ public class TxcMessageCodec {
                 // message type
                 out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
                 // Serializer (default: seata)
-                out.writeByte(2);
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(2));
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchCommitRequest);
                 // Compress
                 out.writeByte(0);
