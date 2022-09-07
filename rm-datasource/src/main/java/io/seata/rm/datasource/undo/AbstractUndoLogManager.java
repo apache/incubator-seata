@@ -48,7 +48,9 @@ import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.ConfigurationKeys.STORE_MQ_ENABLE;
 import static io.seata.common.ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_MQ_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_TYPE;
@@ -246,11 +248,14 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             undoLogContent = CompressorFactory.getCompressor(compressorType.getCode()).compress(undoLogContent);
         }
 
-        String topic = ConfigurationFactory.getInstance().getConfig(TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
-        BranchUndoLogDTO branchUndoLogDTO = new BranchUndoLogDTO(branchUndoLog.getXid(),
-                branchUndoLog.getBranchId(), branchUndoLog.getSqlUndoLogs().toString());
-        MqProducerFactory.getInstance().publish(topic, xid.getBytes(StandardCharsets.UTF_8),
-                JSON.toJSONString(branchUndoLogDTO).getBytes(StandardCharsets.UTF_8));
+        if (ConfigurationFactory.getInstance().getBoolean(STORE_MQ_ENABLE, DEFAULT_STORE_MQ_ENABLE)) {
+            String topic = ConfigurationFactory.getInstance().getConfig(TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+            BranchUndoLogDTO branchUndoLogDTO = new BranchUndoLogDTO(branchUndoLog.getXid(),
+                    branchUndoLog.getBranchId(), branchUndoLog.getSqlUndoLogs().toString());
+            MqProducerFactory.getInstance().publish(topic, xid.getBytes(StandardCharsets.UTF_8),
+                    JSON.toJSONString(branchUndoLogDTO).getBytes(StandardCharsets.UTF_8));
+        }
+
         insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
     }
 

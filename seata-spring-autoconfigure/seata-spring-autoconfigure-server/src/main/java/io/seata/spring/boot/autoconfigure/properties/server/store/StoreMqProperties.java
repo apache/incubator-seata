@@ -23,7 +23,16 @@ import static io.seata.common.ConfigurationKeys.STORE_MQ_PREFIX;
 @Component
 @ConfigurationProperties(prefix = STORE_MQ_PREFIX)
 public class StoreMqProperties {
+    private boolean enable = false;
     private String mode = "kafka";
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 
     public String getMode() {
         return mode;

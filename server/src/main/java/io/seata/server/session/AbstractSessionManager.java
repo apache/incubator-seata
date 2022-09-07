@@ -35,7 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.STORE_DB_BRANCH_TABLE;
+import static io.seata.common.ConfigurationKeys.STORE_MQ_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_MQ_ENABLE;
 
 /**
  * The type Abstract session manager.
@@ -106,13 +108,15 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         }
         writeSession(LogOperation.BRANCH_ADD, branchSession);
 
-        String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
-        BranchSessionDTO branchSessionDTO = new BranchSessionDTO(branchSession.getXid(), branchSession.getTransactionId(),
-                branchSession.getBranchId(), branchSession.getResourceGroupId(), branchSession.getResourceId(),
-                branchSession.getBranchType().name(), branchSession.getStatus().getCode(), branchSession.getClientId(),
-                branchSession.getApplicationData());
-        MqProducerFactory.getInstance().publish(topic, branchSession.getXid().getBytes(StandardCharsets.UTF_8),
-                JSON.toJSONString(branchSessionDTO).getBytes(StandardCharsets.UTF_8));
+        if (ConfigurationFactory.getInstance().getBoolean(STORE_MQ_ENABLE, DEFAULT_STORE_MQ_ENABLE)) {
+            String topic = ConfigurationFactory.getInstance().getConfig(STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
+            BranchSessionDTO branchSessionDTO = new BranchSessionDTO(branchSession.getXid(), branchSession.getTransactionId(),
+                    branchSession.getBranchId(), branchSession.getResourceGroupId(), branchSession.getResourceId(),
+                    branchSession.getBranchType().name(), branchSession.getStatus().getCode(), branchSession.getClientId(),
+                    branchSession.getApplicationData());
+            MqProducerFactory.getInstance().publish(topic, branchSession.getXid().getBytes(StandardCharsets.UTF_8),
+                    JSON.toJSONString(branchSessionDTO).getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     @Override

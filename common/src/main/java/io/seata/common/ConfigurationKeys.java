@@ -283,6 +283,11 @@ public interface ConfigurationKeys {
     String STORE_MQ_PREFIX = STORE_PREFIX + "mq";
 
     /**
+     * The constant STORE_MQ_ENABLE
+     */
+    String STORE_MQ_ENABLE = STORE_MQ_PREFIX + ".enable";
+
+    /**
      * The constant STORE_MQ_MODE
      */
     String STORE_MQ_MODE = STORE_MQ_PREFIX + ".mode";

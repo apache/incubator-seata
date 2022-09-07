@@ -77,6 +77,11 @@ public interface DefaultValues {
     String DEFAULT_STORE_DB_BRANCH_TABLE = "branch_table";
 
     /**
+     * The constant DEFAULT_STORE_MQ_ENABLE
+     */
+    boolean DEFAULT_STORE_MQ_ENABLE = false;
+
+    /**
      * The constant DEFAULT_STORE_MQ_MODE
      */
     String DEFAULT_STORE_MQ_MODE = "kafka";
@@ -146,7 +151,7 @@ public interface DefaultValues {
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
-  
+
     /**
      * the constant TCC_ACTION_INTERCEPTOR_ORDER
      */
