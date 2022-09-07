@@ -18,12 +18,10 @@ package io.seata.consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MqConsumer implements Runnable {
+public abstract class MqConsumer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MqConsumer.class);
 
-    public void consume() {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract void consume();
 
     protected String name() {
         return "MqConsumer";

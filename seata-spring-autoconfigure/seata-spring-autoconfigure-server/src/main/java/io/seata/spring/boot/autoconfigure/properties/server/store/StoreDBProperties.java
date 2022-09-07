@@ -138,7 +138,7 @@ public class StoreDBProperties {
     }
 
     public StoreDBProperties setUndo(String undo) {
-        this.undo= undo;
+        this.undo = undo;
         return this;
     }
 
