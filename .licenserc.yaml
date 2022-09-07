@@ -62,7 +62,7 @@ header:
     - 'distribution/LICENSE-BIN'
     - 'distribution/NOTICE-BIN'
     - 'test/src/test/resources/**'
-    - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/io/seata/protocol/transcation/*.proto'
+    - 'protobuf-lib/src/main/proto/**'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
