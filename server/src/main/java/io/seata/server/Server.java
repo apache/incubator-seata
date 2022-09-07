@@ -73,7 +73,6 @@ public class Server {
         SessionHolder.init(parameterParser.getSessionStoreMode());
         LockerManagerFactory.init(parameterParser.getLockStoreMode());
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
-        coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
 
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
@@ -91,5 +90,6 @@ public class Server {
             }
         }
         nettyRemotingServer.init();
+        coordinator.init();
     }
 }
