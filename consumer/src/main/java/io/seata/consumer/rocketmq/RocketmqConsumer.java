@@ -19,9 +19,10 @@ import io.seata.consumer.MqConsumer;
 
 public class RocketmqConsumer extends MqConsumer {
 
-    protected String name(){
+    protected String name() {
         return "RocketmqConsumer";
     }
+
     @Override
     public void consume() {
         throw new UnsupportedOperationException();
