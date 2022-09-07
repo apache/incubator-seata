@@ -22,6 +22,6 @@ jobs:
       - name: Check Dependencies' License
         uses: apache/skywalking-eyes/dependency@v0.4.0
         with:
-          log: debug
+          log: info
           config: .licenserc.yaml
-          mode: resolve
+          mode: check
