@@ -31,6 +31,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4865](https://github.com/seata/seata/pull/4865)] fix some security vulnerabilities in GGEditor
 - [[#4590](https://github.com/seata/seata/pull/4590)] auto degrade enable to dynamic configure
 - [[#4490](https://github.com/seata/seata/pull/4490)] tccfence log table delete by index
+- [[#4911](https://github.com/seata/seata/pull/4911)] add license checker workflow
+- [[#4917](https://github.com/seata/seata/pull/4917)] upgrade package-lock.json fix vulnerabilities
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
