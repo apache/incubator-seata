@@ -15,7 +15,6 @@
  */
 package io.seata.consumer.handler;
 
-
 import com.alibaba.fastjson.JSONObject;
 import io.seata.common.dto.mq.BranchSessionDTO;
 import io.seata.common.dto.mq.BranchUndoLogDTO;

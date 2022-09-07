@@ -21,7 +21,10 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 
 import java.util.ServiceLoader;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class MqConsumerManager {
     private final ExecutorService executorService =

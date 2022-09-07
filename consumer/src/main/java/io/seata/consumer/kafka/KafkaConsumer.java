@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
 public class KafkaConsumer extends MqConsumer {
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 

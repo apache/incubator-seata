@@ -15,7 +15,6 @@
  */
 package io.seata.consumer.utils;
 
-
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -26,7 +25,6 @@ import org.influxdb.dto.Point;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 
 public class InfluxDBUtils {
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
