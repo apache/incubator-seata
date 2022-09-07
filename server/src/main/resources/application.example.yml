@@ -109,7 +109,10 @@ seata:
     retry-dead-threshold: 130000
     xaer-nota-retry-timeout: 60000
     recovery:
-      handle-all-session-period: 1000
+      committing-retry-period: 1000
+      async-committing-retry-period: 1000
+      rollbacking-retry-period: 1000
+      timeout-retry-period: 1000
     undo:
       log-save-days: 7
       log-delete-period: 86400000
