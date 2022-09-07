@@ -370,7 +370,7 @@ public interface ConfigurationKeys {
     /**
      * The constant ASYN_COMMITING_RETRY_PERIOD.
      */
-    String ASYN_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asynCommittingRetryPeriod";
+    String ASYNC_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asyncCommittingRetryPeriod";
 
     /**
      * The constant ROLLBACKING_RETRY_PERIOD.
