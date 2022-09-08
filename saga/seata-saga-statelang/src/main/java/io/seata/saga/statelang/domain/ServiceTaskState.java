@@ -27,49 +27,49 @@ public interface ServiceTaskState extends TaskState {
     /**
      * Service type: such as SpringBean, SOFA RPC, default is StringBean
      *
-     * @return
+     * @return the service type
      */
     String getServiceType();
 
     /**
      * service name
      *
-     * @return
+     * @return the service name
      */
     String getServiceName();
 
     /**
      * service method
      *
-     * @return
+     * @return the service method
      */
     String getServiceMethod();
 
     /**
-     * service method
+     * parameter types
      *
-     * @return
+     * @return the parameter types
      */
     List<String> getParameterTypes();
 
     /**
      * Is it necessary to persist the service execution log? default is true
      *
-     * @return
+     * @return the boolean
      */
     boolean isPersist();
 
     /**
      * Is update last retry execution log, default append new
      *
-     * @return
+     * @return the boolean
      */
     Boolean isRetryPersistModeUpdate();
 
     /**
      * Is update last compensate execution log, default append new
      *
-     * @return
+     * @return the boolean
      */
     Boolean isCompensatePersistModeUpdate();
 }
