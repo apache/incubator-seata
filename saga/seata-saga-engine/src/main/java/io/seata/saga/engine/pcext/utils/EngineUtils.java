@@ -48,8 +48,8 @@ public class EngineUtils {
     /**
      * generate parent id
      *
-     * @param stateInstance
-     * @return
+     * @param stateInstance the state instance
+     * @return the state instance parent id
      */
     public static String generateParentId(StateInstance stateInstance) {
         return stateInstance.getMachineInstanceId() + DomainConstants.SEPERATOR_PARENT_ID + stateInstance.getId();
@@ -58,8 +58,8 @@ public class EngineUtils {
     /**
      * get origin state name without suffix like fork
      *
-     * @param stateInstance
-     * @return
+     * @param stateInstance the state instance
+     * @return the origin state name
      * @see LoopTaskUtils#generateLoopStateName(ProcessContext, String)
      */
     public static String getOriginStateName(StateInstance stateInstance) {
@@ -76,7 +76,7 @@ public class EngineUtils {
     /**
      * end StateMachine
      *
-     * @param context
+     * @param context the process context
      */
     public static void endStateMachine(ProcessContext context) {
 
@@ -132,8 +132,8 @@ public class EngineUtils {
     /**
      * fail StateMachine
      *
-     * @param context
-     * @param exp
+     * @param context the process context
+     * @param exp the exception
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
 
@@ -171,9 +171,9 @@ public class EngineUtils {
 
     /**
      * test if is timeout
-     * @param gmtUpdated
-     * @param timeoutMillis
-     * @return
+     * @param gmtUpdated the engine update gmt
+     * @param timeoutMillis the timeout millis
+     * @return the boolean
      */
     public static boolean isTimeout(Date gmtUpdated, int timeoutMillis) {
         if (gmtUpdated == null || timeoutMillis < 0) {
@@ -185,9 +185,9 @@ public class EngineUtils {
     /**
      * Handle exceptions while ServiceTask or ScriptTask Executing
      *
-     * @param context
-     * @param state
-     * @param e
+     * @param context the process context
+     * @param state the task state
+     * @param e the throwable
      */
     public static void handleException(ProcessContext context, AbstractTaskState state, Throwable e) {
         List<ExceptionMatch> catches = state.getCatches();

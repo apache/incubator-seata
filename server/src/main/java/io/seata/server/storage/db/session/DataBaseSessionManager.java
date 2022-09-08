@@ -108,7 +108,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
      * 1. rootSessionManager remove normal globalSession
      * 2. retryCommitSessionManager and retryRollbackSessionManager remove retry expired globalSession
      * @param session the session
-     * @throws TransactionException
+     * @throws TransactionException the transaction exception
      */
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {

@@ -27,16 +27,16 @@ public interface EventConsumer<E> {
     /**
      * process
      *
-     * @param event
-     * @throws FrameworkException
+     * @param event the event
+     * @throws FrameworkException the framework exception
      */
     void process(E event) throws FrameworkException;
 
     /**
      * if thd handler can handle this class return true otherwise return false
      *
-     * @param clazz
-     * @return
+     * @param clazz the event class
+     * @return the boolean
      */
     boolean accept(Class<E> clazz);
 }

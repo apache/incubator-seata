@@ -208,7 +208,7 @@ public class MetricsSubscriber {
     /**
      * PMD check
      * SuppressWarnings("checkstyle:EqualsHashCode")
-     * @return
+     * @return the hash code
      */
     @Override
     public int hashCode() {

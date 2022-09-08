@@ -18,7 +18,7 @@ package io.seata.rm.datasource.undo;
 /**
  * The Type UndoExecutorHolder
  *
- * @author: Zhibei Hao
+ * @author Zhibei Hao
  */
 public interface UndoExecutorHolder {
 

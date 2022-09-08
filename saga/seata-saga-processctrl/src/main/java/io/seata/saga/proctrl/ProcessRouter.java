@@ -28,9 +28,9 @@ public interface ProcessRouter {
     /**
      * route
      *
-     * @param context
-     * @return
-     * @throws FrameworkException
+     * @param context the process context
+     * @return the instruction
+     * @throws FrameworkException the framework exception
      */
     Instruction route(ProcessContext context) throws FrameworkException;
 }

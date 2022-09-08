@@ -28,7 +28,7 @@ import io.seata.core.lock.RowLock;
 
 /**
  * GlobalLockVO
- * @author: zhongxiang.wang
+ * @author zhongxiang.wang
  * @author miaoxueyu
  */
 public class GlobalLockVO {

@@ -194,10 +194,10 @@ public class TCCBeanParserUtils {
     /**
      * Create a proxy bean for tcc service
      *
-     * @param interfaceClass
-     * @param fieldValue
-     * @param actionInterceptor
-     * @return
+     * @param interfaceClass the interface class
+     * @param fieldValue the field value
+     * @param actionInterceptor the action interceptor
+     * @return the service proxy bean
      */
     public static <T> T createProxy(Class<T> interfaceClass, Object fieldValue, TccActionInterceptor actionInterceptor) {
         ProxyFactory factory = new ProxyFactory();
