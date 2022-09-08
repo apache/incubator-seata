@@ -89,7 +89,9 @@ public class Server {
                 XID.setIpAddress(NetUtil.getLocalIp());
             }
         }
-        nettyRemotingServer.init();
+        XID.setPort(nettyRemotingServer.getListenPort());
         coordinator.init();
+
+        nettyRemotingServer.init();
     }
 }
