@@ -350,7 +350,7 @@ public class GrpcServerChannelManager implements ServerChannelManager {
     }
 
     public void unregister(String connectionId) {
-        SeataChannel seataChannel = channelMap.get(connectionId);
+        SeataChannel seataChannel = channelMap.remove(connectionId);
         if (null != seataChannel) {
             releaseRpcContext(seataChannel);
             if (LOGGER.isInfoEnabled()) {
