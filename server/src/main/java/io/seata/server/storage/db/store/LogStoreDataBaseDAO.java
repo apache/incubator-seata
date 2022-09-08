@@ -90,20 +90,24 @@ public class LogStoreDataBaseDAO implements LogStore {
      * @param logStoreDataSource the log store data source
      */
     public LogStoreDataBaseDAO(DataSource logStoreDataSource) {
+        this();
         this.logStoreDataSource = logStoreDataSource;
-        globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
-            DEFAULT_STORE_DB_GLOBAL_TABLE);
-        branchTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
-            DEFAULT_STORE_DB_BRANCH_TABLE);
-        dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-        if (StringUtils.isBlank(dbType)) {
-            throw new StoreException("there must be db type.");
-        }
         if (logStoreDataSource == null) {
             throw new StoreException("there must be logStoreDataSource.");
         }
         // init transaction_name size
         initTransactionNameSize();
+    }
+
+    public LogStoreDataBaseDAO() {
+        globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
+                DEFAULT_STORE_DB_GLOBAL_TABLE);
+        branchTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
+                DEFAULT_STORE_DB_BRANCH_TABLE);
+        dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        if (StringUtils.isBlank(dbType)) {
+            throw new StoreException("there must be db type.");
+        }
     }
 
     @Override

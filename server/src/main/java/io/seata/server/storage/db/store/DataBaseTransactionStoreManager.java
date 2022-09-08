@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import io.seata.common.exception.StoreException;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -37,11 +38,15 @@ import io.seata.core.store.LogStore;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
+import io.seata.server.storage.r2dbc.store.R2dbcLogStoreDataBaseDAO;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.storage.SessionConverter;
+import org.springframework.context.ApplicationContext;
 
+
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.core.constants.RedisKeyConstants.DEFAULT_LOG_QUERY_LIMIT;
 
 /**
@@ -91,7 +96,9 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        logStore = new LogStoreDataBaseDAO(logStoreDataSource);
+        ApplicationContext applicationContext =     (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
+        R2dbcLogStoreDataBaseDAO r2dbcLogStoreDataBaseDAO = applicationContext.getBean(R2dbcLogStoreDataBaseDAO.class);
+        logStore = r2dbcLogStoreDataBaseDAO!=null?r2dbcLogStoreDataBaseDAO:new LogStoreDataBaseDAO(logStoreDataSource);
     }
 
     @Override

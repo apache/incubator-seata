@@ -111,6 +111,7 @@
         <junit-platform.version>1.8.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
+        <r2dbc-mysql.version>0.8.2.RELEASE</r2dbc-mysql.version>
     </properties>
 
     <dependencyManagement>
@@ -137,6 +138,11 @@
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>dev.miku</groupId>
+                <artifactId>r2dbc-mysql</artifactId>
+                <version>${r2dbc-mysql.version}</version>
             </dependency>
 
             <!-- the 3rd part -->
