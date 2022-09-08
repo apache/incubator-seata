@@ -81,5 +81,6 @@ dependency:
   files:
     - pom.xml
     - saga/seata-saga-statemachine-designer/package.json
+    - console/src/main/resources/static/console-fe/package.json
   excludes:
     - name: io.seata:*
