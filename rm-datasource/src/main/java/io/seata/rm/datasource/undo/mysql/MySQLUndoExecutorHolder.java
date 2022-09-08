@@ -24,7 +24,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type MySQLUndoExecutorHolder
  *
- * @author: Zhibei Hao
+ * @author Zhibei Hao
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoExecutorHolder implements UndoExecutorHolder {

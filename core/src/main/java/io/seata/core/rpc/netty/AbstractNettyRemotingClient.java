@@ -95,8 +95,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
-     * Send via asynchronous thread {@link MergedSendRunnable}
-     * {@link this#isEnableClientBatchSendRequest()}
+     * Send via asynchronous thread {@link io.seata.core.rpc.netty.AbstractNettyRemotingClient.MergedSendRunnable}
+     * {@link AbstractNettyRemotingClient#isEnableClientBatchSendRequest()}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
 

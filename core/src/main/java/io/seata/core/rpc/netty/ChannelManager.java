@@ -441,7 +441,7 @@ public class ChannelManager {
     /**
      * get rm channels
      *
-     * @return
+     * @return the rm channels,key:resourceId,value:channel
      */
     public static Map<String,Channel> getRmChannels() {
         if (RM_CHANNELS.isEmpty()) {

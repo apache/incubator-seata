@@ -32,7 +32,7 @@ public interface GlobalLockExecutor {
 
     /**
      * global lock config info
-     * @return
+     * @return the global lock config
      */
     GlobalLockConfig getGlobalLockConfig();
 }

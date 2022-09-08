@@ -20,7 +20,7 @@ import com.netflix.appinfo.EurekaInstanceConfig;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
 
 /**
- * @author: rui_849217@163.com
+ * @author rui_849217@163.com
  * override MyDataCenterInstanceConfig for set value,
  * eg: instanceId \ipAddress \ applicationName...
  */

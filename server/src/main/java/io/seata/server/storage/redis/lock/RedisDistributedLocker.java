@@ -27,7 +27,7 @@ import redis.clients.jedis.Transaction;
 import redis.clients.jedis.params.SetParams;
 
 /**
- * @description Redis distributed lock
+ * Redis distributed lock
  * @author  zhongxiang.wang
  */
 @LoadLevel(name = "redis", scope = Scope.SINGLETON)
@@ -39,8 +39,8 @@ public class RedisDistributedLocker implements DistributedLocker {
     /**
      * Acquire the distributed lock
      *
-     * @param distributedLockDO
-     * @return
+     * @param distributedLockDO the distributed lock info
+     * @return the distributed lock info
      */
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
@@ -61,8 +61,8 @@ public class RedisDistributedLocker implements DistributedLocker {
     /**
      * Release the distributed lock
      *
-     * @param distributedLockDO
-     * @return
+     * @param distributedLockDO the distributed lock info
+     * @return the boolean
      */
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {

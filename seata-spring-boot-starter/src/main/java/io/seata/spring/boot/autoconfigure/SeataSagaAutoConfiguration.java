@@ -81,6 +81,7 @@ public class SeataSagaAutoConfiguration {
     }
 
     /**
+     * @param config state machine config
      * Create state machine engine bean.
      */
     @Bean

@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  * the api of sharing business action context to tcc phase 2
  *
  * @author tanzj
- * @date 2021/4/16
  */
 public final class BusinessActionContextUtil {
 

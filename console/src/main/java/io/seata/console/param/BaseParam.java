@@ -18,8 +18,8 @@ package io.seata.console.param;
 import java.io.Serializable;
 
 /**
- * @description: The base param
- * @author: zhongxiang.wang
+ * The base param
+ * @author zhongxiang.wang
  */
 public class BaseParam implements Serializable {
 

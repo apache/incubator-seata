@@ -145,7 +145,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init globalMap
      *
-     * @return void
      */
     public void initGlobalMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
@@ -160,7 +159,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init branchMap
      *
-     * @return void
      */
     public void initBranchMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
