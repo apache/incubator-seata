@@ -20,10 +20,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.transaction.BranchCommitRequest;
-import io.seata.core.protocol.transaction.BranchCommitResponse;
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
-import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.protocol.transaction.*;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
@@ -302,6 +299,31 @@ public class TxcMessageCodec {
                 out.writeByte(1);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchCommitResponse);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 5: {
+                BranchRollbackRequest branchRollbackRequest = new BranchRollbackRequest();
+                BranchRollbackMessage branchRollbackMessage = (BranchRollbackMessage) gtsCodec;
+                String serverAddr = branchRollbackMessage.getServerAddr();
+                String xid = serverAddr + ":" + String.valueOf(branchRollbackMessage.getTranId());
+                long branchId = branchRollbackMessage.getBranchId();
+                String resourceId = branchRollbackMessage.getDbName();
+                String applicationData = branchRollbackMessage.getUdata();
+
+                branchRollbackRequest.setXid(xid);
+                branchRollbackRequest.setBranchId(branchId);
+                branchRollbackRequest.setResourceId(resourceId);
+                branchRollbackRequest.setApplicationData(applicationData);
+                branchRollbackRequest.setBranchType(BranchType.GTS);
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(branchRollbackRequest);
                 // Compress
                 out.writeByte(0);
                 return msgOut;
