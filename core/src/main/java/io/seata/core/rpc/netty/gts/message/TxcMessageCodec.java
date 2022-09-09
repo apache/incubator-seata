@@ -20,7 +20,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
-import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
@@ -281,26 +280,6 @@ public class TxcMessageCodec {
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchCommitRequest);
                 // Compress
-                out.writeByte(0);
-                return msgOut;
-            }
-            case 4: {
-                BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
-                BranchCommitResultMessage branchCommitResultMessage = (BranchCommitResultMessage) gtsCodec;
-
-                // TODO xid is not equal to tranId
-                String xid = String.valueOf(branchCommitResultMessage.getTranIds().get(0));
-                // TODO result is not equal to ResultCode.get()
-                int result = branchCommitResultMessage.getResult();
-
-                branchCommitResponse.setXid(xid);
-                branchCommitResponse.setBranchId(branchCommitResultMessage.getBranchIds().get(0));
-                branchCommitResponse.setResultCode(ResultCode.get(result));
-
-                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-                out.writeByte(1);
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
-                msgOut = serializer.serialize(branchCommitResponse);
                 out.writeByte(0);
                 return msgOut;
             }

@@ -50,6 +50,7 @@ public class BranchCommitResultMessageTest {
         msg.setResult(1);
 
         System.out.println(msg.toString());
+
         GtsRpcMessage rpcMessage = new GtsRpcMessage();
         rpcMessage.setId(1L);
         rpcMessage.setBody(msg);

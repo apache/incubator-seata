@@ -21,10 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.seata.core.exception.DecodeException;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
-import io.seata.core.rpc.netty.gts.message.GtsRpcMessage;
-import io.seata.core.rpc.netty.gts.message.MergedMessage;
-import io.seata.core.rpc.netty.gts.message.TxcCodec;
-import io.seata.core.rpc.netty.gts.message.TxcMessageCodec;
+import io.seata.core.rpc.netty.gts.message.*;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
@@ -249,7 +246,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                     try {
                         if (isTxcCodec) {
                             TxcCodec codec = TxcMessageCodec.getTxcCodecInstance(typeCode);
-                            if (!MergedMessage.class.isAssignableFrom(codec.getClass())) {
+                            if (!MergedMessage.class.isAssignableFrom(codec.getClass()) || AbstractResultMessage.class.isAssignableFrom(codec.getClass())) {
                                 if (!codec.decode(in)) {
                                     in.readerIndex(begin);
                                     throw new Exception("gts message format exception");
