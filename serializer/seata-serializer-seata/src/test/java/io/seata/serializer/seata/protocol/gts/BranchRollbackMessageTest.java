@@ -28,13 +28,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author liusicheng
- * @website seata
- * @description /
- * @date 2022/9/8
- **/
-
 public class BranchRollbackMessageTest {
 
     private static short MAGIC = -9510;
