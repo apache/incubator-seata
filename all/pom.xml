@@ -725,6 +725,7 @@
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>io.seata:seata-*</dependencySourceInclude>
                             </dependencySourceIncludes>
+                            <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                         <executions>
                             <execution>

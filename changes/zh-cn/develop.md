@@ -33,6 +33,7 @@
 - [[#4490](https://github.com/seata/seata/pull/4490)] tccfence 记录表优化成按索引删除
 - [[#4911](https://github.com/seata/seata/pull/4911)] 添加 header 和license 检测
 - [[#4917](https://github.com/seata/seata/pull/4917)] 升级 package-lock.json 修复漏洞
+- [[#4924](https://github.com/seata/seata/pull/4924)] 优化 pom 依赖
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -54,5 +55,6 @@
 - [AlbumenJ](https://github.com/AlbumenJ)
 - [misselvexu](https://github.com/misselvexu)
 - [doubleDimple](https://github.com/doubleDimple)
+- [jsbxyyx](https://github.com/jsbxyyx)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
