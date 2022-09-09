@@ -295,7 +295,7 @@ public class TxcMessageCodec {
                 branchCommitResponse.setXid(xid);
                 branchCommitResponse.setBranchId(branchId);
                 branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
-                branchCommitResponse.setResultCode(ResultCode.Success);
+                branchCommitResponse.setResultCode(ResultCode.get((byte) branchCommitResultMessage.getResult()));
                 // message type
                 out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
                 // Serializer (default: seata)
