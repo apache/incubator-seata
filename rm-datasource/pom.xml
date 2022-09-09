@@ -52,7 +52,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-producer</artifactId>
+            <artifactId>seata-storage-producer</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
