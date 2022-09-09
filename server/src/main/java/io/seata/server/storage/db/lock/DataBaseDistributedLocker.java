@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 import javax.sql.DataSource;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -39,9 +40,12 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.distributed.lock.DistributedLockSqlFactory;
+import io.seata.server.storage.r2dbc.lock.R2dbcDistributedLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABLE;
 
 /**
@@ -66,12 +70,19 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     @Deprecated
     private volatile boolean demotion;
 
+    R2dbcDistributedLocker r2dbcDistributedLocker;
+
     /**
      * Instantiates a new Log store data base dao.
      */
     public DataBaseDistributedLocker() {
         Configuration configuration = ConfigurationFactory.getInstance();
-
+        ApplicationContext applicationContext =
+            (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
+        try {
+            r2dbcDistributedLocker = applicationContext.getBean(R2dbcDistributedLocker.class);
+        } catch (Exception ignored) {
+        }
         distributedLockTable = configuration.getConfig(DISTRIBUTED_LOCK_DB_TABLE);
         dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         datasourceType = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
@@ -104,7 +115,9 @@ public class DataBaseDistributedLocker implements DistributedLocker {
         if (demotion) {
             return true;
         }
-
+        if (r2dbcDistributedLocker != null) {
+            return r2dbcDistributedLocker.acquireLock(distributedLockDO);
+        }
         Connection connection = null;
         boolean originalAutoCommit = false;
         try {
@@ -112,7 +125,8 @@ public class DataBaseDistributedLocker implements DistributedLocker {
             originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
 
-            DistributedLockDO distributedLockDOFromDB = getDistributedLockDO(connection, distributedLockDO.getLockKey());
+            DistributedLockDO distributedLockDOFromDB =
+                getDistributedLockDO(connection, distributedLockDO.getLockKey());
             if (null == distributedLockDOFromDB) {
                 boolean ret = insertDistribute(connection, distributedLockDO);
                 connection.commit();
@@ -121,7 +135,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
             if (distributedLockDOFromDB.getExpireTime() >= System.currentTimeMillis()) {
                 LOGGER.debug("the distribute lock for key :{} is holding by :{}, acquire lock failure.",
-                        distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
+                    distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
                 connection.commit();
                 return false;
             }
@@ -146,7 +160,8 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                     connection.setAutoCommit(true);
                 }
                 IOUtil.close(connection);
-            } catch (SQLException ignore) { }
+            } catch (SQLException ignore) {
+            }
         }
     }
 
@@ -155,7 +170,9 @@ public class DataBaseDistributedLocker implements DistributedLocker {
         if (demotion) {
             return true;
         }
-
+        if (r2dbcDistributedLocker != null) {
+            return r2dbcDistributedLocker.releaseLock(distributedLockDO);
+        }
         Connection connection = null;
         boolean originalAutoCommit = false;
         try {
@@ -163,15 +180,17 @@ public class DataBaseDistributedLocker implements DistributedLocker {
             originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
 
-            DistributedLockDO distributedLockDOFromDB = getDistributedLockDO(connection, distributedLockDO.getLockKey());
+            DistributedLockDO distributedLockDOFromDB =
+                getDistributedLockDO(connection, distributedLockDO.getLockKey());
             if (null == distributedLockDOFromDB) {
-                throw new ShouldNeverHappenException("distributedLockDO would not be null when release distribute lock");
+                throw new ShouldNeverHappenException(
+                    "distributedLockDO would not be null when release distribute lock");
             }
 
             if (distributedLockDOFromDB.getExpireTime() >= System.currentTimeMillis()
-                    && !Objects.equals(distributedLockDOFromDB.getLockValue(), distributedLockDO.getLockValue())) {
+                && !Objects.equals(distributedLockDOFromDB.getLockValue(), distributedLockDO.getLockValue())) {
                 LOGGER.debug("the distribute lock for key :{} is holding by :{}, skip the release lock.",
-                        distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
+                    distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
                 connection.commit();
                 return true;
             }
@@ -199,7 +218,8 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                     connection.setAutoCommit(true);
                 }
                 IOUtil.close(connection);
-            } catch (SQLException ignore) { }
+            } catch (SQLException ignore) {
+            }
         }
     }
 
@@ -248,7 +268,10 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     }
 
     private void init() {
-        this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        if (r2dbcDistributedLocker == null) {
+            this.distributedLockDataSource =
+                EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        }
     }
 
 }

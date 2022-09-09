@@ -16,26 +16,35 @@
 package io.seata.server.storage.r2dbc.entity;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * @author funkye
  */
 @Table("distributed_lock")
-public class DistributedLock {
+public class DistributedLock implements Persistable {
     /**
      * the key of distributed lock
      */
     @Id
+    @Column("lock_key")
     private String lockKey;
     /**
      * the value of distributed lock
      */
+    @Column("lock_value")
     private String lockValue;
     /**
      * the expire time of distributed lock,time unit is milliseconds
      */
-    private Long expireTime;
+    @Column("expire")
+    private Long expireTime = 0L;
+
+    @Transient
+    private boolean newLock = true;
 
     public DistributedLock() {}
 
@@ -68,4 +77,24 @@ public class DistributedLock {
     public void setExpireTime(Long expireTime) {
         this.expireTime = expireTime;
     }
+
+    public boolean isNewLock() {
+        return newLock;
+    }
+
+    public void setNewLock(boolean newLock) {
+        this.newLock = newLock;
+    }
+
+    @Override
+    public Object getId() {
+        return this.getLockKey();
+    }
+
+    @Override
+    @Transient
+    public boolean isNew() {
+        return this.newLock;
+    }
+
 }

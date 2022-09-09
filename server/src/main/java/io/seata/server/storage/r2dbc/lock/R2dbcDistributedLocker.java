@@ -61,17 +61,18 @@ public class R2dbcDistributedLocker implements DistributedLocker {
         try {
             return Boolean.TRUE.equals(distributedLockRepository.findById(distributedLockDO.getLockKey())
                 .publishOn(Schedulers.boundedElastic()).map(distributedLock -> {
-                    if (distributedLock != null
+                    if (distributedLock != null && StringUtils.isNotBlank(distributedLock.getLockValue())
                         && !StringUtils.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())
-                        && distributedLock.getExpireTime() < System.currentTimeMillis()) {
+                        && System.currentTimeMillis() < distributedLock.getExpireTime()) {
                         return false;
                     }
 
                     if (distributedLock != null) {
-                        distributedLock.setExpireTime(System.currentTimeMillis());
+                        distributedLock.setExpireTime(distributedLockDO.getExpireTime());
                         if (!StringUtils.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())) {
                             distributedLock.setLockValue(distributedLockDO.getLockValue());
                         }
+                        distributedLock.setNewLock(false);
                         return distributedLockRepository.save(distributedLock).block() != null;
                     }
                     distributedLock = new DistributedLock();
@@ -100,6 +101,7 @@ public class R2dbcDistributedLocker implements DistributedLocker {
                             distributedLockDO.getLockKey(), distributedLock.getLockValue());
                         return true;
                     }
+                    distributedLock.setNewLock(false);
                     distributedLock.setLockValue(StringUtils.SPACE);
                     distributedLock.setExpireTime(0L);
                     return distributedLockRepository.save(distributedLock).block() != null;
