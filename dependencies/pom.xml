@@ -112,6 +112,7 @@
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <r2dbc-mysql.version>0.8.2.RELEASE</r2dbc-mysql.version>
+        <opentracing-jdbc.version>0.1.2</opentracing-jdbc.version>
     </properties>
 
     <dependencyManagement>
@@ -138,6 +139,11 @@
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentracing.contrib</groupId>
+                <artifactId>opentracing-jdbc</artifactId>
+                <version>${opentracing-jdbc.version}</version>
             </dependency>
             <dependency>
                 <groupId>dev.miku</groupId>

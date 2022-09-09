@@ -130,11 +130,11 @@
         </dependency>
 
        <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
-        <dependency>
+<!--        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.29</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -192,6 +192,10 @@
         <dependency>
             <groupId>com.github.danielwegener</groupId>
             <artifactId>logback-kafka-appender</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-jdbc</artifactId>
         </dependency>
     </dependencies>
 

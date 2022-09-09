@@ -17,9 +17,10 @@ package io.seata.server.storage.r2dbc.entity;
 
 import static io.seata.core.model.LockStatus.Locked;
 
-
 import io.seata.common.util.StringUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
@@ -28,7 +29,7 @@ import org.springframework.data.relational.core.mapping.Table;
  * @author jianbin.chen
  */
 @Table("lock_table")
-public class Lock {
+public class Lock implements Persistable {
 
     private String xid;
 
@@ -46,6 +47,11 @@ public class Lock {
 
     @Id
     private String rowKey;
+
+    // true=save false=update
+    @Transient
+    private boolean newLock = true;
+
 
     /**
      * Instantiates a new Lock do.
@@ -199,5 +205,23 @@ public class Lock {
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+
+    @Override public Object getId() {
+        return this.rowKey;
+    }
+
+    @Override
+    @Transient
+    public boolean isNew() {
+        return this.newLock;
+    }
+
+    public boolean isNewLock() {
+        return newLock;
+    }
+
+    public void setNewLock(boolean newLock) {
+        this.newLock = newLock;
     }
 }

@@ -97,7 +97,11 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         //init dataSource
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         ApplicationContext applicationContext =     (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-        R2dbcLogStoreDataBaseDAO r2dbcLogStoreDataBaseDAO = applicationContext.getBean(R2dbcLogStoreDataBaseDAO.class);
+        R2dbcLogStoreDataBaseDAO r2dbcLogStoreDataBaseDAO = null;
+        try {
+            r2dbcLogStoreDataBaseDAO = applicationContext.getBean(R2dbcLogStoreDataBaseDAO.class);
+        } catch (Exception ignored) {
+        }
         logStore = r2dbcLogStoreDataBaseDAO!=null?r2dbcLogStoreDataBaseDAO:new LogStoreDataBaseDAO(logStoreDataSource);
     }
 

@@ -18,6 +18,7 @@ package io.seata.server.storage.r2dbc.lock;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,6 +38,7 @@ import io.seata.server.storage.r2dbc.entity.Lock;
 import io.seata.server.storage.r2dbc.repository.LockRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -44,6 +46,7 @@ import org.springframework.data.relational.core.query.Update;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Mono;
 
 /**
  * The type Data base lock store.
@@ -56,12 +59,14 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
 
     @Resource
     LockRepository lockRepository;
-    BeanCopier lockDOToEntity = BeanCopier.create(LockDO.class, Lock.class, false);
+
     @Resource
     private R2dbcEntityTemplate r2dbcEntityTemplate;
+
     @Resource
     private TransactionalOperator operator;
 
+    BeanCopier lockDOToEntity = BeanCopier.create(LockDO.class, Lock.class, false);
 
     /**
      * Instantiates a new Data base lock store dao.
@@ -82,18 +87,17 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
     }
 
     @Override
-    @Transactional
     public boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit, boolean skipCheckLock) {
         try {
             lockRepository.saveAll(lockDOs.parallelStream().map(lockDO -> {
                 Lock lock = new Lock();
-                lockDOToEntity.copy(lockDO, lockDO, null);
+                lockDOToEntity.copy(lockDO, lock, null);
                 return lock;
-            }).collect(Collectors.toList())).as(operator::transactional).collectList().block();
+            }).collect(Collectors.toList())).collectList().as(operator::transactional).block();
             return true;
-        } catch (R2dbcDataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             // lock fail
-            if (skipCheckLock) {
+            if (!skipCheckLock) {
                 List<Lock> list = r2dbcEntityTemplate.select(
                     Query.query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
                         .in(lockDOs.parallelStream().map(LockDO::getRowKey).collect(Collectors.toList()))
@@ -137,9 +141,9 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
 
     @Override
     public boolean unLock(String xid) {
-        Integer count = r2dbcEntityTemplate.delete(Lock.class).from(lockTable)
+        r2dbcEntityTemplate.delete(Lock.class).from(lockTable)
             .matching(Query.query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_XID).is(xid))).all().block();
-        return count != null && count > 0;
+        return true;
     }
 
     @Override

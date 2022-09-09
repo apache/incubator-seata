@@ -20,11 +20,15 @@ import javax.sql.DataSource;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.holder.ObjectHolder;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockStore;
+import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import io.seata.server.storage.r2dbc.lock.R2dbcLockStoreDataBaseDAO;
 import io.seata.server.storage.r2dbc.store.R2dbcLogStoreDataBaseDAO;
@@ -42,24 +46,23 @@ public class DataBaseLocker extends AbstractLocker {
 
     private LockStore lockStore;
 
-    /**
-     * Instantiates a new Data base locker.
-     */
-    public DataBaseLocker() {
-    }
 
     /**
      * Instantiates a new Data base locker.
      *
-     * @param logStoreDataSource the log store data source
      */
-    public DataBaseLocker(DataSource logStoreDataSource) {
+    public DataBaseLocker() {
         ApplicationContext applicationContext =
             (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-        R2dbcLockStoreDataBaseDAO r2dbcLockStoreDataBaseDAO =
-            applicationContext.getBean(R2dbcLockStoreDataBaseDAO.class);
+        R2dbcLockStoreDataBaseDAO r2dbcLockStoreDataBaseDAO = null;
+        try {
+            r2dbcLockStoreDataBaseDAO = applicationContext.getBean(R2dbcLockStoreDataBaseDAO.class);
+        } catch (Exception ignored) {
+        }
+        String datasourceType =
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         lockStore = r2dbcLockStoreDataBaseDAO != null ? r2dbcLockStoreDataBaseDAO
-            : new LockStoreDataBaseDAO(logStoreDataSource);
+            : new LockStoreDataBaseDAO(EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide());
     }
 
     @Override
