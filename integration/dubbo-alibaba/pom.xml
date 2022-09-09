@@ -39,6 +39,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

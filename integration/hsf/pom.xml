@@ -38,6 +38,7 @@
         <dependency>
             <groupId>com.alibaba.edas</groupId>
             <artifactId>edas-sdk</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
