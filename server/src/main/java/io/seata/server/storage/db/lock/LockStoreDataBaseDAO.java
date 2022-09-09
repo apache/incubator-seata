@@ -54,7 +54,7 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFa
  */
 public class LockStoreDataBaseDAO implements LockStore {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);
 
     /**
      * The constant CONFIG.
@@ -82,14 +82,18 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @param lockStoreDataSource the log store data source
      */
     public LockStoreDataBaseDAO(DataSource lockStoreDataSource) {
+        this();
         this.lockStoreDataSource = lockStoreDataSource;
+        if (lockStoreDataSource == null) {
+            throw new StoreException("there must be lockStoreDataSource.");
+        }
+    }
+
+    public LockStoreDataBaseDAO() {
         lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
-        }
-        if (lockStoreDataSource == null) {
-            throw new StoreException("there must be lockStoreDataSource.");
         }
     }
 

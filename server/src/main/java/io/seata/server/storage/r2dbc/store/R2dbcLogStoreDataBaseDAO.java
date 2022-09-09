@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.r2dbc.store;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +43,7 @@ import org.springframework.stereotype.Component;
 /**
  * The type Log store data base dao.
  *
- * @author zhangsen
+ * @author jianbin.chen
  */
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 @Component
@@ -88,10 +87,11 @@ public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
 
     @Override
     public GlobalTransactionDO queryGlobalTransactionDO(long transactionId) {
-        GlobalTransaction globalTransaction = r2dbcEntityTemplate
-                .selectOne(Query.query(Criteria.where(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID).is(transactionId)), GlobalTransaction.class).block();
+        GlobalTransaction globalTransaction = r2dbcEntityTemplate.selectOne(
+            Query.query(Criteria.where(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID).is(transactionId)),
+            GlobalTransaction.class).block();
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-        globalEntityToDO.copy(globalTransaction,globalTransactionDO,null);
+        globalEntityToDO.copy(globalTransaction, globalTransactionDO, null);
         return globalTransactionDO;
     }
 

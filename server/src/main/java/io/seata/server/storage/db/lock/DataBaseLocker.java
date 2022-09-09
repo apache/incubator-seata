@@ -19,11 +19,19 @@ import java.util.List;
 import javax.sql.DataSource;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockStore;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
+import io.seata.server.storage.r2dbc.lock.R2dbcLockStoreDataBaseDAO;
+import io.seata.server.storage.r2dbc.store.R2dbcLogStoreDataBaseDAO;
+import org.springframework.context.ApplicationContext;
+
+
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 /**
  * The type Data base locker.
@@ -46,7 +54,12 @@ public class DataBaseLocker extends AbstractLocker {
      * @param logStoreDataSource the log store data source
      */
     public DataBaseLocker(DataSource logStoreDataSource) {
-        lockStore = new LockStoreDataBaseDAO(logStoreDataSource);
+        ApplicationContext applicationContext =
+            (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
+        R2dbcLockStoreDataBaseDAO r2dbcLockStoreDataBaseDAO =
+            applicationContext.getBean(R2dbcLockStoreDataBaseDAO.class);
+        lockStore = r2dbcLockStoreDataBaseDAO != null ? r2dbcLockStoreDataBaseDAO
+            : new LockStoreDataBaseDAO(logStoreDataSource);
     }
 
     @Override
