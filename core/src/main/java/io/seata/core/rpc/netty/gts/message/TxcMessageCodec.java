@@ -16,10 +16,12 @@
 package io.seata.core.rpc.netty.gts.message;
 
 import io.netty.buffer.ByteBuf;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
+import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
@@ -279,6 +281,27 @@ public class TxcMessageCodec {
                 out.writeByte(1);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchCommitRequest);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 4: {
+                BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
+                BranchCommitResultMessage branchCommitResultMessage = (BranchCommitResultMessage) gtsCodec;
+                // still need to solve serverAddr
+                String serverAddr = "127.0.0.1";
+                String xid = serverAddr + ":" + String.valueOf(branchCommitResultMessage.getTranIds().get(0));
+                Long branchId = branchCommitResultMessage.getBranchIds().get(0);
+                branchCommitResponse.setXid(xid);
+                branchCommitResponse.setBranchId(branchId);
+                branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
+                branchCommitResponse.setResultCode(ResultCode.Success);
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(branchCommitResponse);
                 // Compress
                 out.writeByte(0);
                 return msgOut;
