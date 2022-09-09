@@ -95,7 +95,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * The constant ASYNC_COMMITTING_RETRY_PERIOD.
      */
     protected static final long ASYNC_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
-        ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD, 1000L);
+        ConfigurationKeys.ASYNC_COMMITING_RETRY_PERIOD, 1000L);
 
     /**
      * The constant ROLLBACKING_RETRY_PERIOD.
