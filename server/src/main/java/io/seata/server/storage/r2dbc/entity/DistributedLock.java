@@ -19,7 +19,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
- * @author jianbin.chen
+ * @author funkye
  */
 @Table("distributed_lock")
 public class DistributedLock {

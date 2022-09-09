@@ -21,6 +21,9 @@ import io.seata.core.model.BranchStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+/**
+ * @author funkye
+ */
 @Table("branch_table")
 public class BranchTransaction {
 

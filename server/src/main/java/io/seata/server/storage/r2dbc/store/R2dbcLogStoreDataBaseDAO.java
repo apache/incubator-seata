@@ -15,9 +15,7 @@
  */
 package io.seata.server.storage.r2dbc.store;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +31,6 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import io.seata.server.storage.r2dbc.entity.BranchTransaction;
 import io.seata.server.storage.r2dbc.entity.GlobalTransaction;
-import io.seata.server.storage.r2dbc.repository.GlobalTransactionRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -46,7 +43,7 @@ import org.springframework.stereotype.Component;
 /**
  * The type Log store data base dao.
  *
- * @author jianbin.chen
+ * @author funkye
  */
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 @Component
@@ -54,9 +51,6 @@ public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
 
     @Resource
     private R2dbcEntityTemplate r2dbcEntityTemplate;
-
-    @Resource
-    private GlobalTransactionRepository globalTransactionRepository;
 
     BeanCopier globalEntityToDO = BeanCopier.create(GlobalTransaction.class, GlobalTransactionDO.class, false);
     BeanCopier globalDOToEntity = BeanCopier.create(GlobalTransactionDO.class, GlobalTransaction.class, false);

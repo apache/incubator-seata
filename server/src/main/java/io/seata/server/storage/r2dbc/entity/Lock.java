@@ -26,7 +26,7 @@ import org.springframework.data.relational.core.mapping.Table;
 /**
  * The type Lock do.
  *
- * @author jianbin.chen
+ * @author funkye
  */
 @Table("lock_table")
 public class Lock implements Persistable {

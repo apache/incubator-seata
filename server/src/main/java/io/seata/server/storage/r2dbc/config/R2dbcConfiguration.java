@@ -39,6 +39,9 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
 import static io.r2dbc.spi.ConnectionFactoryOptions.SSL;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
+/**
+ * @author funkye
+ */
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')||'db'.equals('${lockMode}')}")
 @Configuration
 public class R2dbcConfiguration extends AbstractDataSourceProvider {

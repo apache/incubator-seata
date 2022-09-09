@@ -18,7 +18,6 @@ package io.seata.server.storage.r2dbc.lock;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
@@ -44,14 +42,12 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.reactive.TransactionalOperator;
-import reactor.core.publisher.Mono;
 
 /**
  * The type Data base lock store.
  *
- * @author jianbin.chen
+ * @author funkye
  */
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 @Component
