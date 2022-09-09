@@ -15,15 +15,10 @@
  */
 package io.seata.server.storage.db.lock;
 
-import javax.sql.DataSource;
 import io.seata.common.executor.Initialize;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
-import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;

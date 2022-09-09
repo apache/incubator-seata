@@ -145,7 +145,8 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
     @Override
     public boolean unLock(Long branchId) {
         Integer count = r2dbcEntityTemplate.delete(Lock.class).from(lockTable)
-            .matching(Query.query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID).is(branchId))).all().block();
+            .matching(Query.query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID).is(branchId))).all()
+            .block();
         return count != null && count > 0;
     }
 

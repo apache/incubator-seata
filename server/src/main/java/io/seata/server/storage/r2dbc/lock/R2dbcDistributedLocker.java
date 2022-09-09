@@ -48,16 +48,13 @@ public class R2dbcDistributedLocker implements DistributedLocker {
     @Resource
     DistributedLockRepository distributedLockRepository;
 
-
     @Resource
     private TransactionalOperator operator;
 
     /**
      * Instantiates a new Log store data base dao.
      */
-    public R2dbcDistributedLocker() {
-    }
-
+    public R2dbcDistributedLocker() {}
 
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
@@ -112,6 +109,5 @@ public class R2dbcDistributedLocker implements DistributedLocker {
             return false;
         }
     }
-
 
 }

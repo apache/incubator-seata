@@ -56,7 +56,7 @@ public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
     BeanCopier globalDOToEntity = BeanCopier.create(GlobalTransactionDO.class, GlobalTransaction.class, false);
 
     BeanCopier branchEntityToDO = BeanCopier.create(BranchTransaction.class, BranchTransactionDO.class, false);
-    
+
     BeanCopier branchDOToEntity = BeanCopier.create(BranchTransactionDO.class, BranchTransaction.class, false);
 
     public R2dbcLogStoreDataBaseDAO() {
@@ -75,13 +75,14 @@ public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
 
     @Override
     public GlobalTransactionDO queryGlobalTransactionDO(String xid) {
-        GlobalTransaction globalTransaction = r2dbcEntityTemplate
-            .selectOne(Query.query(Criteria.where(ServerTableColumnsName.GLOBAL_TABLE_XID).is(xid)), GlobalTransaction.class).block();
+        GlobalTransaction globalTransaction =
+            r2dbcEntityTemplate.selectOne(Query.query(Criteria.where(ServerTableColumnsName.GLOBAL_TABLE_XID).is(xid)),
+                GlobalTransaction.class).block();
         if (globalTransaction == null) {
             return null;
         }
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-        globalEntityToDO.copy(globalTransaction,globalTransactionDO,null);
+        globalEntityToDO.copy(globalTransaction, globalTransactionDO, null);
         return globalTransactionDO;
     }
 
@@ -97,10 +98,10 @@ public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
 
     @Override
     public List<GlobalTransactionDO> queryGlobalTransactionDO(int[] statuses, int limit) {
-        List<GlobalTransaction> list = r2dbcEntityTemplate
-            .select(Query.query(Criteria.where(ServerTableColumnsName.GLOBAL_TABLE_STATUS)
-                .in(Arrays.stream(statuses).parallel().boxed().toArray(Integer[]::new))).limit(limit), GlobalTransaction.class)
-            .collectList().block();
+        List<GlobalTransaction> list = r2dbcEntityTemplate.select(
+            Query.query(Criteria.where(ServerTableColumnsName.GLOBAL_TABLE_STATUS)
+                .in(Arrays.stream(statuses).parallel().boxed().toArray(Integer[]::new))).limit(limit),
+            GlobalTransaction.class).collectList().block();
         return list != null ? list.parallelStream().map(globalTransaction -> {
             GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
             globalEntityToDO.copy(globalTransaction, globalTransactionDO, null);
@@ -148,11 +149,11 @@ public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
     @Override
     public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
         return r2dbcEntityTemplate.select(Query.query(Criteria.where(ServerTableColumnsName.BRANCH_TABLE_XID).in(xids)),
-                BranchTransaction.class).collectList().block().parallelStream().map(branchTransaction -> {
-            BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-            branchEntityToDO.copy(branchTransaction, branchTransactionDO, null);
-            return branchTransactionDO;
-        }).collect(Collectors.toList());
+            BranchTransaction.class).collectList().block().parallelStream().map(branchTransaction -> {
+                BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
+                branchEntityToDO.copy(branchTransaction, branchTransactionDO, null);
+                return branchTransactionDO;
+            }).collect(Collectors.toList());
     }
 
     @Override

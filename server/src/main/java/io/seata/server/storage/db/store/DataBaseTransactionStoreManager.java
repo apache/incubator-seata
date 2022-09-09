@@ -94,15 +94,17 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     private DataBaseTransactionStoreManager() {
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-        //init dataSource
+        // init dataSource
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        ApplicationContext applicationContext =     (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
+        ApplicationContext applicationContext =
+            (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
         R2dbcLogStoreDataBaseDAO r2dbcLogStoreDataBaseDAO = null;
         try {
             r2dbcLogStoreDataBaseDAO = applicationContext.getBean(R2dbcLogStoreDataBaseDAO.class);
         } catch (Exception ignored) {
         }
-        logStore = r2dbcLogStoreDataBaseDAO!=null?r2dbcLogStoreDataBaseDAO:new LogStoreDataBaseDAO(logStoreDataSource);
+        logStore =
+            r2dbcLogStoreDataBaseDAO != null ? r2dbcLogStoreDataBaseDAO : new LogStoreDataBaseDAO(logStoreDataSource);
     }
 
     @Override
