@@ -39,10 +39,12 @@
         <dependency>
             <groupId>com.weibo</groupId>
             <artifactId>motan-core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.weibo</groupId>
             <artifactId>motan-transport-netty</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
