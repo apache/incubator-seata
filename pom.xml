@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +13,8 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
         <artifactId>seata-build</artifactId>
@@ -37,7 +35,6 @@
         <module>common</module>
         <module>config</module>
         <module>console</module>
-        <module>consumer</module>
         <module>core</module>
         <module>dependencies</module>
         <module>discovery</module>
@@ -57,7 +54,6 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
-        <module>producer</module>
         <module>serializer</module>
         <module>seata-spring-boot-starter</module>
         <module>seata-spring-autoconfigure</module>
@@ -65,6 +61,8 @@
         <module>saga</module>
         <module>sqlparser</module>
         <module>server</module>
+        <module>storage-consumer</module>
+        <module>storage-producer</module>
         <module>ext/apm-seata-skywalking-plugin</module>
         <!--<module>seata-plugin</module>-->
     </modules>
@@ -137,7 +135,9 @@
                                     <failOnMissing>false</failOnMissing>
                                     <licenseMerges>
                                         <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version
-                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software License, Version 2.0
+                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License
+                                            v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software
+                                            License, Version 2.0
                                         </licenseMerge>
                                         <licenseMerge>The MIT License|MIT License</licenseMerge>
                                         <licenseMerge>The 3-Clause BSD License|New BSD License|3-Clause BSD
@@ -224,7 +224,8 @@
                                 <phase>validate</phase>
                                 <configuration>
                                     <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
+                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml
+                                    </suppressionsLocation>
                                     <encoding>UTF-8</encoding>
                                     <consoleOutput>true</consoleOutput>
                                     <failsOnError>true</failsOnError>
