@@ -23,50 +23,49 @@ import org.springframework.data.relational.core.mapping.Table;
  */
 @Table("distributed_lock")
 public class DistributedLock {
-	/**
-	 * the key of distributed lock
-	 */
-	@Id
-	private String lockKey;
-	/**
-	 * the value of distributed lock
-	 */
-	private String lockValue;
-	/**
-	 * the expire time of distributed lock,time unit is milliseconds
-	 */
-	private Long expireTime;
+    /**
+     * the key of distributed lock
+     */
+    @Id
+    private String lockKey;
+    /**
+     * the value of distributed lock
+     */
+    private String lockValue;
+    /**
+     * the expire time of distributed lock,time unit is milliseconds
+     */
+    private Long expireTime;
 
-	public DistributedLock() {
-	}
+    public DistributedLock() {}
 
-	public DistributedLock(String lockKey, String lockValue, Long expireTime) {
-		this.lockKey = lockKey;
-		this.lockValue = lockValue;
-		this.expireTime = expireTime;
-	}
+    public DistributedLock(String lockKey, String lockValue, Long expireTime) {
+        this.lockKey = lockKey;
+        this.lockValue = lockValue;
+        this.expireTime = expireTime;
+    }
 
-	public String getLockKey() {
-		return lockKey;
-	}
+    public String getLockKey() {
+        return lockKey;
+    }
 
-	public void setLockKey(String lockKey) {
-		this.lockKey = lockKey;
-	}
+    public void setLockKey(String lockKey) {
+        this.lockKey = lockKey;
+    }
 
-	public String getLockValue() {
-		return lockValue;
-	}
+    public String getLockValue() {
+        return lockValue;
+    }
 
-	public void setLockValue(String lockValue) {
-		this.lockValue = lockValue;
-	}
+    public void setLockValue(String lockValue) {
+        this.lockValue = lockValue;
+    }
 
-	public Long getExpireTime() {
-		return expireTime;
-	}
+    public Long getExpireTime() {
+        return expireTime;
+    }
 
-	public void setExpireTime(Long expireTime) {
-		this.expireTime = expireTime;
-	}
+    public void setExpireTime(Long expireTime) {
+        this.expireTime = expireTime;
+    }
 }

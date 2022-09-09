@@ -19,11 +19,12 @@ import java.io.IOException;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration;
 
 /**
  * @author spilledyear@outlook.com
  */
-@SpringBootApplication(scanBasePackages = {"io.seata"})
+@SpringBootApplication(scanBasePackages = {"io.seata"},exclude = R2dbcAutoConfiguration.class)
 public class ServerApplication {
     public static void main(String[] args) throws IOException {
         // run the spring-boot application
