@@ -22,6 +22,7 @@ import io.opentracing.contrib.jdbc.parser.URLParser;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
+import io.seata.common.util.StringUtils;
 import io.seata.core.store.db.AbstractDataSourceProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
@@ -48,15 +49,29 @@ public class R2dbcConfiguration extends AbstractDataSourceProvider {
 
     @Bean
     public ConnectionFactory connectionFactory() {
-        ConnectionInfo connectionInfo = URLParser.parser(getUrl());
+        String url = getUrl();
+        ConnectionInfo connectionInfo = URLParser.parser(url);
         String[] dbPeer = connectionInfo.getDbPeer().split(":");
         String host = dbPeer[0];
         int port = Integer.parseInt(dbPeer[1]);
-        ConnectionFactoryOptions options = ConnectionFactoryOptions.builder().option(SSL, false)
+        ConnectionFactoryOptions.Builder options = ConnectionFactoryOptions.builder()
             .option(DRIVER, getDBType().name().toLowerCase()).option(HOST, host).option(USER, getUser())
             .option(PORT, port).option(PASSWORD, getPassword()).option(DATABASE, connectionInfo.getDbInstance())
-            .option(CONNECT_TIMEOUT, Duration.ofMillis(getMaxWait())).build();
-        return ConnectionFactories.get(options);
+            .option(CONNECT_TIMEOUT, Duration.ofMillis(getMaxWait()));
+        String paramUrl = url.substring(url.indexOf("?") + 1);
+        if (StringUtils.isNotBlank(paramUrl)) {
+            String useSSL = "useSSL";
+            if (paramUrl.contains(useSSL)) {
+                String[] params = paramUrl.split("&");
+                for (String param : params) {
+                    if (param.contains(useSSL)) {
+                        options.option(SSL, Boolean.parseBoolean(param.split("=")[1]));
+                        break;
+                    }
+                }
+            }
+        }
+        return ConnectionFactories.get(options.build());
     }
 
     @Bean
