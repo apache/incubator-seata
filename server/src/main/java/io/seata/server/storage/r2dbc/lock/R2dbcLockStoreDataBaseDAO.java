@@ -20,11 +20,8 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFa
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import javax.annotation.Resource;
-
 import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
