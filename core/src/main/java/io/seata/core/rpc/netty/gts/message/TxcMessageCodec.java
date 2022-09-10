@@ -20,6 +20,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
+import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
@@ -328,6 +329,27 @@ public class TxcMessageCodec {
                 out.writeByte(1);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchRollbackRequest);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 6: {
+                BranchRollbackResponse branchRollbackResponse = new BranchRollbackResponse();
+                BranchRollbackResultMessage branchRollbackResultMessage = (BranchRollbackResultMessage) gtsCodec;
+                // still need to solve serverAddr
+                String serverAddr = "127.0.0.1";
+                String xid = serverAddr + ":" + String.valueOf(branchRollbackResultMessage.getTranId());
+                Long branchId = branchRollbackResultMessage.getBranchId();
+                branchRollbackResponse.setXid(xid);
+                branchRollbackResponse.setBranchId(branchId);
+                branchRollbackResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
+                branchRollbackResponse.setResultCode(ResultCode.get((byte) branchRollbackResultMessage.getResult()));
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(branchRollbackResponse);
                 // Compress
                 out.writeByte(0);
                 return msgOut;
