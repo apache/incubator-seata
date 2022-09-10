@@ -94,25 +94,33 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
         } catch (DataIntegrityViolationException e) {
             // lock fail
             if (!skipCheckLock) {
-                List<Lock> list = r2dbcEntityTemplate.select(
-                    Query.query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
-                        .in(lockDOs.parallelStream().map(LockDO::getRowKey).collect(Collectors.toList()))
-                        .and(Criteria.where(ServerTableColumnsName.LOCK_TABLE_XID).not(lockDOs.get(0).getXid()))),
+                List<Lock> list = r2dbcEntityTemplate.select(Query
+                    .query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
+                        .in(lockDOs.parallelStream().map(LockDO::getRowKey).collect(Collectors.toList())))
+                    .columns(ServerTableColumnsName.LOCK_TABLE_XID, ServerTableColumnsName.LOCK_TABLE_BRANCH_ID,
+                        ServerTableColumnsName.LOCK_TABLE_PK, ServerTableColumnsName.LOCK_TABLE_TABLE_NAME,
+                        ServerTableColumnsName.LOCK_TABLE_STATUS),
                     Lock.class).collectList().block();
                 if (CollectionUtils.isNotEmpty(list)) {
-                    AtomicBoolean failFast = new AtomicBoolean(false);
-                    list.parallelStream().forEach(lock -> {
-                        if (!failFast.get()) {
-                            failFast.set(lock.getStatus() == LockStatus.Rollbacking.getCode());
+                    String xid = lockDOs.get(0).getXid();
+                    boolean failFast = false;
+                    boolean lockResult = true;
+                    for (Lock lock : list) {
+                        if (!lock.getXid().equals(xid)) {
+                            if (lockResult) {
+                                lockResult = false;
+                            }
+                            if (!failFast && lock.getStatus() == LockStatus.Rollbacking.getCode()) {
+                                failFast = true;
+                            }
+                            LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", lock.getTableName(),
+                                lock.getPk(), lock.getXid(), lock.getBranchId());
                         }
-                        LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", lock.getTableName(),
-                            lock.getPk(), lock.getXid(), lock.getBranchId());
-                    });
-                    if (failFast.get()) {
+                    }
+                    if (failFast) {
                         throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
                     }
-                } else {
-                    return true;
+                    return lockResult;
                 }
             }
             return false;

@@ -18,7 +18,7 @@ package io.seata.core.exception;
 import java.util.Objects;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.ConfigurationKeys;
 import io.seata.core.model.LockStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
@@ -132,8 +132,9 @@ public abstract class AbstractExceptionHandler {
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
             if (Objects.equals(LockKeyConflict, tex.getCode())) {
-                LOGGER.info("this request cannot acquire global lock, you can let Seata retry by setting config [{}] = false or manually retry by yourself. request: {}",
-                        ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, request);
+                LOGGER.info(
+                    "this request cannot acquire global lock, you can let Seata retry by setting config [{}] and [{}]  or manually retry by yourself. request: {}",
+                    ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, request);
             } else if (Objects.equals(LockKeyConflictFailFast, tex.getCode())) {
                 LOGGER.info("this request cannot acquire global lock, decide fail-fast because LockStatus is {}. request: {}",
                         LockStatus.Rollbacking, request);
