@@ -34,6 +34,7 @@ public interface ScannerChecker {
      * @param beanName    the bean name
      * @param beanFactory the bean factory
      * @return the boolean: true=need scan | false=do not scan
+     * @throws Exception the exception
      */
     boolean check(Object bean, String beanName, @Nullable ConfigurableListableBeanFactory beanFactory) throws Exception;
 }
