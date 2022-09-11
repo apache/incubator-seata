@@ -33,13 +33,15 @@ import io.seata.server.storage.r2dbc.entity.Lock;
 import io.seata.server.storage.r2dbc.repository.LockRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cglib.beans.BeanCopier;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * The type Data base lock store.
@@ -82,45 +84,45 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
     @Override
     public boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit, boolean skipCheckLock) {
         try {
-            lockRepository.saveAll(lockDOs.parallelStream().map(lockDO -> {
-                Lock lock = new Lock();
-                lockDOToEntity.copy(lockDO, lock, null);
-                return lock;
-            }).collect(Collectors.toList())).collectList().as(operator::transactional).block();
-            return true;
-        } catch (DataIntegrityViolationException e) {
-            // lock fail
-            if (!skipCheckLock) {
-                List<Lock> list = r2dbcEntityTemplate.select(Query
-                    .query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
-                        .in(lockDOs.parallelStream().map(LockDO::getRowKey).collect(Collectors.toList())))
-                    .columns(ServerTableColumnsName.LOCK_TABLE_XID, ServerTableColumnsName.LOCK_TABLE_BRANCH_ID,
-                        ServerTableColumnsName.LOCK_TABLE_PK, ServerTableColumnsName.LOCK_TABLE_TABLE_NAME,
-                        ServerTableColumnsName.LOCK_TABLE_STATUS),
-                    Lock.class).collectList().block();
+            String xid = lockDOs.get(0).getXid();
+            Mono<List<Lock>> mono = skipCheckLock ? Mono.just(Collections.emptyList())
+                : r2dbcEntityTemplate
+                    .select(Query
+                        .query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
+                            .in(lockDOs.parallelStream().map(LockDO::getRowKey).collect(Collectors.toList()))
+                            .and(Criteria.where(ServerTableColumnsName.LOCK_TABLE_XID).not(xid)))
+                        .columns(ServerTableColumnsName.LOCK_TABLE_XID, ServerTableColumnsName.LOCK_TABLE_BRANCH_ID,
+                            ServerTableColumnsName.LOCK_TABLE_PK, ServerTableColumnsName.LOCK_TABLE_TABLE_NAME,
+                            ServerTableColumnsName.LOCK_TABLE_STATUS)
+                        .sort(Sort.by(Sort.Order.desc(ServerTableColumnsName.LOCK_TABLE_STATUS))), Lock.class)
+                    .collectList();
+            return Boolean.TRUE.equals(mono.publishOn(Schedulers.boundedElastic()).map(list -> {
                 if (CollectionUtils.isNotEmpty(list)) {
-                    String xid = lockDOs.get(0).getXid();
                     boolean failFast = false;
-                    boolean lockResult = true;
-                    for (Lock lock : list) {
-                        if (!lock.getXid().equals(xid)) {
-                            if (lockResult) {
-                                lockResult = false;
-                            }
-                            if (!failFast && lock.getStatus() == LockStatus.Rollbacking.getCode()) {
-                                failFast = true;
-                            }
-                            LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", lock.getTableName(),
-                                lock.getPk(), lock.getXid(), lock.getBranchId());
-                        }
+                    Lock lock = list.get(0);
+                    LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", lock.getTableName(),
+                        lock.getPk(), lock.getXid(), lock.getBranchId());
+                    if (lock.getStatus() == LockStatus.Rollbacking.getCode()) {
+                        failFast = true;
                     }
                     if (failFast) {
                         throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
                     }
-                    return lockResult;
+                    return false;
                 }
+                lockRepository.saveAll(lockDOs.parallelStream().map(lockDO -> {
+                    Lock lock = new Lock();
+                    lockDOToEntity.copy(lockDO, lock, null);
+                    return lock;
+                }).collect(Collectors.toList())).collectList().block();
+                return true;
+            }).as(operator::transactional).block());
+        } catch (Exception e) {
+            // lock fail
+            if (e instanceof StoreException) {
+                throw e;
             }
-            return false;
+            throw new StoreException(e);
         }
     }
 

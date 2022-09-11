@@ -16,16 +16,19 @@
 package io.seata.server.storage.db.lock;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.LambdaUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
+import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.storage.r2dbc.lock.R2dbcLockStoreDataBaseDAO;
@@ -73,7 +76,12 @@ public class DataBaseLocker extends AbstractLocker {
             return true;
         }
         try {
-            return lockStore.acquireLock(convertToLockDO(locks), autoCommit, skipCheckLock);
+            List<LockDO> lockDOs = convertToLockDO(locks);
+            if (lockDOs.size() > 1) {
+                lockDOs =
+                    lockDOs.parallelStream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+            }
+            return lockStore.acquireLock(lockDOs, autoCommit, skipCheckLock);
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {

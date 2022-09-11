@@ -114,9 +114,6 @@ public class LockStoreDataBaseDAO implements LockStore {
         ResultSet rs = null;
         Set<String> dbExistedRowKeys = new HashSet<>();
         boolean originalAutoCommit = true;
-        if (lockDOs.size() > 1) {
-            lockDOs = lockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
-        }
         try {
             conn = lockStoreDataSource.getConnection();
             if (originalAutoCommit = conn.getAutoCommit()) {
