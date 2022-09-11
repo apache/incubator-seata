@@ -35,7 +35,7 @@ public interface RemotingServer {
      *
      * @param resourceId rm client resourceId
      * @param clientId   rm client id
-     * @param msg        transaction message {@link io.seata.core.protocol}
+     * @param msg        transaction message {@code io.seata.core.protocol}
      * @return client result message
      * @throws TimeoutException TimeoutException
      */
@@ -45,7 +45,7 @@ public interface RemotingServer {
      * server send sync request.
      *
      * @param channel client channel
-     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @param msg     transaction message {@code io.seata.core.protocol}
      * @return client result message
      * @throws TimeoutException TimeoutException
      */
@@ -55,7 +55,7 @@ public interface RemotingServer {
      * server send async request.
      *
      * @param channel client channel
-     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @param msg     transaction message {@code io.seata.core.protocol}
      */
     void sendAsyncRequest(SeataChannel channel, Object msg);
 
@@ -64,7 +64,7 @@ public interface RemotingServer {
      *
      * @param rpcMessage rpc message from client request
      * @param channel    client channel
-     * @param msg        transaction message {@link io.seata.core.protocol}
+     * @param msg        transaction message {@code io.seata.core.protocol}
      */
     void sendAsyncResponse(RpcMessage rpcMessage, SeataChannel channel, Object msg);
 

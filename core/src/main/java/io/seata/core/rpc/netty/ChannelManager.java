@@ -412,6 +412,11 @@ public class ChannelManager implements ServerChannelManager {
 
     }
 
+    /**
+     * get rm channels
+     *
+     * @return the rm channels,key:resourceId,value:channel
+     */
     @Override
     public Map<String, SeataChannel> getRmChannels() {
         if (RM_CHANNELS.isEmpty()) {

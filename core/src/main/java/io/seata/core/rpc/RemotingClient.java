@@ -38,7 +38,7 @@ public interface RemotingClient {
      * {@link TmNettyRemotingClient#isEnableClientBatchSendRequest()}
      * is enabled, the message will be sent in batches.
      *
-     * @param msg transaction message {@link io.seata.core.protocol}
+     * @param msg transaction message {@code io.seata.core.protocol}
      * @return server result message
      * @throws TimeoutException TimeoutException
      */
