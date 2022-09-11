@@ -21,11 +21,7 @@ import io.grpc.Attributes;
 import io.grpc.Grpc;
 import io.grpc.ServerTransportFilter;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.rpc.RpcType;
-import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.grpc.ContextKeyConstants;
-import io.seata.core.rpc.grpc.GrpcServerChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
