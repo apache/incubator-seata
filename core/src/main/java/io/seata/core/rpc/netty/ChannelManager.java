@@ -240,10 +240,12 @@ public class ChannelManager {
             ConcurrentMap<Integer, RpcContext> clientRpcMap = TM_CHANNELS.get(clientIdentified);
             return getChannelFromSameClientMap(clientRpcMap, clientPort);
         } else if (clientRole == NettyPoolKey.TransactionRole.RMROLE) {
-            for (Map<Integer, RpcContext> clientRmMap : rpcContext.getClientRMHolderMap().values()) {
-                Channel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
-                if (sameClientChannel != null) {
-                    return sameClientChannel;
+            if (CollectionUtils.isNotEmpty(rpcContext.getClientRMHolderMap())){
+                for (Map<Integer, RpcContext> clientRmMap : rpcContext.getClientRMHolderMap().values()) {
+                    Channel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
+                    if (sameClientChannel != null) {
+                        return sameClientChannel;
+                    }
                 }
             }
         }
