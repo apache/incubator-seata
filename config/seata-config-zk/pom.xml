@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-zk</artifactId>
     <name>seata-config-zk ${project.version}</name>
+    <description>config-zookeeper for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -34,6 +35,12 @@
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

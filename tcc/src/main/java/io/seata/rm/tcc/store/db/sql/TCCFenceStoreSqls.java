@@ -34,6 +34,12 @@ public class TCCFenceStoreSqls {
     public static final String LOCAL_TCC_LOG_PLACEHOLD = " #local_tcc_log# ";
 
     /**
+     * The constant PRAMETER_PLACEHOLD.
+     * format: ?, ?, ?
+     */
+    public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
+
+    /**
      * The constant INSERT_LOCAL_TCC_LOG.
      */
     protected static final String INSERT_LOCAL_TCC_LOG = "insert into " + LOCAL_TCC_LOG_PLACEHOLD
@@ -48,6 +54,15 @@ public class TCCFenceStoreSqls {
             + " where xid = ? and branch_id = ? for update";
 
     /**
+     * The constant QUERY_END_STATUS_BY_DATE.
+     */
+    protected static final String QUERY_END_STATUS_BY_DATE = "select xid, branch_id, status, gmt_create, gmt_modified "
+            + "from " + LOCAL_TCC_LOG_PLACEHOLD
+            + " where  gmt_modified < ? "
+            + " and status in (" + TCCFenceConstant.STATUS_COMMITTED + " , " + TCCFenceConstant.STATUS_ROLLBACKED + " , " + TCCFenceConstant.STATUS_SUSPENDED + ")"
+            + " limit ?";
+
+    /**
      * The constant UPDATE_STATUS_BY_BRANCH_ID_AND_XID.
      */
     protected static final String UPDATE_STATUS_BY_BRANCH_ID_AND_XID = "update " + LOCAL_TCC_LOG_PLACEHOLD + " set status = ?, gmt_modified = ?"
@@ -59,11 +74,18 @@ public class TCCFenceStoreSqls {
     protected static final String DELETE_BY_BRANCH_ID_AND_XID = "delete from " + LOCAL_TCC_LOG_PLACEHOLD + " where xid = ? and  branch_id = ? ";
 
     /**
+     * The constant DELETE_BY_BRANCH_ID_AND_XID.
+     */
+    protected static final String DELETE_BY_BRANCH_XIDS = "delete from " + LOCAL_TCC_LOG_PLACEHOLD + " where xid in (" + PRAMETER_PLACEHOLD + ")";
+
+
+    /**
      * The constant DELETE_BY_DATE_AND_STATUS.
      */
     protected static final String DELETE_BY_DATE_AND_STATUS = "delete from " + LOCAL_TCC_LOG_PLACEHOLD
             + " where gmt_modified < ? "
-            + " and status in (" + TCCFenceConstant.STATUS_COMMITTED + " , " + TCCFenceConstant.STATUS_ROLLBACKED + " , " + TCCFenceConstant.STATUS_SUSPENDED + ")";
+            + " and status in (" + TCCFenceConstant.STATUS_COMMITTED + " , " + TCCFenceConstant.STATUS_ROLLBACKED + " , " + TCCFenceConstant.STATUS_SUSPENDED + ")"
+            + " limit ?";
 
     public static String getInsertLocalTCCLogSQL(String localTccTable) {
         return INSERT_LOCAL_TCC_LOG.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
@@ -73,12 +95,21 @@ public class TCCFenceStoreSqls {
         return QUERY_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
+    public static String getQueryEndStatusSQLByDate(String localTccTable) {
+        return QUERY_END_STATUS_BY_DATE.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
+    }
+
     public static String getUpdateStatusSQLByBranchIdAndXid(String localTccTable) {
         return UPDATE_STATUS_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
     public static String getDeleteSQLByBranchIdAndXid(String localTccTable) {
         return DELETE_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
+    }
+
+    public static String getDeleteSQLByXids(String localTccTable, String paramsPlaceHolder) {
+        return DELETE_BY_BRANCH_XIDS.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable)
+                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     public static String getDeleteSQLByDateAndStatus(String localTccTable) {

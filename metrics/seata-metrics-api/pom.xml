@@ -26,4 +26,5 @@
 
     <artifactId>seata-metrics-api</artifactId>
     <name>seata-metrics-api ${project.version}</name>
+    <description>metrics-api for Seata built with Maven</description>
 </project>
