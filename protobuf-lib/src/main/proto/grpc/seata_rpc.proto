@@ -46,6 +46,8 @@ message BiStreamMessage {
   int32 ID = 1;
   BiStreamMessageType MessageType = 2;
   google.protobuf.Any Message = 3;
+
+  string clientId = 4;
 }
 
 service TransactionManagerService {

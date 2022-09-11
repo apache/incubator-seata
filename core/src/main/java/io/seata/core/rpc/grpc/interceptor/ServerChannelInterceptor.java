@@ -24,18 +24,28 @@ import io.grpc.ServerInterceptor;
 import io.grpc.internal.ServerStream;
 import io.grpc.netty.shaded.io.netty.channel.Channel;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.rpc.grpc.ContextKeyConstants;
+import io.seata.core.rpc.grpc.MetaHeaderConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author goodboycoder
  */
 public class ServerChannelInterceptor implements ServerInterceptor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerChannelInterceptor.class);
+
     @Override
     public <R, S> ServerCall.Listener<R> interceptCall(ServerCall<R, S> call, Metadata headers, ServerCallHandler<R, S> next) {
         Context ctx = Context.current();
-        //get current connection ID from serverCall
-        String connectionId = call.getAttributes().get(ContextKeyConstants.CONNECT_ID);
-        ctx = ctx.withValue(ContextKeyConstants.CUR_CONNECT_ID, connectionId);
+        //get clientId from header
+        String clientId = headers.get(MetaHeaderConstants.CLIENT_ID);
+        if (StringUtils.isBlank(clientId)) {
+            //get current connection ID from serverCall
+            clientId = call.getAttributes().get(ContextKeyConstants.CONNECT_ID);
+        }
+        ctx = ctx.withValue(ContextKeyConstants.CUR_CONNECT_ID, clientId);
 
         //get internal channel from serverCall
         try {

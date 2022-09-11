@@ -69,6 +69,7 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
             public void onNext(GrpcRemoting.BiStreamMessage biStreamMessage) {
                 GrpcRemoting.BiStreamMessageType messageType = biStreamMessage.getMessageType();
                 Any message = biStreamMessage.getMessage();
+
                 Object requestModel;
                 RpcMessageHandleContext handleContext;
                 if (GrpcRemoting.BiStreamMessageType.TYPERegisterRMRequest == messageType) {
@@ -90,6 +91,7 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
                                 .setID(biStreamMessage.getID())
                                 .setMessageType(GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse)
                                 .setMessage(Any.pack(responseProto))
+                                .setClientId(handleContext.channel().getId())
                                 .build();
                         try {
                             responseObserver.onNext(responseMessage);
@@ -115,7 +117,7 @@ public class ResourceManagerService extends ResourceManagerServiceGrpc.ResourceM
 
             @Override
             public void onError(Throwable throwable) {
-                LOGGER.error("RM Bi stream on error, error: {}, will close the responseObserve", throwable.toString());
+                LOGGER.error("RM Bi stream on error, error: {}, will close the responseObserver", throwable.toString());
                 if (responseObserver instanceof ServerCallStreamObserver) {
                     ServerCallStreamObserver<?> serverCallStreamObserver = (ServerCallStreamObserver<?>) responseObserver;
                     if (!serverCallStreamObserver.isCancelled()) {

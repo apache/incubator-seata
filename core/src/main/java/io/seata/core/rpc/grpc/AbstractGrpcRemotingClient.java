@@ -79,6 +79,8 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
 
+    protected volatile String clientId;
+
     /**
      * merge message send setting
      */
@@ -395,6 +397,10 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
             }
         }
         return StringUtils.isBlank(xid) ? String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)) : xid;
+    }
+
+    public String getClientId() {
+        return this.clientId;
     }
 
     /**

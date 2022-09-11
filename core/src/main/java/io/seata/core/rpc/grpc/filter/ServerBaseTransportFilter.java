@@ -41,28 +41,20 @@ public class ServerBaseTransportFilter extends ServerTransportFilter {
     public Attributes transportReady(Attributes transportAttrs) {
         InetSocketAddress remoteAddress = (InetSocketAddress) transportAttrs.get(Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
         if (null == remoteAddress) {
-            throw new ShouldNeverHappenException("can not get remoteAddress from transportAttrs");
+            throw new ShouldNeverHappenException("[GRPC]can not get remoteAddress from transportAttrs");
         }
 
         //Generate connection ID based on remote address and current time
         String connectionId = remoteAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR +
-                remoteAddress.getPort() + "_" + System.currentTimeMillis();
+                remoteAddress.getPort() + "#" + System.currentTimeMillis();
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Transport ready for connection:" + connectionId);
+            LOGGER.info("[GRPC]Transport ready for client:" + remoteAddress);
         }
         return transportAttrs.toBuilder().set(ContextKeyConstants.CONNECT_ID, connectionId).build();
     }
 
     @Override
     public void transportTerminated(Attributes transportAttrs) {
-        String connectionId = transportAttrs.get(ContextKeyConstants.CONNECT_ID);
-        if (StringUtils.isNotBlank(connectionId)) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Transport terminated for connection:" + connectionId);
-            }
-            GrpcServerChannelManager serverManager = (GrpcServerChannelManager) SeataChannelServerManager.getServerManager(RpcType.GRPC);
-            serverManager.unregister(connectionId);
-        }
         super.transportTerminated(transportAttrs);
     }
 }

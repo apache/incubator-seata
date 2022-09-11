@@ -48,18 +48,18 @@ public class GrpcServerChannelManager implements ServerChannelManager {
     private final Map<String, SeataChannel> channelMap = new ConcurrentHashMap<>();
 
     /**
-     * connectionId -> rpcContext
+     * connection -> rpcContext
      */
     private static final ConcurrentHashMap<SeataChannel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<>();
 
     /**
-     * resourceId -> applicationId -> ip -> port -> connectionId
+     * resourceId -> applicationId -> ip -> port -> connection
      */
     private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String,
             ConcurrentMap<Integer, RpcContext>>>> RM_CHANNELS = new ConcurrentHashMap<>();
 
     /**
-     * applicationId+ip -> port -> connectionId
+     * applicationId+ip -> port -> connection
      */
     private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
             = new ConcurrentHashMap<>();
@@ -67,12 +67,14 @@ public class GrpcServerChannelManager implements ServerChannelManager {
     @Override
     public void registerTMChannel(RegisterTMRequest request, SeataChannel channel) throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
+        //remove pre TM connection if need
+        unregister(channel.getId());
+
         RpcContext rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.TMROLE, request.getVersion(),
                 request.getApplicationId(),
                 request.getTransactionServiceGroup(),
                 null, channel);
         rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
-        IDENTIFIED_CHANNELS.put(channel, rpcContext);
         channelMap.put(channel.getId(), channel);
 
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
@@ -86,17 +88,14 @@ public class GrpcServerChannelManager implements ServerChannelManager {
     public void registerRMChannel(RegisterRMRequest request, SeataChannel channel)
             throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
+        //remove pre RM connection if need
+        unregister(channel.getId());
+
         Set<String> dbKeySet = dbKeyToSet(request.getResourceIds());
-        RpcContext rpcContext;
-        if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
-            rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.RMROLE, request.getVersion(),
-                    request.getApplicationId(), request.getTransactionServiceGroup(),
-                    request.getResourceIds(), channel);
-            rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
-        } else {
-            rpcContext = IDENTIFIED_CHANNELS.get(channel);
-            rpcContext.addResources(dbKeySet);
-        }
+        RpcContext rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.RMROLE, request.getVersion(),
+                request.getApplicationId(), request.getTransactionServiceGroup(),
+                request.getResourceIds(), channel);
+        rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         channelMap.put(channel.getId(), channel);
 
         if (CollectionUtils.isEmpty(dbKeySet)) {
@@ -350,12 +349,11 @@ public class GrpcServerChannelManager implements ServerChannelManager {
     }
 
     public void unregister(String connectionId) {
-        SeataChannel seataChannel = channelMap.remove(connectionId);
+        SeataChannel seataChannel = channelMap.get(connectionId);
         if (null != seataChannel) {
             releaseRpcContext(seataChannel);
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("remove closed channel, connectionId:{} channel:{}", connectionId, seataChannel);
-            }
+            IDENTIFIED_CHANNELS.remove(seataChannel);
+            LOGGER.info("remove closed channel, connectionId:{} channel:{}", connectionId, seataChannel);
         }
     }
 

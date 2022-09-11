@@ -262,6 +262,10 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
+
+        if (channel instanceof GrpcClientSeataChannel) {
+            ((GrpcClientSeataChannel)channel).setClientId(getClientId());
+        }
         getClientChannelManager().registerChannel(serverAddress, channel);
     }
 
@@ -283,6 +287,10 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
                 int messageId = message.getID();
                 GrpcRemoting.BiStreamMessageType messageType = message.getMessageType();
                 Any body = message.getMessage();
+                String newClientId = message.getClientId();
+                if (io.seata.common.util.StringUtils.isBlank(clientId) || !clientId.equals(newClientId)) {
+                    clientId = newClientId;
+                }
                 if (GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse == messageType) {
                     io.seata.serializer.protobuf.generated.RegisterTMResponseProto registerTMResponseProto;
                     try {
@@ -293,6 +301,10 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
                     MessageFuture messageFuture = futures.get(messageId);
                     if (null != messageFuture) {
                         messageFuture.setResultMessage(ProtoTypeConvertHelper.convertToModel(registerTMResponseProto));
+                    }
+
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("[GRPC]Tm receive clientId:{}", clientId);
                     }
                 } else {
                     Message unpackMessage;
@@ -315,7 +327,7 @@ public class TmGrpcRemotingClient extends AbstractGrpcRemotingClient {
 
             @Override
             public void onError(Throwable throwable) {
-                LOGGER.warn("TM Request stream error: {}. Client channel was cancelled and the stream will be closed", throwable.getMessage());
+                LOGGER.error("TM Request stream error: {}. Client channel was cancelled and the stream will be closed", throwable.getMessage());
                 channel.close();
             }
 

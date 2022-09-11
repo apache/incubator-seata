@@ -96,6 +96,7 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
                                 .setID(biStreamMessage.getID())
                                 .setMessageType(GrpcRemoting.BiStreamMessageType.TYPERegisterTMResponse)
                                 .setMessage(Any.pack(responseProto))
+                                .setClientId(handleContext.channel().getId())
                                 .build();
                         try {
                             responseObserver.onNext(responseMessage);
@@ -121,7 +122,7 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
 
             @Override
             public void onError(Throwable throwable) {
-                LOGGER.error("TM Bi stream on error, error: {}, will close the responseObserve", throwable.toString());
+                LOGGER.error("TM Bi stream on error, error: {}, will close the responseObserver", throwable.toString());
                 if (responseObserver instanceof ServerCallStreamObserver) {
                     ServerCallStreamObserver<?> serverCallStreamObserver = (ServerCallStreamObserver<?>) responseObserver;
                     if (!serverCallStreamObserver.isCancelled()) {

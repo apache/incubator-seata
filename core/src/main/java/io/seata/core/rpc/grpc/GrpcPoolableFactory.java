@@ -16,7 +16,10 @@
 package io.seata.core.rpc.grpc;
 
 import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.List;
 
+import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -27,6 +30,7 @@ import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
+import io.seata.core.rpc.grpc.interceptor.ClientHeaderInterceptor;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,15 +51,15 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
     public SeataChannel makeObject(RpcChannelPoolKey key) {
         InetSocketAddress address = NetUtil.toInetSocketAddress(key.getAddress());
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("[GRPC]NettyPool create channel to " + key);
+            LOGGER.info("[GRPC]GrpcPool create channel to " + key);
         }
         ManagedChannel managedChannel = creatNewChannel(address);
         long start = System.currentTimeMillis();
         Object response;
         GrpcClientSeataChannel channelToServer = null;
-        GrpcClientSeataChannel tmpChannel = new GrpcClientSeataChannel(managedChannel, address);
+        GrpcClientSeataChannel tmpChannel = new GrpcClientSeataChannel(managedChannel, address, getClientInterceptors());
         if (key.getMessage() == null) {
-            throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
+            throw new FrameworkException("[GRPC]register msg is null, role:" + key.getTransactionRole().name());
         }
         StreamObserver<GrpcRemoting.BiStreamMessage> clientStreamObserver = rpcRemotingClient.bindBiStream(tmpChannel);
         if (null != clientStreamObserver) {
@@ -72,12 +76,12 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         } catch (Exception exx) {
             String errMessage = exx.getMessage();
             tmpChannel.close();
-            LOGGER.error("can not connect to server with grpc, maybe the server:{} does not support grpc protocol communication", address);
+            LOGGER.error("[GRPC]can not connect to server with grpc, maybe the server:{} does not support grpc protocol communication", address);
             throw new FrameworkException(
                     "register " + key.getTransactionRole().name() + " error, errMsg:" + errMessage);
         }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register success, cost " + (System.currentTimeMillis() - start) + " ms, version:" + getVersion(
+            LOGGER.info("[GRPC]register success, cost " + (System.currentTimeMillis() - start) + " ms, version:" + getVersion(
                     response, key.getTransactionRole()) + ",role:" + key.getTransactionRole().name() + ",channel:"
                     + channelToServer);
         }
@@ -118,6 +122,10 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
                 .usePlaintext()
                 .directExecutor()
                 .build();
+    }
+
+    private List<ClientInterceptor> getClientInterceptors() {
+        return Collections.singletonList(new ClientHeaderInterceptor(rpcRemotingClient));
     }
 
     @Override

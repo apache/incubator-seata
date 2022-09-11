@@ -207,6 +207,9 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient implements 
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register RM success. client version:{}, server version:{},channel:{}", registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
         }
+        if (channel instanceof GrpcClientSeataChannel) {
+            ((GrpcClientSeataChannel)channel).setClientId(getClientId());
+        }
         getClientChannelManager().registerChannel(serverAddress, channel);
         String dbKey = getMergedResourceKeys();
         if (registerRMRequest.getResourceIds() != null) {
@@ -234,6 +237,11 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient implements 
                 int messageId = message.getID();
                 GrpcRemoting.BiStreamMessageType messageType = message.getMessageType();
                 Any body = message.getMessage();
+                String newClientId = message.getClientId();
+                if (StringUtils.isBlank(clientId) || !clientId.equals(newClientId)) {
+                    clientId = newClientId;
+                }
+
                 if (GrpcRemoting.BiStreamMessageType.TYPERegisterRMResponse == messageType) {
                     io.seata.serializer.protobuf.generated.RegisterRMResponseProto registerRMResponseProto;
                     try {
@@ -244,6 +252,9 @@ public class RmGrpcRemotingClient extends AbstractGrpcRemotingClient implements 
                     MessageFuture messageFuture = futures.get(messageId);
                     if (null != messageFuture) {
                         messageFuture.setResultMessage(ProtoTypeConvertHelper.convertToModel(registerRMResponseProto));
+                    }
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("[GRPC]Rm receive clientId:{}", clientId);
                     }
                 } else {
                     Message unpackMessage;
