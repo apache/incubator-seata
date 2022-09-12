@@ -417,6 +417,24 @@ public class TxcMessageCodec {
                 out.writeByte(0);
                 return msgOut;
             }
+            case 10: {
+                GlobalRollbackResponse globalRollbackResponse = new GlobalRollbackResponse();
+                GlobalRollbackResultMessage globalRollbackResultMessage = (GlobalRollbackResultMessage) gtsCodec;
+
+                globalRollbackResponse.setResultCode(ResultCode.get((byte) globalRollbackResultMessage.getResult()));
+                // TODO still need to solve global status
+                globalRollbackResponse.setGlobalStatus(GlobalStatus.Rollbacked);
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(globalRollbackResponse);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
             default:
                 return null;
         }
