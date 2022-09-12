@@ -18,6 +18,7 @@ package io.seata.core.rpc.netty.gts.message;
 import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
@@ -26,6 +27,8 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
+import io.seata.core.protocol.transaction.GlobalCommitRequest;
+import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
@@ -350,6 +353,44 @@ public class TxcMessageCodec {
                 out.writeByte(1);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchRollbackResponse);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 7: {
+                GlobalCommitRequest globalCommitRequest = new GlobalCommitRequest();
+                GlobalCommitMessage globalCommitMessage = (GlobalCommitMessage) gtsCodec;
+
+                // TODO still need to solve serverAddr
+                String serverAddr = "127.0.0.1";
+                String xid = serverAddr + ":" + String.valueOf(globalCommitMessage.getTranId());
+
+                globalCommitRequest.setXid(xid);
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(globalCommitRequest);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 8: {
+                GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
+                GlobalCommitResultMessage globalCommitResultMessage = (GlobalCommitResultMessage) gtsCodec;
+
+                globalCommitResponse.setResultCode(ResultCode.get((byte) globalCommitResultMessage.getResult()));
+                // TODO still need to solve global status
+                 globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(globalCommitResponse);
                 // Compress
                 out.writeByte(0);
                 return msgOut;
