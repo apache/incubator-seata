@@ -29,6 +29,8 @@ import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
+import io.seata.core.protocol.transaction.GlobalRollbackRequest;
+import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
@@ -294,7 +296,7 @@ public class TxcMessageCodec {
                 BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
                 BranchCommitResultMessage branchCommitResultMessage = (BranchCommitResultMessage) gtsCodec;
                 // still need to solve serverAddr
-                String serverAddr = "127.0.0.1";
+                String serverAddr = "127.0.0.1:8091";
                 String xid = serverAddr + ":" + String.valueOf(branchCommitResultMessage.getTranIds().get(0));
                 Long branchId = branchCommitResultMessage.getBranchIds().get(0);
                 branchCommitResponse.setXid(xid);
@@ -340,7 +342,7 @@ public class TxcMessageCodec {
                 BranchRollbackResponse branchRollbackResponse = new BranchRollbackResponse();
                 BranchRollbackResultMessage branchRollbackResultMessage = (BranchRollbackResultMessage) gtsCodec;
                 // still need to solve serverAddr
-                String serverAddr = "127.0.0.1";
+                String serverAddr = "127.0.0.1:8091";
                 String xid = serverAddr + ":" + String.valueOf(branchRollbackResultMessage.getTranId());
                 Long branchId = branchRollbackResultMessage.getBranchId();
                 branchRollbackResponse.setXid(xid);
@@ -362,7 +364,7 @@ public class TxcMessageCodec {
                 GlobalCommitMessage globalCommitMessage = (GlobalCommitMessage) gtsCodec;
 
                 // TODO still need to solve serverAddr
-                String serverAddr = "127.0.0.1";
+                String serverAddr = "127.0.0.1:8091";
                 String xid = serverAddr + ":" + String.valueOf(globalCommitMessage.getTranId());
 
                 globalCommitRequest.setXid(xid);
@@ -383,7 +385,7 @@ public class TxcMessageCodec {
 
                 globalCommitResponse.setResultCode(ResultCode.get((byte) globalCommitResultMessage.getResult()));
                 // TODO still need to solve global status
-                 globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
+                globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
 
                 // message type
                 out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
@@ -391,6 +393,26 @@ public class TxcMessageCodec {
                 out.writeByte(1);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(globalCommitResponse);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 9: {
+                GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
+                GlobalRollbackMessage globalRollbackMessage = (GlobalRollbackMessage) gtsCodec;
+
+                // real server address always be null
+                String realServerAddr = globalRollbackMessage.getRealSvrAddr();
+                String xid = realServerAddr + ":" + String.valueOf(globalRollbackMessage.getTranId());
+
+                globalRollbackRequest.setXid(xid);
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(globalRollbackRequest);
                 // Compress
                 out.writeByte(0);
                 return msgOut;
