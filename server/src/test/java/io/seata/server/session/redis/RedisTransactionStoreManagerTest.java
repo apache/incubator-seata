@@ -15,6 +15,8 @@
  */
 package io.seata.server.session.redis;
 
+import io.seata.server.storage.redis.store.RedisLuaTransactionStoreManager;
+import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,17 +57,10 @@ public class RedisTransactionStoreManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
-    private static RedisServer server = null;
-    private static RedisTransactionStoreManager redisTransactionStoreManager = null;
-    private static SessionManager sessionManager = null;
+    static RedisServer server = null;
+    static RedisTransactionStoreManager redisTransactionStoreManager = null;
+    static SessionManager sessionManager = null;
 
-    /**
-     * because of mock redis server can not run lua script,
-     * if you want to test lua mode, please modify application.yaml and config your redis instance info.
-     *
-     * @param context
-     * @throws IOException
-     */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
         server = RedisServer.newRedisServer(6789);
@@ -74,7 +69,7 @@ public class RedisTransactionStoreManagerTest {
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
         JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
-        redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
+        redisTransactionStoreManager = new RedisTransactionStoreManager();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
         sessionManager = redisSessionManager;

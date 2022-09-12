@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.redis.store;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,7 +48,6 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.storage.redis.LuaParser;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
@@ -67,7 +65,6 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
-import static io.seata.server.storage.redis.LuaParser.LuaErrorStatus;
 
 /**
  * The redis transaction store manager
@@ -101,60 +98,30 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
-    private static volatile RedisTransactionStoreManager instance;
-
     private static final String OK = "OK";
 
     /**
      * The constant CONFIG.
      */
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * The Log query limit.
      */
-    private int logQueryLimit;
-
-    public static final String LUA_PREFIX = "lua/redisStore/";
-
-    private static final String INSERT_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "insertTransactionDO.lua";
-
-    private static final String DELETE_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "deleteTransactionDO.lua";
-
-    private static final String UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "updateBranchTransactionDO.lua";
-
-    private static final String UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "updateGlobalTransactionDO.lua";
-
-    private static final String ROLLBACK_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "rollbackGlobalTransactionDO.lua";
-
-    /**
-     * key filename
-     * value LOCK_SHA_SCRIPT_ID
-     */
-    private static final Map<String, String> LOCK_SHA_MAP = new HashMap<>(5);
-
-    /**
-     * Get the instance.
-     */
-    public static RedisTransactionStoreManager getInstance() {
-        if (instance == null) {
-            synchronized (RedisTransactionStoreManager.class) {
-                if (instance == null) {
-                    instance = new RedisTransactionStoreManager();
-                }
-            }
-        }
-        return instance;
-    }
+    protected int logQueryLimit;
 
     /**
      * init map to constructor
      */
     public RedisTransactionStoreManager() {
         super();
+        LOGGER.info("init redisTransactionStoreManager");
         initGlobalMap();
         initBranchMap();
-        initRedisMode();
+        initLogQueryLimit();
+    }
+
+    protected void initLogQueryLimit() {
         logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         /**
          * redis mode: if DEFAULT_LOG_QUERY_LIMIT < STORE_REDIS_QUERY_LIMIT get DEFAULT_LOG_QUERY_LIMIT if
@@ -177,7 +144,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * init globalMap
-     *
      */
     public void initGlobalMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
@@ -191,7 +157,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * init branchMap
-     *
      */
     public void initBranchMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
@@ -200,31 +165,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 .put(LogOperation.BRANCH_UPDATE, this::updateBranchTransactionDO)
                 .put(LogOperation.BRANCH_REMOVE, this::deleteBranchTransactionDO)
                 .build();
-        }
-    }
-
-    /**
-     * load redis lua script
-     */
-    private void initRedisMode() {
-        loadLuaFile(INSERT_TRANSACTION_DO_LUA_FILE_NAME, "insertTransactionDO");
-        loadLuaFile(DELETE_TRANSACTION_DO_LUA_FILE_NAME, "deleteTransactionDO");
-        loadLuaFile(UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME, "updateBranchTransactionDO");
-        loadLuaFile(UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME, "updateGlobalTransactionDO");
-        loadLuaFile(ROLLBACK_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME, "rollbackGlobalTransactionDO");
-    }
-
-    private void loadLuaFile(String fileName, String mode) {
-        try {
-            LOCK_SHA_MAP.putAll(LuaParser.getEvalShaMapFromFile(fileName));
-        } catch (IOException e) {
-            // if it fails to read the file, pipeline mode is used
-            if (LOCK_SHA_MAP.get(fileName) != null) {
-                LOCK_SHA_MAP.remove(fileName);
-            }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("redis session: {} use pipeline mode", mode);
-            }
         }
     }
 
@@ -245,39 +185,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param branchTransactionDO
      * @return the boolean
      */
-    private boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
+    protected boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
-        Date now = new Date();
-        branchTransactionDO.setGmtCreate(now);
-        branchTransactionDO.setGmtModified(now);
-        Map<String, String> branchTransactionDOMap = BeanUtils.objectToMap(branchTransactionDO);
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String luaSHA = LOCK_SHA_MAP.get(INSERT_TRANSACTION_DO_LUA_FILE_NAME);
-            if (luaSHA != null) {
-                ArrayList<String> keys = new ArrayList<String>() {
-                    {
-                        add(branchKey);
-                        add(branchListKey);
-                    }
-                };
-                ArrayList<String> args = new ArrayList<String>() {
-                    {
-                        add("branch");
-                        add(String.valueOf(branchTransactionDOMap.size()));
-                    }
-                };
-                for (Map.Entry<String, String> entry : branchTransactionDOMap.entrySet()) {
-                    keys.add(entry.getKey());
-                    args.add(entry.getValue());
-                }
-                jedis.evalsha(luaSHA, keys, args);
-            } else {
-                Pipeline pipelined = jedis.pipelined();
-                pipelined.hmset(branchKey, branchTransactionDOMap);
-                pipelined.rpush(branchListKey, branchKey);
-                pipelined.sync();
-            }
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
+            Date now = new Date();
+            branchTransactionDO.setGmtCreate(now);
+            branchTransactionDO.setGmtModified(now);
+            pipelined.hmset(branchKey, BeanUtils.objectToMap(branchTransactionDO));
+            pipelined.rpush(branchListKey, branchKey);
+            pipelined.sync();
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -290,35 +207,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param branchTransactionDO
      * @return
      */
-    private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
+    protected boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String luaSHA = LOCK_SHA_MAP.get(DELETE_TRANSACTION_DO_LUA_FILE_NAME);
-            if (luaSHA != null) {
-                ArrayList<String> keys = new ArrayList<String>() {
-                    {
-                        add(branchKey);
-                        add(branchListKey);
-                        add(REDIS_KEY_BRANCH_XID);
-                    }
-                };
-                ArrayList<String> args = new ArrayList<String>() {
-                    {
-                        add("branch");
-                    }
-                };
-                jedis.evalsha(luaSHA, keys, args);
-            } else {
-                String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
-                if (StringUtils.isEmpty(xid)) {
-                    return true;
-                }
-                try (Pipeline pipelined = jedis.pipelined()) {
-                    pipelined.lrem(branchListKey, 0, branchKey);
-                    pipelined.del(branchKey);
-                    pipelined.sync();
-                }
+            String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
+            if (StringUtils.isEmpty(xid)) {
+                return true;
+            }
+            try (Pipeline pipelined = jedis.pipelined()) {
+                pipelined.lrem(branchListKey, 0, branchKey);
+                pipelined.del(branchKey);
+                pipelined.sync();
             }
             return true;
         } catch (Exception ex) {
@@ -332,49 +232,23 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param branchTransactionDO
      * @return
      */
-    private boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
+    protected boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         String branchStatus = String.valueOf(branchTransactionDO.getStatus());
         String applicationData = String.valueOf(branchTransactionDO.getApplicationData());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String luaSHA = LOCK_SHA_MAP.get(UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME);
-            if (luaSHA != null) {
-                ArrayList<String> keys = new ArrayList<String>() {
-                    {
-                        add(branchKey);
-                        add(REDIS_KEY_BRANCH_STATUS);
-                        add(REDIS_KEY_BRANCH_GMT_MODIFIED);
-                        add(REDIS_KEY_BRANCH_APPLICATION_DATA);
-                    }
-                };
-                ArrayList<String> args = new ArrayList<String>() {
-                    {
-                        add(branchStatus);
-                        add(String.valueOf((new Date()).getTime()));
-                        add(applicationData);
-                    }
-                };
-                String result = (String) jedis.evalsha(luaSHA, keys, args);
-                LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
-                if (!luaResult.getSuccess()) {
-                    throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
-                } else {
-                    return true;
-                }
-            } else {
-                String previousBranchStatus = jedis.hget(branchKey, REDIS_KEY_BRANCH_STATUS);
-                if (StringUtils.isEmpty(previousBranchStatus)) {
-                    throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
-                }
-                Map<String, String> map = new HashMap<>(3, 1);
-                map.put(REDIS_KEY_BRANCH_STATUS, branchStatus);
-                map.put(REDIS_KEY_BRANCH_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
-                if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
-                    map.put(REDIS_KEY_BRANCH_APPLICATION_DATA, applicationData);
-                }
-                jedis.hmset(branchKey, map);
-                return true;
+            String previousBranchStatus = jedis.hget(branchKey, REDIS_KEY_BRANCH_STATUS);
+            if (StringUtils.isEmpty(previousBranchStatus)) {
+                throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
+            Map<String, String> map = new HashMap<>(3, 1);
+            map.put(REDIS_KEY_BRANCH_STATUS, branchStatus);
+            map.put(REDIS_KEY_BRANCH_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
+            if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
+                map.put(REDIS_KEY_BRANCH_APPLICATION_DATA, applicationData);
+            }
+            jedis.hmset(branchKey, map);
+            return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
@@ -386,43 +260,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param globalTransactionDO
      * @return
      */
-    private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
+    protected boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
-        String globalStatus = buildGlobalStatus(globalTransactionDO.getStatus());
-        String xid = globalTransactionDO.getXid();
-        Date now = new Date();
-        globalTransactionDO.setGmtCreate(now);
-        globalTransactionDO.setGmtModified(now);
-        Map<String, String> globalTransactionDOMap = BeanUtils.objectToMap(globalTransactionDO);
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String luaSHA = LOCK_SHA_MAP.get(INSERT_TRANSACTION_DO_LUA_FILE_NAME);
-            if (luaSHA != null) {
-                // lua mode
-                ArrayList<String> keys = new ArrayList<String>() {
-                    {
-                        add(globalKey);
-                        add(globalStatus);
-                    }
-                };
-                ArrayList<String> args = new ArrayList<String>() {
-                    {
-                        add("global");
-                        add(String.valueOf(globalTransactionDOMap.size()));
-                    }
-                };
-                for (Map.Entry<String, String> entry : globalTransactionDOMap.entrySet()) {
-                    keys.add(entry.getKey());
-                    args.add(entry.getValue());
-                }
-                args.add(xid);
-                jedis.evalsha(luaSHA, keys, args);
-            } else {
-                // pipeline mode
-                Pipeline pipelined = jedis.pipelined();
-                pipelined.hmset(globalKey, globalTransactionDOMap);
-                pipelined.rpush(globalStatus, xid);
-                pipelined.sync();
-            }
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
+            Date now = new Date();
+            globalTransactionDO.setGmtCreate(now);
+            globalTransactionDO.setGmtModified(now);
+            pipelined.hmset(globalKey, BeanUtils.objectToMap(globalTransactionDO));
+            pipelined.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), globalTransactionDO.getXid());
+            pipelined.sync();
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -439,40 +285,21 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param globalTransactionDO
      * @return
      */
-    private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
+    protected boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         String globalStatus = buildGlobalStatus(globalTransactionDO.getStatus());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String luaSHA = LOCK_SHA_MAP.get(DELETE_TRANSACTION_DO_LUA_FILE_NAME);
-            if (luaSHA != null) {
-                // lua mode
-                ArrayList<String> keys = new ArrayList<String>() {
-                    {
-                        add(globalKey);
-                        add(globalStatus);
-                        add(REDIS_KEY_GLOBAL_XID);
-                    }
-                };
-                ArrayList<String> args = new ArrayList<String>() {
-                    {
-                        add("global");
-                        add(globalTransactionDO.getXid());
-                    }
-                };
-                jedis.evalsha(luaSHA, keys, args);
-            } else {
-                // pipeline mode
-                String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
-                if (StringUtils.isEmpty(xid)) {
-                    LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
-                        globalTransactionDO.getXid());
-                    return true;
-                }
-                try (Pipeline pipelined = jedis.pipelined()) {
-                    pipelined.lrem(globalStatus, 0, globalTransactionDO.getXid());
-                    pipelined.del(globalKey);
-                    pipelined.sync();
-                }
+            // pipeline mode
+            String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
+            if (StringUtils.isEmpty(xid)) {
+                LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
+                    globalTransactionDO.getXid());
+                return true;
+            }
+            try (Pipeline pipelined = jedis.pipelined()) {
+                pipelined.lrem(globalStatus, 0, globalTransactionDO.getXid());
+                pipelined.del(globalKey);
+                pipelined.sync();
             }
             return true;
         } catch (Exception ex) {
@@ -490,161 +317,74 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param globalTransactionDO
      * @return
      */
-    private boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
+    protected boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String xid = globalTransactionDO.getXid();
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         Integer status = globalTransactionDO.getStatus();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String luaSHA = LOCK_SHA_MAP.get(UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME);
-            if (luaSHA != null) {
-                return updateGlobalTransactionDOByLua(jedis, xid, globalKey, status, luaSHA);
-            } else {
-                return updateGlobalTransactionDOByPipeline(jedis, xid, globalKey, status);
-            }
-        } catch (Exception ex) {
-            throw new RedisException(ex);
-        }
-    }
-
-    private boolean updateGlobalTransactionDOByLua(Jedis jedis, String xid, String globalKey, Integer status,
-        String luaSHA) {
-        ArrayList<String> keys = new ArrayList<String>() {
-            {
-                add(globalKey);
-                add(REDIS_KEY_GLOBAL_STATUS);
-                add(REDIS_KEY_GLOBAL_GMT_MODIFIED);
-            }
-        };
-        ArrayList<String> args = new ArrayList<String>() {
-            {
-                add(String.valueOf(status));
-                add(String.valueOf((new Date()).getTime()));
-                add(xid);
-            }
-        };
-        String result = (String) jedis.evalsha(luaSHA, keys, args);
-        LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
-        // fail
-        if (!luaResult.getSuccess()) {
-            String type = luaResult.getStatus();
-            if (LuaErrorStatus.XID_NOT_EXISTED.equals(type)) {
+            // Defensive watch to prevent other TC server operating concurrently,Fail fast
+            jedis.watch(globalKey);
+            List<String> statusAndGmtModified = jedis.hmget(globalKey, REDIS_KEY_GLOBAL_STATUS, REDIS_KEY_GLOBAL_GMT_MODIFIED);
+            String previousStatus = statusAndGmtModified.get(0);
+            if (StringUtils.isEmpty(previousStatus)) {
+                jedis.unwatch();
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
-            } else if (LuaErrorStatus.ILLEGAL_CHANGE_STATUS.equals(type)) {
-                String previousStatus = luaResult.getData();
-                GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
-                GlobalStatus after = GlobalStatus.get(status);
+            }
+            if (previousStatus.equals(String.valueOf(status))) {
+                jedis.unwatch();
+                return true;
+            }
+            GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
+            GlobalStatus after = GlobalStatus.get(status);
+            if (!SessionStatusValidator.validateUpdateStatus(before, after)) {
                 throw new StoreException("Illegal changing of global status, update global transaction failed."
                     + " beforeStatus[" + before.name() + "] cannot be changed to afterStatus[" + after.name() + "]");
             }
-        }
-        return true;
-    }
 
-    private boolean updateGlobalTransactionDOByPipeline(Jedis jedis, String xid, String globalKey, Integer status) {
-        // Defensive watch to prevent other TC server operating concurrently,Fail fast
-        jedis.watch(globalKey);
-        List<String> statusAndGmtModified = jedis.hmget(globalKey, REDIS_KEY_GLOBAL_STATUS, REDIS_KEY_GLOBAL_GMT_MODIFIED);
-        String previousStatus = statusAndGmtModified.get(0);
-        if (StringUtils.isEmpty(previousStatus)) {
-            jedis.unwatch();
-            throw new StoreException("Global transaction is not exist, update global transaction failed.");
-        }
-        if (previousStatus.equals(String.valueOf(status))) {
-            jedis.unwatch();
-            return true;
-        }
-        GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
-        GlobalStatus after = GlobalStatus.get(status);
-        if (!SessionStatusValidator.validateUpdateStatus(before, after)) {
-            throw new StoreException("Illegal changing of global status, update global transaction failed."
-                + " beforeStatus[" + before.name() + "] cannot be changed to afterStatus[" + after.name() + "]");
-        }
-
-        String previousGmtModified = statusAndGmtModified.get(1);
-        Transaction multi = jedis.multi();
-        Map<String, String> map = new HashMap<>(2);
-        map.put(REDIS_KEY_GLOBAL_STATUS, String.valueOf(status));
-        map.put(REDIS_KEY_GLOBAL_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
-        multi.hmset(globalKey, map);
-        multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)), 0, xid);
-        multi.rpush(buildGlobalStatus(status), xid);
-        List<Object> exec = multi.exec();
-        if (CollectionUtils.isEmpty(exec)) {
-            //The data has changed by another tc, so we still think the modification is successful.
-            LOGGER.warn("The global transaction xid = {}, maybe changed by another TC. It does not affect the results", xid);
-            return true;
-        }
-        String hmset = exec.get(0).toString();
-        long lrem = (long) exec.get(1);
-        long rpush = (long) exec.get(2);
-        if (OK.equalsIgnoreCase(hmset) && lrem > 0 && rpush > 0) {
-            return true;
-        } else {
-            rollbackGlobalTransactionDO(jedis, globalKey, hmset, lrem, rpush, xid, previousStatus, previousGmtModified, status);
-            return false;
-        }
-    }
-
-    /**
-     * rollback globalTransactionDO
-     * If someone failed, the succeed operations need rollback
-     *
-     * @param jedis
-     * @param globalKey
-     * @param hmset
-     * @param lrem
-     * @param rpush
-     * @param xid
-     * @param previousStatus
-     * @param previousGmtModified
-     * @param status
-     */
-    private void rollbackGlobalTransactionDO(Jedis jedis, String globalKey, String hmset, long lrem, long rpush,
-        String xid, String previousStatus, String previousGmtModified, Integer status) {
-        // lua mode
-        String luaSHA = LOCK_SHA_MAP.get(ROLLBACK_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME);
-        if (luaSHA != null) {
-            ArrayList<String> keys = new ArrayList<String>() {
-                {
-                    add(globalKey);
-                    add(REDIS_KEY_GLOBAL_XID);
-                    add(REDIS_KEY_GLOBAL_STATUS);
-                    add(REDIS_KEY_GLOBAL_GMT_MODIFIED);
-                    add(String.valueOf(status));
-                }
-            };
-            ArrayList<String> args = new ArrayList<String>() {
-                {
-                    add(previousStatus);
-                    add(previousGmtModified);
-                    add(xid);
-                    add(hmset);
-                    add(String.valueOf(lrem));
-                    add(String.valueOf(rpush));
-                }
-            };
-            jedis.evalsha(luaSHA, keys, args);
-            return;
-        }
-        // pipeline mode
-        if (OK.equalsIgnoreCase(hmset)) {
-            // Defensive watch to prevent other TC server operating concurrently,give up this operate
-            jedis.watch(globalKey);
-            String xid2 = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
-            if (StringUtils.isNotEmpty(xid2)) {
-                Map<String, String> mapPrevious = new HashMap<>(2, 1);
-                mapPrevious.put(REDIS_KEY_GLOBAL_STATUS, previousStatus);
-                mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED, previousGmtModified);
-                Transaction multi2 = jedis.multi();
-                multi2.hmset(globalKey, mapPrevious);
-                multi2.exec();
+            String previousGmtModified = statusAndGmtModified.get(1);
+            Transaction multi = jedis.multi();
+            Map<String, String> map = new HashMap<>(2);
+            map.put(REDIS_KEY_GLOBAL_STATUS, String.valueOf(status));
+            map.put(REDIS_KEY_GLOBAL_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
+            multi.hmset(globalKey, map);
+            multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)), 0, xid);
+            multi.rpush(buildGlobalStatus(status), xid);
+            List<Object> exec = multi.exec();
+            if (CollectionUtils.isEmpty(exec)) {
+                //The data has changed by another tc, so we still think the modification is successful.
+                LOGGER.warn("The global transaction xid = {}, maybe changed by another TC. It does not affect the results", xid);
+                return true;
             }
-        }
-        if (lrem > 0) {
-            jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)), xid);
-        }
-        if (rpush > 0) {
-            jedis.lrem(buildGlobalStatus(status), 0, xid);
+            String hmset = exec.get(0).toString();
+            long lrem = (long) exec.get(1);
+            long rpush = (long) exec.get(2);
+            if (OK.equalsIgnoreCase(hmset) && lrem > 0 && rpush > 0) {
+                return true;
+            } else {
+                // pipeline mode
+                if (OK.equalsIgnoreCase(hmset)) {
+                    // Defensive watch to prevent other TC server operating concurrently,give up this operate
+                    jedis.watch(globalKey);
+                    String xid2 = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
+                    if (StringUtils.isNotEmpty(xid2)) {
+                        Map<String, String> mapPrevious = new HashMap<>(2, 1);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_STATUS, previousStatus);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED, previousGmtModified);
+                        Transaction multi2 = jedis.multi();
+                        multi2.hmset(globalKey, mapPrevious);
+                        multi2.exec();
+                    }
+                }
+                if (lrem > 0) {
+                    jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)), xid);
+                }
+                if (rpush > 0) {
+                    jedis.lrem(buildGlobalStatus(status), 0, xid);
+                }
+                return false;
+            }
+        } catch (Exception ex) {
+            throw new RedisException(ex);
         }
     }
 
@@ -1049,19 +789,19 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return listList;
     }
 
-    private String buildBranchListKeyByXid(String xid) {
+    protected String buildBranchListKeyByXid(String xid) {
         return REDIS_SEATA_BRANCHES_PREFIX + xid;
     }
 
-    private String buildGlobalKeyByTransactionId(Object transactionId) {
+    protected String buildGlobalKeyByTransactionId(Object transactionId) {
         return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
     }
 
-    private String buildBranchKey(Long branchId) {
+    protected String buildBranchKey(Long branchId) {
         return REDIS_SEATA_BRANCH_PREFIX + branchId;
     }
 
-    private String buildGlobalStatus(Integer status) {
+    protected String buildGlobalStatus(Integer status) {
         return REDIS_SEATA_STATUS_PREFIX + status;
     }
 

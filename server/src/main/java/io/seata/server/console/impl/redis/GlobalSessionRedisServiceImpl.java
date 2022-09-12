@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.impl.redis;
 
+import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,7 +61,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         }
         List<GlobalSession> globalSessions = new ArrayList<>();
 
-        RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
+        RedisTransactionStoreManager instance = RedisTransactionStoreManagerFactory.getInstance();
 
         checkPage(param);
 

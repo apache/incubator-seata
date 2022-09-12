@@ -36,8 +36,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
-
 /**
  * @author funkye
  * @author conghuhu
@@ -128,13 +126,14 @@ public class RedisLockManagerTest {
         branchSession2.setLockKey("t1:8");
         Assertions.assertTrue(lockManager.isLockable(branchSession2.getXid(), branchSession2.getResourceId(),
             branchSession2.getLockKey()));
+        Assertions.assertTrue(lockManager.releaseLock(branchSession));
     }
 
     @Test
     public void updateLockStatus() throws TransactionException {
         BranchSession branchSession = getBranchSession();
         Assertions.assertTrue(lockManager.acquireLock(branchSession));
-        lockManager.updateLockStatus("abc-123:786756", LockStatus.Rollbacking);
+        lockManager.updateLockStatus(branchSession.getXid(), LockStatus.Rollbacking);
         Assertions.assertTrue(lockManager.releaseLock(branchSession));
     }
 
@@ -153,10 +152,6 @@ public class RedisLockManagerTest {
         public Locker getLocker(BranchSession branchSession) {
             return new RedisLocker();
         }
-    }
-
-    private String buildLockKey(String rowKey) {
-        return DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX + rowKey;
     }
 
     private BranchSession getBranchSession() {

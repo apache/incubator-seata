@@ -166,4 +166,6 @@ public interface Constants {
      */
     String REGISTRY_TYPE_SPLIT_CHAR = ",";
 
+    String STORE_REDIS_TYPE_PIPELINE = "pipeline";
+
 }

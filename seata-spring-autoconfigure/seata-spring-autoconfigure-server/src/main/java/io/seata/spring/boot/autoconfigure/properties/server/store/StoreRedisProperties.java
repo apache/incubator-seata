@@ -32,6 +32,7 @@ public class StoreRedisProperties {
      * single, sentinel
      */
     private String mode = "single";
+    private String type = "pipeline";
     private String password = null;
     private Integer maxConn = 10;
     private Integer minConn = 1;
@@ -45,6 +46,15 @@ public class StoreRedisProperties {
 
     public StoreRedisProperties setMode(String mode) {
         this.mode = mode;
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public StoreRedisProperties setType(String type) {
+        this.type = type;
         return this;
     }
 
@@ -102,7 +112,6 @@ public class StoreRedisProperties {
         return this;
     }
 
-
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SINGLE_PREFIX)
     public static class Single {
@@ -127,8 +136,6 @@ public class StoreRedisProperties {
             return this;
         }
     }
-
-
 
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SENTINEL_PREFIX)
