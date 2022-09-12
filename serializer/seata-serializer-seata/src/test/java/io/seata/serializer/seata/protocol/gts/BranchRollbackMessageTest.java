@@ -17,16 +17,12 @@ package io.seata.serializer.seata.protocol.gts;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.seata.core.rpc.netty.gts.message.BranchCommitMessage;
 import io.seata.core.rpc.netty.gts.message.BranchRollbackMessage;
 import io.seata.core.rpc.netty.gts.message.GtsRpcMessage;
 import io.seata.core.rpc.netty.gts.message.TxcCodec;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import org.junit.jupiter.api.Test;
-
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BranchRollbackMessageTest {
 

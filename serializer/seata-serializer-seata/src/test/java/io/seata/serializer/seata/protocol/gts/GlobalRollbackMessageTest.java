@@ -17,7 +17,6 @@ package io.seata.serializer.seata.protocol.gts;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.seata.core.rpc.netty.gts.message.GlobalCommitMessage;
 import io.seata.core.rpc.netty.gts.message.GlobalRollbackMessage;
 import io.seata.core.rpc.netty.gts.message.GtsRpcMessage;
 import io.seata.core.rpc.netty.gts.message.TxcCodec;
