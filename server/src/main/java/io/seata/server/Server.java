@@ -67,18 +67,6 @@ public class Server {
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
                 new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
-        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-        UUIDGenerator.init(parameterParser.getServerNode());
-        //log store mode : file, db, redis
-        SessionHolder.init(parameterParser.getSessionStoreMode());
-        LockerManagerFactory.init(parameterParser.getLockStoreMode());
-        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
-        coordinator.init();
-        nettyRemotingServer.setHandler(coordinator);
-
-        // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
-        ServerRunner.addDisposable(coordinator);
-
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
@@ -90,6 +78,20 @@ public class Server {
                 XID.setIpAddress(NetUtil.getLocalIp());
             }
         }
+
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        XID.setPort(nettyRemotingServer.getListenPort());
+        UUIDGenerator.init(parameterParser.getServerNode());
+        //log store mode : file, db, redis
+        SessionHolder.init(parameterParser.getSessionStoreMode());
+        LockerManagerFactory.init(parameterParser.getLockStoreMode());
+        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
+        coordinator.init();
+        nettyRemotingServer.setHandler(coordinator);
+
+        // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
+        ServerRunner.addDisposable(coordinator);
+
         nettyRemotingServer.init();
     }
 }
