@@ -32,6 +32,7 @@ import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
@@ -444,7 +445,7 @@ public class TxcMessageCodec {
                 String serverAddr = "127.0.0.1:8091";
                 String xid = serverAddr + ":" + String.valueOf(registerMessage.getTranId());
                 String resourceId = registerMessage.getKey();
-                String lockKey =registerMessage.getBusinessKey();
+                String lockKey = registerMessage.getBusinessKey();
 
                 branchRegisterRequest.setXid(xid);
                 branchRegisterRequest.setBranchType(BranchType.GTS);
@@ -457,6 +458,24 @@ public class TxcMessageCodec {
                 out.writeByte(1);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchRegisterRequest);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 12: {
+                BranchRegisterResponse branchRegisterResponse = new BranchRegisterResponse();
+                RegisterResultMessage registerResultMessage = (RegisterResultMessage) gtsCodec;
+
+                branchRegisterResponse.setResultCode(ResultCode.get((byte) registerResultMessage.getResult()));
+                // TODO still need to solve global status
+                branchRegisterResponse.setBranchId(registerResultMessage.getBranchId());
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(branchRegisterResponse);
                 // Compress
                 out.writeByte(0);
                 return msgOut;

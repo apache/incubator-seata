@@ -18,7 +18,7 @@ package io.seata.serializer.seata.protocol.gts;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.seata.core.rpc.netty.gts.message.GtsRpcMessage;
-import io.seata.core.rpc.netty.gts.message.RegisterMessage;
+import io.seata.core.rpc.netty.gts.message.RegisterResultMessage;
 import io.seata.core.rpc.netty.gts.message.TxcCodec;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import org.junit.jupiter.api.Test;
@@ -32,17 +32,16 @@ import java.nio.ByteBuffer;
  * @date 2022/9/13
  **/
 
-public class RegisterMessageTest {
+public class RegisterResultMessageTest {
 
     private static short MAGIC = -9510;
 
     @Test
-    public void testRegisterMessage(){
-        RegisterMessage msg = new RegisterMessage();
-        msg.setTranId(347723853L);
-        msg.setKey("jdbc:mysql://localhost:3306/txc_db1");
-        msg.setBusinessKey("user_money_a:1");
-        msg.setCommitMode((byte) 1);
+    public void testRegisterResultMessage(){
+        RegisterResultMessage msg = new RegisterResultMessage();
+        msg.setTranId(0L);
+        msg.setBranchId(0L);
+        msg.setResult(1);
 
         System.out.println(msg.toString());
         GtsRpcMessage rpcMessage = new GtsRpcMessage();
