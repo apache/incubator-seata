@@ -11,9 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 # the Dockerfile support x86 & arrch64
-
-
 # build：
 # 1. mvn -Prelease-seata -Dmaven.test.skip=true clean install -U
 # 2. cd distribution/target/seata-server-xxx/seata/
