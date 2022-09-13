@@ -163,10 +163,10 @@ public class DataBaseSessionManager extends AbstractSessionManager
     @Override
     public Collection<GlobalSession> allSessions() {
         // all data
-        return findGlobalSessions(new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Begin,
-            GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
-            GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
-            GlobalStatus.AsyncCommitting));
+        return findGlobalSessions(
+            new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Begin, GlobalStatus.Committing,
+                GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying,
+                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting));
     }
 
     @Override
