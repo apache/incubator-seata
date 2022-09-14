@@ -22,10 +22,3 @@ export default async function fetchData():Promise<any> {
   });
   return result;
 }
-
-export  async function saveData():Promise<any> {
-  let result = await request('/console/putconfig', {
-    method: 'post',
-  });
-  return result;
-}
