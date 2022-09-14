@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 import React from 'react';
-import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Pagination, Input } from '@alicloud/console-components';
-import Actions, { LinkButton } from '@alicloud/console-components-actions';
+import { ConfigProvider, Table, Button, Dialog, DatePicker, Form, Icon, Pagination, Input } from '@alicloud/console-components';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
@@ -25,18 +24,26 @@ import PropTypes from 'prop-types';
 import './index.scss';
 import {AppPropsType} from "@/app";
 
+const FormItem = Form.Item;
+const formItemLayout = {
+  labelCol: {
+    fixedSpan: 5
+  },
+  wrapperCol: {
+    span: 8
+  }
+}
 
 type GlobalConfigurationInfoState = {
-  list: Array<any>;
+  list: [];
   total: number;
   loading: boolean;
+  visible: boolean;
 }
+
 
 class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfigurationInfoState> {
   static displayName = 'ConfigurationInfo';
-  constructor(props: AppPropsType) {
-    super(props);
-  }
   static propTypes = {
     locale: PropTypes.object,
     history: PropTypes.object,
@@ -48,7 +55,12 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
     list: [],
     total: 0,
     loading: true,
+    visible: false,
   };
+  constructor(props: AppPropsType) {
+    super(props);
+  }
+
   componentDidMount = () => {
     // search once by default
     this.search();
@@ -63,6 +75,7 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
           list: [],
           total: 0,
           loading: false,
+          visible: false,
         });
         return;
       }
@@ -71,19 +84,29 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
         list: data.data,
         total: data.total,
         loading: false,
+        visible: false,
       });
     }).catch(err => {
       this.setState({ loading: false });
     });
   }
 
-  edit() {
-    let a = ""
-  }
-
-  save() {
+  save () {
 
   }
+
+  onClose = ( ) => {
+    this.setState({
+      visible: false
+    });
+  };
+  onOpen = () => {
+    //  console.log(item)
+    this.setState({
+      visible: true
+    });
+  };
+
   render() {
     const {locale = {} } = this.props;
     const {title, subTitle} = locale;
@@ -102,17 +125,39 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
       >
 
         <div>
-          <Button type="primary" className="ml-8" onClick={this.edit}>编辑</Button>
           <Button type="primary" className="ml-8" onClick={this.save}>保存</Button>
         </div>
-        <Table className="mt-16" dataSource={this.state.list} loading={this.state.loading}>
+        <Table className="mt-16"  dataSource={this.state.list} loading={this.state.loading}>
           <Table.Column title="id" dataIndex="id"/>
           <Table.Column title="name" dataIndex="name"/>
           <Table.Column title="value" dataIndex="value"/>
-          <Table.Column title="descr" dataIndex="descr">
+          <Table.Column title="descr" dataIndex="descr"/>
+          <Table.Column title="操作"  cell={ <span> <Button type="primary"  onClick={   this.onOpen}  >编辑</Button>
 
-          </Table.Column>
+          <Dialog
+            title="编辑"
+            visible={this.state.visible}
+            onOk={this.onClose.bind(this, 'okClick')}
+            onCancel={this.onClose.bind(this, 'cancelClick')}
+            onClose={this.onClose}>
 
+            <Form style={{width: '400px', height: '200px'}}  {...formItemLayout} >
+              <FormItem label="配置项:">
+                <h3 defaultValue={'配置项'}></h3>
+              </FormItem>
+
+              <FormItem label="配置值:">
+                <Input  name="value" value={"配置值"} placeholder="请输入修改的配置值" contentEditable={true}/>
+              </FormItem>
+
+              <FormItem label="配置描述:" >
+                <h3 defaultValue={"配置描述"}></h3>
+              </FormItem>
+
+            </Form>
+          </Dialog>
+          </span>
+          }/>
         </Table>
       </Page>
     );

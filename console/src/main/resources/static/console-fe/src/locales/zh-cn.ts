@@ -21,6 +21,7 @@ const zhCn: ILocale = {
     overview: '概览',
     transactionInfo: '事务信息',
     globalLockInfo: '全局锁信息',
+    configurationInfo: '配置信息'
   },
   Header: {
     home: '首页',

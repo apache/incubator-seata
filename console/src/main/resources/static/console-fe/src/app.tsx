@@ -67,13 +67,13 @@ class App extends React.Component<AppPropsType, AppStateType> {
     get menu() {
         const { locale }: AppPropsType = this.props;
         const { MenuRouter = {} } = locale;
-        const {transactionInfo,globalLockInfo,configurationInfo,overview} = MenuRouter;
+        const {overview,transactionInfo,globalLockInfo,configurationInfo} = MenuRouter;
         return {
             items: [
-              {
-                key: '/Overview',
-                label: overview,
-              },
+              // {
+              //   key: '/Overview',
+              //   label: overview,
+              // },
                 {
                     key: '/TransactionInfo',
                     label: transactionInfo,

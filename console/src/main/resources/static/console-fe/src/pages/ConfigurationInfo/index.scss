@@ -13,3 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+.product{
+  display: flex;
+  align-items: center;
+};
+.productPic{
+  width: 60;
+  height: 60;
+};
+.productTitle{
+  margin: 0;
+};
+.btn{
+  display: inline-block;
+  padding: 6px 12px;
+  color: #fff;
+  font-size: 12px;
+  text-decoration: none;
+  border-radius: 4px;
+  cursor: pointer;
+};
+.editBtn{
+  margin-right: 8px;
+  background: #447eff;
+};
+.deleteBtn{
+  background: #ee706d;
+};
+.pagination{
+  margin: 20px 0 !important;
+  text-align: right !important;
+};
+.hb{
+  display: inline-block;
+  margin-right: 8px;
+  padding: 6px 12px;
+  color: #fff;
+  font-size: 12px;
+  text-decoration: none;
+  background: #447eff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.hb2{
+  display: inline-block;
+  padding: 6px 12px;
+  color: #fff;
+  font-size: 12px;
+  text-decoration: none;
+  background: #ee706d;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.lead{
+  width:  24px;
+  height: 24px;
+  border-radius: 4px;
+}
+.team{
+  width: 24px;
+  height: 24px;
+  border: 2px solid #fff;
+  border-radius: 50px;
+  box-shadow: 0 2px 10px 0 rgba(0,0,0,.2);
+}
