@@ -32,25 +32,23 @@ import io.seata.server.storage.db.DataBaseStoreType;
 public class DataBaseDistributedLocker implements DistributedLocker {
 
     DistributedLocker distributedLocker;
-    
+
     /**
      * Instantiates a new Log store data base dao.
      */
     public DataBaseDistributedLocker() {
-        this.distributedLocker = DataBaseStoreFactory.getDistributedLocker(
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
+        this.distributedLocker = DataBaseStoreFactory.getDistributedLocker(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
     }
-
 
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
-       return this.distributedLocker.acquireLock(distributedLockDO);
+        return this.distributedLocker.acquireLock(distributedLockDO);
     }
 
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
         return this.distributedLocker.releaseLock(distributedLockDO);
     }
-
 
 }
