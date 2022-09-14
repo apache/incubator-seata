@@ -30,42 +30,42 @@ public interface StateLogRepository {
     /**
      * Get state machine instance
      *
-     * @param stateMachineInstanceId
-     * @return
+     * @param stateMachineInstanceId the state machine instance id
+     * @return the state machine instance
      */
     StateMachineInstance getStateMachineInstance(String stateMachineInstanceId);
 
     /**
      * Get state machine instance by businessKey
      *
-     * @param businessKey
-     * @param tenantId
-     * @return
+     * @param businessKey the business key
+     * @param tenantId the tenant id
+     * @return the state machine instance
      */
     StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId);
 
     /**
      * Query the list of state machine instances by parent id
      *
-     * @param parentId
-     * @return
+     * @param parentId the state parent id
+     * @return state machine instance list
      */
     List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId);
 
     /**
      * Get state instance
      *
-     * @param stateInstanceId
-     * @param machineInstId
-     * @return
+     * @param stateInstanceId the state instance id
+     * @param machineInstId the state machine instance id
+     * @return the state instance
      */
     StateInstance getStateInstance(String stateInstanceId, String machineInstId);
 
     /**
      * Get a list of state instances by state machine instance id
      *
-     * @param stateMachineInstanceId
-     * @return
+     * @param stateMachineInstanceId the state machine instance id
+     * @return the state machine instance list
      */
     List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId);
 }
