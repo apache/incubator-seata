@@ -45,6 +45,7 @@
                     <artifactId>protobuf-java</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
