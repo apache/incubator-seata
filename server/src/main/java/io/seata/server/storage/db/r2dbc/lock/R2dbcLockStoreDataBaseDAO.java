@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.r2dbc.lock;
+package io.seata.server.storage.db.r2dbc.lock;
 
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
@@ -22,15 +22,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
-import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
+import io.seata.server.storage.db.jdbc.lock.LockStoreDataBaseDAO;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockDO;
-import io.seata.server.storage.r2dbc.entity.Lock;
-import io.seata.server.storage.r2dbc.repository.LockRepository;
+import io.seata.server.storage.db.r2dbc.entity.Lock;
+import io.seata.server.storage.db.r2dbc.repository.LockRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.data.domain.Sort;
@@ -38,6 +39,7 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
@@ -48,12 +50,13 @@ import reactor.core.scheduler.Schedulers;
  *
  * @author funkye
  */
-@ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
+@ConditionalOnExpression("#{'db'.equals('${lockMode}')}")
+@ConditionalOnBean(DatabaseClient.class)
 @Component
 public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
 
     @Resource
-    LockRepository lockRepository;
+    private LockRepository lockRepository;
 
     @Resource
     private R2dbcEntityTemplate r2dbcEntityTemplate;
@@ -61,7 +64,7 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
     @Resource
     private TransactionalOperator operator;
 
-    BeanCopier lockDOToEntity = BeanCopier.create(LockDO.class, Lock.class, false);
+    private BeanCopier lockDOToEntity = BeanCopier.create(LockDO.class, Lock.class, false);
 
     /**
      * Instantiates a new Data base lock store dao.
@@ -85,17 +88,25 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
     public boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit, boolean skipCheckLock) {
         try {
             String xid = lockDOs.get(0).getXid();
-            Mono<List<Lock>> mono = skipCheckLock ? Mono.just(Collections.emptyList())
-                : r2dbcEntityTemplate
-                    .select(Query
-                        .query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
-                            .in(lockDOs.parallelStream().map(LockDO::getRowKey).collect(Collectors.toList()))
-                            .and(Criteria.where(ServerTableColumnsName.LOCK_TABLE_XID).not(xid)))
-                        .columns(ServerTableColumnsName.LOCK_TABLE_XID, ServerTableColumnsName.LOCK_TABLE_BRANCH_ID,
-                            ServerTableColumnsName.LOCK_TABLE_PK, ServerTableColumnsName.LOCK_TABLE_TABLE_NAME,
-                            ServerTableColumnsName.LOCK_TABLE_STATUS)
-                        .sort(Sort.by(Sort.Order.desc(ServerTableColumnsName.LOCK_TABLE_STATUS))), Lock.class)
-                    .collectList();
+            Mono<
+                List<
+                    Lock>> mono =
+                        skipCheckLock ? Mono.just(Collections.emptyList())
+                            : r2dbcEntityTemplate
+                                .select(
+                                    Query
+                                        .query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
+                                            .in(lockDOs.parallelStream().map(LockDO::getRowKey)
+                                                .collect(Collectors.toList()))
+                                            .and(Criteria.where(ServerTableColumnsName.LOCK_TABLE_XID).not(xid)))
+                                        .columns(ServerTableColumnsName.LOCK_TABLE_XID,
+                                            ServerTableColumnsName.LOCK_TABLE_BRANCH_ID,
+                                            ServerTableColumnsName.LOCK_TABLE_PK,
+                                            ServerTableColumnsName.LOCK_TABLE_TABLE_NAME,
+                                            ServerTableColumnsName.LOCK_TABLE_STATUS)
+                                        .sort(Sort.by(Sort.Order.desc(ServerTableColumnsName.LOCK_TABLE_STATUS))),
+                                    Lock.class)
+                                .collectList();
             return Boolean.TRUE.equals(mono.publishOn(Schedulers.boundedElastic()).map(list -> {
                 if (CollectionUtils.isNotEmpty(list)) {
                     boolean failFast = false;

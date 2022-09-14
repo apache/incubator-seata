@@ -154,6 +154,7 @@ seata:
       url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
       user: mysql
       password: mysql
+      type: jdbc
       min-conn: 5
       max-conn: 100
       global-table: global_table

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.db.lock;
+package io.seata.server.storage.db.jdbc.lock;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

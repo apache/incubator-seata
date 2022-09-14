@@ -13,18 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.r2dbc.config;
+package io.seata.server.storage.db.r2dbc.repository;
 
+import io.seata.server.storage.db.r2dbc.entity.Lock;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.data.r2dbc.R2dbcDataAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.r2dbc.core.DatabaseClient;
 
 /**
- * @author jianbin.chen
+ * @author funkye
  */
-@ConditionalOnExpression("#{'db'.equals('${sessionMode}')||'db'.equals('${lockMode}')}")
-@Configuration
-@Import(R2dbcDataAutoConfiguration.class)
-public class R2dbcAutoConfiguration {
+@ConditionalOnBean(DatabaseClient.class)
+public interface LockRepository extends ReactiveCrudRepository<Lock, String> {
 }

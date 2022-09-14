@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.r2dbc.store;
+package io.seata.server.storage.db.r2dbc.store;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,9 +28,10 @@ import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
-import io.seata.server.storage.r2dbc.entity.BranchTransaction;
-import io.seata.server.storage.r2dbc.entity.GlobalTransaction;
+import io.seata.server.storage.db.jdbc.store.LogStoreDataBaseDAO;
+import io.seata.server.storage.db.r2dbc.entity.BranchTransaction;
+import io.seata.server.storage.db.r2dbc.entity.GlobalTransaction;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -38,6 +39,7 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
 import org.springframework.data.relational.core.sql.SqlIdentifier;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,18 +48,19 @@ import org.springframework.stereotype.Component;
  * @author funkye
  */
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
+@ConditionalOnBean(DatabaseClient.class)
 @Component
 public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
 
     @Resource
     private R2dbcEntityTemplate r2dbcEntityTemplate;
 
-    BeanCopier globalEntityToDO = BeanCopier.create(GlobalTransaction.class, GlobalTransactionDO.class, false);
-    BeanCopier globalDOToEntity = BeanCopier.create(GlobalTransactionDO.class, GlobalTransaction.class, false);
+    private BeanCopier globalEntityToDO = BeanCopier.create(GlobalTransaction.class, GlobalTransactionDO.class, false);
+    private BeanCopier globalDOToEntity = BeanCopier.create(GlobalTransactionDO.class, GlobalTransaction.class, false);
 
-    BeanCopier branchEntityToDO = BeanCopier.create(BranchTransaction.class, BranchTransactionDO.class, false);
+    private BeanCopier branchEntityToDO = BeanCopier.create(BranchTransaction.class, BranchTransactionDO.class, false);
 
-    BeanCopier branchDOToEntity = BeanCopier.create(BranchTransactionDO.class, BranchTransaction.class, false);
+    private BeanCopier branchDOToEntity = BeanCopier.create(BranchTransactionDO.class, BranchTransaction.class, false);
 
     public R2dbcLogStoreDataBaseDAO() {
         super();

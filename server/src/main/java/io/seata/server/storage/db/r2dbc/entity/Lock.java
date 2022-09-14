@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.r2dbc.entity;
+package io.seata.server.storage.db.r2dbc.entity;
 
 import static io.seata.core.model.LockStatus.Locked;
 

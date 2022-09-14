@@ -20,6 +20,7 @@ import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.server.storage.db.DataBaseStoreType;
 import io.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
 import io.seata.spring.boot.autoconfigure.SeataServerEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
@@ -30,6 +31,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+
+import static io.seata.common.ConfigurationKeys.STORE_DB_STORE_TYPE;
 import static io.seata.common.ConfigurationKeys.STORE_LOCK_MODE;
 import static io.seata.common.ConfigurationKeys.STORE_MODE;
 import static io.seata.common.ConfigurationKeys.STORE_SESSION_MODE;
@@ -67,6 +70,7 @@ public class ServerApplicationListener implements GenericApplicationListener {
                 config.getConfig(STORE_SESSION_MODE, config.getConfig(STORE_MODE, "file")));
         System.setProperty("lockMode",
                 config.getConfig(STORE_LOCK_MODE, config.getConfig(STORE_MODE, "file")));
+        System.setProperty(STORE_DB_STORE_TYPE, config.getConfig(STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
 
         String[] args = environmentPreparedEvent.getArgs();
 

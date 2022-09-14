@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.r2dbc.config;
+package io.seata.server.storage.db.r2dbc.config;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 /**
  * @author funkye
  */
-@ConditionalOnExpression("#{'db'.equals('${sessionMode}')||'db'.equals('${lockMode}')}")
+@ConditionalOnExpression("#{'r2dbc'.equals('${store.db.type}')}")
 @Configuration
 @EnableConfigurationProperties(R2dbcProperties.class)
 @AutoConfigureBefore(R2dbcAutoConfiguration.class)

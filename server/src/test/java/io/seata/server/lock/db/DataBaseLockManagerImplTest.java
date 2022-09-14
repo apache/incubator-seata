@@ -26,7 +26,7 @@ import io.seata.core.lock.Locker;
 import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.storage.db.lock.DataBaseLocker;
-import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
+import io.seata.server.storage.db.jdbc.lock.LockStoreDataBaseDAO;
 import io.seata.server.storage.file.lock.FileLockManager;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.Assertions;

@@ -25,7 +25,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
+import io.seata.server.storage.db.jdbc.store.LogStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;

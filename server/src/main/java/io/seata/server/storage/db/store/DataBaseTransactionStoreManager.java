@@ -21,33 +21,25 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
-import io.seata.common.holder.ObjectHolder;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
-import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
-import io.seata.server.storage.r2dbc.store.R2dbcLogStoreDataBaseDAO;
+import io.seata.server.storage.db.DataBaseStoreFactory;
+import io.seata.server.storage.db.DataBaseStoreType;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.storage.SessionConverter;
-import org.springframework.context.ApplicationContext;
-
-
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_LOG_QUERY_LIMIT;
 
 /**
  * The type Database transaction store manager.
@@ -92,19 +84,9 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * Instantiates a new Database transaction store manager.
      */
     private DataBaseTransactionStoreManager() {
-        logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
-        String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-        // init dataSource
-        DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        ApplicationContext applicationContext =
-            (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-        R2dbcLogStoreDataBaseDAO r2dbcLogStoreDataBaseDAO = null;
-        try {
-            r2dbcLogStoreDataBaseDAO = applicationContext.getBean(R2dbcLogStoreDataBaseDAO.class);
-        } catch (Exception ignored) {
-        }
-        logStore =
-            r2dbcLogStoreDataBaseDAO != null ? r2dbcLogStoreDataBaseDAO : new LogStoreDataBaseDAO(logStoreDataSource);
+        this.logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, 100);
+        this.logStore = DataBaseStoreFactory
+            .getLogStore(CONFIG.getConfig(ConfigurationKeys.STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
     }
 
     @Override

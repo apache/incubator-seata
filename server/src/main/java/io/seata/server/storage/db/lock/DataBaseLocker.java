@@ -17,24 +17,19 @@ package io.seata.server.storage.db.lock;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
-import io.seata.common.holder.ObjectHolder;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
-import io.seata.core.store.db.DataSourceProvider;
-import io.seata.server.storage.r2dbc.lock.R2dbcLockStoreDataBaseDAO;
-import org.springframework.context.ApplicationContext;
-
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import io.seata.server.storage.db.DataBaseStoreFactory;
+import io.seata.server.storage.db.DataBaseStoreType;
 
 /**
  * The type Data base locker.
@@ -51,17 +46,8 @@ public class DataBaseLocker extends AbstractLocker {
      *
      */
     public DataBaseLocker() {
-        ApplicationContext applicationContext =
-            (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-        R2dbcLockStoreDataBaseDAO r2dbcLockStoreDataBaseDAO = null;
-        try {
-            r2dbcLockStoreDataBaseDAO = applicationContext.getBean(R2dbcLockStoreDataBaseDAO.class);
-        } catch (Exception ignored) {
-        }
-        String datasourceType =
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-        lockStore = r2dbcLockStoreDataBaseDAO != null ? r2dbcLockStoreDataBaseDAO
-            : new LockStoreDataBaseDAO(EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide());
+        lockStore = DataBaseStoreFactory
+                .getLockStore(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
     }
 
     @Override

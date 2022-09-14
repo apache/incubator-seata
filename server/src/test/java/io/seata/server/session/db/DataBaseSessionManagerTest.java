@@ -35,7 +35,7 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.db.session.DataBaseSessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
+import io.seata.server.storage.db.jdbc.store.LogStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;

@@ -38,6 +38,7 @@ public class StoreDBProperties {
     private String branchTable = "branch_table";
     private String lockTable = "lock_table";
     private String distributedLockTable = "distributed_lock";
+    private String type = "jdbc";
     private Integer queryLimit = 100;
     private Integer maxWait = 5000;
 
@@ -164,5 +165,13 @@ public class StoreDBProperties {
     public StoreDBProperties setMaxWait(Integer maxWait) {
         this.maxWait = maxWait;
         return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.db.store;
+package io.seata.server.storage.db.jdbc.store;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

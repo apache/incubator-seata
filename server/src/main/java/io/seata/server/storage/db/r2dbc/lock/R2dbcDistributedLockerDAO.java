@@ -13,15 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.r2dbc.lock;
+package io.seata.server.storage.db.r2dbc.lock;
 
 import java.util.Objects;
 
 import javax.annotation.Resource;
 
 import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
-import io.seata.server.storage.r2dbc.entity.DistributedLock;
-import io.seata.server.storage.r2dbc.repository.DistributedLockRepository;
+import io.seata.server.storage.db.r2dbc.repository.DistributedLockRepository;
+import io.seata.server.storage.db.r2dbc.entity.DistributedLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +29,10 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.scheduler.Schedulers;
@@ -38,12 +40,12 @@ import reactor.core.scheduler.Schedulers;
 /**
  * @author jianbin.chen
  */
-@ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
+@ConditionalOnBean(DatabaseClient.class)
 @Component
-public class R2dbcDistributedLocker implements DistributedLocker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(R2dbcDistributedLocker.class);
+public class R2dbcDistributedLockerDAO implements DistributedLocker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(R2dbcDistributedLockerDAO.class);
 
-    BeanCopier distributedLockDOToEntity = BeanCopier.create(DistributedLockDO.class, DistributedLock.class, false);
+    private BeanCopier distributedLockDOToEntity = BeanCopier.create(DistributedLockDO.class, DistributedLock.class, false);
 
     @Resource
     DistributedLockRepository distributedLockRepository;
@@ -54,7 +56,7 @@ public class R2dbcDistributedLocker implements DistributedLocker {
     /**
      * Instantiates a new Log store data base dao.
      */
-    public R2dbcDistributedLocker() {}
+    public R2dbcDistributedLockerDAO() {}
 
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
