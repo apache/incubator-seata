@@ -21,18 +21,20 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
-import io.seata.core.protocol.transaction.BranchRollbackRequest;
-import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
-import io.seata.core.protocol.transaction.GlobalCommitRequest;
-import io.seata.core.protocol.transaction.GlobalCommitResponse;
-import io.seata.core.protocol.transaction.GlobalRollbackRequest;
-import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
+import io.seata.core.protocol.transaction.BranchRollbackRequest;
+import io.seata.core.protocol.transaction.BranchRollbackResponse;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.protocol.transaction.GlobalCommitRequest;
+import io.seata.core.protocol.transaction.GlobalCommitResponse;
+import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalRollbackRequest;
+import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.rpc.netty.gts.exception.TxcException;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
@@ -476,6 +478,53 @@ public class TxcMessageCodec {
                 out.writeByte(1);
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
                 msgOut = serializer.serialize(branchRegisterResponse);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 21: {
+                GlobalLockQueryRequest globalLockQueryRequest = new GlobalLockQueryRequest();
+                QueryLockMessage queryLockMessage = (QueryLockMessage) gtsCodec;
+
+//              registerMessage.getCommitMode() is unused
+                String serverAddr = "127.0.0.1:8091";
+                String xid = serverAddr + ":" + String.valueOf(queryLockMessage.getTranId());
+                String resourceId = queryLockMessage.getKey();
+                String lockKey = queryLockMessage.getBusinessKey();
+
+                globalLockQueryRequest.setXid(xid);
+                globalLockQueryRequest.setBranchType(BranchType.GTS);
+                globalLockQueryRequest.setResourceId(resourceId);
+                globalLockQueryRequest.setLockKey(lockKey);
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(globalLockQueryRequest);
+                // Compress
+                out.writeByte(0);
+                return msgOut;
+            }
+            case 22: {
+                GlobalLockQueryResponse globalLockQueryResponse = new GlobalLockQueryResponse();
+                QueryLockResultMessage queryLockResultMessage = (QueryLockResultMessage) gtsCodec;
+
+                String businessKey = queryLockResultMessage.getBusinessKey();
+                long tranId = queryLockResultMessage.getTranId();
+                int result = queryLockResultMessage.getResult();
+
+                // TODO judge lockable
+                globalLockQueryResponse.setLockable(true);
+                globalLockQueryResponse.setResultCode(ResultCode.get(result));
+
+                // message type
+                out.writeByte(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+                // Serializer (default: seata)
+                out.writeByte(1);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(1));
+                msgOut = serializer.serialize(globalLockQueryResponse);
                 // Compress
                 out.writeByte(0);
                 return msgOut;
