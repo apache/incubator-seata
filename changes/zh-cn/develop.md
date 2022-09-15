@@ -35,6 +35,7 @@
 - [[#4911](https://github.com/seata/seata/pull/4911)] 添加 header 和license 检测
 - [[#4917](https://github.com/seata/seata/pull/4917)] 升级 package-lock.json 修复漏洞
 - [[#4924](https://github.com/seata/seata/pull/4924)] 优化 pom 依赖
+- [[#4932](https://github.com/seata/seata/pull/4932)] 抽取部分配置的默认值
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -57,5 +58,6 @@
 - [misselvexu](https://github.com/misselvexu)
 - [doubleDimple](https://github.com/doubleDimple)
 - [jsbxyyx](https://github.com/jsbxyyx)
+- [tuwenlin](https://github.com/tuwenlin)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
