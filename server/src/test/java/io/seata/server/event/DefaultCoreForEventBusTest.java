@@ -53,7 +53,7 @@ import org.springframework.context.ApplicationContext;
 @SpringBootTest
 public class DefaultCoreForEventBusTest {
 
-    private static final boolean DELAY_HANDLE_SESSION = StoreConfig.getSessionMode() == SessionMode.FILE;
+    private static final boolean DELAY_HANDLE_SESSION = StoreConfig.getSessionMode() != SessionMode.FILE;
 
     @BeforeAll
     public static void setUp(ApplicationContext context) throws InterruptedException {

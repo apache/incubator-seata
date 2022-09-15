@@ -60,7 +60,7 @@ public class SessionHelper {
      */
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
-    private static final boolean DELAY_HANDLE_SESSION = StoreConfig.getSessionMode() == SessionMode.FILE;
+    private static final boolean DELAY_HANDLE_SESSION = StoreConfig.getSessionMode() != SessionMode.FILE;
 
     private SessionHelper() {
     }
