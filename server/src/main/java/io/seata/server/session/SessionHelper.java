@@ -37,6 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
+
 /**
  * The type Session helper.
  *
@@ -51,7 +53,7 @@ public class SessionHelper {
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
-            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, false);
+            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
 
     /**
      * The instance of DefaultCoordinator

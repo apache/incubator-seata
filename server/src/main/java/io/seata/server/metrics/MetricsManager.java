@@ -25,6 +25,8 @@ import io.seata.metrics.registry.Registry;
 import io.seata.metrics.registry.RegistryFactory;
 import io.seata.server.event.EventBusManager;
 
+import static io.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
+
 /**
  * Metrics manager for init
  *
@@ -47,7 +49,7 @@ public class MetricsManager {
 
     public void init() {
         boolean enabled = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, true);
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, DEFAULT_METRICS_ENABLED);
         if (enabled) {
             registry = RegistryFactory.getInstance();
             if (registry != null) {

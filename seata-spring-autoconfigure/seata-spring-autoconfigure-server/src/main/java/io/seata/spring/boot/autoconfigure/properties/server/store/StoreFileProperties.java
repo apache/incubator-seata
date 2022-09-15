@@ -18,6 +18,7 @@ package io.seata.spring.boot.autoconfigure.properties.server.store;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
 
 /**
@@ -30,7 +31,7 @@ public class StoreFileProperties {
     private Integer maxBranchSessionSize = 16384;
     private Integer maxGlobalSessionSize = 512;
     private Integer fileWriteBufferCacheSize = 16384;
-    private Integer sessionReloadReadSize = 100;
+    private Integer sessionReloadReadSize = DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
     private String flushDiskMode = "async";
 
     public String getDir() {
