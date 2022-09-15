@@ -89,7 +89,7 @@ public class SessionHolder {
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
-    public static void init(){
+    public static void init() {
         init(null);
     }
     /**
@@ -99,7 +99,7 @@ public class SessionHolder {
      * @throws IOException the io exception
      */
     public static void init(SessionMode sessionMode) {
-        if (null==sessionMode) {
+        if (null == sessionMode) {
             sessionMode = StoreConfig.getSessionMode();
         }
         if (SessionMode.DB.equals(sessionMode)) {
