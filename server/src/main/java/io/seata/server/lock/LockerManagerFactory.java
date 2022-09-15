@@ -55,7 +55,7 @@ public class LockerManagerFactory {
         if (LOCK_MANAGER == null) {
             synchronized (LockerManagerFactory.class) {
                 if (LOCK_MANAGER == null) {
-                    if (null == lockMode){
+                    if (null == lockMode) {
                         lockMode = StoreConfig.getLockMode();
                     }
                     //if not exist the lock mode, throw exception
