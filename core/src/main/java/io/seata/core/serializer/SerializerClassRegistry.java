@@ -61,7 +61,7 @@ import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
 /**
  * Provide a unified serialization registry, this class used for {@code seata-serializer-fst}
- * and {@code seata-serializer-kryo}, it will register some classes at startup time (for example {@link KryoSerializerFactory#create})
+ * and {@code seata-serializer-kryo}, it will register some classes at startup time (for example {@code KryoSerializerFactory#create})
  * @author funkye
  */
 public class SerializerClassRegistry {
