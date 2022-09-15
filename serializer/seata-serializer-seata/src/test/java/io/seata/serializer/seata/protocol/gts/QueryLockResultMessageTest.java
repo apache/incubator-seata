@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.seata.core.rpc.netty.gts.message.GtsRpcMessage;
 import io.seata.core.rpc.netty.gts.message.QueryLockResultMessage;
-import io.seata.core.rpc.netty.gts.message.RegisterResultMessage;
 import io.seata.core.rpc.netty.gts.message.TxcCodec;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import org.junit.jupiter.api.Test;
