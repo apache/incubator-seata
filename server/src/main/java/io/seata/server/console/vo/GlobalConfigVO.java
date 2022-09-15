@@ -1,10 +1,7 @@
 package io.seata.server.console.vo;
-
 /**
- * @Author:Yuzhiqiang
- * @Description:
- * @Date: Create in 20:25 2022/7/27
- * @Modified By:
+ * GlobalLockVO
+ * @author Yuzhiqiang
  */
 public class GlobalConfigVO {
     private String id;

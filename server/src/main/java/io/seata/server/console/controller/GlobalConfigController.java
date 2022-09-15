@@ -1,5 +1,4 @@
 package io.seata.server.console.controller;
-
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.constant.Code;
@@ -32,13 +31,13 @@ public class GlobalConfigController {
 
         try {
             Boolean result = CONFIG.putConfig(dataId, content);
-            if(result) {
+            if (result) {
                 return SingleResult.success(result);
             } else {
                 return SingleResult.failure(Code.ERROR);
             }
-        } catch(Exception e) {
-            return SingleResult.failure("101", "修改配置异常");
+        } catch (Exception e) {
+            return SingleResult.failure("101", "config exception");
         }
     }
 
@@ -46,8 +45,4 @@ public class GlobalConfigController {
     public PageResult<GlobalConfigVO> get()  {
         return globalConfigDBService.getConfigList();
     }
-
-
-
-
 }
