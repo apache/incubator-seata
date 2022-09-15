@@ -17,7 +17,6 @@ package io.seata.server.storage.db.r2dbc.repository;
 
 import io.seata.server.storage.db.r2dbc.entity.Lock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.r2dbc.core.DatabaseClient;
 
