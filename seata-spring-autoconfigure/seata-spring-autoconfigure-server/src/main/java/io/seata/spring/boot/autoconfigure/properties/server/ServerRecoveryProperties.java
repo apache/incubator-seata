@@ -18,6 +18,10 @@ package io.seata.spring.boot.autoconfigure.properties.server;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_COMMITING_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
 
 /**
@@ -27,10 +31,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVER
 @ConfigurationProperties(prefix = SERVER_RECOVERY_PREFIX)
 public class ServerRecoveryProperties {
 
-    private int committingRetryPeriod = 1000;
-    private int asyncCommittingRetryPeriod = 1000;
-    private int rollbackingRetryPeriod = 1000;
-    private int timeoutRetryPeriod = 1000;
+    private int committingRetryPeriod = DEFAULT_COMMITING_RETRY_PERIOD;
+    private int asyncCommittingRetryPeriod = DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
+    private int rollbackingRetryPeriod = DEFAULT_ROLLBACKING_RETRY_PERIOD;
+    private int timeoutRetryPeriod = DEFAULT_TIMEOUT_RETRY_PERIOD;
 
     public int getCommittingRetryPeriod() {
         return committingRetryPeriod;

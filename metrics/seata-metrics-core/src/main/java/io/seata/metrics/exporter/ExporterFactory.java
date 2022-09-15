@@ -26,6 +26,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.DefaultValues.DEFAULT_METRICS_EXPORTER_LIST;
+
 /**
  * Exporter Factory for load all configured exporters
  *
@@ -37,7 +39,7 @@ public class ExporterFactory {
     public static List<Exporter> getInstanceList() {
         List<Exporter> exporters = new ArrayList<>();
         String exporterTypeNameList = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, null);
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, DEFAULT_METRICS_EXPORTER_LIST);
         if (!StringUtils.isNullOrEmpty(exporterTypeNameList)) {
             String[] exporterTypeNames = exporterTypeNameList.split(",");
             for (String exporterTypeName : exporterTypeNames) {
