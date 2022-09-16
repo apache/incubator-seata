@@ -16,10 +16,7 @@
 package io.seata.core.rpc.grpc;
 
 import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.List;
 
-import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -30,7 +27,6 @@ import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
-import io.seata.core.rpc.grpc.interceptor.ClientHeaderInterceptor;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +53,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
         long start = System.currentTimeMillis();
         Object response;
         GrpcClientSeataChannel channelToServer = null;
-        GrpcClientSeataChannel tmpChannel = new GrpcClientSeataChannel(managedChannel, address, getClientInterceptors());
+        GrpcClientSeataChannel tmpChannel = new GrpcClientSeataChannel(managedChannel, address);
         if (key.getMessage() == null) {
             throw new FrameworkException("[GRPC]register msg is null, role:" + key.getTransactionRole().name());
         }
@@ -121,11 +117,8 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
                 .forAddress(address.getAddress().getHostAddress(), address.getPort())
                 .usePlaintext()
                 .directExecutor()
+                .intercept(rpcRemotingClient.getClientInterceptors())
                 .build();
-    }
-
-    private List<ClientInterceptor> getClientInterceptors() {
-        return Collections.singletonList(new ClientHeaderInterceptor(rpcRemotingClient));
     }
 
     @Override

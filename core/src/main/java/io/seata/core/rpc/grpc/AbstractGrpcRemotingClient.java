@@ -17,6 +17,7 @@ package io.seata.core.rpc.grpc;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -31,6 +32,7 @@ import java.util.function.Function;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.ClientInterceptor;
 import io.grpc.stub.StreamObserver;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
@@ -55,6 +57,7 @@ import io.seata.core.rpc.SeataChannel;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.grpc.generated.GrpcRemoting;
 import io.seata.core.rpc.grpc.generated.ResourceManagerServiceGrpc;
+import io.seata.core.rpc.grpc.interceptor.ClientHeaderInterceptor;
 import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
@@ -401,6 +404,10 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
 
     public String getClientId() {
         return this.clientId;
+    }
+
+    public List<ClientInterceptor> getClientInterceptors() {
+        return Collections.singletonList(new ClientHeaderInterceptor(this));
     }
 
     /**

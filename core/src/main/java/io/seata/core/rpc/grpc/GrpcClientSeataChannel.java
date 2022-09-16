@@ -16,11 +16,8 @@
 package io.seata.core.rpc.grpc;
 
 import java.net.SocketAddress;
-import java.util.List;
 import java.util.Objects;
 
-import io.grpc.ClientInterceptor;
-import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.ClientCallStreamObserver;
 import io.grpc.stub.StreamObserver;
@@ -40,13 +37,11 @@ public class GrpcClientSeataChannel implements SeataChannel {
 
     private String clientId;
 
-    private final List<ClientInterceptor> interceptors;
 
 
-    public GrpcClientSeataChannel(ManagedChannel managedChannel, SocketAddress remoteAddress, List<ClientInterceptor> interceptors) {
+    public GrpcClientSeataChannel(ManagedChannel managedChannel, SocketAddress remoteAddress) {
         this.managedChannel = managedChannel;
         this.remoteAddress = remoteAddress;
-        this.interceptors = interceptors;
     }
 
     public StreamObserver getStreamObserver() {
@@ -73,7 +68,7 @@ public class GrpcClientSeataChannel implements SeataChannel {
 
     @Override
     public Object originChannel() {
-        return ClientInterceptors.intercept(managedChannel, interceptors);
+        return managedChannel;
     }
 
     @Override
