@@ -220,10 +220,13 @@ public class ChannelManager implements ServerChannelManager {
             ConcurrentMap<Integer, RpcContext> clientRpcMap = TM_CHANNELS.get(clientIdentified);
             return getChannelFromSameClientMap(clientRpcMap, clientPort);
         } else if (clientRole == RpcChannelPoolKey.TransactionRole.RMROLE) {
-            for (Map<Integer, RpcContext> clientRmMap : rpcContext.getClientRMHolderMap().values()) {
-                SeataChannel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
-                if (sameClientChannel != null) {
-                    return sameClientChannel;
+            ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> clientRMHolderMap = rpcContext.getClientRMHolderMap();
+            if (CollectionUtils.isNotEmpty(clientRMHolderMap)) {
+                for (Map<Integer, RpcContext> clientRmMap : clientRMHolderMap.values()) {
+                    SeataChannel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
+                    if (sameClientChannel != null) {
+                        return sameClientChannel;
+                    }
                 }
             }
         }

@@ -18,6 +18,10 @@ package io.seata.spring.boot.autoconfigure.properties.server;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
+import static io.seata.common.DefaultValues.DEFAULT_METRICS_EXPORTER_LIST;
+import static io.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYPE;
+import static io.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
 
 /**
@@ -26,17 +30,17 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX
 @Component
 @ConfigurationProperties(prefix = METRICS_PREFIX)
 public class MetricsProperties {
-    private Boolean enabled = false;
-    private String registryType = "compact";
-    private String exporterList = "prometheus";
-    private Integer exporterPrometheusPort = 9898;
+    private boolean enabled = DEFAULT_METRICS_ENABLED;
+    private String registryType = DEFAULT_METRICS_REGISTRY_TYPE;
+    private String exporterList = DEFAULT_METRICS_EXPORTER_LIST;
+    private int exporterPrometheusPort = DEFAULT_PROMETHEUS_PORT;
 
 
     public Boolean getEnabled() {
         return enabled;
     }
 
-    public MetricsProperties setEnabled(Boolean enabled) {
+    public MetricsProperties setEnabled(boolean enabled) {
         this.enabled = enabled;
         return this;
     }
@@ -59,11 +63,11 @@ public class MetricsProperties {
         return this;
     }
 
-    public Integer getExporterPrometheusPort() {
+    public int getExporterPrometheusPort() {
         return exporterPrometheusPort;
     }
 
-    public MetricsProperties setExporterPrometheusPort(Integer exporterPrometheusPort) {
+    public MetricsProperties setExporterPrometheusPort(int exporterPrometheusPort) {
         this.exporterPrometheusPort = exporterPrometheusPort;
         return this;
     }

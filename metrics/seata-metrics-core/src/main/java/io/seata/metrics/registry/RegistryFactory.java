@@ -23,6 +23,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
+import static io.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYPE;
+
 /**
  * Registry Factory for load configured metrics registry
  *
@@ -32,7 +34,7 @@ public class RegistryFactory {
     public static Registry getInstance() {
         RegistryType registryType;
         String registryTypeName = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE, null);
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE, DEFAULT_METRICS_REGISTRY_TYPE);
         if (!StringUtils.isNullOrEmpty(registryTypeName)) {
             try {
                 registryType = RegistryType.getType(registryTypeName);
