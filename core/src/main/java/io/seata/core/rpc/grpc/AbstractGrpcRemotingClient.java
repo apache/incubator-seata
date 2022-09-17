@@ -115,7 +115,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
     public AbstractGrpcRemotingClient(GrpcClientConfig clientConfig, ThreadPoolExecutor messageExecutor, RpcChannelPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
-        this.clientChannelManager = new GrpcClientChannelManager(new GrpcPoolableFactory(this), getPoolKeyFunction(), clientConfig);
+        this.clientChannelManager = new GrpcClientChannelManager(new GrpcPoolableFactory(this, clientConfig), getPoolKeyFunction(), clientConfig);
     }
 
     @Override
@@ -244,6 +244,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
                     .setID(rpcMessage.getId())
                     .setMessageType(biStreamMessageType)
                     .setMessage(Any.pack(protoRequest))
+                    .setClientId(channel.getId())
                     .build();
             try {
                 channel.sendMsg(biStreamMessage);
@@ -279,6 +280,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
                     .setID(rpcMessage.getId())
                     .setMessageType(biStreamMessageType)
                     .setMessage(Any.pack(protoRequest))
+                    .setClientId(channel.getId())
                     .build();
             try {
                 channel.sendMsg(biStreamMessage);

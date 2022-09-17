@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>protobuf-lib</artifactId>
+            <artifactId>seata-protobuf-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
 

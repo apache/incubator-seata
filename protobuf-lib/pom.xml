@@ -24,9 +24,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>protobuf-lib</artifactId>
+    <artifactId>seata-protobuf-lib</artifactId>
     <packaging>jar</packaging>
-    <name>protobuf-lib ${project.version}</name>
+    <name>seata-protobuf-lib ${project.version}</name>
     <description>protobuf-lib for Seata built with Maven</description>
 
     <dependencies>

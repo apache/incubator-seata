@@ -16,6 +16,7 @@
 package io.seata.core.rpc.grpc;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -39,8 +40,11 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
 
     private final AbstractGrpcRemotingClient rpcRemotingClient;
 
-    public GrpcPoolableFactory(AbstractGrpcRemotingClient rpcRemotingClient) {
+    private final GrpcClientConfig clientConfig;
+
+    public GrpcPoolableFactory(AbstractGrpcRemotingClient rpcRemotingClient, GrpcClientConfig clientConfig) {
         this.rpcRemotingClient = rpcRemotingClient;
+        this.clientConfig = clientConfig;
     }
 
     @Override
@@ -118,6 +122,7 @@ public class GrpcPoolableFactory implements KeyedPoolableObjectFactory<RpcChanne
                 .usePlaintext()
                 .directExecutor()
                 .intercept(rpcRemotingClient.getClientInterceptors())
+                .keepAliveTime(clientConfig.getKeepAliveTime(), TimeUnit.MILLISECONDS)
                 .build();
     }
 

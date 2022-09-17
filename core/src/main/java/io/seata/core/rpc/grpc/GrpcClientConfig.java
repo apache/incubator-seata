@@ -47,6 +47,8 @@ public class GrpcClientConfig extends BaseRpcConfig {
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
 
+    private static final long keepAliveTime = 6 * 60 * 1000;
+
 
     /**
      * Gets client worker threads.
@@ -55,6 +57,15 @@ public class GrpcClientConfig extends BaseRpcConfig {
      */
     public int getClientWorkerThreads() {
         return clientWorkerThreads;
+    }
+
+    /**
+     * Gets client channel keepalive time.
+     *
+     * @return the client channel keepalive time
+     */
+    public long getKeepAliveTime() {
+        return keepAliveTime;
     }
 
     /**
