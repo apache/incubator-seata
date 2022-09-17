@@ -18,6 +18,7 @@ package io.seata.core.rpc.grpc;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -61,6 +62,7 @@ import io.seata.core.rpc.grpc.interceptor.ClientHeaderInterceptor;
 import io.seata.core.rpc.processor.MessageMeta;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.serializer.protobuf.generated.BranchRegisterResponseProto;
@@ -83,6 +85,11 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
 
     protected volatile String clientId;
+
+    protected long maxWriteIdleTime;
+    protected Map<String, Long> lastActiveTimeMap = new ConcurrentHashMap<>();
+    private static final long SCHEDULE_HEARTBEAT_DELAY_MILLS = 10 * 1000L;
+    private static final long SCHEDULE_HEARTBEAT_INTERVAL_MILLS = 5 * 1000L;
 
     /**
      * merge message send setting
@@ -115,6 +122,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
     public AbstractGrpcRemotingClient(GrpcClientConfig clientConfig, ThreadPoolExecutor messageExecutor, RpcChannelPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
+        this.maxWriteIdleTime = clientConfig.getMaxWriteIdleSeconds() * 1000L;
         this.clientChannelManager = new GrpcClientChannelManager(new GrpcPoolableFactory(this, clientConfig), getPoolKeyFunction(), clientConfig);
     }
 
@@ -128,6 +136,37 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
                 clientChannelManager.reconnect(getTransactionServiceGroup());
             }
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+
+        //add heartbeat check if enable
+        if (maxWriteIdleTime > 0) {
+            timerExecutor.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    Iterator<Map.Entry<String, Long>> iterator = lastActiveTimeMap.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, Long> nextMap = iterator.next();
+                        String serverAddress = nextMap.getKey();
+                        long lastActiveTime = nextMap.getValue();
+                        if (clientChannelManager.isRegister(serverAddress)) {
+                            if (System.currentTimeMillis() - lastActiveTime >= maxWriteIdleTime) {
+                                try {
+                                    SeataChannel seataChannel = clientChannelManager.acquireChannel(serverAddress);
+                                    if (LOGGER.isDebugEnabled()) {
+                                        LOGGER.debug("[GRPC]will send ping msg, channel {}", seataChannel);
+                                    }
+                                    sendAsyncRequest(seataChannel, HeartbeatMessage.PING);
+                                    nextMap.setValue(System.currentTimeMillis());
+                                } catch (Throwable throwable) {
+                                    LOGGER.error("[GRPC]send ping msg error: {}", throwable.getMessage(), throwable);
+                                }
+                            }
+                        } else {
+                            iterator.remove();
+                        }
+                    }
+                }
+            }, SCHEDULE_HEARTBEAT_DELAY_MILLS, SCHEDULE_HEARTBEAT_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
@@ -228,6 +267,7 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
 
     @Override
     protected Object doSyncSend(SeataChannel channel, RpcMessage rpcMessage, long timeoutMillis) throws Exception {
+        String serverAddress = NetUtil.toStringAddress(channel.remoteAddress());
         Object messageBody = rpcMessage.getBody();
         MessageTypeAware messageTypeAware = (MessageTypeAware) messageBody;
 
@@ -240,12 +280,14 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
                 LOGGER.error("[GRPC]can not find useful stub for request type:{}", messageTypeAware.getTypeCode());
                 throw new IllegalArgumentException("can not find a useful stub for the request type" + messageTypeAware.getTypeCode());
             }
-            GrpcRemoting.BiStreamMessage biStreamMessage = GrpcRemoting.BiStreamMessage.newBuilder()
+            GrpcRemoting.BiStreamMessage.Builder messageBuilder = GrpcRemoting.BiStreamMessage.newBuilder()
                     .setID(rpcMessage.getId())
                     .setMessageType(biStreamMessageType)
-                    .setMessage(Any.pack(protoRequest))
-                    .setClientId(channel.getId())
-                    .build();
+                    .setMessage(Any.pack(protoRequest));
+            if (StringUtils.isNotBlank(channel.getId())) {
+                messageBuilder.setClientId(channel.getId());
+            }
+            GrpcRemoting.BiStreamMessage biStreamMessage = messageBuilder.build();
             try {
                 channel.sendMsg(biStreamMessage);
             } catch (Exception e) {
@@ -255,10 +297,14 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
             messageFuture.setRequestMessage(rpcMessage);
             messageFuture.setTimeout(timeoutMillis);
             getFutures().put(rpcMessage.getId(), messageFuture);
-            return messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            Object response = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            lastActiveTimeMap.put(serverAddress, System.currentTimeMillis());
+            return response;
         } else {
             ListenableFuture<Message> future = stubFunction.apply(channel, protoRequest);
-            return ProtoTypeConvertHelper.convertToModel(future.get(timeoutMillis, TimeUnit.MILLISECONDS));
+            Object response = ProtoTypeConvertHelper.convertToModel(future.get(timeoutMillis, TimeUnit.MILLISECONDS));
+            lastActiveTimeMap.put(serverAddress, System.currentTimeMillis());
+            return response;
         }
     }
 
@@ -276,12 +322,14 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
                 LOGGER.error("[GRPC]can not find useful stub for request type:{}", messageTypeAware.getTypeCode());
                 throw new IllegalArgumentException("can not find a useful stub for the request type" + messageTypeAware.getTypeCode());
             }
-            GrpcRemoting.BiStreamMessage biStreamMessage = GrpcRemoting.BiStreamMessage.newBuilder()
+            GrpcRemoting.BiStreamMessage.Builder messageBuilder = GrpcRemoting.BiStreamMessage.newBuilder()
                     .setID(rpcMessage.getId())
                     .setMessageType(biStreamMessageType)
-                    .setMessage(Any.pack(protoRequest))
-                    .setClientId(channel.getId())
-                    .build();
+                    .setMessage(Any.pack(protoRequest));
+            if (StringUtils.isNotBlank(channel.getId())) {
+                messageBuilder.setClientId(channel.getId());
+            }
+            GrpcRemoting.BiStreamMessage biStreamMessage = messageBuilder.build();
             try {
                 channel.sendMsg(biStreamMessage);
             } catch (Exception e) {
@@ -410,6 +458,13 @@ public abstract class AbstractGrpcRemotingClient extends AbstractGrpcRemoting im
 
     public List<ClientInterceptor> getClientInterceptors() {
         return Collections.singletonList(new ClientHeaderInterceptor(this));
+    }
+
+    @Override
+    public void processMessage(RpcMessageHandleContext ctx, Object message) {
+        String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+        lastActiveTimeMap.put(serverAddress, System.currentTimeMillis());
+        super.processMessage(ctx, message);
     }
 
     /**

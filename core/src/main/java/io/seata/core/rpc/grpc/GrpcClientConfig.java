@@ -47,7 +47,7 @@ public class GrpcClientConfig extends BaseRpcConfig {
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
 
-    private static final long keepAliveTime = 6 * 60 * 1000;
+    private static final long KEEP_ALIVE_TIME = 6 * 60 * 1000;
 
 
     /**
@@ -65,7 +65,16 @@ public class GrpcClientConfig extends BaseRpcConfig {
      * @return the client channel keepalive time
      */
     public long getKeepAliveTime() {
-        return keepAliveTime;
+        return KEEP_ALIVE_TIME;
+    }
+
+    /**
+     * Gets client max write idle time
+     *
+     * @return the client max write idle time
+     */
+    public int getMaxWriteIdleSeconds() {
+        return MAX_WRITE_IDLE_SECONDS;
     }
 
     /**

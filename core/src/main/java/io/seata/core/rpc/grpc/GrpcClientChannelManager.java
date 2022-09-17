@@ -290,4 +290,8 @@ public class GrpcClientChannelManager {
         channels.clear();
         channelLocks.clear();
     }
+
+    public boolean isRegister(String serverAddress) {
+        return channels.containsKey(serverAddress);
+    }
 }
