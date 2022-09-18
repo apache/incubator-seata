@@ -31,4 +31,6 @@ public class BranchSessionController {
 
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;
+
+
 }

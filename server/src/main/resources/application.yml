@@ -38,10 +38,10 @@ console:
 seata:
   config:
     # support: nacos, consul, apollo, zk, etcd3
-    type: nacos
+    type: file
   registry:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa
-    type: nacos
+    type: file
   store:
     # support: file 、 db 、 redis
     mode: file
@@ -51,4 +51,4 @@ seata:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000
     ignore:
-      urls: /api/v1/editconfig/*,/,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login

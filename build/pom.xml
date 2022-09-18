@@ -26,7 +26,6 @@
 
     <name>Seata Build ${project.version}</name>
     <description>Seata Build Pom</description>
-
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
