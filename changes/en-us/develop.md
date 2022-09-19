@@ -16,6 +16,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4912](https://github.com/seata/seata/pull/4912)] fix mysql InsertOnDuplicateUpdate column case is different and cannot be matched
 - [[#4543](https://github.com/seata/seata/pull/4543)] fix support Oracle nclob types
 - [[#4915](https://github.com/seata/seata/pull/4915)] fix failed to get server recovery properties
+- [[#4919](https://github.com/seata/seata/pull/4919)] fix XID port  and  address null:0 before coordinator.init
 
 
 ### optimize:
@@ -34,6 +35,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4911](https://github.com/seata/seata/pull/4911)] add license checker workflow
 - [[#4917](https://github.com/seata/seata/pull/4917)] upgrade package-lock.json fix vulnerabilities
 - [[#4924](https://github.com/seata/seata/pull/4924)] optimize pom dependencies
+- [[#4932](https://github.com/seata/seata/pull/4932)] extract the default values for some properties
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -55,5 +57,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [AlbumenJ](https://github.com/AlbumenJ)
 - [doubleDimple](https://github.com/doubleDimple)
 - [jsbxyyx](https://github.com/jsbxyyx)
+- [tuwenlin](https://github.com/tuwenlin)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
