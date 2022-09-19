@@ -28,7 +28,7 @@ public class GlobalConfigVO {
 
     private String descr;
 
-    public GlobalConfigVO () {
+    public GlobalConfigVO() {
 
     }
 
