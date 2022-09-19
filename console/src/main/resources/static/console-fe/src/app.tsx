@@ -70,10 +70,10 @@ class App extends React.Component<AppPropsType, AppStateType> {
         const { overview,transactionInfo,globalLockInfo,configurationInfo } = MenuRouter;
         return {
             items: [
-              // {
-              //     key: '/Overview',
-              //     label: overview,
-              // },
+                // {
+                //     key: '/Overview',
+                //     label: overview,
+                // },
                 {
                     key: '/TransactionInfo',
                     label: transactionInfo,

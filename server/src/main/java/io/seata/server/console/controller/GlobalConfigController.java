@@ -45,7 +45,7 @@ public class GlobalConfigController {
     public SingleResult<Boolean> putconfig(String dataId, String content)  {
 
         try {
-            Boolean result = CONFIG.putConfig(dataId, content);
+            boolean result = CONFIG.putConfig(dataId, content);
             if (result) {
                 return SingleResult.success(result);
             } else {

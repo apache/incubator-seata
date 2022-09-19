@@ -25,7 +25,7 @@
     <version>${revision}</version>
 
     <name>Seata Build ${project.version}</name>
-    <description>Seata Build Pom</description>
+    <description>plugin management for Seata built with Maven</description>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
