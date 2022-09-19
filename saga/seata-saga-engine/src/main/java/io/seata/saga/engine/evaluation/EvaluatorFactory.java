@@ -26,8 +26,8 @@ public interface EvaluatorFactory {
     /**
      * create evaluator
      *
-     * @param expressionString
-     * @return
+     * @param expressionString the expression
+     * @return the evaluator
      */
     Evaluator createEvaluator(String expressionString);
 }
