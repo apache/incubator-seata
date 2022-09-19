@@ -40,8 +40,8 @@ import static io.seata.server.console.result.PageResult.checkPage;
 
 /**
  * Global Lock Redis Service Impl
- * @author: zhongxiang.wang
- * @author: doubleDimple
+ * @author zhongxiang.wang
+ * @author doubleDimple
  */
 @Component
 @org.springframework.context.annotation.Configuration

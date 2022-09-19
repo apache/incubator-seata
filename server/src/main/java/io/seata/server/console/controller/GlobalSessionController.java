@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Global Session Controller
- * @author: zhongxiang.wang
+ * @author zhongxiang.wang
  */
 @RestController
 @RequestMapping("server/api/v1/console/globalSession")

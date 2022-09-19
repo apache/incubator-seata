@@ -20,8 +20,8 @@ import java.io.Serializable;
 
 
 /**
- * @description: Global lock param
- * @author: zhongxiang.wang
+ * Global lock param
+ * @author zhongxiang.wang
  */
 public class GlobalLockParam extends BaseParam implements Serializable {
 
