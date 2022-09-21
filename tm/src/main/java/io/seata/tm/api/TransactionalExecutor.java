@@ -78,7 +78,13 @@ public interface TransactionalExecutor {
          * Rollback retrying code.
          */
         //
-        RollbackRetrying
+        RollbackRetrying,
+
+        /**
+         * Timeout Rollback code.
+         */
+        //
+        TimeoutRollback
     }
 
     /**

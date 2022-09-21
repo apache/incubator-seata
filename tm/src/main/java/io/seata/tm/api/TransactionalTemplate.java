@@ -15,7 +15,9 @@
  */
 package io.seata.tm.api;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
@@ -27,6 +29,7 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +94,8 @@ public class TransactionalTemplate {
                     // If transaction is existing, throw exception.
                     if (existingTransaction(tx)) {
                         throw new TransactionException(
-                            String.format("Existing transaction found for transaction marked with propagation 'never', xid = %s"
-                                    , tx.getXid()));
+                                String.format("Existing transaction found for transaction marked with propagation 'never', xid = %s"
+                                        , tx.getXid()));
                     } else {
                         // Execute without transaction and return.
                         return business.execute();
@@ -132,7 +135,7 @@ public class TransactionalTemplate {
                 }
 
                 // 4. everything is fine, commit.
-                commitTransaction(tx);
+                commitTransaction(tx, txInfo);
 
                 return rs;
             } finally {
@@ -148,6 +151,19 @@ public class TransactionalTemplate {
             }
         }
     }
+
+    /**
+     * Judge whether timeout
+     *
+     * @param beginTime the beginTime
+     * @param txInfo          the transaction info
+     * @return is timeout
+     */
+    private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
+
+        return (System.currentTimeMillis() - beginTime) > txInfo.getTimeOut();
+    }
+
 
     private boolean existingTransaction(GlobalTransaction tx) {
         return tx != null;
@@ -172,23 +188,26 @@ public class TransactionalTemplate {
         }
     }
 
-    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {
+    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException)
+            throws TransactionalExecutor.ExecutionException, TransactionException {
         //roll back
         if (txInfo != null && txInfo.rollbackOn(originalException)) {
-            try {
-                rollbackTransaction(tx, originalException);
-            } catch (TransactionException txe) {
-                // Failed to rollback
-                throw new TransactionalExecutor.ExecutionException(tx, txe,
-                        TransactionalExecutor.Code.RollbackFailure, originalException);
-            }
+            rollbackTransaction(tx, originalException);
         } else {
             // not roll back on this exception, so commit
-            commitTransaction(tx);
+            commitTransaction(tx, txInfo);
         }
     }
 
-    private void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+    private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
+            throws TransactionalExecutor.ExecutionException, TransactionException {
+        if (isTimeout(tx.getCreateTime(), txInfo)) {
+            // business execution timeout
+            LOGGER.info("TM detected timeout, xid = {}", tx.getXid());
+            tx.rollback();
+            return;
+        }
+
         try {
             triggerBeforeCommit();
             tx.commit();
@@ -196,17 +215,31 @@ public class TransactionalTemplate {
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.CommitFailure);
+                    TransactionalExecutor.Code.CommitFailure);
+        }
+
+        if (Arrays.asList(GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbacked).contains(tx.getLocalStatus())) {
+            throw new TransactionalExecutor.ExecutionException(tx,
+                    new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
+                    TransactionalExecutor.Code.TimeoutRollback);
         }
     }
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable originalException) throws TransactionException, TransactionalExecutor.ExecutionException {
-        triggerBeforeRollback();
-        tx.rollback();
-        triggerAfterRollback();
+
+        try {
+            triggerBeforeRollback();
+            tx.rollback();
+            triggerAfterRollback();
+        } catch (TransactionException txe) {
+            // Failed to rollback
+            throw new TransactionalExecutor.ExecutionException(tx, txe,
+                    TransactionalExecutor.Code.RollbackFailure, originalException);
+        }
+
         // 3.1 Successfully rolled back
         throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
-            ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
+                ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
@@ -216,7 +249,7 @@ public class TransactionalTemplate {
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.BeginFailure);
+                    TransactionalExecutor.Code.BeginFailure);
 
         }
     }

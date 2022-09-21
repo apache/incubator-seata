@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.eventbus.Subscribe;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
@@ -36,17 +35,19 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
 import io.seata.core.model.GlobalLockConfig;
+import io.seata.rm.GlobalLockExecutor;
+import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.event.DegradeCheckEvent;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
-import io.seata.rm.GlobalLockExecutor;
-import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
+
+import com.google.common.eventbus.Subscribe;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -260,6 +261,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 case RollbackRetrying:
                     failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
                     throw e.getOriginalException();
+                case TimeoutRollback:
+                    failureHandler.onTimeoutRollback(e.getTransaction(), e.getOriginalException());
+                    throw e.getCause();
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
