@@ -131,4 +131,10 @@ public interface GlobalTransaction {
      */
     GlobalTransactionRole getGlobalTransactionRole();
 
+    /**
+     * get create time
+     *
+     * @return create time
+     */
+    long getCreateTime();
 }
