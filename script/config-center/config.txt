@@ -65,7 +65,7 @@ tcc.fence.cleanPeriod=1h
 #Log rule configuration, for client and server
 log.exceptionRate=100
 
-#Transaction storage configuration, only for the server. The file, DB, and redis configuration values are optional.
+#Transaction storage configuration, only for the server. The file, db, and redis configuration values are optional.
 store.mode=file
 store.lock.mode=file
 store.session.mode=file

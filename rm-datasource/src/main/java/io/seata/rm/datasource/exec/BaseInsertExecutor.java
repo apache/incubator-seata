@@ -132,7 +132,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * parse primary key value from statement.
-     * @return
+     * @return the primary key and values<key:primary key,value:primary key values></key:primary>
      */
     protected Map<String, List<Object>> parsePkValuesFromStatement() {
         // insert values including PK
@@ -221,10 +221,34 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * default get generated keys.
-     *
-     * @param pkKey the primary key
-     * @return value list of generated key
-     * @throws SQLException sql exception
+     * @return the generate keys
+     * @throws SQLException the sql exception
+     */
+    @Deprecated
+    public List<Object> getGeneratedKeys() throws SQLException {
+        // PK is just auto generated
+        ResultSet genKeys = statementProxy.getGeneratedKeys();
+        List<Object> pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = genKeys.getObject(1);
+            pkValues.add(v);
+        }
+        if (pkValues.isEmpty()) {
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
+        }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
+        }
+        return pkValues;
+    }
+
+    /**
+     * default get generated keys.
+     * @param pkKey the pk key
+     * @return the generated key list
+     * @throws SQLException
      */
     public List<Object> getGeneratedKeys(String pkKey) throws SQLException {
         // PK is just auto generated
@@ -245,16 +269,47 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return pkValues;
     }
 
+    /**
+     * the modify for test
+     *
+     * @param expr the expr
+     * @return the pk values by sequence
+     * @throws SQLException the sql exception
+     */
     @Deprecated
-    public List<Object> getGeneratedKeys() throws SQLException {
-        return getGeneratedKeys(null);
+    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
+        List<Object> pkValues = null;
+        try {
+            pkValues = getGeneratedKeys();
+        } catch (NotSupportYetException | SQLException ignore) {
+        }
+
+        if (!CollectionUtils.isEmpty(pkValues)) {
+            return pkValues;
+        }
+
+        Sequenceable sequenceable = (Sequenceable) this;
+        final String sql = sequenceable.getSequenceSql(expr);
+        LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+
+        Connection conn = statementProxy.getConnection();
+        try (Statement ps = conn.createStatement();
+             ResultSet genKeys = ps.executeQuery(sql)) {
+
+            pkValues = new ArrayList<>();
+            while (genKeys.next()) {
+                Object v = genKeys.getObject(1);
+                pkValues.add(v);
+            }
+            return pkValues;
+        }
     }
 
     /**
-     * default get sequence value.
+     * the modify for test
      *
-     * @param expr the sequence expr
-     * @param pkKey the primary key
+     * @param expr  the expr
+     * @param pkKey the pk key
      * @return the pk values by sequence
      * @throws SQLException the sql exception
      */
@@ -284,11 +339,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
             return pkValues;
         }
-    }
-
-    @Deprecated
-    public List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
-        return getPkValuesBySequence(expr,null);
     }
 
     /**
