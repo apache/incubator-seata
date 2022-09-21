@@ -245,6 +245,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return pkValues;
     }
 
+    @Deprecated
     public List<Object> getGeneratedKeys() throws SQLException {
         return getGeneratedKeys(null);
     }
@@ -285,6 +286,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         }
     }
 
+    @Deprecated
     public List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
         return getPkValuesBySequence(expr,null);
     }

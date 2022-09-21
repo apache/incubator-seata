@@ -61,11 +61,10 @@ public class OceanBaseOracleMultiInsertExecutor<T, S extends Statement> extends 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         TableRecords tableRecords = new TableRecords(getTableMeta(tableName));
-        Connection conn = statementProxy.getConnection();
-        try (Statement statement = conn.createStatement()) {
+        try (Connection conn = statementProxy.getConnection()) {
             for (SQLRecognizer recognizer : sqlRecognizers) {
                 getAfterImageFromRecognizer(
-                    (SQLInsertRecognizer) recognizer, beforeImage, statement, tableRecords
+                    (SQLInsertRecognizer) recognizer, beforeImage, conn, tableRecords
                 );
             }
         } catch (ClassCastException e) {
@@ -76,10 +75,11 @@ public class OceanBaseOracleMultiInsertExecutor<T, S extends Statement> extends 
 
     private void getAfterImageFromRecognizer(final SQLInsertRecognizer recognizer,
                                              final TableRecords beforeImage,
-                                             final Statement statement,
+                                             final Connection conn,
                                              final TableRecords tableRecords) throws SQLException {
         String conditionSQL = recognizer.getConditionSQL();
-        try (ResultSet rs = statement.executeQuery(conditionSQL)) {
+        try (Statement statement = conn.createStatement();
+             ResultSet rs = statement.executeQuery(conditionSQL)) {
             int executeTimes = 1;
             if (conditionSQL != null) {
                 rs.last();
