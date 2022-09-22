@@ -88,10 +88,10 @@ public class TxAnnotationProcessor implements BeanPostProcessor {
      * @param bean           the bean
      * @param beanName       the bean name
      * @param field          the field
-     * @param interfaceClass the interface class
+     * @param serviceClass   the serviceClass
      * @throws IllegalAccessException the illegal access exception
      */
-    public void addTxAdvise(Object bean, String beanName, Field field, Class interfaceClass) throws IllegalAccessException {
+    public void addTxAdvise(Object bean, String beanName, Field field, Class serviceClass) throws IllegalAccessException {
         Object fieldValue = field.get(bean);
         if (fieldValue == null) {
             return;
@@ -99,7 +99,7 @@ public class TxAnnotationProcessor implements BeanPostProcessor {
 
         IsTransactionProxyResult isProxyTargetBeanResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
         if (isProxyTargetBeanResult.isProxyTargetBean()) {
-            Object proxyBean = TxBeanParserUtils.createProxy(interfaceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
+            Object proxyBean = TxBeanParserUtils.createProxy(serviceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
             field.setAccessible(true);
             field.set(bean, proxyBean);
             LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy [" + isProxyTargetBeanResult.getMethodInterceptor().getClass().getName() + "]");

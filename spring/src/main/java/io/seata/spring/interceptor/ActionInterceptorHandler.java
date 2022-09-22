@@ -58,10 +58,11 @@ public class ActionInterceptorHandler {
     /**
      * Handler the Tx Aspect
      *
-     * @param method              the method
-     * @param arguments           the arguments
+     * @param method         the method
+     * @param arguments      the arguments
+     * @param xid            the xid
      * @param businessActionParam the business action params
-     * @param targetCallback      the target callback
+     * @param targetCallback the target callback
      * @return the business result
      * @throws Throwable the throwable
      */
@@ -126,6 +127,7 @@ public class ActionInterceptorHandler {
     /**
      * Get or create action context, and reset to arguments
      *
+     * @param parameterTypes the par
      * @param arguments the arguments
      * @return the action context
      * @since above 1.4.2

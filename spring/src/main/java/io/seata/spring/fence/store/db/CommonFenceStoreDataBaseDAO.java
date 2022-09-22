@@ -32,6 +32,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The type Common Fence store data base dao
@@ -79,6 +82,28 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
             } else {
                 return null;
             }
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps);
+        }
+    }
+
+    @Override
+    public Set<String> queryEndStatusXidsByDate(Connection conn, Date datetime, int limit) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String sql = CommonFenceStoreSqls.getQueryEndStatusSQLByDate(logTableName);
+            ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, new Timestamp(datetime.getTime()));
+            ps.setInt(2, limit);
+            rs = ps.executeQuery();
+            Set<String> xids = new HashSet<>(limit);
+            while (rs.next()) {
+                xids.add(rs.getString("xid"));
+            }
+            return xids;
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
@@ -149,12 +174,31 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
     }
 
     @Override
-    public int deleteCommonFenceDOByDate(Connection conn, Date datetime) {
+    public int deleteTCCFenceDO(Connection conn, List<String> xids) {
+        PreparedStatement ps = null;
+        try {
+            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", xids.size());
+            String sql = CommonFenceStoreSqls.getDeleteSQLByXids(logTableName, paramsPlaceHolder);
+            ps = conn.prepareStatement(sql);
+            for (int i = 0; i < xids.size(); i++) {
+                ps.setString(i + 1, xids.get(i));
+            }
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps);
+        }
+    }
+
+    @Override
+    public int deleteCommonFenceDOByDate(Connection conn, Date datetime, int limit) {
         PreparedStatement ps = null;
         try {
             String sql = CommonFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setTimestamp(1, new Timestamp(datetime.getTime()));
+            ps.setInt(2, limit);
             return ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);

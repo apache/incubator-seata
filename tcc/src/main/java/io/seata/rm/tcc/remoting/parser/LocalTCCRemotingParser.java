@@ -23,6 +23,7 @@ import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.spring.remoting.Protocols;
 import io.seata.spring.remoting.RemotingDesc;
 import io.seata.spring.remoting.parser.AbstractedRemotingParser;
+import org.springframework.aop.framework.AopProxyUtils;
 
 /**
  * local tcc bean parsing
@@ -51,11 +52,19 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         remotingDesc.setService(this.isService(bean, beanName));
         remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
+        // check if LocalTCC annotation is marked on the implementation class
+        if (classType.isAnnotationPresent(LocalTCC.class)) {
+            remotingDesc.setServiceClass(AopProxyUtils.ultimateTargetClass(bean));
+            remotingDesc.setServiceClassName(remotingDesc.getServiceClass().getName());
+            remotingDesc.setTargetBean(bean);
+            return remotingDesc;
+        }
+        // check if LocalTCC annotation is marked on the interface
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
         for (Class<?> interClass : interfaceClasses) {
             if (interClass.isAnnotationPresent(LocalTCC.class)) {
-                remotingDesc.setInterfaceClassName(interClass.getName());
-                remotingDesc.setInterfaceClass(interClass);
+                remotingDesc.setServiceClassName(interClass.getName());
+                remotingDesc.setServiceClass(interClass);
                 remotingDesc.setTargetBean(bean);
                 return remotingDesc;
             }
@@ -69,7 +78,7 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
     }
 
     /**
-     * Determine whether there is an annotation {@link LocalTCC}
+     * Determine whether there is an annotation on interface or impl {@link LocalTCC}
      * @param bean the bean
      * @return boolean
      */
@@ -81,6 +90,6 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
                 return true;
             }
         }
-        return false;
+        return classType.isAnnotationPresent(LocalTCC.class);
     }
 }

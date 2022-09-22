@@ -53,9 +53,6 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
     private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
             DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
-    /**
-     * TODO singleTone?
-     */
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     private volatile boolean disable = ConfigurationFactory.getInstance().getBoolean(

@@ -162,6 +162,11 @@ public interface Constants {
     String SKIP_CHECK_LOCK = "skipCheckLock";
 
     /**
+     * The constant REGISTRY_TYPE_SPLIT_CHAR.
+     */
+    String REGISTRY_TYPE_SPLIT_CHAR = ",";
+    
+    /**
      * phase two compensation method name
      */
     String COMPENSATION_METHOD = "sys::compensation";

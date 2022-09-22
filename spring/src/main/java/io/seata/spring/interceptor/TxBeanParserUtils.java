@@ -151,10 +151,10 @@ public class TxBeanParserUtils {
     /**
      * Create a proxy bean for transaction service
      *
-     * @param interfaceClass
-     * @param fieldValue
-     * @param actionInterceptor
-     * @return
+     * @param interfaceClass the interface class
+     * @param fieldValue the field value
+     * @param actionInterceptor the action interceptor
+     * @return the service proxy bean
      */
     public static <T> T createProxy(Class<T> interfaceClass, Object fieldValue, MethodInterceptor actionInterceptor) {
         ProxyFactory factory = new ProxyFactory();
