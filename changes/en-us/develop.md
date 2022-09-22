@@ -13,6 +13,11 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
 - [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
+- [[#4912](https://github.com/seata/seata/pull/4912)] fix mysql InsertOnDuplicateUpdate column case is different and cannot be matched
+- [[#4543](https://github.com/seata/seata/pull/4543)] fix support Oracle nclob types
+- [[#4915](https://github.com/seata/seata/pull/4915)] fix failed to get server recovery properties
+- [[#4919](https://github.com/seata/seata/pull/4919)] fix XID port  and  address null:0 before coordinator.init
+
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -27,6 +32,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4865](https://github.com/seata/seata/pull/4865)] fix some security vulnerabilities in GGEditor
 - [[#4590](https://github.com/seata/seata/pull/4590)] auto degrade enable to dynamic configure
 - [[#4490](https://github.com/seata/seata/pull/4490)] tccfence log table delete by index
+- [[#4911](https://github.com/seata/seata/pull/4911)] add license checker workflow
+- [[#4917](https://github.com/seata/seata/pull/4917)] upgrade package-lock.json fix vulnerabilities
+- [[#4924](https://github.com/seata/seata/pull/4924)] optimize pom dependencies
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -46,5 +54,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
 - [AlbumenJ](https://github.com/AlbumenJ)
+- [doubleDimple](https://github.com/doubleDimple)
+- [jsbxyyx](https://github.com/jsbxyyx)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

@@ -411,8 +411,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     /**
      * RollbackInfo to bytes
      *
-     * @param rs
-     * @return
+     * @param rs result set
+     * @return rollback info
      * @throws SQLException SQLException
      */
     protected byte[] getRollbackInfo(ResultSet rs) throws SQLException  {

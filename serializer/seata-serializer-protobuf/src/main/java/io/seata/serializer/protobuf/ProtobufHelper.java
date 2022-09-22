@@ -45,8 +45,8 @@ public class ProtobufHelper {
 
     /**
      *
-     * @param clazzName
-     * @return
+     * @param clazzName class name
+     * @return the protobuf class
      */
     public Class getPbClass(String clazzName) {
         return CollectionUtils.computeIfAbsent(requestClassCache, clazzName, key -> {
