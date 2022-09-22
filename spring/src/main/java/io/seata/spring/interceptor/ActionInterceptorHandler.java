@@ -285,25 +285,25 @@ public class ActionInterceptorHandler {
      * @return the action interface method
      */
     public Method getActionInterfaceMethod(MethodInvocation invocation, RemotingDesc remotingDesc) {
-        Class<?> interfaceType = null;
+        Class<?> serviceType = null;
         try {
             if (remotingDesc == null) {
-                interfaceType = getProxyInterface(invocation.getThis());
+                serviceType = getProxyInterface(invocation.getThis());
             } else {
-                interfaceType = remotingDesc.getInterfaceClass();
+                serviceType = remotingDesc.getServiceClass();
             }
-            if (interfaceType == null && remotingDesc != null && remotingDesc.getInterfaceClassName() != null) {
-                interfaceType = Class.forName(remotingDesc.getInterfaceClassName(), true,
+            if (serviceType == null && remotingDesc != null && remotingDesc.getServiceClassName() != null) {
+                serviceType = Class.forName(remotingDesc.getServiceClassName(), true,
                         Thread.currentThread().getContextClassLoader());
             }
-            if (interfaceType == null) {
+            if (serviceType == null) {
                 return invocation.getMethod();
             }
-            return interfaceType.getMethod(invocation.getMethod().getName(),
+            return serviceType.getMethod(invocation.getMethod().getName(),
                     invocation.getMethod().getParameterTypes());
         } catch (NoSuchMethodException e) {
-            if (interfaceType != null && !"toString".equals(invocation.getMethod().getName())) {
-                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), interfaceType.getName());
+            if (serviceType != null && !"toString".equals(invocation.getMethod().getName())) {
+                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), serviceType.getName());
             }
             return invocation.getMethod();
         } catch (Exception e) {

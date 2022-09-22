@@ -49,8 +49,8 @@ public class TccTransactionAutoProxy implements TransactionAutoProxy {
         //check if it is TCC bean
         boolean isTccClazz = false;
         boolean userFence = false;
-        Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-        Method[] methods = tccInterfaceClazz.getMethods();
+        Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+        Method[] methods = tccServiceClazz.getMethods();
         TwoPhaseBusinessAction twoPhaseBusinessAction;
         for (Method method : methods) {
             twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
@@ -92,8 +92,8 @@ public class TccTransactionAutoProxy implements TransactionAutoProxy {
     private void registryResource(RemotingDesc remotingDesc) {
         if (remotingDesc.isService()) {
             try {
-                Class<?> interfaceClass = remotingDesc.getInterfaceClass();
-                Method[] methods = interfaceClass.getMethods();
+                Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+                Method[] methods = tccServiceClazz.getMethods();
                 //service bean, registry resource
                 Object targetBean = remotingDesc.getTargetBean();
                 for (Method m : methods) {
@@ -104,10 +104,10 @@ public class TccTransactionAutoProxy implements TransactionAutoProxy {
                         tccResource.setTargetBean(targetBean);
                         tccResource.setPrepareMethod(m);
                         tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                        tccResource.setCommitMethod(interfaceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                        tccResource.setCommitMethod(tccServiceClazz.getMethod(twoPhaseBusinessAction.commitMethod(),
                                 twoPhaseBusinessAction.commitArgsClasses()));
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                        tccResource.setRollbackMethod(interfaceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                        tccResource.setRollbackMethod(tccServiceClazz.getMethod(twoPhaseBusinessAction.rollbackMethod(),
                                 twoPhaseBusinessAction.rollbackArgsClasses()));
                         // set argsClasses
                         tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
