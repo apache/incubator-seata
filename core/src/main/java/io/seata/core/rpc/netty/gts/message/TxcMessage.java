@@ -23,7 +23,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TxcMessage implements TxcMsgVisitor, Serializable, TxcCodec {
+public abstract class TxcMessage implements Serializable, TxcCodec {
     private static final long serialVersionUID = -1441020418526899889L;
     public static final short TYPE_BEGIN = 1;
     public static final short TYPE_BEGIN_RESULT = 2;
@@ -72,19 +72,10 @@ public abstract class TxcMessage implements TxcMsgVisitor, Serializable, TxcCode
     public static final short TYPE_CLUSTER_BKUP = 123;
     public static final short TYPE_CLUSTER_BKUP_RESULT = 124;
     public static final Charset UTF8 = Charset.forName("utf-8");
-    public MsgHandler handler;
     public ChannelHandlerContext ctx;
     public static final Map<Short, String> TYPE_MAP = new HashMap();
 
     public TxcMessage() {
-    }
-
-    public MsgHandler getHandler() {
-        return this.handler;
-    }
-
-    public void setHandler(MsgHandler handler) {
-        this.handler = handler;
     }
 
     public static int bytesToInt(byte[] bytes, int offset) {
@@ -103,10 +94,6 @@ public abstract class TxcMessage implements TxcMsgVisitor, Serializable, TxcCode
         bytes[offset + 1] = (byte) (i >> 16 & 255);
         bytes[offset + 2] = (byte) (i >> 8 & 255);
         bytes[offset + 3] = (byte) (i & 255);
-    }
-
-    @Override
-    public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
     }
 
     @Override

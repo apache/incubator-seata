@@ -111,7 +111,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
                         && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1) {
                     // seata message
-                    if (b2 == ProtocolConstants.VERSION) {
+                    if (b2 >= ProtocolConstants.VERSION) {
                         // need LengthFieldBasedFrameDecoder check
                         decoded = super.decode(ctx, in);
                         if (decoded instanceof ByteBuf) {

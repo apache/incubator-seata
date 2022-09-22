@@ -47,11 +47,6 @@ public class BranchRollbackResultMessage extends AbstractResultMessage {
     }
 
     @Override
-    public void handleMessage(long msgId, String dbKeys, String clientIp, String clientAppName, String vgroupName, TxcMessage message, AbstractResultMessage[] results, int idx) {
-        ((TxcMsgHandler)this.handler).handleMessage(msgId, dbKeys, clientIp, clientAppName, vgroupName, this, results, idx);
-    }
-
-    @Override
     public short getTypeCode() {
         return 6;
     }
