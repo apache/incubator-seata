@@ -31,6 +31,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.server.UUIDGenerator;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
@@ -50,6 +51,7 @@ public class MysqlUpdateJoinTest {
 
 
     @Test
+    @Disabled
     public void testUpdateJoin() throws Throwable {
         doPrepareData("insert into t1(id,name) values(1,'zhangsan')");
         doPrepareData("insert into t2(id,name) values(1,'zhangsan')");
