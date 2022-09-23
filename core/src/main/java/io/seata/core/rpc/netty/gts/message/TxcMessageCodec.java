@@ -511,8 +511,6 @@ public class TxcMessageCodec {
                 GlobalLockQueryResponse globalLockQueryResponse = new GlobalLockQueryResponse();
                 QueryLockResultMessage queryLockResultMessage = (QueryLockResultMessage) gtsCodec;
 
-                String businessKey = queryLockResultMessage.getBusinessKey();
-                long tranId = queryLockResultMessage.getTranId();
                 int result = queryLockResultMessage.getResult();
 
                 // TODO judge lockable
