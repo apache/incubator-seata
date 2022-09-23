@@ -36,6 +36,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4917](https://github.com/seata/seata/pull/4917)] upgrade package-lock.json fix vulnerabilities
 - [[#4924](https://github.com/seata/seata/pull/4924)] optimize pom dependencies
 - [[#4932](https://github.com/seata/seata/pull/4932)] extract the default values for some properties
+- [[#4946](https://github.com/seata/seata/pull/4946)] pass the sqlexception to client when get lock
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
