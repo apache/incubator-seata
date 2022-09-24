@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
+import io.seata.commonapi.autoproxy.DefaultTransactionAutoProxy;
+import io.seata.commonapi.autoproxy.IsTransactionProxyResult;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
@@ -35,13 +37,11 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
+import io.seata.commonapi.interceptor.TxBeanParserUtils;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
-import io.seata.spring.autoproxy.DefaultTransactionAutoProxy;
-import io.seata.spring.autoproxy.IsTransactionProxyResult;
-import io.seata.spring.interceptor.TxBeanParserUtils;
 import io.seata.spring.util.OrderUtil;
-import io.seata.spring.util.SpringProxyUtils;
+import io.seata.commonapi.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.aop.Advice;

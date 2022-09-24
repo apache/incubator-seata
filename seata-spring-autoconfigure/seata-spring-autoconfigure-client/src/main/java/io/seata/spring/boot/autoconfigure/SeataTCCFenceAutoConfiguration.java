@@ -15,7 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.spring.fence.config.CommonFenceConfig;
+import io.seata.commonapi.fence.config.CommonFenceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;

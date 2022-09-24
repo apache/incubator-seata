@@ -1,0 +1,4 @@
+io.seata.remoting.parser.DubboRemotingParser
+io.seata.rm.tcc.remoting.parser.LocalTCCRemotingParser
+io.seata.remoting.parser.SofaRpcRemotingParser
+io.seata.remoting.parser.HSFRemotingParser

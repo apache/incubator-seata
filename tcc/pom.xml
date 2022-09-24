@@ -53,8 +53,13 @@
             <artifactId>fastjson</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>io.seata</groupId>
             <artifactId>seata-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

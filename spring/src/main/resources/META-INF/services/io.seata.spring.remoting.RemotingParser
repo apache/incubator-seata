@@ -1,4 +1,0 @@
-io.seata.spring.remoting.parser.DubboRemotingParser
-io.seata.rm.tcc.remoting.parser.LocalTCCRemotingParser
-io.seata.spring.remoting.parser.SofaRpcRemotingParser
-io.seata.spring.remoting.parser.HSFRemotingParser

@@ -22,11 +22,11 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
+import io.seata.commonapi.fence.CommonFenceHandler;
+import io.seata.commonapi.remoting.TwoPhaseResult;
 import io.seata.rm.AbstractResourceManager;
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextUtil;
-import io.seata.spring.fence.CommonFenceHandler;
-import io.seata.spring.remoting.TwoPhaseResult;
+import io.seata.commonapi.rm.tcc.api.BusinessActionContext;
+import io.seata.commonapi.rm.tcc.api.BusinessActionContextUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;

@@ -15,15 +15,15 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
-import java.util.Set;
-
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.commonapi.remoting.Protocols;
+import io.seata.commonapi.remoting.RemotingDesc;
+import io.seata.commonapi.remoting.parser.AbstractedRemotingParser;
 import io.seata.rm.tcc.api.LocalTCC;
-import io.seata.spring.remoting.Protocols;
-import io.seata.spring.remoting.RemotingDesc;
-import io.seata.spring.remoting.parser.AbstractedRemotingParser;
 import org.springframework.aop.framework.AopProxyUtils;
+
+import java.util.Set;
 
 /**
  * local tcc bean parsing

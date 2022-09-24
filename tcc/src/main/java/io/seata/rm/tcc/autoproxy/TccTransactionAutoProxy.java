@@ -15,16 +15,17 @@
  */
 package io.seata.rm.tcc.autoproxy;
 
+import io.seata.commonapi.autoproxy.IsTransactionProxyResult;
+import io.seata.commonapi.autoproxy.TransactionAutoProxy;
 import io.seata.common.exception.FrameworkException;
+import io.seata.commonapi.remoting.Protocols;
+import io.seata.commonapi.remoting.RemotingDesc;
+import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptor;
-import io.seata.spring.autoproxy.IsTransactionProxyResult;
-import io.seata.spring.autoproxy.TransactionAutoProxy;
-import io.seata.spring.remoting.Protocols;
-import io.seata.spring.remoting.RemotingDesc;
-import io.seata.spring.remoting.parser.DefaultRemotingParser;
+import io.seata.rm.tcc.interceptor.TccManualApiExecute;
 
 import java.lang.reflect.Method;
 
@@ -65,28 +66,21 @@ public class TccTransactionAutoProxy implements TransactionAutoProxy {
         if (!isTccClazz) {
             return new IsTransactionProxyResult();
         }
-        short protocols = remotingDesc.getProtocol();
-        //LocalTCC
-        if (Protocols.IN_JVM == protocols) {
-            this.registryResource(remotingDesc);
-            //in jvm TCC bean , AOP
-            IsTransactionProxyResult result = new IsTransactionProxyResult();
-            result.setProxyTargetBean(true);
-            result.setUseCommonFence(userFence);
-            result.setMethodInterceptor(new TccActionInterceptor(remotingDesc));
-            return result;
-        }
-        // sofa:reference /  dubbo:reference, AOP
-        if (remotingDesc.isReference()) {
+        
+        if (// LocalTCC in jvm TCC bean , AOP
+            Protocols.IN_JVM == remotingDesc.getProtocol()
+            // sofa:reference /  dubbo:reference, AOP
+            || remotingDesc.isReference()) {
             this.registryResource(remotingDesc);
             IsTransactionProxyResult result = new IsTransactionProxyResult();
             result.setProxyTargetBean(true);
             result.setUseCommonFence(userFence);
             result.setMethodInterceptor(new TccActionInterceptor(remotingDesc));
+            result.setManualApiExecute(new TccManualApiExecute());
             return result;
-        } else {
-            return new IsTransactionProxyResult();
         }
+        return new IsTransactionProxyResult();
+        
     }
 
     private void registryResource(RemotingDesc remotingDesc) {

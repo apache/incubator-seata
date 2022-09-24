@@ -15,9 +15,9 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
+import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.tcc.TccParam;
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.spring.remoting.parser.DefaultRemotingParser;
+import io.seata.commonapi.rm.tcc.api.BusinessActionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
