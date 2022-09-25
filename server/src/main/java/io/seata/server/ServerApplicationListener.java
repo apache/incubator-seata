@@ -34,6 +34,7 @@ import static io.seata.common.ConfigurationKeys.STORE_LOCK_MODE;
 import static io.seata.common.ConfigurationKeys.STORE_MODE;
 import static io.seata.common.ConfigurationKeys.STORE_SESSION_MODE;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
@@ -64,9 +65,9 @@ public class ServerApplicationListener implements GenericApplicationListener {
         Configuration config  = ConfigurationFactory.getInstance();
         // Load by priority
         System.setProperty("sessionMode",
-                config.getConfig(STORE_SESSION_MODE, config.getConfig(STORE_MODE, "file")));
+                config.getConfig(STORE_SESSION_MODE, config.getConfig(STORE_MODE, SERVER_DEFAULT_STORE_MODE)));
         System.setProperty("lockMode",
-                config.getConfig(STORE_LOCK_MODE, config.getConfig(STORE_MODE, "file")));
+                config.getConfig(STORE_LOCK_MODE, config.getConfig(STORE_MODE, SERVER_DEFAULT_STORE_MODE)));
 
         String[] args = environmentPreparedEvent.getArgs();
 
