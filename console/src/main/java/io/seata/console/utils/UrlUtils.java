@@ -16,7 +16,6 @@
 package io.seata.console.utils;
 
 import io.seata.console.config.WebSecurityConfig;
-import io.seata.console.controller.GlobalSessionServerController;
 import io.seata.console.result.PageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

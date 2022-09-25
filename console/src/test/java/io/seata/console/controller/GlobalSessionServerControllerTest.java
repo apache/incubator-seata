@@ -50,7 +50,7 @@ public class GlobalSessionServerControllerTest {
         globalSessionParam.setPageNum(1);
         PageResult pageResult = new PageResult();
         pageResult.isSuccess();
-        Mockito.when(globalSessionServerController.queryByXid(globalSessionParam))
+        Mockito.when(globalSessionServerController.query(globalSessionParam))
                 .thenReturn(pageResult);
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/console/globalSession/query?withBranch=true&pageSize=10&pageNum=1").contentType(MediaType.APPLICATION_JSON)).andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
