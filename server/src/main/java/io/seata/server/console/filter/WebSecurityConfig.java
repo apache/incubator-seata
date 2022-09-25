@@ -15,22 +15,15 @@
  */
 package io.seata.server.console.filter;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-
 
 /**
  * @description: Spring security config in server
-<<<<<<< HEAD
-=======
- * @authorz: jameslcj wfnuser
->>>>>>> 95a603b2 (feature: add filter for http request)
- * @author: Sher
+ * @author: jameslcj wfnuser sher
  */
 @Configuration(proxyBeanMethods = false)
 
-public class WebSecurityConfig  {
+public class WebSecurityConfig {
 
     /**
      * The constant AUTHORIZATION_HEADER.
@@ -51,19 +44,4 @@ public class WebSecurityConfig  {
      * The constant TOKEN_PREFIX.
      */
     public static final String TOKEN_PREFIX = "Bearer ";
-
-
-    @Autowired
-    private JwtTokenUtils tokenProvider;
-
-    @Autowired
-    private Environment env;
-
-    /**
-     * Password encoder password encoder.
-     *
-     * @return the password encoder
-     */
-
-
 }

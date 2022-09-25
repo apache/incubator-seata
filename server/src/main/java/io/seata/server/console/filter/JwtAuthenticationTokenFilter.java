@@ -15,12 +15,10 @@
  */
 package io.seata.server.console.filter;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebFilter;
@@ -39,7 +37,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     private JwtTokenUtils tokenProvider;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationTokenFilter.class);
 
     /**
      * Instantiates a new Jwt authentication token filter.
