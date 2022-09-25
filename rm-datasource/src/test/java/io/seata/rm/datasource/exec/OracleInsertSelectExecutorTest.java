@@ -142,7 +142,7 @@ public class OracleInsertSelectExecutorTest {
         idList.add("100");
         idList.add("200");
         map.put(ID_COLUMN, idList);
-        Map<String, ArrayList<Object>> resultMap = insertSelectExecutorMock.buildImageParamperters(sqlInsertRecognizer);
+        Map<String, ArrayList<Object>> resultMap = insertSelectExecutorMock.buildImageParameters(sqlInsertRecognizer);
         Assertions.assertEquals(map.toString(),resultMap.toString());
     }
 

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -34,6 +33,8 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
+import io.seata.rm.datasource.sql.struct.KeyType;
+import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
@@ -120,7 +121,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
     public void testBuildImageSQL() {
         String selectSQLStr = "SELECT *  FROM null WHERE (user_id) in((?),(?)) OR (id) in((?),(?)) ";
         String paramAppenderListStr = "{[user_id]=[userId1, userId2], [id]=[100, 101]}";
-        mockImageParamperterMap_contain_constant();
+        mockImageParameterMap_contain_constant();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,userStatus1");
         insertParamsList.add("?,?,?,userStatus2");

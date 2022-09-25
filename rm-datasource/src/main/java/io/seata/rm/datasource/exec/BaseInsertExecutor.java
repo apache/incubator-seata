@@ -37,6 +37,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
+import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.common.util.StringUtils;
@@ -632,7 +633,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     public String buildImageSQL(TableMeta tableMeta) {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         int insertNum = getInsertParamsValue().size();
-        Map<String, ArrayList<Object>> imageParamperterMap = buildImageParamperters(recognizer);
+        Map<String, ArrayList<Object>> imageParamperterMap = buildImageParameters(recognizer);
         if (Objects.isNull(paramAppenderMap)) {
             paramAppenderMap = new HashMap<>();
         }
@@ -650,7 +651,8 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                                 && !columnName.equals(ColumnUtils.delEscape(recognizer.getHintColumnName(), getDbType()))) {
                             break;
                         }
-                        if (imageParamperterMap.get(columnName) == null) {
+                        List<Object> imageParameters = imageParamperterMap.get(columnName);
+                        if (imageParameters == null) {
                             if (m.getColumnDef() != null) {
                                 columnList.add(columnName);
                                 columnValue.add("DEFAULT(" + columnName + ")");
@@ -659,10 +661,10 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                                 break;
                             }
                         }
-                        if (imageParamperterMap.get(columnName).get(finalI) == null) {
+                        if (imageParameters.get(finalI) == null) {
                             break;
                         }
-                        if (imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
+                        if (imageParameters.get(finalI) instanceof Null) {
                             if (!IndexType.PRIMARY.equals(v.getIndextype())) {
                                 columnList.add(columnName);
                                 columnValue.add("NULL");
@@ -707,7 +709,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @param recognizer recognizer
      * @return key: columnName value: what the user insert
      */
-    protected Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
+    protected Map<String, ArrayList<Object>> buildImageParameters(SQLInsertRecognizer recognizer) {
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         List<String> insertParamsList = getInsertParamsValue();
@@ -716,7 +718,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         if (CollectionUtils.isEmpty(insertColumns)) {
             insertColumns = getTableMeta(recognizer.getTableName()).getDefaultTableColumn();
         }
-        Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>(insertColumns.size(), 1);
+        Map<String, ArrayList<Object>> imageParamperterMap = new LowerCaseLinkHashMap<>(insertColumns.size(), 1);
         int paramIndex = 1;
         for (String insertParams : insertParamsList) {
             String[] insertParamsArray = insertParams.split(",");
@@ -728,14 +730,12 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                     ArrayList<Object> objects = parameters.get(paramIndex);
                     imageListTemp.addAll(objects);
                     paramIndex++;
-                } else if (params instanceof String) {
+                } else {
                     // params is characterstring constant
                     if (params.trim().startsWith("'") && params.trim().endsWith("'") || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
                         params = params.trim();
                         params = params.substring(1, params.length() - 1);
                     }
-                    imageListTemp.add(params);
-                } else {
                     imageListTemp.add(params);
                 }
                 imageParamperterMap.put(m, imageListTemp);

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
+import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -82,7 +83,7 @@ public class MySQLInsertIgnoreExecutorTest {
         insertParamsList.add("?,?,?,?");
         when(sqlInsertRecognizer.getInsertParamsValue()).thenReturn(insertParamsList);
         mockInsertColumns();
-        Map<String, ArrayList<Object>> imageParamperterMap = insertIgnoreExecutor.buildImageParamperters(sqlInsertRecognizer);
+        Map<String, ArrayList<Object>> imageParamperterMap = insertIgnoreExecutor.buildImageParameters(sqlInsertRecognizer);
         Assertions.assertEquals(imageParamperterMap.toString(), mockImageParamperterMap().toString());
     }
 
@@ -94,7 +95,7 @@ public class MySQLInsertIgnoreExecutorTest {
         insertParamsList.add("?,?,?,userStatus2");
         when(sqlInsertRecognizer.getInsertParamsValue()).thenReturn(insertParamsList);
         mockInsertColumns();
-        Map<String, ArrayList<Object>> imageParamperterMap = insertIgnoreExecutor.buildImageParamperters(sqlInsertRecognizer);
+        Map<String, ArrayList<Object>> imageParamperterMap = insertIgnoreExecutor.buildImageParameters(sqlInsertRecognizer);
         Assertions.assertEquals(imageParamperterMap.toString(), mockImageParamperterMap().toString());
     }
 
@@ -272,7 +273,7 @@ public class MySQLInsertIgnoreExecutorTest {
     }
 
     private Map<String, ArrayList<Object>> mockImageParamperterMap() {
-        Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
+        Map<String, ArrayList<Object>> imageParamperterMap = new LowerCaseLinkHashMap<>();
         ArrayList<Object> idList = new ArrayList<>();
         idList.add("100");
         idList.add("101");

@@ -44,7 +44,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author: yangyicong
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
-public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
+public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
 
     /**
      * before image sql and after image sql,condition is unique index
@@ -61,7 +61,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         this.selectSQL = selectSQL;
     }
 
-    public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    public MySQLInsertOnDuplicateUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
         afterHandler = AfterHandlerFactory.getAfterHandler(SQLTypeConstant.INSERT_ON_DUPLICATE_UPDATE);
     }
@@ -96,7 +96,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     @Override
     @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
-    public Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
+    public Map<String, ArrayList<Object>> buildImageParameters(SQLInsertRecognizer recognizer) {
         List<String> duplicateKeyUpdateCloms = recognizer.getDuplicateKeyUpdate();
         if (CollectionUtils.isNotEmpty(duplicateKeyUpdateCloms)) {
             getTableMeta().getAllIndexes().forEach((k, v) -> {
@@ -109,7 +109,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 }
             });
         }
-        return super.buildImageParamperters(recognizer);
+        return super.buildImageParameters(recognizer);
     }
 
     @Override

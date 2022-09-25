@@ -83,13 +83,13 @@ public class OracleInsertSelectExecutor extends OracleInsertExecutor {
         if (Objects.isNull(afterHandler)) {
             return TableRecords.empty(tableMeta);
         } else {
-            return buildTableRecords2(tableMeta, selectSQL, new ArrayList<>(paramAppenderMap.values()));
+            return buildTableRecords2(tableMeta, selectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
         }
     }
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        return buildTableRecords2(getTableMeta(), selectSQL, new ArrayList<>(paramAppenderMap.values()));
+        return buildTableRecords2(getTableMeta(), selectSQL, new ArrayList<List<Object>>(paramAppenderMap.values()));
     }
 
     @Override
@@ -126,7 +126,7 @@ public class OracleInsertSelectExecutor extends OracleInsertExecutor {
     }
 
     @Override
-    public Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
+    public Map<String, ArrayList<Object>> buildImageParameters(SQLInsertRecognizer recognizer) {
         List<String> insertParamsList = getInsertParamsValue();
         List<String> insertColumns = Optional.ofNullable(recognizer.getInsertColumns()).map(list -> list.stream()
                 .map(column -> ColumnUtils.delEscape(column, getDbType())).collect(Collectors.toList())).orElse(null);

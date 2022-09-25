@@ -144,7 +144,7 @@ public class MySQLInsertSelectExecutor extends MySQLInsertExecutor implements De
     }
 
     @Override
-    protected Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
+    protected Map<String, ArrayList<Object>> buildImageParameters(SQLInsertRecognizer recognizer) {
         List<String> insertParamsList = getInsertParamsValue();
         List<String> insertColumns = Optional.ofNullable(recognizer.getInsertColumns()).map(list -> list.stream()
                 .map(column -> ColumnUtils.delEscape(column, getDbType())).collect(Collectors.toList())).orElse(null);
