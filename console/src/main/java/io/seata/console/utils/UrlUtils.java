@@ -51,7 +51,7 @@ public class UrlUtils {
     RestTemplate restTemplate;
     @Resource
     HttpServletRequest request;
-    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionServerController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlUtils.class);
 
     /**
      * generate server http request url
