@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author jameslcj
  */
 @SpringBootApplication(scanBasePackages = {"io.seata.console"})
-public class Application {
+public class ConsoleApplication {
 
     /**
      * The entry point of application.
@@ -32,6 +32,6 @@ public class Application {
      * @param args the input arguments
      */
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(ConsoleApplication.class, args);
     }
 }
