@@ -718,14 +718,14 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         if (CollectionUtils.isEmpty(insertColumns)) {
             insertColumns = getTableMeta(recognizer.getTableName()).getDefaultTableColumn();
         }
-        Map<String, ArrayList<Object>> imageParamperterMap = new LowerCaseLinkHashMap<>(insertColumns.size(), 1);
+        Map<String, ArrayList<Object>> imageParameterMap = new LowerCaseLinkHashMap<>(insertColumns.size(), 1);
         int paramIndex = 1;
         for (String insertParams : insertParamsList) {
             String[] insertParamsArray = insertParams.split(",");
             for (int i = 0; i < insertColumns.size(); i++) {
                 String m = ColumnUtils.delEscape(insertColumns.get(i), getDbType());
                 String params = insertParamsArray[i];
-                ArrayList<Object> imageListTemp = imageParamperterMap.computeIfAbsent(m, k -> new ArrayList<>());
+                ArrayList<Object> imageListTemp = imageParameterMap.computeIfAbsent(m, k -> new ArrayList<>());
                 if ("?".equals(params.trim())) {
                     ArrayList<Object> objects = parameters.get(paramIndex);
                     imageListTemp.addAll(objects);
@@ -738,10 +738,10 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                     }
                     imageListTemp.add(params);
                 }
-                imageParamperterMap.put(m, imageListTemp);
+                imageParameterMap.put(m, imageListTemp);
             }
         }
-        return imageParamperterMap;
+        return imageParameterMap;
     }
 
     /**

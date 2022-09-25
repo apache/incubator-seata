@@ -1,7 +1,21 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.rm.datasource.exec;
 
 import com.google.common.collect.Lists;
-import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -20,6 +34,7 @@ import org.mockito.Mockito;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +61,7 @@ public class OracleInsertIgnoreExecutorTest {
     private OracleInsertIgnoreExecutor insertIgnoreExecutor;
 
     private final int pkIndex = 0;
-    private HashMap<String,Integer> pkIndexMap;
+    private HashMap<String, Integer> pkIndexMap;
 
     @BeforeEach
     public void init() throws SQLException {
@@ -61,7 +76,7 @@ public class OracleInsertIgnoreExecutorTest {
         tableMeta = mock(TableMeta.class);
         insertIgnoreExecutor = Mockito.spy(new OracleInsertIgnoreExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        pkIndexMap = new HashMap<String,Integer>(){
+        pkIndexMap = new HashMap<String, Integer>() {
             {
                 put(ID_COLUMN, pkIndex);
             }
@@ -69,7 +84,7 @@ public class OracleInsertIgnoreExecutorTest {
     }
 
     @Test
-    public void TestBuildImageParamperters(){
+    public void TestBuildImageParamperters() {
         mockParameters();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,?");
@@ -77,11 +92,11 @@ public class OracleInsertIgnoreExecutorTest {
         when(sqlInsertRecognizer.getInsertParamsValue()).thenReturn(insertParamsList);
         mockInsertColumns();
         Map<String, ArrayList<Object>> imageParamperterMap = insertIgnoreExecutor.buildImageParameters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParamperterMap.toString(),mockImageParamperterMap().toString());
+        Assertions.assertEquals(imageParamperterMap.toString(), mockImageParamperterMap().toString());
     }
 
     @Test
-    public void TestBuildImageParamperters_contain_constant(){
+    public void TestBuildImageParamperters_contain_constant() {
         mockImageParamperterMap_contain_constant();
         List<String> insertParamsList = new ArrayList<>();
         insertParamsList.add("?,?,?,userStatus1");
@@ -89,11 +104,11 @@ public class OracleInsertIgnoreExecutorTest {
         when(sqlInsertRecognizer.getInsertParamsValue()).thenReturn(insertParamsList);
         mockInsertColumns();
         Map<String, ArrayList<Object>> imageParamperterMap = insertIgnoreExecutor.buildImageParameters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParamperterMap.toString(),mockImageParamperterMap().toString());
+        Assertions.assertEquals(imageParamperterMap.toString(), mockImageParamperterMap().toString());
     }
 
     @Test
-    public void testBuildImageSQL(){
+    public void testBuildImageSQL() {
         String selectSQLStr = "SELECT *  FROM null WHERE (user_id) in((?),(?)) OR (id) in((?),(?)) ";
         String paramAppenderListStr = "{[user_id]=[userId1, userId2], [id]=[100, 101]}";
         mockImageParamperterMap_contain_constant();
@@ -106,12 +121,12 @@ public class OracleInsertIgnoreExecutorTest {
         mockInsertColumns();
         mockAllIndexes();
         String selectSQL = insertIgnoreExecutor.buildImageSQL(tableMeta);
-        Assertions.assertEquals(selectSQLStr,selectSQL);
-        Assertions.assertEquals(paramAppenderListStr,insertIgnoreExecutor.getParamAppenderMap().toString());
+        Assertions.assertEquals(selectSQLStr, selectSQL);
+        Assertions.assertEquals(paramAppenderListStr, insertIgnoreExecutor.getParamAppenderMap().toString());
     }
 
 
-    private void mockAllIndexes(){
+    private void mockAllIndexes() {
         Map<String, IndexMeta> allIndex = new HashMap<>();
         List<String> primaryKeyOnlyNameList = new ArrayList<>();
         primaryKeyOnlyNameList.add("id");
@@ -148,7 +163,7 @@ public class OracleInsertIgnoreExecutorTest {
      * {1=[100], 2=[userId1], 3=[userName1], 4=[userStatus1], 5=[101], 6=[userId2], 7=[userName2], 8=[userStatus2]}
      */
     private void mockParameters() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(PK_VALUE);
         ArrayList arrayList11 = new ArrayList<>();
@@ -162,7 +177,7 @@ public class OracleInsertIgnoreExecutorTest {
         paramters.put(3, arrayList12);
         paramters.put(4, arrayList13);
         ArrayList arrayList20 = new ArrayList<>();
-        arrayList20.add(PK_VALUE+1);
+        arrayList20.add(PK_VALUE + 1);
         ArrayList arrayList21 = new ArrayList<>();
         arrayList21.add("userId2");
         ArrayList arrayList22 = new ArrayList<>();
@@ -182,7 +197,7 @@ public class OracleInsertIgnoreExecutorTest {
      * {1=[100], 2=[userId1], 3=[userName1], 4=[101], 5=[userId2], 6=[userName2]}
      */
     private void mockImageParamperterMap_contain_constant() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(PK_VALUE);
         ArrayList arrayList11 = new ArrayList<>();
@@ -193,7 +208,7 @@ public class OracleInsertIgnoreExecutorTest {
         paramters.put(2, arrayList11);
         paramters.put(3, arrayList12);
         ArrayList arrayList20 = new ArrayList<>();
-        arrayList20.add(PK_VALUE+1);
+        arrayList20.add(PK_VALUE + 1);
         ArrayList arrayList21 = new ArrayList<>();
         arrayList21.add("userId2");
         ArrayList arrayList22 = new ArrayList<>();
@@ -205,24 +220,24 @@ public class OracleInsertIgnoreExecutorTest {
         when(psp.getParameters()).thenReturn(paramters);
     }
 
-    private Map<String, ArrayList<Object>> mockImageParamperterMap(){
-        Map<String, ArrayList<Object>> imageParamperterMap = new LowerCaseLinkHashMap<>();
+    private Map<String, ArrayList<Object>> mockImageParamperterMap() {
+        Map<String, ArrayList<Object>> imageParamperterMap = new LinkedHashMap<>();
         ArrayList<Object> idList = new ArrayList<>();
         idList.add("100");
         idList.add("101");
-        imageParamperterMap.put("id",idList);
+        imageParamperterMap.put("id", idList);
         ArrayList<Object> user_idList = new ArrayList<>();
         user_idList.add("userId1");
         user_idList.add("userId2");
-        imageParamperterMap.put("user_id",user_idList);
+        imageParamperterMap.put("user_id", user_idList);
         ArrayList<Object> user_nameList = new ArrayList<>();
         user_nameList.add("userName1");
         user_nameList.add("userName2");
-        imageParamperterMap.put("user_name",user_nameList);
+        imageParamperterMap.put("user_name", user_nameList);
         ArrayList<Object> user_statusList = new ArrayList<>();
         user_statusList.add("userStatus1");
         user_statusList.add("userStatus2");
-        imageParamperterMap.put("user_status",user_statusList);
+        imageParamperterMap.put("user_status", user_statusList);
         return imageParamperterMap;
     }
 }
