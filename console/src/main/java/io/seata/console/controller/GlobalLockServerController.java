@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/console/globalLock")
 public class GlobalLockServerController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionServerController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockServerController.class);
     @Autowired
     private UrlUtils urlUtils;
 

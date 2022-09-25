@@ -37,13 +37,13 @@ public class GlobalSessionServerController {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionServerController.class);
 
     /**
-     * Query all globalSession
+     * Query all globalSession by param
      *
      * @param param param for query globalSession
      * @return the list of GlobalSessionVO
      */
     @RequestMapping("query")
-    PageResult<GlobalSessionVO> queryByXid(GlobalSessionParam param) {
+    PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
         PageResult result = new PageResult();
         try {
             result = urlUtils.getPageResult();
