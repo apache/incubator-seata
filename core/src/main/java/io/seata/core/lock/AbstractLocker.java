@@ -89,6 +89,11 @@ public abstract class AbstractLocker implements Locker {
     }
 
     @Override
+    public boolean releaseLock(List<RowLock> rowLock) {
+        return false;
+    }
+
+    @Override
     public boolean releaseLock(String xid, Long branchId) {
         return false;
     }

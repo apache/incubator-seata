@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.impl.redis;
 
+import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import io.seata.common.util.CollectionUtils;
@@ -47,7 +48,7 @@ public class BranchSessionRedisServiceImpl implements BranchSessionService {
 
         List<BranchSessionVO> branchSessionVos = new ArrayList<>();
 
-        RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
+        RedisTransactionStoreManager instance = RedisTransactionStoreManagerFactory.getInstance();
 
         List<BranchTransactionDO> branchSessionDos = instance.findBranchSessionByXid(xid);
 

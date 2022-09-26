@@ -164,6 +164,8 @@ seata:
       max-wait: 5000
     redis:
       mode: single
+      # support: lua 、 pipeline
+      type: lua
       database: 0
       min-conn: 1
       max-conn: 10
