@@ -234,6 +234,7 @@
                         <exclude>**/META-INF/additional-spring-configuration-metadata.json</exclude>
                         <exclude>protobuf/**</exclude>
                         <exclude>**/*.proto</exclude>
+                        <exclude>static/console-fe/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
