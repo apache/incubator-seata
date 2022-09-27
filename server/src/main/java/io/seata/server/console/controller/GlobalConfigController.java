@@ -17,7 +17,6 @@ package io.seata.server.console.controller;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.constant.Code;
-import io.seata.console.result.PageResult;
 import io.seata.console.result.SingleResult;
 import io.seata.server.console.service.GlobalConfigService;
 import io.seata.server.console.vo.GlobalConfigVO;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 
 /**
@@ -57,7 +57,7 @@ public class GlobalConfigController {
     }
 
     @RequestMapping(value = "/getconfiglist", method = RequestMethod.GET)
-    public PageResult<GlobalConfigVO> get()  {
+    public List<GlobalConfigVO> get()  {
         return globalConfigDBService.getConfigList();
     }
 }

@@ -15,8 +15,8 @@
  */
 package io.seata.server.console.service;
 
-import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalConfigVO;
+import java.util.List;
 
 /**
  * Global config service
@@ -27,5 +27,5 @@ public interface GlobalConfigService {
     /**
      * @return the list of GlobalLockVO
      */
-    PageResult<GlobalConfigVO> getConfigList();
+    List<GlobalConfigVO> getConfigList();
 }

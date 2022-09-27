@@ -73,6 +73,9 @@ const enUs: ILocale = {
   ConfigurationInfo: {
     title: 'ConfigurationInfo',
     subTitle: 'list',
+    operateTitle: 'operate',
+    editButtonTitle: 'edit',
+    configurationDialogTitle: 'Configuration info',
   },
 };
 

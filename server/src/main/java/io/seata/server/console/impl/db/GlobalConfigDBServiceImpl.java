@@ -17,7 +17,6 @@ package io.seata.server.console.impl.db;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.console.result.PageResult;
 import io.seata.server.console.service.GlobalConfigService;
 import io.seata.server.console.vo.GlobalConfigVO;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class GlobalConfigDBServiceImpl implements GlobalConfigService {
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Override
-    public PageResult<GlobalConfigVO> getConfigList() {
+    public List<GlobalConfigVO> getConfigList() {
 
         List<GlobalConfigVO> list = new ArrayList<>();
         String[] configKey = {"1", "2", "3", "4", "5", "6"};
@@ -42,9 +41,9 @@ public class GlobalConfigDBServiceImpl implements GlobalConfigService {
         for (int i = 0; i < configKey.length; i++) {
             String config = configKey[i];
             String value = CONFIG.getConfig(config);
-            GlobalConfigVO globalConfig = new GlobalConfigVO(String.valueOf(i), config, "value", descr[i]);
+            GlobalConfigVO globalConfig = new GlobalConfigVO(String.valueOf(i), config, value, descr[i]);
             list.add(globalConfig);
         }
-        return PageResult.success(list, list.size(), 10, 1);
+        return list;
     }
 }

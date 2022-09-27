@@ -73,6 +73,9 @@ const zhCn: ILocale = {
   ConfigurationInfo: {
     title: '配置信息',
     subTitle: '基础列表页',
+    operateTitle: '操作',
+    editButtonTitle: '编辑',
+    configurationDialogTitle: '配置信息',
   },
 };
 

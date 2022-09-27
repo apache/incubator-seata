@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 
 import './index.scss';
 import {AppPropsType} from "@/app";
+import Actions, {LinkButton} from "@alicloud/console-components-actions";
 
 const FormItem = Form.Item;
 const formItemLayout = {
@@ -34,15 +35,16 @@ const formItemLayout = {
   }
 }
 
-type GlobalConfigurationInfoState = {
+type ConfigurationInfoState = {
   list: [];
   total: number;
   loading: boolean;
-  visible: boolean;
+  configurationDialogVisible: boolean;
+  configurationData: any;
 }
 
 
-class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfigurationInfoState> {
+class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoState> {
   static displayName = 'ConfigurationInfo';
   static propTypes = {
     locale: PropTypes.object,
@@ -51,11 +53,12 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
   };
 
 
-  state: GlobalConfigurationInfoState = {
+  state: ConfigurationInfoState = {
     list: [],
     total: 0,
     loading: true,
-    visible: false,
+    configurationDialogVisible: false,
+    configurationData: null,
   };
   constructor(props: AppPropsType) {
     super(props);
@@ -69,47 +72,49 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
   search = () => {
     this.setState({ loading: true });
     getData().then(data => {
-      // if the result set is empty, set the page number to go back to the first page
-      if (data.total === 0) {
-        this.setState({
-          list: [],
-          total: 0,
-          loading: false,
-          visible: false,
-        });
-        return;
-      }
-      // format time
       this.setState({
-        list: data.data,
-        total: data.total,
+        list: data.data || [],
+        total: data.total || 0,
         loading: false,
-        visible: false,
+        configurationDialogVisible: false,
       });
     }).catch(err => {
       this.setState({ loading: false });
     });
   }
 
-  save () {
-
+  onSave = () => {
+    alert(JSON.stringify(this.state.configurationData));
   }
 
   onClose = ( ) => {
     this.setState({
-      visible: false
+      configurationDialogVisible: false
     });
   };
-  onOpen = () => {
-    //  console.log(item)
+  onOpen = (val: string, index: number, record: any) => {
+    const { locale = {} } = this.props;
+    const { editButtonTitle } = locale;
+    return (
+      <Actions style={{ width: '200px' }}>
+        <LinkButton
+          onClick={this.showConfigurationDialog(val, index, record)}
+        >
+          {editButtonTitle}
+        </LinkButton>
+      </Actions>);
+  }
+
+  showConfigurationDialog = (val: string, index: number, record: any) => () => {
     this.setState({
-      visible: true
+      configurationDialogVisible: true,
+      configurationData: record,
     });
-  };
+  }
 
   render() {
     const {locale = {} } = this.props;
-    const {title, subTitle} = locale;
+    const {title, subTitle, operateTitle, configurationDialogTitle} = locale;
     return (
       <Page
         title={title}
@@ -123,42 +128,51 @@ class ConfigurationInfo extends React.Component<GlobalProps, GlobalConfiguration
           },
         ]}
       >
-
-        <div>
-          <Button type="primary" className="ml-8" onClick={this.save}>保存</Button>
-        </div>
-        <Table className="mt-16"  dataSource={this.state.list} loading={this.state.loading}>
+        <Table className="mt-16" dataSource={this.state.list} loading={this.state.loading}>
           <Table.Column title="id" dataIndex="id"/>
           <Table.Column title="name" dataIndex="name"/>
           <Table.Column title="value" dataIndex="value"/>
           <Table.Column title="descr" dataIndex="descr"/>
-          <Table.Column title="操作"  cell={ <span> <Button type="primary"  onClick={   this.onOpen}  >编辑</Button>
+          <Table.Column
+            title={operateTitle}
+            cell={this.onOpen}
+          />
+        </Table>
 
+        {/* Edit session dialog */}
+        {
           <Dialog
-            title="编辑"
-            visible={this.state.visible}
-            onOk={this.onClose.bind(this, 'okClick')}
+            title={configurationDialogTitle}
+            visible={this.state.configurationDialogVisible}
+            onOk={this.onSave}
             onCancel={this.onClose.bind(this, 'cancelClick')}
             onClose={this.onClose}>
+            {
+              this.state.configurationData
+                ?
+                <Form style={{width: '400px', height: '200px'}}  {...formItemLayout} >
+                  <FormItem label="配置项:">
+                    <h3>{this.state.configurationData.name}</h3>
+                  </FormItem>
 
-            <Form style={{width: '400px', height: '200px'}}  {...formItemLayout} >
-              <FormItem label="配置项:">
-                <h3 defaultValue={'配置项'}></h3>
-              </FormItem>
+                  <FormItem label="配置值:">
+                    <Input
+                      name="value"
+                      value={this.state.configurationData.value}
+                      placeholder="请输入修改的配置值"
+                      contentEditable={true}
+                    />
+                  </FormItem>
 
-              <FormItem label="配置值:">
-                <Input  name="value" value={"配置值"} placeholder="请输入修改的配置值" contentEditable={true}/>
-              </FormItem>
-
-              <FormItem label="配置描述:" >
-                <h3 defaultValue={"配置描述"}></h3>
-              </FormItem>
-
-            </Form>
+                  <FormItem label="配置描述:" >
+                    <h3>{this.state.configurationData.descr}</h3>
+                  </FormItem>
+                </Form>
+                :
+                null
+            }
           </Dialog>
-          </span>
-          }/>
-        </Table>
+        }
       </Page>
     );
   }
