@@ -40,6 +40,7 @@ import io.seata.core.store.DistributedLocker;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.core.store.StoreMode;
 
+import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
@@ -80,7 +81,7 @@ public class SessionHolder {
     /**
      * The redis distributed lock expire time
      */
-    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, 10000);
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
