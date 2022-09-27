@@ -255,7 +255,8 @@
                             </platform>
                             <platform>
                                 <os>linux</os>
-                                <architecture>arm64/v8</architecture>
+                                <architecture>arm64</architecture>
+                                <variant>v8</variant>
                             </platform>
                         </platforms>
                     </from>
