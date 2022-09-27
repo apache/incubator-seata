@@ -259,6 +259,9 @@ public class TransactionManagerService extends TransactionManagerServiceGrpc.Tra
     }
 
     private boolean isProcessable(GrpcRemoting.BiStreamMessageType messageType) {
-        return true;
+        //This method is used to set the processable message type from TM to TC.
+        //Since there is no related message at present, it is set to false by default as reserved,
+        //that is, no message is processed.
+        return false;
     }
 }
