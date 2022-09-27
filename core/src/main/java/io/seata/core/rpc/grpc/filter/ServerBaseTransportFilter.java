@@ -43,8 +43,8 @@ public class ServerBaseTransportFilter extends ServerTransportFilter {
         //Generate connection ID based on remote address and current time
         String connectionId = remoteAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR +
                 remoteAddress.getPort() + "#" + System.currentTimeMillis();
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("[GRPC]Transport ready for client:" + remoteAddress);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("[GRPC]Transport ready for client:" + remoteAddress);
         }
         return transportAttrs.toBuilder().set(ContextKeyConstants.CONNECT_ID, connectionId).build();
     }

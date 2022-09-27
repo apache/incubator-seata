@@ -39,27 +39,30 @@ public class GrpcServerConfig extends BaseRpcConfig {
     /**
      * Server Rpc request timeout
      */
-    private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(io.seata.common.ConfigurationKeys.GRPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
+    private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(io.seata.common.ConfigurationKeys.GRPC_TC_REQUEST_TIMEOUT,
+            CONFIG.getLong(io.seata.common.ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT));
 
     /**
      * Configuration of the worker thread pool on the Seata server
      */
     private static int minServerPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.GRPC_MIN_SERVER_POOL_SIZE, "50"));
+            ConfigurationKeys.GRPC_MIN_SERVER_POOL_SIZE, System.getProperty(ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50")));
     private static int maxServerPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.GRPC_MAX_SERVER_POOL_SIZE, "500"));
+            ConfigurationKeys.GRPC_MAX_SERVER_POOL_SIZE, System.getProperty(ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500")));
     private static int maxTaskQueueSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.GRPC_MAX_TASK_QUEUE_SIZE, "20000"));
+            ConfigurationKeys.GRPC_MAX_TASK_QUEUE_SIZE, System.getProperty(ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000")));
     private static int keepAliveTime = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.GRPC_KEEP_ALIVE_TIME, "500"));
+            ConfigurationKeys.GRPC_KEEP_ALIVE_TIME, System.getProperty(ConfigurationKeys.KEEP_ALIVE_TIME, "500")));
 
     /**
      * Batch result response thread pool configuration
      */
     private static int minBranchResultPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.GRPC_MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE)));
+            ConfigurationKeys.GRPC_MIN_BRANCH_RESULT_POOL_SIZE,
+            System.getProperty(ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE))));
     private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.GRPC_MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE)));
+            ConfigurationKeys.GRPC_MAX_BRANCH_RESULT_POOL_SIZE,
+            System.getProperty(ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE))));
 
     /**
      * Gets default listen port.
