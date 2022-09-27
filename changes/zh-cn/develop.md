@@ -35,6 +35,7 @@
 - [[#4917](https://github.com/seata/seata/pull/4917)] 升级 package-lock.json 修复漏洞
 - [[#4924](https://github.com/seata/seata/pull/4924)] 优化 pom 依赖
 - [[#4932](https://github.com/seata/seata/pull/4932)] 抽取部分配置的默认值
+- [[#4962](https://github.com/seata/seata/pull/4962)] 优化构建配置，并修正docker镜像的基础镜像
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
