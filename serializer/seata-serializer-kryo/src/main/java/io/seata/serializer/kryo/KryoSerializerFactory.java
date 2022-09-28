@@ -39,48 +39,49 @@ import io.seata.core.serializer.SerializerClassRegistry;
 /**
  * @author jsbxyyx
  */
-public class KryoSerializerFactory extends Pool<Kryo> {
+public class KryoSerializerFactory {
 
     private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
 
-    private KryoSerializerFactory() {
-        super(true, true);
-    }
+    private Pool<Kryo> pool = new Pool<Kryo>(true, true) {
+
+        @Override
+        protected Kryo create() {
+            Kryo kryo = new Kryo();
+            kryo.setRegistrationRequired(false);
+
+            // register serializer
+            kryo.register(Arrays.asList("").getClass(), new ArraysAsListSerializer());
+            kryo.register(GregorianCalendar.class, new GregorianCalendarSerializer());
+            kryo.register(InvocationHandler.class, new JdkProxySerializer());
+            kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
+            kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
+            kryo.register(Pattern.class, new RegexSerializer());
+            kryo.register(BitSet.class, new BitSetSerializer());
+            kryo.register(URI.class, new URISerializer());
+            kryo.register(UUID.class, new UUIDSerializer());
+
+            // register commonly class
+            SerializerClassRegistry.getRegisteredClasses().keySet().forEach(kryo::register);
+            return kryo;
+        }
+    };
+
+    private KryoSerializerFactory() {}
 
     public static KryoSerializerFactory getInstance() {
         return FACTORY;
     }
 
     public KryoInnerSerializer get() {
-        return new KryoInnerSerializer(getInstance().obtain());
+        return new KryoInnerSerializer(pool.obtain());
     }
 
     public void returnKryo(KryoInnerSerializer kryoSerializer) {
         if (kryoSerializer == null) {
             throw new IllegalArgumentException("kryoSerializer is null");
         }
-        getInstance().free(kryoSerializer.getKryo());
-    }
-
-    @Override
-    public Kryo create() {
-        Kryo kryo = new Kryo();
-        kryo.setRegistrationRequired(false);
-
-        // register serializer
-        kryo.register(Arrays.asList("").getClass(), new ArraysAsListSerializer());
-        kryo.register(GregorianCalendar.class, new GregorianCalendarSerializer());
-        kryo.register(InvocationHandler.class, new JdkProxySerializer());
-        kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
-        kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
-        kryo.register(Pattern.class, new RegexSerializer());
-        kryo.register(BitSet.class, new BitSetSerializer());
-        kryo.register(URI.class, new URISerializer());
-        kryo.register(UUID.class, new UUIDSerializer());
-
-        // register commonly class
-        SerializerClassRegistry.getRegisteredClasses().keySet().forEach(kryo::register);
-        return kryo;
+        pool.free(kryoSerializer.getKryo());
     }
 
 }
