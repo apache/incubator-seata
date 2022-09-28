@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### bugfix:
+- [[#4954](https://github.com/seata/seata/pull/4954)] fix output expression incorrectly throws npe
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
 - [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
@@ -36,6 +37,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4917](https://github.com/seata/seata/pull/4917)] upgrade package-lock.json fix vulnerabilities
 - [[#4924](https://github.com/seata/seata/pull/4924)] optimize pom dependencies
 - [[#4932](https://github.com/seata/seata/pull/4932)] extract the default values for some properties
+- [[#4946](https://github.com/seata/seata/pull/4946)] pass the sqlexception to client when get lock
+- [[#4962](https://github.com/seata/seata/pull/4962)] optimize build and fix the base image
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`

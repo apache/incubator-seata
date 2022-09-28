@@ -22,7 +22,7 @@
 # 1. docker run --name=seata-server -d seata-server:1.6.0-dev
 #
 # https://hub.docker.com/orgs/seataio
-FROM openjdk:8u332
+FROM openjdk:8u342
 
 # set label
 LABEL maintainer="Seata <seata.io>"
