@@ -10,6 +10,7 @@
 
 
 ### bugfix：
+- [[#4954](https://github.com/seata/seata/pull/4954)] 修复output表达式错误时，保存执行结果空指针异常
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
 - [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
 - [[#4779](https://github.com/seata/seata/pull/4779)] 修复支持 Apache Dubbo 3 版本
