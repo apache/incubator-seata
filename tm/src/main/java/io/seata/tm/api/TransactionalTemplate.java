@@ -152,6 +152,19 @@ public class TransactionalTemplate {
         }
     }
 
+    /**
+     * Judge whether timeout
+     *
+     * @param beginTime the beginTime
+     * @param txInfo          the transaction info
+     * @return is timeout
+     */
+    private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
+
+        return (System.currentTimeMillis() - beginTime) > txInfo.getTimeOut();
+    }
+
+
     private boolean existingTransaction(GlobalTransaction tx) {
         return tx != null;
     }
@@ -188,13 +201,20 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
             throws TransactionalExecutor.ExecutionException, TransactionException {
+        if (isTimeout(tx.getCreateTime(), txInfo)) {
+            // business execution timeout
+            LOGGER.info("TM detected timeout, xid = {}", tx.getXid());
+            tx.rollback();
+            return;
+        }
+
         try {
             triggerBeforeCommit();
             tx.commit();
 
             if (Arrays.asList(GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbacked).contains(tx.getLocalStatus())) {
                 throw new TransactionalExecutor.ExecutionException(tx,
-                        new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback.", tx.getXid())),
+                        new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
                         TransactionalExecutor.Code.TimeoutRollback);
             }
 
