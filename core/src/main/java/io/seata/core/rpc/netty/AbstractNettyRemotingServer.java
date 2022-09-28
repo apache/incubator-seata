@@ -15,6 +15,8 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
@@ -100,6 +102,14 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
                 : ProtocolConstants.MSGTYPE_RESPONSE);
+            if(rpcMessage.getHeadMap() != null) {
+                Map<String, String> map = rpcMessage.getHeadMap();
+                if(map.containsKey("protocol")) {
+                    if(map.get("protocol").equals("GtsToSeata")) {
+                        rpcMsg.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+                    }
+                }
+            }
             super.sendAsync(clientChannel, rpcMsg);
         } else {
             throw new RuntimeException("channel is error.");
