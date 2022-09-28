@@ -264,6 +264,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 if (stateMachineInstance.getStateMachine().isPersist() && state.isPersist()
                     && stateMachineConfig.getStateLogStore() != null) {
 
+                    stateInstance.setGmtEnd(new Date());
                     stateMachineConfig.getStateLogStore().recordStateFinished(stateInstance, context);
                 }
 
