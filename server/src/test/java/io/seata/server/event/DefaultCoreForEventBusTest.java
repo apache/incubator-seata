@@ -25,20 +25,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.store.StoreMode;
 import io.seata.metrics.registry.Registry;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.StoreConfig.SessionMode;
 import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -55,9 +53,7 @@ import org.springframework.context.ApplicationContext;
 @SpringBootTest
 public class DefaultCoreForEventBusTest {
 
-    private static final boolean DELAY_HANDLE_SESSION =
-            !StringUtils.equalsIgnoreCase(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-                    ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE)), StoreMode.FILE.getName());
+    private static final boolean DELAY_HANDLE_SESSION = StoreConfig.getSessionMode() != SessionMode.FILE;
 
     @BeforeAll
     public static void setUp(ApplicationContext context) throws InterruptedException {
