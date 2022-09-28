@@ -42,10 +42,10 @@ import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.store.StoreMode;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig.SessionMode;
 import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -228,7 +228,7 @@ public class DefaultCoordinatorTest {
 
     private static void deleteAndCreateDataFile() throws IOException {
         StoreUtil.deleteDataFile();
-        SessionHolder.init(StoreMode.FILE.name());
+        SessionHolder.init(SessionMode.FILE);
     }
 
     @AfterEach

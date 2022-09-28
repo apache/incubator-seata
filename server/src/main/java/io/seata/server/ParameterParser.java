@@ -21,10 +21,9 @@ import com.beust.jcommander.ParameterException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
+import io.seata.server.store.StoreConfig;
 
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 
 /**
@@ -67,6 +66,10 @@ public class ParameterParser {
         this.init(args);
     }
 
+    /**
+     * startup args > docker env
+     * @param args
+     */
     private void init(String[] args) {
         try {
             getCommandParameters(args);
@@ -74,15 +77,7 @@ public class ParameterParser {
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
-            if (StringUtils.isBlank(storeMode)) {
-                storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
-            }
-            if (StringUtils.isBlank(sessionStoreMode)) {
-                sessionStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE, storeMode);
-            }
-            if (StringUtils.isBlank(lockStoreMode)) {
-                lockStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_LOCK_MODE, storeMode);
-            }
+            StoreConfig.setStartupParameter(storeMode, sessionStoreMode, lockStoreMode);
         } catch (ParameterException e) {
             printError(e);
         }
@@ -111,15 +106,6 @@ public class ParameterParser {
         }
         if (serverNode == null) {
             serverNode = ContainerHelper.getServerNode();
-        }
-        if (StringUtils.isBlank(storeMode)) {
-            storeMode = ContainerHelper.getStoreMode();
-        }
-        if (StringUtils.isBlank(sessionStoreMode)) {
-            sessionStoreMode = ContainerHelper.getSessionStoreMode();
-        }
-        if (StringUtils.isBlank(lockStoreMode)) {
-            lockStoreMode = ContainerHelper.getLockStoreMode();
         }
     }
 
@@ -163,7 +149,7 @@ public class ParameterParser {
      * @return the store mode
      */
     public String getLockStoreMode() {
-        return StringUtils.isNotEmpty(lockStoreMode) ? lockStoreMode : storeMode;
+        return lockStoreMode;
     }
 
     /**
@@ -172,7 +158,7 @@ public class ParameterParser {
      * @return the store mode
      */
     public String getSessionStoreMode() {
-        return StringUtils.isNotEmpty(sessionStoreMode) ? sessionStoreMode : storeMode;
+        return sessionStoreMode;
     }
 
     /**

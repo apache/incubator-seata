@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 @Import(SpringApplicationContextProvider.class)
 public class CustomPropertiesTest extends BasePropertiesTest {
 
-    @Bean
+    @Bean("testConfigCustomProperties")
     public ConfigCustomProperties configCustomProperties() {
         return new ConfigCustomProperties().setName(STR_TEST_AAA);
     }
