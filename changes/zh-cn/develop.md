@@ -19,6 +19,7 @@
 - [[#4915](https://github.com/seata/seata/pull/4915)] 修复获取不到ServerRecoveryProperties属性的问题
 - [[#4919](https://github.com/seata/seata/pull/4919)] 修复XID的port和address出现null:0的情况
 - [[#4928](https://github.com/seata/seata/pull/4928)] 修复 rpcContext.getClientRMHolderMap NPE 问题
+- [[#4953](https://github.com/seata/seata/pull/4953)] 修复InsertOnDuplicateUpdate可绕过修改主键的问题
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
