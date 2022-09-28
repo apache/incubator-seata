@@ -25,9 +25,8 @@ import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.pool.KryoFactory;
-import com.esotericsoftware.kryo.pool.KryoPool;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
+import com.esotericsoftware.kryo.util.Pool;
 import de.javakaffee.kryoserializers.ArraysAsListSerializer;
 import de.javakaffee.kryoserializers.BitSetSerializer;
 import de.javakaffee.kryoserializers.GregorianCalendarSerializer;
@@ -40,27 +39,27 @@ import io.seata.core.serializer.SerializerClassRegistry;
 /**
  * @author jsbxyyx
  */
-public class KryoSerializerFactory implements KryoFactory {
+public class KryoSerializerFactory extends Pool<Kryo> {
 
     private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
 
-    private KryoPool pool = new KryoPool.Builder(this).softReferences().build();
-
-    private KryoSerializerFactory() {}
+    private KryoSerializerFactory() {
+        super(true, true);
+    }
 
     public static KryoSerializerFactory getInstance() {
         return FACTORY;
     }
 
     public KryoInnerSerializer get() {
-        return new KryoInnerSerializer(pool.borrow());
+        return new KryoInnerSerializer(getInstance().obtain());
     }
 
     public void returnKryo(KryoInnerSerializer kryoSerializer) {
         if (kryoSerializer == null) {
             throw new IllegalArgumentException("kryoSerializer is null");
         }
-        pool.release(kryoSerializer.getKryo());
+        getInstance().free(kryoSerializer.getKryo());
     }
 
     @Override
