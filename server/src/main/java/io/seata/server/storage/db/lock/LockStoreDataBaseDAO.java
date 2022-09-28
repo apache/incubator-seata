@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -347,7 +348,7 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @param lockDOs the lock do list
      * @return the boolean
      */
-    protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) {
+    protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) throws SQLException {
         PreparedStatement ps = null;
         try {
             //insert
@@ -365,10 +366,12 @@ public class LockStoreDataBaseDAO implements LockStore {
                 ps.addBatch();
             }
             return ps.executeBatch().length == lockDOs.size();
-        } catch (SQLException e) {
+        } catch (SQLIntegrityConstraintViolationException e) {
             LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
             //return false,let the caller go to conn.rollabck()
             return false;
+        } catch (SQLException e) {
+            throw e;
         } finally {
             IOUtil.close(ps);
         }
