@@ -28,7 +28,6 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.AttributeKey;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
@@ -71,8 +70,8 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        if(channel.hasAttr(NettyBaseConfig.gtsMessageKey)) {
-            rpcMessage.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+        if (channel.hasAttr(NettyBaseConfig.GTS_MESSAGE_KEY)) {
+            rpcMessage.setHeadMap(NettyBaseConfig.GTS_HEADER_MAP);
         }
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
@@ -83,8 +82,8 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        if(channel.hasAttr(NettyBaseConfig.gtsMessageKey)) {
-            rpcMessage.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+        if (channel.hasAttr(NettyBaseConfig.GTS_MESSAGE_KEY)) {
+            rpcMessage.setHeadMap(NettyBaseConfig.GTS_HEADER_MAP);
         }
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
@@ -95,8 +94,8 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        if(channel.hasAttr(NettyBaseConfig.gtsMessageKey)) {
-            rpcMessage.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+        if (channel.hasAttr(NettyBaseConfig.GTS_MESSAGE_KEY)) {
+            rpcMessage.setHeadMap(NettyBaseConfig.GTS_HEADER_MAP);
         }
         super.sendAsync(channel, rpcMessage);
     }
@@ -109,14 +108,14 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
         if (clientChannel != null) {
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
-                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
-                : ProtocolConstants.MSGTYPE_RESPONSE);
-            if(rpcMessage.getHeadMap() != null) {
+                    ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
+                    : ProtocolConstants.MSGTYPE_RESPONSE);
+            if (rpcMessage.getHeadMap() != null) {
                 Map<String, String> map = rpcMessage.getHeadMap();
-                if(map.containsKey("protocol")) {
-                    if(map.get("protocol").equals("GtsToSeata")) {
-                        rpcMsg.setHeadMap(NettyBaseConfig.gtsHeaderMap);
-                        channel.attr(NettyBaseConfig.gtsMessageKey);
+                if (map.containsKey("protocol")) {
+                    if (map.get("protocol").equals("GtsToSeata")) {
+                        rpcMsg.setHeadMap(NettyBaseConfig.GTS_HEADER_MAP);
+                        channel.attr(NettyBaseConfig.GTS_MESSAGE_KEY);
                     }
                 }
             }
@@ -150,7 +149,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     /**
      * Debug log.
      *
-     * @param format the info
+     * @param format    the info
      * @param arguments the arguments
      */
     protected void debugLog(String format, Object... arguments) {
@@ -166,6 +165,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         ctx.disconnect();
         ctx.close();
     }
+
     /**
      * The type ServerHandler.
      */

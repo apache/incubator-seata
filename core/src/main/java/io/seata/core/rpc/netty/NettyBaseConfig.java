@@ -27,7 +27,6 @@ import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
@@ -115,9 +114,9 @@ public class NettyBaseConfig {
      */
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
-    protected static final HashMap<String, String> gtsHeaderMap;
+    protected static final HashMap<String, String> GTS_HEADER_MAP;
 
-    protected static final AttributeKey<String> gtsMessageKey;
+    protected static final AttributeKey<String> GTS_MESSAGE_KEY;
 
     static {
         TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
@@ -180,14 +179,14 @@ public class NettyBaseConfig {
             MAX_WRITE_IDLE_SECONDS = 0;
         }
         MAX_READ_IDLE_SECONDS = MAX_WRITE_IDLE_SECONDS * READIDLE_BASE_WRITEIDLE;
-        gtsHeaderMap = new HashMap<>();
-        gtsHeaderMap.put("protocol", "GtsToSeata");
-        gtsMessageKey =  AttributeKey.valueOf("gtsMessage");
+        GTS_HEADER_MAP = new HashMap<>();
+        GTS_HEADER_MAP.put("protocol", "GtsToSeata");
+        GTS_MESSAGE_KEY = AttributeKey.valueOf("gtsMessage");
     }
 
     private static void raiseUnsupportedTransportError() throws RuntimeException {
         String errMsg = String.format("Unsupported provider type :[%s] for transport:[%s].", TRANSPORT_SERVER_TYPE,
-            TRANSPORT_PROTOCOL_TYPE);
+                TRANSPORT_PROTOCOL_TYPE);
         LOGGER.error(errMsg);
         throw new IllegalArgumentException(errMsg);
     }
