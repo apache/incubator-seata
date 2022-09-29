@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Collections;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
@@ -346,10 +347,12 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
     public Map<String, ArrayList<Object>> buildImageParameters(SQLInsertRecognizer recognizer) {
         List<String> duplicateKeyUpdateColumns = recognizer.getDuplicateKeyUpdate();
         if (CollectionUtils.isNotEmpty(duplicateKeyUpdateColumns)) {
+            List<String> duplicateKeyUpdateLowerCaseColumns =
+                duplicateKeyUpdateColumns.parallelStream().map(String::toLowerCase).collect(Collectors.toList());
             getTableMeta().getAllIndexes().forEach((k, v) -> {
                 if ("PRIMARY".equalsIgnoreCase(k)) {
                     for (ColumnMeta m : v.getValues()) {
-                        if (duplicateKeyUpdateColumns.contains(m.getColumnName())) {
+                        if (duplicateKeyUpdateLowerCaseColumns.contains(m.getColumnName().toLowerCase())) {
                             throw new ShouldNeverHappenException("update pk value is not supported!");
                         }
                     }
