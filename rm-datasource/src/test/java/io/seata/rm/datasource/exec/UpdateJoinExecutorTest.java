@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
@@ -36,6 +37,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+/**
+ * @author renliangyu857
+ */
 public class UpdateJoinExecutorTest {
     @Test
     public void testUpdateJoinUndoLog() throws SQLException {
@@ -54,17 +58,17 @@ public class UpdateJoinExecutorTest {
         String sql = "update t1 inner join t2 on t1.id = t2.id set name = 'WILL'";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
-        UpdateExecutor updateExecutor = new UpdateExecutor(beforeMockStatementProxy, (statement, args) -> {
+        UpdateExecutor mySQLUpdateJoinExecutor = new MySQLUpdateJoinExecutor(beforeMockStatementProxy, (statement, args) -> {
             return null;
         }, recognizer);
-        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords beforeImage = mySQLUpdateJoinExecutor.beforeImage();
         Object[][] afterReturnValue = new Object[][]{
                 new Object[]{1, "WILL"},
         };
         StatementProxy afterMockStatementProxy = mockStatementProxy(returnValueColumnLabels, afterReturnValue, columnMetas, indexMetas);
-        updateExecutor.statementProxy = afterMockStatementProxy;
-        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
-        Assertions.assertDoesNotThrow(()->updateExecutor.prepareUndoLog(beforeImage, afterImage));
+        mySQLUpdateJoinExecutor.statementProxy = afterMockStatementProxy;
+        TableRecords afterImage = mySQLUpdateJoinExecutor.afterImage(beforeImage);
+        Assertions.assertDoesNotThrow(()->mySQLUpdateJoinExecutor.prepareUndoLog(beforeImage, afterImage));
     }
 
     private StatementProxy mockStatementProxy(List<String> returnValueColumnLabels, Object[][] returnValue, Object[][] columnMetas, Object[][] indexMetas) {

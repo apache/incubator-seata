@@ -38,6 +38,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/**
+ * @author renliangyu857
+ */
 public class MysqlUpdateJoinTest {
     private static final int testRecordId = 1;
     private static final long testTid = UUIDGenerator.generateUUID();

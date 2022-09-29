@@ -45,9 +45,9 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
  */
 public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpdateRecognizer {
 
-    private MySqlUpdateStatement ast;
+    private final MySqlUpdateStatement ast;
 
-    private Map<String, String> tableName2AliasMap = new HashMap<>(4);
+    private final Map<String, String> tableName2AliasMap = new HashMap<>(4);
 
     /**
      * Instantiates a new My sql update recognizer.
@@ -62,7 +62,7 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.UPDATE;
+        return tableName2AliasMap.keySet().size() > 1 ? SQLType.UPDATE_JOIN : SQLType.UPDATE;
     }
 
     @Override
