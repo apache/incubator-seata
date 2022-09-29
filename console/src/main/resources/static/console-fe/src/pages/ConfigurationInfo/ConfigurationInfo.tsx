@@ -37,7 +37,6 @@ const formItemLayout = {
 
 type ConfigurationInfoState = {
   list: [];
-  total: number;
   loading: boolean;
   configurationDialogVisible: boolean;
   configurationData: any;
@@ -55,7 +54,6 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
 
   state: ConfigurationInfoState = {
     list: [],
-    total: 0,
     loading: true,
     configurationDialogVisible: false,
     configurationData: null,
@@ -73,8 +71,7 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
     this.setState({ loading: true });
     getData().then(data => {
       this.setState({
-        list: data.data || [],
-        total: data.total || 0,
+        list: data || [],
         loading: false,
         configurationDialogVisible: false,
       });
