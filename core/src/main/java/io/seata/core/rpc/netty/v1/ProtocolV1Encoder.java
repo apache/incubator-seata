@@ -19,12 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
-import io.seata.core.protocol.transaction.GlobalBeginResponse;
-import io.seata.core.rpc.netty.gts.message.BeginResultMessage;
 import io.seata.core.rpc.netty.gts.message.TxcCodec;
-import io.seata.core.rpc.netty.gts.message.TxcMessage;
 import io.seata.core.rpc.netty.gts.message.TxcMessageCodec;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
@@ -37,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
@@ -104,7 +98,7 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                     // heartbeat has no body
                     Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
                     if (headMap != null && "GtsToSeata".equals(headMap.getOrDefault("protocol", ""))) {
-                        TxcCodec codec = change2TxcCodec((AbstractMessage) rpcMessage.getBody());
+                        TxcCodec codec = TxcMessageCodec.change2TxcCodec((AbstractMessage) rpcMessage.getBody());
                         Method method = codec.getClass().getMethod("encode");
                         bodyBytes = (byte[]) method.invoke(codec);
                     } else {
@@ -131,25 +125,6 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
             }
         } catch (Throwable e) {
             LOGGER.error("Encode request error!", e);
-        }
-    }
-
-    private TxcCodec change2TxcCodec(AbstractMessage abstractMessage) {
-        short typeCode = abstractMessage.getTypeCode();
-        switch (typeCode) {
-            // TYPE_GLOBAL_BEGIN_RESULT
-            case 2: {
-                GlobalBeginResponse globalBeginResponse = (GlobalBeginResponse) abstractMessage;
-                BeginResultMessage beginResultMessage = new BeginResultMessage();
-                String xid = globalBeginResponse.getXid();
-                ResultCode resultCode = globalBeginResponse.getResultCode();
-                beginResultMessage.setXid(xid);
-                beginResultMessage.setResult(resultCode.ordinal());
-                // beginResultMessage.setNextSvrAddr("");
-                return beginResultMessage;
-            }
-            default:
-                return null;
         }
     }
 }
