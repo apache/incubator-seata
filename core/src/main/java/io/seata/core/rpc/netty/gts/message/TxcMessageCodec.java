@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
@@ -39,6 +40,9 @@ import io.seata.core.rpc.netty.gts.exception.TxcException;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TxcMessageCodec {
     public static TxcCodec getTxcCodecInstance(short typeCode) {
@@ -526,6 +530,132 @@ public class TxcMessageCodec {
                 // Compress
                 out.writeByte(0);
                 return msgOut;
+            }
+            default:
+                return null;
+        }
+    }
+
+    public static TxcCodec change2TxcCodec(AbstractMessage abstractMessage) {
+        short typeCode = abstractMessage.getTypeCode();
+        switch (typeCode) {
+            // TYPE_GLOBAL_BEGIN_RESULT
+            case 2: {
+                GlobalBeginResponse globalBeginResponse = (GlobalBeginResponse) abstractMessage;
+                BeginResultMessage beginResultMessage = new BeginResultMessage();
+                String xid = globalBeginResponse.getXid();
+                ResultCode resultCode = globalBeginResponse.getResultCode();
+                beginResultMessage.setXid(xid);
+                beginResultMessage.setResult(resultCode.ordinal());
+                // beginResultMessage.setNextSvrAddr("");
+                return beginResultMessage;
+            }
+            // TYPE_BRANCH_COMMIT
+            case 4: {
+                BranchCommitResponse branchCommitResponse = (BranchCommitResponse) abstractMessage;
+                BranchCommitResultMessage branchCommitResultMessage = new BranchCommitResultMessage();
+                long branchId = branchCommitResponse.getBranchId();
+                String xid = branchCommitResponse.getXid();
+                // unused variable
+                BranchStatus branchStatus = branchCommitResponse.getBranchStatus();
+                String msg = branchCommitResponse.getMsg();
+                ResultCode resultCode = branchCommitResponse.getResultCode();
+
+                List<Long> tranIds = new ArrayList<>();
+                tranIds.add(Long.parseLong(xid.split(":")[0]));
+                List<Long> branchIds = new ArrayList<>();
+                branchIds.add(branchId);
+
+                branchCommitResultMessage.setResult(resultCode.ordinal());
+                branchCommitResultMessage.setTranIds(tranIds);
+                branchCommitResultMessage.setBranchIds(branchIds);
+                branchCommitResultMessage.setMsg(msg);
+
+                return branchCommitResultMessage;
+            }
+            // TYPE_BRANCH_ROLLBACK_RESULT
+            case 6: {
+                BranchRollbackResponse branchRollbackResponse = (BranchRollbackResponse) abstractMessage;
+                BranchRollbackResultMessage branchRollbackResultMessage = new BranchRollbackResultMessage();
+
+                String xid = branchRollbackResponse.getXid();
+                long branchId = branchRollbackResponse.getBranchId();
+                // unused variable
+                BranchStatus branchStatus = branchRollbackResponse.getBranchStatus();
+                ResultCode resultCode = branchRollbackResponse.getResultCode();
+                String msg = branchRollbackResponse.getMsg();
+
+                branchRollbackResultMessage.setTranId(Long.parseLong(xid.split(":")[0]));
+                branchRollbackResultMessage.setTranId(branchId);
+                branchRollbackResultMessage.setResult(resultCode.ordinal());
+                branchRollbackResultMessage.setMsg(msg);
+
+                return branchRollbackResultMessage;
+            }
+            // TYPE_GLOBAL_COMMIT_RESULT
+            case 8: {
+                GlobalCommitResponse globalCommitResponse = (GlobalCommitResponse) abstractMessage;
+                GlobalCommitResultMessage globalCommitResultMessage = new GlobalCommitResultMessage();
+
+                ResultCode resultCode = globalCommitResponse.getResultCode();
+                String msg = globalCommitResponse.getMsg();
+                GlobalStatus globalStatus = globalCommitResponse.getGlobalStatus();
+
+                globalCommitResultMessage.setResult(resultCode.ordinal());
+                globalCommitResultMessage.setMsg(msg);
+                //  unknown tranId
+                //  globalCommitResultMessage.setTranId();
+
+                return globalCommitResultMessage;
+            }
+            // TYPE_GLOBAL_ROLLBACK_RESULT
+            case 10: {
+                GlobalRollbackResponse globalRollbackResponse = (GlobalRollbackResponse) abstractMessage;
+                GlobalRollbackResultMessage globalRollbackResultMessage = new GlobalRollbackResultMessage();
+
+                ResultCode resultCode = globalRollbackResponse.getResultCode();
+                String msg = globalRollbackResponse.getMsg();
+                GlobalStatus globalStatus = globalRollbackResponse.getGlobalStatus();
+
+                globalRollbackResultMessage.setResult(resultCode.ordinal());
+                globalRollbackResultMessage.setMsg(msg);
+                //  unknown tranId
+                //  globalRollbackResultMessage.setTranId();
+
+                return globalRollbackResultMessage;
+            }
+            // TYPE_BRANCH_REGISTER_RESULT
+            case 12: {
+                BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) abstractMessage;
+                RegisterResultMessage registerResultMessage = new RegisterResultMessage();
+
+                long branchId = branchRegisterResponse.getBranchId();
+                ResultCode resultCode = branchRegisterResponse.getResultCode();
+                String msg = branchRegisterResponse.getMsg();
+
+                registerResultMessage.setBranchId(branchId);
+                registerResultMessage.setResult(resultCode.ordinal());
+                registerResultMessage.setMsg(msg);
+                //  unknown tranId
+                //  registerResultMessage.setTranId();
+
+                return registerResultMessage;
+            }
+            // TYPE_GLOBAL_LOCK_QUERY_RESULT
+            case 22: {
+                GlobalLockQueryResponse globalLockQueryResponse = (GlobalLockQueryResponse) abstractMessage;
+                QueryLockResultMessage queryLockResultMessage = new QueryLockResultMessage();
+
+                ResultCode resultCode = globalLockQueryResponse.getResultCode();
+                String msg = globalLockQueryResponse.getMsg();
+
+                queryLockResultMessage.setResult(resultCode.ordinal());
+                queryLockResultMessage.setMsg(msg);
+                // unknown BusinessKey and TranId
+                // queryLockResultMessage.setBusinessKey();
+                // queryLockResultMessage.setTranId();
+
+                return queryLockResultMessage;
             }
             default:
                 return null;

@@ -18,6 +18,9 @@ package io.seata.core.rpc.netty.v1;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.rpc.netty.gts.message.TxcCodec;
+import io.seata.core.rpc.netty.gts.message.TxcMessageCodec;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
@@ -28,6 +31,7 @@ import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -93,7 +97,13 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                         && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     // heartbeat has no body
                     Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
-                    bodyBytes = serializer.serialize(rpcMessage.getBody());
+                    if (headMap != null && "GtsToSeata".equals(headMap.getOrDefault("protocol", ""))) {
+                        TxcCodec codec = TxcMessageCodec.change2TxcCodec((AbstractMessage) rpcMessage.getBody());
+                        Method method = codec.getClass().getMethod("encode");
+                        bodyBytes = (byte[]) method.invoke(codec);
+                    } else {
+                        bodyBytes = serializer.serialize(rpcMessage.getBody());
+                    }
                     Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
                     bodyBytes = compressor.compress(bodyBytes);
                     fullLength += bodyBytes.length;

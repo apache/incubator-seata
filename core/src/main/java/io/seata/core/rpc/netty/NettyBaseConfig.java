@@ -27,6 +27,8 @@ import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.config.Configuration;
@@ -37,6 +39,8 @@ import io.seata.core.rpc.TransportServerType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
 
 import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 
@@ -111,6 +115,10 @@ public class NettyBaseConfig {
      */
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
+    protected static final HashMap<String, String> gtsHeaderMap;
+
+    protected static final AttributeKey<String> gtsMessageKey;
+
     static {
         TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
         String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
@@ -172,6 +180,9 @@ public class NettyBaseConfig {
             MAX_WRITE_IDLE_SECONDS = 0;
         }
         MAX_READ_IDLE_SECONDS = MAX_WRITE_IDLE_SECONDS * READIDLE_BASE_WRITEIDLE;
+        gtsHeaderMap = new HashMap<>();
+        gtsHeaderMap.put("protocol", "GtsToSeata");
+        gtsMessageKey =  AttributeKey.valueOf("gtsMessage");
     }
 
     private static void raiseUnsupportedTransportError() throws RuntimeException {

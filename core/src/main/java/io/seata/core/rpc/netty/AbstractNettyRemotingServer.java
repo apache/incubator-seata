@@ -15,6 +15,7 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
@@ -27,6 +28,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.AttributeKey;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
@@ -69,6 +71,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        if(channel.hasAttr(NettyBaseConfig.gtsMessageKey)) {
+            rpcMessage.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+        }
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
@@ -78,6 +83,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        if(channel.hasAttr(NettyBaseConfig.gtsMessageKey)) {
+            rpcMessage.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+        }
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
@@ -87,6 +95,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+        if(channel.hasAttr(NettyBaseConfig.gtsMessageKey)) {
+            rpcMessage.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+        }
         super.sendAsync(channel, rpcMessage);
     }
 
@@ -100,6 +111,15 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
                 : ProtocolConstants.MSGTYPE_RESPONSE);
+            if(rpcMessage.getHeadMap() != null) {
+                Map<String, String> map = rpcMessage.getHeadMap();
+                if(map.containsKey("protocol")) {
+                    if(map.get("protocol").equals("GtsToSeata")) {
+                        rpcMsg.setHeadMap(NettyBaseConfig.gtsHeaderMap);
+                        channel.attr(NettyBaseConfig.gtsMessageKey);
+                    }
+                }
+            }
             super.sendAsync(clientChannel, rpcMsg);
         } else {
             throw new RuntimeException("channel is error.");
@@ -146,7 +166,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         ctx.disconnect();
         ctx.close();
     }
-
     /**
      * The type ServerHandler.
      */
