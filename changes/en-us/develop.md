@@ -19,7 +19,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4915](https://github.com/seata/seata/pull/4915)] fix failed to get server recovery properties
 - [[#4919](https://github.com/seata/seata/pull/4919)] fix XID port  and  address null:0 before coordinator.init
 - [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
-
+- [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
