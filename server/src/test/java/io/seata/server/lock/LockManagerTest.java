@@ -38,6 +38,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -216,7 +217,7 @@ public class LockManagerTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
         SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init("file");
+        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         //make sure sessionMaanager is empty
         Collection<GlobalSession> sessions = sessionManager.allSessions();

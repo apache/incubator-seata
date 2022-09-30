@@ -10,6 +10,7 @@
 
 
 ### bugfix：
+- [[#4954](https://github.com/seata/seata/pull/4954)] 修复output表达式错误时，保存执行结果空指针异常
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
 - [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
 - [[#4779](https://github.com/seata/seata/pull/4779)] 修复支持 Apache Dubbo 3 版本
@@ -17,6 +18,8 @@
 - [[#4543](https://github.com/seata/seata/pull/4543)] 修复对 Oracle 数据类型nclob的支持
 - [[#4915](https://github.com/seata/seata/pull/4915)] 修复获取不到ServerRecoveryProperties属性的问题
 - [[#4919](https://github.com/seata/seata/pull/4919)] 修复XID的port和address出现null:0的情况
+- [[#4928](https://github.com/seata/seata/pull/4928)] 修复 rpcContext.getClientRMHolderMap NPE 问题
+- [[#4953](https://github.com/seata/seata/pull/4953)] 修复InsertOnDuplicateUpdate可绕过修改主键的问题
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -35,6 +38,11 @@
 - [[#4917](https://github.com/seata/seata/pull/4917)] 升级 package-lock.json 修复漏洞
 - [[#4924](https://github.com/seata/seata/pull/4924)] 优化 pom 依赖
 - [[#4932](https://github.com/seata/seata/pull/4932)] 抽取部分配置的默认值
+- [[#4925](https://github.com/seata/seata/pull/4925)] 优化 javadoc 注释
+- [[#4921](https://github.com/seata/seata/pull/4921)] 修复控制台模块安全漏洞和升级 skywalking-eyes 版本
+- [[#4936](https://github.com/seata/seata/pull/4936)] 优化存储配置的读取
+- [[#4946](https://github.com/seata/seata/pull/4946)] 将获取锁时遇到的sql异常传递给客户端
+- [[#4962](https://github.com/seata/seata/pull/4962)] 优化构建配置，并修正docker镜像的基础镜像
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
