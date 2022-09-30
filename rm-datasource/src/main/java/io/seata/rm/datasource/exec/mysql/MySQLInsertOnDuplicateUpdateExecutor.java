@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Collections;
 import java.util.StringJoiner;
-
+import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
@@ -33,6 +33,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
+import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -52,10 +53,10 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author: yangyicong
+ * @author yangyicong
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
-public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
+public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
 
 
     private static final String COLUMN_SEPARATOR = "|";
@@ -83,7 +84,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     private ArrayList<List<Object>> paramAppenderList;
 
-    public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    public MySQLInsertOnDuplicateUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -255,7 +256,8 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList, List<Object> primaryKeys) throws SQLException {
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL + " FOR UPDATE")) {
+        try (PreparedStatement ps = statementProxy.getConnection()
+            .prepareStatement(primaryKeys.isEmpty() ? selectSQL + " FOR UPDATE" : selectSQL)) {
             int ts = CollectionUtils.isEmpty(paramAppenderList) ? 0 : paramAppenderList.size();
             int ds = ts == 0 ? 0 : paramAppenderList.get(0).size();
             for (int i = 0; i < ts; i++) {
@@ -300,12 +302,13 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
-                        if (imageParameterMap.get(columnName) == null && m.getColumnDef() != null) {
+                        List<Object> imageParameters = imageParameterMap.get(columnName);
+                        if (imageParameters == null && m.getColumnDef() != null) {
                             uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
                             columnIsNull = false;
                             continue;
                         }
-                        if ((imageParameterMap.get(columnName) == null && m.getColumnDef() == null) || imageParameterMap.get(columnName).get(finalI) == null || imageParameterMap.get(columnName).get(finalI) instanceof Null) {
+                        if ((imageParameters == null && m.getColumnDef() == null) || imageParameters.get(finalI) == null || imageParameters.get(finalI) instanceof Null) {
                             if (!"PRIMARY".equalsIgnoreCase(k)) {
                                 columnIsNull = false;
                                 uniqueList.add(columnName + " is ? ");
@@ -316,7 +319,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                         }
                         columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
-                        paramAppenderTempList.add(imageParameterMap.get(columnName).get(finalI));
+                        paramAppenderTempList.add(imageParameters.get(finalI));
                     }
                     if (!columnIsNull) {
                         if (isContainWhere[0]) {
@@ -344,17 +347,19 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     public Map<String, ArrayList<Object>> buildImageParameters(SQLInsertRecognizer recognizer) {
         List<String> duplicateKeyUpdateColumns = recognizer.getDuplicateKeyUpdate();
         if (CollectionUtils.isNotEmpty(duplicateKeyUpdateColumns)) {
+            List<String> duplicateKeyUpdateLowerCaseColumns =
+                duplicateKeyUpdateColumns.parallelStream().map(String::toLowerCase).collect(Collectors.toList());
             getTableMeta().getAllIndexes().forEach((k, v) -> {
                 if ("PRIMARY".equalsIgnoreCase(k)) {
                     for (ColumnMeta m : v.getValues()) {
-                        if (duplicateKeyUpdateColumns.contains(m.getColumnName())) {
+                        if (duplicateKeyUpdateLowerCaseColumns.contains(m.getColumnName().toLowerCase())) {
                             throw new ShouldNeverHappenException("update pk value is not supported!");
                         }
                     }
                 }
             });
         }
-        Map<String, ArrayList<Object>> imageParameterMap = new HashMap<>();
+        Map<String, ArrayList<Object>> imageParameterMap = new LowerCaseLinkHashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         List<String> insertParamsList = recognizer.getInsertParamsValue();
@@ -370,14 +375,12 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
                     paramsindex++;
-                } else if (params instanceof String) {
+                } else {
                     // params is character string constant
                     if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
                         params = params.trim();
                         params = params.substring(1, params.length() - 1);
                     }
-                    imageListTemp.add(params);
-                } else {
                     imageListTemp.add(params);
                 }
                 imageParameterMap.put(m, imageListTemp);
