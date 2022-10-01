@@ -31,11 +31,11 @@ public interface StateMachineEngine {
     /**
      * start a state machine instance
      *
-     * @param stateMachineName
-     * @param tenantId
-     * @param startParams
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineName the state machine name
+     * @param tenantId the tenant id
+     * @param startParams the start params
+     * @return the state machine instance
+     * @throws EngineExecutionException the engine execution exception
      */
     StateMachineInstance start(String stateMachineName, String tenantId, Map<String, Object> startParams)
         throws EngineExecutionException;
@@ -43,12 +43,12 @@ public interface StateMachineEngine {
     /**
      * start a state machine instance with businessKey
      *
-     * @param stateMachineName
-     * @param tenantId
-     * @param businessKey
-     * @param startParams
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineName the state machine name
+     * @param tenantId the tenant id
+     * @param businessKey the businessKey
+     * @param startParams the start params
+     * @return the state machine instance
+     * @throws EngineExecutionException the engine execution exception
      */
     StateMachineInstance startWithBusinessKey(String stateMachineName, String tenantId, String businessKey,
                                               Map<String, Object> startParams) throws EngineExecutionException;
@@ -56,12 +56,12 @@ public interface StateMachineEngine {
     /**
      * start a state machine instance asynchronously
      *
-     * @param stateMachineName
-     * @param tenantId
-     * @param startParams
-     * @param callback
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineName the state machine name
+     * @param tenantId the tenant id
+     * @param startParams the start params
+     * @param callback callback after start machine
+     * @return the state machine instance
+     * @throws EngineExecutionException the engine execution exception
      */
     StateMachineInstance startAsync(String stateMachineName, String tenantId, Map<String, Object> startParams,
                                     AsyncCallback callback) throws EngineExecutionException;
@@ -69,13 +69,13 @@ public interface StateMachineEngine {
     /**
      * start a state machine instance asynchronously with businessKey
      *
-     * @param stateMachineName
-     * @param tenantId
-     * @param businessKey
-     * @param startParams
-     * @param callback
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineName the state machine name
+     * @param tenantId the tenant id
+     * @param businessKey the businessKey
+     * @param startParams the start params
+     * @param callback the callback after start a state machine
+     * @return the state machine instance
+     * @throws EngineExecutionException the engine execution exception
      */
     StateMachineInstance startWithBusinessKeyAsync(String stateMachineName, String tenantId, String businessKey,
                                                    Map<String, Object> startParams, AsyncCallback callback)
@@ -84,10 +84,10 @@ public interface StateMachineEngine {
     /**
      * forward restart a failed state machine instance
      *
-     * @param stateMachineInstId
-     * @param replaceParams
-     * @return
-     * @throws ForwardInvalidException
+     * @param stateMachineInstId the state machine instance id
+     * @param replaceParams the replace params
+     * @return the state machine instance
+     * @throws ForwardInvalidException forward invalid exception
      */
     StateMachineInstance forward(String stateMachineInstId, Map<String, Object> replaceParams)
         throws ForwardInvalidException;
@@ -95,11 +95,11 @@ public interface StateMachineEngine {
     /**
      * forward restart a failed state machine instance asynchronously
      *
-     * @param stateMachineInstId
-     * @param replaceParams
-     * @param callback
-     * @return
-     * @throws ForwardInvalidException
+     * @param stateMachineInstId the state machine instance id
+     * @param replaceParams the replace params
+     * @param callback callback after forward restart a failed state machine
+     * @return the state machine instance
+     * @throws ForwardInvalidException the forward invalid exception
      */
     StateMachineInstance forwardAsync(String stateMachineInstId, Map<String, Object> replaceParams,
                                       AsyncCallback callback) throws ForwardInvalidException;
@@ -107,10 +107,10 @@ public interface StateMachineEngine {
     /**
      * compensate a state machine instance
      *
-     * @param stateMachineInstId
-     * @param replaceParams
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineInstId the state machine id
+     * @param replaceParams the replace params
+     * @return the state machine instance
+     * @throws EngineExecutionException the engin execution exception
      */
     StateMachineInstance compensate(String stateMachineInstId, Map<String, Object> replaceParams)
         throws EngineExecutionException;
@@ -118,11 +118,11 @@ public interface StateMachineEngine {
     /**
      * compensate a state machine instance asynchronously
      *
-     * @param stateMachineInstId
-     * @param replaceParams
-     * @param callback
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineInstId the state machine instance id
+     * @param replaceParams the replace params
+     * @param callback callback after compensate a failed state machine
+     * @return the state machine instance
+     * @throws EngineExecutionException the engine execution exception
      */
     StateMachineInstance compensateAsync(String stateMachineInstId, Map<String, Object> replaceParams,
                                          AsyncCallback callback) throws EngineExecutionException;
@@ -130,19 +130,19 @@ public interface StateMachineEngine {
     /**
      * skip current failed state instance and forward restart state machine instance
      *
-     * @param stateMachineInstId
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineInstId the state machine instance id
+     * @return the state machine instance
+     * @throws EngineExecutionException the engine execution exception
      */
     StateMachineInstance skipAndForward(String stateMachineInstId, Map<String, Object> replaceParams) throws EngineExecutionException;
 
     /**
      * skip current failed state instance and forward restart state machine instance asynchronously
      *
-     * @param stateMachineInstId
-     * @param callback
-     * @return
-     * @throws EngineExecutionException
+     * @param stateMachineInstId the state machine instance id
+     * @param callback callback after skip and forward restart a failed state machine
+     * @return the state machine instance
+     * @throws EngineExecutionException the engine execution exception
      */
     StateMachineInstance skipAndForwardAsync(String stateMachineInstId, AsyncCallback callback)
         throws EngineExecutionException;
@@ -150,14 +150,14 @@ public interface StateMachineEngine {
     /**
      * get state machine configurations
      *
-     * @return
+     * @return the state machine configurations
      */
     StateMachineConfig getStateMachineConfig();
 
     /**
      * Reload StateMachine Instance
-     * @param instId
-     * @return
+     * @param instId the state machine instance id
+     * @return the state machine instance
      */
     StateMachineInstance reloadStateMachineInstance(String instId);
 }

@@ -80,7 +80,7 @@ public class GlobalSessionTest {
     @ParameterizedTest
     @MethodSource("globalSessionProvider")
     public void changeStatusTest(GlobalSession globalSession) throws Exception {
-        globalSession.changeStatus(GlobalStatus.Committed);
+        globalSession.changeGlobalStatus(GlobalStatus.Committed);
     }
 
     /**

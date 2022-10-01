@@ -172,7 +172,7 @@ public abstract class AbstractUndoExecutor {
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
-            } else if (type == JDBCType.CLOB.getVendorTypeNumber()) {
+            } else if (type == JDBCType.CLOB.getVendorTypeNumber() || type == JDBCType.NCLOB.getVendorTypeNumber()) {
                 SerialClob serialClob = (SerialClob) value;
                 if (serialClob != null) {
                     undoPST.setClob(undoIndex, serialClob.getCharacterStream());
@@ -195,6 +195,8 @@ public abstract class AbstractUndoExecutor {
                     undoPST.setObject(undoIndex, null);
                 }
             } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
+                undoPST.setObject(undoIndex, value);
+            } else if (undoValue.getType() == JDBCType.BIT.getVendorTypeNumber()) {
                 undoPST.setObject(undoIndex, value);
             } else {
                 // JDBCType.REF, JDBCType.JAVA_OBJECT etc...

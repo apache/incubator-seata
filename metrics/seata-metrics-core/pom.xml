@@ -26,6 +26,7 @@
 
     <artifactId>seata-metrics-core</artifactId>
     <name>seata-metrics-core ${project.version}</name>
+    <description>metrics-core for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
