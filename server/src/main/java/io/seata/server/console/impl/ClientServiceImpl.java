@@ -82,7 +82,13 @@ public class ClientServiceImpl implements ClientService {
 
 
     public enum ClientRole {
+        /**
+         * TM
+         */
         TM_ROLE("TMROLE"),
+        /**
+         * RM
+         */
         RM_ROLE("RMROLE");
 
         private String role;

@@ -58,7 +58,7 @@ public class SingleResult<T> extends Result<T> implements Serializable {
     }
 
     public static <T> SingleResult<T> success(T data) {
-        return new SingleResult<>(Code.SUCCESS);
+        return new SingleResult<>(Code.SUCCESS, data);
     }
 
     public T getData() {

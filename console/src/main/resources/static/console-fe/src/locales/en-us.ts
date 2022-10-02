@@ -21,6 +21,7 @@ const enUs: ILocale = {
     overview: 'Overview',
     transactionInfo: 'TransactionInfo',
     globalLockInfo: 'GlobalLockInfo',
+    clientInfo: 'ClientInfo',
   },
   Header: {
     home: 'HOME',
@@ -49,6 +50,20 @@ const enUs: ILocale = {
   },
   TransactionInfo: {
     title: 'TransactionInfo',
+    subTitle: 'list',
+    createTimeLabel: 'CreateTime',
+    selectFilerPlaceholder: 'Please select filter criteria',
+    inputFilterPlaceholder: 'Please enter filter criteria',
+    branchSessionSwitchLabel: 'Whether to include branch sessions',
+    resetButtonLabel: 'Reset',
+    searchButtonLabel: 'Search',
+    operateTitle: 'operate',
+    showBranchSessionTitle: 'View branch session',
+    showGlobalLockTitle: 'View global lock',
+    branchSessionDialogTitle: 'Branch session info',
+  },
+  ClientInfo: {
+    title: 'ClientInfo',
     subTitle: 'list',
     createTimeLabel: 'CreateTime',
     selectFilerPlaceholder: 'Please select filter criteria',
