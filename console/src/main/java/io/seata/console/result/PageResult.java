@@ -56,6 +56,10 @@ public class PageResult<T> extends Result<T> implements Serializable {
     public PageResult() {
     }
 
+    public PageResult(Code code) {
+        super(code);
+    }
+
     public PageResult(String code, String message) {
         super(code, message);
     }
@@ -67,10 +71,6 @@ public class PageResult<T> extends Result<T> implements Serializable {
         this.pageNum = pageNum;
         this.pageSize = pageSize;
         this.data = data;
-    }
-
-    public PageResult(Code code) {
-        super(code);
     }
 
     public static <T> PageResult<T> build(List<T> list, Integer pageNum, Integer pageSize) {

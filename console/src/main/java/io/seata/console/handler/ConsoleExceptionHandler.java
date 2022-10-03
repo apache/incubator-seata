@@ -31,13 +31,11 @@ public class ConsoleExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public Result exceptionHandle(Exception e) {
-        e.printStackTrace();
         return Result.error();
     }
 
     @ExceptionHandler(ConsoleException.class)
     public Result consoleExceptionHandle(ConsoleException e) {
-        e.printStackTrace();
         return Result.result(e.getCode());
     }
 }

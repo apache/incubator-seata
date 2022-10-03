@@ -33,18 +33,18 @@ public class Result<T> implements Serializable {
     public Result() {
     }
 
-    public Result(String code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-
     public Result(Code code) {
         this.code = code.getCode();
         this.message = code.getMsg();
     }
 
+    public Result(String code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
     public static Result error() {
-        return new Result(Code.SUCCESS);
+        return new Result(Code.ERROR);
     }
 
     public static Result ok() {

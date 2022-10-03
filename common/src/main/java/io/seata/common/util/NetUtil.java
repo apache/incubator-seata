@@ -15,11 +15,7 @@
  */
 package io.seata.common.util;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
@@ -51,7 +47,7 @@ public class NetUtil {
      * @param address the address
      * @return the string
      */
-    public static String toStringAddress(SocketAddress address) {
+    public static String btoStringAddress(SocketAddress address) {
         if (address == null) {
             return StringUtils.EMPTY;
         }
