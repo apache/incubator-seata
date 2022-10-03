@@ -244,7 +244,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the column name in sql
      */
     protected String getColumnNamesInSQL(String tableAlias,List<String> columnNameList) {
-        if (Objects.isNull(columnNameList) || columnNameList.isEmpty()) {
+        if (CollectionUtils.isEmpty(columnNameList)) {
             return null;
         }
         StringBuilder columnNamesStr = new StringBuilder();
@@ -300,7 +300,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return true: contains pk false: not contains pk
      */
     protected boolean containsPK(List<String> columns) {
-        if (columns == null || columns.isEmpty()) {
+        if (CollectionUtils.isEmpty(columns)) {
             return false;
         }
         List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
