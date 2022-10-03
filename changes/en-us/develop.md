@@ -7,6 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
+- [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
 
 
 ### bugfix:
@@ -65,5 +66,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [doubleDimple](https://github.com/doubleDimple)
 - [jsbxyyx](https://github.com/jsbxyyx)
 - [tuwenlin](https://github.com/tuwenlin)
+- [CrazyLionLi](https://github.com/JavaLionLi)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
