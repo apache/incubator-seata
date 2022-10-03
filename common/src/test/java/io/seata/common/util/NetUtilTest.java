@@ -18,7 +18,6 @@ package io.seata.common.util;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import org.junit.jupiter.api.Test;

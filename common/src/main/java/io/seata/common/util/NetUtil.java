@@ -15,7 +15,12 @@
  */
 package io.seata.common.util;
 
-import java.net.*;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
