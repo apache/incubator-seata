@@ -52,7 +52,7 @@ public class NetUtil {
      * @param address the address
      * @return the string
      */
-    public static String btoStringAddress(SocketAddress address) {
+    public static String toStringAddress(SocketAddress address) {
         if (address == null) {
             return StringUtils.EMPTY;
         }
