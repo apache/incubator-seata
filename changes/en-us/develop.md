@@ -43,6 +43,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4936](https://github.com/seata/seata/pull/4936)] optimize read of storage configuration
 - [[#4946](https://github.com/seata/seata/pull/4946)] pass the sqlexception to client when get lock
 - [[#4962](https://github.com/seata/seata/pull/4962)] optimize build and fix the base image
+- [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
