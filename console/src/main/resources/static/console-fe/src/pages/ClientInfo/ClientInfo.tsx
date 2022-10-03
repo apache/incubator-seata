@@ -160,7 +160,7 @@ import getData, { ClientInfoParam, offline } from '../../service/clientInfo';
         clientRole: record.clientRole,
       });
 
-      if (res.data.data === '200') this.search();
+      if (res.code === '200') this.search();
     }
 
    render() {
@@ -169,6 +169,8 @@ import getData, { ClientInfoParam, offline } from '../../service/clientInfo';
        inputFilterPlaceholder,
        resetButtonLabel,
        searchButtonLabel,
+       operateTitle,
+       offlineTitle,
      } = locale;
      return (
        <Page
@@ -235,7 +237,7 @@ import getData, { ClientInfoParam, offline } from '../../service/clientInfo';
            <Table.Column title="clientRole" dataIndex="clientRole" />
            <Table.Column title="transactionServiceGroup" dataIndex="transactionServiceGroup" />
            <Table.Column title="resourceSets" dataIndex="resourceSets" cell={(value:string[]) => <ResourceSetCell data={value} />} />
-           <Table.Column title="operator" dataIndex="operator" cell={(a, b, record:any) => <a onClick={() => this.operatorOnclick(record)}>offline</a>}/>
+           <Table.Column title={operateTitle} dataIndex="operator" cell={(a, b, record:any) => <a onClick={() => this.operatorOnclick(record)}>{offlineTitle}</a>}/>
          </Table>
          <Pagination
            total={this.state.total}

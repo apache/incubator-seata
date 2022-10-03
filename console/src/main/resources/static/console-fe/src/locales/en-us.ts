@@ -65,16 +65,12 @@ const enUs: ILocale = {
   ClientInfo: {
     title: 'ClientInfo',
     subTitle: 'list',
-    createTimeLabel: 'CreateTime',
     selectFilerPlaceholder: 'Please select filter criteria',
     inputFilterPlaceholder: 'Please enter filter criteria',
-    branchSessionSwitchLabel: 'Whether to include branch sessions',
     resetButtonLabel: 'Reset',
     searchButtonLabel: 'Search',
     operateTitle: 'operate',
-    showBranchSessionTitle: 'View branch session',
-    showGlobalLockTitle: 'View global lock',
-    branchSessionDialogTitle: 'Branch session info',
+    offlineTitle: 'offline',
   },
   GlobalLockInfo: {
     title: 'GlobalLockInfo',
