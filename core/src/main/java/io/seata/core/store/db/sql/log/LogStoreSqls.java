@@ -39,21 +39,6 @@ public interface LogStoreSqls {
      */
     String getAllBranchSessionSQL(String branchTable, String whereCondition);
 
-    /**
-     * Get insert global transaction sql string.
-     *
-     * @param globalTable the global table
-     * @return the string
-     */
-    String getInsertGlobalTransactionSQL(String globalTable);
-
-    /**
-     * Get update global transaction status sql string.
-     *
-     * @param globalTable the global table
-     * @return the string
-     */
-    String getUpdateGlobalTransactionStatusSQL(String globalTable);
 
     /**
      * Get delete global transaction sql string.
@@ -79,38 +64,6 @@ public interface LogStoreSqls {
      */
     String getQueryGlobalTransactionSQLByTransactionId(String globalTable);
 
-    /**
-     * Get query global transaction sql by status string.
-     *
-     * @param globalTable       the global table
-     * @param paramsPlaceHolder the params place holder
-     * @return the string
-     */
-    String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
-
-    /**
-     * Get query global transaction for recovery sql string.
-     *
-     * @param globalTable the global table
-     * @return the string
-     */
-    String getQueryGlobalTransactionForRecoverySQL(String globalTable);
-
-    /**
-     * Get insert branch transaction sql string.
-     *
-     * @param branchTable the branch table
-     * @return the string
-     */
-    String getInsertBranchTransactionSQL(String branchTable);
-
-    /**
-     * Get update branch transaction status sql string.
-     *
-     * @param branchTable the branch table
-     * @return the string
-     */
-    String getUpdateBranchTransactionStatusSQL(String branchTable);
 
     /**
      * Get update branch transaction status and app data sql string.

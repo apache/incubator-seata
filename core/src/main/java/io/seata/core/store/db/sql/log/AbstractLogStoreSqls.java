@@ -156,10 +156,21 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
         return QUERY_ALL_BRANCH_WITH_XID.replace(BRANCH_TABLE_PLACEHOLD, branchTable).replace(WHERE_PLACEHOLD, whereCondition);
     }
 
-    @Override
+    /**
+     * Get insert global transaction sql string.
+     *
+     * @param globalTable the global table
+     * @return the string
+     */
+
     public abstract String getInsertGlobalTransactionSQL(String globalTable);
 
-    @Override
+    /**
+     * Get update global transaction status sql string.
+     *
+     * @param globalTable the global table
+     * @return the string
+     */
     public abstract String getUpdateGlobalTransactionStatusSQL(String globalTable);
 
     @Override
@@ -177,16 +188,37 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
         return QUERY_GLOBAL_TRANSACTION_BY_ID.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
-    @Override
+    /**
+     * Get query global transaction sql by status string.
+     *
+     * @param globalTable       the global table
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     */
     public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
 
-    @Override
+    /**
+     * Get query global transaction for recovery sql string.
+     *
+     * @param globalTable the global table
+     * @return the string
+     */
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
 
-    @Override
+    /**
+     * Get insert branch transaction sql string.
+     *
+     * @param branchTable the branch table
+     * @return the string
+     */
     public abstract String getInsertBranchTransactionSQL(String branchTable);
 
-    @Override
+    /**
+     * Get update branch transaction status sql string.
+     *
+     * @param branchTable the branch table
+     * @return the string
+     */
     public abstract String getUpdateBranchTransactionStatusSQL(String branchTable);
 
     @Override

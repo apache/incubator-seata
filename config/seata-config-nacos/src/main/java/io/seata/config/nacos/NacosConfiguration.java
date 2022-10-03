@@ -56,14 +56,13 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String NACOS_DATA_ID_KEY = "dataId";
-    private static final String CONFIG_TYPE = "nacos";
+    private static final String ENDPOINT_KEY = "endpoint";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
-    private static final String USE_PARSE_RULE = "false";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -99,6 +98,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                 throw new RuntimeException(e);
             }
         }
+        CONFIG_TYPE = "nacos";
     }
 
     @Override
@@ -203,9 +203,9 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static Properties getConfigProperties() {
         Properties properties = new Properties();
-        properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
-        properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
-        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+        if (System.getProperty(ENDPOINT_KEY) != null) {
+            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
+        } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
@@ -321,11 +321,6 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
     }
 
-
-    @Override
-    public String getTypeName() {
-        return CONFIG_TYPE;
-    }
 
     /**
      * Non-blocking subscriptions prohibit adding subscriptions in the thread pool to prevent thread termination

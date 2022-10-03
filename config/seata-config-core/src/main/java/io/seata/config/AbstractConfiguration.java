@@ -40,6 +40,7 @@ public abstract class AbstractConfiguration implements Configuration {
     public static final long DEFAULT_LONG = 0L;
     public static final Duration DEFAULT_DURATION = Duration.ZERO;
     public static final boolean DEFAULT_BOOLEAN = false;
+    protected static String CONFIG_TYPE = "";
 
 
     @Override
@@ -161,10 +162,8 @@ public abstract class AbstractConfiguration implements Configuration {
         return removeConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
-    /**
-     * Gets type name.
-     *
-     * @return the type name
-     */
-    public abstract String getTypeName();
+
+    public String getTypeName(){
+        return CONFIG_TYPE;
+    }
 }

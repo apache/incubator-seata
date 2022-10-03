@@ -27,9 +27,9 @@ import org.springframework.context.ApplicationContext;
 
 public class SpringCloudConfiguration extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudConfiguration.class);
-    private static final String CONFIG_TYPE = "SpringCloudConfig";
     private static volatile SpringCloudConfiguration instance;
     private static final String PREFIX = "seata.";
+
 
     public static SpringCloudConfiguration getInstance() {
         if (instance == null) {
@@ -43,13 +43,9 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
     }
 
     private SpringCloudConfiguration() {
-
+            CONFIG_TYPE = "SpringCloudConfig";
     }
 
-    @Override
-    public String getTypeName() {
-        return CONFIG_TYPE;
-    }
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {

@@ -117,7 +117,7 @@ public class TableRecordsTest {
 
     @Test
     public void testEmpty() {
-        TableRecords.EmptyTableRecords emptyTableRecords = new TableRecords.EmptyTableRecords();
+        EmptyTableRecords emptyTableRecords = new EmptyTableRecords();
         Assertions.assertEquals(0, emptyTableRecords.size());
 
         TableRecords empty = TableRecords.empty(new TableMeta());

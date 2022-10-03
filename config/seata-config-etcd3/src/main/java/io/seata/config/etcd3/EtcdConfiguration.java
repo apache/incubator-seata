@@ -77,7 +77,6 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String ETCD_CONFIG_KEY = "key";
-    private static final String CONFIG_TYPE = "etcd3";
     private static final String DEFAULT_ETCD_CONFIG_KEY_VALUE = "seata.properties";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
@@ -95,6 +94,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
                 new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
         initSeataConfig();
+        CONFIG_TYPE = "etcd3";
     }
 
     /**
@@ -111,11 +111,6 @@ public class EtcdConfiguration extends AbstractConfiguration {
             }
         }
         return instance;
-    }
-
-    @Override
-    public String getTypeName() {
-        return CONFIG_TYPE;
     }
 
     @Override

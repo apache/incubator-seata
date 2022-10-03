@@ -40,23 +40,12 @@ public class LogStoreSqlsFactoryTest {
     @Test
     public void mysqlLogTest() {
 
-        String sql = mysqlLog.getInsertGlobalTransactionSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = mysqlLog.getUpdateGlobalTransactionStatusSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = mysqlLog.getDeleteGlobalTransactionSQL(globalTable);
+
+        String sql = mysqlLog.getDeleteGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = mysqlLog.getQueryGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = mysqlLog.getQueryGlobalTransactionSQLByTransactionId(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = mysqlLog.getQueryGlobalTransactionSQLByStatus(globalTable, "1");
-        Assertions.assertNotNull(sql);
-        sql = mysqlLog.getQueryGlobalTransactionForRecoverySQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = mysqlLog.getInsertBranchTransactionSQL(branchTable);
-        Assertions.assertNotNull(sql);
-        sql = mysqlLog.getUpdateBranchTransactionStatusSQL(branchTable);
         Assertions.assertNotNull(sql);
         sql = mysqlLog.getDeleteBranchTransactionByBranchIdSQL(branchTable);
         Assertions.assertNotNull(sql);
@@ -75,23 +64,11 @@ public class LogStoreSqlsFactoryTest {
     @Test
     public void oracleLogTest() {
 
-        String sql = oracleLog.getInsertGlobalTransactionSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oracleLog.getUpdateGlobalTransactionStatusSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oracleLog.getDeleteGlobalTransactionSQL(globalTable);
+        String sql = oracleLog.getDeleteGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = oracleLog.getQueryGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = oracleLog.getQueryGlobalTransactionSQLByTransactionId(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oracleLog.getQueryGlobalTransactionSQLByStatus(globalTable, "1");
-        Assertions.assertNotNull(sql);
-        sql = oracleLog.getQueryGlobalTransactionForRecoverySQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oracleLog.getInsertBranchTransactionSQL(branchTable);
-        Assertions.assertNotNull(sql);
-        sql = oracleLog.getUpdateBranchTransactionStatusSQL(branchTable);
         Assertions.assertNotNull(sql);
         sql = oracleLog.getDeleteBranchTransactionByBranchIdSQL(branchTable);
         Assertions.assertNotNull(sql);
@@ -110,23 +87,11 @@ public class LogStoreSqlsFactoryTest {
     @Test
     public void pgLogTest() {
 
-        String sql = pgLog.getInsertGlobalTransactionSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = pgLog.getUpdateGlobalTransactionStatusSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = pgLog.getDeleteGlobalTransactionSQL(globalTable);
+        String sql = pgLog.getDeleteGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = pgLog.getQueryGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = pgLog.getQueryGlobalTransactionSQLByTransactionId(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = pgLog.getQueryGlobalTransactionSQLByStatus(globalTable, "1");
-        Assertions.assertNotNull(sql);
-        sql = pgLog.getQueryGlobalTransactionForRecoverySQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = pgLog.getInsertBranchTransactionSQL(branchTable);
-        Assertions.assertNotNull(sql);
-        sql = pgLog.getUpdateBranchTransactionStatusSQL(branchTable);
         Assertions.assertNotNull(sql);
         sql = pgLog.getDeleteBranchTransactionByBranchIdSQL(branchTable);
         Assertions.assertNotNull(sql);
@@ -145,23 +110,11 @@ public class LogStoreSqlsFactoryTest {
     @Test
     public void h2LogTest() {
 
-        String sql = h2Log.getInsertGlobalTransactionSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = h2Log.getUpdateGlobalTransactionStatusSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = h2Log.getDeleteGlobalTransactionSQL(globalTable);
+        String sql = h2Log.getDeleteGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = h2Log.getQueryGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = h2Log.getQueryGlobalTransactionSQLByTransactionId(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = h2Log.getQueryGlobalTransactionSQLByStatus(globalTable, "1");
-        Assertions.assertNotNull(sql);
-        sql = h2Log.getQueryGlobalTransactionForRecoverySQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = h2Log.getInsertBranchTransactionSQL(branchTable);
-        Assertions.assertNotNull(sql);
-        sql = h2Log.getUpdateBranchTransactionStatusSQL(branchTable);
         Assertions.assertNotNull(sql);
         sql = h2Log.getDeleteBranchTransactionByBranchIdSQL(branchTable);
         Assertions.assertNotNull(sql);
@@ -180,23 +133,11 @@ public class LogStoreSqlsFactoryTest {
     @Test
     public void oceanbaseLogTest() {
 
-        String sql = oceanbase.getInsertGlobalTransactionSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oceanbase.getUpdateGlobalTransactionStatusSQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oceanbase.getDeleteGlobalTransactionSQL(globalTable);
+        String sql = oceanbase.getDeleteGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = oceanbase.getQueryGlobalTransactionSQL(globalTable);
         Assertions.assertNotNull(sql);
         sql = oceanbase.getQueryGlobalTransactionSQLByTransactionId(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oceanbase.getQueryGlobalTransactionSQLByStatus(globalTable, "1");
-        Assertions.assertNotNull(sql);
-        sql = oceanbase.getQueryGlobalTransactionForRecoverySQL(globalTable);
-        Assertions.assertNotNull(sql);
-        sql = oceanbase.getInsertBranchTransactionSQL(branchTable);
-        Assertions.assertNotNull(sql);
-        sql = oceanbase.getUpdateBranchTransactionStatusSQL(branchTable);
         Assertions.assertNotNull(sql);
         sql = oceanbase.getDeleteBranchTransactionByBranchIdSQL(branchTable);
         Assertions.assertNotNull(sql);
