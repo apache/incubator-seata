@@ -137,7 +137,7 @@ public class ClientServiceImpl implements ClientService {
                             // applicationId
                             (isBlank(param.getApplicationId()) || session.getApplicationId().contains(param.getApplicationId())) &&
                             // resourceId
-                            (isBlank(param.getResourceId()) || session.getResourceId().contains(param.getResourceId()));
+                            (isBlank(param.getResourceId()) || param.getResourceId().equals(session.getResourceId()));
         };
     }
 
