@@ -16,19 +16,8 @@
 package io.seata.rm.datasource.undo.oceanbaseoracle;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.core.compressor.CompressorType;
-import io.seata.core.constants.ClientTableColumnsName;
-import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.rm.datasource.undo.oracle.OracleUndoLogManager;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
 
 /**
  * Undo log manager of OceanBaseOracle
@@ -36,76 +25,5 @@ import java.util.Date;
  * @author hsien999
  */
 @LoadLevel(name = JdbcConstants.OCEANBASE_ORACLE)
-public class OceanBaseOracleUndoLogManager extends AbstractUndoLogManager {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OracleUndoLogManager.class);
-
-    private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL = "SELECT 1 FROM " + UNDO_LOG_TABLE_NAME
-        + " WHERE ROWNUM = 1";
-
-    /**
-     * Table name: undo_log(default)
-     * Table columns: id(generated), branch_id, xid, context, rollback_info, log_status, log_created, log_modified
-     */
-    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
-        " (" + ClientTableColumnsName.UNDO_LOG_ID + ", " + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
-        + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
-        + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
-        + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
-        + "VALUES (UNDO_LOG_SEQ.NEXTVAL, ?, ?, ?, ?, ?, SYSDATE, SYSDATE)";
-
-    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-        " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? and ROWNUM <= ?";
-
-    @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser undoLogParser,
-                                                   Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, buildContext(undoLogParser.getName(), CompressorType.NONE),
-            undoLogParser.getDefaultContent(), State.GlobalFinished, conn);
-    }
-
-    @Override
-    protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx,
-                                           byte[] undoLogContent, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
-    }
-
-    @Override
-    public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
-        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
-            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
-            deletePST.setInt(2, limitRows);
-            int deleteRows = deletePST.executeUpdate();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Batch size of deleted undo log: {}", deleteRows);
-            }
-            return deleteRows;
-        } catch (Exception cause) {
-            if (cause instanceof SQLException) {
-                throw cause;
-            }
-            throw new SQLException(cause);
-        }
-    }
-
-    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
-                               State state, Connection conn) throws SQLException {
-        try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
-            pst.setLong(1, branchID);
-            pst.setString(2, xid);
-            pst.setString(3, rollbackCtx);
-            pst.setBytes(4, undoLogContent);
-            pst.setInt(5, state.getValue());
-            pst.executeUpdate();
-        } catch (Exception cause) {
-            if (cause instanceof SQLException) {
-                throw cause;
-            }
-            throw new SQLException(cause);
-        }
-    }
-
-    @Override
-    protected String getCheckUndoLogTableExistSql() {
-        return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
-    }
+public class OceanBaseOracleUndoLogManager extends OracleUndoLogManager {
 }

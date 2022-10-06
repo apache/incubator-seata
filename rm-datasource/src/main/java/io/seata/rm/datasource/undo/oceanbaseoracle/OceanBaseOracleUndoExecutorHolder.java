@@ -16,9 +16,7 @@
 package io.seata.rm.datasource.undo.oceanbaseoracle;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.AbstractUndoExecutor;
-import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoExecutorHolder;
+import io.seata.rm.datasource.undo.oracle.OracleUndoExecutorHolder;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -27,19 +25,5 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author hsien999
  */
 @LoadLevel(name = JdbcConstants.OCEANBASE_ORACLE)
-public class OceanBaseOracleUndoExecutorHolder implements UndoExecutorHolder {
-    @Override
-    public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
-        return new OceanBaseOracleUndoInsertExecutor(sqlUndoLog);
-    }
-
-    @Override
-    public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog) {
-        return new OceanBaseOracleUndoUpdateExecutor(sqlUndoLog);
-    }
-
-    @Override
-    public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
-        return new OceanBaseOracleUndoDeleteExecutor(sqlUndoLog);
-    }
+public class OceanBaseOracleUndoExecutorHolder extends OracleUndoExecutorHolder {
 }
