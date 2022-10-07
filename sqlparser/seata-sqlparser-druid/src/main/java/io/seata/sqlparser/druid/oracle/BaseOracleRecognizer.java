@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
@@ -123,6 +126,24 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
                 //just like: UPDATE table a INNER JOIN table b ON a.id = b.pid ...
                 throw new NotSupportYetException("not support the sql syntax with join table:" + x
                         + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(OracleUpdateStatement x) {
+                if (x.getTableSource() instanceof OracleSelectSubqueryTableSource) {
+                    //just like: "update a set a.id = (select id from b where a.pid = b.pid)"
+                    throw new NotSupportYetException("not support the sql syntax with join table:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                }
+                List<SQLUpdateSetItem> updateSetItems = x.getItems();
+                for (SQLUpdateSetItem updateSetItem : updateSetItems) {
+                    if (updateSetItem.getValue() instanceof SQLQueryExpr) {
+                        //just like: "update a set a.id = (select id from b where a.pid = b.pid)"
+                        throw new NotSupportYetException("not support the sql syntax with join table:" + x
+                            + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                    }
+                }
+                return true;
             }
 
             @Override

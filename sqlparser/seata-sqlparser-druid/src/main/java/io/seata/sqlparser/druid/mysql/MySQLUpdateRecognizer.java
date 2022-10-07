@@ -62,7 +62,8 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
 
     @Override
     public SQLType getSQLType() {
-        return tableName2AliasMap.keySet().size() > 1 ? SQLType.UPDATE_JOIN : SQLType.UPDATE;
+        SQLTableSource tableSource = this.ast.getTableSource();
+        return tableSource instanceof SQLExprTableSource ? SQLType.UPDATE : SQLType.UPDATE_JOIN;
     }
 
     @Override

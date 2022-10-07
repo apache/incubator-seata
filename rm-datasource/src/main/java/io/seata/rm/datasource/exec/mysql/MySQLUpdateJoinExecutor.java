@@ -26,6 +26,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 
+import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.SQLType;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -44,6 +49,7 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
  * @author renliangyu857
  */
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
+    private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
 
@@ -72,14 +78,19 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         String joinTable = tableItems[0];
         int itemTableIndex = 1;
         for (int i = itemTableIndex; i < tableItems.length; i++) {
-            String selectSQL = buildBeforeImageSQL(joinTable, tableItems[i], paramAppenderList);
+            List<String> itemTableUpdateColumns = getItemUpdateColumns(this.getTableMeta(tableItems[i]), recognizer.getUpdateColumns());
+            if (CollectionUtils.isEmpty(itemTableUpdateColumns)) {
+                continue;
+            }
+            String selectSQL = buildBeforeImageSQL(joinTable, tableItems[i], itemTableUpdateColumns, paramAppenderList);
             TableRecords tableRecords = buildTableRecords(getTableMeta(tableItems[i]), selectSQL, paramAppenderList);
             beforeImagesMap.put(tableItems[i], tableRecords);
         }
         return null;
     }
 
-    private String buildBeforeImageSQL(String joinTable, String itemTable, ArrayList<List<Object>> paramAppenderList) {
+    private String buildBeforeImageSQL(String joinTable, String itemTable, List<String> itemTableUpdateColumns,
+        ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(joinTable);
@@ -97,8 +108,6 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        TableMeta itemTableMeta = this.getTableMeta(itemTable);
-        List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta.getAllColumns().keySet(), recognizer.getUpdateColumns());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         for (String needUpdateColumn : needUpdateColumns) {
             selectSQLJoin.add(needUpdateColumn);
@@ -118,6 +127,9 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         int itemTableIndex = 1;
         for (int i = itemTableIndex; i < tableItems.length; i++) {
             TableRecords tableBeforeImage = beforeImagesMap.get(tableItems[i]);
+            if (tableBeforeImage == null) {
+                continue;
+            }
             String selectSQL = buildAfterImageSQL(joinTable, tableItems[i], tableBeforeImage);
             ResultSet rs = null;
             try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
@@ -134,13 +146,13 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
 
     private String buildAfterImageSQL(String joinTable, String itemTable,
         TableRecords beforeImage) throws SQLException {
+        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         TableMeta itemTableMeta = getTableMeta(itemTable);
         StringBuilder prefix = new StringBuilder("SELECT ");
-        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(itemTableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
+        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName()), beforeImage.pkRows().size(), getDbType());
         String suffix = " FROM " + joinTable + " WHERE " + whereSql;
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
-        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-        List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta.getAllColumns().keySet(), recognizer.getUpdateColumns());
+        List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         for (String needUpdateColumn : needUpdateColumns) {
             selectSQLJoiner.add(needUpdateColumn);
@@ -148,10 +160,20 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         return selectSQLJoiner.toString();
     }
 
-    private List<String> getItemUpdateColumns(Set<String> itemAllColumns, List<String> updateColumns) {
+    private List<String> getItemUpdateColumns(TableMeta itemTableMeta, List<String> updateColumns) {
         List<String> itemUpdateColumns = new ArrayList<>();
+        Set<String> itemTableAllColumns = itemTableMeta.getAllColumns().keySet();
+        String itemTableName = itemTableMeta.getTableName();
+        String itemTableNameAlias = ((SQLUpdateRecognizer) sqlRecognizer).getTableAlias(itemTableName);
         for (String updateColumn : updateColumns) {
-            if (itemAllColumns.contains(updateColumn)) {
+            if (updateColumn.contains(DOT)) {
+                String[] specificTableColumn = updateColumn.split("\\.");
+                String tableNamePrefix = specificTableColumn[0];
+                String column = specificTableColumn[1];
+                if ((tableNamePrefix.equals(itemTableName) || tableNamePrefix.equals(itemTableNameAlias)) && itemTableAllColumns.contains(column)) {
+                    itemUpdateColumns.add(updateColumn);
+                }
+            } else if (itemTableAllColumns.contains(updateColumn)) {
                 itemUpdateColumns.add(updateColumn);
             }
         }
@@ -160,7 +182,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
 
     @Override
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if (beforeImagesMap == null || afterImagesMap == null) {
+        if (CollectionUtils.isEmpty(beforeImagesMap) || CollectionUtils.isEmpty(afterImagesMap)) {
             throw new IllegalStateException("images can not be null");
         }
         for (Map.Entry<String, TableRecords> entry : beforeImagesMap.entrySet()) {
@@ -172,5 +194,30 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             }
             super.prepareUndoLog(tableBeforeImage, tableAfterImage);
         }
+    }
+
+    @Override
+    protected TableMeta getTableMeta(String tableName) {
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        return TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+            .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
+    }
+
+    /**
+     * build a SQLUndoLog
+     *
+     * @param beforeImage the before image
+     * @param afterImage  the after image
+     * @return sql undo log
+     */
+    protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
+        SQLType sqlType = sqlRecognizer.getSQLType();
+        String tableName = beforeImage.getTableName();
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setSqlType(sqlType);
+        sqlUndoLog.setTableName(tableName);
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
+        return sqlUndoLog;
     }
 }

@@ -131,11 +131,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         TableMeta tableMeta = getTableMeta(table);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(table, originUpdateColumns)) {
-                needUpdateColumns.add(getColumnNamesInSQL(tableAlias, tableMeta.getEscapePkNameList(getDbType())));
+                needUpdateColumns.add(getColumnNamesWithTablePrefix(table,tableAlias, tableMeta.getEscapePkNameList(getDbType())));
             }
-            for (String columnName : originUpdateColumns) {
-                needUpdateColumns.add(columnName);
-            }
+            needUpdateColumns.addAll(originUpdateColumns);
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();

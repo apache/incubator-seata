@@ -44,22 +44,21 @@ import org.junit.jupiter.api.Test;
  */
 public class MysqlUpdateJoinTest {
     private static final int testRecordId = 1;
+    private static final int testRecordId1 = 2;
     private static final long testTid = UUIDGenerator.generateUUID();
     private static final String mockXid = "127.0.0.1:8091:" + testTid;
     private static final long mockBranchId = testTid + 1;
 
-    private static final String mysql_jdbcUrl = "jdbc:mysql://127.0.0.1:3306/seata";
-    private static final String mysql_username = "demo";
-    private static final String mysql_password = "demo";
-    private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER;
+    private static final String mysql_jdbcUrl = "jdbc:mysql://43.143.11.65:3306/seata";
+    private static final String mysql_username = "root";
+    private static final String mysql_password = "123456";
+    private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER_6;
 
 
     @Test
     @Disabled
     public void testUpdateJoin() throws Throwable {
-        doPrepareData("insert into t1(id,name) values(1,'zhangsan')");
-        doPrepareData("insert into t2(id,name) values(1,'zhangsan')");
-        doTestPhase2(false, "update t1 inner join t2 on t1.id = t2.id set name = 'lisi'");
+        doTestPhase2(false, "update t inner join t1 on t.a = t1.a set b = 3,t.c=3");
         System.out.println("AT MODE Phase2 test for update join looks good!");
     }
 
@@ -96,13 +95,13 @@ public class MysqlUpdateJoinTest {
         // >>> query before image
         helperConn = helperDS.getConnection();
         helperStat = helperConn.createStatement();
-        table1HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId);
-        table2HelperRes = helperStat.executeQuery("select * from t2 where id = " + testRecordId);
+        table1HelperRes = helperStat.executeQuery("select * from t where id = " + testRecordId );
         TableMeta table1Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
-                "t1", dataSourceProxy.getResourceId());
-        TableMeta table2Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
-                "t2", dataSourceProxy.getResourceId());
+                "t", dataSourceProxy.getResourceId());
         TableRecords table1BeforeImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
+        table2HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId1);
+        TableMeta table2Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
+                "t1", dataSourceProxy.getResourceId());
         TableRecords table2BeforeImage = TableRecords.buildRecords(table2Meta, table2HelperRes);
         // >>> update record should not throw exception
         Assertions.assertDoesNotThrow(() -> testStat.execute(updateSql));
@@ -120,10 +119,10 @@ public class MysqlUpdateJoinTest {
             // >>> Global Tx Phase 2: rollback have a check,rollbacked record must equal to before image
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
-            table1HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId);
-            table2HelperRes = helperStat.executeQuery("select * from t2 where id = " + testRecordId);
+            table1HelperRes = helperStat.executeQuery("select * from t where id = " + testRecordId);
             TableRecords table1CurrentImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
-            TableRecords table2CurrentImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
+            table2HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId1);
+            TableRecords table2CurrentImage = TableRecords.buildRecords(table2Meta, table2HelperRes);
             Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table1BeforeImage, table1CurrentImage).getResult());
             Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table2BeforeImage, table2CurrentImage).getResult());
             table1HelperRes.close();

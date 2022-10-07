@@ -205,15 +205,33 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return tableAlias == null ? columnName : tableAlias + "." + columnName;
     }
 
+
     /**
-     * Gets column name in sql.
+     * Gets column name with table prefix
      *
+     * @param table      the table name
      * @param tableAlias the tableAlias
      * @param columnName the column name
-     * @return the column name in sql
+     * @return
      */
-    protected String getColumnNameInSQL(String tableAlias,String columnName) {
-        return tableAlias == null ? columnName : tableAlias + "." + columnName;
+    protected String getColumnNameWithTablePrefix(String table, String tableAlias, String columnName) {
+        return tableAlias == null ? (table == null ? columnName : table + "." + columnName) : (tableAlias + "." + columnName);
+    }
+
+    /**
+     * Gets column name with table prefix
+     *
+     * @param table      the table name
+     * @param tableAlias the tableAlias
+     * @param columnNames the column names
+     * @return
+     */
+    protected List<String> getColumnNamesWithTablePrefixList(String table,String tableAlias,List<String> columnNames) {
+        List<String> columnNameWithTablePrefix = new ArrayList<>();
+        for (String columnName : columnNames) {
+            columnNameWithTablePrefix.add(this.getColumnNameWithTablePrefix(table,tableAlias,columnName));
+        }
+        return columnNameWithTablePrefix;
     }
 
     /**
@@ -239,11 +257,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * Gets several column name in sql.
      *
-     * @param tableAlias the table alias
+     * @param table          the table
+     * @param tableAlias     the table alias
      * @param columnNameList the column name
      * @return the column name in sql
      */
-    protected String getColumnNamesInSQL(String tableAlias,List<String> columnNameList) {
+    protected String getColumnNamesWithTablePrefix(String table,String tableAlias, List<String> columnNameList) {
         if (CollectionUtils.isEmpty(columnNameList)) {
             return null;
         }
@@ -252,7 +271,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             if (i > 0) {
                 columnNamesStr.append(" , ");
             }
-            columnNamesStr.append(getColumnNameInSQL(tableAlias,columnNameList.get(i)));
+            columnNamesStr.append(getColumnNameWithTablePrefix(table,tableAlias, columnNameList.get(i)));
         }
         return columnNamesStr.toString();
     }
@@ -430,7 +449,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sqlUndoLog.setAfterImage(afterImage);
         return sqlUndoLog;
     }
-
 
     /**
      * build a BeforeImage
