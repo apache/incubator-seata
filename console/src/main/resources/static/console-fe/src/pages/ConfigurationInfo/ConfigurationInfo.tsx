@@ -159,7 +159,7 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
                 ?
                 <Form style={{width: '400px', height: '200px'}}  {...formItemLayout} >
                   <FormItem label="配置项:">
-                    <h3>{this.state.configurationData.name}</h3>
+                    <span className="text">{this.state.configurationData.name}</span>
                   </FormItem>
 
                   <FormItem label="配置值:">
@@ -172,8 +172,8 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
                     />
                   </FormItem>
 
-                  <FormItem label="配置描述:" >
-                    <h3>{this.state.configurationData.descr}</h3>
+                  <FormItem label="配置描述:">
+                    <span className="text">{this.state.configurationData.descr}</span>
                   </FormItem>
                 </Form>
                 :
