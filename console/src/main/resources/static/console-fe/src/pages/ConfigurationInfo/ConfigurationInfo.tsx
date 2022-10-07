@@ -71,7 +71,7 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
     this.setState({ loading: true });
     getData().then(data => {
       this.setState({
-        list: data || [],
+        list: data.data || [],
         loading: false,
         configurationDialogVisible: false,
       });

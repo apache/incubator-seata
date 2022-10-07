@@ -43,7 +43,6 @@ public class GlobalConfigController {
 
     @RequestMapping(value = "/putconfig", method = RequestMethod.POST)
     public SingleResult<Boolean> putconfig(String dataId, String content)  {
-
         try {
             boolean result = CONFIG.putConfig(dataId, content);
             if (result) {
@@ -57,7 +56,8 @@ public class GlobalConfigController {
     }
 
     @RequestMapping(value = "/getconfiglist", method = RequestMethod.GET)
-    public List<GlobalConfigVO> get()  {
-        return globalConfigDBService.getConfigList();
+    public SingleResult<List<GlobalConfigVO>> get() {
+        List<GlobalConfigVO> configVOList = globalConfigDBService.getConfigList();
+        return SingleResult.success(configVOList);
     }
 }
