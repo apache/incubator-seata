@@ -18,8 +18,10 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.constant.Code;
 import io.seata.console.result.SingleResult;
+import io.seata.server.console.param.ConfigurationParam;
 import io.seata.server.console.service.GlobalConfigService;
 import io.seata.server.console.vo.GlobalConfigVO;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,9 +44,10 @@ public class GlobalConfigController {
     private GlobalConfigService globalConfigDBService;
 
     @RequestMapping(value = "/putconfig", method = RequestMethod.POST)
-    public SingleResult<Boolean> putconfig(String dataId, String content)  {
+    public SingleResult<Boolean> putconfig(@RequestBody ConfigurationParam param)  {
+
         try {
-            boolean result = CONFIG.putConfig(dataId, content);
+            boolean result = CONFIG.putConfig(param.getDataId(), param.getContent());
             if (result) {
                 return SingleResult.success(result);
             } else {
@@ -56,8 +59,7 @@ public class GlobalConfigController {
     }
 
     @RequestMapping(value = "/getconfiglist", method = RequestMethod.GET)
-    public SingleResult<List<GlobalConfigVO>> get() {
-        List<GlobalConfigVO> configVOList = globalConfigDBService.getConfigList();
-        return SingleResult.success(configVOList);
+    public SingleResult<List<GlobalConfigVO>> get()  {
+        return SingleResult.success(globalConfigDBService.getConfigList());
     }
 }

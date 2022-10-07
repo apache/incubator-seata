@@ -19,6 +19,7 @@ import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import getData from '@/service/configurationInfo';
+import putConfig from '@/service/configurationPut';
 import PropTypes from 'prop-types';
 
 import './index.scss';
@@ -81,12 +82,21 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
   }
 
   onSave = () => {
-    alert(JSON.stringify(this.state.configurationData));
+    if (this.state.configurationData.newValue === undefined || this.state.configurationData.newValue === this.state.configurationData.value) {
+      alert("请先修改");
+      return;
+    }
+
+    putConfig(this.state.configurationData.name, this.state.configurationData.newValue).then(data => {
+      this.onClose();
+      this.search();
+    });
   }
 
   onClose = ( ) => {
     this.setState({
-      configurationDialogVisible: false
+      configurationDialogVisible: false,
+      configurationData: null
     });
   };
   onOpen = (val: string, index: number, record: any) => {
@@ -155,7 +165,8 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
                   <FormItem label="配置值:">
                     <Input
                       name="value"
-                      value={this.state.configurationData.value}
+                      defaultValue={this.state.configurationData.value}
+                      onChange={(value: string) => { this.state.configurationData.newValue = value; }}
                       placeholder="请输入修改的配置值"
                       contentEditable={true}
                     />
