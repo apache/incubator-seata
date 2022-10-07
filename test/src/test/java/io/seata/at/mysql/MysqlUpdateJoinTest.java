@@ -49,10 +49,10 @@ public class MysqlUpdateJoinTest {
     private static final String mockXid = "127.0.0.1:8091:" + testTid;
     private static final long mockBranchId = testTid + 1;
 
-    private static final String mysql_jdbcUrl = "jdbc:mysql://43.143.11.65:3306/seata";
-    private static final String mysql_username = "root";
-    private static final String mysql_password = "123456";
-    private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER_6;
+    private static final String mysql_jdbcUrl = "jdbc:mysql://127.0.0.1:3306/seata";
+    private static final String mysql_username = "demo";
+    private static final String mysql_password = "demo";
+    private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER;
 
 
     @Test
