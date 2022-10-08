@@ -35,7 +35,7 @@ client.rm.lock.retryInterval=10
 client.rm.lock.retryTimes=30
 client.rm.lock.retryPolicyBranchRollbackOnConflict=true
 client.rm.reportRetryCount=5
-client.rm.tableMetaCheckEnable=false
+client.rm.tableMetaCheckEnable=true
 client.rm.tableMetaCheckerInterval=60000
 client.rm.sqlParserType=druid
 client.rm.reportSuccessEnable=false
@@ -65,7 +65,7 @@ tcc.fence.cleanPeriod=1h
 #Log rule configuration, for client and server
 log.exceptionRate=100
 
-#Transaction storage configuration, only for the server. The file, DB, and redis configuration values are optional.
+#Transaction storage configuration, only for the server. The file, db, and redis configuration values are optional.
 store.mode=file
 store.lock.mode=file
 store.session.mode=file
@@ -120,7 +120,8 @@ server.rollbackRetryTimeoutUnlockEnable=false
 server.distributedLockExpireTime=10000
 server.xaerNotaRetryTimeout=60000
 server.session.branchAsyncQueueSize=5000
-server.session.enableBranchAsyncRemove=true
+server.session.enableBranchAsyncRemove=false
+server.enableParallelRequestHandle=false
 
 #Metrics configuration, only for the server
 metrics.enabled=false

@@ -16,10 +16,12 @@
 package io.seata.server;
 
 import java.util.Properties;
+
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.server.store.StoreConfig;
 import io.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
 import io.seata.spring.boot.autoconfigure.SeataServerEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
@@ -30,9 +32,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import static io.seata.common.ConfigurationKeys.STORE_LOCK_MODE;
-import static io.seata.common.ConfigurationKeys.STORE_MODE;
-import static io.seata.common.ConfigurationKeys.STORE_SESSION_MODE;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
@@ -63,14 +62,12 @@ public class ServerApplicationListener implements GenericApplicationListener {
         SeataServerEnvironmentPostProcessor.init();
         Configuration config  = ConfigurationFactory.getInstance();
         // Load by priority
-        System.setProperty("sessionMode",
-                config.getConfig(STORE_SESSION_MODE, config.getConfig(STORE_MODE, "file")));
-        System.setProperty("lockMode",
-                config.getConfig(STORE_LOCK_MODE, config.getConfig(STORE_MODE, "file")));
+        System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
+        System.setProperty("lockMode", StoreConfig.getLockMode().getName());
 
         String[] args = environmentPreparedEvent.getArgs();
 
-        // port: -h > -D > env > yml > default
+        // port: -p > -D > env > yml > default
 
         //-p 8091
         if (args != null && args.length >= 2) {
@@ -83,28 +80,28 @@ public class ServerApplicationListener implements GenericApplicationListener {
         }
 
         // -Dserver.servicePort=8091
-        String dPort = config.getConfig(SERVER_SERVICE_PORT_CAMEL);
+        String dPort = environment.getProperty(SERVER_SERVICE_PORT_CAMEL, String.class);
         if (StringUtils.isNotBlank(dPort)) {
             setTargetPort(environment, dPort, true);
             return;
         }
 
         //docker -e SEATA_PORT=8091
-        String envPort = environment.getProperty(ENV_SEATA_PORT_KEY);
+        String envPort = environment.getProperty(ENV_SEATA_PORT_KEY, String.class);
         if (StringUtils.isNotBlank(envPort)) {
             setTargetPort(environment, envPort, true);
             return;
         }
 
-        //yml properties server.servicePort=8091
-        String configPort = config.getConfig(SERVER_SERVICE_PORT_CAMEL);
+        //yml properties server.service-port=8091
+        String configPort = environment.getProperty(SERVER_SERVICE_PORT_CONFIG, String.class);
         if (StringUtils.isNotBlank(configPort)) {
             setTargetPort(environment, configPort, false);
             return;
         }
 
         // server.port=7091
-        String serverPort = environment.getProperty("server.port");
+        String serverPort = environment.getProperty("server.port", String.class);
         if (StringUtils.isBlank(serverPort)) {
             serverPort = "8080";
         }

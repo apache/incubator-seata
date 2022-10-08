@@ -42,10 +42,10 @@ import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.store.StoreMode;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig.SessionMode;
 import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -97,7 +97,7 @@ public class DefaultCoordinatorTest {
         EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         RemotingServer remotingServer = new MockServerMessageSender();
-        defaultCoordinator =DefaultCoordinator.getInstance(null);
+        defaultCoordinator =DefaultCoordinator.getInstance(remotingServer);
         defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
     }
@@ -150,7 +150,7 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(branchId);
 
         Thread.sleep(100);
-        defaultCoordinator.handleAllSession();
+        defaultCoordinator.timeoutCheck();
         defaultCoordinator.handleRetryRollbacking();
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
@@ -226,15 +226,15 @@ public class DefaultCoordinatorTest {
         }
     }
 
+    private static void deleteAndCreateDataFile() throws IOException {
+        StoreUtil.deleteDataFile();
+        SessionHolder.init(SessionMode.FILE);
+    }
+
     @AfterEach
     public void tearDown() throws IOException {
         MetricsManager.get().getRegistry().clearUp();
         StoreUtil.deleteDataFile();
-    }
-
-    private static void deleteAndCreateDataFile() throws IOException {
-        StoreUtil.deleteDataFile();
-        SessionHolder.init(StoreMode.FILE.name());
     }
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
