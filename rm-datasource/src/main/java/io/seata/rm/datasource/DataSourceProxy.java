@@ -109,7 +109,12 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             throw new IllegalStateException("can not init dataSource", e);
         }
         initResourceId();
-        dbType = checkDbTypeAfter(dbType);
+        if (JdbcConstants.OCEANBASE.equals(dbType)) {
+            // the OceanBase in MySQL mode is directly delegated to MySQL.
+            // In druid, the SQLStatementParser for generic SQL statements is returned when db type is OCEANBASE,
+            // not specified for MySQL (called: io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl#create)
+            dbType = JdbcConstants.MYSQL;
+        }
 
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
@@ -127,27 +132,28 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
+     * Converting the database type to compatible one.
+     * <ol><li> For OceanBase:
      * Detect the compatibility mode of OceanBase based on the physical database name or validation query.
-     * <p>
-     * 1. For oceanbase-client 1.x: jdbc url starting with 'jdbc:oceanbase:' indicates that the running mode is MYSQL,
-     * while one starting with 'jdbc:oceanbase:oracle:' indicates ORACLE mode.
-     * 2. For oceanbase-client 2.x: The format of the jdbc url is 'jdbc:oceanbase:hamode:',
-     * where hamode is the high availability mode(optional: loadbalance etc.).
-     * <p>
-     * Note: db type parser of druid recognizes it by url prefix (only adapted to old version driver)
+     * <ul><li>For oceanbase-client 1.x: jdbc url starting with 'jdbc:oceanbase:' indicates
+     * that the running mode is MYSQL, while one starting with 'jdbc:oceanbase:oracle:' indicates ORACLE mode.</li>
+     * <li>For oceanbase-client 2.x: The format of the jdbc url is 'jdbc:oceanbase:hamode:',
+     * where hamode is the high availability mode(optional: loadbalance etc.).</li></ul>
+     * Note: db type parser of druid recognizes it by url prefix (only adapted to old version driver)</li>
+     * <li> For Mariadb: Be delegated to MySQL</li></ol>
      */
     private String checkDbTypeBefore(String dbType, Connection conn) throws SQLException {
         // determine the origin result from druid parser
         if (JdbcConstants.OCEANBASE.equals(dbType) || JdbcConstants.OCEANBASE_ORACLE.equals(dbType)) {
             DatabaseMetaData meta = conn.getMetaData();
-            String databaseName = meta.getDatabaseProductName();
-            if (databaseName.equalsIgnoreCase("mysql")) {
+            String databaseName = meta.getDatabaseProductName().toUpperCase();
+            if (databaseName.contains("MYSQL")) {
                 return JdbcConstants.OCEANBASE;
-            } else if (databaseName.equalsIgnoreCase("oracle")) {
+            } else if (databaseName.contains("ORACLE")) {
                 return JdbcConstants.OCEANBASE_ORACLE;
             } else {
                 try (Statement statement = conn.createStatement();
-                     ResultSet rs = statement.executeQuery("select * from dual")) {
+                     ResultSet rs = statement.executeQuery("SELECT * FROM DUAL")) {
                     if (!rs.next()) {
                         throw new SQLException("Validation query for OceanBase(Oracle mode) didn't return a row");
                     }
@@ -155,16 +161,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 }
             }
         } else if (JdbcConstants.MARIADB.equals(dbType)) {
-            return JdbcConstants.MYSQL;
-        }
-        return dbType;
-    }
-
-    private String checkDbTypeAfter(String dbType) {
-        if (JdbcConstants.OCEANBASE.equals(dbType)) {
-            // the OceanBase in MySQL mode is directly delegated to MySQL
-            // in druid, the SQLStatementParser for generic SQL statements is returned when db type is OCEANBASE
-            // not specified for MySQL (called: io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl#create)
             return JdbcConstants.MYSQL;
         }
         return dbType;
@@ -309,9 +305,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * For oceanbase-client-2.x, the supported jdbc URL format is:
-     * "jdbc:oceanbase:hamode://host:port/databasename?[username&password]&[opt1=val1&opt2=val2...]".
      * Handling multiple addresses in URL for loadbalance mode.
+     * For oceanbase-client-2.x, the supported jdbc URL format is:
+     * <i>"jdbc:oceanbase:hamode://host:port/databasename?[username&password]&[opt1=val1&opt2=val2...]"</i>
      */
     private void initOceanBaseResourceId() {
         String startsWith = "jdbc:oceanbase:loadbalance://";

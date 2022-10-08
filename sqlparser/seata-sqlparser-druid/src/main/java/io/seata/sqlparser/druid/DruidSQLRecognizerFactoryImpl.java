@@ -22,22 +22,21 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
-import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.oceanbaseoracle.OceanBaseOracleOperateRecognizerHolder;
-import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * DruidSQLRecognizerFactoryImpl
  *
  * @author sharajava
  * @author ggndnn
+ * @author hsien999
  */
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
@@ -45,6 +44,12 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
         if (CollectionUtils.isEmpty(asts)) {
             throw new UnsupportedOperationException("Not supported SQL: " + sql);
+        }
+        if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
+            || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement)
+            || asts.stream().allMatch(statement -> statement instanceof OracleMultiInsertStatement))) {
+            throw new UnsupportedOperationException(
+                "Only multiple sql of the same type (UPDATE, DELETE, or INSERT in Oracle) are supported: " + sql);
         }
         List<SQLRecognizer> recognizers = new ArrayList<>();
         for (SQLStatement ast : asts) {
@@ -65,19 +70,8 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 }
             }
         }
-        // check if recognizers are supported
-        if (!recognizers.stream().allMatch(this::isSupportedRecognizer)) {
-            throw new NotSupportYetException("Not supported SQL: " + sql);
-        }
-        // check if multi recognizers are supported
-        if (recognizers.size() > 1 && !(recognizers.stream().allMatch(r -> SQLType.UPDATE.equals(r.getSQLType()))
-            || recognizers.stream().allMatch(r -> SQLType.DELETE.equals(r.getSQLType()))
-            || dbType.equals(JdbcConstants.OCEANBASE_ORACLE)
-            && recognizers.stream().allMatch(r -> SQLType.INSERT.equals(r.getSQLType())))
-        ) {
-            throw new NotSupportYetException(
-                "Only multiple sql of the same type (insert, update or delete) are supported: " + sql);
-        }
+        // filter recognizers that are not supported
+        recognizers = recognizers.stream().filter(this::isSupportedRecognizer).collect(Collectors.toList());
         return recognizers;
     }
 
