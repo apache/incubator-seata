@@ -48,6 +48,7 @@ public class KryoSerializerFactory {
         @Override
         protected Kryo create() {
             Kryo kryo = new Kryo();
+            kryo.setReferences(true);
             kryo.setRegistrationRequired(false);
 
             // register serializer
