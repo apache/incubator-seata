@@ -46,6 +46,7 @@
 - [[#4946](https://github.com/seata/seata/pull/4946)] 将获取锁时遇到的sql异常传递给客户端
 - [[#4962](https://github.com/seata/seata/pull/4962)] 优化构建配置，并修正docker镜像的基础镜像
 - [[#4974](https://github.com/seata/seata/pull/4974)] 取消redis模式下,查询globalStatus条数的限制
+- [[#4981](https://github.com/seata/seata/pull/4981)] 优化当tcc栅栏记录查不到时的错误提示
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
