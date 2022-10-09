@@ -17,7 +17,7 @@ import request from '@/utils/request';
 
 
 export default async function fetchData():Promise<any> {
-  let result = await request('/console/editconfig/getconfiglist', {
+  let result = await request('/console/editconfig/getConfigList', {
     method: 'get',
   });
   return result;

@@ -21,6 +21,8 @@ import io.seata.console.result.SingleResult;
 import io.seata.server.console.param.ConfigurationParam;
 import io.seata.server.console.service.GlobalConfigService;
 import io.seata.server.console.vo.GlobalConfigVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,28 +40,33 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/console/editconfig")
 public class GlobalConfigController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalConfigController.class);
+
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Resource(type = GlobalConfigService.class)
     private GlobalConfigService globalConfigDBService;
 
-    @RequestMapping(value = "/putconfig", method = RequestMethod.POST)
-    public SingleResult<Boolean> putconfig(@RequestBody ConfigurationParam param)  {
+    @RequestMapping(value = "/putConfig", method = RequestMethod.POST)
+    public SingleResult<Boolean> putConfig(@RequestBody ConfigurationParam param)  {
 
         try {
             boolean result = CONFIG.putConfig(param.getDataId(), param.getContent());
             if (result) {
+                LOGGER.info("Put config '{} = {}' succeed.", param.getDataId(), param.getContent());
                 return SingleResult.success(result);
             } else {
+                LOGGER.error("Put config '{} = {}' failed.", param.getDataId(), param.getContent());
                 return SingleResult.failure(Code.ERROR);
             }
         } catch (Exception e) {
+            LOGGER.error("Put config '{} = {}' failed.", param.getDataId(), param.getContent(), e);
             return SingleResult.failure("101", "config exception");
         }
     }
 
-    @RequestMapping(value = "/getconfiglist", method = RequestMethod.GET)
-    public SingleResult<List<GlobalConfigVO>> get()  {
+    @RequestMapping(value = "/getConfigList", method = RequestMethod.GET)
+    public SingleResult<List<GlobalConfigVO>> getConfigList()  {
         return SingleResult.success(globalConfigDBService.getConfigList());
     }
 }

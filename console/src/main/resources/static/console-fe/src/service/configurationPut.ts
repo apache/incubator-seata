@@ -17,7 +17,7 @@ import request from '@/utils/request';
 
 
 export default async function putConfig(dataId: string, content: string): Promise<any> {
-  let result = await request('/console/editconfig/putconfig', {
+  let result = await request('/console/editconfig/putConfig', {
     method: 'post',
     data: {
       dataId: dataId,
