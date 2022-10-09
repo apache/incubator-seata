@@ -90,7 +90,7 @@
         <mysql.version>5.1.35</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <postgresql.version>42.1.4</postgresql.version>
-        <h2.version>1.4.181</h2.version>
+        <h2.version>2.1.210</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
         <druid.version>1.2.6</druid.version>
