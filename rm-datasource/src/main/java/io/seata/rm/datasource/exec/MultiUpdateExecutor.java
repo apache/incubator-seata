@@ -89,6 +89,9 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             }
 
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
+            for (String updateColumn : updateColumns) {
+                org.apache.commons.lang.StringUtils.replace(updateColumn, "`", "");
+            }
             updateColumnsSet.addAll(updateColumns);
             if (noWhereCondition) {
                 continue;
@@ -155,7 +158,11 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) sqlRecognizer;
-            updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
+            List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
+            for (String updateColumn : updateColumns) {
+                org.apache.commons.lang.StringUtils.replace(updateColumn, "`", "");
+            }
+            updateColumnsSet.addAll(updateColumns);
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());

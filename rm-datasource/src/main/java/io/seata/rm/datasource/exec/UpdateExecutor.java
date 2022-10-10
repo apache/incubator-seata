@@ -91,6 +91,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
+            for (String updateColumn : updateColumns) {
+                org.apache.commons.lang.StringUtils.replace(updateColumn, "`", "");
+            }
             if (!containsPK(updateColumns)) {
                 selectSQLJoin.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }
@@ -137,6 +140,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (ONLY_CARE_UPDATE_COLUMNS) {
             SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
             List<String> updateColumns = recognizer.getUpdateColumns();
+            for (String updateColumn : updateColumns) {
+                org.apache.commons.lang.StringUtils.replace(updateColumn, "`", "");
+            }
             if (!containsPK(updateColumns)) {
                 selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }
