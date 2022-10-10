@@ -21,6 +21,7 @@
 - [[#4919](https://github.com/seata/seata/pull/4919)] 修复XID的port和address出现null:0的情况
 - [[#4928](https://github.com/seata/seata/pull/4928)] 修复 rpcContext.getClientRMHolderMap NPE 问题
 - [[#4953](https://github.com/seata/seata/pull/4953)] 修复InsertOnDuplicateUpdate可绕过修改主键的问题
+- [[#4978](https://github.com/seata/seata/pull/4978)] 修复 kryo 支持循环依赖
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -44,6 +45,8 @@
 - [[#4936](https://github.com/seata/seata/pull/4936)] 优化存储配置的读取
 - [[#4946](https://github.com/seata/seata/pull/4946)] 将获取锁时遇到的sql异常传递给客户端
 - [[#4962](https://github.com/seata/seata/pull/4962)] 优化构建配置，并修正docker镜像的基础镜像
+- [[#4974](https://github.com/seata/seata/pull/4974)] 取消redis模式下,查询globalStatus条数的限制
+- [[#4981](https://github.com/seata/seata/pull/4981)] 优化当tcc栅栏记录查不到时的错误提示
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
