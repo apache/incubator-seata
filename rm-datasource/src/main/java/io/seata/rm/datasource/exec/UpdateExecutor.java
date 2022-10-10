@@ -73,7 +73,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-        List<String> updateColumns = recognizer.getUpdateColumns();
+        List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
@@ -91,9 +91,6 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
-            for (String updateColumn : updateColumns) {
-                org.apache.commons.lang.StringUtils.replace(updateColumn, "`", "");
-            }
             if (!containsPK(updateColumns)) {
                 selectSQLJoin.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }
@@ -139,10 +136,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-            List<String> updateColumns = recognizer.getUpdateColumns();
-            for (String updateColumn : updateColumns) {
-                org.apache.commons.lang.StringUtils.replace(updateColumn, "`", "");
-            }
+            List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
             if (!containsPK(updateColumns)) {
                 selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }

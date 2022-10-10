@@ -99,6 +99,12 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
+    public List<String> getUpdateColumnsIsSimplified() {
+        List<String> updateColumns = getUpdateColumns();
+        return updateColumnsSimplify(updateColumns);
+    }
+
+    @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
         final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();

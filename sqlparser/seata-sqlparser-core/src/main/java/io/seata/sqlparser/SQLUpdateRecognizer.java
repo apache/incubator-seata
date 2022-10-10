@@ -37,4 +37,25 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
      * @return the update values
      */
     List<Object> getUpdateValues();
+
+    /**
+     * Gets update columns is Simplified.
+     *
+     * @return (`a`, `b`, `c`)  ->  (a, b, c)
+     */
+    List<String> getUpdateColumnsIsSimplified();
+
+    /**
+     * simplify update columns.
+     */
+    default List<String> updateColumnsSimplify(List<String> updateColumns) {
+        if (updateColumns.isEmpty()) {
+            return null;
+        }
+
+        for (String insertColumn : updateColumns) {
+            org.apache.commons.lang.StringUtils.replace(insertColumn, "`", "");
+        }
+        return updateColumns;
+    }
 }

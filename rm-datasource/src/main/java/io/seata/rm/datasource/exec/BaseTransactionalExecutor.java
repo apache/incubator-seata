@@ -431,11 +431,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
-            for (String insertColumn : insertColumns) {
-                org.apache.commons.lang.StringUtils.replace(insertColumn, "`", "");
-            }
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            columns.addAll(insertColumns);
+            columns.addAll(recognizer.getInsertColumnsIsSimplified());
             columns.addAll(pkColumnNameList);
             for (String columnName : columns) {
                 selectSQLJoin.add(columnName);

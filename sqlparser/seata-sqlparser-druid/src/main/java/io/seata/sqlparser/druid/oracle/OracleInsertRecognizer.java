@@ -151,6 +151,12 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     }
 
     @Override
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return insertColumnsSimplify(insertColumns);
+    }
+
+    @Override
     protected SQLStatement getAst() {
         return ast;
     }

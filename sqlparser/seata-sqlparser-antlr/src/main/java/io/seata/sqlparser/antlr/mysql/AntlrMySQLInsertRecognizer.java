@@ -105,4 +105,10 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
     public List<String> getDuplicateKeyUpdate() {
         return null;
     }
+
+    @Override
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return insertColumnsSimplify(insertColumns);
+    }
 }

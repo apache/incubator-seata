@@ -73,6 +73,12 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
     }
 
     @Override
+    public List<String> getUpdateColumnsIsSimplified() {
+        List<String> updateColumns = getUpdateColumns();
+        return updateColumnsSimplify(updateColumns);
+    }
+
+    @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         return sqlContext.getWhereCondition();
     }

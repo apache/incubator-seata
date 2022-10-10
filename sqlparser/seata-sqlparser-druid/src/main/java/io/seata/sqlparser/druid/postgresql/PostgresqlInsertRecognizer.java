@@ -161,6 +161,12 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return insertColumnsSimplify(insertColumns);
+    }
+
+    @Override
     protected SQLStatement getAst() {
         return ast;
     }
