@@ -36,6 +36,7 @@ public enum StoreMode {
 	 * redis store
 	 */
 	REDIS("redis"),
+	
 	/**
 	 * raft store
 	 */
@@ -52,30 +53,30 @@ public enum StoreMode {
 	 * @param name the mode name
 	 * @return the store mode
 	 */
-	public static StoreMode get(String name) {
-		for (StoreMode sm : StoreMode.class.getEnumConstants()) {
-			if (sm.name.equalsIgnoreCase(name)) {
-				return sm;
-			}
-		}
-		throw new IllegalArgumentException("unknown store mode:" + name);
-	}
+    public static StoreMode get(String name) {
+        for (StoreMode sm : StoreMode.class.getEnumConstants()) {
+            if (sm.name.equalsIgnoreCase(name)) {
+                return sm;
+            }
+        }
+        throw new IllegalArgumentException("unknown store mode:" + name);
+    }
 
 	/**
 	 * whether contains value of store mode
 	 * @param name the mode name
 	 * @return the boolean
 	 */
-	public static boolean contains(String name) {
-		try {
-			return get(name) != null ? true : false;
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-	}
+    public static boolean contains(String name) {
+        try {
+            return get(name) != null ? true : false;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
 }
