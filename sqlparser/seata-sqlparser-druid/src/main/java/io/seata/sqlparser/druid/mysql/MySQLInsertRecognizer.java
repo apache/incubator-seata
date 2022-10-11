@@ -31,6 +31,7 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
@@ -170,7 +171,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     @Override
     public List<String> getInsertColumnsIsSimplified() {
         List<String> insertColumns = getInsertColumns();
-        return insertColumnsSimplify(insertColumns);
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     @Override

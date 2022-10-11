@@ -30,6 +30,7 @@ import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -103,7 +104,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     @Override
     public List<String> getUpdateColumnsIsSimplified() {
         List<String> updateColumns = getUpdateColumns();
-        return updateColumnsSimplify(updateColumns);
+        return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
     @Override

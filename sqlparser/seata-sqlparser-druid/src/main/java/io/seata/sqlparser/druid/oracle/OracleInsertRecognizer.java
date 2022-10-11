@@ -31,6 +31,7 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
@@ -153,7 +154,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     @Override
     public List<String> getInsertColumnsIsSimplified() {
         List<String> insertColumns = getInsertColumns();
-        return insertColumnsSimplify(insertColumns);
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     @Override

@@ -66,18 +66,4 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @return (`a`, `b`, `c`)  ->  (a, b, c)
      */
     List<String> getInsertColumnsIsSimplified();
-
-    /**
-     * simplify insert columns.
-     */
-    default List<String> insertColumnsSimplify(List<String> insertColumns) {
-        if (insertColumns.isEmpty()) {
-            return null;
-        }
-
-        for (String insertColumn : insertColumns) {
-            org.apache.commons.lang.StringUtils.replace(insertColumn, "`", "");
-        }
-        return insertColumns;
-    }
 }

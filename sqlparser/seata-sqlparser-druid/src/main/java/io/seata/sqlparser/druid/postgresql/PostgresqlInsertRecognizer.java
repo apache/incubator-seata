@@ -33,6 +33,7 @@ import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
@@ -163,7 +164,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     @Override
     public List<String> getInsertColumnsIsSimplified() {
         List<String> insertColumns = getInsertColumns();
-        return insertColumnsSimplify(insertColumns);
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     @Override
