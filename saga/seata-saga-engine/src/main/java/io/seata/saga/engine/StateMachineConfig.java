@@ -146,26 +146,26 @@ public interface StateMachineConfig {
     /**
      * get ServiceInvokerManager
      *
-     * @return
+     * @return the service invoker manager info
      */
     ServiceInvokerManager getServiceInvokerManager();
 
     /**
      * get trans operation timeout
-     * @return
+     * @return the transaction operate time out
      */
     int getTransOperationTimeout();
 
     /**
      * get service invoke timeout
-     * @return
+     * @return the service invoke time out
      */
     int getServiceInvokeTimeout();
 
     /**
      * get ScriptEngineManager
      *
-     * @return
+     * @return the script engine manager info
      */
     ScriptEngineManager getScriptEngineManager();
 }

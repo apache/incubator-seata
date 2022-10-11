@@ -41,7 +41,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.core.store.StoreMode;
 import io.seata.serializer.kryo.KryoSerializerFactory;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
@@ -62,6 +61,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
+import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +137,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
-        if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
+        if (!StringUtils.equals(StoreConfig.SessionMode.RAFT.getName(), mode)) {
             done.run(Status.OK());
             return;
         }
@@ -175,7 +175,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public boolean onSnapshotLoad(final SnapshotReader reader) {
-        if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
+        if (!StringUtils.equals(StoreConfig.SessionMode.RAFT.getName(), mode)) {
             return true;
         }
         if (isLeader()) {
@@ -245,7 +245,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         // become the leader again,reloading global session
         if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
             LOGGER.info("session map: {} ",SessionHolder.getRootSessionManager().allSessions().size());
-            SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreMode.RAFT, false);
+            SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreConfig.SessionMode.RAFT, false);
             NettyRemotingServer nettyRemotingServer =
                 (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
             LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();

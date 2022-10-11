@@ -23,9 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
 import io.seata.core.model.LockStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -37,18 +34,21 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
-import io.seata.core.store.StoreMode;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.raft.RaftServer;
 import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.storage.file.lock.FileLockManager;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.StoreConfig.SessionMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static java.io.File.separator;
+import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
-import static java.io.File.separator;
 /**
  * The type Session holder.
  *
@@ -86,7 +86,7 @@ public class SessionHolder {
     /**
      * The redis distributed lock expire time
      */
-    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, 10000);
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
@@ -95,85 +95,91 @@ public class SessionHolder {
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
+    public static void init() {
+        init(null);
+    }
     /**
      * Init.
      *
-     * @param mode the store mode: file, db, redis
+     * @param sessionMode the store mode: file, db, redis
      * @throws IOException the io exception
      */
-    public static void init(String mode) {
-        if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-                    CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
+    public static void init(SessionMode sessionMode) {
+        if (null == sessionMode) {
+            sessionMode = StoreConfig.getSessionMode();
         }
-        StoreMode storeMode = StoreMode.get(mode);
-        if (StoreMode.DB.equals(storeMode)) {
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+        if (SessionMode.DB.equals(sessionMode)) {
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
                 new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
                 new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
                 new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-        } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
+        } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
-            if (StoreMode.RAFT.equals(storeMode)) {
-                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
+            if (SessionMode.RAFT.equals(sessionMode)) {
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             } else {
-                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             }
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-        } else if (StoreMode.REDIS.equals(storeMode)) {
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
+        } else if (SessionMode.REDIS.equals(sessionMode)) {
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+                SessionMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
+                SessionMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+                SessionMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.REDIS.getName());
         } else {
             // unknown store
-            throw new IllegalArgumentException("unknown store mode:" + mode);
+            throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
         RaftServerFactory.getInstance().init(XID.getIpAddress(),
             Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "9091")));
         if (RaftServerFactory.getInstance().getRaftServer() != null) {
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.RAFT.getName());
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.RAFT.getName());
         } else {
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(storeMode.getName());
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(sessionMode.getName());
         }
         if (RaftServerFactory.getInstance().isRaftMode()) {
             return;
         }
-        reload(storeMode);
+        reload(sessionMode);
     }
 
     /**
      * Reload.
      *
-     * @param storeMode the mode of store
+     * @param sessionMode the mode of store
      */
-    protected static void reload(StoreMode storeMode) {
+    protected static void reload(SessionMode sessionMode) {
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable)ROOT_SESSION_MANAGER).reload();
-            reload(ROOT_SESSION_MANAGER.allSessions(), storeMode);
+            reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
+        } else {
+            reload(null, sessionMode);
         }
     }
 
-    public static void reload(Collection<GlobalSession> allSessions, StoreMode storeMode) {
+    public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode) {
         reload(allSessions, storeMode, true);
     }
 
-    public static void reload(Collection<GlobalSession> allSessions,StoreMode storeMode, boolean acquireLock) {
-        if (CollectionUtils.isNotEmpty(allSessions)) {
+    public static void reload(Collection<GlobalSession> allSessions,SessionMode storeMode, boolean acquireLock) {
+        if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
+            && CollectionUtils.isNotEmpty(allSessions)) {
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
@@ -209,10 +215,11 @@ public class SessionHolder {
                             case TimeoutRollbacking:
                             case TimeoutRollbackRetrying:
                                 globalSession.getBranchSessions().parallelStream().forEach(branchSession -> {
-                                    if (storeMode == StoreMode.RAFT) {
+                                    if (storeMode == SessionMode.RAFT) {
                                         if (globalSession.getStatus() == GlobalStatus.Rollbacking) {
                                             globalSession.setStatus(GlobalStatus.RollbackRetrying);
-                                            LOGGER.info("xid :{} change status RollbackRetrying", globalSession.getXid());
+                                            LOGGER.info("xid :{} change status RollbackRetrying",
+                                                globalSession.getXid());
                                         }
                                     }
                                     branchSession.setLockStatus(LockStatus.Rollbacking);
@@ -220,7 +227,7 @@ public class SessionHolder {
                                 queueToRetryRollback(globalSession);
                                 break;
                             case Begin:
-                                if (storeMode == StoreMode.RAFT) {
+                                if (storeMode == SessionMode.RAFT) {
                                     globalSession.setStatus(GlobalStatus.RollbackRetrying);
                                     LOGGER.info("xid :{} change status RollbackRetrying", globalSession.getXid());
                                     queueToRetryRollback(globalSession);
@@ -285,7 +292,7 @@ public class SessionHolder {
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
         FileLockManager fileLockManager =
-                (FileLockManager)EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
+                (FileLockManager)EnhancedServiceLoader.load(LockManager.class, SessionMode.FILE.getName());
         branchSessions.forEach(branchSession -> {
             try {
                 if (StringUtils.isNotBlank(branchSession.getLockKey())) {

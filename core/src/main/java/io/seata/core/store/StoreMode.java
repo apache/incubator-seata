@@ -22,61 +22,60 @@ package io.seata.core.store;
  */
 public enum StoreMode {
 
-    /**
-     * file store
-     */
-    FILE("file"),
+	/**
+	 * file store
+	 */
+	FILE("file"),
 
-    /**
-     * database store
-     */
-    DB("db"),
+	/**
+	 * database store
+	 */
+	DB("db"),
 
-    /**
-     * redis store
-     */
-    REDIS("redis"),
+	/**
+	 * redis store
+	 */
+	REDIS("redis"),
+	/**
+	 * raft store
+	 */
+	RAFT("raft");
 
-    /**
-     * raft store
-     */
-    RAFT("raft");
+	private String name;
 
-    private String name;
+	StoreMode(String name) {
+		this.name = name;
+	}
 
-    StoreMode(String name) {
-        this.name = name;
-    }
+	/**
+	 * get value of store mode
+	 * @param name the mode name
+	 * @return the store mode
+	 */
+	public static StoreMode get(String name) {
+		for (StoreMode sm : StoreMode.class.getEnumConstants()) {
+			if (sm.name.equalsIgnoreCase(name)) {
+				return sm;
+			}
+		}
+		throw new IllegalArgumentException("unknown store mode:" + name);
+	}
 
-    public String getName() {
-        return name;
-    }
+	/**
+	 * whether contains value of store mode
+	 * @param name the mode name
+	 * @return the boolean
+	 */
+	public static boolean contains(String name) {
+		try {
+			return get(name) != null ? true : false;
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
+	}
 
-    /**
-     * get value of store mode
-     * @param name the mode name
-     * @return the store mode
-     */
-    public static StoreMode get(String name) {
-        for (StoreMode sm : StoreMode.class.getEnumConstants()) {
-            if (sm.name.equalsIgnoreCase(name)) {
-                return sm;
-            }
-        }
-        throw new IllegalArgumentException("unknown store mode:" + name);
-    }
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * whether contains value of store mode
-     * @param name the mode name
-     * @return the boolean
-     */
-    public static boolean contains(String name) {
-        try {
-            return get(name) != null ? true : false;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-    
 }

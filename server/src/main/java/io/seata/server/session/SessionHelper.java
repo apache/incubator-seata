@@ -19,23 +19,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.StoreMode;
 import io.seata.metrics.IdConstants;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsPublisher;
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
 
 /**
  * The type Session helper.
@@ -51,6 +53,9 @@ public class SessionHelper {
      */
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
+    private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
+            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
+
     /**
      * The instance of DefaultCoordinator
      */
@@ -58,15 +63,12 @@ public class SessionHelper {
 
     private static final String STORE_MODE =
         ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE, StoreMode.FILE.getName()));
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE, SessionMode.FILE.getName()));
 
     private static final boolean DELAY_HANDLE_SESSION =
-        !(StringUtils.equalsIgnoreCase(STORE_MODE, StoreMode.FILE.getName())
-            || StringUtils.equalsIgnoreCase(STORE_MODE, StoreMode.RAFT.getName()));
+        !(StringUtils.equalsIgnoreCase(STORE_MODE, SessionMode.FILE.getName())
+            || StringUtils.equalsIgnoreCase(STORE_MODE, SessionMode.RAFT.getName()));
 
-    private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE =
-        CONFIG.getBoolean(ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, false)
-            && DELAY_HANDLE_SESSION;
 
     private SessionHelper() {
     }

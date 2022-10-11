@@ -44,7 +44,6 @@ public class RaftDistributedLocker implements DistributedLocker {
         return RaftServerFactory.getInstance().isLeader();
     }
 
-
     /**
      * Release the distributed lock
      *
