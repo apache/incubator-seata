@@ -37,12 +37,6 @@
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-rm-datasource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

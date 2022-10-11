@@ -38,11 +38,6 @@
             <artifactId>druid</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-rm-datasource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
