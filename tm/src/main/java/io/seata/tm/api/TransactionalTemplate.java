@@ -211,17 +211,18 @@ public class TransactionalTemplate {
         try {
             triggerBeforeCommit();
             tx.commit();
+
+            if (Arrays.asList(GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbacked).contains(tx.getLocalStatus())) {
+                throw new TransactionalExecutor.ExecutionException(tx,
+                        new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
+                        TransactionalExecutor.Code.TimeoutRollback);
+            }
+
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                     TransactionalExecutor.Code.CommitFailure);
-        }
-
-        if (Arrays.asList(GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbacked).contains(tx.getLocalStatus())) {
-            throw new TransactionalExecutor.ExecutionException(tx,
-                    new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
-                    TransactionalExecutor.Code.TimeoutRollback);
         }
     }
 
