@@ -7,6 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
+- [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
 
 
 ### bugfix:
@@ -21,6 +22,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4919](https://github.com/seata/seata/pull/4919)] fix XID port  and  address null:0 before coordinator.init
 - [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
 - [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
+- [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
 
 
 ### optimize:
@@ -45,6 +47,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4936](https://github.com/seata/seata/pull/4936)] optimize read of storage configuration
 - [[#4946](https://github.com/seata/seata/pull/4946)] pass the sqlexception to client when get lock
 - [[#4962](https://github.com/seata/seata/pull/4962)] optimize build and fix the base image
+- [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
+- [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -68,5 +72,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [doubleDimple](https://github.com/doubleDimple)
 - [jsbxyyx](https://github.com/jsbxyyx)
 - [tuwenlin](https://github.com/tuwenlin)
+- [CrazyLionLi](https://github.com/JavaLionLi)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
