@@ -25,6 +25,8 @@ import javax.sql.DataSource;
 
 import com.alibaba.druid.mock.MockDriver;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
@@ -110,7 +112,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private void initSeataDataSource(DataSource targetDataSource) {
-        if (targetDataSource instanceof DruidDataSource) {
+        String className = targetDataSource.getClass().getSimpleName();
+        if (className.startsWith("Druid") && targetDataSource instanceof DruidDataSource) {
             DruidDataSource druidDataSource = (DruidDataSource)targetDataSource;
             Driver driver = druidDataSource.getDriver();
             if (!(driver instanceof MockDriver)) {
@@ -135,6 +138,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 }
                 this.seataDataSource = seataDataSource;
             }
+        } else if (className.startsWith("Hikari") && targetDataSource instanceof HikariConfig) {
+            this.seataDataSource = new HikariDataSource((HikariConfig)targetDataSource);
         }
     }
 
