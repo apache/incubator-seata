@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;

@@ -18,8 +18,8 @@ package io.seata.rm.datasource.undo.oracle.keyword;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import io.seata.sqlparser.KeywordChecker;
+import io.seata.sqlparser.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**

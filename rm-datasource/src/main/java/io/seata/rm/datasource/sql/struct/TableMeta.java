@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LowerCaseLinkHashMap;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * The type Table meta.
