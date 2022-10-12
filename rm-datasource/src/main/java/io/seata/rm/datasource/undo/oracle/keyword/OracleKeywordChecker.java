@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.KeywordChecker;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**

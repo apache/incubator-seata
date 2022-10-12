@@ -13,13 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource;
+package io.seata.sqlparser.util;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.sqlparser.KeywordChecker;
+import io.seata.sqlparser.KeywordCheckerFactory;
 
 import java.util.ArrayList;
 import java.util.List;

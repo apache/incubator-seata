@@ -174,4 +174,26 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
     public String getDbType() {
         return JdbcConstants.MYSQL;
     }
+
+    @Test
+    public void testGetInsertColumns_2() {
+        String sql = "insert into t(`id`, `no`, `name`, `age`) values (1, 'no001', 'aaa', '20')";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
+        List<String> insertColumns = recognizer.getInsertColumns();
+        for (String insertColumn : insertColumns) {
+            Assertions.assertTrue(insertColumn.contains("`"));
+        }
+    }
+
+    @Test
+    public void testGetInsertColumnsIsSimplified() {
+        String sql = "insert into t(`id`, `no`, `name`, `age`) values (1, 'no001', 'aaa', '20')";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
+        List<String> insertColumns = recognizer.getInsertColumnsIsSimplified();
+        for (String insertColumn : insertColumns) {
+            Assertions.assertFalse(insertColumn.contains("`"));
+        }
+    }
 }

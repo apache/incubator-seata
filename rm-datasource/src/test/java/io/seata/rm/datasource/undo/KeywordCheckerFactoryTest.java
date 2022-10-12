@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.sqlparser.KeywordCheckerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

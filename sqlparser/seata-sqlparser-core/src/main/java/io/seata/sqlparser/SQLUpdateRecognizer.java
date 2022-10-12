@@ -37,4 +37,11 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
      * @return the update values
      */
     List<Object> getUpdateValues();
+
+    /**
+     * Gets update columns is Simplified.
+     *
+     * @return (`a`, `b`, `c`)  ->  (a, b, c)
+     */
+    List<String> getUpdateColumnsIsSimplified();
 }
