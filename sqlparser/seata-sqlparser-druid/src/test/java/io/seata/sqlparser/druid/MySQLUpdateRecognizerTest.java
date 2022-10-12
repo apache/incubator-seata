@@ -362,7 +362,7 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         List<String> updateColumns = recognizer.getUpdateColumns();
         for (String updateColumn : updateColumns) {
-            Assertions.assertFalse(updateColumn.contains("`"));
+            Assertions.assertTrue(updateColumn.contains("`"));
         }
     }
 

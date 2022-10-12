@@ -182,7 +182,7 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         List<String> insertColumns = recognizer.getInsertColumns();
         for (String insertColumn : insertColumns) {
-            Assertions.assertFalse(insertColumn.contains("`"));
+            Assertions.assertTrue(insertColumn.contains("`"));
         }
     }
 
