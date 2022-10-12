@@ -49,6 +49,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4962](https://github.com/seata/seata/pull/4962)] optimize build and fix the base image
 - [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
 - [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
+- [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
+
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -73,5 +75,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [jsbxyyx](https://github.com/jsbxyyx)
 - [tuwenlin](https://github.com/tuwenlin)
 - [CrazyLionLi](https://github.com/JavaLionLi)
+- [whxxxxx](https://github.com/whxxxxx)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
