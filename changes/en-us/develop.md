@@ -46,6 +46,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4946](https://github.com/seata/seata/pull/4946)] pass the sqlexception to client when get lock
 - [[#4962](https://github.com/seata/seata/pull/4962)] optimize build and fix the base image
 - [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
+- [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
