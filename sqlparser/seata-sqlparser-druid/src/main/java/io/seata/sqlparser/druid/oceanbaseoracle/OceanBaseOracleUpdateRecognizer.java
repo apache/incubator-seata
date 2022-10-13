@@ -35,6 +35,7 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,6 +120,12 @@ public class OceanBaseOracleUpdateRecognizer extends BaseOceanBaseOracleRecogniz
             }
         }
         return updateValues;
+    }
+
+    @Override
+    public List<String> getUpdateColumnsIsSimplified() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
     @Override

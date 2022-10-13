@@ -40,10 +40,9 @@ public final class ColumnUtils {
      * Delete escapes to the column name in list
      * (No feasibility verification for deletion)
      *
-     * <p>
-     * 1. do not consider schema name here, e.g.
+     * <p> 1. do not consider schema name here, e.g.
      * => in mysql: SELECT * FROM `sampdb`.`member` WHERE `sampdb`.`member`.`member_id` > 100;
-     * 2. do not support names that contain escape and dot yet, e.g.
+     * <p> 2. do not support names that contain escape and dot yet, e.g.
      * a legal name like `table.``123`.id for mysql or "id.""123" for pgsql will return an error result.
      *
      * @param cols   the column name list
@@ -135,16 +134,17 @@ public final class ColumnUtils {
     }
 
     /**
-     * Add escapes to the column name in list, if necessary
-     * <p>
-     * 1. Mysql: only deal with keyword.
-     * 2. Postgresql: deal with keyword, or that contains upper character.
-     * 3. Oracle/OceanBase(Oracle mode): deal with keyword, or that contains lower character.
-     * <p>
-     * 1. do not consider schema name here, e.g.
+     * Add escapes to the column names if necessary.
+     *
+     * <p> 1. Mysql: only deal with keyword.
+     * <p> 2. Postgresql: deal with keyword, or that contains upper character.
+     * <p> 3. Oracle/OceanBase(Oracle mode): deal with keyword, or that contains lower character.
+     *
+     * <p> Note:
+     * <p> 1. Do not consider schema name here, e.g.
      * => in mysql: SELECT * FROM `sampdb`.`member` WHERE `sampdb`.`member`.`member_id` > 100;
-     * 2. do not support names that contain escape and dot yet, e.g.
-     * a legal name like `table.``123`.id for mysql or "id.""123" for pgsql will return an error result.
+     * <p> 2. Do not support a name that contain escape and dot yet, e.g.
+     * <p> a legal name like `table.``123`.id for mysql or "id.""123" for pgsql will return an error result.
      *
      * @param cols   the column name list
      * @param dbType the db type
@@ -162,7 +162,7 @@ public final class ColumnUtils {
     }
 
     /**
-     * Add escapes to the column name, if necessary
+     * Add escapes to the column name if necessary.
      *
      * @param colName column name
      * @param dbType  the db type
@@ -176,7 +176,7 @@ public final class ColumnUtils {
     }
 
     /**
-     * Add escapes to the column name, if necessary
+     * Add escapes to the column name if necessary.
      *
      * @param colName column name
      * @param dbType  the db type

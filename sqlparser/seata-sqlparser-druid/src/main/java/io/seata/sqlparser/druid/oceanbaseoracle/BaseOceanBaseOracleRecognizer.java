@@ -21,6 +21,7 @@ import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.sqlparser.druid.oracle.BaseOracleRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * Base sql recognizer for OceanBaseOracle
@@ -63,6 +64,10 @@ public abstract class BaseOceanBaseOracleRecognizer extends BaseOracleRecognizer
                 tableSource.getClass().getName());
         }
         return tableName.toString();
+    }
+
+    public String getDbType() {
+        return JdbcConstants.OCEANBASE_ORACLE;
     }
 
     protected abstract SQLTableSource getTableSource();

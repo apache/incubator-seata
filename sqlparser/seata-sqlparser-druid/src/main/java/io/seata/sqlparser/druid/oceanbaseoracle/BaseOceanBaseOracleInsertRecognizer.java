@@ -39,6 +39,7 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,6 +105,12 @@ public abstract class BaseOceanBaseOracleInsertRecognizer extends BaseOceanBaseO
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return null;
+    }
+
+    @Override
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     protected List<String> getInsertColumns(List<SQLExpr> columnExprList) {
