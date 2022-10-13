@@ -48,4 +48,9 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
     default String getTableAlias(String tableName) {
         return null;
     }
+     * Gets update columns is Simplified.
+     *
+     * @return (`a`, `b`, `c`)  ->  (a, b, c)
+     */
+    List<String> getUpdateColumnsIsSimplified();
 }

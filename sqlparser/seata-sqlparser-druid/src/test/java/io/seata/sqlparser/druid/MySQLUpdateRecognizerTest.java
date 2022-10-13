@@ -363,4 +363,26 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
     public String getDbType() {
         return JdbcConstants.MYSQL;
     }
+
+    @Test
+    public void testGetUpdateColumns_2() {
+        String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<String> updateColumns = recognizer.getUpdateColumns();
+        for (String updateColumn : updateColumns) {
+            Assertions.assertTrue(updateColumn.contains("`"));
+        }
+    }
+
+    @Test
+    public void testGetUpdateColumnsIsSimplified() {
+        String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
+        for (String updateColumn : updateColumns) {
+            Assertions.assertFalse(updateColumn.contains("`"));
+        }
+    }
 }
