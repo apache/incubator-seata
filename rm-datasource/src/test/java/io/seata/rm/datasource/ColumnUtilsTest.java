@@ -15,231 +15,218 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test cases for column util
- *
  * @author jsbxyyx
- * @author hsien999
  */
 public class ColumnUtilsTest {
 
     @Test
-    public void testDelEscapeByEscape() {
-        List<String> testCols;
-        // test all type of escapes
-        for (ColumnUtils.Escape escape : ColumnUtils.Escape.values()) {
-            String ch = String.valueOf(escape.value);
+    public void test_delEscape_byEscape() throws Exception {
+        List<String> cols = new ArrayList<>();
+        cols.add("`id`");
+        cols.add("name");
+        cols = ColumnUtils.delEscape(cols, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("id", cols.get(0));
+        Assertions.assertEquals("name", cols.get(1));
 
-            // like: "id" | `id`
-            testCols = Arrays.asList(ch + "id" + ch, "name");
-            testCols = ColumnUtils.delEscape(testCols, escape);
-            Assertions.assertEquals("id", testCols.get(0));
-            Assertions.assertEquals("name", testCols.get(1));
+        List<String> cols2 = new ArrayList<>();
+        cols2.add("\"id\"");
+        cols2 = ColumnUtils.delEscape(cols2, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("id", cols2.get(0));
 
-            // like: "table".id | `table`.id
-            testCols = Collections.singletonList(ch + "table" + ch + "." + "id");
-            testCols = ColumnUtils.delEscape(testCols, escape);
-            Assertions.assertEquals("table.id", testCols.get(0));
+        List<String> cols3 = new ArrayList<>();
+        cols3.add("\"scheme\".\"id\"");
+        cols3 = ColumnUtils.delEscape(cols3, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("scheme.id", cols3.get(0));
 
-            // like: table."id" | table.`id`
-            testCols = Collections.singletonList("table" + "." + ch + "id" + ch);
-            testCols = ColumnUtils.delEscape(testCols, escape);
-            Assertions.assertEquals("table.id", testCols.get(0));
+        List<String> cols4 = new ArrayList<>();
+        cols4.add("`scheme`.`id`");
+        cols4 = ColumnUtils.delEscape(cols4, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("scheme.id", cols4.get(0));
 
-            // like: "table"."id" | `table`.`id`
-            testCols = Collections.singletonList(ch + "table" + ch + "." + ch + "id" + ch);
-            testCols = ColumnUtils.delEscape(testCols, escape);
-            Assertions.assertEquals("table.id", testCols.get(0));
+        List<String> cols5 = new ArrayList<>();
+        cols5.add("\"scheme\".id");
+        cols5 = ColumnUtils.delEscape(cols5, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("scheme.id", cols5.get(0));
 
-            // follow cases demonstrates the lack of functionality
-            // like: "id""123" => id""123
-            testCols = Collections.singletonList(ch + "id" + ch + ch + "123" + ch);
-            testCols = ColumnUtils.delEscape(testCols, escape);
-            Assertions.assertEquals("id" + ch + ch + "123", testCols.get(0));
+        List<String> cols6 = new ArrayList<>();
+        cols6.add("\"tab\"\"le\"");
+        cols6 = ColumnUtils.delEscape(cols6, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("tab\"\"le", cols6.get(0));
 
-            // like: "table"".".id => table".".id
-            testCols = Collections.singletonList(ch + "table" + ch + ch + "." + ch + "." + "id");
-            testCols = ColumnUtils.delEscape(testCols, escape);
-            Assertions.assertEquals("table" + ch + "." + ch + "." + "id", testCols.get(0));
-        }
+        List<String> cols7 = new ArrayList<>();
+        cols7.add("scheme.\"id\"");
+        cols7 = ColumnUtils.delEscape(cols7, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("scheme.id", cols7.get(0));
+
+        List<String> cols8 = new ArrayList<>();
+        cols8.add("`scheme`.id");
+        cols8 = ColumnUtils.delEscape(cols8, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("scheme.id", cols8.get(0));
+
+        List<String> cols9 = new ArrayList<>();
+        cols9.add("scheme.`id`");
+        cols9 = ColumnUtils.delEscape(cols9, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("scheme.id", cols9.get(0));
+
+        Assertions.assertNull(ColumnUtils.delEscape((String) null, ColumnUtils.Escape.MYSQL));
     }
 
     @Test
-    public void testDelEscapeByDbType() {
-        List<String> testCols;
-        // test all type of escapes
-        for (String dbType : Arrays.asList(JdbcConstants.MYSQL, JdbcConstants.ORACLE, JdbcConstants.POSTGRESQL,
-            JdbcConstants.MARIADB, JdbcConstants.OCEANBASE, JdbcConstants.OCEANBASE_ORACLE)) {
-            String ch = String.valueOf((isMysqlSeries(dbType) ?
-                ColumnUtils.Escape.MYSQL : ColumnUtils.Escape.STANDARD).value);
+    public void test_delEscape_byDbType() throws Exception {
 
-            // like: "id" | `id`
-            testCols = Arrays.asList(ch + "id" + ch, "name");
-            testCols = ColumnUtils.delEscape(testCols, dbType);
-            Assertions.assertEquals("id", testCols.get(0));
-            Assertions.assertEquals("name", testCols.get(1));
+        List<String> cols3 = new ArrayList<>();
+        cols3.add("\"id\"");
+        cols3 = ColumnUtils.delEscape(cols3, JdbcConstants.ORACLE);
+        Assertions.assertEquals("id", cols3.get(0));
 
-            // like: "table".id | `table`.id
-            testCols = Collections.singletonList(ch + "table" + ch + "." + "id");
-            testCols = ColumnUtils.delEscape(testCols, dbType);
-            Assertions.assertEquals("table.id", testCols.get(0));
+        List<String> cols4 = new ArrayList<>();
+        cols4.add("`id`");
+        cols4 = ColumnUtils.delEscape(cols4, JdbcConstants.MYSQL);
+        Assertions.assertEquals("id", cols4.get(0));
 
-            // like: table."id" | table.`id`
-            testCols = Collections.singletonList("table" + "." + ch + "id" + ch);
-            testCols = ColumnUtils.delEscape(testCols, dbType);
-            Assertions.assertEquals("table.id", testCols.get(0));
+        List<String> cols5 = new ArrayList<>();
+        cols5.add("\"id\"");
+        cols5 = ColumnUtils.delEscape(cols5, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("id", cols5.get(0));
 
-            // like: "table"."id" | `table`.`id`
-            testCols = Collections.singletonList(ch + "table" + ch + "." + ch + "id" + ch);
-            testCols = ColumnUtils.delEscape(testCols, dbType);
-            Assertions.assertEquals("table.id", testCols.get(0));
-
-            // follow cases demonstrates the lack of functionality
-            // like: "id""123" => id""123
-            testCols = Collections.singletonList(ch + "id" + ch + ch + "123" + ch);
-            testCols = ColumnUtils.delEscape(testCols, dbType);
-            Assertions.assertEquals("id" + ch + ch + "123", testCols.get(0));
-
-            // like: "table"".".id => table".".id
-            testCols = Collections.singletonList(ch + "table" + ch + ch + "." + ch + "." + "id");
-            testCols = ColumnUtils.delEscape(testCols, dbType);
-            Assertions.assertEquals("table" + ch + "." + ch + "." + "id", testCols.get(0));
-        }
-    }
-
-    private boolean isMysqlSeries(String dbType) {
-        return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
-            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
-            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB) ||
-            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.OCEANBASE);
+        Assertions.assertEquals("id", ColumnUtils.delEscape("`id`", JdbcConstants.MYSQL));
+        Assertions.assertEquals("id", ColumnUtils.delEscape("\"id\"", JdbcConstants.ORACLE));
+        Assertions.assertEquals("id", ColumnUtils.delEscape("\"id\"", JdbcConstants.POSTGRESQL));
     }
 
     @Test
-    public void testAddEscapeByDbType() {
-        List<String> testCols;
+    public void test_addEscape_byDbType() throws Exception {
+        List<String> cols = new ArrayList<>();
+        cols.add("id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.MYSQL);
+        Assertions.assertEquals("id", cols.get(0));
 
-        // case1: test for Mysql
-        // only deal with keyword for Mysql
-        testCols = Collections.singletonList("id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.MYSQL);
-        Assertions.assertEquals("id", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("`id`");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.MYSQL);
+        Assertions.assertEquals("`id`", cols.get(0));
 
-        testCols = Collections.singletonList("ID");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.MYSQL);
-        Assertions.assertEquals("ID", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("from");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.MYSQL);
+        Assertions.assertEquals("`from`", cols.get(0));
 
-        testCols = Collections.singletonList("limit");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.MYSQL);
-        Assertions.assertEquals("`limit`", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("scheme.id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.MYSQL);
+        Assertions.assertEquals("scheme.id", cols.get(0));
 
-        testCols = Collections.singletonList("LIMIT");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.MYSQL);
-        Assertions.assertEquals("`LIMIT`", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("`scheme`.id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.MYSQL);
+        Assertions.assertEquals("`scheme`.id", cols.get(0));
 
-        testCols = Collections.singletonList("`TABLE`.id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.MYSQL);
-        Assertions.assertEquals("`TABLE`.id", testCols.get(0));
-
-        testCols = Collections.singletonList("table.`ID`");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.MYSQL);
-        Assertions.assertEquals("table.`ID`", testCols.get(0));
-
-
-        // case2: test for Pgsql
-        // deal with keyword for Pgsql
-        testCols = Collections.singletonList("current_date");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("\"current_date\"", testCols.get(0));
-
-        testCols = Collections.singletonList("CURRENT_DATE");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("\"CURRENT_DATE\"", testCols.get(0));
-
-        // deal with case-sensitive for Pgsql
-        testCols = Collections.singletonList("id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("id", testCols.get(0));
-
-        testCols = Collections.singletonList("ID");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("\"ID\"", testCols.get(0));
-
-        testCols = Collections.singletonList("table.\"id\"");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("table.\"id\"", testCols.get(0));
-
-        testCols = Collections.singletonList("\"TABLE\".id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("\"TABLE\".\"id\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("scheme.`id`");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.MYSQL);
+        Assertions.assertEquals("scheme.`id`", cols.get(0));
 
 
-        // case3: test for Oracle
-        // deal with keyword for Oracle
-        testCols = Collections.singletonList("varchar2");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.ORACLE);
-        Assertions.assertEquals("\"varchar2\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"id\"", cols.get(0));
 
-        testCols = Collections.singletonList("VARCHAR2");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.ORACLE);
-        Assertions.assertEquals("\"VARCHAR2\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("\"id\"");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"id\"", cols.get(0));
 
-        // deal with case-sensitive for Oracle
-        testCols = Collections.singletonList("id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.ORACLE);
-        Assertions.assertEquals("\"id\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("from");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"from\"", cols.get(0));
 
-        testCols = Collections.singletonList("ID");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.ORACLE);
-        Assertions.assertEquals("ID", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("FROM");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"FROM\"", cols.get(0));
 
-        testCols = Collections.singletonList("id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.ORACLE);
-        Assertions.assertEquals("\"id\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("ID");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("ID", cols.get(0));
 
-        testCols = Collections.singletonList("TABLE.\"ID\"");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.ORACLE);
-        Assertions.assertEquals("TABLE.\"ID\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("\"SCHEME\".ID");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"SCHEME\".ID", cols.get(0));
 
-        testCols = Collections.singletonList("\"TABLE\".id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.ORACLE);
-        Assertions.assertEquals("\"TABLE\".\"id\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("\"scheme\".id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"scheme\".\"id\"", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("SCHEME.\"ID\"");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("SCHEME.\"ID\"", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("scheme.id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"scheme\".\"id\"", cols.get(0));
 
 
-        // case4: test for OceanBase(Oracle mode)
-        // deal with keyword for OceanBase(Oracle mode)
-        testCols = Collections.singletonList("dual");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.OCEANBASE_ORACLE);
-        Assertions.assertEquals("\"dual\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("id", cols.get(0));
 
-        testCols = Collections.singletonList("DUAL");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.OCEANBASE_ORACLE);
-        Assertions.assertEquals("\"DUAL\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("Id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"Id\"", cols.get(0));
 
-        // deal with case-sensitive for OceanBase(Oracle mode)
-        testCols = Collections.singletonList("id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.OCEANBASE_ORACLE);
-        Assertions.assertEquals("\"id\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("from");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"from\"", cols.get(0));
 
-        testCols = Collections.singletonList("ID");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.OCEANBASE_ORACLE);
-        Assertions.assertEquals("ID", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("FROM");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"FROM\"", cols.get(0));
 
-        testCols = Collections.singletonList("TABLE.\"ID\"");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.OCEANBASE_ORACLE);
-        Assertions.assertEquals("TABLE.\"ID\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("scheme.Id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"scheme\".\"Id\"", cols.get(0));
 
-        testCols = Collections.singletonList("\"TABLE\".id");
-        testCols = ColumnUtils.addEscape(testCols, JdbcConstants.OCEANBASE_ORACLE);
-        Assertions.assertEquals("\"TABLE\".\"id\"", testCols.get(0));
+        cols = new ArrayList<>();
+        cols.add("SCHEME.\"ID\"");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"SCHEME\".\"ID\"", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("\"SCHEME\".ID");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"SCHEME\".\"ID\"", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("scheme.id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("scheme.id", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("schEme.id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"schEme\".\"id\"", cols.get(0));
+
     }
 
 }

@@ -27,7 +27,6 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
 
     /**
      * insert columns is empty.
-     *
      * @return true: empty. false: not empty.
      */
     boolean insertColumnsIsEmpty();
@@ -50,7 +49,7 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
     /**
      * Gets insert
      *
-     * @return VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     * @return  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      */
     List<String> getInsertParamsValue();
 
@@ -62,11 +61,9 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
     List<String> getDuplicateKeyUpdate();
 
     /**
-     * Gets the conditional sql for insert statement (for oracle sql)
+     * Gets insert columns is Simplified.
      *
-     * @return condition sql
+     * @return (`a`, `b`, `c`)  ->  (a, b, c)
      */
-    default String getConditionSQL() {
-        return null;
-    }
+    List<String> getInsertColumnsIsSimplified();
 }
