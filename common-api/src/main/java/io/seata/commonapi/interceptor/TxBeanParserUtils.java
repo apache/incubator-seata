@@ -73,14 +73,14 @@ public class TxBeanParserUtils {
             }
         }
     }
-    
+
     public static IsTransactionProxyResult getManualProxyResult(Object bean, String beanName) {
         parserRemotingServiceInfo(bean, beanName);
         RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-        if(remotingDesc == null) {
+        if (remotingDesc == null) {
             return new IsTransactionProxyResult();
         }
-        if(!DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc)) {
+        if (!DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc)) {
             return new IsTransactionProxyResult();
         }
         return DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
@@ -116,7 +116,7 @@ public class TxBeanParserUtils {
     /**
      * init common fence clean task if enable useCommonFence
      *
-     * @param remotingDesc the remoting desc
+     * @param remotingDesc       the remoting desc
      * @param applicationContext applicationContext
      */
     public static void initCommonFenceCleanTask(RemotingDesc remotingDesc, ApplicationContext applicationContext, boolean useCommonFence) {
@@ -164,8 +164,8 @@ public class TxBeanParserUtils {
     /**
      * Create a proxy bean for transaction service
      *
-     * @param interfaceClass the interface class
-     * @param fieldValue the field value
+     * @param interfaceClass    the interface class
+     * @param fieldValue        the field value
      * @param actionInterceptor the action interceptor
      * @return the service proxy bean
      */
