@@ -24,6 +24,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -128,5 +130,9 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
         StringBuilder sb = new StringBuilder();
         executeOrderBy(sqlOrderBy, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
+    }
+
+    public String getDbType() {
+        return JdbcConstants.POSTGRESQL;
     }
 }
