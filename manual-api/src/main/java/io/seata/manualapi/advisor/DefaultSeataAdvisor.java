@@ -6,6 +6,9 @@ import net.bytebuddy.asm.Advice;
 
 import java.lang.reflect.Method;
 
+/**
+ * The default seata advisor
+ */
 public class DefaultSeataAdvisor {
 
     @Advice.OnMethodEnter
