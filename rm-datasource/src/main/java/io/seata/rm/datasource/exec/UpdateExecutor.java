@@ -36,6 +36,7 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Update executor.
@@ -131,7 +132,10 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         TableMeta tableMeta = getTableMeta(table);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(table, originUpdateColumns)) {
-                needUpdateColumns.add(getColumnNamesWithTablePrefix(table,tableAlias, tableMeta.getEscapePkNameList(getDbType())));
+                List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
+                if (CollectionUtils.isNotEmpty(pkNameList)) {
+                    needUpdateColumns.add(getColumnNamesWithTablePrefix(table,tableAlias,pkNameList));
+                }
             }
             needUpdateColumns.addAll(originUpdateColumns);
 

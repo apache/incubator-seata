@@ -38,6 +38,8 @@ import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type My sql update recognizer.
@@ -64,7 +66,13 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     @Override
     public SQLType getSQLType() {
         SQLTableSource tableSource = this.ast.getTableSource();
-        return tableSource instanceof SQLExprTableSource ? SQLType.UPDATE : SQLType.UPDATE_JOIN;
+        if (tableSource instanceof SQLExprTableSource) {
+            return SQLType.UPDATE;
+        } else if (tableSource instanceof SQLJoinTableSource) {
+            return SQLType.UPDATE_JOIN;
+        } else {
+            throw new NotSupportYetException("not support update table source with unknow");
+        }
     }
 
     @Override
@@ -137,14 +145,20 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
         SQLTableSource tableSource = this.ast.getTableSource();
         if (tableSource instanceof SQLExprTableSource) {
             return visitTableName((SQLExprTableSource) tableSource);
-        } else {
+        } else if (tableSource instanceof SQLJoinTableSource) {
             //update join sql,like update t1 inner join t2 on t1.id = t2.id set name = ?, age = ?
+            final int minTableNum = 2;
             StringBuilder joinTables = new StringBuilder();
             joinTables.append(tableSource.toString());
             tableName2AliasMap.put(tableSource.toString(), tableSource.getAlias());
             this.getTableNames(tableSource, joinTables);
-            //will return union table view name and single table names which concated by "#", like t1 inner join t2 on t1.id = t2.id#t1#t2
+            if (joinTables.toString().split(MULTI_TABLE_NAME_SEPERATOR).length < minTableNum + 1) {
+                throw new ShouldNeverHappenException("should get at least two table name for update join table source:" + tableSource.toString());
+            }
+            //will return union table view name and single table names which linked by "#", like t1 inner join t2 on t1.id = t2.id#t1#t2
             return joinTables.toString();
+        } else {
+            throw new NotSupportYetException("not support the syntax of update with unknow");
         }
     }
 

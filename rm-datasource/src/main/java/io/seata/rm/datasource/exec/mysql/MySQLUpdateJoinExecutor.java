@@ -70,9 +70,6 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
-        if (StringUtils.isEmpty(tableNames)) {
-            return null;
-        }
         // update join sql,like update t1 inner join t2 on t1.id = t2.id set t1.name = ?; tableItems = {"update t1 inner join t2","t1","t2"}
         String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
         String joinTable = tableItems[0];
@@ -119,9 +116,6 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
-        if (StringUtils.isEmpty(tableNames)) {
-            return null;
-        }
         String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
         String joinTable = tableItems[0];
         int itemTableIndex = 1;

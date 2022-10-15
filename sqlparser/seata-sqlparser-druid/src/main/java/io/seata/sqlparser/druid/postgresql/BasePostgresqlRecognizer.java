@@ -82,7 +82,7 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
 
             @Override
             public boolean visit(SQLSubqueryTableSource x) {
-                //just like: select * from (select * from t)
+                //just like: select * from (select * from t) for update
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
                     + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }

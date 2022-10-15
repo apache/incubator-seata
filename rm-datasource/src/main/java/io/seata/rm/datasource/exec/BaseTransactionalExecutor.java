@@ -22,7 +22,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeSet;
@@ -241,7 +240,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the column name in sql
      */
     protected String getColumnNamesInSQL(List<String> columnNameList) {
-        if (Objects.isNull(columnNameList) || columnNameList.isEmpty()) {
+        if (CollectionUtils.isEmpty(columnNameList)) {
             return null;
         }
         StringBuilder columnNamesStr = new StringBuilder();
@@ -334,7 +333,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return true: contains pk false: not contains pk
      */
     protected boolean containsPK(String tableName,List<String> columns) {
-        if (columns == null || columns.isEmpty()) {
+        if (CollectionUtils.isEmpty(columns)) {
             return false;
         }
         List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());

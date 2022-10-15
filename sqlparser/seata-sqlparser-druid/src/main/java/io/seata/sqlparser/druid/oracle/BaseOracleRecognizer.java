@@ -132,7 +132,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
             @Override
             public boolean visit(OracleUpdateStatement x) {
                 if (x.getTableSource() instanceof OracleSelectSubqueryTableSource) {
-                    //just like: "update a set a.id = (select id from b where a.pid = b.pid)"
+                    //just like: "update (select a.id,a.name from a inner join b on a.id = b.id) t set t.name = 'xxx'"
                     throw new NotSupportYetException("not support the sql syntax with join table:" + x
                         + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
                 }
@@ -156,7 +156,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
             @Override
             public boolean visit(OracleSelectSubqueryTableSource x) {
-                //just like: select * from (select * from t)
+                //just like: select * from (select * from t) for update
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
                         + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
