@@ -32,9 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +68,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String resourceGroupId;
     private String jdbcUrl;
     private String resourceId;
+    private String rawDbType;
     private String dbType;
     private String userName;
 
@@ -99,23 +98,18 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private void init(DataSource dataSource, String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
-        try (Connection connection = dataSource.getConnection()) {
-            jdbcUrl = connection.getMetaData().getURL();
-            dbType = checkDbTypeBefore(JdbcUtils.getDbType(jdbcUrl), connection);
-            if (JdbcConstants.ORACLE.equals(dbType)) {
-                userName = connection.getMetaData().getUserName();
+        try (Connection conn = dataSource.getConnection()) {
+            DatabaseMetaData metaData = conn.getMetaData();
+            jdbcUrl = metaData.getURL();
+            rawDbType = JdbcUtils.getDbType(jdbcUrl);
+            dbType = JdbcUtils.convertCompatibleDbType(rawDbType, conn);
+            if (JdbcConstants.ORACLE.equals(rawDbType)) {
+                userName = metaData.getUserName();
             }
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
         initResourceId();
-        if (JdbcConstants.OCEANBASE.equals(dbType)) {
-            // the OceanBase in MySQL mode is directly delegated to MySQL.
-            // In druid, the SQLStatementParser for generic SQL statements is returned when db type is OCEANBASE,
-            // not specified for MySQL (called: io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl#create)
-            dbType = JdbcConstants.MYSQL;
-        }
-
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExecutor.scheduleAtFixedRate(() -> {
@@ -132,41 +126,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * Converting the database type to compatible one.
-     * <ol><li> For OceanBase:
-     * Detect the compatibility mode of OceanBase based on the physical database name or validation query.
-     * <ul><li>For oceanbase-client 1.x: jdbc url starting with 'jdbc:oceanbase:' indicates
-     * that the running mode is MYSQL, while one starting with 'jdbc:oceanbase:oracle:' indicates ORACLE mode.</li>
-     * <li>For oceanbase-client 2.x: The format of the jdbc url is 'jdbc:oceanbase:hamode:',
-     * where hamode is the high availability mode(optional: loadbalance etc.).</li></ul>
-     * Note: db type parser of druid recognizes it by url prefix (only adapted to old version driver)</li>
-     * <li> For Mariadb: Be delegated to MySQL</li></ol>
-     */
-    private String checkDbTypeBefore(String dbType, Connection conn) throws SQLException {
-        // determine the origin result from druid parser
-        if (JdbcConstants.OCEANBASE.equals(dbType) || JdbcConstants.OCEANBASE_ORACLE.equals(dbType)) {
-            DatabaseMetaData meta = conn.getMetaData();
-            String databaseName = meta.getDatabaseProductName().toUpperCase();
-            if (databaseName.contains("MYSQL")) {
-                return JdbcConstants.OCEANBASE;
-            } else if (databaseName.contains("ORACLE")) {
-                return JdbcConstants.OCEANBASE_ORACLE;
-            } else {
-                try (Statement statement = conn.createStatement();
-                     ResultSet rs = statement.executeQuery("SELECT * FROM DUAL")) {
-                    if (!rs.next()) {
-                        throw new SQLException("Validation query for OceanBase(Oracle mode) didn't return a row");
-                    }
-                    return JdbcConstants.OCEANBASE_ORACLE;
-                }
-            }
-        } else if (JdbcConstants.MARIADB.equals(dbType)) {
-            return JdbcConstants.MYSQL;
-        }
-        return dbType;
-    }
-
-    /**
      * Gets plain connection.
      *
      * @return the plain connection
@@ -177,9 +136,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * Gets db type.
+     * Get the compatible database type via JDBC URL and connection info
      *
-     * @return the db type
+     * @return db type string
      */
     public String getDbType() {
         return dbType;
@@ -211,13 +170,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private void initResourceId() {
-        if (JdbcConstants.POSTGRESQL.equals(dbType)) {
+        if (JdbcConstants.POSTGRESQL.equals(rawDbType)) {
             initPGResourceId();
-        } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
+        } else if (JdbcConstants.ORACLE.equals(rawDbType) && userName != null) {
             initOracleResourceId();
-        } else if (JdbcConstants.MYSQL.equals(dbType)) {
+        } else if (JdbcConstants.MYSQL.equals(rawDbType) || JdbcConstants.MARIADB.equals(rawDbType)) {
             initMysqlResourceId();
-        } else if (JdbcConstants.OCEANBASE.equals(dbType) || JdbcConstants.OCEANBASE_ORACLE.equals(dbType)) {
+        } else if (JdbcConstants.OCEANBASE.equals(rawDbType) || JdbcConstants.OCEANBASE_ORACLE.equals(rawDbType)) {
             initOceanBaseResourceId();
         } else {
             initDefaultResourceId();
@@ -305,18 +264,27 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * Handling multiple addresses in URL for loadbalance mode.
-     * For oceanbase-client-2.x, the supported jdbc URL format is:
-     * <i>"jdbc:oceanbase:hamode://host:port/databasename?[username&password]&[opt1=val1&opt2=val2...]"</i>
+     * Handling multiple addresses in JDBC URL for OceanBase.
+     * <p> For oceanbase-client-2.x, the supported format of jdbc URL is:
+     * <p> jdbc:oceanbase[:oracle][:hamode]://hostAddresses/databasename?[username&password]&[opt1=val1&opt2=val2...]
+     * <p> hostAddresses: { hostAddress } [,hostAddress ...]
+     * <p> hostAddress: host[:port] | address=(host=hostStr) [(post=portStr)] [(type=typeStr)]
+     * <p> hamode: [ AURORA | REPLICATION | SEQUENTIAL | LOADBALANCE(=FAILOVER) | NONE  ]
      */
     private void initOceanBaseResourceId() {
-        String startsWith = "jdbc:oceanbase:loadbalance://";
-        if (jdbcUrl.startsWith(startsWith)) {
-            int qmIdx = jdbcUrl.indexOf('?');
-            String url = qmIdx > -1 ? jdbcUrl.substring(0, qmIdx) : jdbcUrl;
-            resourceId = url.replace(",", "|");
+        int separator = jdbcUrl.indexOf("//");
+        if (separator > -1) {
+            StringBuilder resourceIdBuilder = new StringBuilder();
+            resourceIdBuilder.append(jdbcUrl, 0, separator + 2);
+            String urlSecondPart = jdbcUrl.substring(separator + 2);
+            int paramIndex = urlSecondPart.indexOf("?");
+            if (paramIndex > -1) {
+                urlSecondPart = urlSecondPart.substring(0, paramIndex);
+            }
+            resourceIdBuilder.append(urlSecondPart.replace(",", "|"));
+            resourceId = resourceIdBuilder.toString();
         } else {
-            initDefaultResourceId();
+            resourceId = jdbcUrl;
         }
     }
 

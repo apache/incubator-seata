@@ -388,7 +388,8 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException SQLException
      */
     protected String getDbType(Connection conn) throws SQLException {
-        return JdbcUtils.getDbType(conn.getMetaData().getURL());
+        String rawDbType = JdbcUtils.getDbType(conn.getMetaData().getURL());
+        return JdbcUtils.convertCompatibleDbType(rawDbType, conn);
     }
 
 }

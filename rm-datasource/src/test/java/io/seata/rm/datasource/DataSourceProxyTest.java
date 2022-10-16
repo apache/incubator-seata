@@ -67,8 +67,8 @@ public class DataSourceProxyTest {
         // get fields
         Field resourceIdField = proxy.getClass().getDeclaredField("resourceId");
         resourceIdField.setAccessible(true);
-        Field dbTypeField = proxy.getClass().getDeclaredField("dbType");
-        dbTypeField.setAccessible(true);
+        Field rawDbTypeField = proxy.getClass().getDeclaredField("rawDbType");
+        rawDbTypeField.setAccessible(true);
         Field userNameField = proxy.getClass().getDeclaredField("userName");
         userNameField.setAccessible(true);
         Field jdbcUrlField = proxy.getClass().getDeclaredField("jdbcUrl");
@@ -81,46 +81,46 @@ public class DataSourceProxyTest {
         userNameField.set(proxy, username);
 
 
-        // case: dbType = oracle
+        // case: rawDbType = oracle
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.ORACLE);
-            Assertions.assertEquals("jdbc:mock:xxx/username", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            rawDbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.ORACLE);
+            Assertions.assertEquals("jdbc:mock:xxx/username", proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
         }
 
         // case: dbType = postgresql
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.POSTGRESQL);
-            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            rawDbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.POSTGRESQL);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
             jdbcUrlField.set(proxy, "jdbc:postgresql://mock/postgresql?xxx=1111&currentSchema=schema1,schema2&yyy=1");
-            Assertions.assertEquals("jdbc:postgresql://mock/postgresql?currentSchema=schema1!schema2", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            Assertions.assertEquals("jdbc:postgresql://mock/postgresql?currentSchema=schema1!schema2", proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
             jdbcUrlField.set(proxy, jdbcUrl);
         }
 
         // case: dbType = mysql
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.MYSQL);
-            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            rawDbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.MYSQL);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
             jdbcUrlField.set(proxy, "jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.3:3306,192.168.100.1:3306/seata");
-            Assertions.assertEquals("jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            Assertions.assertEquals("jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
             jdbcUrlField.set(proxy, jdbcUrl);
         }
 
         // case: dbType = OceanBaseOracle
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, JdbcConstants.OCEANBASE_ORACLE);
-            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            rawDbTypeField.set(proxy, JdbcConstants.OCEANBASE_ORACLE);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
             jdbcUrlField.set(proxy, "jdbc:oceanbase:loadbalance://192.168.100.2:3306,192.168.100.3:3306,192.168.100.1:3306/seata");
-            Assertions.assertEquals("jdbc:oceanbase:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            Assertions.assertEquals("jdbc:oceanbase:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
             jdbcUrlField.set(proxy, jdbcUrl);
         }
     }
