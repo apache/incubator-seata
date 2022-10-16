@@ -17,10 +17,11 @@ package io.seata.integration.http;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 
@@ -31,9 +32,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter {
 
-
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationInterceptor.class);
-
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -43,7 +42,7 @@ public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in HttpContext[{}]", xid, rpcXid);
         }
-        if (xid == null && rpcXid != null) {
+        if (StringUtils.isBlank(xid) && StringUtils.isNotBlank(rpcXid)) {
             RootContext.bind(rpcXid);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("bind[{}] to RootContext", rpcXid);
@@ -54,8 +53,7 @@ public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-        ModelAndView modelAndView) {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         if (RootContext.inGlobalTransaction()) {
             XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
         }

@@ -34,7 +34,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.serial.SerialArray;
@@ -117,9 +117,10 @@ public abstract class AbstractUndoExecutor {
         if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
             return;
         }
+        PreparedStatement undoPST = null;
         try {
             String undoSQL = buildUndoSQL();
-            PreparedStatement undoPST = conn.prepareStatement(undoSQL);
+            undoPST = conn.prepareStatement(undoSQL);
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
@@ -141,6 +142,10 @@ public abstract class AbstractUndoExecutor {
             } else {
                 throw new SQLException(ex);
             }
+        }
+        finally {
+            //important for oracle
+            IOUtil.close(undoPST);
         }
 
     }
@@ -167,7 +172,7 @@ public abstract class AbstractUndoExecutor {
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
-            } else if (type == JDBCType.CLOB.getVendorTypeNumber()) {
+            } else if (type == JDBCType.CLOB.getVendorTypeNumber() || type == JDBCType.NCLOB.getVendorTypeNumber()) {
                 SerialClob serialClob = (SerialClob) value;
                 if (serialClob != null) {
                     undoPST.setClob(undoIndex, serialClob.getCharacterStream());
@@ -190,6 +195,8 @@ public abstract class AbstractUndoExecutor {
                     undoPST.setObject(undoIndex, null);
                 }
             } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
+                undoPST.setObject(undoIndex, value);
+            } else if (undoValue.getType() == JDBCType.BIT.getVendorTypeNumber()) {
                 undoPST.setObject(undoIndex, value);
             } else {
                 // JDBCType.REF, JDBCType.JAVA_OBJECT etc...
@@ -261,7 +268,7 @@ public abstract class AbstractUndoExecutor {
                     }
                 }
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("check dirty datas failed, old and new data are not equal," +
+                    LOGGER.debug("check dirty data failed, old and new data are not equal, " +
                             "tableName:[" + sqlUndoLog.getTableName() + "]," +
                             "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
                             "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");

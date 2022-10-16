@@ -39,13 +39,13 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
-import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.storage.file.FlushDiskMode;
 import io.seata.server.storage.file.ReloadableStore;
+import io.seata.server.storage.file.TransactionWriteStore;
+import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.storage.file.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -69,7 +69,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     private static final int MAX_SHUTDOWN_RETRY = 3;
 
-    private static final int SHUTDOWN_CHECK_INTERNAL = 1 * 1000;
+    private static final int SHUTDOWN_CHECK_INTERVAL = 1 * 1000;
 
     private static final int MAX_WRITE_RETRY = 5;
 
@@ -171,8 +171,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-        writeSessionLock.lock();
         long curFileTrxNum;
+        writeSessionLock.lock();
         try {
             if (!writeDataFile(new TransactionWriteStore(session, logOperation).encode())) {
                 return false;
@@ -326,7 +326,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             while (!fileWriteExecutor.isTerminated() && retry < MAX_SHUTDOWN_RETRY) {
                 ++retry;
                 try {
-                    Thread.sleep(SHUTDOWN_CHECK_INTERNAL);
+                    Thread.sleep(SHUTDOWN_CHECK_INTERVAL);
                 } catch (InterruptedException ignore) {
                 }
             }
@@ -335,9 +335,11 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             }
         }
         try {
-            currFileChannel.force(true);
+            if (currFileChannel.isOpen()) {
+                currFileChannel.force(true);
+            }
         } catch (IOException e) {
-            LOGGER.error("fileChannel force error{}", e.getMessage(), e);
+            LOGGER.error("fileChannel force error: {}", e.getMessage(), e);
         }
         closeFile(currRaf);
     }
@@ -361,9 +363,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     @Override
     public boolean hasRemaining(boolean isHistory) {
-        File file = null;
+        File file;
         RandomAccessFile raf = null;
-        long currentOffset = 0;
+        long currentOffset;
         if (isHistory) {
             file = new File(hisFullFileName);
             currentOffset = recoverHisOffset;

@@ -15,29 +15,32 @@
  */
 package io.seata.server.lock.db;
 
-import io.seata.common.util.IOUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
-import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
-import io.seata.server.storage.file.lock.FileLockManager;
-import io.seata.server.lock.LockManager;
-import io.seata.server.storage.db.lock.DataBaseLocker;
-import io.seata.server.session.BranchSession;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import io.seata.common.util.IOUtil;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.Locker;
+import io.seata.server.lock.LockManager;
+import io.seata.server.session.BranchSession;
+import io.seata.server.storage.db.lock.DataBaseLocker;
+import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
+import io.seata.server.storage.file.lock.FileLockManager;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 
 
 /**
  * @author zhangsen
  */
+@SpringBootTest
 public class DataBaseLockManagerImplTest {
 
     static LockManager lockManager = null;
@@ -47,7 +50,7 @@ public class DataBaseLockManagerImplTest {
     static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;
 
     @BeforeAll
-    public static void start(){
+    public static void start(ApplicationContext context){
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/db_lock");
@@ -72,7 +75,7 @@ public class DataBaseLockManagerImplTest {
                 s.execute("drop table lock_table");
             } catch (Exception e) {
             }
-            s.execute("CREATE TABLE lock_table ( xid varchar(96),  transaction_id long , branch_id long, resource_id varchar(32) ,table_name varchar(32) ,pk varchar(32)  ,  row_key  varchar(128) primary key not null, gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6)) ");
+            s.execute("CREATE TABLE lock_table ( xid varchar(96) , transaction_id long , branch_id long, resource_id varchar(32) ,table_name varchar(32) ,pk varchar(32)  ,  row_key  varchar(128) primary key not null , status  integer , gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6)) ");
             System.out.println("create table lock_table success.");
 
         } catch (Exception e) {

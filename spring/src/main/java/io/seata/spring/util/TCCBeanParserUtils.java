@@ -15,7 +15,9 @@
  */
 package io.seata.spring.util;
 
+import io.seata.common.DefaultValues;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.config.TCCFenceConfig;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
@@ -111,8 +113,8 @@ public class TCCBeanParserUtils {
         }
         //check if it is TCC bean
         boolean isTccClazz = false;
-        Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-        Method[] methods = tccInterfaceClazz.getMethods();
+        Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+        Method[] methods = tccServiceClazz.getMethods();
         TwoPhaseBusinessAction twoPhaseBusinessAction;
         for (Method method : methods) {
             twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
@@ -132,6 +134,36 @@ public class TCCBeanParserUtils {
         }
         // sofa:reference /  dubbo:reference, AOP
         return remotingDesc.isReference();
+    }
+
+    /**
+     * init tcc fence clean task if enable useTccFence
+     *
+     * @param remotingDesc the remoting desc
+     * @param applicationContext applicationContext
+     */
+    public static void initTccFenceCleanTask(RemotingDesc remotingDesc, ApplicationContext applicationContext) {
+        if (remotingDesc == null) {
+            return;
+        }
+        if (applicationContext != null && applicationContext.containsBean(DefaultValues.TCC_FENCE_BEAN_NAME)) {
+            TCCFenceConfig tccFenceConfig = (TCCFenceConfig) applicationContext.getBean(DefaultValues.TCC_FENCE_BEAN_NAME);
+            if (tccFenceConfig == null || tccFenceConfig.getInitialized().get()) {
+                return;
+            }
+            Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+            Method[] methods = tccServiceClazz.getMethods();
+            for (Method method : methods) {
+                TwoPhaseBusinessAction twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
+                if (twoPhaseBusinessAction != null && twoPhaseBusinessAction.useTCCFence()) {
+                    if (tccFenceConfig.getInitialized().compareAndSet(false, true)) {
+                        // init tcc fence clean task if enable useTccFence
+                        tccFenceConfig.initCleanTask();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -162,10 +194,10 @@ public class TCCBeanParserUtils {
     /**
      * Create a proxy bean for tcc service
      *
-     * @param interfaceClass
-     * @param fieldValue
-     * @param actionInterceptor
-     * @return
+     * @param interfaceClass the interface class
+     * @param fieldValue the field value
+     * @param actionInterceptor the action interceptor
+     * @return the service proxy bean
      */
     public static <T> T createProxy(Class<T> interfaceClass, Object fieldValue, TccActionInterceptor actionInterceptor) {
         ProxyFactory factory = new ProxyFactory();

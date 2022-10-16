@@ -28,12 +28,12 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.ROUND_ROBIN_LOAD
  * @author slievrly
  */
 @LoadLevel(name = ROUND_ROBIN_LOAD_BALANCE)
-public class RoundRobinLoadBalance extends AbstractLoadBalance {
+public class RoundRobinLoadBalance implements LoadBalance {
 
     private final AtomicInteger sequence = new AtomicInteger();
 
     @Override
-    protected <T> T doSelect(List<T> invokers, String xid) {
+    public <T> T select(List<T> invokers, String xid) {
         int length = invokers.size();
         return invokers.get(getPositiveSequence() % length);
     }

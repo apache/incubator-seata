@@ -141,4 +141,24 @@ public class RedisKeyConstants {
      */
     public static final String REDIS_KEY_BRANCH_GMT_MODIFIED = "gmtModified";
 
+    /**
+     * The globalLock key
+     */
+    public static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX = "SEATA_GLOBAL_LOCK";
+
+    /**
+     * The globalLock keys
+     */
+    public static final String DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX = "SEATA_ROW_LOCK_";
+
+    /**
+     * The split
+     */
+    public static final String SPLIT = "^^^";
+
+    /**
+     * The constant DEFAULT_LOG_QUERY_LIMIT.
+     */
+    public static final int DEFAULT_LOG_QUERY_LIMIT = 100;
+
 }

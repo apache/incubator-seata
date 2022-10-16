@@ -94,7 +94,11 @@ else
 	fi
 fi
 
+COMMENT_START="#"
 for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
+  if [[ "$line" =~ ^"${COMMENT_START}".*  ]]; then
+        continue
+  fi
 	key=${line%%=*}
 	value=${line#*=}
 	echo "Set" "${key}" "=" "${value}"

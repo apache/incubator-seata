@@ -29,12 +29,11 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.common.DefaultValues;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
@@ -74,21 +73,20 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-        List<String> updateColumns = recognizer.getUpdateColumns();
+        List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
+        String orderByCondition = buildOrderCondition(recognizer, paramAppenderList);
+        String limitCondition = buildLimitCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
-        String orderBy = recognizer.getOrderBy();
-        if (StringUtils.isNotBlank(orderBy)) {
-            suffix.append(orderBy);
+        if (StringUtils.isNotBlank(orderByCondition)) {
+            suffix.append(" ").append(orderByCondition);
         }
-        ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
-        String limit = recognizer.getLimit(parametersHolder, paramAppenderList);
-        if (StringUtils.isNotBlank(limit)) {
-            suffix.append(limit);
+        if (StringUtils.isNotBlank(limitCondition)) {
+            suffix.append(" ").append(limitCondition);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
@@ -98,6 +96,13 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
             for (String columnName : updateColumns) {
                 selectSQLJoin.add(columnName);
+            }
+
+            // The on update xxx columns will be auto update by db, so it's also the actually updated columns
+            List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
+            onUpdateColumns.removeAll(updateColumns);
+            for (String onUpdateColumn : onUpdateColumns) {
+                selectSQLJoin.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
             }
         } else {
             for (String columnName : tableMeta.getAllColumns().keySet()) {
@@ -131,12 +136,19 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-            List<String> updateColumns = recognizer.getUpdateColumns();
+            List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
             if (!containsPK(updateColumns)) {
                 selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }
             for (String columnName : updateColumns) {
                 selectSQLJoiner.add(columnName);
+            }
+
+            // The on update xxx columns will be auto update by db, so it's also the actually updated columns
+            List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
+            onUpdateColumns.removeAll(updateColumns);
+            for (String onUpdateColumn : onUpdateColumns) {
+                selectSQLJoiner.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
             }
         } else {
             for (String columnName : tableMeta.getAllColumns().keySet()) {

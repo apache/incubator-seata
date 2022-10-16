@@ -26,6 +26,8 @@
     <artifactId>seata-serializer-protobuf</artifactId>
     <packaging>jar</packaging>
     <name>seata-serializer-protobuf ${project.version}</name>
+    <description>serializer-protobuf for Seata built with Maven</description>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -43,4 +45,26 @@
             <artifactId>protobuf-java</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <configuration>
+                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/io/seata/protocol/transcation/</protoSourceRoot>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:3.3.0:exe:${os.detected.classifier}
+                    </protocArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

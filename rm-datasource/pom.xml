@@ -27,6 +27,7 @@
     <artifactId>seata-rm-datasource</artifactId>
     <packaging>jar</packaging>
     <name>seata-rm-datasource ${project.version}</name>
+    <description>datasource resource manager for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -124,6 +125,17 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

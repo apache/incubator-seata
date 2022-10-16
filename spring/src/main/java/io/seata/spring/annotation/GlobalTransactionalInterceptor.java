@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.eventbus.Subscribe;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
@@ -35,17 +35,19 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
 import io.seata.core.model.GlobalLockConfig;
+import io.seata.rm.GlobalLockExecutor;
+import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.event.DegradeCheckEvent;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
-import io.seata.rm.GlobalLockExecutor;
-import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
+
+import com.google.common.eventbus.Subscribe;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -59,13 +61,14 @@ import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
+import static io.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
 
 /**
  * The type Global transactional interceptor.
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, SeataInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -74,15 +77,15 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
     private final FailureHandler failureHandler;
     private volatile boolean disable;
+    private int order;
+    protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
-    private static volatile boolean degradeCheck;
+    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
     private static final EventBus EVENT_BUS = new GuavaEventBus("degradeCheckEventBus", true);
-    private static ScheduledThreadPoolExecutor executor =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
-
+    private static volatile ScheduledThreadPoolExecutor executor;
     //region DEFAULT_GLOBAL_TRANSACTION_TIMEOUT
 
     private static int defaultGlobalTransactionTimeout = 0;
@@ -106,6 +109,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
+    public GlobalTransactionalInterceptor() {
+        this(null);
+    }
+
     //endregion
 
     /**
@@ -118,19 +125,19 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
-        degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
+        this.order =
+            ConfigurationFactory.getInstance().getInt(ConfigurationKeys.TM_INTERCEPTOR_ORDER, TM_INTERCEPTOR_ORDER);
+        boolean degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
-        if (degradeCheck) {
-            ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
-            degradeCheckPeriod = ConfigurationFactory.getInstance().getInt(
-                ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
-            degradeCheckAllowTimes = ConfigurationFactory.getInstance().getInt(
-                ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
-            EVENT_BUS.register(this);
-            if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                startDegradeCheck();
-            }
+        degradeCheckPeriod = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
+        degradeCheckAllowTimes = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
+        EVENT_BUS.register(this);
+        if (degradeCheck && degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+            startDegradeCheck();
         }
+        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
         this.initDefaultGlobalTransactionTimeout();
     }
 
@@ -144,10 +151,23 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-            boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
+            boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
-                if (globalTransactionalAnnotation != null) {
-                    return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
+                if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
+                    AspectTransactional transactional;
+                    if (globalTransactionalAnnotation != null) {
+                        transactional = new AspectTransactional(globalTransactionalAnnotation.timeoutMills(),
+                            globalTransactionalAnnotation.name(), globalTransactionalAnnotation.rollbackFor(),
+                            globalTransactionalAnnotation.rollbackForClassName(),
+                            globalTransactionalAnnotation.noRollbackFor(),
+                            globalTransactionalAnnotation.noRollbackForClassName(),
+                            globalTransactionalAnnotation.propagation(),
+                            globalTransactionalAnnotation.lockRetryInterval(),
+                            globalTransactionalAnnotation.lockRetryTimes());
+                    } else {
+                        transactional = this.aspectTransactional;
+                    }
+                    return handleGlobalTransaction(methodInvocation, transactional);
                 } else if (globalLockAnnotation != null) {
                     return handleGlobalLock(methodInvocation, globalLockAnnotation);
                 }
@@ -156,8 +176,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return methodInvocation.proceed();
     }
 
-    Object handleGlobalLock(final MethodInvocation methodInvocation,
-        final GlobalLock globalLockAnno) throws Throwable {
+    private Object handleGlobalLock(final MethodInvocation methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
             public Object execute() throws Throwable {
@@ -167,7 +186,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             @Override
             public GlobalLockConfig getGlobalLockConfig() {
                 GlobalLockConfig config = new GlobalLockConfig();
-                config.setLockRetryInternal(globalLockAnno.lockRetryInternal());
+                config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
                 config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
                 return config;
             }
@@ -175,7 +194,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     Object handleGlobalTransaction(final MethodInvocation methodInvocation,
-        final GlobalTransactional globalTrxAnno) throws Throwable {
+        final AspectTransactional aspectTransactional) throws Throwable {
         boolean succeed = true;
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
@@ -185,7 +204,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 }
 
                 public String name() {
-                    String name = globalTrxAnno.name();
+                    String name = aspectTransactional.getName();
                     if (!StringUtils.isNullOrEmpty(name)) {
                         return name;
                     }
@@ -195,7 +214,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 @Override
                 public TransactionInfo getTransactionInfo() {
                     // reset the value of timeout
-                    int timeout = globalTrxAnno.timeoutMills();
+                    int timeout = aspectTransactional.getTimeoutMills();
                     if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
                         timeout = defaultGlobalTransactionTimeout;
                     }
@@ -203,20 +222,20 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     TransactionInfo transactionInfo = new TransactionInfo();
                     transactionInfo.setTimeOut(timeout);
                     transactionInfo.setName(name());
-                    transactionInfo.setPropagation(globalTrxAnno.propagation());
-                    transactionInfo.setLockRetryInternal(globalTrxAnno.lockRetryInternal());
-                    transactionInfo.setLockRetryTimes(globalTrxAnno.lockRetryTimes());
+                    transactionInfo.setPropagation(aspectTransactional.getPropagation());
+                    transactionInfo.setLockRetryInterval(aspectTransactional.getLockRetryInterval());
+                    transactionInfo.setLockRetryTimes(aspectTransactional.getLockRetryTimes());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
-                    for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
+                    for (Class<?> rbRule : aspectTransactional.getRollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));
                     }
-                    for (String rbRule : globalTrxAnno.rollbackForClassName()) {
+                    for (String rbRule : aspectTransactional.getRollbackForClassName()) {
                         rollbackRules.add(new RollbackRule(rbRule));
                     }
-                    for (Class<?> rbRule : globalTrxAnno.noRollbackFor()) {
+                    for (Class<?> rbRule : aspectTransactional.getNoRollbackFor()) {
                         rollbackRules.add(new NoRollbackRule(rbRule));
                     }
-                    for (String rbRule : globalTrxAnno.noRollbackForClassName()) {
+                    for (String rbRule : aspectTransactional.getNoRollbackForClassName()) {
                         rollbackRules.add(new NoRollbackRule(rbRule));
                     }
                     transactionInfo.setRollbackRules(rollbackRules);
@@ -242,11 +261,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 case RollbackRetrying:
                     failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
                     throw e.getOriginalException();
+                case TimeoutRollback:
+                    failureHandler.onTimeoutRollback(e.getTransaction(), e.getOriginalException());
+                    throw e.getCause();
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            if (degradeCheck) {
+            if (ATOMIC_DEGRADE_CHECK.get()) {
                 EVENT_BUS.post(new DegradeCheckEvent(succeed));
             }
         }
@@ -275,13 +297,28 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     public void onChangeEvent(ConfigurationChangeEvent event) {
         if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                disable, event.getNewValue());
+                    disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
-            degradeCheck = Boolean.parseBoolean(event.getNewValue());
+            boolean degradeCheck = Boolean.parseBoolean(event.getNewValue());
             if (!degradeCheck) {
                 degradeNum = 0;
+                stopDegradeCheck();
+            } else if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+                startDegradeCheck();
             }
+        }
+    }
+
+    /**
+     * stop auto degrade
+     */
+    private static void stopDegradeCheck() {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(true, false)) {
+            return;
+        }
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
         }
     }
 
@@ -289,8 +326,15 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * auto upgrade service detection
      */
     private static void startDegradeCheck() {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(false, true)) {
+            return;
+        }
+        if (executor != null && !executor.isShutdown()) {
+            return;
+        }
+        executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
         executor.scheduleAtFixedRate(() -> {
-            if (degradeCheck) {
+            if (ATOMIC_DEGRADE_CHECK.get()) {
                 try {
                     String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
                     TransactionManagerHolder.get().commit(xid);
@@ -329,5 +373,20 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 reachNum = 0;
             }
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.BeforeTransaction;
     }
 }

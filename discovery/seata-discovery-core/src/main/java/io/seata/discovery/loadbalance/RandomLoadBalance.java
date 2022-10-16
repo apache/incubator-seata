@@ -28,10 +28,10 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.RANDOM_LOAD_BALA
  * @author yuoyao
  */
 @LoadLevel(name = RANDOM_LOAD_BALANCE)
-public class RandomLoadBalance extends AbstractLoadBalance {
+public class RandomLoadBalance implements LoadBalance {
 
     @Override
-    protected <T> T doSelect(List<T> invokers, String xid) {
+    public <T> T select(List<T> invokers, String xid) {
         int length = invokers.size();
         return invokers.get(ThreadLocalRandom.current().nextInt(length));
     }

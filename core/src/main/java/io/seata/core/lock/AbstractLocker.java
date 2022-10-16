@@ -52,17 +52,22 @@ public abstract class AbstractLocker implements Locker {
             return lockDOs;
         }
         for (RowLock rowLock : locks) {
-            LockDO lockDO = new LockDO();
-            lockDO.setBranchId(rowLock.getBranchId());
-            lockDO.setPk(rowLock.getPk());
-            lockDO.setResourceId(rowLock.getResourceId());
-            lockDO.setRowKey(getRowKey(rowLock.getResourceId(), rowLock.getTableName(), rowLock.getPk()));
-            lockDO.setXid(rowLock.getXid());
-            lockDO.setTransactionId(rowLock.getTransactionId());
-            lockDO.setTableName(rowLock.getTableName());
+            LockDO lockDO = convertToLockDO(rowLock);
             lockDOs.add(lockDO);
         }
         return lockDOs;
+    }
+
+    protected LockDO convertToLockDO(RowLock rowLock) {
+        LockDO lockDO = new LockDO();
+        lockDO.setBranchId(rowLock.getBranchId());
+        lockDO.setPk(rowLock.getPk());
+        lockDO.setResourceId(rowLock.getResourceId());
+        lockDO.setRowKey(getRowKey(rowLock.getResourceId(), rowLock.getTableName(), rowLock.getPk()));
+        lockDO.setXid(rowLock.getXid());
+        lockDO.setTransactionId(rowLock.getTransactionId());
+        lockDO.setTableName(rowLock.getTableName());
+        return lockDO;
     }
 
     /**
@@ -89,7 +94,7 @@ public abstract class AbstractLocker implements Locker {
     }
 
     @Override
-    public boolean releaseLock(String xid, List<Long> branchIds) {
+    public boolean releaseLock(String xid) {
         return false;
     }
 

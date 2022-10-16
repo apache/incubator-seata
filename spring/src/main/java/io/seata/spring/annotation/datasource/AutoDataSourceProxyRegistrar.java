@@ -32,7 +32,6 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
     private static final String ATTRIBUTE_KEY_EXCLUDES = "excludes";
     private static final String ATTRIBUTE_KEY_DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 
-    public static final String BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR = "seataDataSourceBeanPostProcessor";
     public static final String BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR = "seataAutoDataSourceProxyCreator";
 
     @Override
@@ -42,16 +41,6 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
         boolean useJdkProxy = Boolean.parseBoolean(annotationAttributes.get(ATTRIBUTE_KEY_USE_JDK_PROXY).toString());
         String[] excludes = (String[]) annotationAttributes.get(ATTRIBUTE_KEY_EXCLUDES);
         String dataSourceProxyMode = (String) annotationAttributes.get(ATTRIBUTE_KEY_DATA_SOURCE_PROXY_MODE);
-
-        //register seataDataSourceBeanPostProcessor bean def
-        if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)) {
-            AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
-                .genericBeanDefinition(SeataDataSourceBeanPostProcessor.class)
-                .addConstructorArgValue(excludes)
-                .addConstructorArgValue(dataSourceProxyMode)
-                .getBeanDefinition();
-            registry.registerBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR, beanDefinition);
-        }
 
         //register seataAutoDataSourceProxyCreator bean def
         if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)) {
