@@ -15,17 +15,17 @@
  */
 package io.seata.config;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author funkye
@@ -39,6 +39,10 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     private static final ConcurrentHashMap<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
+
+
+    private static final ThreadLocal<Boolean> ENABLE_LOCAL = new ThreadLocal<>();
+
 
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
         if (StringUtils.isBlank(dataId)) {
@@ -104,7 +108,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         return (Configuration)Enhancer.create(Configuration.class,
             (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(METHOD_PREFIX)
-                        && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                        && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)
+                        && !Boolean.FALSE.equals(ENABLE_LOCAL.get())) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
                     ObjectWrapper.ConfigType type = ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
@@ -132,6 +137,14 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     public static void clear() {
         CONFIG_CACHE.clear();
+    }
+
+    public static void disableCurrent() {
+        ENABLE_LOCAL.set(false);
+    }
+
+    public static void enableCurrent() {
+        ENABLE_LOCAL.remove();
     }
 
     private static class ObjectWrapper {

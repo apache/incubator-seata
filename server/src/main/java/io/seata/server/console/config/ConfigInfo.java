@@ -13,31 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.console.vo;
+package io.seata.server.console.config;
+
 /**
- * GlobalLockVO
- * @author Yuzhiqiang
+ * Config info
+ * @author: Yuzhiqiang
  */
-public class GlobalConfigVO {
+public class ConfigInfo {
 
     private Integer id;
-
     private String name;
-
-    private String value;
-
+    private String defaultValue;
     private String descr;
-
-    public GlobalConfigVO() {
-
-    }
-
-    public GlobalConfigVO(Integer id, String name, String value, String descr) {
-        this.id = id;
-        this.name = name;
-        this.value = value;
-        this.descr = descr;
-    }
 
 
     public Integer getId() {
@@ -56,12 +43,12 @@ public class GlobalConfigVO {
         this.name = name;
     }
 
-    public String getValue() {
-        return value;
+    public String getDefaultValue() {
+        return defaultValue;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public String getDescr() {

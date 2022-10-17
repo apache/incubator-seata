@@ -16,15 +16,21 @@
 package io.seata.server.console.impl.db;
 
 import io.seata.config.Configuration;
+import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
+import io.seata.server.console.config.ConfigurationConsoleProperties;
 import io.seata.server.console.service.GlobalConfigService;
 import io.seata.server.console.vo.GlobalConfigVO;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+
+import javax.annotation.Resource;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Global Config  ServiceImpl
+ *
  * @author: Yuzhiqiang
  */
 @Service
@@ -32,18 +38,33 @@ public class GlobalConfigDBServiceImpl implements GlobalConfigService {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
+    @Resource(type = ConfigurationConsoleProperties.class)
+    private ConfigurationConsoleProperties properties;
+
+
     @Override
     public List<GlobalConfigVO> getConfigList() {
+        List<GlobalConfigVO> list = new CopyOnWriteArrayList<>();
 
-        List<GlobalConfigVO> list = new ArrayList<>();
-        String[] configKey = {"1", "2", "3", "4", "5", "6"};
-        String[] descr = {"11111", "22222", "33333", "44444", "55555", "66666"};
-        for (int i = 0; i < configKey.length; i++) {
-            String config = configKey[i];
-            String value = CONFIG.getConfig(config);
-            GlobalConfigVO globalConfig = new GlobalConfigVO(String.valueOf(i), config, value, descr[i]);
-            list.add(globalConfig);
-        }
+        properties.getConfigItems().stream().parallel().forEach(configInfo -> {
+            ConfigurationCache.disableCurrent();
+            try {
+                Integer id = configInfo.getId();
+                String config = configInfo.getName();
+                String value = CONFIG.getConfig(config);
+                if (value == null) {
+                    value = configInfo.getDefaultValue();
+                }
+                String descr = configInfo.getDescr();
+
+                GlobalConfigVO globalConfig = new GlobalConfigVO(id, config, value, descr);
+                list.add(globalConfig);
+            } finally {
+                ConfigurationCache.enableCurrent();
+            }
+        });
+
+        list.sort(Comparator.comparingInt(GlobalConfigVO::getId));
         return list;
     }
 }

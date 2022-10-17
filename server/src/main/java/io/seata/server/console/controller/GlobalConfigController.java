@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 package io.seata.server.console.controller;
+
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.constant.Code;
