@@ -14,6 +14,9 @@
  *  limitations under the License.
  */
 package io.seata.server.console.vo;
+
+import java.util.Map;
+
 /**
  * GlobalLockVO
  * @author Yuzhiqiang
@@ -26,17 +29,17 @@ public class GlobalConfigVO {
 
     private String value;
 
-    private String descr;
+    private Map<String, String> descrMap;
 
     public GlobalConfigVO() {
 
     }
 
-    public GlobalConfigVO(Integer id, String name, String value, String descr) {
+    public GlobalConfigVO(Integer id, String name, String value, Map<String, String> descrMap) {
         this.id = id;
         this.name = name;
         this.value = value;
-        this.descr = descr;
+        this.descrMap = descrMap;
     }
 
 
@@ -64,11 +67,11 @@ public class GlobalConfigVO {
         this.value = value;
     }
 
-    public String getDescr() {
-        return descr;
+    public Map<String, String> getDescrMap() {
+        return descrMap;
     }
 
-    public void setDescr(String descr) {
-        this.descr = descr;
+    public void setDescrMap(Map<String, String> descrMap) {
+        this.descrMap = descrMap;
     }
 }

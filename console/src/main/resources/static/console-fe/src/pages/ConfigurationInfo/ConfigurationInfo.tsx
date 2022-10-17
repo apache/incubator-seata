@@ -25,6 +25,7 @@ import PropTypes from 'prop-types';
 import './index.scss';
 import {AppPropsType} from "@/app";
 import Actions, {LinkButton} from "@alicloud/console-components-actions";
+import {getCurrentLanguage} from "@/reducers/locale";
 
 const FormItem = Form.Item;
 const formItemLayout = {
@@ -37,7 +38,7 @@ const formItemLayout = {
 }
 
 type ConfigurationInfoState = {
-  list: [];
+  list: any[];
   loading: boolean;
   configurationDialogVisible: boolean;
   configurationData: any;
@@ -103,7 +104,7 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
     const { locale = {} } = this.props;
     const { editButtonTitle } = locale;
     return (
-      <Actions style={{ width: '200px' }}>
+      <Actions>
         <LinkButton
           onClick={this.showConfigurationDialog(val, index, record)}
         >
@@ -121,7 +122,15 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
 
   render() {
     const {locale = {} } = this.props;
-    const {title, subTitle, operateTitle, configurationDialogTitle} = locale;
+    const {title, subTitle, operateTitle, configurationDialogTitle,
+      idCellTitle, nameCellTitle, valueCellTitle, valuePlaceholder, descrCellTitle} = locale;
+
+    const language = getCurrentLanguage();
+
+    this.state.list.forEach(record => {
+      record.descr = record.descrMap[language];
+    });
+
     return (
       <Page
         title={title}
@@ -136,10 +145,10 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
         ]}
       >
         <Table className="mt-16" dataSource={this.state.list} loading={this.state.loading}>
-          <Table.Column title="id" dataIndex="id"/>
-          <Table.Column title="name" dataIndex="name"/>
-          <Table.Column title="value" dataIndex="value"/>
-          <Table.Column title="descr" dataIndex="descr"/>
+          <Table.Column title={idCellTitle} dataIndex="id"/>
+          <Table.Column title={nameCellTitle} dataIndex="name"/>
+          <Table.Column title={valueCellTitle} dataIndex="value"/>
+          <Table.Column title={descrCellTitle} dataIndex="descr"/>
           <Table.Column
             title={operateTitle}
             cell={this.onOpen}
@@ -157,23 +166,23 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
             {
               this.state.configurationData
                 ?
-                <Form style={{width: '400px', height: '200px'}}  {...formItemLayout} >
-                  <FormItem label="配置项:">
+                <Form style={{width: '500px', height: '250px'}}  {...formItemLayout} >
+                  <FormItem label={nameCellTitle + ":"}>
                     <span className="text">{this.state.configurationData.name}</span>
                   </FormItem>
 
-                  <FormItem label="配置值:">
+                  <FormItem label={valueCellTitle + ":"}>
                     <Input
                       name="value"
                       defaultValue={this.state.configurationData.value}
                       onChange={(value: string) => { this.state.configurationData.newValue = value; }}
-                      placeholder="请输入修改的配置值"
+                      placeholder={valuePlaceholder}
                       contentEditable={true}
                     />
                   </FormItem>
 
-                  <FormItem label="配置描述:">
-                    <span className="text">{this.state.configurationData.descr}</span>
+                  <FormItem label={descrCellTitle + ":"}>
+                    <span className="text">{this.state.configurationData.descrMap[language]}</span>
                   </FormItem>
                 </Form>
                 :

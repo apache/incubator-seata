@@ -15,8 +15,12 @@
  */
 package io.seata.server.console.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Config info
+ *
  * @author: Yuzhiqiang
  */
 public class ConfigInfo {
@@ -24,7 +28,7 @@ public class ConfigInfo {
     private Integer id;
     private String name;
     private String defaultValue;
-    private String descr;
+    private Map<String, String> descrMap = new HashMap<>();
 
 
     public Integer getId() {
@@ -51,11 +55,11 @@ public class ConfigInfo {
         this.defaultValue = defaultValue;
     }
 
-    public String getDescr() {
-        return descr;
+    public Map<String, String> getDescrMap() {
+        return descrMap;
     }
 
-    public void setDescr(String descr) {
-        this.descr = descr;
+    public void setDescrMap(Map<String, String> descrMap) {
+        this.descrMap = descrMap;
     }
 }

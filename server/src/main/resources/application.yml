@@ -56,129 +56,28 @@ seata:
 seata.console.configuration.config-items:
   - id: 1
     name: 1
-    default_value: xxx
-    descr: aa
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-1
+      en-US: config-1
 
   - id: 2
     name: 2
-    default_value: xxx
-    descr: bb
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-2
+      en-US: config-2
 
   - id: 3
     name: 3
-    default_value: xxx
-    descr: cc
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-3
+      en-US: config-3
 
   - id: 4
     name: 4
-    default_value: xxx
-    descr: dd
-
-  - id: 5
-    name: 5
-    default_value: xxx
-    descr: ee
-
-  - id: 6
-    name: 6
-    default_value: xxx
-    descr: ff
-
-  - id: 7
-    name: 7
-    default_value: xxx
-    descr: gg
-
-  - id: 8
-    name: 8
-    default_value: xxx
-    descr: hh
-
-  - id: 9
-    name: 9
-    default_value: xxx
-    descr: ii
-
-  - id: 10
-    name: 10
-    default_value: xxx
-    descr: jj
-
-  - id: 11
-    name: 11
-    default_value: xxx
-    descr: kk
-
-  - id: 12
-    name: 12
-    default_value: xxx
-    descr: ll
-
-  - id: 13
-    name: 13
-    default_value: xxx
-    descr: mm
-
-  - id: 14
-    name: 14
-    default_value: xxx
-    descr: nn
-
-  - id: 15
-    name: 15
-    default_value: xxx
-    descr: oo
-
-  - id: 16
-    name: 16
-    default_value: xxx
-    descr: pp
-
-  - id: 17
-    name: 17
-    default_value: xxx
-    descr: qq
-
-  - id: 18
-    name: 18
-    default_value: xxx
-    descr: rr
-
-  - id: 19
-    name: 19
-    default_value: xxx
-    descr: ss
-
-  - id: 20
-    name: 20
-    default_value: xxx
-    descr: tt
-
-  - id: 21
-    name: 21
-    default_value: xxx
-    descr: uu
-
-  - id: 22
-    name: 22
-    descr: vv
-
-  - id: 23
-    name: 23
-    default_value: xxx
-    descr: ww
-
-  - id: 24
-    name: 24
-    default_value: xxx
-    descr: xx
-
-  - id: 25
-    name: 25
-    default_value: xxx
-    descr: yy
-
-  - id: 26
-    name: 26
-    default_value: xxx
-    descr: zz
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-4
+      en-US: config-4

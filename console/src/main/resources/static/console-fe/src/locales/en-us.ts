@@ -76,6 +76,11 @@ const enUs: ILocale = {
     operateTitle: 'operate',
     editButtonTitle: 'edit',
     configurationDialogTitle: 'Configuration info',
+    idCellTitle: 'id',
+    nameCellTitle: 'name',
+    valueCellTitle: 'value',
+    valuePlaceholder: 'Please enter a value',
+    descrCellTitle: 'descr',
   },
 };
 

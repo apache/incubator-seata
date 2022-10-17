@@ -76,6 +76,11 @@ const zhCn: ILocale = {
     operateTitle: '操作',
     editButtonTitle: '编辑',
     configurationDialogTitle: '配置信息',
+    idCellTitle: '序号',
+    nameCellTitle: '配置项',
+    valueCellTitle: '配置值',
+    valuePlaceholder: '请输入修改的配置值',
+    descrCellTitle: '配置描述',
   },
 };
 

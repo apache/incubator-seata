@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -55,9 +56,9 @@ public class GlobalConfigDBServiceImpl implements GlobalConfigService {
                 if (value == null) {
                     value = configInfo.getDefaultValue();
                 }
-                String descr = configInfo.getDescr();
+                Map<String, String> descrMap = configInfo.getDescrMap();
 
-                GlobalConfigVO globalConfig = new GlobalConfigVO(id, config, value, descr);
+                GlobalConfigVO globalConfig = new GlobalConfigVO(id, config, value, descrMap);
                 list.add(globalConfig);
             } finally {
                 ConfigurationCache.enableCurrent();
