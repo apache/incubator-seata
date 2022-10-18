@@ -90,7 +90,14 @@ class ConfigurationInfo extends React.Component<GlobalProps, ConfigurationInfoSt
 
     putConfig(this.state.configurationData.name, this.state.configurationData.newValue).then(data => {
       this.onClose();
-      this.search();
+      this.setState({ loading: true });
+
+      // New values in some the configuration center are delayed,
+      // so the search operation is also delayed.
+      let that = this;
+      setTimeout(function () {
+        that.search();
+      }, 100);
     });
   }
 
