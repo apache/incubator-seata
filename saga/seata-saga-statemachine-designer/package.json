@@ -1,6 +1,6 @@
 {
   "name": "seata-saga-statemachine-designer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A visual graph designer for Seata Saga StateMachine based on GGEdior 2.0.4",
   "keywords": [
     "react",
@@ -49,13 +49,13 @@
   },
   "dependencies": {
     "@antv/g6": "^2.2.6",
-    "codemirror": "^5.55.0",
+    "codemirror": "^5.65.8",
     "core-js": "^3.6.5",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.21",
     "react-codemirror": "^1.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.4",
+    "@babel/cli": "^7.18.10",
     "@babel/core": "^7.10.4",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
