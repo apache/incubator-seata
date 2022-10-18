@@ -28,8 +28,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.pool.KryoFactory;
-import com.esotericsoftware.kryo.pool.KryoPool;
+import com.esotericsoftware.kryo.util.Pool;
 import de.javakaffee.kryoserializers.JdkProxySerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +36,43 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jsbxyyx
  */
-public class KryoSerializerFactory implements KryoFactory {
+public class KryoSerializerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KryoSerializerFactory.class);
 
     private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
 
-    private KryoPool pool = new KryoPool.Builder(this).softReferences().build();
+    private Pool<Kryo> pool = new Pool<Kryo>(true, true) {
+
+        @Override
+        public Kryo create() {
+            Kryo kryo = new Kryo();
+            kryo.setReferences(true);
+            kryo.setRegistrationRequired(false);
+
+            for (Map.Entry<Class, Serializer> entry : TYPE_MAP.entrySet()) {
+                kryo.register(entry.getKey(), entry.getValue());
+            }
+
+            // support clob and blob
+            kryo.register(SerialBlob.class, new BlobSerializer());
+            kryo.register(SerialClob.class, new ClobSerializer());
+
+            // register sql type
+            kryo.register(Timestamp.class, new TimestampSerializer());
+            kryo.register(InvocationHandler.class, new JdkProxySerializer());
+            // register commonly class
+            UndoLogSerializerClassRegistry.getRegisteredClasses().forEach((clazz, ser) -> {
+                if (ser == null) {
+                    kryo.register(clazz);
+                } else {
+                    kryo.register(clazz, (Serializer)ser);
+                }
+            });
+            return kryo;
+        }
+
+    };
 
     private static final Map<Class, Serializer> TYPE_MAP = new ConcurrentHashMap<>();
 
@@ -54,47 +83,20 @@ public class KryoSerializerFactory implements KryoFactory {
     }
 
     public KryoSerializer get() {
-        return new KryoSerializer(pool.borrow());
+        return new KryoSerializer(pool.obtain());
     }
 
     public void returnKryo(KryoSerializer kryoSerializer) {
         if (kryoSerializer == null) {
             throw new IllegalArgumentException("kryoSerializer is null");
         }
-        pool.release(kryoSerializer.getKryo());
+        pool.free(kryoSerializer.getKryo());
     }
 
     public void registerSerializer(Class type, Serializer ser) {
         if (type != null && ser != null) {
             TYPE_MAP.put(type, ser);
         }
-    }
-
-    @Override
-    public Kryo create() {
-        Kryo kryo = new Kryo();
-        kryo.setRegistrationRequired(false);
-
-        for (Map.Entry<Class, Serializer> entry : TYPE_MAP.entrySet()) {
-            kryo.register(entry.getKey(), entry.getValue());
-        }
-
-        // support clob and blob
-        kryo.register(SerialBlob.class, new BlobSerializer());
-        kryo.register(SerialClob.class, new ClobSerializer());
-
-        // register sql type
-        kryo.register(Timestamp.class, new TimestampSerializer());
-        kryo.register(InvocationHandler.class, new JdkProxySerializer());
-        // register commonly class
-        UndoLogSerializerClassRegistry.getRegisteredClasses().forEach((clazz, ser) -> {
-            if (ser == null) {
-                kryo.register(clazz);
-            } else {
-                kryo.register(clazz, (Serializer)ser);
-            }
-        });
-        return kryo;
     }
 
     private static class BlobSerializer extends Serializer<Blob> {
@@ -111,7 +113,7 @@ public class KryoSerializerFactory implements KryoFactory {
         }
 
         @Override
-        public Blob read(Kryo kryo, Input input, Class<Blob> type) {
+        public Blob read(Kryo kryo, Input input, Class<? extends Blob> type) {
             int length = input.readInt(true);
             byte[] bytes = input.readBytes(length);
             try {
@@ -137,7 +139,7 @@ public class KryoSerializerFactory implements KryoFactory {
         }
 
         @Override
-        public Clob read(Kryo kryo, Input input, Class<Clob> type) {
+        public Clob read(Kryo kryo, Input input, Class<? extends Clob> type) {
             try {
                 String s = input.readString();
                 return new SerialClob(s.toCharArray());
@@ -157,7 +159,7 @@ public class KryoSerializerFactory implements KryoFactory {
         }
 
         @Override
-        public Timestamp read(Kryo kryo, Input input, Class<Timestamp> type) {
+        public Timestamp read(Kryo kryo, Input input, Class<? extends Timestamp> type) {
             Timestamp timestamp = new Timestamp(input.readLong(true));
             timestamp.setNanos(input.readInt(true));
             return timestamp;

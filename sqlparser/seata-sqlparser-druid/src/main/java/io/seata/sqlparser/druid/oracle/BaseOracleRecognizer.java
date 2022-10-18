@@ -36,6 +36,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author will
@@ -165,5 +166,9 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
         };
         getAst().accept(visitor);
         return true;
+    }
+
+    public String getDbType() {
+        return JdbcConstants.ORACLE;
     }
 }
