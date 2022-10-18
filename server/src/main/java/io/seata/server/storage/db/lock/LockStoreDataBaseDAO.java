@@ -351,7 +351,7 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @param lockDOs the lock do list
      * @return the boolean
      */
-    protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) {
+    protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) throws SQLException {
         PreparedStatement ps = null;
         try {
             //insert
@@ -369,12 +369,12 @@ public class LockStoreDataBaseDAO implements LockStore {
                 ps.addBatch();
             }
             return ps.executeBatch().length == lockDOs.size();
-        } catch (SQLException e) {
-            if (!(e instanceof SQLIntegrityConstraintViolationException)) {
-                LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
-                // return false,let the caller go to conn.rollabck()
-            }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
+            //return false,let the caller go to conn.rollabck()
             return false;
+        } catch (SQLException e) {
+            throw e;
         } finally {
             IOUtil.close(ps);
         }

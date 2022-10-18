@@ -31,7 +31,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -132,7 +132,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * parse primary key value from statement.
-     * @return
+     * @return the primary key and values<key:primary key,value:primary key values></key:primary>
      */
     protected Map<String, List<Object>> parsePkValuesFromStatement() {
         // insert values including PK
@@ -221,8 +221,8 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * default get generated keys.
-     * @return
-     * @throws SQLException
+     * @return the generate keys
+     * @throws SQLException the sql exception
      */
     @Deprecated
     public List<Object> getGeneratedKeys() throws SQLException {
@@ -247,7 +247,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     /**
      * default get generated keys.
      * @param pkKey the pk key
-     * @return
+     * @return the generated key list
      * @throws SQLException
      */
     public List<Object> getGeneratedKeys(String pkKey) throws SQLException {
