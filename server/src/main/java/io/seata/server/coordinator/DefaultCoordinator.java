@@ -75,6 +75,14 @@ import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.DefaultValues.DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_COMMITING_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_MAX_COMMIT_RETRY_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERIOD;
 
 /**
  * The type Default coordinator.
@@ -89,30 +97,31 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * The constant COMMITTING_RETRY_PERIOD.
      */
     protected static final long COMMITTING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.COMMITING_RETRY_PERIOD,
-        1000L);
+            DEFAULT_COMMITING_RETRY_PERIOD);
 
     /**
      * The constant ASYNC_COMMITTING_RETRY_PERIOD.
      */
     protected static final long ASYNC_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
-        ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD, 1000L);
+            ConfigurationKeys.ASYNC_COMMITING_RETRY_PERIOD, DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD);
 
     /**
      * The constant ROLLBACKING_RETRY_PERIOD.
      */
     protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
-        1000L);
+            DEFAULT_ROLLBACKING_RETRY_PERIOD);
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
      */
-    protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.TIMEOUT_RETRY_PERIOD, 1000L);
+    protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.TIMEOUT_RETRY_PERIOD,
+            DEFAULT_TIMEOUT_RETRY_PERIOD);
 
     /**
      * The Transaction undo log delete period.
      */
     protected static final long UNDO_LOG_DELETE_PERIOD = CONFIG.getLong(
-            ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
+            ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, DEFAULT_UNDO_LOG_DELETE_PERIOD);
 
     /**
      * The Transaction undo log delay delete period
@@ -132,13 +141,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final int BRANCH_ASYNC_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
-            ConfigurationKeys.MAX_COMMIT_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
+            ConfigurationKeys.MAX_COMMIT_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, DEFAULT_MAX_COMMIT_RETRY_TIMEOUT);
 
     private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
-            ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
+            ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT);
 
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
+            ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE);
 
     private final ScheduledThreadPoolExecutor retryRollbacking =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_ROLLBACKING, 1));

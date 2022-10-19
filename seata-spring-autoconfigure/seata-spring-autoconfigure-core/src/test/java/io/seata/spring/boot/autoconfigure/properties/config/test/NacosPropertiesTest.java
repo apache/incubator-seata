@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class NacosPropertiesTest extends BasePropertiesTest {
-    @Bean
+    @Bean("testConfigNacosProperties")
     public ConfigNacosProperties configNacosProperties() {
         return new ConfigNacosProperties().setServerAddr(STR_TEST_AAA).setDataId(STR_TEST_BBB).setGroup(STR_TEST_CCC).setNamespace(STR_TEST_DDD).setUsername(STR_TEST_EEE).setPassword(STR_TEST_FFF);
     }

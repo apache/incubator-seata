@@ -32,7 +32,7 @@
     <description>dependencies for Seata built with Maven</description>
 
     <properties>
-        <dubbo.version>2.7.4</dubbo.version>
+        <dubbo-seata.version>1.0.0</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
@@ -48,7 +48,7 @@
         <apache-zookeeper.version>3.5.9</apache-zookeeper.version>
         <curator-test.version>2.9.1</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
-        <apollo-client.version>1.6.0</apollo-client.version>
+        <apollo-client.version>2.0.1</apollo-client.version>
         <mock-jedis.version>0.1.16</mock-jedis.version>
         <eureka-clients.version>1.10.17</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
@@ -63,13 +63,13 @@
         <jcommander.version>1.72</jcommander.version>
         <xz.version>1.8</xz.version>
         <commons-compress.version>1.19</commons-compress.version>
-        <ant.version>1.10.6</ant.version>
+        <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
 
         <protobuf.version>3.7.1</protobuf.version>
         <grpc.version>1.17.1</grpc.version>
-        <kryo.version>4.0.2</kryo.version>
-        <kryo-serializers.version>0.42</kryo-serializers.version>
+        <kryo.version>5.3.0</kryo.version>
+        <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
@@ -221,11 +221,6 @@
                 <version>${protobuf.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.baidu</groupId>
                 <artifactId>brpc-java</artifactId>
                 <version>${brpc.version}</version>
@@ -234,6 +229,11 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>dubbo</artifactId>
                 <version>${dubbo.alibaba.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.dubbo.extensions</groupId>
+                <artifactId>dubbo-filter-seata</artifactId>
+                <version>${dubbo-seata.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.edas</groupId>
@@ -295,6 +295,12 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>registry-client-all</artifactId>
                 <version>${sofa.registry.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.alipay.sofa.lookout</groupId>
+                        <artifactId>lookout-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
@@ -352,6 +358,10 @@
                     <exclusion>
                         <groupId>javax.servlet</groupId>
                         <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.github.andrewoma.dexx</groupId>
+                        <artifactId>dexx-collections</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
