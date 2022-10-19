@@ -104,6 +104,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         if (StringUtils.isNotBlank(limitCondition)) {
             suffix.append(" ").append(limitCondition);
         }
+        //maybe duplicate row for select join sql.abandon extra duplicate row by 'group by pks'
         suffix.append(GROUP_BY);
         suffix.append(buildGroupByByPks(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName())));
         suffix.append(" FOR UPDATE");
@@ -148,6 +149,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         StringBuilder prefix = new StringBuilder("SELECT ");
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName()), beforeImage.pkRows().size(), getDbType());
         String suffix = " FROM " + joinTable + " WHERE " + whereSql;
+        //maybe duplicate row for select join sql.abandon extra duplicate row by 'group by pks'
         suffix += GROUP_BY;
         suffix += buildGroupByByPks(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName()));
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
