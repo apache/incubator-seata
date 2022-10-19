@@ -44,7 +44,7 @@ import redis.clients.jedis.JedisPoolConfig;
  * @author zhongxiang.wang
  * @author funkye
  */
-@SpringBootTest
+//@SpringBootTest
 public class RedisDistributedLockerTest {
 
     private String retryRollbacking = "RetryRollbacking";
@@ -53,7 +53,7 @@ public class RedisDistributedLockerTest {
     private static DistributedLocker distributedLocker;
     private static Jedis jedis;
 
-    @BeforeAll
+    //@BeforeAll
     public static void start(ApplicationContext context) throws IOException {
         EnhancedServiceLoader.unload(DistributedLocker.class);
         MockRedisServer.getInstance();
@@ -62,7 +62,7 @@ public class RedisDistributedLockerTest {
         jedis = JedisPooledFactory.getJedisInstance();
     }
 
-    @Test
+    //@Test
     public void test_acquireScheduledLock_success() {
         boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000L));
         Assertions.assertTrue(acquire);
@@ -73,7 +73,7 @@ public class RedisDistributedLockerTest {
         Assertions.assertNull(jedis.get(retryRollbacking));
     }
 
-    @Test
+    //@Test
     public void test_acquireScheduledLock_success_() throws UnknownHostException {
         SessionHolder.init(StoreMode.REDIS.getName());
         boolean accquire = SessionHolder.acquireDistributedLock(retryRollbacking);
@@ -85,7 +85,7 @@ public class RedisDistributedLockerTest {
         Assertions.assertNull(jedis.get(retryRollbacking));
     }
 
-    @Test
+    //@Test
     public void test_acquireLock_concurrent() {
         //acquire the lock success
         boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000l));
@@ -127,7 +127,7 @@ public class RedisDistributedLockerTest {
         boolean f = distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue + 2,null));
     }
 
-    @Test
+    //@Test
     public void test_acquireLock_false() {
         String set = jedis.set(retryCommiting, lockValue);
         Assertions.assertEquals("OK",set);
@@ -135,7 +135,7 @@ public class RedisDistributedLockerTest {
         Assertions.assertFalse(acquire);
     }
 
-    @AfterAll
+    //@AfterAll
     public static void after() throws IOException {
         EnhancedServiceLoader.unload(DistributedLocker.class);
         DistributedLockerFactory.cleanLocker();
