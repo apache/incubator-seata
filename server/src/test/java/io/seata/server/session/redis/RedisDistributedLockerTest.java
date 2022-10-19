@@ -29,10 +29,14 @@ import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
-import io.seata.core.store.StoreMode;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.server.store.StoreConfig.SessionMode;
+import org.junit.jupiter.api.Assertions;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @description redis distributed lock test

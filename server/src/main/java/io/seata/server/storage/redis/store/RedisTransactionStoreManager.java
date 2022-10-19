@@ -127,13 +127,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         initGlobalMap();
         initBranchMap();
         logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
-        /**
-         * redis mode: if DEFAULT_LOG_QUERY_LIMIT < STORE_REDIS_QUERY_LIMIT get DEFAULT_LOG_QUERY_LIMIT if
-         * DEFAULT_LOG_QUERY_LIMIT >= STORE_REDIS_QUERY_LIMIT get STORE_REDIS_QUERY_LIMIT
-         */
-        if (logQueryLimit > DEFAULT_LOG_QUERY_LIMIT) {
-            logQueryLimit = DEFAULT_LOG_QUERY_LIMIT;
-        }
     }
 
     /**
@@ -150,7 +143,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init globalMap
      *
-     * @return void
      */
     public void initGlobalMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
@@ -165,7 +157,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init branchMap
      *
-     * @return void
      */
     public void initBranchMap() {
         if (CollectionUtils.isEmpty(branchMap)) {

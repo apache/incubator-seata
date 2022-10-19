@@ -28,49 +28,49 @@ public interface TaskState extends State {
     /**
      * get compensate state
      *
-     * @return
+     * @return the compensate state
      */
     String getCompensateState();
 
     /**
      * Is this state is used to compensate an other state, default false
      *
-     * @return
+     * @return is for compensate
      */
     boolean isForCompensation();
 
     /**
      * Is this state will update data? default false
      *
-     * @return
+     * @return is for update
      */
     boolean isForUpdate();
 
     /**
      * retry strategy
      *
-     * @return
+     * @return retry list
      */
     List<Retry> getRetry();
 
     /**
      * exception handling strategy
      *
-     * @return
+     * @return exception list
      */
     List<ExceptionMatch> getCatches();
 
     /**
      * Execution state determination rule
      *
-     * @return
+     * @return execution state
      */
     Map<String, String> getStatus();
 
     /**
      * loop strategy
      *
-     * @return
+     * @return the loop strategy
      */
     Loop getLoop();
 
@@ -82,41 +82,41 @@ public interface TaskState extends State {
         /**
          * exceptions
          *
-         * @return
+         * @return the exception list
          */
         List<String> getExceptions();
 
         /**
          * exception classes
          *
-         * @return
+         * @return exception list
          */
         List<Class<? extends Exception>> getExceptionClasses();
 
         /**
          * set exception classes
-         * @param exceptionClasses
+         * @param exceptionClasses exception class
          */
         void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);
 
         /**
          * getIntervalSeconds
          *
-         * @return
+         * @return the interval seconds
          */
         double getIntervalSeconds();
 
         /**
          * getMaxAttempts
          *
-         * @return
+         * @return the max attempts
          */
         int getMaxAttempts();
 
         /**
          * get BackoffRate, default 1
          *
-         * @return
+         * @return the backoff rate
          */
         double getBackoffRate();
     }
@@ -129,27 +129,27 @@ public interface TaskState extends State {
         /**
          * exceptions
          *
-         * @return
+         * @return exception list
          */
         List<String> getExceptions();
 
         /**
          * exception classes
          *
-         * @return
+         * @return exception classes
          */
         List<Class<? extends Exception>> getExceptionClasses();
 
         /**
          * set exception classes
-         * @param exceptionClasses
+         * @param exceptionClasses exception class
          */
         void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);
 
         /**
          * next state name
          *
-         * @return
+         * @return the next state name
          */
         String getNext();
     }
@@ -162,21 +162,21 @@ public interface TaskState extends State {
         /**
          * status
          *
-         * @return
+         * @return the task execution status
          */
         ExecutionStatus getStatus();
 
         /**
          * expression
          *
-         * @return
+         * @return the task execution expression
          */
         String getExpression();
 
         /**
          * expression type, default(SpringEL)|exception
          *
-         * @return
+         * @return the task expression type
          */
         String getExpressionType();
     }
@@ -189,35 +189,35 @@ public interface TaskState extends State {
         /**
          * parallel size, default 1
          *
-         * @return
+         * @return the task parallel size
          */
         int getParallel();
 
         /**
          * collection object name
          *
-         * @return
+         * @return the collection object name
          */
         String getCollection();
 
         /**
          * element variable name
          *
-         * @return
+         * @return the element variable name
          */
         String getElementVariableName();
 
         /**
          * element variable index name, default loopCounter
          *
-         * @return
+         * @return the element variable index name
          */
         String getElementIndexName();
 
         /**
          * completion condition, default nrOfInstances == nrOfCompletedInstances
          *
-         * @return
+         * @return the completion condition
          */
         String getCompletionCondition();
     }

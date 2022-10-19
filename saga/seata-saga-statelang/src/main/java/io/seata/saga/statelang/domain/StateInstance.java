@@ -27,203 +27,203 @@ public interface StateInstance {
     /**
      * id
      *
-     * @return
+     * @return the state instance id
      */
     String getId();
 
     /**
      * set id
      *
-     * @param id
+     * @param id the id
      */
     void setId(String id);
 
     /**
      * get Machine InstanceId
      *
-     * @return
+     * @return the Machine InstanceId
      */
     String getMachineInstanceId();
 
     /**
      * set Machine InstanceId
      *
-     * @param machineInstanceId
+     * @param machineInstanceId Machine InstanceId
      */
     void setMachineInstanceId(String machineInstanceId);
 
     /**
      * get name
      *
-     * @return
+     * @return the name
      */
     String getName();
 
     /**
      * set name
      *
-     * @param name
+     * @param name state instance name
      */
     void setName(String name);
 
     /**
      * get type
      *
-     * @return
+     * @return state instance type
      */
     String getType();
 
     /**
      * set type
      *
-     * @param type
+     * @param type state instance type
      */
     void setType(String type);
 
     /**
      * get service name
      *
-     * @return
+     * @return the state instance service name
      */
     String getServiceName();
 
     /**
      * set service name
      *
-     * @param serviceName
+     * @param serviceName the state instance service name
      */
     void setServiceName(String serviceName);
 
     /**
      * get service method
      *
-     * @return
+     * @return the state instance service method
      */
     String getServiceMethod();
 
     /**
      * set service method
      *
-     * @param serviceMethod
+     * @param serviceMethod the state instance service method
      */
     void setServiceMethod(String serviceMethod);
 
     /**
      * get service type
      *
-     * @return
+     * @return the state instance service type
      */
     String getServiceType();
 
     /**
      * get service type
      *
-     * @param serviceType
+     * @param serviceType the state instance service type
      */
     void setServiceType(String serviceType);
 
     /**
      * get businessKey
      *
-     * @return
+     * @return the state instance businessKey
      */
     String getBusinessKey();
 
     /**
      * set business key
      *
-     * @param businessKey
+     * @param businessKey the state instance businessKey
      */
     void setBusinessKey(String businessKey);
 
     /**
      * get start time
      *
-     * @return
+     * @return the state instance start time
      */
     Date getGmtStarted();
 
     /**
      * set start time
      *
-     * @param gmtStarted
+     * @param gmtStarted the state instance start time
      */
     void setGmtStarted(Date gmtStarted);
 
     /**
      * get update time
      *
-     * @return
+     * @return the state instance update time
      */
     Date getGmtUpdated();
 
     /**
      * set update time
      *
-     * @param gmtUpdated
+     * @param gmtUpdated the state instance update time
      */
     void setGmtUpdated(Date gmtUpdated);
 
     /**
      * get end time
      *
-     * @return
+     * @return the state instance end time
      */
     Date getGmtEnd();
 
     /**
      * set end time
      *
-     * @param gmtEnd
+     * @param gmtEnd the state instance end time
      */
     void setGmtEnd(Date gmtEnd);
 
     /**
      * Is this state task will update data?
      *
-     * @return
+     * @return the boolean
      */
     boolean isForUpdate();
 
     /**
      * setForUpdate
      *
-     * @param forUpdate
+     * @param forUpdate is for update
      */
     void setForUpdate(boolean forUpdate);
 
     /**
      * get exception
      *
-     * @return
+     * @return exception
      */
     Exception getException();
 
     /**
      * set exception
      *
-     * @param exception
+     * @param exception exception
      */
     void setException(Exception exception);
 
     /**
      * get input params
      *
-     * @return
+     * @return input params
      */
     Object getInputParams();
 
     /**
      * set inout params
      *
-     * @param inputParams
+     * @param inputParams inputParams
      */
     void setInputParams(Object inputParams);
 
     /**
      * get output params
      *
-     * @return
+     * @return output params
      */
     Object getOutputParams();
 

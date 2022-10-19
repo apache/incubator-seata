@@ -16,13 +16,10 @@
 package io.seata.server.lock;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.store.StoreMode;
-
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.StoreConfig.LockMode;
 
 /**
  * The type Lock manager factory.
@@ -54,16 +51,16 @@ public class LockerManagerFactory {
         init(null);
     }
 
-    public static void init(String lockMode) {
+    public static void init(LockMode lockMode) {
         if (LOCK_MANAGER == null) {
             synchronized (LockerManagerFactory.class) {
                 if (LOCK_MANAGER == null) {
-                    if (StringUtils.isBlank(lockMode)) {
-                        lockMode = CONFIG.getConfig(ConfigurationKeys.STORE_LOCK_MODE,
-                            CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
+                    if (null == lockMode) {
+                        lockMode = StoreConfig.getLockMode();
                     }
-                    if (StoreMode.contains(lockMode)) {
-                        LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode);
+                    //if not exist the lock mode, throw exception
+                    if (null != StoreConfig.StoreMode.get(lockMode.name())) {
+                        LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode.getName());
                     }
                 }
             }
