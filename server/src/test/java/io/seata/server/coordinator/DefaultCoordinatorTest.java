@@ -172,7 +172,7 @@ public class DefaultCoordinatorTest {
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
         TimeUnit.MILLISECONDS.sleep(100);
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
@@ -200,7 +200,7 @@ public class DefaultCoordinatorTest {
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
         TimeUnit.MILLISECONDS.sleep(100);
 
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
 
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
