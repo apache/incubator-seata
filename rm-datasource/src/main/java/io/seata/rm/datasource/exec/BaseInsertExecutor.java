@@ -31,8 +31,8 @@ import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -137,6 +137,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      */
     protected Map<String, List<Object>> parsePkValuesFromStatement() {
         // insert values including PK
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final Map<String, Integer> pkIndexMap = getPkIndex();
         if (pkIndexMap.isEmpty()) {
             throw new ShouldNeverHappenException("pkIndex is not found");
@@ -488,4 +489,5 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         }
         return false;
     }
+
 }

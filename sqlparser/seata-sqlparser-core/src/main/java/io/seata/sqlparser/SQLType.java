@@ -213,9 +213,13 @@ public enum SQLType {
      */
     INSERT_ON_DUPLICATE_UPDATE(102),
     /**
+     * update join sql type
+     */
+    UPDATE_JOIN(103);
+    /**
      * Insert select sql type.
      */
-    INSERT_SELECT(103);
+    INSERT_SELECT(104);
 
     private int i;
 
