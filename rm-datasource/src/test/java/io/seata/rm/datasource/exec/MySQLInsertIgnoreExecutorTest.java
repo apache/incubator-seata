@@ -35,7 +35,6 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
-import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,7 +141,7 @@ public class MySQLInsertIgnoreExecutorTest {
         HashMap<List<String>, List<Object>> paramAppenderMap = insertIgnoreExecutor.getParamAppenderMap();
         doReturn(tableMeta).when(insertIgnoreExecutor).getTableMeta();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertIgnoreExecutor).buildTableRecords2(tableMeta, selectSQL, new ArrayList<>(paramAppenderMap.values()));
+        doReturn(tableRecords).when(insertIgnoreExecutor).buildTableRecords2(tableMeta, selectSQL, new ArrayList<>(paramAppenderMap.values()), Collections.emptyList());
         TableRecords beforeImage = insertIgnoreExecutor.beforeImage();
         Assertions.assertEquals(beforeImage, tableRecords);
     }
@@ -150,7 +149,6 @@ public class MySQLInsertIgnoreExecutorTest {
     @Test
     public void testAfterImage() throws SQLException {
         String selectSQL = "SELECT *  FROM null WHERE (id) in((?),(?)) ";
-        String afterSQL = "";
         TableRecords afterImage = new TableRecords();
         doReturn(tableMeta).when(insertIgnoreExecutor).getTableMeta();
         TableRecords beforeImage = new TableRecords();
@@ -158,27 +156,9 @@ public class MySQLInsertIgnoreExecutorTest {
         insertIgnoreExecutor.setParamAppenderMap(hashMap);
         hashMap.put(Collections.singletonList("id"), Collections.singletonList("id1"));
         insertIgnoreExecutor.setSelectSQL(selectSQL);
-        doReturn(afterImage).when(insertIgnoreExecutor).buildTableRecords2(tableMeta, selectSQL + afterSQL, new ArrayList<>(hashMap.values()));
+        doReturn(afterImage).when(insertIgnoreExecutor).buildTableRecords2(tableMeta, selectSQL, new ArrayList<>(hashMap.values()), Collections.emptyList());
         TableRecords resultRecords = insertIgnoreExecutor.afterImage(beforeImage);
         Assertions.assertEquals(resultRecords, afterImage);
-    }
-
-    @Test
-    public void testBuildUndoRow() {
-        TableRecords beforeImage = new TableRecords();
-        TableRecords afterImage = new TableRecords();
-        getMockTableRecords(beforeImage);
-        getMockTableRecords(afterImage);
-        Map<SQLType, List<Row>> sqlTypeListMap = insertIgnoreExecutor.buildUndoRow(beforeImage, afterImage);
-        Assertions.assertTrue(sqlTypeListMap.get(SQLType.INSERT).isEmpty());
-        List<Row> insert = afterImage.getRows();
-        Row insertRow = new Row();
-        insert.add(insertRow);
-        Row insertRow01 = new Row();
-        insert.add(insertRow01);
-        afterImage.setRows(insert);
-        Map<SQLType, List<Row>> sqlTypeListMap01 = insertIgnoreExecutor.buildUndoRow(beforeImage, afterImage);
-        Assertions.assertEquals(sqlTypeListMap01.get(SQLType.INSERT).toString(), insert.toString());
     }
 
     private void getMockTableRecords(TableRecords tableRecords) {

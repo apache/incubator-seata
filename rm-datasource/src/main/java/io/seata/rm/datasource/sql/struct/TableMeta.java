@@ -189,6 +189,11 @@ public class TableMeta {
         }
     }
 
+    /**
+     * Get the default table column in order
+     *
+     * @return the column name in order
+     */
     public List<String> getDefaultTableColumn() {
         return allColumns.values().stream()
                 .sorted(Comparator.comparingInt(ColumnMeta::getOrdinalPosition))

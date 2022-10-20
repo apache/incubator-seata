@@ -175,10 +175,10 @@ class MySQLInsertSelectExecutorTest {
         list.add(PK_VALUE_LIST.get(0));
         ArrayList<Object> list1 = new ArrayList<>();
         list1.add(PK_VALUE_LIST.get(1));
-        ArrayList<Object> paramFromSql = new ArrayList<>();
+        ArrayList<List<Object>> paramFromSql = new ArrayList<>();
         paramFromSql.add(list);
         paramFromSql.add(list1);
-        doReturn(tableRecords).when(insertSelectExecutorMock).buildTableRecords2(selectTableMeta, selectSQL, paramFromSql);
+        doReturn(tableRecords).when(insertSelectExecutorMock).buildTableRecords2(selectTableMeta, selectSQL, paramFromSql, Collections.emptyList());
         insertSelectExecutorMock.superCreateInsertRecognizer();
 
         String imagesSQL = insertSelectExecutorMock.buildImageSQL(tableMeta);
@@ -195,15 +195,15 @@ class MySQLInsertSelectExecutorTest {
         HashMap<List<String>, List<Object>> paramAppenderMap = insertSelectExecutorMock.getParamAppenderMap();
         insertSelectExecutorMock.setSelectSQL(imagesSQL);
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertSelectExecutorMock).buildTableRecords2(tableMeta, imagesSQL, new ArrayList<>(paramAppenderMap.values()));
+        doReturn(tableRecords).when(insertSelectExecutorMock).buildTableRecords2(tableMeta, imagesSQL, new ArrayList<>(paramAppenderMap.values()), Collections.emptyList());
         TableRecords resultRecords = insertSelectExecutorMock.beforeImage();
-        Assertions.assertEquals(resultRecords,tableRecords);
+        Assertions.assertEquals(resultRecords, tableRecords);
     }
 
     private void mockEmptyRecognize() throws SQLException {
         TableRecords tableRecords = new TableRecords();
         mockRecordsRow(tableRecords);
-        doReturn(tableRecords).when(insertSelectExecutorMock).buildTableRecords2(selectTableMeta, selectSQL, Collections.EMPTY_LIST);
+        doReturn(tableRecords).when(insertSelectExecutorMock).buildTableRecords2(selectTableMeta, selectSQL, new ArrayList<>(Collections.EMPTY_LIST), Collections.emptyList());
         insertSelectExecutorMock.superCreateInsertRecognizer();
     }
 

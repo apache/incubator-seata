@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.exec;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,42 +24,26 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Objects;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.IOUtil;
-import io.seata.common.util.LowerCaseLinkHashMap;
 import io.seata.rm.datasource.ColumnUtils;
-import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,27 +57,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     protected static final String PLACEHOLDER = "?";
 
-    protected static final String FOR_UPDATE = " FOR UPDATE";
-
-    private static final String SELECT = "SELECT";
-
-    /**
-     * the params of selectSQL, value is the unique index
-     */
-    public HashMap<List<String>, List<Object>> paramAppenderMap;
-
-    public HashMap<List<String>, List<Object>> getParamAppenderMap() {
-        return paramAppenderMap;
-    }
-
-    /**
-     * just for test
-     *
-     * @param paramAppenderMap paramAppenderMap
-     */
-    public void setParamAppenderMap(HashMap<List<String>, List<Object>> paramAppenderMap) {
-        this.paramAppenderMap = paramAppenderMap;
-    }
     /**
      * Instantiates a new Abstract dml base executor.
      *
@@ -122,18 +84,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return afterImage;
     }
 
-    @Override
-    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) {
-        if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
-            return;
-        }
-        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-        TableRecords lockKeyRecords = afterImage;
-        String lockKeys = buildLockKey(lockKeyRecords);
-        connectionProxy.appendLockKey(lockKeys);
-        buildUndoItemAll(connectionProxy, beforeImage, afterImage);
-    }
-
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
@@ -141,91 +91,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             return false;
         }
         return containsPK(insertColumns);
-    }
-
-    /**
-     * build a SQLUndoLog
-     *
-     * @param beforeImage the before image
-     * @param afterImage  the after image
-     */
-    protected void buildUndoItemAll(ConnectionProxy connectionProxy, TableRecords beforeImage, TableRecords afterImage) {
-        // the situation of normal insert or insert select when select is empty
-        if (CollectionUtils.isEmpty(beforeImage.getRows())) {
-            SQLUndoLog sqlUndoLog = buildUndoItem(SQLType.INSERT, TableRecords.empty(getTableMeta()), afterImage);
-            connectionProxy.appendUndoLog(sqlUndoLog);
-            return;
-        }
-        Map<SQLType, List<Row>> undoRowMap = buildUndoRow(beforeImage, afterImage);
-        undoRowMap.forEach((sqlType, rows) -> {
-            if (CollectionUtils.isNotEmpty(rows)) {
-                TableRecords partAfterImage = new TableRecords(afterImage.getTableMeta());
-                partAfterImage.setRows(rows);
-                if (SQLType.INSERT == sqlType) {
-                    connectionProxy.appendUndoLog(buildUndoItem(sqlType, TableRecords.empty(getTableMeta()), partAfterImage));
-                }
-                if (SQLType.UPDATE == sqlType) {
-                    connectionProxy.appendUndoLog(buildUndoItem(sqlType, beforeImage, partAfterImage));
-                }
-            }
-        });
-    }
-
-    /**
-     * build undo row when happens collision,
-     * when there has no collision but execute method, just throw exception
-     *
-     * @param beforeImage before image
-     * @param afterImage  after image
-     * @return Map<SQLType, List < Row>>
-     */
-    protected Map<SQLType, List<Row>> buildUndoRow(TableRecords beforeImage, TableRecords afterImage) {
-        throw new ShouldNeverHappenException("");
-    }
-
-    /**
-     * build a SQLUndoLog
-     *
-     * @param sqlType     sql type
-     * @param beforeImage before image
-     * @param afterImage  after image
-     * @return sqlUndoLog the sql undo log
-     */
-    protected SQLUndoLog buildUndoItem(SQLType sqlType, TableRecords beforeImage, TableRecords afterImage) {
-        String tableName = sqlRecognizer.getTableName();
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(sqlType);
-        sqlUndoLog.setTableName(tableName);
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-        return sqlUndoLog;
-    }
-
-    /**
-     * build tableRecords from databases
-     *
-     * @param tableMeta      tableMeta
-     * @param selectSQL      the select SQL contain eg: select * from test where id in (?,?)
-     * @param sequenceValues the values to fill the select SQL by sequence
-     * @return TableRecords
-     * @throws SQLException
-     */
-    public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, List<List<Object>> sequenceValues) throws SQLException {
-        ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL + FOR_UPDATE)) {
-            if (CollectionUtils.isNotEmpty(sequenceValues)) {
-                int i = 1;
-                for (List<Object> sequenceValue : sequenceValues) {
-                    for (Object o : sequenceValue) {
-                        ps.setObject(i++, o);
-                    }
-                }
-            }
-            rs = ps.executeQuery();
-            return TableRecords.buildRecords(tableMeta, rs);
-        } finally {
-            IOUtil.close(rs);
-        }
     }
 
     /**
@@ -623,195 +488,4 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         }
         return false;
     }
-
-    /**
-     * build image sql and the param to fill placeholder
-     *
-     * @param tableMeta table meta
-     * @return image sql
-     */
-    public String buildImageSQL(TableMeta tableMeta) {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        int insertNum = getInsertParamsValue().size();
-        Map<String, ArrayList<Object>> imageParamperterMap = buildImageParameters(recognizer);
-        if (Objects.isNull(paramAppenderMap)) {
-            paramAppenderMap = new HashMap<>();
-        }
-        String prefix = "SELECT * ";
-        StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        for (int i = 0; i < insertNum; i++) {
-            int finalI = i;
-            tableMeta.getAllIndexes().forEach((k, v) -> {
-                if (!v.isNonUnique()) {
-                    List<String> columnList = new ArrayList<>(v.getValues().size());
-                    List<Object> columnValue = new ArrayList<>(v.getValues().size());
-                    for (ColumnMeta m : v.getValues()) {
-                        String columnName = m.getColumnName();
-                        if (JdbcConstants.ORACLE.equals(getDbType()) && recognizer.isIgnore()
-                                && !columnName.equals(ColumnUtils.delEscape(recognizer.getHintColumnName(), getDbType()))) {
-                            break;
-                        }
-                        List<Object> imageParameters = imageParamperterMap.get(columnName);
-                        if (imageParameters == null) {
-                            if (m.getColumnDef() != null) {
-                                columnList.add(columnName);
-                                columnValue.add("DEFAULT(" + columnName + ")");
-                                continue;
-                            } else {
-                                break;
-                            }
-                        }
-                        if (imageParameters.get(finalI) == null) {
-                            break;
-                        }
-                        if (imageParameters.get(finalI) instanceof Null) {
-                            if (!IndexType.PRIMARY.equals(v.getIndextype())) {
-                                columnList.add(columnName);
-                                columnValue.add("NULL");
-                                continue;
-                            }
-                            // break for the situation of composite primary key
-                            break;
-                        }
-                        columnList.add(columnName);
-                        columnValue.add(imageParamperterMap.get(columnName).get(finalI));
-                    }
-                    if (CollectionUtils.isNotEmpty(columnList)) {
-                        CollectionUtils.computeIfAbsent(paramAppenderMap, columnList, e -> new ArrayList<>())
-                                .addAll(columnValue);
-                    }
-                }
-            });
-        }
-        suffix.append(" WHERE ");
-        paramAppenderMap.forEach((columnsName, columnsValue) -> {
-            suffix.append("(");
-            suffix.append(Joiner.on(",").join(columnsName));
-            suffix.append(") in(");
-            for (int i = 0; i < columnsValue.size() / columnsName.size(); i++) {
-                suffix.append("(");
-                for (int j = 0; j < columnsName.size(); j++) {
-                    suffix.append("?,");
-                }
-                suffix.insert(suffix.length() - 1, ")");
-            }
-            suffix.deleteCharAt(suffix.length() - 1);
-            suffix.append(") OR ");
-        });
-        suffix.delete(suffix.length() - 4, suffix.length() - 1);
-        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
-        return selectSQLJoin.toString();
-    }
-
-    /**
-     * get image param from the sql
-     *
-     * @param recognizer recognizer
-     * @return key: columnName value: what the user insert
-     */
-    protected Map<String, ArrayList<Object>> buildImageParameters(SQLInsertRecognizer recognizer) {
-        Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
-        //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        List<String> insertParamsList = getInsertParamsValue();
-        List<String> insertColumns = Optional.ofNullable(recognizer.getInsertColumns()).map(list -> list.stream()
-                .map(column -> ColumnUtils.delEscape(column, getDbType())).collect(Collectors.toList())).orElse(null);
-        if (CollectionUtils.isEmpty(insertColumns)) {
-            insertColumns = getTableMeta(recognizer.getTableName()).getDefaultTableColumn();
-        }
-        Map<String, ArrayList<Object>> imageParameterMap = new LowerCaseLinkHashMap<>(insertColumns.size(), 1);
-        int paramIndex = 1;
-        for (String insertParams : insertParamsList) {
-            String[] insertParamsArray = insertParams.split(",");
-            for (int i = 0; i < insertColumns.size(); i++) {
-                String m = ColumnUtils.delEscape(insertColumns.get(i), getDbType());
-                String params = insertParamsArray[i];
-                ArrayList<Object> imageListTemp = imageParameterMap.computeIfAbsent(m, k -> new ArrayList<>());
-                if ("?".equals(params.trim())) {
-                    ArrayList<Object> objects = parameters.get(paramIndex);
-                    imageListTemp.addAll(objects);
-                    paramIndex++;
-                } else {
-                    // params is characterstring constant
-                    if (params.trim().startsWith("'") && params.trim().endsWith("'") || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
-                        params = params.trim();
-                        params = params.substring(1, params.length() - 1);
-                    }
-                    imageListTemp.add(params);
-                }
-                imageParameterMap.put(m, imageListTemp);
-            }
-        }
-        return imageParameterMap;
-    }
-
-    /**
-     * just for the different recognize or sql
-     * normal to see {@link SQLInsertRecognizer#getInsertParamsValue}
-     *
-     * @return
-     */
-    protected List<String> getInsertParamsValue() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        return recognizer.getInsertParamsValue();
-    }
-
-    /**
-     * create the real insert recognizer
-     *
-     * @param querySQL the sql after insert
-     * @throws SQLException
-     */
-    protected SQLInsertRecognizer doCreateInsertRecognizer(String querySQL) throws SQLException {
-        Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
-        List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(querySQL + FOR_UPDATE, getDbType());
-        SQLRecognizer selectRecognizer = sqlRecognizers.get(0);
-        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-        TableMeta selectTableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-                .getTableMeta(connectionProxy.getTargetConnection(), selectRecognizer.getTableName(), connectionProxy.getDataSourceProxy().getResourceId());
-        // use query SQL to get values from database
-        TableRecords tableRecords = buildTableRecords2(selectTableMeta, querySQL, new ArrayList<>(parameters.values()));
-        if (CollectionUtils.isNotEmpty(tableRecords.getRows())) {
-            StringBuilder valuesSQL = new StringBuilder();
-            // build values sql
-            valuesSQL.append(" VALUES");
-            tableRecords.getRows().forEach(row -> {
-                List<Object> values = row.getFields().stream().map(Field::getValue)
-                        .map(value -> Objects.isNull(value) ? null : value).collect(Collectors.toList());
-                valuesSQL.append("(");
-                for (Object value : values) {
-                    if (Objects.isNull(value)) {
-                        valuesSQL.append((String) null);
-                    } else {
-                        valuesSQL.append(value);
-                    }
-                    valuesSQL.append(",");
-                }
-                valuesSQL.insert(valuesSQL.length() - 1, ")");
-            });
-            valuesSQL.deleteCharAt(valuesSQL.length() - 1);
-            return (SQLInsertRecognizer) SQLVisitorFactory.get(formatOriginSQL(valuesSQL.toString()), getDbType()).get(0);
-        }
-        return null;
-    }
-
-    /**
-     * format origin sql
-     *
-     * @param valueSQL the value after insert sql
-     * @return eg: insert into test values(1,1)
-     */
-    private String formatOriginSQL(String valueSQL) {
-        String tableName = this.sqlRecognizer.getTableName().toUpperCase();
-        String originalSQL = this.sqlRecognizer.getOriginalSQL().toUpperCase();
-        int index = originalSQL.indexOf(SELECT);
-        if (tableName.equalsIgnoreCase(SELECT)) {
-            // choose the next select
-            index = originalSQL.indexOf(SELECT, index + SELECT.length());
-        }
-        if (index == -1) {
-            throw new ShouldNeverHappenException("may be the query sql is not a select SQL");
-        }
-        return this.sqlRecognizer.getOriginalSQL().substring(0, index) + valueSQL;
-    }
-
 }

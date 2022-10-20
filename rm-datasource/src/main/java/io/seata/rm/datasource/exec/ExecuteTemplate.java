@@ -27,8 +27,6 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertIgnoreExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertSelectExecutor;
-import io.seata.rm.datasource.exec.oracle.OracleInsertIgnoreExecutor;
-import io.seata.rm.datasource.exec.oracle.OracleInsertSelectExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
@@ -120,10 +118,8 @@ public class ExecuteTemplate {
                     case INSERT_IGNORE:
                         switch (dbType) {
                             case JdbcConstants.MYSQL:
-                                executor = new MySQLInsertIgnoreExecutor(statementProxy, statementCallback, sqlRecognizer);
-                                break;
                             case JdbcConstants.ORACLE:
-                                executor = new OracleInsertIgnoreExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                executor = new MySQLInsertIgnoreExecutor(statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             default:
                                 throw new NotSupportYetException(dbType + " not support to insert ignore");
@@ -132,10 +128,8 @@ public class ExecuteTemplate {
                     case INSERT_SELECT:
                         switch (dbType) {
                             case JdbcConstants.MYSQL:
-                                executor = new MySQLInsertSelectExecutor(statementProxy, statementCallback, sqlRecognizer);
-                                break;
                             case JdbcConstants.ORACLE:
-                                executor = new OracleInsertSelectExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                executor = new MySQLInsertSelectExecutor(statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             default:
                                 throw new NotSupportYetException(dbType + " not support to insert select");
