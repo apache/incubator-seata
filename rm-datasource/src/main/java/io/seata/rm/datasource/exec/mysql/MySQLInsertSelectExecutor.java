@@ -19,7 +19,6 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LowerCaseLinkHashMap;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -34,6 +33,7 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.SQLException;

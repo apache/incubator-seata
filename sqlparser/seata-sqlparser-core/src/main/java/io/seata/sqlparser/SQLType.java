@@ -215,7 +215,7 @@ public enum SQLType {
     /**
      * update join sql type
      */
-    UPDATE_JOIN(103);
+    UPDATE_JOIN(103),
     /**
      * Insert select sql type.
      */
