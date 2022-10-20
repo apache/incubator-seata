@@ -12,6 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### bugfix:
+- [[#4780](https://github.com/seata/seata/pull/4780)] fix can't post TimeoutRollbacked event after a successful timeout rollback
 - [[#4954](https://github.com/seata/seata/pull/4954)] fix output expression incorrectly throws npe
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
@@ -24,6 +25,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
 - [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
+
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -60,6 +62,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
+- [tuwenlin](https://github.com/tuwenlin)
 - [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
