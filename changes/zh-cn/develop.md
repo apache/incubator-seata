@@ -11,6 +11,7 @@
 
 
 ### bugfix：
+- [[#4780](https://github.com/seata/seata/pull/4780)] 修复超时回滚成功后无法发送TimeoutRollbacked事件
 - [[#4954](https://github.com/seata/seata/pull/4954)] 修复output表达式错误时，保存执行结果空指针异常
 - [[#4817](https://github.com/seata/seata/pull/4817)] 修复高版本springboot配置不标准的问题
 - [[#4838](https://github.com/seata/seata/pull/4838)] 修复使用 Statement.executeBatch() 时无法生成undo log 的问题
@@ -24,6 +25,7 @@
 - [[#4978](https://github.com/seata/seata/pull/4978)] 修复 kryo 支持循环依赖
 - [[#4985](https://github.com/seata/seata/pull/4985)] 修复 undo_log id重复的问题
 - [[#4874](https://github.com/seata/seata/pull/4874)] 修复OpenJDK 11 Server1.5.2 启动失败
+
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -58,6 +60,7 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [tuwenlin](https://github.com/tuwenlin)
 - [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
