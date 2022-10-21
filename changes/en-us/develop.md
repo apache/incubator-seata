@@ -7,9 +7,11 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
+- [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
 
 
 ### bugfix:
+- [[#4780](https://github.com/seata/seata/pull/4780)] fix can't post TimeoutRollbacked event after a successful timeout rollback
 - [[#4954](https://github.com/seata/seata/pull/4954)] fix output expression incorrectly throws npe
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
@@ -20,6 +22,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4919](https://github.com/seata/seata/pull/4919)] fix XID port  and  address null:0 before coordinator.init
 - [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
 - [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
+- [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
+
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -43,6 +47,10 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4936](https://github.com/seata/seata/pull/4936)] optimize read of storage configuration
 - [[#4946](https://github.com/seata/seata/pull/4946)] pass the sqlexception to client when get lock
 - [[#4962](https://github.com/seata/seata/pull/4962)] optimize build and fix the base image
+- [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
+- [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
+- [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
+
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -52,6 +60,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
+- [tuwenlin](https://github.com/tuwenlin)
 - [lcmvs](https://github.com/lcmvs)
 - [wangliang181230](https://github.com/wangliang181230)
 - [a364176773](https://github.com/a364176773)
@@ -65,5 +74,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [doubleDimple](https://github.com/doubleDimple)
 - [jsbxyyx](https://github.com/jsbxyyx)
 - [tuwenlin](https://github.com/tuwenlin)
+- [CrazyLionLi](https://github.com/JavaLionLi)
+- [whxxxxx](https://github.com/whxxxxx)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
