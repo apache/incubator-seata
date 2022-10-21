@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -43,6 +43,7 @@ import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +76,9 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        if (CollectionUtils.isEmpty(((SQLInsertRecognizer)sqlRecognizer).getInsertRows(Collections.emptyList()))) {
+            return buildTableRecordsForValueEmpty((SQLInsertRecognizer) sqlRecognizer);
+        }
         Map<String, List<Object>> pkValues = getPkValues();
         TableRecords afterImage = buildTableRecords(pkValues);
         if (afterImage == null) {

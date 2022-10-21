@@ -15,6 +15,9 @@
  */
 package io.seata.sqlparser.druid.mysql;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import io.seata.common.loader.LoadLevel;
@@ -51,5 +54,10 @@ public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder 
             return new MySQLSelectForUpdateRecognizer(sql, ast);
         }
         return null;
+    }
+
+    @Override
+    public List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast) {
+        return Collections.emptyList();
     }
 }

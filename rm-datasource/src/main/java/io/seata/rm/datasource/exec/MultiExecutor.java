@@ -18,9 +18,11 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.oracle.OracleMultiInsertExecutor;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -71,6 +73,14 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         AbstractDMLBaseExecutor<T, S> executor = null;
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
+                case INSERT:
+                    String dbType = statementProxy.getConnectionProxy().getDbType();
+                    if (JdbcConstants.ORACLE.equals(dbType)) {
+                        executor = new OracleMultiInsertExecutor<>(statementProxy,statementCallback,value);
+                    } else {
+                        throw new UnsupportedOperationException("not a multi insert sql for dbType:" + dbType);
+                    }
+                    break;
                 case UPDATE:
                     executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
                     break;
@@ -91,6 +101,14 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         AbstractDMLBaseExecutor<T, S> executor = null;
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
+                case INSERT:
+                    String dbType = statementProxy.getConnectionProxy().getDbType();
+                    if (JdbcConstants.ORACLE.equals(dbType)) {
+                        executor = new OracleMultiInsertExecutor<>(statementProxy,statementCallback,value);
+                    } else {
+                        throw new UnsupportedOperationException("not a multi insert sql for dbType:" + dbType);
+                    }
+                    break;
                 case UPDATE:
                     executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
                     break;

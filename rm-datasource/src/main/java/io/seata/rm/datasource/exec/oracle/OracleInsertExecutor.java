@@ -20,6 +20,7 @@ import io.seata.common.loader.Scope;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.Sequenceable;
@@ -84,6 +85,11 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     @Override
     public String getSequenceSql(SqlSequenceExpr expr) {
         return "SELECT " + expr.getSequence() + ".currval FROM DUAL";
+    }
+
+    @Override
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        return super.afterImage(beforeImage);
     }
 
 }

@@ -91,19 +91,20 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     @Override
     public List<String> getInsertColumns() {
         List<SQLExpr> columnSQLExprs = ast.getColumns();
+        List<String> columns = new ArrayList<>();
         if (columnSQLExprs.isEmpty()) {
-            // INSERT INTO ta VALUES (...), without fields clarified
-            return null;
+            //just like "insert into table1 select * from table2"
+            parseInsertSelectColumns(ast.getQuery().getQuery(),columns);
+            return columns;
         }
-        List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                columns.add(((SQLIdentifierExpr)expr).getName());
             } else {
                 wrapSQLParsingException(expr);
             }
         }
-        return list;
+        return columns;
     }
 
     @Override
@@ -177,5 +178,10 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     @Override
     protected SQLStatement getAst() {
         return ast;
+    }
+
+    @Override
+    public String getSubQuerySql() {
+        return this.ast.getQuery() != null ? this.ast.getQuery().toString() : "";
     }
 }
