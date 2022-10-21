@@ -20,10 +20,6 @@ spring:
     name: seata-server
 
 logging:
-  level:
-    org:
-      springframework:
-        r2dbc: debug
   config: classpath:logback-spring.xml
   file:
     path: ${user.home}/logs/seata
