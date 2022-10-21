@@ -42,10 +42,10 @@ import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.store.StoreMode;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig.SessionMode;
 import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -158,6 +158,11 @@ public class DefaultCoordinatorTest {
 
     }
 
+    private static void deleteAndCreateDataFile() throws IOException {
+        StoreUtil.deleteDataFile();
+        SessionHolder.init(SessionMode.FILE);
+    }
+
     @Test
     @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
@@ -172,40 +177,11 @@ public class DefaultCoordinatorTest {
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
         TimeUnit.MILLISECONDS.sleep(100);
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
             Assertions.assertTrue(lockSize > 0);
-        } finally {
-            globalSession.closeAndClean();
-            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
-        }
-    }
-
-    @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
-    public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
-        NoSuchFieldException, IllegalAccessException {
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
-
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        Assertions.assertNotNull(globalSession);
-        Assertions.assertNotNull(globalSession.getBranchSessions());
-        Assertions.assertNotNull(branchId);
-
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
-        TimeUnit.MILLISECONDS.sleep(100);
-
-        defaultCoordinator.timeoutCheck();
-        defaultCoordinator.handleRetryRollbacking();
-
-        int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
-        try {
-            Assertions.assertTrue(lockSize == 0);
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
@@ -226,9 +202,33 @@ public class DefaultCoordinatorTest {
         }
     }
 
-    private static void deleteAndCreateDataFile() throws IOException {
-        StoreUtil.deleteDataFile();
-        SessionHolder.init(StoreMode.FILE.name());
+    @Test
+    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+    public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
+        NoSuchFieldException, IllegalAccessException {
+        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        Assertions.assertNotNull(globalSession.getBranchSessions());
+        Assertions.assertNotNull(branchId);
+
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
+        TimeUnit.MILLISECONDS.sleep(100);
+
+        globalSession.queueToRetryRollback();
+        defaultCoordinator.handleRetryRollbacking();
+
+        int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
+        try {
+            Assertions.assertTrue(lockSize == 0);
+        } finally {
+            globalSession.closeAndClean();
+            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
+                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+        }
     }
 
     @AfterEach
