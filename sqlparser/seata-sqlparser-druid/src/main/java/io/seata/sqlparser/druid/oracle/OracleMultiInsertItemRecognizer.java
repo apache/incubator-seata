@@ -31,6 +31,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * The type oracle multi insert recognizer,just like "insert all into table1 into table2 select * from table3"
@@ -136,6 +137,12 @@ public class OracleMultiInsertItemRecognizer extends BaseOracleRecognizer implem
             }
         };
         visitor.visit(tableSource);
+    }
+
+    @Override 
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     @Override

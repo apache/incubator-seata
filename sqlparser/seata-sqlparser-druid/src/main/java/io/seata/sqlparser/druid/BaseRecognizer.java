@@ -169,17 +169,18 @@ public abstract class BaseRecognizer implements SQLRecognizer {
 
 
     protected void parseInsertSelectColumns(SQLSelectQuery selectQuery, List<String> columns) {
-        if(selectQuery == null){
+        if (selectQuery == null) {
             return;
         }
-        if(selectQuery instanceof SQLUnionQuery) {
+        if (selectQuery instanceof SQLUnionQuery) {
             //a: get left(SQLSelectQueryBlock)
             List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) ((SQLUnionQuery)selectQuery).getLeft()).getSelectList();
             this.getColumnNames(selectItems,columns);
             //b:  get right(SQLUnionQuery)
-            if(((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
+            if (((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
                 this.parseInsertSelectColumns(((SQLUnionQuery)selectQuery).getRight(),columns);
-            } else {//b:  get right(SQLSelectQueryBlock)
+            } else {
+                //b:  get right(SQLSelectQueryBlock)
                 selectItems = ((SQLSelectQueryBlock)((SQLUnionQuery)selectQuery).getRight()).getSelectList();
                 this.getColumnNames(selectItems,columns);
             }
@@ -187,9 +188,10 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         //SQLSelectQueryBlock
         else {
             //select * from (select * from dual union select * from dual)
-            if(((SQLSelectQueryBlock) selectQuery).getFrom() instanceof SQLSubqueryTableSource) {
+            if (((SQLSelectQueryBlock) selectQuery).getFrom() instanceof SQLSubqueryTableSource) {
                 this.parseInsertSelectColumns(((SQLSubqueryTableSource)((SQLSelectQueryBlock) selectQuery).getFrom()).getSelect().getQuery(),columns);
-            } else {//select * from dual
+            } else {
+                //select * from dual
                 List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) selectQuery).getSelectList();
                 this.getColumnNames(selectItems, columns);
             }

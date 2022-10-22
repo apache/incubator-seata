@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
+import io.seata.sqlparser.util.ColumnUtils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,6 +53,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
+    protected static final String GROUP_BY = " GROUP BY ";
 
     /**
      * Instantiates a new Update executor.
@@ -89,6 +91,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     private String buildBeforeImageSQL(String joinTable, String itemTable, List<String> itemTableUpdateColumns,
         ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
+        TableMeta itemTableMeta = getTableMeta(itemTable);
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(joinTable);
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
@@ -103,6 +106,8 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         if (StringUtils.isNotBlank(limitCondition)) {
             suffix.append(" ").append(limitCondition);
         }
+//        suffix.append(GROUP_BY);
+//        suffix.append(buildGroupByByPks(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName())));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
@@ -145,6 +150,8 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         StringBuilder prefix = new StringBuilder("SELECT ");
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName()), beforeImage.pkRows().size(), getDbType());
         String suffix = " FROM " + joinTable + " WHERE " + whereSql;
+//        suffix += GROUP_BY;
+//        suffix += buildGroupByByPks(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName()));
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
@@ -213,5 +220,22 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
         return sqlUndoLog;
+    }
+
+    /**
+     * build group by condition with pk names which used for join sql deleting duplicate data."
+     *
+     * @param pkNameList pkNameList
+     * @return return group by condition string.
+     */
+    private String buildGroupByByPks(List<String> pkNameList) {
+        StringBuilder groupByStr = new StringBuilder();
+        for (int i = 0; i < pkNameList.size(); i++) {
+            if (i > 0) {
+                groupByStr.append(",");
+            }
+            groupByStr.append(ColumnUtils.addEscape(pkNameList.get(i),getDbType()));
+        }
+        return groupByStr.toString();
     }
 }

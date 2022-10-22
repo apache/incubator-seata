@@ -62,7 +62,7 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
     public List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast) {
         List<SQLRecognizer> sqlRecognizers = new ArrayList<>();
         OracleMultiInsertStatement oracleAst = (OracleMultiInsertStatement)ast;
-        List<OracleMultiInsertStatement.Entry> entries = (oracleAst).getEntries();
+        List<OracleMultiInsertStatement.Entry> entries = oracleAst.getEntries();
         for (OracleMultiInsertStatement.Entry entryItem : entries) {
             if (entryItem instanceof OracleMultiInsertStatement.InsertIntoClause) {
                 sqlRecognizers.add(new OracleMultiInsertItemRecognizer(sql,ast,entryItem));
