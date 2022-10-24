@@ -15,10 +15,7 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,7 +24,9 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.core.protocol.Version;
 import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLType;
@@ -43,15 +42,19 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.sqlparser.util.ColumnUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * @author renliangyu857
  */
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUpdateJoinExecutor.class);
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
+    private String sqlMode = "";
 
     /**
      * Instantiates a new Update executor.
@@ -104,12 +107,13 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         if (StringUtils.isNotBlank(limitCondition)) {
             suffix.append(" ").append(limitCondition);
         }
-        //maybe duplicate row for select join sql.abandon extra duplicate row by 'group by pks'
+        //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix.append(GROUP_BY);
-        suffix.append(buildGroupByByPks(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName())));
+        List<String> pkColumnNames = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
+        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         for (String needUpdateColumn : needUpdateColumns) {
             selectSQLJoin.add(needUpdateColumn);
         }
@@ -147,14 +151,15 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         TableMeta itemTableMeta = getTableMeta(itemTable);
         StringBuilder prefix = new StringBuilder("SELECT ");
-        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName()), beforeImage.pkRows().size(), getDbType());
+        List<String> pkColumns = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
+        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkColumns, beforeImage.pkRows().size(), getDbType());
         String suffix = " FROM " + joinTable + " WHERE " + whereSql;
-        //maybe duplicate row for select join sql.abandon extra duplicate row by 'group by pks'
+        //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix += GROUP_BY;
-        suffix += buildGroupByByPks(getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName()));
-        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        suffix += buildGroupBy(pkColumns,needUpdateColumns);
+        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         for (String needUpdateColumn : needUpdateColumns) {
             selectSQLJoiner.add(needUpdateColumn);
         }
@@ -223,19 +228,45 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     }
 
     /**
-     * build group by condition with pk names which used for join sql deleting duplicate data."
+     * build group by condition which used for removing duplicate row in select join sql"
      *
-     * @param pkNameList pkNameList
+     * @param pkColumns pkColumnsList
+     * @param allSelectColumns allSelectColumns
      * @return return group by condition string.
      */
-    private String buildGroupByByPks(List<String> pkNameList) {
+    private String buildGroupBy(List<String> pkColumns,List<String> allSelectColumns) {
+        boolean groupByPks = true;
+        //only pks group by is valid when db version >= 5.7.5
+        try {
+            if (Version.convertVersion(getDbVersion()) < Version.convertVersion("5.7.5")) {
+                if (StringUtils.isEmpty(sqlMode)) {
+                    try (PreparedStatement preparedStatement = statementProxy.getConnection().prepareStatement("SELECT @@SQL_MODE");
+                         ResultSet resultSet = preparedStatement.executeQuery()) {
+                        if (resultSet.next()) {
+                            sqlMode = resultSet.getString("@@SQL_MODE");
+                        }
+                    }
+                }
+                if (sqlMode.contains("ONLY_FULL_GROUP_BY")) {
+                    groupByPks = false;
+                }
+            }
+        } catch (Exception e) {
+            groupByPks = false;
+            LOGGER.warn("determine group by pks or all columns error:{}",e.getMessage());
+        }
+        List<String> groupByColumns = groupByPks ? pkColumns : allSelectColumns;
         StringBuilder groupByStr = new StringBuilder();
-        for (int i = 0; i < pkNameList.size(); i++) {
+        for (int i = 0; i < groupByColumns.size(); i++) {
             if (i > 0) {
                 groupByStr.append(",");
             }
-            groupByStr.append(ColumnUtils.addEscape(pkNameList.get(i),getDbType()));
+            groupByStr.append(ColumnUtils.addEscape(groupByColumns.get(i),getDbType()));
         }
         return groupByStr.toString();
+    }
+
+    private String getDbVersion(){
+        return statementProxy.getConnectionProxy().getDataSourceProxy().getVersion();
     }
 }
