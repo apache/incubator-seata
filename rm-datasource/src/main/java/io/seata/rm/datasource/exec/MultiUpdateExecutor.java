@@ -32,7 +32,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.common.DefaultValues;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
@@ -88,7 +88,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
                 throw new NotSupportYetException("Multi update SQL with orderBy condition is not support yet !");
             }
 
-            List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
+            List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumnsIsSimplified();
             updateColumnsSet.addAll(updateColumns);
             if (noWhereCondition) {
                 continue;
@@ -155,7 +155,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) sqlRecognizer;
-            updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
+            updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumnsIsSimplified());
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());

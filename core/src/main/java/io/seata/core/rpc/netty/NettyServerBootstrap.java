@@ -167,7 +167,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
         try {
             this.serverBootstrap.bind(getListenPort()).sync();
-            XID.setPort(getListenPort());
             LOGGER.info("Server started, service listen port: {}", getListenPort());
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
             for (RegistryService registryService : MultiRegistryFactory.getInstances()) {

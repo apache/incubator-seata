@@ -126,7 +126,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     return wrapper == null ? null : wrapper.convertData(type);
                 }
                 return method.invoke(originalConfiguration, args);
-            })).make().load(this.getClass().getClassLoader()).getLoaded().getDeclaredConstructor().newInstance();
+            })).make().load(originalConfiguration.getClass().getClassLoader()).getLoaded().getDeclaredConstructor()
+            .newInstance();
     }
 
     private static class ConfigurationCacheInstance {
