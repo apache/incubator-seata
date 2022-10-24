@@ -16,6 +16,10 @@
 package io.seata.rm.tcc.interceptor;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +35,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.ParamType;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -291,6 +296,64 @@ public final class ActionContextUtil {
             String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
                     key, value.getClass().getName(), targetClazz.getName());
             throw new FrameworkException(e, errorMsg);
+        }
+    }
+
+    /**
+     * load ActionContextParamType from prepareMethod and put it into the map
+     *
+     * @param method prepareMethod
+     */
+    public static void loadActionContextParamTypeFromMethodAndPutToMap(@Nonnull Method method, @Nonnull Map<String, Type> parameterTypeMap) {
+        Parameter[] parameters = method.getParameters();
+        if (ArrayUtils.isEmpty(parameters)) {
+            return;
+        }
+        for (Parameter parameter : parameters) {
+            if (parameter.isAnnotationPresent(BusinessActionContextParameter.class)) {
+                BusinessActionContextParameter parameterAnnotation = parameter.getDeclaredAnnotation(BusinessActionContextParameter.class);
+                loadActionContextParamTypeAndPutToMap(parameterAnnotation, parameter.getParameterizedType(), parameterTypeMap);
+            }
+        }
+    }
+
+    /**
+     * Load the parameter type annotated with BusinessActionContextParameter and put it into the map
+     *
+     * @param annotation       BusinessActionContextParameter
+     * @param type             param type
+     * @param parameterTypeMap paramter's type map
+     */
+    public static void loadActionContextParamTypeAndPutToMap(@Nonnull BusinessActionContextParameter annotation, @Nonnull Type type, @Nonnull Map<String, Type> parameterTypeMap) {
+        String paramName = getParamNameFromAnnotation(annotation);
+        // If {@code index >= 0}, Type is List or Array
+        if (annotation.index() >= 0) {
+            if (type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                parameterTypeMap.put(paramName, parameterizedType.getActualTypeArguments()[0]);
+            }else{
+                Class<?> clazz = (Class<?>) type;
+                if (clazz.isArray()) {
+                    parameterTypeMap.put(paramName, clazz.getComponentType());
+                }
+            }
+            return;
+        }
+        // if {@code isParamInProperty == true}, fetch param type from fields
+        if (annotation.isParamInProperty()) {
+            Field[] fields = ReflectionUtil.getAllFields((Class<?>) type);
+            if (ArrayUtils.isEmpty(fields)) {
+                return;
+            }
+            for (Field field : fields) {
+                if (field.isAnnotationPresent(BusinessActionContextParameter.class)) {
+                    BusinessActionContextParameter fieldDeclaredAnnotation = field.getDeclaredAnnotation(BusinessActionContextParameter.class);
+                    loadActionContextParamTypeAndPutToMap(fieldDeclaredAnnotation, field.getGenericType(), parameterTypeMap);
+                }
+            }
+        }else{
+            // put param type in map
+            parameterTypeMap.put(paramName, type);
         }
     }
 }

@@ -16,15 +16,21 @@
 package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.util.TypeUtils;
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.SkipCallbackWrapperException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -96,7 +102,7 @@ public class TCCResourceManager extends AbstractResourceManager {
         try {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
-                applicationData);
+                applicationData, tccResource.getPrepareParamTypeMap());
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
@@ -154,7 +160,7 @@ public class TCCResourceManager extends AbstractResourceManager {
         try {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
-                applicationData);
+                applicationData, tccResource.getPrepareParamTypeMap());
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
@@ -197,11 +203,25 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @return business action context
      */
     protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId,
-                                                             String applicationData) {
+                                                             String applicationData, Map<String, Type> prepareParamTypeMap) {
         Map actionContextMap = null;
         if (StringUtils.isNotBlank(applicationData)) {
             Map tccContext = JSON.parseObject(applicationData, Map.class);
             actionContextMap = (Map)tccContext.get(Constants.TCC_ACTION_CONTEXT);
+            // convert value type in actionContextMap to target type in prepareParamTypeMap
+            if(CollectionUtils.isNotEmpty(prepareParamTypeMap)) {
+                Iterator<Map.Entry<String, Type>> iterator = prepareParamTypeMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, Type> e = iterator.next();
+                    String paramName = e.getKey();
+                    Type paramType = e.getValue();
+                    Object value = actionContextMap.get(paramName);
+                    if (Objects.isNull(value)) {
+                        continue;
+                    }
+                    actionContextMap.put(paramName, TypeUtils.cast(value, paramType, ParserConfig.getGlobalInstance()));
+                }
+            }
         }
         if (actionContextMap == null) {
             actionContextMap = new HashMap<>(2);
