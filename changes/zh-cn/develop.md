@@ -7,8 +7,10 @@
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC注解支持添加在实现类及其方法上也生效
+- [[#4877](https://github.com/seata/seata/pull/4877)] seata client支持jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] 支持kryo 5.3.0
 - [[#4914](https://github.com/seata/seata/pull/4914)] 支持mysql的update join联表更新语法
+
 
 
 ### bugfix：
