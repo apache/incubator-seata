@@ -51,7 +51,7 @@ public class BranchStatusTest {
 
     @Test
     public void testGetException() {
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> BranchStatus.get(NONE));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BranchStatus.get(NONE));
     }
 
 
@@ -63,6 +63,6 @@ public class BranchStatusTest {
         BranchStatus branchStatusTwo = BranchStatus.get(Max_CODE);
         Assertions.assertEquals(branchStatusTwo, BranchStatus.PhaseTwo_RollbackFailed_Unretryable);
 
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> BranchStatus.get(NONE));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BranchStatus.get(NONE));
     }
 }

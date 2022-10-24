@@ -45,6 +45,7 @@ import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
  *
  * @author slievrly
  */
+@Deprecated
 public class NettyBaseConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyBaseConfig.class);
 

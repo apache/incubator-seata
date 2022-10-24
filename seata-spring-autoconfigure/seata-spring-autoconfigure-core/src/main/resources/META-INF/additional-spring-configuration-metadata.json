@@ -80,10 +80,22 @@
       "defaultValue": "Default"
     },
     {
-      "name": "seata.transport.thread-factory.boss-thread-size",
-      "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
-      "defaultValue": 1
+      "name": "seata.transport.grpc.enable-rm-client-batch-send-request",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.GrpcProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.transport.grpc.enable-tm-client-batch-send-request",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.GrpcProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.transport.grpc.enable-tc-client-batch-send-request",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.GrpcProperties",
+      "defaultValue": false
     },
     {
       "name": "seata.log.exception-rate",

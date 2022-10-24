@@ -25,6 +25,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.grpc.GrpcRemotingServer;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -79,6 +80,7 @@ public class Server {
             }
         }
 
+        // init Netty remoting server
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
@@ -93,5 +95,10 @@ public class Server {
         ServerRunner.addDisposable(coordinator);
 
         nettyRemotingServer.init();
+
+        // init grpc remoting server
+        GrpcRemotingServer grpcRemotingServer = new GrpcRemotingServer(workingThreads);
+        grpcRemotingServer.setHandler(coordinator);
+        grpcRemotingServer.init();
     }
 }

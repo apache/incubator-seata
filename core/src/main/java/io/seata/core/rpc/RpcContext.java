@@ -15,19 +15,16 @@
  */
 package io.seata.core.rpc;
 
-import io.netty.channel.Channel;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.core.rpc.netty.ChannelUtil;
-import io.seata.core.rpc.netty.NettyPoolKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type rpc context.
@@ -38,7 +35,7 @@ public class RpcContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcContext.class);
 
-    private NettyPoolKey.TransactionRole clientRole;
+    private RpcChannelPoolKey.TransactionRole clientRole;
 
     private String version;
 
@@ -48,14 +45,14 @@ public class RpcContext {
 
     private String clientId;
 
-    private Channel channel;
+    private SeataChannel channel;
 
     private Set<String> resourceSets;
 
     /**
      * id
      */
-    private ConcurrentMap<Channel, RpcContext> clientIDHolderMap;
+    private ConcurrentMap<SeataChannel, RpcContext> clientIDHolderMap;
 
     /**
      * tm
@@ -71,15 +68,15 @@ public class RpcContext {
      * Release.
      */
     public void release() {
-        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
+        Integer clientPort = SeataChannelUtil.getClientPortFromChannel(channel);
         if (clientIDHolderMap != null) {
             clientIDHolderMap = null;
         }
-        if (clientRole == NettyPoolKey.TransactionRole.TMROLE && clientTMHolderMap != null) {
+        if (clientRole == RpcChannelPoolKey.TransactionRole.TMROLE && clientTMHolderMap != null) {
             clientTMHolderMap.remove(clientPort);
             clientTMHolderMap = null;
         }
-        if (clientRole == NettyPoolKey.TransactionRole.RMROLE && clientRMHolderMap != null) {
+        if (clientRole == RpcChannelPoolKey.TransactionRole.RMROLE && clientRMHolderMap != null) {
             for (Map<Integer, RpcContext> portMap : clientRMHolderMap.values()) {
                 portMap.remove(clientPort);
             }
@@ -100,7 +97,7 @@ public class RpcContext {
             throw new IllegalStateException();
         }
         this.clientTMHolderMap = clientTMHolderMap;
-        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
+        Integer clientPort = SeataChannelUtil.getClientPortFromChannel(channel);
         this.clientTMHolderMap.put(clientPort, this);
     }
 
@@ -109,7 +106,7 @@ public class RpcContext {
      *
      * @param clientIDHolderMap the client id holder map
      */
-    public void holdInIdentifiedChannels(ConcurrentMap<Channel, RpcContext> clientIDHolderMap) {
+    public void holdInIdentifiedChannels(ConcurrentMap<SeataChannel, RpcContext> clientIDHolderMap) {
         if (this.clientIDHolderMap != null) {
             throw new IllegalStateException();
         }
@@ -127,7 +124,7 @@ public class RpcContext {
         if (this.clientRMHolderMap == null) {
             this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
-        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
+        Integer clientPort = SeataChannelUtil.getClientPortFromChannel(channel);
         portMap.put(clientPort, this);
         this.clientRMHolderMap.put(resourceId, portMap);
     }
@@ -180,7 +177,7 @@ public class RpcContext {
      *
      * @return the get channel
      */
-    public Channel getChannel() {
+    public SeataChannel getChannel() {
         return channel;
     }
 
@@ -189,7 +186,7 @@ public class RpcContext {
      *
      * @param channel the channel
      */
-    public void setChannel(Channel channel) {
+    public void setChannel(SeataChannel channel) {
         this.channel = channel;
     }
 
@@ -234,7 +231,7 @@ public class RpcContext {
      *
      * @return the get client role
      */
-    public NettyPoolKey.TransactionRole getClientRole() {
+    public RpcChannelPoolKey.TransactionRole getClientRole() {
         return clientRole;
     }
 
@@ -243,7 +240,7 @@ public class RpcContext {
      *
      * @param clientRole the client role
      */
-    public void setClientRole(NettyPoolKey.TransactionRole clientRole) {
+    public void setClientRole(RpcChannelPoolKey.TransactionRole clientRole) {
         this.clientRole = clientRole;
     }
 
@@ -304,7 +301,9 @@ public class RpcContext {
      * @param resources the resources
      */
     public void addResources(Set<String> resources) {
-        if (resources == null) { return; }
+        if (resources == null) {
+            return;
+        }
         if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
@@ -323,11 +322,11 @@ public class RpcContext {
     @Override
     public String toString() {
         return "RpcContext{" +
-            "applicationId='" + applicationId + '\'' +
-            ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
-            ", clientId='" + clientId + '\'' +
-            ", channel=" + channel +
-            ", resourceSets=" + resourceSets +
-            '}';
+                "applicationId='" + applicationId + '\'' +
+                ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", channel=" + channel +
+                ", resourceSets=" + resourceSets +
+                '}';
     }
 }

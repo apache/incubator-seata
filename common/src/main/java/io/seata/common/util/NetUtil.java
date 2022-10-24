@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
 
+import io.seata.common.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,7 @@ public class NetUtil {
      * @return the string
      */
     public static String toStringAddress(InetSocketAddress address) {
-        return address.getAddress().getHostAddress() + ":" + address.getPort();
+        return address.getAddress().getHostAddress() + Constants.IP_PORT_SPLIT_CHAR + address.getPort();
     }
 
     /**
@@ -83,7 +84,7 @@ public class NetUtil {
      * @return the inet socket address
      */
     public static InetSocketAddress toInetSocketAddress(String address) {
-        int i = address.indexOf(':');
+        int i = address.indexOf(Constants.IP_PORT_SPLIT_CHAR);
         String host;
         int port;
         if (i > -1) {

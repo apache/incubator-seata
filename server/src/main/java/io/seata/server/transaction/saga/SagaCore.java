@@ -18,7 +18,6 @@ package io.seata.server.transaction.saga;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import io.netty.channel.Channel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -30,7 +29,9 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.netty.ChannelManager;
+import io.seata.core.rpc.ServerRequester;
+import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.server.coordinator.AbstractCore;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -61,38 +62,38 @@ public class SagaCore extends AbstractCore {
     @Override
     public BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
                                          BranchSession branchSession) throws IOException, TimeoutException {
-        Map<String, Channel> channels = ChannelManager.getRmChannels();
+        Map<String, SeataChannel> channels = SeataChannelServerManager.getAllRmChannels();
         if (CollectionUtils.isEmpty(channels)) {
             LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
         String sagaResourceId = getSagaResourceId(globalSession);
-        Channel sagaChannel = channels.get(sagaResourceId);
+        SeataChannel sagaChannel = channels.get(sagaResourceId);
         if (sagaChannel == null) {
             LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid()
                     + ", cannot find channel by resourceId[" + sagaResourceId + "]");
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
-        BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(sagaChannel, request);
+        BranchCommitResponse response = (BranchCommitResponse) ServerRequester.getInstance().sendSyncRequest(sagaChannel, request);
         return response.getBranchStatus();
     }
 
     @Override
     public BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
                                            BranchSession branchSession) throws IOException, TimeoutException {
-        Map<String, Channel> channels = ChannelManager.getRmChannels();
+        Map<String, SeataChannel> channels = SeataChannelServerManager.getAllRmChannels();
         if (CollectionUtils.isEmpty(channels)) {
             LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
         String sagaResourceId = getSagaResourceId(globalSession);
-        Channel sagaChannel = channels.get(sagaResourceId);
+        SeataChannel sagaChannel = channels.get(sagaResourceId);
         if (sagaChannel == null) {
             LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid()
                     + ", cannot find channel by resourceId[" + sagaResourceId + "]");
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
-        BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(sagaChannel, request);
+        BranchRollbackResponse response = (BranchRollbackResponse) ServerRequester.getInstance().sendSyncRequest(sagaChannel, request);
         return response.getBranchStatus();
     }
 

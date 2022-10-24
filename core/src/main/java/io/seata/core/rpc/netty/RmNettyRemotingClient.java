@@ -15,6 +15,14 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.DefaultValues;
@@ -33,7 +41,9 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
-import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
+import io.seata.core.rpc.RmRemotingClient;
+import io.seata.core.rpc.RpcChannelPoolKey;
+import io.seata.core.rpc.RpcChannelPoolKey.TransactionRole;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
@@ -41,14 +51,6 @@ import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
 import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -60,7 +62,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  * @author zhangchenghui.dev@gmail.com
  */
 
-public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
+public final class RmNettyRemotingClient extends AbstractNettyRemotingClient implements RmRemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyRemotingClient.class);
     private ResourceManager resourceManager;
@@ -202,6 +204,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @param resourceGroupId the resource group id
      * @param resourceId      the db key
      */
+    @Override
     public void registerResource(String resourceGroupId, String resourceId) {
 
         // Resource registration cannot be performed until the RM client is initialized
@@ -269,7 +272,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+    protected Function<String, RpcChannelPoolKey> getPoolKeyFunction() {
         return serverAddress -> {
             String resourceIds = getMergedResourceKeys();
             if (resourceIds != null && LOGGER.isInfoEnabled()) {
@@ -277,7 +280,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             }
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
             message.setResourceIds(resourceIds);
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.RMROLE, serverAddress, message);
+            return new RpcChannelPoolKey(RpcChannelPoolKey.TransactionRole.RMROLE, serverAddress, message);
         };
     }
 

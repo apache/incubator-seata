@@ -15,19 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import io.netty.channel.Channel;
-import io.seata.common.Constants;
-import io.seata.common.exception.FrameworkException;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.IncompatibleVersionException;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.protocol.Version;
-import io.seata.core.rpc.RpcContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,15 +23,31 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import io.seata.common.Constants;
+import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.core.protocol.IncompatibleVersionException;
+import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.Version;
+import io.seata.core.rpc.RpcChannelPoolKey;
+import io.seata.core.rpc.RpcContext;
+import io.seata.core.rpc.SeataChannel;
+import io.seata.core.rpc.SeataChannelUtil;
+import io.seata.core.rpc.ServerChannelManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The type channel manager.
  *
  * @author slievrly
  */
-public class ChannelManager {
+public class ChannelManager implements ServerChannelManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelManager.class);
-    private static final ConcurrentMap<Channel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<SeataChannel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<>();
 
     /**
      * resourceId -> applicationId -> ip -> port -> RpcContext
@@ -58,13 +61,9 @@ public class ChannelManager {
     private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
         = new ConcurrentHashMap<>();
 
-    /**
-     * Is registered boolean.
-     *
-     * @param channel the channel
-     * @return the boolean
-     */
-    public static boolean isRegistered(Channel channel) {
+
+    @Override
+    public boolean isRegistered(SeataChannel channel) {
         return IDENTIFIED_CHANNELS.containsKey(channel);
     }
 
@@ -74,7 +73,7 @@ public class ChannelManager {
      * @param channel the channel
      * @return the get role from channel
      */
-    public static NettyPoolKey.TransactionRole getRoleFromChannel(Channel channel) {
+    public RpcChannelPoolKey.TransactionRole getRoleFromChannel(SeataChannel channel) {
         RpcContext context = IDENTIFIED_CHANNELS.get(channel);
         if (context != null) {
             return context.getClientRole();
@@ -82,26 +81,22 @@ public class ChannelManager {
         return null;
     }
 
-    /**
-     * Gets get context from identified.
-     *
-     * @param channel the channel
-     * @return the get context from identified
-     */
-    public static RpcContext getContextFromIdentified(Channel channel) {
+
+    @Override
+    public RpcContext getContextFromIdentified(SeataChannel channel) {
         return IDENTIFIED_CHANNELS.get(channel);
     }
 
-    private static String buildClientId(String applicationId, Channel channel) {
-        return applicationId + Constants.CLIENT_ID_SPLIT_CHAR + ChannelUtil.getAddressFromChannel(channel);
+    private String buildClientId(String applicationId, SeataChannel channel) {
+        return applicationId + Constants.CLIENT_ID_SPLIT_CHAR + SeataChannelUtil.getAddressFromChannel(channel);
     }
 
-    private static String[] readClientId(String clientId) {
+    private String[] readClientId(String clientId) {
         return clientId.split(Constants.CLIENT_ID_SPLIT_CHAR);
     }
 
-    private static RpcContext buildChannelHolder(NettyPoolKey.TransactionRole clientRole, String version, String applicationId,
-                                                 String txServiceGroup, String dbkeys, Channel channel) {
+    private RpcContext buildChannelHolder(RpcChannelPoolKey.TransactionRole clientRole, String version, String applicationId,
+                                                 String txServiceGroup, String dbkeys, SeataChannel channel) {
         RpcContext holder = new RpcContext();
         holder.setClientRole(clientRole);
         holder.setVersion(version);
@@ -113,42 +108,30 @@ public class ChannelManager {
         return holder;
     }
 
-    /**
-     * Register tm channel.
-     *
-     * @param request the request
-     * @param channel the channel
-     * @throws IncompatibleVersionException the incompatible version exception
-     */
-    public static void registerTMChannel(RegisterTMRequest request, Channel channel)
+    @Override
+    public void registerTMChannel(RegisterTMRequest request, SeataChannel channel)
         throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
-        RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
+        RpcContext rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.TMROLE, request.getVersion(),
             request.getApplicationId(),
             request.getTransactionServiceGroup(),
             null, channel);
         rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-            + ChannelUtil.getClientIpFromChannel(channel);
+            + SeataChannelUtil.getClientIpFromChannel(channel);
         ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = CollectionUtils.computeIfAbsent(TM_CHANNELS,
             clientIdentified, key -> new ConcurrentHashMap<>());
         rpcContext.holdInClientChannels(clientIdentifiedMap);
     }
 
-    /**
-     * Register rm channel.
-     *
-     * @param resourceManagerRequest the resource manager request
-     * @param channel                the channel
-     * @throws IncompatibleVersionException the incompatible  version exception
-     */
-    public static void registerRMChannel(RegisterRMRequest resourceManagerRequest, Channel channel)
+    @Override
+    public void registerRMChannel(RegisterRMRequest resourceManagerRequest, SeataChannel channel)
         throws IncompatibleVersionException {
         Version.checkVersion(resourceManagerRequest.getVersion());
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
         RpcContext rpcContext;
         if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
-            rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, resourceManagerRequest.getVersion(),
+            rpcContext = buildChannelHolder(RpcChannelPoolKey.TransactionRole.RMROLE, resourceManagerRequest.getVersion(),
                 resourceManagerRequest.getApplicationId(), resourceManagerRequest.getTransactionServiceGroup(),
                 resourceManagerRequest.getResourceIds(), channel);
             rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
@@ -161,14 +144,14 @@ public class ChannelManager {
             String clientIp;
             ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
                     .computeIfAbsent(resourceManagerRequest.getApplicationId(), key -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(clientIp = ChannelUtil.getClientIpFromChannel(channel), key -> new ConcurrentHashMap<>());
+                    .computeIfAbsent(clientIp = SeataChannelUtil.getClientIpFromChannel(channel), key -> new ConcurrentHashMap<>());
 
             rpcContext.holdInResourceManagerChannels(resourceId, portMap);
             updateChannelsResource(resourceId, clientIp, resourceManagerRequest.getApplicationId());
         }
     }
 
-    private static void updateChannelsResource(String resourceId, String clientIp, String applicationId) {
+    private void updateChannelsResource(String resourceId, String clientIp, String applicationId) {
         ConcurrentMap<Integer, RpcContext> sourcePortMap = RM_CHANNELS.get(resourceId).get(applicationId).get(clientIp);
         for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
             RpcContext>>>> rmChannelEntry : RM_CHANNELS.entrySet()) {
@@ -191,19 +174,16 @@ public class ChannelManager {
         }
     }
 
-    private static Set<String> dbKeytoSet(String dbkey) {
+    private Set<String> dbKeytoSet(String dbkey) {
         if (StringUtils.isNullOrEmpty(dbkey)) {
             return null;
         }
-        return new HashSet<String>(Arrays.asList(dbkey.split(Constants.DBKEYS_SPLIT_CHAR)));
+        return new HashSet<>(Arrays.asList(dbkey.split(Constants.DBKEYS_SPLIT_CHAR)));
     }
 
-    /**
-     * Release rpc context.
-     *
-     * @param channel the channel
-     */
-    public static void releaseRpcContext(Channel channel) {
+
+    @Override
+    public void releaseRpcContext(SeataChannel channel) {
         RpcContext rpcContext = getContextFromIdentified(channel);
         if (rpcContext != null) {
             rpcContext.release();
@@ -216,7 +196,7 @@ public class ChannelManager {
      * @param channel the channel
      * @return the get same income client channel
      */
-    public static Channel getSameClientChannel(Channel channel) {
+    public SeataChannel getSameClientChannel(SeataChannel channel) {
         if (channel.isActive()) {
             return channel;
         }
@@ -229,21 +209,21 @@ public class ChannelManager {
             // recheck
             return rpcContext.getChannel();
         }
-        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
-        NettyPoolKey.TransactionRole clientRole = rpcContext.getClientRole();
-        if (clientRole == NettyPoolKey.TransactionRole.TMROLE) {
+        Integer clientPort = SeataChannelUtil.getClientPortFromChannel(channel);
+        RpcChannelPoolKey.TransactionRole clientRole = rpcContext.getClientRole();
+        if (clientRole == RpcChannelPoolKey.TransactionRole.TMROLE) {
             String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-                + ChannelUtil.getClientIpFromChannel(channel);
+                + SeataChannelUtil.getClientIpFromChannel(channel);
             if (!TM_CHANNELS.containsKey(clientIdentified)) {
                 return null;
             }
             ConcurrentMap<Integer, RpcContext> clientRpcMap = TM_CHANNELS.get(clientIdentified);
             return getChannelFromSameClientMap(clientRpcMap, clientPort);
-        } else if (clientRole == NettyPoolKey.TransactionRole.RMROLE) {
+        } else if (clientRole == RpcChannelPoolKey.TransactionRole.RMROLE) {
             ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> clientRMHolderMap = rpcContext.getClientRMHolderMap();
             if (CollectionUtils.isNotEmpty(clientRMHolderMap)) {
                 for (Map<Integer, RpcContext> clientRmMap : clientRMHolderMap.values()) {
-                    Channel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
+                    SeataChannel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
                     if (sameClientChannel != null) {
                         return sameClientChannel;
                     }
@@ -254,14 +234,14 @@ public class ChannelManager {
 
     }
 
-    private static Channel getChannelFromSameClientMap(Map<Integer, RpcContext> clientChannelMap, int exclusivePort) {
+    private SeataChannel getChannelFromSameClientMap(Map<Integer, RpcContext> clientChannelMap, int exclusivePort) {
         if (clientChannelMap != null && !clientChannelMap.isEmpty()) {
             for (ConcurrentMap.Entry<Integer, RpcContext> entry : clientChannelMap.entrySet()) {
                 if (entry.getKey() == exclusivePort) {
                     clientChannelMap.remove(entry.getKey());
                     continue;
                 }
-                Channel channel = entry.getValue().getChannel();
+                SeataChannel channel = entry.getValue().getChannel();
                 if (channel.isActive()) { return channel; }
                 clientChannelMap.remove(entry.getKey());
             }
@@ -269,15 +249,9 @@ public class ChannelManager {
         return null;
     }
 
-    /**
-     * Gets get channel.
-     *
-     * @param resourceId Resource ID
-     * @param clientId   Client ID - ApplicationId:IP:Port
-     * @return Corresponding channel, NULL if not found.
-     */
-    public static Channel getChannel(String resourceId, String clientId) {
-        Channel resultChannel = null;
+    @Override
+    public SeataChannel getChannel(String resourceId, String clientId) {
+        SeataChannel resultChannel = null;
 
         String[] clientIdInfo = readClientId(clientId);
 
@@ -307,7 +281,7 @@ public class ChannelManager {
             if (portMapOnTargetIP != null && !portMapOnTargetIP.isEmpty()) {
                 RpcContext exactRpcContext = portMapOnTargetIP.get(targetPort);
                 if (exactRpcContext != null) {
-                    Channel channel = exactRpcContext.getChannel();
+                    SeataChannel channel = exactRpcContext.getChannel();
                     if (channel.isActive()) {
                         resultChannel = channel;
                         if (LOGGER.isDebugEnabled()) {
@@ -326,7 +300,7 @@ public class ChannelManager {
                 if (resultChannel == null) {
                     for (ConcurrentMap.Entry<Integer, RpcContext> portMapOnTargetIPEntry : portMapOnTargetIP
                         .entrySet()) {
-                        Channel channel = portMapOnTargetIPEntry.getValue().getChannel();
+                        SeataChannel channel = portMapOnTargetIPEntry.getValue().getChannel();
 
                         if (channel.isActive()) {
                             resultChannel = channel;
@@ -359,7 +333,7 @@ public class ChannelManager {
                     }
 
                     for (ConcurrentMap.Entry<Integer, RpcContext> portMapOnOtherIPEntry : portMapOnOtherIP.entrySet()) {
-                        Channel channel = portMapOnOtherIPEntry.getValue().getChannel();
+                        SeataChannel channel = portMapOnOtherIPEntry.getValue().getChannel();
 
                         if (channel.isActive()) {
                             resultChannel = channel;
@@ -399,9 +373,9 @@ public class ChannelManager {
 
     }
 
-    private static Channel tryOtherApp(ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
+    private SeataChannel tryOtherApp(ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
         RpcContext>>> applicationIdMap, String myApplicationId) {
-        Channel chosenChannel = null;
+        SeataChannel chosenChannel = null;
         for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMapEntry : applicationIdMap
             .entrySet()) {
             if (!StringUtils.isNullOrEmpty(myApplicationId) && applicationIdMapEntry.getKey().equals(myApplicationId)) {
@@ -421,7 +395,7 @@ public class ChannelManager {
                 }
 
                 for (ConcurrentMap.Entry<Integer, RpcContext> portMapEntry : portMap.entrySet()) {
-                    Channel channel = portMapEntry.getValue().getChannel();
+                    SeataChannel channel = portMapEntry.getValue().getChannel();
                     if (channel.isActive()) {
                         chosenChannel = channel;
                         break;
@@ -446,13 +420,14 @@ public class ChannelManager {
      *
      * @return the rm channels,key:resourceId,value:channel
      */
-    public static Map<String,Channel> getRmChannels() {
+    @Override
+    public Map<String, SeataChannel> getRmChannels() {
         if (RM_CHANNELS.isEmpty()) {
             return null;
         }
-        Map<String, Channel> channels = new HashMap<>(RM_CHANNELS.size());
+        Map<String, SeataChannel> channels = new HashMap<>(RM_CHANNELS.size());
         RM_CHANNELS.forEach((resourceId, value) -> {
-            Channel channel = tryOtherApp(value, null);
+            SeataChannel channel = tryOtherApp(value, null);
             if (channel == null) {
                 return;
             }

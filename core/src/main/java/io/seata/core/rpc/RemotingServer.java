@@ -15,12 +15,11 @@
  */
 package io.seata.core.rpc;
 
-import io.netty.channel.Channel;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.processor.RemotingProcessor;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
+
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.processor.RemotingProcessor;
 
 /**
  * The interface Remoting server.
@@ -50,7 +49,7 @@ public interface RemotingServer {
      * @return client result message
      * @throws TimeoutException TimeoutException
      */
-    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
+    Object sendSyncRequest(SeataChannel channel, Object msg) throws TimeoutException;
 
     /**
      * server send async request.
@@ -58,7 +57,7 @@ public interface RemotingServer {
      * @param channel client channel
      * @param msg     transaction message {@code io.seata.core.protocol}
      */
-    void sendAsyncRequest(Channel channel, Object msg);
+    void sendAsyncRequest(SeataChannel channel, Object msg);
 
     /**
      * server send async response.
@@ -67,7 +66,7 @@ public interface RemotingServer {
      * @param channel    client channel
      * @param msg        transaction message {@code io.seata.core.protocol}
      */
-    void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg);
+    void sendAsyncResponse(RpcMessage rpcMessage, SeataChannel channel, Object msg);
 
     /**
      * register processor
@@ -76,6 +75,6 @@ public interface RemotingServer {
      * @param processor   {@link RemotingProcessor}
      * @param executor    thread pool
      */
-    void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
+    void registerProcessor(final int messageType, final RemotingProcessor<?> processor, final ExecutorService executor);
 
 }

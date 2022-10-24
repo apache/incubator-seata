@@ -15,9 +15,6 @@
  */
 package io.seata.core.rpc.processor;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.seata.core.protocol.RpcMessage;
-
 /**
  * The remoting processor
  * <p>
@@ -28,15 +25,15 @@ import io.seata.core.protocol.RpcMessage;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public interface RemotingProcessor {
+public interface RemotingProcessor<T> {
 
     /**
      * Process message
      *
      * @param ctx        Channel handler context.
-     * @param rpcMessage rpc message.
+     * @param request rpc message.
      * @throws Exception throws exception process message error.
      */
-    void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception;
+    void process(RpcMessageHandleContext ctx, T request) throws Exception;
 
 }

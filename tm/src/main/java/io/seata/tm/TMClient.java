@@ -15,6 +15,12 @@
  */
 package io.seata.tm;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.rpc.RpcType;
+import io.seata.core.rpc.grpc.TmGrpcRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
 /**
@@ -43,8 +49,25 @@ public class TMClient {
      * @param secretKey               the secret key
      */
     public static void init(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup, accessKey, secretKey);
-        tmNettyRemotingClient.init();
+        RpcType rpcType = getRpcType();
+        switch (rpcType) {
+            case NETTY:
+                TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup, accessKey, secretKey);
+                tmNettyRemotingClient.init();
+                break;
+            case GRPC:
+                TmGrpcRemotingClient tmGrpcRemotingClient = TmGrpcRemotingClient.getInstance(applicationId, transactionServiceGroup, accessKey, secretKey);
+                tmGrpcRemotingClient.init();
+                break;
+            default:
+                throw new ShouldNeverHappenException("init TMClient fail");
+        }
+
+    }
+
+    private static RpcType getRpcType() {
+        String strRpcType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.CLIENT_RPC_TYPE, DefaultValues.DEFAULT_CLIENT_RPC_TYPE);
+        return RpcType.getTypeByName(strRpcType);
     }
 
 }

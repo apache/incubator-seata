@@ -15,11 +15,10 @@
  */
 package io.seata.core.rpc.processor.client;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class RmUndoLogProcessor implements RemotingProcessor {
+public class RmUndoLogProcessor implements RemotingProcessor<UndoLogDeleteRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmUndoLogProcessor.class);
 
@@ -43,12 +42,11 @@ public class RmUndoLogProcessor implements RemotingProcessor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        Object msg = rpcMessage.getBody();
+    public void process(RpcMessageHandleContext ctx, UndoLogDeleteRequest request) throws Exception {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("rm handle undo log process:" + msg);
+            LOGGER.info("rm handle undo log process:" + request);
         }
-        handleUndoLogDelete((UndoLogDeleteRequest) msg);
+        handleUndoLogDelete(request);
     }
 
     private void handleUndoLogDelete(UndoLogDeleteRequest undoLogDeleteRequest) {

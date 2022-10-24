@@ -15,6 +15,12 @@
  */
 package io.seata.rm;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.rpc.RpcType;
+import io.seata.core.rpc.grpc.RmGrpcRemotingClient;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 
 /**
@@ -31,10 +37,32 @@ public class RMClient {
      * @param transactionServiceGroup the transaction service group
      */
     public static void init(String applicationId, String transactionServiceGroup) {
-        RmNettyRemotingClient rmNettyRemotingClient = RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-        rmNettyRemotingClient.setResourceManager(DefaultResourceManager.get());
-        rmNettyRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
-        rmNettyRemotingClient.init();
+        RpcType rpcType = getRpcType();
+        switch (rpcType) {
+            case NETTY:
+                RmNettyRemotingClient rmNettyRemotingClient = RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+                rmNettyRemotingClient.setResourceManager(DefaultResourceManager.get());
+                rmNettyRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
+                rmNettyRemotingClient.init();
+                break;
+            case GRPC:
+                RmGrpcRemotingClient rmGrpcRemotingClient = RmGrpcRemotingClient.getInstance(applicationId, transactionServiceGroup);
+                rmGrpcRemotingClient.setResourceManager(DefaultResourceManager.get());
+                rmGrpcRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
+                rmGrpcRemotingClient.init();
+                break;
+            default:
+                throw new ShouldNeverHappenException("init RMClient fail");
+        }
+    }
+
+    private static RpcType getRpcType() {
+        String strRpcType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.CLIENT_RPC_TYPE, DefaultValues.DEFAULT_CLIENT_RPC_TYPE);
+        RpcType rpcType = RpcType.getTypeByName(strRpcType);
+        if (null == rpcType) {
+            throw new RuntimeException("unknown rpc type:" + strRpcType);
+        }
+        return rpcType;
     }
 
 }

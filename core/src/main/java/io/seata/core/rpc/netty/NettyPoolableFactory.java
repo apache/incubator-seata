@@ -22,6 +22,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author slievrly
  */
-public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
+public class NettyPoolableFactory implements KeyedPoolableObjectFactory<RpcChannelPoolKey, Channel> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyPoolableFactory.class);
 
@@ -50,7 +51,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     }
 
     @Override
-    public Channel makeObject(NettyPoolKey key) {
+    public Channel makeObject(RpcChannelPoolKey key) {
         InetSocketAddress address = NetUtil.toInetSocketAddress(key.getAddress());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyPool create channel to " + key);
@@ -85,17 +86,17 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         return channelToServer;
     }
 
-    private boolean isRegisterSuccess(Object response, NettyPoolKey.TransactionRole transactionRole) {
+    private boolean isRegisterSuccess(Object response, RpcChannelPoolKey.TransactionRole transactionRole) {
         if (response == null) {
             return false;
         }
-        if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
+        if (transactionRole.equals(RpcChannelPoolKey.TransactionRole.TMROLE)) {
             if (!(response instanceof RegisterTMResponse)) {
                 return false;
             }
             RegisterTMResponse registerTMResponse = (RegisterTMResponse)response;
             return registerTMResponse.isIdentified();
-        } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
+        } else if (transactionRole.equals(RpcChannelPoolKey.TransactionRole.RMROLE)) {
             if (!(response instanceof RegisterRMResponse)) {
                 return false;
             }
@@ -105,8 +106,8 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         return false;
     }
 
-    private String getVersion(Object response, NettyPoolKey.TransactionRole transactionRole) {
-        if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
+    private String getVersion(Object response, RpcChannelPoolKey.TransactionRole transactionRole) {
+        if (transactionRole.equals(RpcChannelPoolKey.TransactionRole.TMROLE)) {
             return ((RegisterTMResponse) response).getVersion();
         } else {
             return ((RegisterRMResponse) response).getVersion();
@@ -114,7 +115,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     }
 
     @Override
-    public void destroyObject(NettyPoolKey key, Channel channel) throws Exception {
+    public void destroyObject(RpcChannelPoolKey key, Channel channel) throws Exception {
         if (channel != null) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("will destroy channel:" + channel);
@@ -125,7 +126,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     }
 
     @Override
-    public boolean validateObject(NettyPoolKey key, Channel obj) {
+    public boolean validateObject(RpcChannelPoolKey key, Channel obj) {
         if (obj != null && obj.isActive()) {
             return true;
         }
@@ -136,12 +137,12 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     }
 
     @Override
-    public void activateObject(NettyPoolKey key, Channel obj) throws Exception {
+    public void activateObject(RpcChannelPoolKey key, Channel obj) throws Exception {
 
     }
 
     @Override
-    public void passivateObject(NettyPoolKey key, Channel obj) throws Exception {
+    public void passivateObject(RpcChannelPoolKey key, Channel obj) throws Exception {
 
     }
 }

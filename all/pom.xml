@@ -95,6 +95,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-core-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-discovery-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -227,7 +232,7 @@
             <artifactId>seata-serializer-protobuf</artifactId>
             <version>${project.version}</version>
             <!-- Slimming down for 'seata-all.jar' -->
-            <scope>provided</scope>
+<!--            <scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>

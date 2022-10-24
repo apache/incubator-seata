@@ -15,22 +15,22 @@
  */
 package io.seata.core.rpc.processor.server;
 
-import io.netty.channel.ChannelHandlerContext;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.seata.common.util.NetUtil;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MessageFuture;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RpcContext;
+import io.seata.core.rpc.SeataChannelServerManager;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * handle RM/TM response message.
@@ -43,9 +43,9 @@ import java.util.concurrent.ConcurrentMap;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class ServerOnResponseProcessor implements RemotingProcessor {
+public class ServerOnResponseProcessor implements RemotingProcessor<AbstractMessage> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MergedWarpMessageProcessor.class);
 
     /**
      * To handle the received RPC message on upper level.
@@ -64,12 +64,12 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        MessageFuture messageFuture = futures.remove(rpcMessage.getId());
+    public void process(RpcMessageHandleContext ctx, AbstractMessage rpcMessage) throws Exception {
+        MessageFuture messageFuture = futures.remove(ctx.getMessageMeta().getMessageId());
         if (messageFuture != null) {
-            messageFuture.setResultMessage(rpcMessage.getBody());
+            messageFuture.setResultMessage(rpcMessage);
         } else {
-            if (ChannelManager.isRegistered(ctx.channel())) {
+            if (SeataChannelServerManager.isRegistered(ctx.channel())) {
                 onResponseMessage(ctx, rpcMessage);
             } else {
                 try {
@@ -88,23 +88,23 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
         }
     }
 
-    private void onResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+    private void onResponseMessage(RpcMessageHandleContext ctx, AbstractMessage rpcMessage) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", rpcMessage.getBody(),
-                NetUtil.toIpAddress(ctx.channel().remoteAddress()),
-                ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
+            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", rpcMessage,
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()),
+                    SeataChannelServerManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
         } else {
             try {
                 BatchLogHandler.INSTANCE.getLogQueue()
-                    .put(rpcMessage.getBody() + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
-                        + ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
+                        .put(rpcMessage + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
+                                + SeataChannelServerManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
             } catch (InterruptedException e) {
                 LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
             }
         }
-        if (rpcMessage.getBody() instanceof AbstractResultMessage) {
-            RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
-            transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage.getBody(), rpcContext);
+        if (rpcMessage instanceof AbstractResultMessage) {
+            RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(ctx.channel());
+            transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage, rpcContext);
         }
     }
 }

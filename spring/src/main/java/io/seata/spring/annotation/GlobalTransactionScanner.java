@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
@@ -32,7 +33,10 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.RpcType;
 import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.grpc.RmGrpcRemotingClient;
+import io.seata.core.rpc.grpc.TmGrpcRemotingClient;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
@@ -239,8 +243,20 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
-        ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+        String strRpcType = ConfigurationFactory.getInstance().getConfig(io.seata.common.ConfigurationKeys.CLIENT_RPC_TYPE, DefaultValues.DEFAULT_CLIENT_RPC_TYPE);
+        RpcType rpcType = RpcType.getTypeByName(strRpcType);
+        switch (rpcType) {
+            case NETTY:
+                ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+                ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+                break;
+            case GRPC:
+                ShutdownHook.getInstance().addDisposable(TmGrpcRemotingClient.getInstance(applicationId, txServiceGroup));
+                ShutdownHook.getInstance().addDisposable(RmGrpcRemotingClient.getInstance(applicationId, txServiceGroup));
+                break;
+            default:
+                LOGGER.warn("no match disposable ");
+        }
     }
 
     /**

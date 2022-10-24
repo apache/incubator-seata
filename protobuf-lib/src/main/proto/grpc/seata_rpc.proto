@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package io.seata.grpc;
+
+import "google/protobuf/any.proto";
+import "protocol/transcation/registerTMRequest.proto";
+import "protocol/transcation/registerTMResponse.proto";
+import "protocol/transcation/globalBeginRequest.proto";
+import "protocol/transcation/globalBeginResponse.proto";
+import "protocol/transcation/globalCommitRequest.proto";
+import "protocol/transcation/globalCommitResponse.proto";
+import "protocol/transcation/globalRollbackRequest.proto";
+import "protocol/transcation/globalRollbackResponse.proto";
+import "protocol/transcation/globalReportRequest.proto";
+import "protocol/transcation/globalReportResponse.proto";
+import "protocol/transcation/globalStatusRequest.proto";
+import "protocol/transcation/globalStatusResponse.proto";
+import "protocol/transcation/heartbeatMessage.proto";
+
+import "protocol/transcation/registerRMRequest.proto";
+import "protocol/transcation/registerRMResponse.proto";
+import "protocol/transcation/branchRegisterRequest.proto";
+import "protocol/transcation/branchRegisterResponse.proto";
+import "protocol/transcation/branchReportRequest.proto";
+import "protocol/transcation/branchReportResponse.proto";
+import "protocol/transcation/globalLockQueryRequest.proto";
+import "protocol/transcation/globalLockQueryResponse.proto";
+
+option java_package = "io.seata.core.rpc.grpc.generated";
+option java_outer_classname = "GrpcRemoting";
+
+enum BiStreamMessageType {
+  TypeBranchCommit = 0;
+  TypeBranchCommitResult = 1;
+  TypeBranchRollback = 2;
+  TypeBranchRollBackResult = 3;
+  TypeRMUndoLogDelete = 4;
+
+  TYPERegisterRMRequest = 5;
+  TYPERegisterRMResponse = 6;
+  TYPERegisterTMRequest = 7;
+  TYPERegisterTMResponse = 8;
+}
+
+message BiStreamMessage {
+  int32 ID = 1;
+  BiStreamMessageType MessageType = 2;
+  google.protobuf.Any Message = 3;
+
+  string clientId = 4;
+}
+
+service TransactionManagerService {
+  rpc RegisterTM(stream BiStreamMessage) returns (stream BiStreamMessage);
+  rpc GlobalBegin(io.seata.protocol.protobuf.GlobalBeginRequestProto) returns (io.seata.protocol.protobuf.GlobalBeginResponseProto);
+  rpc GlobalCommit(io.seata.protocol.protobuf.GlobalCommitRequestProto) returns (io.seata.protocol.protobuf.GlobalCommitResponseProto);
+  rpc GlobalRollback(io.seata.protocol.protobuf.GlobalRollbackRequestProto) returns (io.seata.protocol.protobuf.GlobalRollbackResponseProto);
+  rpc GlobalReport(io.seata.protocol.protobuf.GlobalReportRequestProto) returns (io.seata.protocol.protobuf.GlobalReportResponseProto);
+  rpc GetGlobalStatus(io.seata.protocol.protobuf.GlobalStatusRequestProto) returns (io.seata.protocol.protobuf.GlobalStatusResponseProto);
+}
+
+service ResourceManagerService {
+  rpc RegisterRM(stream BiStreamMessage) returns (stream BiStreamMessage);
+  rpc BranchRegister(io.seata.protocol.protobuf.BranchRegisterRequestProto) returns (io.seata.protocol.protobuf.BranchRegisterResponseProto);
+  rpc BranchReport(io.seata.protocol.protobuf.BranchReportRequestProto) returns (io.seata.protocol.protobuf.BranchReportResponseProto);
+  rpc LockQuery(io.seata.protocol.protobuf.GlobalLockQueryRequestProto) returns (io.seata.protocol.protobuf.GlobalLockQueryResponseProto);
+}
+
+service HealthCheckService {
+  rpc HeartbeatChecker(io.seata.protocol.protobuf.HeartbeatMessageProto) returns (io.seata.protocol.protobuf.HeartbeatMessageProto);
+}

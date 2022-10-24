@@ -16,6 +16,7 @@
 package io.seata.server;
 
 import java.util.Properties;
+
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;

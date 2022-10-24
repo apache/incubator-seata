@@ -32,7 +32,7 @@ import io.seata.core.model.Resource;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
-import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.core.rpc.ClientRequester;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class DataSourceManager extends AbstractResourceManager {
         try {
             GlobalLockQueryResponse response;
             if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
+                response = (GlobalLockQueryResponse) ClientRequester.getInstance().getRmRemotingClient().sendSyncRequest(request);
             } else {
                 throw new RuntimeException("unknow situation!");
             }

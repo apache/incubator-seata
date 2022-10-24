@@ -223,6 +223,12 @@
       "defaultValue": 10
     },
     {
+      "name": "seata.client.rpc.type",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ClientRpcProperties",
+      "defaultValue": "netty"
+    },
+    {
       "name": "seata.registry.load-balance",
       "type": "java.lang.String",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties",

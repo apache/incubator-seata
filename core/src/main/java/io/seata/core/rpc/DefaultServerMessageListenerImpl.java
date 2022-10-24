@@ -15,6 +15,14 @@
  */
 package io.seata.core.rpc;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
@@ -29,18 +37,10 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
-import io.seata.core.rpc.netty.ChannelManager;
+import io.seata.core.rpc.netty.NettySeataChannel;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The type Default server message listener.
@@ -71,7 +71,8 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     @Override
     public void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx) {
         Object message = request.getBody();
-        RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+        NettySeataChannel channel = new NettySeataChannel(ctx.channel());
+        RpcContext rpcContext = SeataChannelServerManager.getContextFromIdentified(channel);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
                 NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
@@ -94,27 +95,28 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            getServerMessageSender().sendAsyncResponse(request, ctx.channel(), resultMessage);
+            getServerMessageSender().sendAsyncResponse(request, channel, resultMessage);
         } else if (message instanceof AbstractResultMessage) {
             transactionMessageHandler.onResponse((AbstractResultMessage) message, rpcContext);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            getServerMessageSender().sendAsyncResponse(request, ctx.channel(), result);
+            getServerMessageSender().sendAsyncResponse(request, channel, result);
         }
     }
 
     @Override
     public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
         RegisterRMRequest message = (RegisterRMRequest)request.getBody();
+        NettySeataChannel channel = new NettySeataChannel(ctx.channel());
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
             if (checkAuthHandler == null || checkAuthHandler.regResourceManagerCheckAuth(message)) {
-                ChannelManager.registerRMChannel(message, ctx.channel());
-                Version.putChannelVersion(ctx.channel(), message.getVersion());
+                SeataChannelServerManager.registerRMChannel(message, channel);
+                Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
@@ -129,7 +131,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
+        getServerMessageSender().sendAsyncResponse(request, channel, response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
@@ -139,14 +141,15 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     @Override
     public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
         RegisterTMRequest message = (RegisterTMRequest)request.getBody();
+        NettySeataChannel channel = new NettySeataChannel(ctx.channel());
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-        Version.putChannelVersion(ctx.channel(), message.getVersion());
+        Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
         try {
             if (checkAuthHandler == null || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
-                ChannelManager.registerTMChannel(message, ctx.channel());
-                Version.putChannelVersion(ctx.channel(), message.getVersion());
+                SeataChannelServerManager.registerTMChannel(message, channel);
+                Version.putChannelVersion(ctx.channel().remoteAddress(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
@@ -161,7 +164,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
+        getServerMessageSender().sendAsyncResponse(request, channel, response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
@@ -171,7 +174,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     @Override
     public void onCheckMessage(RpcMessage request, ChannelHandlerContext ctx) {
         try {
-            getServerMessageSender().sendAsyncResponse(request, ctx.channel(), HeartbeatMessage.PONG);
+            getServerMessageSender().sendAsyncResponse(request, new NettySeataChannel(ctx.channel()), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
             LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }

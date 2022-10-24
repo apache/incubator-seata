@@ -21,6 +21,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
@@ -43,6 +44,7 @@ public class DefaultRMHandler extends AbstractRMHandler {
 
     protected DefaultRMHandler() {
         initRMHandlers();
+        initFunctionMap();
     }
 
     protected void initRMHandlers() {
@@ -98,5 +100,27 @@ public class DefaultRMHandler extends AbstractRMHandler {
     @Override
     public BranchType getBranchType() {
         throw new FrameworkException("DefaultRMHandler isn't a real AbstractRMHandler");
+    }
+
+    protected void initFunctionMap() {
+        functionMap.put(MessageType.TYPE_BRANCH_COMMIT, request -> {
+            if (!(request instanceof BranchCommitRequest)) {
+                throw new IllegalArgumentException("BranchCommitRequest is required, but is actually " + request.getClass());
+            }
+            return handle((BranchCommitRequest) request);
+        });
+        functionMap.put(MessageType.TYPE_BRANCH_ROLLBACK, request -> {
+            if (!(request instanceof BranchRollbackRequest)) {
+                throw new IllegalArgumentException("BranchRollbackRequest is required, but is actually " + request.getClass());
+            }
+            return handle((BranchRollbackRequest) request);
+        });
+        functionMap.put(MessageType.TYPE_RM_DELETE_UNDOLOG, request -> {
+            if (!(request instanceof UndoLogDeleteRequest)) {
+                throw new IllegalArgumentException("UndoLogDeleteRequest is required, but is actually " + request.getClass());
+            }
+            handle((UndoLogDeleteRequest) request);
+            return null;
+        });
     }
 }

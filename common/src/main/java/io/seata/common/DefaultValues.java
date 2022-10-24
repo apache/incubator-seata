@@ -106,6 +106,8 @@ public interface DefaultValues {
 
     int SERVICE_OFFSET_SPRING_BOOT = 1000;
 
+    int GRPC_SERVICE_PORT_OFFSET = 2000;
+
     String SERVER_PORT = "seata.server.port";
 
     String SERVER_DEFAULT_STORE_MODE = "file";
@@ -194,6 +196,11 @@ public interface DefaultValues {
      * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
      */
     int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
+
+    /**
+     * the constant DEFAULT_CLIENT_RPC_TYPE
+     */
+    String DEFAULT_CLIENT_RPC_TYPE = "netty";
 
     /**
      * the constant DEFAULT_COMMITING_RETRY_PERIOD

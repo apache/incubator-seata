@@ -54,10 +54,12 @@ import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.RpcMessageHandleContext;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
@@ -102,7 +104,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     private final NettyClientBootstrap clientBootstrap;
     private NettyClientChannelManager clientChannelManager;
-    private final NettyPoolKey.TransactionRole transactionRole;
+    private final RpcChannelPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
     protected volatile boolean enableClientBatchSendRequest;
@@ -128,7 +130,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     public AbstractNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
-                                       ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
+                                       ThreadPoolExecutor messageExecutor, RpcChannelPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
         clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
@@ -189,7 +191,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     }
 
-    @Override
+    /**
+     * client send sync request.
+     *
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @return server result message
+     * @throws TimeoutException TimeoutException
+     */
     public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
         if (channel == null) {
             LOGGER.warn("sendSyncRequest nothing, caused by null channel.");
@@ -199,7 +208,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return super.sendSync(channel, rpcMessage, this.getRpcRequestTimeout());
     }
 
-    @Override
+    /**
+     * client send async request.
+     *
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     */
     public void sendAsyncRequest(Channel channel, Object msg) {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequest nothing, caused by null channel.");
@@ -214,7 +228,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         super.sendAsync(channel, rpcMessage);
     }
 
-    @Override
+    /**
+     * client send async response.
+     *
+     * @param serverAddress server address
+     * @param rpcMessage    rpc message from server request
+     * @param msg           transaction message {@link io.seata.core.protocol}
+     */
     public void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg) {
         RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, ProtocolConstants.MSGTYPE_RESPONSE);
         Channel channel = clientChannelManager.acquireChannel(serverAddress);
@@ -304,11 +324,31 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     /**
+     * On register msg success.
+     *
+     * @param serverAddress  the server address
+     * @param channel        the channel
+     * @param response       the response
+     * @param requestMessage the request message
+     */
+    abstract void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response, AbstractMessage requestMessage);
+
+    /**
+     * On register msg fail.
+     *
+     * @param serverAddress  the server address
+     * @param channel        the channel
+     * @param response       the response
+     * @param requestMessage the request message
+     */
+    abstract void onRegisterMsgFail(String serverAddress, Channel channel, Object response, AbstractMessage requestMessage);
+
+    /**
      * Get pool key function.
      *
      * @return lambda function
      */
-    protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
+    protected abstract Function<String, RpcChannelPoolKey> getPoolKeyFunction();
 
     /**
      * Get transaction service group.
@@ -416,7 +456,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             if (!(msg instanceof RpcMessage)) {
                 return;
             }
-            processMessage(ctx, (RpcMessage) msg);
+            RpcMessage rpcMessage = (RpcMessage) msg;
+            RpcMessageHandleContext context = new NettyRpcMessageHandleContext(ctx, rpcMessage);
+            context.setMessageReply(response -> {
+                sendAsyncResponse(NetUtil.toStringAddress(ctx.channel().remoteAddress()), rpcMessage, response);
+            });
+            processMessage(context, rpcMessage.getBody());
         }
 
         @Override

@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.seata.core.rpc.RpcChannelPoolKey;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -51,12 +52,12 @@ class NettyClientChannelManagerTest {
     private NettyPoolableFactory poolableFactory;
     
     @Mock
-    private Function<String, NettyPoolKey> poolKeyFunction;
+    private Function<String, RpcChannelPoolKey> poolKeyFunction;
     
     private NettyClientConfig nettyClientConfig = new NettyClientConfig();
     
     @Mock
-    private NettyPoolKey nettyPoolKey;
+    private RpcChannelPoolKey rpcChannelPoolKey;
     
     @Mock
     private Channel channel;
@@ -78,16 +79,16 @@ class NettyClientChannelManagerTest {
     
     @Test
     void assertAcquireChannelFromPool() {
-        setupPoolFactory(nettyPoolKey, channel);
+        setupPoolFactory(rpcChannelPoolKey, channel);
         Channel actual = channelManager.acquireChannel("localhost");
-        verify(poolableFactory).makeObject(nettyPoolKey);
+        verify(poolableFactory).makeObject(rpcChannelPoolKey);
         Assertions.assertEquals(actual, channel);
     }
     
-    private void setupPoolFactory(final NettyPoolKey nettyPoolKey, final Channel channel) {
-        when(poolKeyFunction.apply(anyString())).thenReturn(nettyPoolKey);
-        when(poolableFactory.makeObject(nettyPoolKey)).thenReturn(channel);
-        when(poolableFactory.validateObject(nettyPoolKey, channel)).thenReturn(true);
+    private void setupPoolFactory(final RpcChannelPoolKey rpcChannelPoolKey, final Channel channel) {
+        when(poolKeyFunction.apply(anyString())).thenReturn(rpcChannelPoolKey);
+        when(poolableFactory.makeObject(rpcChannelPoolKey)).thenReturn(channel);
+        when(poolableFactory.validateObject(rpcChannelPoolKey, channel)).thenReturn(true);
     }
     
     @Test
@@ -95,7 +96,7 @@ class NettyClientChannelManagerTest {
         channelManager.getChannels().putIfAbsent("localhost", channel);
         when(channel.isActive()).thenReturn(true);
         Channel actual = channelManager.acquireChannel("localhost");
-        verify(poolableFactory, times(0)).makeObject(nettyPoolKey);
+        verify(poolableFactory, times(0)).makeObject(rpcChannelPoolKey);
         Assertions.assertEquals(actual, channel);
     }
     
@@ -103,9 +104,9 @@ class NettyClientChannelManagerTest {
     void assertAcquireChannelFromPoolContainsInactiveCache() {
         channelManager.getChannels().putIfAbsent("localhost", channel);
         when(channel.isActive()).thenReturn(false);
-        setupPoolFactory(nettyPoolKey, newChannel);
+        setupPoolFactory(rpcChannelPoolKey, newChannel);
         Channel actual = channelManager.acquireChannel("localhost");
-        verify(poolableFactory).makeObject(nettyPoolKey);
+        verify(poolableFactory).makeObject(rpcChannelPoolKey);
         Assertions.assertEquals(actual, newChannel);
     }
     
@@ -121,7 +122,7 @@ class NettyClientChannelManagerTest {
         setNettyClientKeyPool();
         setUpReleaseChannel();
         channelManager.releaseChannel(channel, "127.0.0.1:8091");
-        verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
+        verify(keyedObjectPool).returnObject(rpcChannelPoolKey, channel);
     }
     
     @Test
@@ -132,7 +133,7 @@ class NettyClientChannelManagerTest {
         channelManager.getChannels().putIfAbsent("127.0.0.1:8091", channel);
         channelManager.releaseChannel(channel, "127.0.0.1:8091");
         assertTrue(channelManager.getChannels().isEmpty());
-        verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
+        verify(keyedObjectPool).returnObject(rpcChannelPoolKey, channel);
     }
     
     @Test
@@ -143,7 +144,7 @@ class NettyClientChannelManagerTest {
         channelManager.getChannels().putIfAbsent("127.0.0.1:8091", newChannel);
         channelManager.releaseChannel(channel, "127.0.0.1:8091");
         assertEquals(1, channelManager.getChannels().size());
-        verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
+        verify(keyedObjectPool).returnObject(rpcChannelPoolKey, channel);
     }
     
     @SuppressWarnings("unchecked")
@@ -151,9 +152,9 @@ class NettyClientChannelManagerTest {
         ConcurrentMap<String, Object> channelLocks =
             (ConcurrentMap<String, Object>) getFieldValue("channelLocks", channelManager);
         channelLocks.putIfAbsent("127.0.0.1:8091", new Object());
-        ConcurrentMap<String, NettyPoolKey> poolKeyMap =
-            (ConcurrentMap<String, NettyPoolKey>) getFieldValue("poolKeyMap", channelManager);
-        poolKeyMap.putIfAbsent("127.0.0.1:8091", nettyPoolKey);
+        ConcurrentMap<String, RpcChannelPoolKey> poolKeyMap =
+            (ConcurrentMap<String, RpcChannelPoolKey>) getFieldValue("poolKeyMap", channelManager);
+        poolKeyMap.putIfAbsent("127.0.0.1:8091", rpcChannelPoolKey);
     }
     
     private Object getFieldValue(final String fieldName, final Object targetObject) {
