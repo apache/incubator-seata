@@ -16,6 +16,7 @@
 package io.seata.config;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,7 @@ class FileConfigurationTest {
             countDownLatch.countDown();
         });
         System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
-        countDownLatch.await();
+        countDownLatch.await(5, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
         System.setProperty("service.disableGlobalTransaction", String.valueOf(value));
         Thread.sleep(2000);
