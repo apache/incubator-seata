@@ -15,7 +15,10 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +29,6 @@ import java.util.StringJoiner;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.protocol.Version;
 import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLType;
@@ -266,7 +268,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         return groupByStr.toString();
     }
 
-    private String getDbVersion(){
+    private String getDbVersion() {
         return statementProxy.getConnectionProxy().getDataSourceProxy().getVersion();
     }
 }
