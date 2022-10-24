@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.util.TypeUtils;
+
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.SkipCallbackWrapperException;
@@ -196,20 +197,21 @@ public class TCCResourceManager extends AbstractResourceManager {
     /**
      * transfer tcc applicationData to BusinessActionContext
      *
-     * @param xid             the xid
-     * @param branchId        the branch id
-     * @param resourceId      the resource id
-     * @param applicationData the application data
+     * @param xid                 the xid
+     * @param branchId            the branch id
+     * @param resourceId          the resource id
+     * @param applicationData     the application data
+     * @param prepareParamTypeMap the params type in prepareMethod
      * @return business action context
      */
     protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId,
-                                                             String applicationData, Map<String, Type> prepareParamTypeMap) {
+        String applicationData, Map<String, Type> prepareParamTypeMap) {
         Map actionContextMap = null;
         if (StringUtils.isNotBlank(applicationData)) {
             Map tccContext = JSON.parseObject(applicationData, Map.class);
             actionContextMap = (Map)tccContext.get(Constants.TCC_ACTION_CONTEXT);
             // convert value type in actionContextMap to target type in prepareParamTypeMap
-            if(CollectionUtils.isNotEmpty(prepareParamTypeMap)) {
+            if (CollectionUtils.isNotEmpty(prepareParamTypeMap)) {
                 Iterator<Map.Entry<String, Type>> iterator = prepareParamTypeMap.entrySet().iterator();
                 while (iterator.hasNext()) {
                     Map.Entry<String, Type> e = iterator.next();

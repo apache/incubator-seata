@@ -304,15 +304,18 @@ public final class ActionContextUtil {
      *
      * @param method prepareMethod
      */
-    public static void loadActionContextParamTypeFromMethodAndPutToMap(@Nonnull Method method, @Nonnull Map<String, Type> parameterTypeMap) {
+    public static void loadActionContextParamTypeFromMethodAndPutToMap(@Nonnull Method method,
+        @Nonnull Map<String, Type> parameterTypeMap) {
         Parameter[] parameters = method.getParameters();
         if (ArrayUtils.isEmpty(parameters)) {
             return;
         }
         for (Parameter parameter : parameters) {
             if (parameter.isAnnotationPresent(BusinessActionContextParameter.class)) {
-                BusinessActionContextParameter parameterAnnotation = parameter.getDeclaredAnnotation(BusinessActionContextParameter.class);
-                loadActionContextParamTypeAndPutToMap(parameterAnnotation, parameter.getParameterizedType(), parameterTypeMap);
+                BusinessActionContextParameter parameterAnnotation =
+                    parameter.getDeclaredAnnotation(BusinessActionContextParameter.class);
+                loadActionContextParamTypeAndPutToMap(parameterAnnotation, parameter.getParameterizedType(),
+                    parameterTypeMap);
             }
         }
     }
@@ -320,19 +323,20 @@ public final class ActionContextUtil {
     /**
      * Load the parameter type annotated with BusinessActionContextParameter and put it into the map
      *
-     * @param annotation       BusinessActionContextParameter
-     * @param type             param type
+     * @param annotation BusinessActionContextParameter
+     * @param type param type
      * @param parameterTypeMap paramter's type map
      */
-    public static void loadActionContextParamTypeAndPutToMap(@Nonnull BusinessActionContextParameter annotation, @Nonnull Type type, @Nonnull Map<String, Type> parameterTypeMap) {
+    public static void loadActionContextParamTypeAndPutToMap(@Nonnull BusinessActionContextParameter annotation,
+        @Nonnull Type type, @Nonnull Map<String, Type> parameterTypeMap) {
         String paramName = getParamNameFromAnnotation(annotation);
         // If {@code index >= 0}, Type is List or Array
         if (annotation.index() >= 0) {
             if (type instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) type;
+                ParameterizedType parameterizedType = (ParameterizedType)type;
                 parameterTypeMap.put(paramName, parameterizedType.getActualTypeArguments()[0]);
-            }else{
-                Class<?> clazz = (Class<?>) type;
+            } else {
+                Class<?> clazz = (Class<?>)type;
                 if (clazz.isArray()) {
                     parameterTypeMap.put(paramName, clazz.getComponentType());
                 }
@@ -341,17 +345,19 @@ public final class ActionContextUtil {
         }
         // if {@code isParamInProperty == true}, fetch param type from fields
         if (annotation.isParamInProperty()) {
-            Field[] fields = ReflectionUtil.getAllFields((Class<?>) type);
+            Field[] fields = ReflectionUtil.getAllFields((Class<?>)type);
             if (ArrayUtils.isEmpty(fields)) {
                 return;
             }
             for (Field field : fields) {
                 if (field.isAnnotationPresent(BusinessActionContextParameter.class)) {
-                    BusinessActionContextParameter fieldDeclaredAnnotation = field.getDeclaredAnnotation(BusinessActionContextParameter.class);
-                    loadActionContextParamTypeAndPutToMap(fieldDeclaredAnnotation, field.getGenericType(), parameterTypeMap);
+                    BusinessActionContextParameter fieldDeclaredAnnotation =
+                        field.getDeclaredAnnotation(BusinessActionContextParameter.class);
+                    loadActionContextParamTypeAndPutToMap(fieldDeclaredAnnotation, field.getGenericType(),
+                        parameterTypeMap);
                 }
             }
-        }else{
+        } else {
             // put param type in map
             parameterTypeMap.put(paramName, type);
         }

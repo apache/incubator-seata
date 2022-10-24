@@ -59,7 +59,7 @@ public class TCCResource implements Resource {
 
     private String[] phaseTwoRollbackKeys;
 
-    private Map<String,Type> prepareParamTypeMap;
+    private Map<String, Type> prepareParamTypeMap;
 
     @Override
     public String getResourceGroupId() {
@@ -295,17 +295,18 @@ public class TCCResource implements Resource {
 
     /**
      * get param type of prepareMethod
-     * @return prepareParamTypeMap  param type map in prepareMethod
+     * 
+     * @return prepareParamTypeMap param type map in prepareMethod
      */
-    public Map<String, Type> getPrepareParamTypeMap(){
+    public Map<String, Type> getPrepareParamTypeMap() {
         return this.prepareParamTypeMap;
     }
 
     /**
      * load BusinessActionParamType from prepareMethod and put it into prepareParamTypeMap
      */
-    public void loadBusinessActionParamTypeFromPrepareMethod(){
-        if(Objects.isNull(this.prepareMethod)){
+    public void loadBusinessActionParamTypeFromPrepareMethod() {
+        if (Objects.isNull(this.prepareMethod)) {
             return;
         }
         this.prepareParamTypeMap = new ConcurrentHashMap<>();
