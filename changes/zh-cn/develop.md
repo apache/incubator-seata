@@ -27,6 +27,7 @@
 - [[#4953](https://github.com/seata/seata/pull/4953)] 修复InsertOnDuplicateUpdate可绕过修改主键的问题
 - [[#4978](https://github.com/seata/seata/pull/4978)] 修复 kryo 支持循环依赖
 - [[#4985](https://github.com/seata/seata/pull/4985)] 修复 undo_log id重复的问题
+- [[#5018](https://github.com/seata/seata/pull/5018)] 修复启动脚本中 loader path 使用相对路径导致 server 启动失败问题
 - [[#5004](https://github.com/seata/seata/pull/5004)] 修复mysql update join行数据重复的问题
 
 
@@ -80,5 +81,6 @@
 - [CrazyLionLi](https://github.com/JavaLionLi)
 - [whxxxxx](https://github.com/whxxxxx)
 - [renliangyu857](https://github.com/renliangyu857)
+- [neillee95](https://github.com/neillee95)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
