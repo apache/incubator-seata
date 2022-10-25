@@ -9,6 +9,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
 - [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
+- [[#4914](https://github.com/seata/seata/pull/4914)] support mysql update join sql
 
 
 ### bugfix:
@@ -24,6 +25,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
 - [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
 - [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
+- [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
 
 
 ### optimize:
@@ -77,5 +79,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [tuwenlin](https://github.com/tuwenlin)
 - [CrazyLionLi](https://github.com/JavaLionLi)
 - [whxxxxx](https://github.com/whxxxxx)
+- [renliangyu857](https://github.com/renliangyu857)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
