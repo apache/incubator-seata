@@ -48,6 +48,8 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
 
     protected static final String WHERE = " WHERE ";
 
+    protected static final String GROUP_BY = " GROUP BY ";
+
 
     /**
      * Instantiates a new Abstract dml base executor.
