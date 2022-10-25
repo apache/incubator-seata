@@ -41,6 +41,10 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
 
+
+    private static final ThreadLocal<Boolean> ENABLE_LOCAL = new ThreadLocal<>();
+
+
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
         if (StringUtils.isBlank(dataId)) {
             return;
@@ -105,7 +109,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         return new ByteBuddy().subclass(Configuration.class).method(ElementMatchers.any())
             .intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
                 String methodName = method.getName();
-                if (methodName.startsWith(METHOD_PREFIX) && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                if (methodName.startsWith(METHOD_PREFIX) && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)
+                        && !Boolean.FALSE.equals(ENABLE_LOCAL.get())) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
                     ObjectWrapper.ConfigType type =
@@ -137,6 +142,14 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     public static void clear() {
         CONFIG_CACHE.clear();
+    }
+
+    public static void disableCurrent() {
+        ENABLE_LOCAL.set(false);
+    }
+
+    public static void enableCurrent() {
+        ENABLE_LOCAL.remove();
     }
 
     private static class ObjectWrapper {

@@ -52,3 +52,32 @@ seata:
     tokenValidityInMilliseconds: 1800000
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
+
+seata.console.configuration.config-items:
+  - id: 1
+    name: 1
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-1
+      en-US: config-1
+
+  - id: 2
+    name: 2
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-2
+      en-US: config-2
+
+  - id: 3
+    name: 3
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-3
+      en-US: config-3
+
+  - id: 4
+    name: 4
+    default-value: xxx
+    descr-map:
+      zh-CN: 配置项-4
+      en-US: config-4

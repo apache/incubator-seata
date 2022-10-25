@@ -80,6 +80,7 @@
     "@alicloud/console-components-console-menu": "^1.0.4",
     "axios": "^0.27.2",
     "history": "^4.10.1",
+    "http-proxy-middleware": "^2.0.6",
     "jquery": "^3.3.1",
     "lodash": "^4.17.15",
     "moment": "^2.29.4",

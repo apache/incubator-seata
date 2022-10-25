@@ -21,6 +21,7 @@ const enUs: ILocale = {
     overview: 'Overview',
     transactionInfo: 'TransactionInfo',
     globalLockInfo: 'GlobalLockInfo',
+    configurationInfo: "ConfigurationInfo",
   },
   Header: {
     home: 'HOME',
@@ -68,6 +69,18 @@ const enUs: ILocale = {
     inputFilterPlaceholder: 'Please enter filter criteria',
     resetButtonLabel: 'Reset',
     searchButtonLabel: 'Search',
+  },
+  ConfigurationInfo: {
+    title: 'ConfigurationInfo',
+    subTitle: 'list',
+    operateTitle: 'operate',
+    editButtonTitle: 'edit',
+    configurationDialogTitle: 'Configuration info',
+    idCellTitle: 'id',
+    nameCellTitle: 'name',
+    valueCellTitle: 'value',
+    valuePlaceholder: 'Please enter a value',
+    descrCellTitle: 'descr',
   },
 };
 

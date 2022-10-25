@@ -21,6 +21,7 @@ const zhCn: ILocale = {
     overview: '概览',
     transactionInfo: '事务信息',
     globalLockInfo: '全局锁信息',
+    configurationInfo: '配置信息',
   },
   Header: {
     home: '首页',
@@ -68,6 +69,18 @@ const zhCn: ILocale = {
     inputFilterPlaceholder: '请输入筛选条件',
     resetButtonLabel: '重置',
     searchButtonLabel: '搜索',
+  },
+  ConfigurationInfo: {
+    title: '配置信息',
+    subTitle: '基础列表页',
+    operateTitle: '操作',
+    editButtonTitle: '编辑',
+    configurationDialogTitle: '配置信息',
+    idCellTitle: '序号',
+    nameCellTitle: '配置项',
+    valueCellTitle: '配置值',
+    valuePlaceholder: '请输入修改的配置值',
+    descrCellTitle: '配置描述',
   },
 };
 

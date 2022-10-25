@@ -15,6 +15,11 @@
       "name": "logging.extend.logstash-appender.destination",
       "type": "java.lang.String",
       "defaultValue": "localhost:4560"
+    },
+    {
+      "name": "seata.console.configuration.config-items",
+      "type": "java.util.List<io.seata.server.console.config.ConfigInfo>",
+      "sourceType": "io.seata.server.console.config.ConfigurationConsoleProperties"
     }
   ],
   "hints": [
