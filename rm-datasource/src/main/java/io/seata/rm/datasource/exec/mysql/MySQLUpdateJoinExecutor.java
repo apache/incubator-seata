@@ -56,6 +56,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
+    private final boolean isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
     private String sqlMode = "";
 
     /**
@@ -240,7 +241,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         boolean groupByPks = true;
         //only pks group by is valid when db version >= 5.7.5
         try {
-            if (Version.convertVersion(getDbVersion()) < Version.convertVersion("5.7.5")) {
+            if (isLowerSupportGroupByPksVersion) {
                 if (StringUtils.isEmpty(sqlMode)) {
                     try (PreparedStatement preparedStatement = statementProxy.getConnection().prepareStatement("SELECT @@SQL_MODE");
                          ResultSet resultSet = preparedStatement.executeQuery()) {
