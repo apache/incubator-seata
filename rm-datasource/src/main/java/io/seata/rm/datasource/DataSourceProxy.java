@@ -16,6 +16,8 @@
 package io.seata.rm.datasource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -26,6 +28,7 @@ import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.common.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -59,6 +62,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String dbType;
 
     private String userName;
+
+    private String version;
 
     /**
      * Enable the table meta checker
@@ -109,6 +114,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             } else if (JdbcConstants.MARIADB.equals(dbType)) {
                 dbType = JdbcConstants.MYSQL;
             }
+            version = selectDbVersion(connection);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
@@ -267,5 +273,23 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public BranchType getBranchType() {
         return BranchType.AT;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    private String selectDbVersion(Connection connection) {
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                 ResultSet versionResult = preparedStatement.executeQuery()) {
+                if (versionResult.next()) {
+                    return versionResult.getString("VERSION()");
+                }
+            } catch (Exception e) {
+                LOGGER.error("get mysql version fail error: {}", e.getMessage());
+            }
+        }
+        return "";
     }
 }
