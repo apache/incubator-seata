@@ -25,6 +25,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
 - [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
 - [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
+- [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
 
 
@@ -80,5 +81,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [CrazyLionLi](https://github.com/JavaLionLi)
 - [whxxxxx](https://github.com/whxxxxx)
 - [renliangyu857](https://github.com/renliangyu857)
+- [neillee95](https://github.com/neillee95)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
