@@ -15,13 +15,8 @@
  */
 package io.seata.sqlparser.druid.oracle;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
@@ -56,20 +51,5 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
             return new OracleSelectForUpdateRecognizer(sql, ast);
         }
         return null;
-    }
-
-    @Override
-    public List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast) {
-        List<SQLRecognizer> sqlRecognizers = new ArrayList<>();
-        OracleMultiInsertStatement oracleAst = (OracleMultiInsertStatement)ast;
-        List<OracleMultiInsertStatement.Entry> entries = oracleAst.getEntries();
-        for (OracleMultiInsertStatement.Entry entryItem : entries) {
-            if (entryItem instanceof OracleMultiInsertStatement.InsertIntoClause) {
-                sqlRecognizers.add(new OracleMultiInsertItemRecognizer(sql,ast,entryItem));
-            } else {
-                throw new NotSupportYetException("not support the batch insert sql syntax with not a InsertIntoClause");
-            }
-        }
-        return sqlRecognizers;
     }
 }

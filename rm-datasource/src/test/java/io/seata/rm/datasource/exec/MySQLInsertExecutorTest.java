@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +125,7 @@ public class MySQLInsertExecutorTest {
 
     @Test
     public void testAfterImage_ByColumn() throws SQLException {
+        mockInsertRows();
         doReturn(true).when(insertExecutor).containsPK();
         Map<String,List<Object>> pkValuesMap =new HashMap<>();
         pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
@@ -138,6 +140,7 @@ public class MySQLInsertExecutorTest {
 
     @Test
     public void testAfterImage_ByAuto() throws SQLException {
+        mockInsertRows();
         doReturn(false).when(insertExecutor).containsPK();
         doReturn(true).when(insertExecutor).containsColumns();
         Map<String,List<Object>> pkValuesMap =new HashMap<>();
@@ -154,6 +157,7 @@ public class MySQLInsertExecutorTest {
     @Test
     public void testAfterImage_Exception() {
         Assertions.assertThrows(SQLException.class, () -> {
+            mockInsertRows();
             doReturn(false).when(insertExecutor).containsPK();
             doReturn(true).when(insertExecutor).containsColumns();
             Map<String,List<Object>> pkValuesMap =new HashMap<>();
@@ -651,5 +655,6 @@ public class MySQLInsertExecutorTest {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(Collections.emptyList())).thenReturn(rows);
     }
 }

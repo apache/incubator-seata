@@ -94,10 +94,14 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     public List<String> getInsertColumns() {
         List<SQLExpr> columnSQLExprs = ast.getColumns();
         List<String> columns = new ArrayList<>();
-        if (columnSQLExprs.size() == 0) {
-            //just like "insert into table1 select * from table2"
-            parseInsertSelectColumns(ast.getQuery().getQuery(),columns);
-            return columns;
+        if (columnSQLExprs.isEmpty()) {
+            if (ast.getQuery() != null) {
+                //just like "insert into table1 select * from table2"
+                parseInsertSelectColumns(ast.getQuery().getQuery(), columns);
+                return columns;
+            } else {
+                return null;
+            }
         }
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {

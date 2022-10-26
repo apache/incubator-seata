@@ -15,9 +15,6 @@
  */
 package io.seata.sqlparser.druid.postgresql;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock;
@@ -56,10 +53,5 @@ public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHo
             return new PostgresqlSelectForUpdateRecognizer(sql, ast);
         }
         return null;
-    }
-
-    @Override
-    public List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast) {
-        return Collections.emptyList();
     }
 }

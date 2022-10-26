@@ -55,9 +55,4 @@ public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder 
         }
         return null;
     }
-
-    @Override
-    public List<SQLRecognizer> getMultiInsertStatement(String sql, SQLStatement ast) {
-        return Collections.emptyList();
-    }
 }

@@ -93,9 +93,13 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
         List<SQLExpr> columnSQLExprs = ast.getColumns();
         List<String> columns = new ArrayList<>();
         if (columnSQLExprs.isEmpty()) {
-            //just like "insert into table1 select * from table2"
-            parseInsertSelectColumns(ast.getQuery().getQuery(),columns);
-            return columns;
+            if (ast.getQuery() != null) {
+                //just like "insert into table1 select * from table2"
+                parseInsertSelectColumns(ast.getQuery().getQuery(), columns);
+                return columns;
+            } else {
+                return null;
+            }
         }
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
