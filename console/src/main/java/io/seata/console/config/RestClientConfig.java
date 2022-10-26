@@ -13,25 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.console;
+package io.seata.console.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 /**
- * The type Application.
+ * restTemplate config
  *
- * @author jameslcj
+ * @author: Sher
  */
-@SpringBootApplication(scanBasePackages = {"io.seata.console"})
-public class Application {
-
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+@Configuration
+public class RestClientConfig {
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

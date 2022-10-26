@@ -28,7 +28,7 @@ import javax.annotation.Resource;
 
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.console.result.PageResult;
+import io.seata.server.console.result.PageResult;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;

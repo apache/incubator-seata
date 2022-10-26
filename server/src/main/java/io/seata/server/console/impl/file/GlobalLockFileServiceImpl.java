@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.server.console.param.GlobalLockParam;
-import io.seata.console.result.PageResult;
+import io.seata.server.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.lock.RowLock;
 import io.seata.server.console.service.GlobalLockService;

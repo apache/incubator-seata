@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import io.seata.common.util.BeanUtils;
 import io.seata.server.console.param.GlobalLockParam;
-import io.seata.console.result.PageResult;
+import io.seata.server.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.storage.redis.JedisPooledFactory;
@@ -32,10 +32,11 @@ import redis.clients.jedis.Jedis;
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
 import static io.seata.common.util.StringUtils.isNotBlank;
-import static io.seata.console.result.PageResult.checkPage;
+
 import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
 import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
 import static io.seata.core.constants.RedisKeyConstants.SPLIT;
+import static io.seata.server.console.result.PageResult.checkPage;
 
 /**
  * Global Lock Redis Service Impl

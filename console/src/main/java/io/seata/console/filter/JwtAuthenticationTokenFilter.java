@@ -16,12 +16,10 @@
 package io.seata.console.filter;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import io.seata.console.config.WebSecurityConfig;
 import io.seata.console.utils.JwtTokenUtils;
 import org.springframework.security.core.Authentication;
