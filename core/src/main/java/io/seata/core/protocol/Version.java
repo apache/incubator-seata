@@ -136,6 +136,15 @@ public class Version {
         return result;
     }
 
+    public static long convertVersionNotThrowException(String version) {
+        try {
+            return convertVersion(version);
+        } catch (Exception e) {
+            LOGGER.error("convert version error,version:{}",version,e);
+        }
+        return -1;
+    }
+
     private static long calculatePartValue(String partNumeric, int size, int index) {
         return Long.parseLong(partNumeric) * Double.valueOf(Math.pow(100, size - index)).longValue();
     }
