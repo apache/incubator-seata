@@ -47,6 +47,7 @@ public class KryoSerializerFactory {
         @Override
         public Kryo create() {
             Kryo kryo = new Kryo();
+            kryo.setReferences(true);
             kryo.setRegistrationRequired(false);
 
             for (Map.Entry<Class, Serializer> entry : TYPE_MAP.entrySet()) {
