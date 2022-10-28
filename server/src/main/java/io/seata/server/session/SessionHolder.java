@@ -21,10 +21,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import io.seata.common.ConfigurationKeys;
-import io.seata.core.model.LockStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
@@ -35,12 +31,16 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.LockStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
-import io.seata.core.store.StoreMode;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.StoreConfig.SessionMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 
 /**
  * The type Session holder.
@@ -80,7 +80,7 @@ public class SessionHolder {
     /**
      * The redis distributed lock expire time
      */
-    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, 10000);
+    private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
@@ -89,56 +89,57 @@ public class SessionHolder {
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
+    public static void init() {
+        init(null);
+    }
     /**
      * Init.
      *
-     * @param mode the store mode: file, db, redis
+     * @param sessionMode the store mode: file, db, redis
      * @throws IOException the io exception
      */
-    public static void init(String mode) {
-        if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-                    CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
+    public static void init(SessionMode sessionMode) {
+        if (null == sessionMode) {
+            sessionMode = StoreConfig.getSessionMode();
         }
-        StoreMode storeMode = StoreMode.get(mode);
-        if (StoreMode.DB.equals(storeMode)) {
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+        if (SessionMode.DB.equals(sessionMode)) {
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
                 new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
                 new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
                 new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.DB.getName());
-        } else if (StoreMode.FILE.equals(storeMode)) {
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.DB.getName());
+        } else if (SessionMode.FILE.equals(sessionMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                     DEFAULT_SESSION_STORE_FILE_DIR);
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                 new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
 
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
-        } else if (StoreMode.REDIS.equals(storeMode)) {
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.FILE.getName());
+        } else if (SessionMode.REDIS.equals(sessionMode)) {
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+                SessionMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
+                SessionMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.REDIS.getName(), new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+                SessionMode.REDIS.getName(), new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
+            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.REDIS.getName());
         } else {
             // unknown store
-            throw new IllegalArgumentException("unknown store mode:" + mode);
+            throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
-        reload(storeMode);
+        reload(sessionMode);
     }
 
     //region reload
@@ -146,15 +147,15 @@ public class SessionHolder {
     /**
      * Reload.
      *
-     * @param storeMode the mode of store
+     * @param sessionMode the mode of store
      */
-    protected static void reload(StoreMode storeMode) {
+    protected static void reload(SessionMode sessionMode) {
 
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
         }
 
-        if (storeMode == StoreMode.FILE) {
+        if (SessionMode.FILE.equals(sessionMode)) {
             Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
             if (CollectionUtils.isNotEmpty(allSessions)) {
                 for (GlobalSession globalSession : allSessions) {
