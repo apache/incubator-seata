@@ -15,6 +15,17 @@
  */
 package io.seata.core.store.db;
 
+import io.seata.common.exception.StoreException;
+import io.seata.common.executor.Initialize;
+import io.seata.common.util.ConfigTools;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.DBType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,17 +34,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-import javax.sql.DataSource;
-import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
-import io.seata.common.util.ConfigTools;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.DBType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The abstract datasource provider
@@ -92,7 +92,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the db type
      */
     protected DBType getDBType() {
-        return DBType.valueof(CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
+        return DBType.valueof(CONFIG.getConfig(io.seata.common.ConfigurationKeys.STORE_DB_TYPE));
     }
 
     /**
@@ -101,10 +101,10 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the db driver class name
      */
     protected String getDriverClassName() {
-        String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
+        String driverClassName = CONFIG.getConfig(io.seata.common.ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
         if (StringUtils.isBlank(driverClassName)) {
             throw new StoreException(
-                String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
+                String.format("the {%s} can't be empty", io.seata.common.ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
         }
         return driverClassName;
     }
@@ -115,7 +115,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the db max wait
      */
     protected Long getMaxWait() {
-        Long maxWait = CONFIG.getLong(ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
+        Long maxWait = CONFIG.getLong(io.seata.common.ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
         return maxWait;
     }
 
@@ -173,9 +173,9 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getUrl() {
-        String url = CONFIG.getConfig(ConfigurationKeys.STORE_DB_URL);
+        String url = CONFIG.getConfig(io.seata.common.ConfigurationKeys.STORE_DB_URL);
         if (StringUtils.isBlank(url)) {
-            throw new StoreException(String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_URL));
+            throw new StoreException(String.format("the {%s} can't be empty", io.seata.common.ConfigurationKeys.STORE_DB_URL));
         }
         return url;
     }
@@ -186,9 +186,9 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getUser() {
-        String user = CONFIG.getConfig(ConfigurationKeys.STORE_DB_USER);
+        String user = CONFIG.getConfig(io.seata.common.ConfigurationKeys.STORE_DB_USER);
         if (StringUtils.isBlank(user)) {
-            throw new StoreException(String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_USER));
+            throw new StoreException(String.format("the {%s} can't be empty", io.seata.common.ConfigurationKeys.STORE_DB_USER));
         }
         return user;
     }
@@ -199,7 +199,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getPassword() {
-        String password = CONFIG.getConfig(ConfigurationKeys.STORE_DB_PASSWORD);
+        String password = CONFIG.getConfig(io.seata.common.ConfigurationKeys.STORE_DB_PASSWORD);
         String publicKey = getPublicKey();
         if (StringUtils.isNotBlank(publicKey)) {
             try {
@@ -219,7 +219,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the int
      */
     protected int getMinConn() {
-        int minConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MIN_CONN, DEFAULT_DB_MIN_CONN);
+        int minConn = CONFIG.getInt(io.seata.common.ConfigurationKeys.STORE_DB_MIN_CONN, DEFAULT_DB_MIN_CONN);
         return minConn < 0 ? DEFAULT_DB_MIN_CONN : minConn;
     }
 
@@ -229,7 +229,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the int
      */
     protected int getMaxConn() {
-        int maxConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MAX_CONN, DEFAULT_DB_MAX_CONN);
+        int maxConn = CONFIG.getInt(io.seata.common.ConfigurationKeys.STORE_DB_MAX_CONN, DEFAULT_DB_MAX_CONN);
         return maxConn < 0 ? DEFAULT_DB_MAX_CONN : maxConn;
     }
 
@@ -253,7 +253,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getPublicKey() {
-        return CONFIG.getConfig(ConfigurationKeys.STORE_PUBLIC_KEY);
+        return CONFIG.getConfig(io.seata.common.ConfigurationKeys.STORE_PUBLIC_KEY);
     }
 
 }

@@ -29,7 +29,7 @@ import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
 public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandler {
 
     private static final Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
+            io.seata.common.ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
 
     @Override
     public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {

@@ -48,7 +48,7 @@ public class ThreadFactoryProperties {
     /**
      * auto default pin or 8
      */
-    private String workerThreadSize = WorkThreadMode.Default.name();
+    private String workerThreadSize = WorkThreadMode.DEFAULT.name();
 
     public String getBossThreadPrefix() {
         return bossThreadPrefix;

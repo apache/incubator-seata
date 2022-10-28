@@ -87,7 +87,7 @@ public class APITest {
         RootContext.bind(DEFAULT_XID);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         Assertions.assertEquals(DEFAULT_XID,tx.getXid());
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(GlobalStatus.Begin, tx.getStatus());
 
     }
 
@@ -99,7 +99,7 @@ public class APITest {
     @Test
     public void testNewTx() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.UnKnown);
+        Assertions.assertEquals(GlobalStatus.UnKnown, tx.getStatus());
         Assertions.assertNull(tx.getXid());
     }
 
@@ -112,7 +112,7 @@ public class APITest {
     public void testBegin() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.begin();
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(GlobalStatus.Begin, tx.getStatus());
         Assertions.assertNotNull(tx.getXid());
 
     }
@@ -210,7 +210,7 @@ public class APITest {
             tx2.globalReport(tx2.getStatus());
         });
 
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(GlobalStatus.Begin, tx.getStatus());
         Assertions.assertNotNull(tx.getXid());
 
     }

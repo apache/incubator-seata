@@ -25,14 +25,6 @@ import org.junit.jupiter.api.Test;
  * @author wang.liang
  */
 class NettyBaseConfigTest {
-    /**
-     * Name.
-     */
-    @Test
-    void name() {
-        NettyBaseConfig nettyBaseConfig = new NettyBaseConfig();
-        System.out.print("test static .");
-    }
 
     @Test
     void test_enum_WorkThreadMode_getModeByName() {

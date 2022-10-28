@@ -15,33 +15,27 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import io.seata.core.protocol.RegisterTMRequest;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.Channel;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Netty client pool manager.
@@ -179,7 +173,7 @@ class NettyClientChannelManager {
 
             if (StringUtils.isBlank(clusterName)) {
                 LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
+                        io.seata.common.ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
                         transactionServiceGroup);
                 return;
             }

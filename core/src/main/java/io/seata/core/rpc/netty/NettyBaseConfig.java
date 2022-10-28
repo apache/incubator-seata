@@ -31,7 +31,6 @@ import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportProtocolType;
 import io.seata.core.rpc.TransportServerType;
 import org.apache.commons.lang.StringUtils;
@@ -55,17 +54,17 @@ public class NettyBaseConfig {
     /**
      * The constant BOSS_THREAD_PREFIX.
      */
-    protected static final String BOSS_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.BOSS_THREAD_PREFIX);
+    protected static final String BOSS_THREAD_PREFIX = CONFIG.getConfig(io.seata.common.ConfigurationKeys.BOSS_THREAD_PREFIX);
 
     /**
      * The constant WORKER_THREAD_PREFIX.
      */
-    protected static final String WORKER_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX);
+    protected static final String WORKER_THREAD_PREFIX = CONFIG.getConfig(io.seata.common.ConfigurationKeys.WORKER_THREAD_PREFIX);
 
     /**
      * The constant SHARE_BOSS_WORKER.
      */
-    protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(ConfigurationKeys.SHARE_BOSS_WORKER);
+    protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(io.seata.common.ConfigurationKeys.SHARE_BOSS_WORKER);
 
     /**
      * The constant WORKER_THREAD_SIZE.
@@ -112,16 +111,16 @@ public class NettyBaseConfig {
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {
-        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
-        String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
+        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getConfig(io.seata.common.ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
+        String workerThreadSize = CONFIG.getConfig(io.seata.common.ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
         } else if (WorkThreadMode.getModeByName(workerThreadSize) != null) {
             WORKER_THREAD_SIZE = WorkThreadMode.getModeByName(workerThreadSize).getValue();
         } else {
-            WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
+            WORKER_THREAD_SIZE = WorkThreadMode.DEFAULT.getValue();
         }
-        TRANSPORT_SERVER_TYPE = TransportServerType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
+        TRANSPORT_SERVER_TYPE = TransportServerType.getType(CONFIG.getConfig(io.seata.common.ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
         switch (TRANSPORT_SERVER_TYPE) {
             case NIO:
                 if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
@@ -165,7 +164,7 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
-        boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, DEFAULT_TRANSPORT_HEARTBEAT);
+        boolean enableHeartbeat = CONFIG.getBoolean(io.seata.common.ConfigurationKeys.TRANSPORT_HEARTBEAT, DEFAULT_TRANSPORT_HEARTBEAT);
         if (enableHeartbeat) {
             MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
         } else {
@@ -189,19 +188,19 @@ public class NettyBaseConfig {
         /**
          * Auto work thread mode.
          */
-        Auto(NettyRuntime.availableProcessors() * 2 + 1),
+        AUTO(NettyRuntime.availableProcessors() * 2 + 1),
         /**
          * Pin work thread mode.
          */
-        Pin(NettyRuntime.availableProcessors()),
+        PIN(NettyRuntime.availableProcessors()),
         /**
          * Busy pin work thread mode.
          */
-        BusyPin(NettyRuntime.availableProcessors() + 1),
+        BUSY_PIN(NettyRuntime.availableProcessors() + 1),
         /**
          * Default work thread mode.
          */
-        Default(NettyRuntime.availableProcessors() * 2);
+        DEFAULT(NettyRuntime.availableProcessors() * 2);
 
         /**
          * Gets value.
