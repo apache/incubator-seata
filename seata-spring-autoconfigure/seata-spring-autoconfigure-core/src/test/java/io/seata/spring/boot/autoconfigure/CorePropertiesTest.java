@@ -59,7 +59,7 @@ public class CorePropertiesTest {
         assertEquals(1, context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadSize());
         assertEquals("NettyClientWorkerThread", context.getBean(ThreadFactoryProperties.class).getClientWorkerThreadPrefix());
         assertEquals(1, context.getBean(ThreadFactoryProperties.class).getBossThreadSize());
-        assertEquals("Default", context.getBean(ThreadFactoryProperties.class).getWorkerThreadSize());
+        assertEquals("DEFAULT", context.getBean(ThreadFactoryProperties.class).getWorkerThreadSize());
     }
 
     @Test
