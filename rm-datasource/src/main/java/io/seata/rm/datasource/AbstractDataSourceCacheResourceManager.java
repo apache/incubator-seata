@@ -34,7 +34,7 @@ public abstract class AbstractDataSourceCacheResourceManager extends AbstractRes
     /**
      * Instantiates a new Data source manager.
      */
-    public AbstractDataSourceCacheResourceManager() {
+    protected AbstractDataSourceCacheResourceManager() {
     }
 
     @Override

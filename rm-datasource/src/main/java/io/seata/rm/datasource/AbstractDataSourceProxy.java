@@ -36,14 +36,14 @@ public abstract class AbstractDataSourceProxy implements SeataDataSourceProxy {
     /**
      * Instantiates a new Abstract data source proxy.
      */
-    public AbstractDataSourceProxy(){}
+    protected AbstractDataSourceProxy(){}
 
     /**
      * Instantiates a new Abstract data source proxy.
      *
      * @param targetDataSource the target data source
      */
-    public AbstractDataSourceProxy(DataSource targetDataSource) {
+    protected AbstractDataSourceProxy(DataSource targetDataSource) {
         this.targetDataSource = targetDataSource;
     }
 

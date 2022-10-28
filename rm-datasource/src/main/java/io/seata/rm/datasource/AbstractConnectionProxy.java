@@ -64,7 +64,7 @@ public abstract class AbstractConnectionProxy implements Connection {
      * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
      */
-    public AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
+    protected AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         this.dataSourceProxy = dataSourceProxy;
         this.targetConnection = targetConnection;
     }

@@ -86,7 +86,7 @@ public class APITest {
     public void testCurrent() throws Exception {
         RootContext.bind(DEFAULT_XID);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        Assertions.assertEquals(tx.getXid(), DEFAULT_XID);
+        Assertions.assertEquals(DEFAULT_XID,tx.getXid());
         Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
 
     }

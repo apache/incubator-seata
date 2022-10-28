@@ -157,14 +157,10 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         String path = ROOT_PATH + cluster;
         if (getClientInstance().exists(path)) {
             getClientInstance().unsubscribeChildChanges(path, listener);
-
-            List<IZkChildListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
-            if (subscribeList != null) {
-                List<IZkChildListener> newSubscribeList = subscribeList.stream()
-                        .filter(eventListener -> !eventListener.equals(listener))
-                        .collect(Collectors.toList());
-                LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
-            }
+            List<IZkChildListener> newSubscribeList = LISTENER_SERVICE_MAP.computeIfPresent(cluster,
+                    (key, subscribeList) -> subscribeList.stream()
+                            .filter(eventListener -> !eventListener.equals(listener)).collect(Collectors.toList()));
+            LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
         }
 
     }
@@ -196,7 +192,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
                 if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
                     boolean exist = getClientInstance().exists(ROOT_PATH + clusterName);
                     if (!exist) {
-                        return null;
+                        return new ArrayList<>();
                     }
 
                     List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH + clusterName);
@@ -232,11 +228,12 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     // visible for test.
     ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout,String... authInfo) {
         ZkClient zkClient = new ZkClient(address, sessionTimeout, connectTimeout);
-        if (authInfo != null && authInfo.length == 2) {
-            if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
-                StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
-                zkClient.addAuthInfo("digest", auth.toString().getBytes());
-            }
+        if (authInfo != null && authInfo.length == 2 &&
+                !StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
+
+            StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
+            zkClient.addAuthInfo("digest", auth.toString().getBytes());
+
         }
         if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
             zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);

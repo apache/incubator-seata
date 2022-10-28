@@ -58,7 +58,7 @@ public abstract class AbstractConnectionProxyXA implements Connection {
 
     protected String xid;
 
-    public AbstractConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource, String xid) {
+    protected AbstractConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource, String xid) {
         this.originalConnection = originalConnection;
         this.xaConnection = xaConnection;
         this.resource = resource;
