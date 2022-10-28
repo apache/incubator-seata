@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The abstract datasource provider
- * 
+ *
  * @author zhangsen
  * @author will
  */
@@ -161,6 +161,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
                         loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
                     }
                 } catch (MalformedURLException ignore) {
+                    LOGGER.error("MysqlDriverClassLoaders URL is not valid");
                 }
             });
         return loaders;
