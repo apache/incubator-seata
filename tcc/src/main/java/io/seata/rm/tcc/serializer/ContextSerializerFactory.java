@@ -38,7 +38,7 @@ public class ContextSerializerFactory {
         INSTANCE {
             @Override
             ContextSerializer getInstance() {
-                return INSTANCES.get(ContextConstants.DEFAULT_SERIALIZER);
+                return ContextSerializerFactory.getInstance(ContextConstants.DEFAULT_SERIALIZER);
             }
         };
 
