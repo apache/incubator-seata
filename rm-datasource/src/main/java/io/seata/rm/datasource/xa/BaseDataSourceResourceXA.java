@@ -84,7 +84,7 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
         return KEEPER.get(key);
     }
 
-    public Map<String, ConnectionProxyXA> getKeeper() {
+    public static Map<String, ConnectionProxyXA> getKeeper() {
         return KEEPER;
     }
 

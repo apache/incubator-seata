@@ -55,7 +55,7 @@ public class DataSourceProxyXANative extends AbstractDataSourceProxyXA {
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        XAConnection xaConnection = getXAConnection(username,password);
+        XAConnection xaConnection = getXAConnection(username, password);
         return getConnectionProxy(xaConnection);
     }
 

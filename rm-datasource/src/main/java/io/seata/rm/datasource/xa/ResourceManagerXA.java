@@ -78,7 +78,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                                 if (resource instanceof DataSourceProxyXA) {
                                     BaseDataSourceResourceXA<ConnectionProxyXA> resourceXA = (BaseDataSourceResourceXA<ConnectionProxyXA>) resource;
                                     if (resourceXA.isShouldBeHeld()) {
-                                        Map<String, ConnectionProxyXA> keeper = resourceXA.getKeeper();
+                                        Map<String, ConnectionProxyXA> keeper = BaseDataSourceResourceXA.getKeeper();
                                         for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
                                             ConnectionProxyXA connection = connectionEntry.getValue();
                                             long now = System.currentTimeMillis();
@@ -93,6 +93,8 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                                                 }
                                             }
                                         }
+                                        // keeper is static
+                                        break;
                                     }
                                 }
                             }
