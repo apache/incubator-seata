@@ -54,6 +54,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
 - [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
 - [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
+- [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
 
 
 ### test:
