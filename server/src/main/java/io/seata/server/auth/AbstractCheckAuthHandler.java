@@ -16,7 +16,6 @@
 package io.seata.server.auth;
 
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
