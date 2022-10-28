@@ -158,7 +158,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         if (getClientInstance().exists(path)) {
             getClientInstance().unsubscribeChildChanges(path, listener);
             List<IZkChildListener> newSubscribeList = LISTENER_SERVICE_MAP.computeIfPresent(cluster,
-                    (key, subscribeList) -> subscribeList.stream()
+                (key, subscribeList) -> subscribeList.stream()
                             .filter(eventListener -> !eventListener.equals(listener))
                             .collect(Collectors.toList()));
             LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
