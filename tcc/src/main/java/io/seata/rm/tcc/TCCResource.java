@@ -16,14 +16,9 @@
 package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-import io.seata.rm.tcc.interceptor.ActionContextUtil;
 
 /**
  * The type Tcc resource.
@@ -58,8 +53,6 @@ public class TCCResource implements Resource {
     private String[] phaseTwoCommitKeys;
 
     private String[] phaseTwoRollbackKeys;
-
-    private Map<String, Type> prepareParamTypeMap;
 
     @Override
     public String getResourceGroupId() {
@@ -291,26 +284,6 @@ public class TCCResource implements Resource {
      */
     public void setPhaseTwoRollbackKeys(String[] phaseTwoRollbackKeys) {
         this.phaseTwoRollbackKeys = phaseTwoRollbackKeys;
-    }
-
-    /**
-     * get param type of prepareMethod
-     * 
-     * @return prepareParamTypeMap param type map in prepareMethod
-     */
-    public Map<String, Type> getPrepareParamTypeMap() {
-        return this.prepareParamTypeMap;
-    }
-
-    /**
-     * load BusinessActionParamType from prepareMethod and put it into prepareParamTypeMap
-     */
-    public void loadBusinessActionParamTypeFromPrepareMethod() {
-        if (Objects.isNull(this.prepareMethod)) {
-            return;
-        }
-        this.prepareParamTypeMap = new ConcurrentHashMap<>();
-        ActionContextUtil.loadActionContextParamTypeFromMethodAndPutToMap(this.prepareMethod, this.prepareParamTypeMap);
     }
 
     @Override

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 
-import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.SkipCallbackWrapperException;
@@ -39,6 +38,7 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.api.ParamType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.serializer.BusinessActionContextSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -194,7 +194,7 @@ public class ActionInterceptorHandler {
 
         //Init applicationData
         Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
-        String applicationContextStr = JSON.toJSONString(applicationContext);
+        String applicationContextStr = BusinessActionContextSerializer.toJsonString(applicationContext);
         try {
             //registry branch record
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, xid,

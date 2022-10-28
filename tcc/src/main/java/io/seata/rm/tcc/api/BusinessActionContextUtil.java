@@ -18,7 +18,9 @@ package io.seata.rm.tcc.api;
 import java.util.Collections;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
@@ -27,8 +29,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.interceptor.ActionContextUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.seata.rm.tcc.serializer.BusinessActionContextSerializer;
 
 /**
  * the api of sharing business action context to tcc phase 2
@@ -104,13 +105,9 @@ public final class BusinessActionContextUtil {
 
         try {
             // branch report
-            DefaultResourceManager.get().branchReport(
-                    BranchType.TCC,
-                    actionContext.getXid(),
-                    actionContext.getBranchId(),
-                    BranchStatus.Registered,
-                    JSON.toJSONString(Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, actionContext.getActionContext()))
-            );
+            DefaultResourceManager.get().branchReport(BranchType.TCC, actionContext.getXid(),
+                actionContext.getBranchId(), BranchStatus.Registered, BusinessActionContextSerializer.toJsonString(
+                    Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, actionContext.getActionContext())));
 
             // reset to un_updated
             actionContext.setUpdated(null);

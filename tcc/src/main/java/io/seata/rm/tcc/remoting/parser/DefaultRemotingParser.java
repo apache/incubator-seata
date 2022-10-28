@@ -197,8 +197,6 @@ public class DefaultRemotingParser {
                                 twoPhaseBusinessAction.commitArgsClasses()));
                         tccResource.setPhaseTwoRollbackKeys(this.getTwoPhaseArgs(tccResource.getRollbackMethod(),
                                 twoPhaseBusinessAction.rollbackArgsClasses()));
-                        // load BusinessActionParamType from prepareMethod and put it into prepareParamTypeMap
-                        tccResource.loadBusinessActionParamTypeFromPrepareMethod();
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
                     }
