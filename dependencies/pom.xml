@@ -35,6 +35,7 @@
         <dubbo-seata.version>1.0.0</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
+        <bytebuddy.version>1.12.13</bytebuddy.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -42,7 +43,6 @@
         <config.version>1.2.1</config.version>
         <commons-logging.version>1.2</commons-logging.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.5.9</apache-zookeeper.version>
@@ -252,9 +252,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib</artifactId>
-                <version>${cglib.version}</version>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${bytebuddy.version}</version>
             </dependency>
             <dependency>
                 <groupId>aopalliance</groupId>
