@@ -40,35 +40,35 @@ public class NettyPoolKeyTest {
 
     @Test
     public void getTransactionRole() {
-        Assertions.assertEquals(nettyPoolKey.getTransactionRole(), RM_ROLE);
+        Assertions.assertEquals(RM_ROLE, nettyPoolKey.getTransactionRole());
     }
 
     @Test
     public void setTransactionRole() {
         nettyPoolKey.setTransactionRole(TM_ROLE);
-        Assertions.assertEquals(nettyPoolKey.getTransactionRole(), TM_ROLE);
+        Assertions.assertEquals(TM_ROLE,nettyPoolKey.getTransactionRole());
     }
 
     @Test
     public void getAddress() {
-        Assertions.assertEquals(nettyPoolKey.getAddress(), ADDRESS1);
+        Assertions.assertEquals(ADDRESS1,nettyPoolKey.getAddress());
     }
 
     @Test
     public void setAddress() {
         nettyPoolKey.setAddress(ADDRESS2);
-        Assertions.assertEquals(nettyPoolKey.getAddress(), ADDRESS2);
+        Assertions.assertEquals(ADDRESS2, nettyPoolKey.getAddress());
     }
 
     @Test
     public void getMessage() {
-        Assertions.assertEquals(nettyPoolKey.getMessage(), MSG1);
+        Assertions.assertEquals(MSG1, nettyPoolKey.getMessage());
     }
 
     @Test
     public void setMessage() {
         nettyPoolKey.setMessage(MSG2);
-        Assertions.assertEquals(nettyPoolKey.getMessage(), MSG2);
+        Assertions.assertEquals(MSG2, nettyPoolKey.getMessage());
     }
 
     @Test

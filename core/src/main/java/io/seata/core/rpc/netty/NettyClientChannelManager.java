@@ -179,7 +179,7 @@ class NettyClientChannelManager {
 
             if (StringUtils.isBlank(clusterName)) {
                 LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
+                        io.seata.common.ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
                         transactionServiceGroup);
                 return;
             }

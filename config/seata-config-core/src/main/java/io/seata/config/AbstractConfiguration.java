@@ -30,7 +30,7 @@ public abstract class AbstractConfiguration implements Configuration {
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.
      */
-    protected static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
+    protected static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000L;
 
     /**
      * The constant DEFAULT_XXX.

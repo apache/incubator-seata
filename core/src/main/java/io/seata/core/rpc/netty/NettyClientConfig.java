@@ -41,8 +41,8 @@ public class NettyClientConfig extends NettyBaseConfig {
     private int perHostMaxConn = 2;
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
-    private static final long RPC_RM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_RM_REQUEST_TIMEOUT, DEFAULT_RPC_RM_REQUEST_TIMEOUT);
-    private static final long RPC_TM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TM_REQUEST_TIMEOUT, DEFAULT_RPC_TM_REQUEST_TIMEOUT);
+    private static final long RPC_RM_REQUEST_TIMEOUT = CONFIG.getLong(io.seata.common.ConfigurationKeys.RPC_RM_REQUEST_TIMEOUT, DEFAULT_RPC_RM_REQUEST_TIMEOUT);
+    private static final long RPC_TM_REQUEST_TIMEOUT = CONFIG.getLong(io.seata.common.ConfigurationKeys.RPC_TM_REQUEST_TIMEOUT, DEFAULT_RPC_TM_REQUEST_TIMEOUT);
     private static String vgroup;
     private static String clientAppName;
     private static int clientType;
@@ -58,7 +58,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
-    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
+    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(io.seata.common.ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
 
     /**
      * Gets connect timeout millis.
@@ -349,7 +349,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the client selector thread size
      */
     public int getClientSelectorThreadSize() {
-        return CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, DEFAULT_SELECTOR_THREAD_SIZE);
+        return CONFIG.getInt(io.seata.common.ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, DEFAULT_SELECTOR_THREAD_SIZE);
     }
 
     /**
@@ -367,7 +367,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientSelectorThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.CLIENT_SELECTOR_THREAD_PREFIX, DEFAULT_SELECTOR_THREAD_PREFIX);
+        return CONFIG.getConfig(io.seata.common.ConfigurationKeys.CLIENT_SELECTOR_THREAD_PREFIX, DEFAULT_SELECTOR_THREAD_PREFIX);
     }
 
     /**
@@ -376,7 +376,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientWorkerThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.CLIENT_WORKER_THREAD_PREFIX, DEFAULT_WORKER_THREAD_PREFIX);
+        return CONFIG.getConfig(io.seata.common.ConfigurationKeys.CLIENT_WORKER_THREAD_PREFIX, DEFAULT_WORKER_THREAD_PREFIX);
     }
 
     /**
