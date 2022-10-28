@@ -44,6 +44,7 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
@@ -297,7 +298,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             int finalI = i;
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
-                if (!v.isNonUnique()) {
+                if (!v.isNonUnique() && isIndexValueNotNull(v,imageParameterMap,finalI)) {
                     boolean columnIsNull = true;
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
@@ -307,15 +308,6 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                             uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
                             columnIsNull = false;
                             continue;
-                        }
-                        if ((imageParameters == null && m.getColumnDef() == null) || imageParameters.get(finalI) == null || imageParameters.get(finalI) instanceof Null) {
-                            if (!"PRIMARY".equalsIgnoreCase(k)) {
-                                columnIsNull = false;
-                                uniqueList.add(columnName + " is ? ");
-                                paramAppenderTempList.add("NULL");
-                                continue;
-                            }
-                            break;
                         }
                         columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
@@ -387,6 +379,19 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             }
         }
         return imageParameterMap;
+    }
+
+    private boolean isIndexValueNotNull(IndexMeta indexMeta, Map<String, ArrayList<Object>> imageParameterMap,int rowIndex) {
+        for (ColumnMeta columnMeta : indexMeta.getValues()) {
+            String columnName = columnMeta.getColumnName();
+            List<Object> imageParameters = imageParameterMap.get(columnName);
+            if ((imageParameters == null && columnMeta.getColumnDef() == null)
+                || imageParameters.get(rowIndex) == null
+                || imageParameters.get(rowIndex) instanceof Null) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
