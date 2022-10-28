@@ -166,6 +166,11 @@ public interface DefaultValues {
     String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
 
     /**
+     * the constant DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_SERIALIZATION
+     */
+    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_SERIALIZATION = "jackson";
+
+    /**
      * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
      */
     long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();

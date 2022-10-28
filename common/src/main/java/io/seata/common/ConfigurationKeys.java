@@ -800,6 +800,16 @@ public interface ConfigurationKeys {
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 
     /**
+     * The constant TCC_BUSINESS_ACTION_CONTEXT_PREFIX
+     */
+    String TCC_BUSINESS_ACTION_CONTEXT_PREFIX = TCC_PREFIX + "businessActionContext.";
+
+    /**
+     * The constant TCC_BUSINESS_ACTION_CONTEXT_SERIALIZER
+     */
+    String TCC_BUSINESS_ACTION_CONTEXT_SERIALIZER = TCC_BUSINESS_ACTION_CONTEXT_PREFIX + "serializer";
+
+    /**
      * The constant rpcRmRequestTimeout
      */
     String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";

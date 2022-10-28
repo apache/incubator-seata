@@ -1,0 +1,2 @@
+io.seata.rm.tcc.serializer.spi.FastJsonContextSerializer
+io.seata.rm.tcc.serializer.spi.JacksonContextSerializer

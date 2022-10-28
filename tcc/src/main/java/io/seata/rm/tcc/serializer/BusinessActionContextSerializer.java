@@ -12,19 +12,7 @@
  */
 package io.seata.rm.tcc.serializer;
 
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.seata.common.util.StringUtils;
+import io.seata.rm.tcc.serializer.spi.FastJsonContextSerializer;
 
 /**
  * Used to serialize and deserialize BusinessActionContext
@@ -33,8 +21,6 @@ import io.seata.common.util.StringUtils;
  */
 public class BusinessActionContextSerializer {
 
-    private static final JacksonSerializer JACKSON_SERIALIZER = new JacksonSerializer();
-
     /**
      * serialize Object value to json string by jackson
      * 
@@ -42,7 +28,8 @@ public class BusinessActionContextSerializer {
      * @return
      */
     public static String toJsonString(Object value) {
-        return JACKSON_SERIALIZER.toJsonString(value);
+        ContextSerializer contextSerializer = ContextSerializerFactory.getInstance();
+        return contextSerializer.encodeToString(value);
     }
 
     /**
@@ -55,63 +42,15 @@ public class BusinessActionContextSerializer {
      */
     public static <T> T parseObject(String json, Class<T> clazz) {
         T result;
-        if (!json.startsWith("{\"@class\":")) {
-            result = JSON.parseObject(json, clazz);
+        // json string start with "{"@class":", it will deserialize by jackson
+        if (json.startsWith("{\"@class\":")) {
+            ContextSerializer defaultContextSerializer = ContextSerializerFactory.getInstance();
+            result = defaultContextSerializer.decodeString(json, clazz);
         } else {
-            result = JACKSON_SERIALIZER.parseObject(json, clazz);
+            ContextSerializer fastjsonContextSerializer =
+                ContextSerializerFactory.getInstance(FastJsonContextSerializer.NAME);
+            result = fastjsonContextSerializer.decodeString(json, clazz);
         }
         return result;
-    }
-
-    private static class JacksonSerializer {
-
-        private static final Logger LOGGER = LoggerFactory.getLogger(JacksonSerializer.class);
-
-        private final ObjectMapper mapper = new ObjectMapper();
-
-        private JacksonSerializer() {
-            this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            this.mapper.activateDefaultTyping(this.mapper.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
-            this.mapper.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);
-        }
-
-        /**
-         * serialize Object value to json string by jackson
-         * 
-         * @param value
-         * @return
-         */
-        public String toJsonString(Object value) {
-            if (Objects.isNull(value)) {
-                return null;
-            }
-            try {
-                return value instanceof String ? (String)value : this.mapper.writeValueAsString(value);
-            } catch (JsonProcessingException e) {
-                LOGGER.error("json toJsonString exception, {}", e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
-        }
-
-        /**
-         * deserialize json string by jackson
-         * 
-         * @param json json string
-         * @param clazz target calss
-         * @param <T>
-         * @return
-         */
-        public <T> T parseObject(String json, Class<T> clazz) {
-            if (StringUtils.isBlank(json) || Objects.isNull(clazz)) {
-                return null;
-            }
-            try {
-                return clazz.equals(String.class) ? (T)json : this.mapper.readValue(json, clazz);
-            } catch (JsonProcessingException e) {
-                LOGGER.error("json parseObject exception, {}", e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
-        }
     }
 }
