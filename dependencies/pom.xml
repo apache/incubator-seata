@@ -111,7 +111,6 @@
         <junit-platform.version>1.8.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
-        <mssql.version>8.4.1.jre8</mssql.version>
     </properties>
 
     <dependencyManagement>
@@ -138,11 +137,6 @@
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.microsoft.sqlserver</groupId>
-                <artifactId>mssql-jdbc</artifactId>
-                <version>${mssql.version}</version>
             </dependency>
             <!-- the 3rd part -->
             <dependency>

@@ -51,13 +51,11 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
         if (dataSource instanceof SeataDataSourceProxy) {
             LOGGER.info("Unwrap the data source, because the type is: {}", dataSource.getClass().getName());
-            dataSource = ((SeataDataSourceProxy)dataSource).getTargetDataSource();
+            dataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
         }
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
-        this.xaDataSource = XAUtils.createXADatasource(this);
-        // Set the default branch type to 'XA' in the RootContext.
         if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
             try (Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
@@ -112,33 +110,25 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     @Override
     public XADataSource getXADataSource() throws SQLException {
-        return this.xaDataSource;
+        return this;
     }
 
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
-        XAConnection xaConnection;
-        if (xaDataSource == null) {
-            Connection physicalConn = connection.unwrap(Connection.class);
-            xaConnection = XAUtils.createXAConnection(physicalConn, this);
-        } else {
-            connection.close();
-            xaConnection = getXAConnection();
-            connection = xaConnection.getConnection();
-        }
-        ConnectionProxyXA connectionProxyXA =
-            new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
+        Connection physicalConn = connection.unwrap(Connection.class);
+        XAConnection xaConnection = XAUtils.createXAConnection(physicalConn, this);
+        ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
     }
 
     @Override
     public XAConnection getXAConnection() throws SQLException {
-        return this.xaDataSource.getXAConnection();
+        return XAUtils.createXAConnection(dataSource.getConnection(), this);
     }
 
     @Override
     public XAConnection getXAConnection(String user, String password) throws SQLException {
-        return this.xaDataSource.getXAConnection(user, password);
+        return XAUtils.createXAConnection(dataSource.getConnection(user, password), this);
     }
-    
+
 }

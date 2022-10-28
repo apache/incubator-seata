@@ -19,6 +19,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
+import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.xa.BaseDataSourceResourceXA;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;

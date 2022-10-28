@@ -30,16 +30,14 @@ import io.seata.rm.BaseDataSourceResource;
  * @author jianbin.chen
  */
 public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseDataSourceResource
-    implements Holder<T>, XADataSource {
+    implements Holder<ConnectionProxyXA>, XADataSource {
 
     private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
         CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
-    protected XADataSource xaDataSource;
+    private static final Map<String, ConnectionProxyXA> KEEPER = new ConcurrentHashMap<>();
 
     private boolean shouldBeHeld = false;
-
-    private final Map<String, T> keeper = new ConcurrentHashMap<>();
 
     public static void setBranchStatus(String xaBranchXid, BranchStatus branchStatus) {
         BRANCH_STATUS_CACHE.put(xaBranchXid, branchStatus);
@@ -56,23 +54,23 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
     }
 
     @Override
-    public T hold(String key, T value) {
+    public ConnectionProxyXA hold(String key, ConnectionProxyXA value) {
         if (value.isHeld()) {
-            T x = keeper.get(key);
+            ConnectionProxyXA x = KEEPER.get(key);
             if (x != value) {
                 throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x + "] but[" + value
                     + "] is also kept with the same key[" + key + "]");
             }
             return value;
         }
-        T x = keeper.put(key, value);
+        ConnectionProxyXA x = KEEPER.put(key, value);
         value.setHeld(true);
         return x;
     }
 
     @Override
-    public T release(String key, T value) {
-        T x = keeper.remove(key);
+    public ConnectionProxyXA release(String key, ConnectionProxyXA value) {
+        ConnectionProxyXA x = KEEPER.remove(key);
         if (x != value) {
             throw new ShouldNeverHappenException(
                 "something wrong with keeper, released[" + x + "] but[" + value + "] is wanted with key[" + key + "]");
@@ -82,20 +80,12 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
     }
 
     @Override
-    public T lookup(String key) {
-        return keeper.get(key);
+    public ConnectionProxyXA lookup(String key) {
+        return KEEPER.get(key);
     }
 
-    public Map<String, T> getKeeper() {
-        return keeper;
-    }
-
-    public XADataSource getXaDataSource() {
-        return xaDataSource;
-    }
-
-    public void setXaDataSource(XADataSource xaDataSource) {
-        this.xaDataSource = xaDataSource;
+    public Map<String, ConnectionProxyXA> getKeeper() {
+        return KEEPER;
     }
 
     public boolean isShouldBeHeld() {
