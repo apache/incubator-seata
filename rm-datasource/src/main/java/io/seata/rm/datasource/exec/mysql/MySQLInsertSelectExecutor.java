@@ -160,7 +160,7 @@ public class MySQLInsertSelectExecutor extends MySQLInsertOnDuplicateUpdateExecu
         List<String> insertColumns = Optional.ofNullable(recognizer.getInsertColumns()).map(list -> list.stream()
                 .map(column -> ColumnUtils.delEscape(column, getDbType())).collect(Collectors.toList())).orElse(null);
         if (CollectionUtils.isEmpty(insertColumns)) {
-            insertColumns = getTableMeta(recognizer.getTableName()).getDefaultTableColumn();
+            insertColumns = new ArrayList<>(getTableMeta().getAllColumns().keySet());
         }
         Map<String, ArrayList<Object>> imageParameterMap = new LowerCaseLinkHashMap<>(insertColumns.size(), 1);
 
