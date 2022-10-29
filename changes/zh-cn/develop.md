@@ -7,7 +7,10 @@
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server支持多注册中心
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC注解支持添加在实现类及其方法上也生效
+- [[#4877](https://github.com/seata/seata/pull/4877)] seata client支持jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] 支持kryo 5.3.0
+- [[#4914](https://github.com/seata/seata/pull/4914)] 支持mysql的update join联表更新语法
+
 
 
 ### bugfix：
@@ -24,6 +27,9 @@
 - [[#4953](https://github.com/seata/seata/pull/4953)] 修复InsertOnDuplicateUpdate可绕过修改主键的问题
 - [[#4978](https://github.com/seata/seata/pull/4978)] 修复 kryo 支持循环依赖
 - [[#4985](https://github.com/seata/seata/pull/4985)] 修复 undo_log id重复的问题
+- [[#5018](https://github.com/seata/seata/pull/5018)] 修复启动脚本中 loader path 使用相对路径导致 server 启动失败问题
+- [[#5004](https://github.com/seata/seata/pull/5004)] 修复mysql update join行数据重复的问题
+- [[#5033](https://github.com/seata/seata/pull/5033)] 修复InsertOnDuplicateUpdate的SQL语句中无插入列字段导致的空指针问题
 
 
 ### optimize：
@@ -75,5 +81,7 @@
 - [tuwenlin](https://github.com/tuwenlin)
 - [CrazyLionLi](https://github.com/JavaLionLi)
 - [whxxxxx](https://github.com/whxxxxx)
+- [renliangyu857](https://github.com/renliangyu857)
+- [neillee95](https://github.com/neillee95)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
