@@ -362,7 +362,8 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         }
         Map<String, ArrayList<Object>> imageParameterMap = new LowerCaseLinkHashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
-        List<String> insertColumns = recognizer.getInsertColumns();
+        List<String> sqlRecognizerColumns = recognizer.getInsertColumns();
+        List<String> insertColumns = CollectionUtils.isEmpty(sqlRecognizerColumns) ? new ArrayList<>(getTableMeta().getAllColumns().keySet()) : sqlRecognizerColumns;
         final Map<String,Integer> pkIndexMap = getPkIndex();
         List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
         int placeHolderIndex = 1;
