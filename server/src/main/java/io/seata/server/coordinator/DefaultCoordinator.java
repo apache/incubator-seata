@@ -379,10 +379,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.error("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
-                    SessionHelper.endRollbackFailed(rollbackingSession, true);
-
-                    // rollback retry timeout event
-                    MetricsPublisher.postSessionDoneEvent(rollbackingSession, GlobalStatus.RollbackRetryTimeout, true, false);
+                    SessionHelper.endRollbackFailed(rollbackingSession, true, true);
 
                     //The function of this 'return' is 'continue'.
                     return;
@@ -421,7 +418,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
-                    MetricsPublisher.postSessionDoneEvent(committingSession, GlobalStatus.CommitRetryTimeout, true, false);
+                    SessionHelper.endCommitFailed(committingSession, true, true);
 
                     //The function of this 'return' is 'continue'.
                     return;

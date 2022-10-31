@@ -17,6 +17,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4954](https://github.com/seata/seata/pull/4954)] fix output expression incorrectly throws npe
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
+- [[#4533](https://github.com/seata/seata/pull/4533)] fix rollback event repeated and some event status not correct
 - [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
 - [[#4912](https://github.com/seata/seata/pull/4912)] fix mysql InsertOnDuplicateUpdate column case is different and cannot be matched
 - [[#4543](https://github.com/seata/seata/pull/4543)] fix support Oracle nclob types
