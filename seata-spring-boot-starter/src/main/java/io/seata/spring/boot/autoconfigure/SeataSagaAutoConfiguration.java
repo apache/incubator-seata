@@ -98,7 +98,6 @@ public class SeataSagaAutoConfiguration {
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(name = StarterConstants.SAGA_STATE_MACHINE_PREFIX + ".enable-async", havingValue = "true")
-    @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
     static class SagaAsyncThreadPoolExecutorConfiguration {
 
         /**
