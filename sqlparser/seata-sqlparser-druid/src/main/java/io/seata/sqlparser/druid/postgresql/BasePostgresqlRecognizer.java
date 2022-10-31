@@ -23,7 +23,6 @@ import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
 import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
-import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGUpdateStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGASTVisitor;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGASTVisitorAdapter;
@@ -118,15 +117,6 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
                     + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
 
-            @Override
-            public boolean visit(PGInsertStatement x) {
-                if (null != x.getQuery()) {
-                    //just like: insert into t select * from t1
-                    throw new NotSupportYetException("not support the sql syntax insert with query:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-                }
-                return true;
-            }
         };
         getAst().accept(visitor);
         return true;

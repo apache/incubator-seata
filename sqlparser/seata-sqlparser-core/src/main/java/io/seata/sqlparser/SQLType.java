@@ -215,7 +215,11 @@ public enum SQLType {
     /**
      * update join sql type
      */
-    UPDATE_JOIN(103);
+    UPDATE_JOIN(103),
+    /**
+     * Insert select sql type.
+     */
+    INSERT_SELECT(104);
 
     private int i;
 
@@ -246,4 +250,9 @@ public enum SQLType {
         }
         throw new IllegalArgumentException("Invalid SQLType:" + i);
     }
+
+    public String getName() {
+        return this.name();
+    }
+
 }

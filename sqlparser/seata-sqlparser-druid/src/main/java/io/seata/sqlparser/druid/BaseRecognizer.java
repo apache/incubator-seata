@@ -25,7 +25,6 @@ import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
 import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
@@ -145,16 +144,6 @@ public abstract class BaseRecognizer implements SQLRecognizer {
                 //just like: merge into ... WHEN MATCHED THEN ...
                 throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
                         + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-            }
-
-            @Override
-            public boolean visit(SQLInsertStatement x) {
-                if (null != x.getQuery()) {
-                    //just like: insert into t select * from t1
-                    throw new NotSupportYetException("not support the sql syntax insert with query:" + x
-                            + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-                }
-                return true;
             }
         };
         getAst().accept(visitor);

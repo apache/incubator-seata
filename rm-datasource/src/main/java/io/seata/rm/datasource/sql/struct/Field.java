@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+
 /**
  * Field
  *

@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,8 +146,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         boolean ps = true;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
-
-            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
+            List<List<Object>> insertRows = getInsertRows(pkIndexMap.values());
             if (insertRows != null && !insertRows.isEmpty()) {
                 Map<Integer, ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
@@ -197,7 +197,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         } else {
             ps = false;
-            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
+            List<List<Object>> insertRows = getInsertRows(pkIndexMap.values());
             for (List<Object> row : insertRows) {
                 pkIndexMap.forEach((pkKey, pkIndex) -> {
                     List<Object> pkValues = pkValuesMap.get(pkKey);
@@ -217,6 +217,17 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         return pkValuesMap;
+    }
+
+    /**
+     * user for insert select
+     *
+     * @param primaryKeyIndex the primary key index
+     * @return the insert rows
+     */
+    protected List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        return recognizer.getInsertRows(primaryKeyIndex);
     }
 
     /**

@@ -66,4 +66,25 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @return (`a`, `b`, `c`)  ->  (a, b, c)
      */
     List<String> getInsertColumnsIsSimplified();
+
+    /**
+     * Gets query sql
+     *
+     * @return the select sql after insert ; return null if not present
+     */
+    String getQuerySQL();
+
+    /**
+     * Gets hint column name
+     *
+     * @return the hint column name ; return null if not present
+     */
+    String getHintColumnName();
+
+    /**
+     * Gets if the sql is ignore
+     *
+     * @return true when the sql is ignore
+     */
+    boolean isIgnore();
 }

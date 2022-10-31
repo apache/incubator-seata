@@ -25,7 +25,9 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertIgnoreExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExecutor;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertSelectExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
@@ -122,6 +124,26 @@ public class ExecuteTemplate {
                                 break;
                             default:
                                 throw new NotSupportYetException(dbType + " not support to " + SQLType.UPDATE_JOIN.name());
+                        }
+                        break;
+                    case INSERT_IGNORE:
+                        switch (dbType) {
+                            case JdbcConstants.MYSQL:
+                            case JdbcConstants.ORACLE:
+                                executor = new MySQLInsertIgnoreExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                break;
+                            default:
+                                throw new NotSupportYetException(dbType + " not support to insert ignore");
+                        }
+                        break;
+                    case INSERT_SELECT:
+                        switch (dbType) {
+                            case JdbcConstants.MYSQL:
+                            case JdbcConstants.ORACLE:
+                                executor = new MySQLInsertSelectExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                break;
+                            default:
+                                throw new NotSupportYetException(dbType + " not support to insert select");
                         }
                         break;
                     default:

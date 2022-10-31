@@ -162,6 +162,21 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
+    public String getQuerySQL() {
+        return null;
+    }
+
+    @Override
+    public String getHintColumnName() {
+        return null;
+    }
+
+    @Override
+    public boolean isIgnore() {
+        return false;
+    }
+
+    @Override
     public List<String> getInsertColumnsIsSimplified() {
         List<String> insertColumns = getInsertColumns();
         return ColumnUtils.delEscape(insertColumns, getDbType());
