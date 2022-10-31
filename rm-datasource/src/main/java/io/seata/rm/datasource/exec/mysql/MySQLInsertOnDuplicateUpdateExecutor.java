@@ -378,7 +378,8 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         List<String> insertParamsList = recognizer.getInsertParamsValue();
-        List<String> insertColumns = recognizer.getInsertColumns();
+        List<String> sqlRecognizerColumns = recognizer.getInsertColumns();
+        List<String> insertColumns = CollectionUtils.isEmpty(sqlRecognizerColumns) ? new ArrayList<>(getTableMeta().getAllColumns().keySet()) : sqlRecognizerColumns;
         int paramsindex = 1;
         for (String insertParams : insertParamsList) {
             String[] insertParamsArray = insertParams.split(",");
