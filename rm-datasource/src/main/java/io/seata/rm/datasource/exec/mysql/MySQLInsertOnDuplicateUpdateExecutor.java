@@ -385,9 +385,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         for (ColumnMeta columnMeta : indexMeta.getValues()) {
             String columnName = columnMeta.getColumnName();
             List<Object> imageParameters = imageParameterMap.get(columnName);
-            if ((imageParameters == null && columnMeta.getColumnDef() == null)
-                || imageParameters.get(rowIndex) == null
-                || imageParameters.get(rowIndex) instanceof Null) {
+            if (imageParameters == null && columnMeta.getColumnDef() == null) {
+                return false;
+            } else if (imageParameters != null && (imageParameters.get(rowIndex) == null || imageParameters.get(rowIndex) instanceof Null)){
                 return false;
             }
         }
