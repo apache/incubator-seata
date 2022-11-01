@@ -290,7 +290,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             paramAppenderList = new ArrayList<>();
         }
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        int insertNum = recognizer.getInsertParamsValue().size();
+        int insertNum = recognizer.getInsertRows(getPkIndex().values()).size();
         Map<String, ArrayList<Object>> imageParameterMap = buildImageParameters(recognizer);
         String prefix = "SELECT * ";
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());

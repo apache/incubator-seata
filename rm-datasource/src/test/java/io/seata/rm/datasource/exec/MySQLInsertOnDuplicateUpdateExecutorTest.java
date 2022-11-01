@@ -105,10 +105,11 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
     public void TestBuildImageParameters_contain_constant(){
         mockImageParameterMap_contain_constant();
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?,?,?,userStatus1"));
-        insertRows.add(Arrays.asList("?,?,?,userStatus2"));
+        insertRows.add(Arrays.asList("?","?","?","userStatus1"));
+        insertRows.add(Arrays.asList("?","?","?","userStatus2"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         mockInsertColumns();
+        doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
         Map<String, ArrayList<Object>> imageParameterMap = insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
         Assertions.assertEquals(imageParameterMap.toString(),mockImageParameterMap().toString());
     }
@@ -119,11 +120,12 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         String paramAppenderListStr = "[[userId1, 100], [userId2, 101]]";
         mockImageParameterMap_contain_constant();
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?,?,?,userStatus1"));
-        insertRows.add(Arrays.asList("?,?,?,userStatus2"));
+        insertRows.add(Arrays.asList("?","?","?","userStatus1"));
+        insertRows.add(Arrays.asList("?","?","?","userStatus2"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         mockInsertColumns();
         mockAllIndexes();
+        doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
         String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
         Assertions.assertEquals(selectSQLStr,selectSQL);
         Assertions.assertEquals(paramAppenderListStr,insertOrUpdateExecutor.getParamAppenderList().toString());
