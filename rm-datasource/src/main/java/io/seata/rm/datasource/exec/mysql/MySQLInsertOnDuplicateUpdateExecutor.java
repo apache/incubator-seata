@@ -18,13 +18,8 @@ package io.seata.rm.datasource.exec.mysql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Objects;
 
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
@@ -49,6 +44,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -74,7 +70,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
      */
     private ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
 
-    private Map<String,List<Object>> beforeImageSQLPks = new HashMap<>(4);
+    private Map<String,ArrayList<Object>> statementParametersMap = new HashMap<>();
 
     public MySQLInsertOnDuplicateUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
@@ -196,18 +192,38 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        List<Row> rows = beforeImage.getRows();
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         Map<String, List<Object>> primaryValueMap = new HashMap<>();
-        primaryValueMap.putAll(beforeImageSQLPks);
-        rows.forEach(m -> {
+        //1.get pk values from statement
+        statementParametersMap.forEach((key,values)->{
+            if (pkColumnNameList.contains(key)) {
+               primaryValueMap.put(key,values);
+            }
+        });
+        //2.get pk values from beforeImage which hit by unique index
+        List<Row> beforeImageRows = beforeImage.getRows();
+        beforeImageRows.forEach(m -> {
             List<Field> fields = m.primaryKeys();
             fields.forEach(f -> {
                 List<Object> values = primaryValueMap.computeIfAbsent(f.getName(), v -> new ArrayList<>());
                 values.add(f.getValue());
             });
         });
-        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        //consider auto increment pk
+        checkPkValues(primaryValueMap,false);
+        //3.get auto increment when value is method or null
+        Set<String> keySet = new HashSet<>(primaryValueMap.keySet());
+        for (String pkKey:keySet) {
+            List<Object> pkValues = primaryValueMap.get(pkKey);
+            // pk auto generated while single insert primary key is expression
+            if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
+                primaryValueMap.putAll(getPkValuesByAuto());
+            }
+            // pk auto generated while column exists and value is null
+            else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
+                primaryValueMap.putAll(getPkValuesByAuto());
+            }
+        }
+        //4.consider auto increment pk
         if (primaryValueMap.keySet().size() < pkColumnNameList.size()) {
             for (String columnName:pkColumnNameList) {
                 if (!primaryValueMap.containsKey(columnName)) {
@@ -272,7 +288,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         }
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         int insertNum = recognizer.getInsertParamsValue().size();
-        Map<String, ArrayList<Object>> imageParameterMap = buildImageParameters(recognizer);
+        statementParametersMap = buildImageParameters(recognizer);
         String prefix = "SELECT * ";
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         boolean[] isContainWhere = {false};
@@ -285,13 +301,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
-                        List<Object> imageParameters = imageParameterMap.get(columnName);
+                        List<Object> imageParameters = statementParametersMap.get(columnName);
                         if (imageParameters == null && m.getColumnDef() != null) {
                             uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
-                            if ("PRIMARY".equalsIgnoreCase(k)) {
-                                List<Object> pkValues = beforeImageSQLPks.computeIfAbsent(columnName,pk -> new ArrayList<>());
-                                pkValues.add("DEFAULT(" + columnName + ")");
-                            }
                             columnIsNull = false;
                             continue;
                         }
@@ -306,10 +318,6 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                         }
                         columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
-                        if ("PRIMARY".equalsIgnoreCase(k)) {
-                            List<Object> pkValues = beforeImageSQLPks.computeIfAbsent(columnName,pk -> new ArrayList<>());
-                            pkValues.add(imageParameters.get(finalI));
-                        }
                         paramAppenderTempList.add(imageParameters.get(finalI));
                     }
                     if (!columnIsNull) {
