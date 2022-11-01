@@ -277,7 +277,8 @@ public class ConnectionContext {
      */
     public String getApplicationData() throws TransactionException {
         GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
-        if (globalLockConfig.isSkipFirstCheckLock() || allBeforeImageEmpty()) {
+        if (globalLockConfig.getLockRetryTimes() > 0
+            && (globalLockConfig.isSkipFirstCheckLock() || allBeforeImageEmpty())) {
             if (applicationData.containsKey(SKIP_CHECK_LOCK)) {
                 this.applicationData.remove(SKIP_CHECK_LOCK);
             } else {
