@@ -19,10 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Collections;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -83,6 +85,11 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
      * the params of selectSQL, value is the unique index
      */
     private ArrayList<List<Object>> paramAppenderList;
+
+    /**
+     * the primary keys in before image sql. if the primary key is auto increment,the set is empty
+     */
+    private Set<String> primaryKeysInBeforeImageSql = new HashSet<>(4);
 
     public MySQLInsertOnDuplicateUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
@@ -224,8 +231,10 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         for (int i = 0; i < rows.size(); i++) {
             List<String> wherePrimaryList = new ArrayList<>();
             primaryValueMap.forEach((k, v) -> {
-                wherePrimaryList.add(k + " = ? ");
-                primaryValues.add(v);
+                if (!primaryKeysInBeforeImageSql.contains(k)) {
+                    wherePrimaryList.add(k + " = ? ");
+                    primaryValues.add(v);
+                }
             });
             afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
         }
@@ -305,6 +314,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                         List<Object> imageParameters = imageParameterMap.get(columnName);
                         if (imageParameters == null && m.getColumnDef() != null) {
                             uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
+                            if ("PRIMARY".equalsIgnoreCase(k)) {
+                                primaryKeysInBeforeImageSql.add(columnName);
+                            }
                             columnIsNull = false;
                             continue;
                         }
@@ -316,6 +328,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                                 continue;
                             }
                             break;
+                        }
+                        if ("PRIMARY".equalsIgnoreCase(k)) {
+                            primaryKeysInBeforeImageSql.add(columnName);
                         }
                         columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
