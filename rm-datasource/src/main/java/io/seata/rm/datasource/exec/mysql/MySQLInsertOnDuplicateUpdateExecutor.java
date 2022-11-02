@@ -368,7 +368,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                 values.add(f.getValue());
             });
         });
-        if (primaryValueMap.isEmpty() && pkColumnNameList.size() == 1){
+        if (primaryValueMap.isEmpty() && pkColumnNameList.size() == 1) {
             //when there is only one auto increment pk
             return getPkValuesByAuto();
         }
