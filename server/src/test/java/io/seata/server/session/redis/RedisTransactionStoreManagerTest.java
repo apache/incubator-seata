@@ -81,7 +81,6 @@ public class RedisTransactionStoreManagerTest {
         session1.setBeginTime(System.currentTimeMillis());
         session1.setApplicationData("abc=878s1");
         session1.setStatus(GlobalStatus.Begin);
-        sessionManager.addGlobalSession(session1);
         GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 450);
         String xid2 = XID.generateXID(session2.getTransactionId());
         session2.setXid(xid2);
@@ -89,9 +88,9 @@ public class RedisTransactionStoreManagerTest {
         session2.setBeginTime(System.currentTimeMillis());
         session2.setApplicationData("abc1=878s2");
         session2.setStatus(GlobalStatus.Begin);
-        sessionManager.addGlobalSession(session2);
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
-        Thread.sleep(100);
+        sessionManager.addGlobalSession(session1);
+        sessionManager.addGlobalSession(session2);
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
         for (GlobalSession globalSession : list) {
             LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
