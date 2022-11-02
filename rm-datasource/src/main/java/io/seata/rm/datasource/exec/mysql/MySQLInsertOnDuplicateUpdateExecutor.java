@@ -18,7 +18,14 @@ package io.seata.rm.datasource.exec.mysql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
