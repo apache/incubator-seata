@@ -192,49 +192,8 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        Map<String, List<Object>> primaryValueMap = new HashMap<>();
-        //1.get pk values from statement
-        statementParametersMap.forEach((key,values)->{
-            if (pkColumnNameList.contains(key)) {
-               primaryValueMap.put(key,values);
-            }
-        });
-        //2.get pk values from beforeImage which hit by unique index
-        List<Row> beforeImageRows = beforeImage.getRows();
-        beforeImageRows.forEach(m -> {
-            List<Field> fields = m.primaryKeys();
-            fields.forEach(f -> {
-                List<Object> values = primaryValueMap.computeIfAbsent(f.getName(), v -> new ArrayList<>());
-                values.add(f.getValue());
-            });
-        });
-        checkPkValues(primaryValueMap,false);
-        //3.get auto increment when value is method or null
-        Set<String> keySet = new HashSet<>(primaryValueMap.keySet());
-        for (String pkKey:keySet) {
-            List<Object> pkValues = primaryValueMap.get(pkKey);
-            // pk auto generated while single insert primary key is expression
-            if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
-                primaryValueMap.putAll(getPkValuesByAuto());
-            }
-            // pk auto generated while column exists and value is null
-            else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
-                primaryValueMap.putAll(getPkValuesByAuto());
-            }
-        }
-        //4.consider auto increment pk
-        if (primaryValueMap.keySet().size() < pkColumnNameList.size()) {
-            for (String columnName:pkColumnNameList) {
-                if (!primaryValueMap.containsKey(columnName)) {
-                    ColumnMeta pkColumnMeta = getTableMeta().getColumnMeta(columnName);
-                    if (Objects.nonNull(pkColumnMeta) && pkColumnMeta.isAutoincrement()) {
-                        primaryValueMap.putAll(getPkValuesByAuto());
-                    }
-                }
-            }
-        }
-        return buildTableRecords(primaryValueMap);
+        Map<String, List<Object>> afterImagePkValues = getAfterImagePkValues(beforeImage);
+        return buildTableRecords(afterImagePkValues);
     }
 
     @Override
@@ -389,6 +348,56 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             }
         }
         return imageParameterMap;
+    }
+
+    private Map<String,List<Object>> getAfterImagePkValues(TableRecords beforeImage) throws SQLException {
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        Map<String, List<Object>> primaryValueMap = new HashMap<>();
+        //1.get pk values from statement
+        statementParametersMap.forEach((key,values)->{
+            if (pkColumnNameList.contains(key)) {
+                primaryValueMap.put(key,values);
+            }
+        });
+        //2.get pk values from beforeImage which hit by unique index
+        List<Row> beforeImageRows = beforeImage.getRows();
+        beforeImageRows.forEach(m -> {
+            List<Field> fields = m.primaryKeys();
+            fields.forEach(f -> {
+                List<Object> values = primaryValueMap.computeIfAbsent(f.getName(), v -> new ArrayList<>());
+                values.add(f.getValue());
+            });
+        });
+        if (primaryValueMap.isEmpty() && pkColumnNameList.size() == 1){
+            //when there is only one auto increment pk
+            return getPkValuesByAuto();
+        }
+        checkPkValues(primaryValueMap,false);
+        //3.get auto increment when value is method or null
+        Set<String> keySet = new HashSet<>(primaryValueMap.keySet());
+        for (String pkKey:keySet) {
+            List<Object> pkValues = primaryValueMap.get(pkKey);
+            // pk auto generated while single insert primary key is expression
+            if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
+                primaryValueMap.putAll(getPkValuesByAuto());
+            }
+            // pk auto generated while column exists and value is null
+            else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
+                primaryValueMap.putAll(getPkValuesByAuto());
+            }
+        }
+        //4.consider auto increment multi pk
+        if (primaryValueMap.keySet().size() < pkColumnNameList.size()) {
+            for (String columnName:pkColumnNameList) {
+                if (!primaryValueMap.containsKey(columnName)) {
+                    ColumnMeta pkColumnMeta = getTableMeta().getColumnMeta(columnName);
+                    if (Objects.nonNull(pkColumnMeta) && pkColumnMeta.isAutoincrement()) {
+                        primaryValueMap.putAll(getPkValuesByAuto());
+                    }
+                }
+            }
+        }
+        return primaryValueMap;
     }
 
 }
