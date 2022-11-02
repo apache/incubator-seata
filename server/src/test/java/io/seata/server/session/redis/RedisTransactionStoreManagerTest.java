@@ -74,7 +74,7 @@ public class RedisTransactionStoreManagerTest {
 
     @Test
     public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
-        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 100);
+        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 500);
         String xid1 = XID.generateXID(session1.getTransactionId());
         session1.setXid(xid1);
         session1.setTransactionId(session1.getTransactionId());
@@ -82,7 +82,7 @@ public class RedisTransactionStoreManagerTest {
         session1.setApplicationData("abc=878s1");
         session1.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session1);
-        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 50);
+        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 450);
         String xid2 = XID.generateXID(session2.getTransactionId());
         session2.setXid(xid2);
         session2.setTransactionId(session2.getTransactionId());
