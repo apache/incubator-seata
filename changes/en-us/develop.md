@@ -30,6 +30,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
 - [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
+- [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
 
 
 ### optimize:
@@ -86,5 +87,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [whxxxxx](https://github.com/whxxxxx)
 - [renliangyu857](https://github.com/renliangyu857)
 - [neillee95](https://github.com/neillee95)
+- [crazy-sheep](https://github.com/crazy-sheep)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
