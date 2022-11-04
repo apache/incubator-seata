@@ -15,28 +15,29 @@
  */
 package io.seata.server.session.redis;
 
-import io.seata.server.storage.redis.store.RedisLuaTransactionStoreManager;
-import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.BeanUtils;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -44,11 +45,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
-
 /**
  * @author doubleDimple
  */
@@ -57,26 +55,115 @@ public class RedisTransactionStoreManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
-    static RedisServer server = null;
     static RedisTransactionStoreManager redisTransactionStoreManager = null;
     static SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
-        redisTransactionStoreManager = new RedisTransactionStoreManager();
+        MockRedisServer.getInstance();
+        EnhancedServiceLoader.unloadAll();
+        JedisPooledFactory.getJedisInstance().flushAll();
+        redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
         sessionManager = redisSessionManager;
     }
 
+    @AfterAll
+    public static void close(){
+        redisTransactionStoreManager=null;
+    }
+
     @Test
-    public void testInsertGlobalSessionDataAndQuery() throws TransactionException {
+    public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
+        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 500);
+        String xid1 = XID.generateXID(session1.getTransactionId());
+        session1.setXid(xid1);
+        session1.setTransactionId(session1.getTransactionId());
+        session1.setBeginTime(System.currentTimeMillis());
+        session1.setApplicationData("abc=878s1");
+        session1.setStatus(GlobalStatus.Begin);
+        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 450);
+        String xid2 = XID.generateXID(session2.getTransactionId());
+        session2.setXid(xid2);
+        session2.setTransactionId(session2.getTransactionId());
+        session2.setBeginTime(System.currentTimeMillis());
+        session2.setApplicationData("abc1=878s2");
+        session2.setStatus(GlobalStatus.Begin);
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
+        JedisPooledFactory.getJedisInstance().flushAll();
+        sessionManager.addGlobalSession(session1);
+        sessionManager.addGlobalSession(session2);
+        List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
+        for (GlobalSession globalSession : list) {
+            LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+        }
+        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
+        for (GlobalSession globalSession : list2) {
+            LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+        }
+        Assertions.assertEquals(2, list2.size());
+        if(CollectionUtils.isNotEmpty(list)) {
+            Assertions.assertEquals(xid1, list.size() > 1 ? list.get(1).getXid() : list.get(0));
+            if (list.size() > 1 && list2.size() > 1) {
+                Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
+            }
+            sessionManager.removeGlobalSession(session1);
+            sessionManager.removeGlobalSession(session2);
+        }
+    }
+
+    @Test
+    public void testInsertGlobalLockData() {
+        String GLOBAL_LOCK_KEY = "SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792";
+        String ROW_LOCK_KEY = "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188";
+        Map<String, String> globallockMap = new HashMap<>();
+        globallockMap.put("137621367686103001", "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188;SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
+        globallockMap.put("237621367686103002", "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
+        GlobalLockVO globalLockVO = new GlobalLockVO();
+        globalLockVO.setXid("192.168.158.80:8091:37621364385185792");
+        globalLockVO.setTransactionId(37621364385185792L);
+        globalLockVO.setBranchId(37621367686103000L);
+        globalLockVO.setResourceId("jdbc:mysql://116.62.62.26/seata-order");
+        globalLockVO.setTableName("order");
+        globalLockVO.setPk("2188");
+        globalLockVO.setRowKey("jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188");
+        globalLockVO.setGmtCreate(System.currentTimeMillis());
+        globalLockVO.setGmtModified(System.currentTimeMillis());
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            jedis.hmset(GLOBAL_LOCK_KEY, globallockMap);
+            jedis.hmset(ROW_LOCK_KEY, BeanUtils.objectToMap(globalLockVO));
+        } catch (Exception ex) {
+            throw new RedisException(ex);
+        }
+    }
+
+    @Test
+    public void testQueryGlobalslSession() {
+        Long count = redisTransactionStoreManager.countByGlobalSessions(GlobalStatus.values());
+        LOGGER.info("the count is:[{}]", count);
+    }
+
+    @Test
+    public void testreadisQuery() {
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setPageNum(0);
+        param.setPageSize(5);
+        param.setWithBranch(false);
+        List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
+        LOGGER.info("the result size is:[{}]", globalSessionKeys.size());
+        LOGGER.info("the globalSessionKeys is:[{}]", globalSessionKeys);
+    }
+
+    @Test
+    public void testLimitAllSessions() {
+        redisTransactionStoreManager.setLogQueryLimit(20);
+        List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
+        LOGGER.info("the limit All Sessions result is:[{}]", globalSessions);
+    }
+
+    @Test
+    public synchronized void testInsertGlobalSessionDataAndQuery() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
@@ -180,62 +267,12 @@ public class RedisTransactionStoreManagerTest {
         final List<GlobalSession> globalSessionStatus = redisTransactionStoreManager.readSessionStatusByPage(param);
         LOGGER.info("the  globalSessionStatus result is:[{}]", globalSessionStatus);
         LOGGER.info("the  globalSessionStatus result size is:[{}]", globalSessionStatus);
-
-    }
-
-    @Test
-    public void testInsertGlobalLockData() {
-        String GLOBAL_LOCK_KEY = "SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792";
-        String ROW_LOCK_KEY = "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188";
-        Map<String, String> globallockMap = new HashMap<>();
-        globallockMap.put("137621367686103001", "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188;SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
-        globallockMap.put("237621367686103002", "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
-        GlobalLockVO globalLockVO = new GlobalLockVO();
-        globalLockVO.setXid("192.168.158.80:8091:37621364385185792");
-        globalLockVO.setTransactionId(37621364385185792L);
-        globalLockVO.setBranchId(37621367686103000L);
-        globalLockVO.setResourceId("jdbc:mysql://116.62.62.26/seata-order");
-        globalLockVO.setTableName("order");
-        globalLockVO.setPk("2188");
-        globalLockVO.setRowKey("jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188");
-        globalLockVO.setGmtCreate(System.currentTimeMillis());
-        globalLockVO.setGmtModified(System.currentTimeMillis());
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            jedis.hmset(GLOBAL_LOCK_KEY, globallockMap);
-            jedis.hmset(ROW_LOCK_KEY, BeanUtils.objectToMap(globalLockVO));
-        } catch (Exception ex) {
-            throw new RedisException(ex);
-        }
-    }
-
-    @Test
-    public void testQueryGlobalslSession() {
-        Long count = redisTransactionStoreManager.countByGlobalSessions(GlobalStatus.values());
-        LOGGER.info("the count is:[{}]", count);
-    }
-
-    @Test
-    public void testreadisQuery() {
-        GlobalSessionParam param = new GlobalSessionParam();
-        param.setPageNum(0);
-        param.setPageSize(5);
-        param.setWithBranch(false);
-        List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
-        LOGGER.info("the result size is:[{}]", globalSessionKeys.size());
-        LOGGER.info("the globalSessionKeys is:[{}]", globalSessionKeys);
-    }
-
-    @Test
-    public void testLimitAllSessions() {
-        redisTransactionStoreManager.setLogQueryLimit(20);
-        List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
-        LOGGER.info("the limit All Sessions result is:[{}]", globalSessions);
-    }
-
-    @AfterAll
-    public static void after() {
-        server.stop();
-        server = null;
+        sessionManager.removeGlobalSession(session1);
+        sessionManager.removeGlobalSession(session2);
+        sessionManager.removeGlobalSession(session3);
+        sessionManager.removeGlobalSession(session4);
+        sessionManager.removeGlobalSession(session5);
+        sessionManager.removeGlobalSession(session);
     }
 
 }

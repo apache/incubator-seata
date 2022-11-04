@@ -17,17 +17,13 @@ package io.seata.server.session.redis;
 
 import java.io.IOException;
 
-import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisLuaTransactionStoreManager;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import com.github.fppt.jedismock.RedisServer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * test RedisLuaTransactionStoreManager
@@ -47,21 +43,12 @@ public class RedisLuaTransactionStoreManagerTest extends RedisTransactionStoreMa
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
+        MockRedisServer.getInstance();
+        EnhancedServiceLoader.unloadAll();
         redisTransactionStoreManager = new RedisLuaTransactionStoreManager();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
         sessionManager = redisSessionManager;
     }
 
-    @AfterAll
-    public static void after() {
-        server.stop();
-        server = null;
-    }
 }

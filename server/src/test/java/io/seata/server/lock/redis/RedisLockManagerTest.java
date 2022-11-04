@@ -15,18 +15,18 @@
  */
 package io.seata.server.lock.redis;
 
-import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.exception.StoreException;
+import java.io.IOException;
+
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.model.LockStatus;
 import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
+import io.seata.server.session.redis.MockRedisServer;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.lock.RedisLockManager;
 import io.seata.server.storage.redis.lock.RedisLocker;
-import java.io.IOException;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,6 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 @SpringBootTest
 public class RedisLockManagerTest {
-    static RedisServer server = null;
     static LockManager lockManager = null;
 
     static Jedis jedis = null;
@@ -56,12 +55,11 @@ public class RedisLockManagerTest {
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
+        MockRedisServer.getInstance();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        jedis = JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000)).getResource();
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000)).getResource();
         lockManager = new RedisLockManagerForTest();
     }
 
@@ -135,12 +133,6 @@ public class RedisLockManagerTest {
         Assertions.assertTrue(lockManager.acquireLock(branchSession));
         lockManager.updateLockStatus(branchSession.getXid(), LockStatus.Rollbacking);
         Assertions.assertTrue(lockManager.releaseLock(branchSession));
-    }
-
-    @AfterAll
-    public static void after() {
-        server.stop();
-        server = null;
     }
 
     public static class RedisLockManagerForTest extends RedisLockManager {

@@ -17,19 +17,16 @@ package io.seata.server.lock.redis;
 
 import java.io.IOException;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.lock.Locker;
 import io.seata.server.session.BranchSession;
-import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.server.session.redis.MockRedisServer;
 import io.seata.server.storage.redis.lock.RedisLockManager;
 import io.seata.server.storage.redis.lock.RedisLuaLocker;
 
-import com.github.fppt.jedismock.RedisServer;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * RedisLocker use lua script
@@ -49,20 +46,11 @@ public class RedisLuaLockManagerTest extends RedisLockManagerTest {
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        jedis = JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000)).getResource();
+        MockRedisServer.getInstance();
+        EnhancedServiceLoader.unloadAll();
         lockManager = new RedisLuaLockManagerTest.RedisLockManagerForTest();
     }
 
-    @AfterAll
-    public static void after() {
-        server.stop();
-        server = null;
-    }
 
     public static class RedisLockManagerForTest extends RedisLockManager {
 
