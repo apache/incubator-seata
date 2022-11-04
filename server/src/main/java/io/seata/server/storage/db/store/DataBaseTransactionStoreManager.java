@@ -165,6 +165,11 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
 
+    @Override
+    public List<GlobalSession> readSortByTimeoutBeginSessions(boolean withBranchSessions) {
+        return readSession(new GlobalStatus[] {GlobalStatus.Begin}, withBranchSessions);
+    }
+
     /**
      * Read session list.
      *
