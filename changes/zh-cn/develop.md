@@ -32,7 +32,7 @@
 - [[#5004](https://github.com/seata/seata/pull/5004)] 修复mysql update join行数据重复的问题
 - [[#5033](https://github.com/seata/seata/pull/5033)] 修复InsertOnDuplicateUpdate的SQL语句中无插入列字段导致的空指针问题
 - [[#5038](https://github.com/seata/seata/pull/5038)] 修复SagaAsyncThreadPoolProperties冲突问题
-- [[#5050](https://github.com/seata/seata/pull/5050)] 修复Saga模式下全局状态未正确更改成Commited
+- [[#5050](https://github.com/seata/seata/pull/5050)] 修复Saga模式下全局状态未正确更改成Committed
 
 
 ### optimize：
