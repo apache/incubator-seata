@@ -7,7 +7,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
 - [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
 - [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
+- [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
+- [[#4914](https://github.com/seata/seata/pull/4914)] support mysql update join sql
 
 
 ### bugfix:
@@ -15,6 +17,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4954](https://github.com/seata/seata/pull/4954)] fix output expression incorrectly throws npe
 - [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
 - [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
+- [[#4533](https://github.com/seata/seata/pull/4533)] fix rollback event repeated and some event status not correct
 - [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
 - [[#4912](https://github.com/seata/seata/pull/4912)] fix mysql InsertOnDuplicateUpdate column case is different and cannot be matched
 - [[#4543](https://github.com/seata/seata/pull/4543)] fix support Oracle nclob types
@@ -23,6 +26,10 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
 - [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
 - [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
+- [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
+- [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
+- [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
+- [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
 
 
 ### optimize:
@@ -50,6 +57,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
 - [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
 - [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
+- [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
 
 
 ### test:
@@ -76,5 +84,8 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [tuwenlin](https://github.com/tuwenlin)
 - [CrazyLionLi](https://github.com/JavaLionLi)
 - [whxxxxx](https://github.com/whxxxxx)
+- [renliangyu857](https://github.com/renliangyu857)
+- [neillee95](https://github.com/neillee95)
+- [crazy-sheep](https://github.com/crazy-sheep)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
