@@ -153,8 +153,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.fppt</groupId>
-            <artifactId>jedis-mock</artifactId>
+            <groupId>com.github.microwww</groupId>
+            <artifactId>redis-server</artifactId>
             <scope>test</scope>
         </dependency>
 
