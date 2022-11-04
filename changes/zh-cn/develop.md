@@ -32,6 +32,8 @@
 - [[#5004](https://github.com/seata/seata/pull/5004)] 修复mysql update join行数据重复的问题
 - [[#5033](https://github.com/seata/seata/pull/5033)] 修复InsertOnDuplicateUpdate的SQL语句中无插入列字段导致的空指针问题
 - [[#5033](https://github.com/seata/seata/pull/5023)] 修复InsertOnDuplicateUpdate中插入值解析为String类型导致的类型识别错误
+- [[#5038](https://github.com/seata/seata/pull/5038)] 修复SagaAsyncThreadPoolProperties冲突问题
+- [[#5050](https://github.com/seata/seata/pull/5050)] 修复Saga模式下全局状态未正确更改成Committed
 
 
 ### optimize：
@@ -58,6 +60,7 @@
 - [[#4962](https://github.com/seata/seata/pull/4962)] 优化构建配置，并修正docker镜像的基础镜像
 - [[#4974](https://github.com/seata/seata/pull/4974)] 取消redis模式下,查询globalStatus条数的限制
 - [[#4981](https://github.com/seata/seata/pull/4981)] 优化当tcc栅栏记录查不到时的错误提示
+- [[#4995](https://github.com/seata/seata/pull/4995)] 修复mysql InsertOnDuplicateUpdate后置镜像查询SQL中重复的主键查询条件
 
 ### test：
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
@@ -85,5 +88,6 @@
 - [whxxxxx](https://github.com/whxxxxx)
 - [renliangyu857](https://github.com/renliangyu857)
 - [neillee95](https://github.com/neillee95)
+- [crazy-sheep](https://github.com/crazy-sheep)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

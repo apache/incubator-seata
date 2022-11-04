@@ -30,6 +30,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
 - [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
 - [[#5033](https://github.com/seata/seata/pull/5023)] fix mysql InsertOnDuplicateUpdate insert value type recognize error
+- [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
+- [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
+
 
 
 ### optimize:
@@ -57,6 +60,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
 - [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
 - [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
+- [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
 
 
 ### test:
@@ -85,5 +89,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [whxxxxx](https://github.com/whxxxxx)
 - [renliangyu857](https://github.com/renliangyu857)
 - [neillee95](https://github.com/neillee95)
+- [crazy-sheep](https://github.com/crazy-sheep)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
