@@ -362,8 +362,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 if (e instanceof SQLUndoDirtyException) {
                     throw new BranchTransactionException(BranchRollbackFailed_Unretriable,
                         String.format(
-                            "Branch session rollback failed because of dirty undo log. xid = %s branchId = %s %s", xid,
-                            branchId, e.getMessage()),
+                            "Branch session rollback failed because of dirty undo log. xid = %s branchId = %s", xid,
+                            branchId),
                         e);
                 }
                 throw new BranchTransactionException(BranchRollbackFailed_Retriable,
