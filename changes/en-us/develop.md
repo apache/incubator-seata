@@ -28,7 +28,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
 - [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
-
+- [[#5052](https://github.com/seata/seata/pull/5052)] fix update join condition placeholder param error
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image

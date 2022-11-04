@@ -30,7 +30,7 @@
 - [[#5018](https://github.com/seata/seata/pull/5018)] 修复启动脚本中 loader path 使用相对路径导致 server 启动失败问题
 - [[#5004](https://github.com/seata/seata/pull/5004)] 修复mysql update join行数据重复的问题
 - [[#5033](https://github.com/seata/seata/pull/5033)] 修复InsertOnDuplicateUpdate的SQL语句中无插入列字段导致的空指针问题
-
+- [[#5052](https://github.com/seata/seata/pull/5052)] 修复update join条件中占位符参数问题
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
