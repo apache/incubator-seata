@@ -58,7 +58,6 @@ public class ServerApplicationListener implements GenericApplicationListener {
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
         SeataCoreEnvironmentPostProcessor.init();
         SeataServerEnvironmentPostProcessor.init();
-        // Configuration config  = ConfigurationFactory.getInstance();
         // Load by priority
         System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
         System.setProperty("lockMode", StoreConfig.getLockMode().getName());

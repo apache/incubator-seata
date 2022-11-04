@@ -47,7 +47,6 @@ public class Server {
      */
     public static void start(String[] args) {
         // create logger
-        // final Logger logger = LoggerFactory.getLogger(Server.class);
 
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
