@@ -30,8 +30,10 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
 - [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
+- [[#5033](https://github.com/seata/seata/pull/5023)] fix mysql InsertOnDuplicateUpdate insert value type recognize error
 - [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
 - [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
+
 
 
 ### optimize:
