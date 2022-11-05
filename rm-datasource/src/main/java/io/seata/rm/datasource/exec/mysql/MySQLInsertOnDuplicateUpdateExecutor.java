@@ -361,7 +361,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         Map<String, List<Object>> primaryValueMap = new HashMap<>();
         //1.get pk values from statement
-        statementParametersMap.forEach((key,values)->{
+        statementParametersMap.forEach((key,values) -> {
             if (pkColumnNameList.contains(key)) {
                 primaryValueMap.put(key,values);
             }
