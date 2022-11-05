@@ -96,7 +96,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         return null;
     }
 
-    private String buildBeforeImageSQLCommonConditionSuffix(ArrayList<List<Object>> paramAppenderList){
+    private String buildBeforeImageSQLCommonConditionSuffix(ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         StringBuilder suffix = new StringBuilder();
         buildJoinCondition(recognizer,paramAppenderList);
