@@ -209,8 +209,9 @@ public class DesignerJsonTransformer {
 
     /**
      * Generate tracing graph json
-     * @param stateMachineInstance
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param jsonParser the json parser
+     * @return the tracing graph json
      */
     @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
     public static String generateTracingGraphJson(StateMachineInstance stateMachineInstance, JsonParser jsonParser) {

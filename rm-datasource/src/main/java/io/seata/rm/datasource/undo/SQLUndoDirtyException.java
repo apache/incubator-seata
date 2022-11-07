@@ -13,24 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.lock;
+package io.seata.rm.datasource.undo;
+
+import java.io.Serializable;
+import java.sql.SQLException;
 
 /**
- * lock mode
- *
- * @author zhangsen
+ * @author zouwei
  */
-public enum LockMode {
+class SQLUndoDirtyException extends SQLException implements Serializable {
 
-    /**
-     * store the lock in user's database
-     */
-    LOCAL,
+    private static final long serialVersionUID = -5168905669539637570L;
 
-    /**
-     * store the lock in seata's server
-     */
-    REMOTE;
-
-
+    SQLUndoDirtyException(String reason) {
+        super(reason);
+    }
 }

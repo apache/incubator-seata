@@ -25,7 +25,7 @@ import io.seata.common.exception.NotSupportYetException;
 /**
  * db page util
  *
- * @author: lvekee 734843455@qq.com
+ * @author lvekee 734843455@qq.com
  */
 public class PageUtil {
     /**
@@ -78,8 +78,8 @@ public class PageUtil {
     /**
      * check page parm
      *
-     * @param pageNum
-     * @param pageSize
+     * @param pageNum the page num
+     * @param pageSize the page size
      */
     public static void checkParam(int pageNum, int pageSize) {
         if (!(pageNum >= MIN_PAGE_NUM && pageNum <= MAX_PAGE_NUM)) {
@@ -93,11 +93,11 @@ public class PageUtil {
     /**
      * get pagesql
      *
-     * @param sourceSql
-     * @param dbType
-     * @param pageNum
-     * @param pageSize
-     * @return
+     * @param sourceSql the source sql
+     * @param dbType the db type
+     * @param pageNum the page num
+     * @param pageSize the page size
+     * @return the page sql
      */
     public static String pageSql(String sourceSql, String dbType, int pageNum, int pageSize) {
         switch (dbType) {
@@ -120,9 +120,9 @@ public class PageUtil {
     /**
      * get countsql
      *
-     * @param sourceSql
-     * @param dbType
-     * @return
+     * @param sourceSql the source sql
+     * @param dbType the db type
+     * @return the count sql
      */
     public static String countSql(String sourceSql, String dbType) {
         switch (dbType) {
@@ -144,9 +144,9 @@ public class PageUtil {
 
     /**
      * set sqlParamList in preparedStatement
-     * @param ps
-     * @param sqlParamList
-     * @throws SQLException
+     * @param ps the prepared statement
+     * @param sqlParamList the sql param list
+     * @throws SQLException the sql exception
      */
     public static void setObject(PreparedStatement ps, List<Object> sqlParamList) throws SQLException {
         for (int i = 0; i < sqlParamList.size(); i++) {
