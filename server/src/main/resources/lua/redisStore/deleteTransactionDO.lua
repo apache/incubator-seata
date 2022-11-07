@@ -18,16 +18,17 @@
 -- param description
 -- KEYS[1] branchOrGlobalKey
 -- KEYS[2] listKey
--- KEYS[3~-1] transactionDOMap.keys
+-- KEYS[3] REDIS_KEY_BRANCH_XID/REDIS_KEY_GLOBAL_XID
+-- KEYS[4] REDIS_SEATA_BEGIN_TRANSACTIONS_KEY (only type is global)
 -- ARGV[1] type: global or branch
--- ARGV[2] transactionDOMap.size()
--- ARGV[3~-1] transactionDOMap.values
--- ARGV[-1] xid only type is global
+-- ARGV[2] globalTransactionDO xid (only type is global)
+-- ARGV[3] globalTransactionDO status (only type is global)
 
 -- init data
 local branchOrGlobalKey = KEYS[1];
 local listKey = KEYS[2];
 local redisKeyXID = KEYS[3];
+
 local type = ARGV[1];
 
 local existedXid = redis.call('HGET', branchOrGlobalKey, redisKeyXID);
@@ -39,10 +40,17 @@ end
 
 if (type == 'branch') then
     redis.call('LREM', listKey, 0, branchOrGlobalKey);
+    redis.call('DEL', branchOrGlobalKey);
 elseif (type == 'global') then
     local xid = ARGV[2];
+    local status = tonumber(ARGV[3]);
+    local REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = KEYS[4];
     redis.call('LREM', listKey, 0, xid);
+    redis.call('DEL', branchOrGlobalKey);
+    -- GlobalStatus.Begin or GlobalStatus.UnKnown
+    if (status == 1 or status == 0) then
+        redis.call('ZREM', REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, branchOrGlobalKey);
+    end
 end
 
-redis.call('DEL', branchOrGlobalKey);
 return 'true';

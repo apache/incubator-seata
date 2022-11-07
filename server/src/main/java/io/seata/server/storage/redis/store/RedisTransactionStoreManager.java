@@ -101,7 +101,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
     /**the key of global transaction status for begin*/
-    private static final String REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = "SEATA_BEGIN_TRANSACTIONS";
+    protected static final String REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = "SEATA_BEGIN_TRANSACTIONS";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -136,7 +136,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     public RedisTransactionStoreManager() {
         super();
-        LOGGER.info("init redisTransactionStoreManager");
         initGlobalMap();
         initBranchMap();
         initLogQueryLimit();

@@ -18,15 +18,18 @@
 -- param description
 -- KEYS[1] branchOrGlobalKey
 -- KEYS[2] listKey
--- KEYS[3~-1] transactionDOMap.keys
+-- KEYS[3~-2] transactionDOMap.keys
+-- KEYS[-1] REDIS_SEATA_BEGIN_TRANSACTIONS_KEY (only type is global)
 -- ARGV[1] type: global or branch
 -- ARGV[2] transactionDOMap.size()
--- ARGV[3~-1] transactionDOMap.values
--- ARGV[-1] xid only type is global
+-- ARGV[3~-2] transactionDOMap.values
+-- ARGV[-2] xid (only type is global)
+-- ARGV[-1] beginTime+timeout (only type is global)
 
 -- init data
 local branchOrGlobalKey = KEYS[1];
 local listKey = KEYS[2];
+
 local type = ARGV[1];
 local keySize = tonumber(ARGV[2]);
 
@@ -37,7 +40,9 @@ end
 if type == 'branch' then
     redis.call('RPUSH', listKey, branchOrGlobalKey);
 elseif type == 'global' then
+    local REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = KEYS[keySize + 3];
     redis.call('RPUSH', listKey, ARGV[keySize + 3]);
+    redis.call('ZADD', REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, ARGV[keySize + 4], branchOrGlobalKey)
 end
 
 return 'true';

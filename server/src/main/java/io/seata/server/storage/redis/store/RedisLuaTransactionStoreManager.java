@@ -98,10 +98,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
 
     public RedisLuaTransactionStoreManager() {
         LOGGER.info("init redisLuaTransactionStoreManager");
-        initGlobalMap();
-        initBranchMap();
         initRedisMode();
-        super.initLogQueryLimit();
     }
 
     @Override
@@ -258,7 +255,9 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                 keys.add(entry.getKey());
                 args.add(entry.getValue());
             }
+            keys.add(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY);
             args.add(xid);
+            args.add(String.valueOf(globalTransactionDO.getBeginTime() + globalTransactionDO.getTimeout()));
             jedis.evalsha(luaSHA, keys, args);
             return true;
         } catch (Exception ex) {
@@ -281,12 +280,14 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(globalKey);
                     add(globalStatus);
                     add(REDIS_KEY_GLOBAL_XID);
+                    add(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY);
                 }
             };
             List<String> args = new ArrayList<String>() {
                 {
                     add("global");
                     add(globalTransactionDO.getXid());
+                    add(String.valueOf(globalTransactionDO.getStatus()));
                 }
             };
             jedis.evalsha(luaSHA, keys, args);
@@ -312,6 +313,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(globalKey);
                     add(REDIS_KEY_GLOBAL_STATUS);
                     add(REDIS_KEY_GLOBAL_GMT_MODIFIED);
+                    add(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY);
                 }
             };
             List<String> args = new ArrayList<String>() {
