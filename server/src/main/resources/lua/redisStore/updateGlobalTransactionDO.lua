@@ -19,6 +19,7 @@
 -- KEYS[1] globalKey
 -- KEYS[2] REDIS_KEY_GLOBAL_STATUS
 -- KEYS[3] REDIS_KEY_GLOBAL_GMT_MODIFIED
+-- KEYS[4] REDIS_SEATA_BEGIN_TRANSACTIONS_KEY
 -- ARGV[1] status
 -- ARGV[2] nowTime
 -- ARGV[3] xid
@@ -27,6 +28,7 @@
 local globalKey = KEYS[1];
 local REDIS_KEY_GLOBAL_STATUS = KEYS[2];
 local REDIS_KEY_GLOBAL_GMT_MODIFIED = KEYS[3];
+local REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = KEYS[4];
 
 local status = ARGV[1];
 local nowTime = ARGV[2];
@@ -97,8 +99,9 @@ local data = {};
 data[1] = redis.call('HMSET', globalKey, REDIS_KEY_GLOBAL_STATUS, status, REDIS_KEY_GLOBAL_GMT_MODIFIED, nowTime)['ok'];
 data[2] = tostring(redis.call('LREM', 'SEATA_STATUS_' .. previousStatus, 0, xid));
 data[3] = tostring(redis.call('RPUSH', 'SEATA_STATUS_' .. status, xid));
-data[4] = previousStatus;
-data[5] = previousGmtModified;
+data[4] = tostring(redis.call('ZREM', REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, globalKey));
+data[5] = previousStatus;
+data[6] = previousGmtModified;
 
 result['success'] = true;
 result['status'] = '';
