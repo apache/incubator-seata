@@ -30,8 +30,6 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
@@ -48,9 +46,6 @@ public class Server {
      * @param args the input arguments
      */
     public static void start(String[] args) {
-        // create logger
-        final Logger logger = LoggerFactory.getLogger(Server.class);
-
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
         //Because, here we need to parse the parameters needed for startup.
