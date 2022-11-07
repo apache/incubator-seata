@@ -56,6 +56,13 @@ public interface TransactionStoreManager {
     GlobalSession readSession(String xid, boolean withBranchSessions);
 
     /**
+     * Read session global session by sort by timeout begin status.
+     *
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    List<GlobalSession> readSortByTimeoutBeginSessions(boolean withBranchSessions);
+    /**
      * Read session global session.
      *
      * @param statuses the statuses
