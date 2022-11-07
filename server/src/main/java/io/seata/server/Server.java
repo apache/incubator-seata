@@ -46,8 +46,6 @@ public class Server {
      * @param args the input arguments
      */
     public static void start(String[] args) {
-        // create logger
-
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
         //Because, here we need to parse the parameters needed for startup.
