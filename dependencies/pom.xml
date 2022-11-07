@@ -48,8 +48,8 @@
         <apache-zookeeper.version>3.5.9</apache-zookeeper.version>
         <curator-test.version>2.9.1</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
+        <mock-jedis.version>0.3.0</mock-jedis.version>
         <apollo-client.version>2.0.1</apollo-client.version>
-        <mock-jedis.version>0.1.16</mock-jedis.version>
         <eureka-clients.version>1.10.17</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>1.4.2</nacos-client.version>
@@ -346,8 +346,8 @@
                 <version>${jedis.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.fppt</groupId>
-                <artifactId>jedis-mock</artifactId>
+                <groupId>com.github.microwww</groupId>
+                <artifactId>redis-server</artifactId>
                 <version>${mock-jedis.version}</version>
             </dependency>
             <dependency>
