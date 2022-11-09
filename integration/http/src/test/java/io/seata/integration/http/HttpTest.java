@@ -44,7 +44,6 @@ class HttpTest {
     private static final String testException = "/testException";
     private static final String getPath = "/testGet";
     private static final String postPath = "/testPost";
-    private static final String putPath = "/testPut";
     public static final String XID = "127.0.0.1:8081:87654321";
     private static final int PARAM_TYPE_MAP = 1;
     private static final int PARAM_TYPE_BEAN = 2;
@@ -73,15 +72,6 @@ class HttpTest {
         providerStart();
         String result = consumerGetExceptionStart();
         Assertions.assertEquals("Callee remove local xid success", result);
-        RootContext.unbind();
-    }
-
-    @Test
-    void testPutProviderXID() {
-        RootContext.bind(XID);
-        providerStart();
-        String result = consumerPutStart(PARAM_TYPE_MAP);
-        Assertions.assertEquals("Person{name='null', age=0}", result);
         RootContext.unbind();
     }
 
@@ -144,40 +134,6 @@ class HttpTest {
                 response = httpExecuter.executePost(host, postPath, person, HttpResponse.class);
             } else {
                 response = httpExecuter.executePost(host, postPath, str, HttpResponse.class);
-            }
-
-            return readStreamAsStr(response.getEntity().getContent());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String consumerPutStart(int param_type) {
-        DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
-        String str = "{\n" +
-                "    \"name\":\"zhangsan\",\n" +
-                "    \"age\":15\n" +
-                "}";
-        Person person = JSON.parseObject(str, Person.class);
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "zhangsan");
-        map.put("age", 15);
-
-        JSONObject json = new JSONObject();
-        json.put("name", "zhangsan");
-        json.put("age", 15);
-
-        //The body parameter of post supports the above types (str,person,map,json)
-        try {
-            HttpResponse response;
-
-            if (param_type == PARAM_TYPE_MAP) {
-                response = httpExecuter.executePut(host, putPath, map, HttpResponse.class);
-            } else if (param_type == PARAM_TYPE_BEAN) {
-                response = httpExecuter.executePut(host, putPath, person, HttpResponse.class);
-            } else {
-                response = httpExecuter.executePut(host, putPath, str, HttpResponse.class);
             }
 
             return readStreamAsStr(response.getEntity().getContent());

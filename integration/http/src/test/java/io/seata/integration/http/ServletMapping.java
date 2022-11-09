@@ -28,7 +28,6 @@ public class ServletMapping {
     static {
         servletMappingList.add(new ServletMapping("/testGet", "testGet", "io.seata.integration.http.MockController"));
         servletMappingList.add(new ServletMapping("/testPost", "testPost", "io.seata.integration.http.MockController"));
-        servletMappingList.add(new ServletMapping("/testPut", "testPut", "io.seata.integration.http.MockController"));
         servletMappingList.add(new ServletMapping("/testException", "testException", "io.seata.integration.http.MockController"));
     }
 
