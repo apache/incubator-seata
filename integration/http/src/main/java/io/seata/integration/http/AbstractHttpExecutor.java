@@ -26,6 +26,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -50,13 +51,35 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     @Override
     public <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException {
-
         Args.notNull(returnType, "returnType");
+        HttpPost httpPost = new HttpPost(host + path);
+        StringEntity entity = execute(host, path, paramObject);
+        if (entity != null) {
+            httpPost.setEntity(entity);
+        }
+        Map<String, String> headers = new HashMap<>();
+        buildPostHeaders(headers, paramObject);
+        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
+        return wrapHttpExecute(returnType, httpClient, httpPost, headers);
+    }
+
+    @Override
+    public <T, K> K executePut(String host, String path, T paramObject, Class<K> returnType) throws IOException {
+        Args.notNull(returnType, "returnType");
+        HttpPut httpPut = new HttpPut(host + path);
+        StringEntity entity = execute(host, path, paramObject);
+        if (entity != null) {
+            httpPut.setEntity(entity);
+        }
+        Map<String, String> headers = new HashMap<>();
+        buildPostHeaders(headers, paramObject);
+        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
+        return wrapHttpExecute(returnType, httpClient, httpPut, headers);
+    }
+
+    private <T> StringEntity execute(String host, String path, T paramObject) {
         Args.notNull(host, "host");
         Args.notNull(path, "path");
-
-        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
-        HttpPost httpPost = new HttpPost(host + path);
         StringEntity entity = null;
         if (paramObject != null) {
             String content;
@@ -80,14 +103,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
             entity = new StringEntity(content, ContentType.APPLICATION_JSON);
         }
 
-        entity = buildEntity(entity, paramObject);
-        if (entity != null) {
-            httpPost.setEntity(entity);
-        }
-        Map<String, String> headers = new HashMap<>();
-
-        buildPostHeaders(headers, paramObject);
-        return wrapHttpExecute(returnType, httpClient, httpPost, headers);
+        return buildEntity(entity, paramObject);
     }
 
     @Override
@@ -115,7 +131,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
     protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
 
     private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest,
-            Map<String, String> headers) throws IOException {
+                                  Map<String, String> headers) throws IOException {
         CloseableHttpResponse response;
         String xid = RootContext.getXID();
         if (xid != null) {

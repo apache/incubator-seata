@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PutMapping;
 
 /**
  * @author : wangxb
@@ -43,6 +44,14 @@ public class MockController {
     @ResponseBody
     @PostMapping("/testPost")
     public String testPost(@RequestBody HttpTest.Person person) {
+        /* verify xid propagate by test case */
+        Assertions.assertEquals(HttpTest.XID,RootContext.getXID());
+        return person.toString();
+    }
+
+    @ResponseBody
+    @PutMapping("/testPut")
+    public String testPut(@RequestBody HttpTest.Person person) {
         /* verify xid propagate by test case */
         Assertions.assertEquals(HttpTest.XID,RootContext.getXID());
         return person.toString();
