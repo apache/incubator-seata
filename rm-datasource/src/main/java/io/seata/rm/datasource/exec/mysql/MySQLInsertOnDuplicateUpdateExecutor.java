@@ -53,6 +53,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -273,7 +274,8 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             for (int i = 0; i < ts; i++) {
                 List<Object> paramAppender = paramAppenderList.get(i);
                 for (int j = 0; j < ds; j++) {
-                    ps.setObject(i * ds + j + 1, "NULL".equals(paramAppender.get(j).toString()) ? null : paramAppender.get(j));
+                    Object param = paramAppender.get(j);
+                    ps.setObject(i * ds + j + 1, (param instanceof Null) ? null : param);
                 }
             }
             for (int i = 0; i < primaryKeys.size(); i++) {
@@ -298,7 +300,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             paramAppenderList = new ArrayList<>();
         }
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        int insertNum = recognizer.getInsertParamsValue().size();
+        int insertNum = recognizer.getInsertRows(getPkIndex().values()).size();
         Map<String, ArrayList<Object>> imageParameterMap = buildImageParameters(recognizer);
         String prefix = "SELECT * ";
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
@@ -368,30 +370,27 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         }
         Map<String, ArrayList<Object>> imageParameterMap = new LowerCaseLinkHashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
-        //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        List<String> insertParamsList = recognizer.getInsertParamsValue();
         List<String> sqlRecognizerColumns = recognizer.getInsertColumns();
         List<String> insertColumns = CollectionUtils.isEmpty(sqlRecognizerColumns) ? new ArrayList<>(getTableMeta().getAllColumns().keySet()) : sqlRecognizerColumns;
-        int paramsindex = 1;
-        for (String insertParams : insertParamsList) {
-            String[] insertParamsArray = insertParams.split(",");
-            for (int i = 0; i < insertColumns.size(); i++) {
-                String m = insertColumns.get(i);
-                String params = insertParamsArray[i];
-                ArrayList<Object> imageListTemp = imageParameterMap.computeIfAbsent(m, k -> new ArrayList<>());
-                if ("?".equals(params.trim())) {
-                    ArrayList<Object> objects = parameters.get(paramsindex);
-                    imageListTemp.addAll(objects);
-                    paramsindex++;
+        final Map<String,Integer> pkIndexMap = getPkIndex();
+        List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
+        int placeHolderIndex = 1;
+        for (List<Object> row : insertRows) {
+            if (row.size() != insertColumns.size()) {
+                throw new IllegalArgumentException("insert row's size is not equal to column size");
+            }
+            for (int i = 0;i < insertColumns.size();i++) {
+                String column = ColumnUtils.delEscape(insertColumns.get(i),getDbType());
+                Object value = row.get(i);
+                ArrayList<Object> columnImages = imageParameterMap.computeIfAbsent(column, k -> new ArrayList<>());
+                if (PLACEHOLDER.equals(value)) {
+                    ArrayList<Object> objects = parameters.get(placeHolderIndex);
+                    columnImages.addAll(objects);
+                    placeHolderIndex++;
                 } else {
-                    // params is character string constant
-                    if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
-                        params = params.trim();
-                        params = params.substring(1, params.length() - 1);
-                    }
-                    imageListTemp.add(params);
+                    columnImages.add(value);
                 }
-                imageParameterMap.put(m, imageListTemp);
+                imageParameterMap.put(column,columnImages);
             }
         }
         return imageParameterMap;
