@@ -375,7 +375,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             });
         });
         if (primaryValueMap.isEmpty() && pkColumnNameList.size() == 1) {
-            //when there is only one auto increment pk
+            //when there is only one auto increment pk and unique index not hit any data,multi pk can't all keys have no data
             return getPkValuesByAuto();
         }
         checkPkValues(primaryValueMap,false);
