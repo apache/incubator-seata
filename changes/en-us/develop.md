@@ -63,6 +63,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
 - [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
 - [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
+- [[#5047](https://github.com/seata/seata/pull/5047)] remove useless code
+- [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
 
 
 ### test:
@@ -92,5 +94,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [renliangyu857](https://github.com/renliangyu857)
 - [neillee95](https://github.com/neillee95)
 - [crazy-sheep](https://github.com/crazy-sheep)
+- [zhangzq7](https://github.com/zhangzq7)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
