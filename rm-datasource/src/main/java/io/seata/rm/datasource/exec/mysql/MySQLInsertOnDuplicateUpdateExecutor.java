@@ -209,9 +209,6 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         TableMeta tableMeta = getTableMeta();
         // After image sql the same of before image
         String selectSQL = buildBeforeImageSQL(tableMeta);
-        if (CollectionUtils.isEmpty(paramAppenderList)) {
-            return TableRecords.empty(getTableMeta());
-        }
         return buildBeforeImageTableRecords(tableMeta, selectSQL, paramAppenderList);
     }
 
@@ -225,6 +222,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
      * @throws SQLException then execute fail
      */
     public TableRecords buildBeforeImageTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+        if (CollectionUtils.isEmpty(paramAppenderList)) {
+            return TableRecords.empty(getTableMeta());
+        }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection()
             .prepareStatement(selectSQL + " FOR UPDATE")) {
@@ -256,7 +256,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         }
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         int insertNum = recognizer.getInsertRows(getPkIndex().values()).size();
-        Map<String, ArrayList<Object>> imageParameterMap = buildImageParameters(recognizer);
+        statementParametersMap = buildImageParameters(recognizer);
         String prefix = "SELECT * ";
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         boolean[] isContainWhere = {false};

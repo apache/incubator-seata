@@ -142,7 +142,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         mockAllIndexes();
         doReturn(tableMeta).when(insertOrUpdateExecutor).getTableMeta();
         try {
-            TableRecords tableRecords = new TableRecords();
+            TableRecords tableRecords = TableRecords.empty(tableMeta);
             String selectSQL = insertOrUpdateExecutor.buildBeforeImageSQL(tableMeta);
             ArrayList<List<Object>> paramAppenderList = insertOrUpdateExecutor.getParamAppenderList();
             doReturn(tableRecords).when(insertOrUpdateExecutor).buildBeforeImageTableRecords(tableMeta,selectSQL,paramAppenderList);
