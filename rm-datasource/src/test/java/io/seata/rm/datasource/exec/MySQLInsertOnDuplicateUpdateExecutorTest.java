@@ -126,7 +126,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         mockInsertColumns();
         mockAllIndexes();
         doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
-        String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
+        String selectSQL = insertOrUpdateExecutor.buildBeforeImageSQL(tableMeta);
         Assertions.assertEquals(selectSQLStr,selectSQL);
         Assertions.assertEquals(paramAppenderListStr,insertOrUpdateExecutor.getParamAppenderList().toString());
     }
@@ -142,10 +142,10 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         mockAllIndexes();
         doReturn(tableMeta).when(insertOrUpdateExecutor).getTableMeta();
         try {
-            TableRecords tableRecords = new TableRecords();
-            String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
+            TableRecords tableRecords = TableRecords.empty(tableMeta);
+            String selectSQL = insertOrUpdateExecutor.buildBeforeImageSQL(tableMeta);
             ArrayList<List<Object>> paramAppenderList = insertOrUpdateExecutor.getParamAppenderList();
-            doReturn(tableRecords).when(insertOrUpdateExecutor).buildTableRecords2(tableMeta,selectSQL,paramAppenderList, Collections.emptyList());
+            doReturn(tableRecords).when(insertOrUpdateExecutor).buildBeforeImageTableRecords(tableMeta,selectSQL,paramAppenderList);
             TableRecords tableRecordsResult = insertOrUpdateExecutor.beforeImage();
             Assertions.assertEquals(tableRecords,tableRecordsResult);
         } catch (SQLException throwables) {
