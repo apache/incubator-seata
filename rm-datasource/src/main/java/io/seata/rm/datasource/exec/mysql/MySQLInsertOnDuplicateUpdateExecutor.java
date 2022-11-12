@@ -274,7 +274,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                 List<Object> paramAppender = paramAppenderList.get(i);
                 for (int j = 0; j < paramAppender.size(); j++) {
                     Object param = paramAppender.get(j);
-                    ps.setObject(i * ds + j + 1, (param instanceof Null) ? null : param);
+                    ps.setObject(paramAppenderCount + 1, (param instanceof Null) ? null : param);
                     paramAppenderCount++; 
                 }
             }
