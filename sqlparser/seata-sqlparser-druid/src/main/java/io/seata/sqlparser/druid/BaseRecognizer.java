@@ -26,7 +26,6 @@ import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
 import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
@@ -120,13 +119,6 @@ public abstract class BaseRecognizer implements SQLRecognizer {
     @Override
     public boolean isSqlSyntaxSupports() {
         SQLASTVisitor visitor = new SQLASTVisitorAdapter() {
-            @Override
-            public boolean visit(SQLJoinTableSource x) {
-                //just like: UPDATE table a INNER JOIN table b ON a.id = b.pid ...
-                throw new NotSupportYetException("not support the sql syntax with join table:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-            }
-
             @Override
             public boolean visit(SQLInSubQueryExpr x) {
                 //just like: ...where id in (select id from t)
