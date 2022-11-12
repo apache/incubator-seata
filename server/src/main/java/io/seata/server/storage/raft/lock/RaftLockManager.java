@@ -45,7 +45,7 @@ public class RaftLockManager extends FileLockManager {
         Closure closure = status -> {
             if (status.isOk()) {
                 try {
-                    completableFuture.complete(super.releaseGlobalSessionLock(globalSession));
+                    completableFuture.complete(this.localReleaseGlobalSessionLock(globalSession));
                 } catch (TransactionException e) {
                     completableFuture.completeExceptionally(e);
                 }

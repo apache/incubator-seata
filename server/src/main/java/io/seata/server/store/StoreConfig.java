@@ -155,7 +155,11 @@ public class StoreConfig {
         /**
          * The Redis store mode.
          */
-        REDIS("redis");
+        REDIS("redis"),
+        /**
+         * The Raft store mode.
+         */
+        RAFT("raft");
 
         private String name;
 

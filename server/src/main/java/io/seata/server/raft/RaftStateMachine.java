@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
@@ -41,7 +42,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.serializer.kryo.KryoSerializerFactory;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.raft.execute.RaftMsgExecute;
@@ -84,8 +84,6 @@ public class RaftStateMachine extends StateMachineAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
     private String mode;
-
-    private static final KryoSerializerFactory FACTORY = KryoSerializerFactory.getInstance();
 
     private static final String BRANCH_SESSION_MAP = "branchSessionMap";
 
@@ -242,19 +240,23 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public void onLeaderStart(final long term) {
-        // become the leader again,reloading global session
-        if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
-            LOGGER.info("session map: {} ",SessionHolder.getRootSessionManager().allSessions().size());
-            SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreConfig.SessionMode.RAFT, false);
-            NettyRemotingServer nettyRemotingServer =
-                (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
-            LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();
-            leaderNotifyRequest.setAddress(XID.getIpAddressAndPort());
-            nettyRemotingServer.sendSyncRequestAll(leaderNotifyRequest);
-        }
+        boolean leader = isLeader();
         this.leaderTerm.set(term);
         super.onLeaderStart(term);
         DefaultCoordinator.getInstance().setPrevent(true);
+        // become the leader again,reloading global session
+        if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
+            CompletableFuture.runAsync(() -> {
+                LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
+                SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreConfig.SessionMode.RAFT,
+                    false);
+                NettyRemotingServer nettyRemotingServer =
+                    (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
+                LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();
+                leaderNotifyRequest.setAddress(XID.getIpAddressAndPort());
+                nettyRemotingServer.sendSyncRequestAll(leaderNotifyRequest);
+            });
+        }
     }
 
     @Override

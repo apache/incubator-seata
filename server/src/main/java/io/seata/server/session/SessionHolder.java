@@ -165,7 +165,7 @@ public class SessionHolder {
      * @param sessionMode the mode of store
      */
     protected static void reload(SessionMode sessionMode) {
-        if (ROOT_SESSION_MANAGER instanceof Reloadable) {
+        if (sessionMode == SessionMode.FILE) {
             ((Reloadable)ROOT_SESSION_MANAGER).reload();
             reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
         } else {
@@ -272,7 +272,8 @@ public class SessionHolder {
     private static void removeInErrorState(GlobalSession globalSession) {
         try {
             LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
-            ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
+            globalSession.addSessionLifecycleListener(getRootSessionManager());
+            globalSession.end();
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Remove global session succeed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
             }
