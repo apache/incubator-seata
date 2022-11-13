@@ -15,6 +15,8 @@
  */
 package io.seata.core.model;
 
+import io.seata.common.LockStrategyMode;
+
 /**
  * @author selfishlover
  */
@@ -24,7 +26,7 @@ public class GlobalLockConfig {
 
     private int lockRetryTimes;
 
-    private boolean skipFirstCheckLock;
+    private LockStrategyMode lockStrategyMode;
 
     public int getLockRetryInterval() {
         return lockRetryInterval;
@@ -42,12 +44,12 @@ public class GlobalLockConfig {
         this.lockRetryTimes = lockRetryTimes;
     }
 
-    public boolean isSkipFirstCheckLock() {
-        return skipFirstCheckLock;
+    public LockStrategyMode getLockStrategyMode() {
+        return lockStrategyMode;
     }
 
-    public void setSkipFirstCheckLock(boolean skipFirstCheckLock) {
-        this.skipFirstCheckLock = skipFirstCheckLock;
+    public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
+        this.lockStrategyMode = lockStrategyMode;
     }
 
 }

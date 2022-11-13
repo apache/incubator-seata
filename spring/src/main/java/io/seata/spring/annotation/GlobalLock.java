@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import io.seata.common.LockStrategyMode;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AliasFor;
 
@@ -66,11 +67,10 @@ public @interface GlobalLock {
     int lockRetryTimes() default -1;
 
     /**
-     * Whether to skip checking for lock owners
-     * When you do not have resources to reent the scene, we recommend that you enable this
-     * configuration, which can greatly improve performance
-     * @return skip check lock
+     * pick the Acquire lock policy
+     *
+     * @return lock strategy mode
      */
-    boolean skipCheckLock() default false;
+    LockStrategyMode lockStrategyMode() default LockStrategyMode.pessimistic;
 
 }

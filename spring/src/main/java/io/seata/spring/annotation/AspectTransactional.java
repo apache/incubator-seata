@@ -16,6 +16,7 @@
 package io.seata.spring.annotation;
 
 import io.seata.common.DefaultValues;
+import io.seata.common.LockStrategyMode;
 import io.seata.common.util.StringUtils;
 import io.seata.tm.api.transaction.Propagation;
 
@@ -74,17 +75,16 @@ public class AspectTransactional {
     int lockRetryTimes = -1;
 
     /**
-     * Whether to skip first checking for lock owners
-     * When you do not have resources to reent the scene, we recommend that you enable this
+     * When you do not have resources to reent the scene, we recommend that you use LockStrategyMode optimistic
      * configuration, which can greatly improve performance
      */
-    boolean skipFirstCheckLock;
+    LockStrategyMode lockStrategyMode;
 
     public AspectTransactional() {}
 
     public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
         String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
-        Propagation propagation, int lockRetryInterval, int lockRetryTimes, boolean skipFirstCheckLock) {
+        Propagation propagation, int lockRetryInterval, int lockRetryTimes, LockStrategyMode lockStrategyMode) {
         this.timeoutMills = timeoutMills;
         this.name = name;
         this.rollbackFor = rollbackFor;
@@ -94,7 +94,7 @@ public class AspectTransactional {
         this.propagation = propagation;
         this.lockRetryInterval = lockRetryInterval;
         this.lockRetryTimes = lockRetryTimes;
-        this.skipFirstCheckLock = skipFirstCheckLock;
+        this.lockStrategyMode = lockStrategyMode;
     }
 
     public int getTimeoutMills() {
@@ -169,12 +169,12 @@ public class AspectTransactional {
         this.lockRetryTimes = lockRetryTimes;
     }
 
-    public boolean isSkipFirstCheckLock() {
-        return skipFirstCheckLock;
+    public LockStrategyMode getLockStrategyMode() {
+        return lockStrategyMode;
     }
 
-    public void setSkipFirstCheckLock(boolean skipFirstCheckLock) {
-        this.skipFirstCheckLock = skipFirstCheckLock;
+    public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
+        this.lockStrategyMode = lockStrategyMode;
     }
 
     @Override
