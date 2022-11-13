@@ -19,7 +19,6 @@ import java.util.Properties;
 
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.server.storage.db.DataBaseStoreType;
 import io.seata.server.store.StoreConfig;
@@ -62,9 +61,8 @@ public class ServerApplicationListener implements GenericApplicationListener {
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
         SeataCoreEnvironmentPostProcessor.init();
         SeataServerEnvironmentPostProcessor.init();
-        Configuration config  = ConfigurationFactory.getInstance();
         // Load by priority
-        System.setProperty(STORE_DB_STORE_TYPE, config.getConfig(STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
+        System.setProperty(STORE_DB_STORE_TYPE, ConfigurationFactory.getInstance().getConfig(STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
         System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
         System.setProperty("lockMode", StoreConfig.getLockMode().getName());
 
