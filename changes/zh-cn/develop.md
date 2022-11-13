@@ -35,7 +35,7 @@
 - [[#5033](https://github.com/seata/seata/pull/5023)] 修复InsertOnDuplicateUpdate中插入值解析为String类型导致的类型识别错误
 - [[#5038](https://github.com/seata/seata/pull/5038)] 修复SagaAsyncThreadPoolProperties冲突问题
 - [[#5050](https://github.com/seata/seata/pull/5050)] 修复Saga模式下全局状态未正确更改成Committed
-
+- [[#5031](https://github.com/seata/seata/pull/5031)] 修复InsertOnDuplicateUpdate中不应该使用null值索引作为查询条件
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
