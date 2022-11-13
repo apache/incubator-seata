@@ -177,7 +177,7 @@ public class TransactionalTemplate {
         GlobalLockConfig myConfig = new GlobalLockConfig();
         myConfig.setLockRetryInterval(info.getLockRetryInterval());
         myConfig.setLockRetryTimes(info.getLockRetryTimes());
-        myConfig.setSkipFirstCheckLock(info.isSkipFirstCheckLock());
+        myConfig.setLockStrategyMode(info.getLockStrategyMode());
         return GlobalLockConfigHolder.setAndReturnPrevious(myConfig);
     }
 
