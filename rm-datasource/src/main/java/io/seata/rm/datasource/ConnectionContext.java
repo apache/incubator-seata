@@ -280,8 +280,10 @@ public class ConnectionContext {
         // lock retry times > 1 & skip first check lock / before image is empty
         if ((globalLockConfig.getLockRetryTimes() == -1 || globalLockConfig.getLockRetryTimes() > 1)
             && (globalLockConfig.isSkipFirstCheckLock() || allBeforeImageEmpty())) {
-            if (applicationData.remove(SKIP_CHECK_LOCK) == null) {
+            if (!applicationData.containsKey(SKIP_CHECK_LOCK)) {
                 this.applicationData.put(SKIP_CHECK_LOCK, true);
+            } else {
+                this.applicationData.put(SKIP_CHECK_LOCK, false);
             }
         }
         boolean autoCommit = this.isAutoCommitChanged();
