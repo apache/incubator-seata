@@ -33,6 +33,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5033](https://github.com/seata/seata/pull/5023)] fix mysql InsertOnDuplicateUpdate insert value type recognize error
 - [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
 - [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
+- [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
 
 
 
