@@ -238,7 +238,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                     primaryValues.add(v);
                 }
             });
-            afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
+            if (wherePrimaryList.size() > 0) {
+                afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
+            }
         }
 
         return buildTableRecords2(tableMeta, afterImageSql.toString(), paramAppenderList, primaryValues);
