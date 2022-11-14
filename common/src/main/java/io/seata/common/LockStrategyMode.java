@@ -20,11 +20,11 @@ package io.seata.common;
  */
 public enum LockStrategyMode {
     /**
-     * The acquire lock use optimistic mode
+     * Optimistic lock mode is recommended when resources are not reused in the current global transaction.
      */
     optimistic,
     /**
-     * The acquire lock use pessimistic mode
+     * Pessimistic lock mode is recommended when there may be repeated use of the same resource in a global transaction.
      */
     pessimistic
 }

@@ -75,8 +75,7 @@ public class AspectTransactional {
     int lockRetryTimes = -1;
 
     /**
-     * When you do not have resources to reent the scene, we recommend that you use LockStrategyMode optimistic
-     * configuration, which can greatly improve performance
+     * lock strategy mode
      */
     LockStrategyMode lockStrategyMode;
 
