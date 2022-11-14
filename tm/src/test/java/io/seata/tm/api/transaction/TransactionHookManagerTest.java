@@ -31,7 +31,7 @@ public class TransactionHookManagerTest {
 
     @AfterEach
     public void clear() {
-        TransactionHookManager.clear();
+        TransactionHookManager.clear(RootContext.getXID());
     }
 
     @Test
@@ -64,12 +64,12 @@ public class TransactionHookManagerTest {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
         TransactionHookManager.registerHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
-        TransactionHookManager.clear();
+        TransactionHookManager.clear(RootContext.getXID());
         assertThat(TransactionHookManager.getHooks()).isEmpty();
         RootContext.bind("123456");
         TransactionHookManager.registerHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
-        TransactionHookManager.clear();
+        TransactionHookManager.clear(RootContext.getXID());
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
 

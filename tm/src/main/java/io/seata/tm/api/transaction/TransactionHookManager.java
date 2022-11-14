@@ -44,9 +44,8 @@ public final class TransactionHookManager {
      * get the current hooks
      *
      * @return TransactionHook list
-     * @throws IllegalStateException IllegalStateException
      */
-    public static List<TransactionHook> getHooks() throws IllegalStateException {
+    public static List<TransactionHook> getHooks() {
         String xid = RootContext.getXID();
         List<TransactionHook> hooks;
         List<TransactionHook> virtualHooks = VIRTUAL_HOOKS.get();
@@ -76,6 +75,27 @@ public final class TransactionHookManager {
                 VIRTUAL_HOOKS.remove();
             }
         }
+        if (hooks == null || hooks.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(hooks);
+    }
+
+    /**
+     * get hooks by xid
+     * 
+     * @param xid
+     * @return TransactionHook list
+     */
+    public static List<TransactionHook> getHooks(String xid) {
+        if (StringUtils.isBlank(xid)) {
+            return Collections.emptyList();
+        }
+        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        if (hooksMap == null) {
+            return Collections.emptyList();
+        }
+        List<TransactionHook> hooks = hooksMap.get(xid);
         if (hooks == null || hooks.isEmpty()) {
             return Collections.emptyList();
         }
@@ -115,10 +135,11 @@ public final class TransactionHookManager {
     }
 
     /**
-     * clear hooks
+     * clear hooks by xid
+     * 
+     * @param xid
      */
-    public static void clear() {
-        String xid = RootContext.getXID();
+    public static void clear(String xid) {
         if (StringUtils.isBlank(xid)) {
             VIRTUAL_HOOKS.remove();
         } else {
