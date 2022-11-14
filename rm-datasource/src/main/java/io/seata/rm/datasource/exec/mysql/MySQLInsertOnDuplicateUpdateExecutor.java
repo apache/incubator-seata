@@ -274,17 +274,18 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection()
             .prepareStatement(primaryKeys.isEmpty() ? selectSQL + " FOR UPDATE" : selectSQL)) {
+            int paramAppenderCount = 0;
             int ts = CollectionUtils.isEmpty(paramAppenderList) ? 0 : paramAppenderList.size();
-            int ds = ts == 0 ? 0 : paramAppenderList.get(0).size();
             for (int i = 0; i < ts; i++) {
                 List<Object> paramAppender = paramAppenderList.get(i);
-                for (int j = 0; j < ds; j++) {
+                for (int j = 0; j < paramAppender.size(); j++) {
                     Object param = paramAppender.get(j);
-                    ps.setObject(i * ds + j + 1, (param instanceof Null) ? null : param);
+                    ps.setObject(paramAppenderCount + 1, (param instanceof Null) ? null : param);
+                    paramAppenderCount++; 
                 }
             }
             for (int i = 0; i < primaryKeys.size(); i++) {
-                ps.setObject(ts * ds + i + 1, primaryKeys.get(i));
+                ps.setObject(paramAppenderCount + i + 1, primaryKeys.get(i));
             }
 
             rs = ps.executeQuery();
