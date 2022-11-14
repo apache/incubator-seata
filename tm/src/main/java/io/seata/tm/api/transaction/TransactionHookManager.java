@@ -49,14 +49,32 @@ public final class TransactionHookManager {
     public static List<TransactionHook> getHooks() throws IllegalStateException {
         String xid = RootContext.getXID();
         List<TransactionHook> hooks;
+        List<TransactionHook> virtualHooks = VIRTUAL_HOOKS.get();
         if (StringUtils.isBlank(xid)) {
-            hooks = VIRTUAL_HOOKS.get();
+            hooks = virtualHooks;
         } else {
             Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-            if (hooksMap == null || hooksMap.isEmpty()) {
-                return Collections.emptyList();
+            if (hooksMap == null) {
+                if (virtualHooks == null || virtualHooks.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                hooksMap = new HashMap<>();
+                LOCAL_HOOKS.set(hooksMap);
+                List<TransactionHook> transactionHooks = new ArrayList<>();
+                transactionHooks.addAll(virtualHooks);
+                hooksMap.put(xid, transactionHooks);
+                VIRTUAL_HOOKS.remove();
+                return Collections.unmodifiableList(transactionHooks);
             }
             hooks = hooksMap.get(xid);
+            if (virtualHooks != null && !virtualHooks.isEmpty()) {
+                if (hooks == null || hooks.isEmpty()) {
+                    hooks = new ArrayList<>();
+                    hooksMap.put(xid, hooks);
+                }
+                hooks.addAll(virtualHooks);
+                VIRTUAL_HOOKS.remove();
+            }
         }
         if (hooks == null || hooks.isEmpty()) {
             return Collections.emptyList();
@@ -107,18 +125,5 @@ public final class TransactionHookManager {
             Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
             hooksMap.remove(xid);
         }
-    }
-
-    /**
-     * change virtual hooks to local hooks
-     */
-    public static void changeVirtualHooksToLocalKeys() {
-        String xid = RootContext.getXID();
-        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-        if (StringUtils.isBlank(xid)) {
-            return;
-        }
-        hooksMap.put(xid, VIRTUAL_HOOKS.get());
-        VIRTUAL_HOOKS.remove();
     }
 }
