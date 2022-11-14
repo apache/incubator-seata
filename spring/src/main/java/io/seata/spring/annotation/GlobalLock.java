@@ -69,6 +69,6 @@ public @interface GlobalLock {
     /**
      * @return lock strategy mode
      */
-    LockStrategyMode lockStrategyMode() default LockStrategyMode.pessimistic;
+    LockStrategyMode lockStrategyMode() default LockStrategyMode.PESSIMISTIC;
 
 }

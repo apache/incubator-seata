@@ -280,7 +280,7 @@ public class ConnectionContext {
         GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
         // lock retry times > 1 & skip first check lock / before image is empty
         if ((globalLockConfig.getLockRetryTimes() == -1 || globalLockConfig.getLockRetryTimes() > 1)
-            && (globalLockConfig.getLockStrategyMode() == LockStrategyMode.optimistic || allBeforeImageEmpty())) {
+            && (globalLockConfig.getLockStrategyMode() == LockStrategyMode.OPTIMISTIC || allBeforeImageEmpty())) {
             if (!applicationData.containsKey(SKIP_CHECK_LOCK)) {
                 this.applicationData.put(SKIP_CHECK_LOCK, true);
             } else {

@@ -22,9 +22,9 @@ public enum LockStrategyMode {
     /**
      * Optimistic lock mode is recommended when resources are not reused in the current global transaction.
      */
-    optimistic,
+    OPTIMISTIC,
     /**
      * Pessimistic lock mode is recommended when there may be repeated use of the same resource in a global transaction.
      */
-    pessimistic
+    PESSIMISTIC
 }
