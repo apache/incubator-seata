@@ -26,7 +26,7 @@ import io.seata.rm.datasource.mock.MockMariadbDataSource;
 import io.seata.rm.datasource.mock.MockResultSet;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;

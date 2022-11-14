@@ -30,7 +30,7 @@ import io.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 
 /**
  * The type Execute template.

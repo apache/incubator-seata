@@ -19,7 +19,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoExecutorHolder;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 
 /**
  * The Type MySQLUndoExecutorHolder

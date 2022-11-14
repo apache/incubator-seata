@@ -15,6 +15,7 @@
  */
 package io.seata.sqlparser.util;
 
+import io.seata.common.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.KeywordChecker;
@@ -258,8 +259,8 @@ public final class ColumnUtils {
 
     private static boolean isMysqlSeries(String dbType) {
         return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
-                StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
-                StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
+               StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
+               StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
     }
 
 }

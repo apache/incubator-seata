@@ -55,12 +55,12 @@ public class R2dbcLogStoreDataBaseDAO extends LogStoreDataBaseDAO {
     @Resource
     private R2dbcEntityTemplate r2dbcEntityTemplate;
 
-    private BeanCopier globalEntityToDO = BeanCopier.create(GlobalTransaction.class, GlobalTransactionDO.class, false);
-    private BeanCopier globalDOToEntity = BeanCopier.create(GlobalTransactionDO.class, GlobalTransaction.class, false);
+    private final BeanCopier globalEntityToDO = BeanCopier.create(GlobalTransaction.class, GlobalTransactionDO.class, false);
+    private final BeanCopier globalDOToEntity = BeanCopier.create(GlobalTransactionDO.class, GlobalTransaction.class, false);
 
-    private BeanCopier branchEntityToDO = BeanCopier.create(BranchTransaction.class, BranchTransactionDO.class, false);
+    private final BeanCopier branchEntityToDO = BeanCopier.create(BranchTransaction.class, BranchTransactionDO.class, false);
 
-    private BeanCopier branchDOToEntity = BeanCopier.create(BranchTransactionDO.class, BranchTransaction.class, false);
+    private final BeanCopier branchDOToEntity = BeanCopier.create(BranchTransactionDO.class, BranchTransaction.class, false);
 
     public R2dbcLogStoreDataBaseDAO() {
         super();

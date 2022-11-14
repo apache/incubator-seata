@@ -54,7 +54,7 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.ColumnUtils;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 
 /**
  * @author yangyicong

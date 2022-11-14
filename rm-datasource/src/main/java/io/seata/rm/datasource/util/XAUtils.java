@@ -25,7 +25,7 @@ import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.PGUtils;
 import io.seata.rm.BaseDataSourceResource;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 import org.mariadb.jdbc.MariaDbConnection;
 import org.mariadb.jdbc.MariaXaConnection;
 import org.slf4j.Logger;

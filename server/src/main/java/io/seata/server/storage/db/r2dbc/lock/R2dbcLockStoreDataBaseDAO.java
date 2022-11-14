@@ -64,7 +64,7 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
     @Resource
     private TransactionalOperator operator;
 
-    private BeanCopier lockDOToEntity = BeanCopier.create(LockDO.class, Lock.class, false);
+    private final BeanCopier lockDOToEntity = BeanCopier.create(LockDO.class, Lock.class, false);
 
     /**
      * Instantiates a new Data base lock store dao.

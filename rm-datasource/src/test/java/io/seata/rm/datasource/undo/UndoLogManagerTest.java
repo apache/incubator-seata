@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;

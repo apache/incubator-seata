@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import io.seata.common.JdbcConstants;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
@@ -83,14 +84,14 @@ public class DataSourceProxyTest {
         // case: dbType = oracle
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.ORACLE);
+            dbTypeField.set(proxy, JdbcConstants.ORACLE);
             Assertions.assertEquals("jdbc:mock:xxx/username", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
         }
 
         // case: dbType = postgresql
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.POSTGRESQL);
+            dbTypeField.set(proxy, JdbcConstants.POSTGRESQL);
             Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
@@ -102,7 +103,7 @@ public class DataSourceProxyTest {
         // case: dbType = mysql
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.MYSQL);
+            dbTypeField.set(proxy, JdbcConstants.MYSQL);
             Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);

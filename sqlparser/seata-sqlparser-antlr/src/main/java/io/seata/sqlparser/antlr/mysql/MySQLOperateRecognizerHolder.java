@@ -18,7 +18,7 @@ package io.seata.sqlparser.antlr.mysql;
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.antlr.SQLOperateRecognizerHolder;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 
 /**
  * The class MySqlOperateRecognizerHolder

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
 import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 
 /**
  * @author guoyao

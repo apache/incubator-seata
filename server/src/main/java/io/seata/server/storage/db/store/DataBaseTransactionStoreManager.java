@@ -35,7 +35,6 @@ import io.seata.core.store.LogStore;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.db.DataBaseStoreFactory;
-import io.seata.server.storage.db.DataBaseStoreType;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
@@ -86,7 +85,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     private DataBaseTransactionStoreManager() {
         this.logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, 100);
         this.logStore = DataBaseStoreFactory
-            .getLogStore(CONFIG.getConfig(ConfigurationKeys.STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
+            .getLogStore(CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override

@@ -338,11 +338,6 @@ public interface ConfigurationKeys {
     String STORE_DB_LOG_QUERY_LIMIT = STORE_DB_PREFIX + "queryLimit";
 
     /**
-     * The constant STORE_DB_STORE_TYPE.
-     */
-    String STORE_DB_STORE_TYPE = STORE_DB_PREFIX + "type";
-
-    /**
      * The constant LOCK_DB_TABLE.
      */
     String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";

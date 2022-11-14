@@ -49,7 +49,7 @@ import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

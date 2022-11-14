@@ -30,6 +30,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
@@ -39,15 +40,16 @@ import reactor.core.scheduler.Schedulers;
 /**
  * @author jianbin.chen
  */
+@ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 @ConditionalOnBean(DatabaseClient.class)
 @Component
 public class R2dbcDistributedLockerDAO implements DistributedLocker {
     private static final Logger LOGGER = LoggerFactory.getLogger(R2dbcDistributedLockerDAO.class);
 
-    private BeanCopier distributedLockDOToEntity = BeanCopier.create(DistributedLockDO.class, DistributedLock.class, false);
+    private final BeanCopier distributedLockDOToEntity = BeanCopier.create(DistributedLockDO.class, DistributedLock.class, false);
 
     @Resource
-    DistributedLockRepository distributedLockRepository;
+    private DistributedLockRepository distributedLockRepository;
 
     @Resource
     private TransactionalOperator operator;

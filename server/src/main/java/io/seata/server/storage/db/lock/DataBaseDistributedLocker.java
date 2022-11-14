@@ -17,13 +17,13 @@ package io.seata.server.storage.db.lock;
 
 
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.JdbcConstants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.storage.db.DataBaseStoreFactory;
-import io.seata.server.storage.db.DataBaseStoreType;
 
 /**
  * @author chd
@@ -38,7 +38,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
      */
     public DataBaseDistributedLocker() {
         this.distributedLocker = DataBaseStoreFactory.getDistributedLocker(ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
+            .getConfig(ConfigurationKeys.STORE_DB_TYPE, JdbcConstants.MYSQL));
     }
 
     @Override

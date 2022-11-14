@@ -15,12 +15,12 @@
  */
 package io.seata.server;
 
+import java.util.Optional;
 import java.util.Properties;
 
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.server.storage.db.DataBaseStoreType;
 import io.seata.server.store.StoreConfig;
 import io.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
 import io.seata.spring.boot.autoconfigure.SeataServerEnvironmentPostProcessor;
@@ -32,7 +32,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import static io.seata.common.ConfigurationKeys.STORE_DB_STORE_TYPE;
+import static io.seata.common.ConfigurationKeys.STORE_DB_TYPE;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.common.ConfigurationKeys.ENV_SEATA_PORT_KEY;
@@ -62,7 +62,8 @@ public class ServerApplicationListener implements GenericApplicationListener {
         SeataCoreEnvironmentPostProcessor.init();
         SeataServerEnvironmentPostProcessor.init();
         // Load by priority
-        System.setProperty(STORE_DB_STORE_TYPE, ConfigurationFactory.getInstance().getConfig(STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
+        Optional.ofNullable(ConfigurationFactory.getInstance().getConfig(STORE_DB_TYPE))
+            .ifPresent(dbType -> System.setProperty(STORE_DB_TYPE, dbType));
         System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
         System.setProperty("lockMode", StoreConfig.getLockMode().getName());
 

@@ -95,8 +95,6 @@ store.db.distributedLockTable=distributed_lock
 store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
-# jdbc or r2dbc
-store.db.type=jdbc
 
 #These configurations are required if the `store mode` is `redis`. If `store.mode,store.lock.mode,store.session.mode` are not equal to `redis`, you can remove the configuration block.
 store.redis.mode=single

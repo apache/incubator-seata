@@ -17,6 +17,7 @@ package io.seata.server.storage.db;
 
 import javax.sql.DataSource;
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.JdbcConstants;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.ConfigurationFactory;
@@ -37,59 +38,49 @@ import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 public class DataBaseStoreFactory {
 
-    public static LogStore getLogStore(String type) {
-        if (DataBaseStoreType.r2dbc.name().equals(type)) {
+    public static LogStore getLogStore(String dbType) {
+        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
             ApplicationContext applicationContext =
                 (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-            R2dbcLogStoreDataBaseDAO r2dbcLogStoreDataBaseDAO = null;
             try {
-                r2dbcLogStoreDataBaseDAO = applicationContext.getBean(R2dbcLogStoreDataBaseDAO.class);
+                return applicationContext.getBean(R2dbcLogStoreDataBaseDAO.class);
             } catch (Exception ignored) {
             }
-            return r2dbcLogStoreDataBaseDAO;
-        } else {
-            String datasourceType =
-                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-            // init dataSource
-            DataSource logStoreDataSource =
-                EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-            return new LogStoreDataBaseDAO(logStoreDataSource);
         }
+        String datasourceType =
+                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        // init dataSource
+        DataSource logStoreDataSource =
+                EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        return new LogStoreDataBaseDAO(logStoreDataSource);
     }
 
-    public static LockStore getLockStore(String type) {
-        if (DataBaseStoreType.r2dbc.name().equals(type)) {
+    public static LockStore getLockStore(String dbType) {
+        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
             ApplicationContext applicationContext =
                 (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-            R2dbcLockStoreDataBaseDAO r2dbcLockStoreDataBaseDAO = null;
             try {
-                r2dbcLockStoreDataBaseDAO = applicationContext.getBean(R2dbcLockStoreDataBaseDAO.class);
+                return applicationContext.getBean(R2dbcLockStoreDataBaseDAO.class);
             } catch (Exception ignored) {
             }
-            return r2dbcLockStoreDataBaseDAO;
-        } else {
-            String datasourceType =
-                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-            // init dataSource
-            DataSource logStoreDataSource =
-                EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-            return new LockStoreDataBaseDAO(logStoreDataSource);
         }
+        String datasourceType =
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        // init dataSource
+        DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        return new LockStoreDataBaseDAO(logStoreDataSource);
     }
 
-    public static DistributedLocker getDistributedLocker(String type) {
-        if (DataBaseStoreType.r2dbc.name().equals(type)) {
+    public static DistributedLocker getDistributedLocker(String dbType) {
+        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
             ApplicationContext applicationContext =
                 (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-            R2dbcDistributedLockerDAO r2dbcDistributedLocker = null;
             try {
-                r2dbcDistributedLocker = applicationContext.getBean(R2dbcDistributedLockerDAO.class);
+                return applicationContext.getBean(R2dbcDistributedLockerDAO.class);
             } catch (Exception ignored) {
             }
-            return r2dbcDistributedLocker;
-        } else {
-            return new DataBaseDistributedLockerDAO();
         }
+        return new DataBaseDistributedLockerDAO();
     }
 
 }

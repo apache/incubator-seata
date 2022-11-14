@@ -29,7 +29,6 @@ import io.seata.core.model.LockStatus;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import io.seata.server.storage.db.DataBaseStoreFactory;
-import io.seata.server.storage.db.DataBaseStoreType;
 
 /**
  * The type Data base locker.
@@ -47,7 +46,7 @@ public class DataBaseLocker extends AbstractLocker {
      */
     public DataBaseLocker() {
         lockStore = DataBaseStoreFactory
-                .getLockStore(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_STORE_TYPE, DataBaseStoreType.jdbc.name()));
+                .getLockStore(ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override

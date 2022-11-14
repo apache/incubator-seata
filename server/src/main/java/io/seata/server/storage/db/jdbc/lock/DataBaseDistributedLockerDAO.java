@@ -26,10 +26,8 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.holder.ObjectHolder;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -45,7 +43,6 @@ import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.distributed.lock.DistributedLockSqlFactory;
 
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABLE;
 
 /**
@@ -74,8 +71,6 @@ public class DataBaseDistributedLockerDAO implements DistributedLocker {
      */
     public DataBaseDistributedLockerDAO() {
         Configuration configuration = ConfigurationFactory.getInstance();
-        ApplicationContext applicationContext =
-            (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
         distributedLockTable = configuration.getConfig(DISTRIBUTED_LOCK_DB_TABLE);
         dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         datasourceType = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);

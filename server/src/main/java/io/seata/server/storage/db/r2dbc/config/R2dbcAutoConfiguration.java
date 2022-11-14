@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Import;
 /**
  * @author jianbin.chen
  */
-@ConditionalOnExpression("#{'r2dbc'.equals('${store.db.type}')}")
+@ConditionalOnExpression("#{'mysql'.equals('${store.db.db-type}')}")
 @Configuration
 @Import(R2dbcDataAutoConfiguration.class)
 public class R2dbcAutoConfiguration {

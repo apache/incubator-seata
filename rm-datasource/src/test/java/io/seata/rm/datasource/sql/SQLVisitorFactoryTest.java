@@ -26,7 +26,7 @@ import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleSelectForUpdateRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleUpdateRecognizer;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

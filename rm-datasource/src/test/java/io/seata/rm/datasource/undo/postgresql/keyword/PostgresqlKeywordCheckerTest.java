@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import io.seata.sqlparser.KeywordChecker;
 import io.seata.sqlparser.KeywordCheckerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 
 /**
  * @author will

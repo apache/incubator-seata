@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.KeywordChecker;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.JdbcConstants;
 
 /**
  * The type MySQL keyword checker.

@@ -61,7 +61,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 /**
  * @author funkye
  */
-@ConditionalOnExpression("#{'r2dbc'.equals('${store.db.type}')}")
+@ConditionalOnExpression("#{'mysql'.equals('${store.db.dbType}')}")
 @Configuration
 @EnableConfigurationProperties(R2dbcProperties.class)
 @AutoConfigureBefore(R2dbcAutoConfiguration.class)
