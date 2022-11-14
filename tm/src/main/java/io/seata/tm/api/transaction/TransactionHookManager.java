@@ -103,6 +103,9 @@ public final class TransactionHookManager {
      */
     public static void clear(String xid) {
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        if (hooksMap == null || hooksMap.isEmpty()) {
+            return;
+        }
         hooksMap.remove(xid);
         if (StringUtils.isNotBlank(xid)) {
             hooksMap.remove(null);
