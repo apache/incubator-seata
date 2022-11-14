@@ -16,8 +16,13 @@
 package io.seata.tm.api.transaction;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.List;
+
+import io.seata.common.util.StringUtils;
+import io.seata.core.context.RootContext;
 
 /**
  * @author guoyao
@@ -28,7 +33,12 @@ public final class TransactionHookManager {
 
     }
 
-    private static final ThreadLocal<List<TransactionHook>> LOCAL_HOOKS = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, List<TransactionHook>>> LOCAL_HOOKS = new ThreadLocal<>();
+
+    /**
+     * virtual hooks for no xid
+     */
+    private static final ThreadLocal<List<TransactionHook>> VIRTUAL_HOOKS = new ThreadLocal<>();
 
     /**
      * get the current hooks
@@ -37,8 +47,17 @@ public final class TransactionHookManager {
      * @throws IllegalStateException IllegalStateException
      */
     public static List<TransactionHook> getHooks() throws IllegalStateException {
-        List<TransactionHook> hooks = LOCAL_HOOKS.get();
-
+        String xid = RootContext.getXID();
+        List<TransactionHook> hooks;
+        if (StringUtils.isBlank(xid)) {
+            hooks = VIRTUAL_HOOKS.get();
+        } else {
+            Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+            if (hooksMap == null || hooksMap.isEmpty()) {
+                return Collections.emptyList();
+            }
+            hooks = hooksMap.get(xid);
+        }
         if (hooks == null || hooks.isEmpty()) {
             return Collections.emptyList();
         }
@@ -54,17 +73,52 @@ public final class TransactionHookManager {
         if (transactionHook == null) {
             throw new NullPointerException("transactionHook must not be null");
         }
-        List<TransactionHook> transactionHooks = LOCAL_HOOKS.get();
-        if (transactionHooks == null) {
-            LOCAL_HOOKS.set(new ArrayList<>());
+        String xid = RootContext.getXID();
+        List<TransactionHook> hooks;
+        if (StringUtils.isBlank(xid)) {
+            hooks = VIRTUAL_HOOKS.get();
+            if (hooks == null) {
+                hooks = new ArrayList<>();
+                VIRTUAL_HOOKS.set(hooks);
+            }
+        } else {
+            Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+            if (hooksMap == null) {
+                hooksMap = new HashMap<>();
+                LOCAL_HOOKS.set(hooksMap);
+            }
+            hooks = hooksMap.get(xid);
+            if (hooks == null) {
+                hooks = new ArrayList<>();
+                hooksMap.put(xid, hooks);
+            }
         }
-        LOCAL_HOOKS.get().add(transactionHook);
+        hooks.add(transactionHook);
     }
 
     /**
      * clear hooks
      */
     public static void clear() {
-        LOCAL_HOOKS.remove();
+        String xid = RootContext.getXID();
+        if (StringUtils.isBlank(xid)) {
+            VIRTUAL_HOOKS.remove();
+        } else {
+            Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+            hooksMap.remove(xid);
+        }
+    }
+
+    /**
+     * change virtual hooks to local hooks
+     */
+    public static void changeVirtualHooksToLocalKeys() {
+        String xid = RootContext.getXID();
+        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        if (StringUtils.isBlank(xid)) {
+            return;
+        }
+        hooksMap.put(xid, VIRTUAL_HOOKS.get());
+        VIRTUAL_HOOKS.remove();
     }
 }

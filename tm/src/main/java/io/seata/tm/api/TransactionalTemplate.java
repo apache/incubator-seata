@@ -248,6 +248,7 @@ public class TransactionalTemplate {
             triggerBeforeBegin();
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
             triggerAfterBegin();
+            changeVirtualHooksToLocalKeys();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                     TransactionalExecutor.Code.BeginFailure);
@@ -273,6 +274,10 @@ public class TransactionalTemplate {
                 LOGGER.error("Failed execute afterBegin in hook {}", e.getMessage(), e);
             }
         }
+    }
+
+    private void changeVirtualHooksToLocalKeys() {
+        TransactionHookManager.changeVirtualHooksToLocalKeys();
     }
 
     private void triggerBeforeRollback() {
