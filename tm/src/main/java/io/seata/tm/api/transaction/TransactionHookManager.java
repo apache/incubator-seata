@@ -36,49 +36,13 @@ public final class TransactionHookManager {
     private static final ThreadLocal<Map<String, List<TransactionHook>>> LOCAL_HOOKS = new ThreadLocal<>();
 
     /**
-     * virtual hooks for no xid
-     */
-    private static final ThreadLocal<List<TransactionHook>> VIRTUAL_HOOKS = new ThreadLocal<>();
-
-    /**
      * get the current hooks
      *
      * @return TransactionHook list
      */
     public static List<TransactionHook> getHooks() {
         String xid = RootContext.getXID();
-        List<TransactionHook> hooks;
-        List<TransactionHook> virtualHooks = VIRTUAL_HOOKS.get();
-        if (StringUtils.isBlank(xid)) {
-            hooks = virtualHooks;
-        } else {
-            Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-            if (hooksMap == null) {
-                if (virtualHooks == null || virtualHooks.isEmpty()) {
-                    return Collections.emptyList();
-                }
-                hooksMap = new HashMap<>();
-                LOCAL_HOOKS.set(hooksMap);
-                List<TransactionHook> transactionHooks = new ArrayList<>();
-                transactionHooks.addAll(virtualHooks);
-                hooksMap.put(xid, transactionHooks);
-                VIRTUAL_HOOKS.remove();
-                return Collections.unmodifiableList(transactionHooks);
-            }
-            hooks = hooksMap.get(xid);
-            if (virtualHooks != null && !virtualHooks.isEmpty()) {
-                if (hooks == null || hooks.isEmpty()) {
-                    hooks = new ArrayList<>();
-                    hooksMap.put(xid, hooks);
-                }
-                hooks.addAll(virtualHooks);
-                VIRTUAL_HOOKS.remove();
-            }
-        }
-        if (hooks == null || hooks.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(hooks);
+        return getHooks(xid);
     }
 
     /**
@@ -88,15 +52,22 @@ public final class TransactionHookManager {
      * @return TransactionHook list
      */
     public static List<TransactionHook> getHooks(String xid) {
-        if (StringUtils.isBlank(xid)) {
-            return Collections.emptyList();
-        }
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-        if (hooksMap == null) {
+        if (hooksMap == null || hooksMap.isEmpty()) {
             return Collections.emptyList();
         }
-        List<TransactionHook> hooks = hooksMap.get(xid);
-        if (hooks == null || hooks.isEmpty()) {
+        List<TransactionHook> hooks = new ArrayList<>();
+        List<TransactionHook> localHooks = hooksMap.get(xid);
+        if (StringUtils.isNotBlank(xid)) {
+            List<TransactionHook> virtualHooks = hooksMap.get(null);
+            if (virtualHooks != null && !virtualHooks.isEmpty()) {
+                hooks.addAll(virtualHooks);
+            }
+        }
+        if (localHooks != null && !localHooks.isEmpty()) {
+            hooks.addAll(localHooks);
+        }
+        if (hooks.isEmpty()) {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(hooks);
@@ -111,25 +82,16 @@ public final class TransactionHookManager {
         if (transactionHook == null) {
             throw new NullPointerException("transactionHook must not be null");
         }
+        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        if (hooksMap == null) {
+            hooksMap = new HashMap<>();
+            LOCAL_HOOKS.set(hooksMap);
+        }
         String xid = RootContext.getXID();
-        List<TransactionHook> hooks;
-        if (StringUtils.isBlank(xid)) {
-            hooks = VIRTUAL_HOOKS.get();
-            if (hooks == null) {
-                hooks = new ArrayList<>();
-                VIRTUAL_HOOKS.set(hooks);
-            }
-        } else {
-            Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-            if (hooksMap == null) {
-                hooksMap = new HashMap<>();
-                LOCAL_HOOKS.set(hooksMap);
-            }
-            hooks = hooksMap.get(xid);
-            if (hooks == null) {
-                hooks = new ArrayList<>();
-                hooksMap.put(xid, hooks);
-            }
+        List<TransactionHook> hooks = hooksMap.get(xid);
+        if (hooks == null) {
+            hooks = new ArrayList<>();
+            hooksMap.put(xid, hooks);
         }
         hooks.add(transactionHook);
     }
@@ -140,11 +102,10 @@ public final class TransactionHookManager {
      * @param xid
      */
     public static void clear(String xid) {
-        if (StringUtils.isBlank(xid)) {
-            VIRTUAL_HOOKS.remove();
-        } else {
-            Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-            hooksMap.remove(xid);
+        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        hooksMap.remove(xid);
+        if (StringUtils.isNotBlank(xid)) {
+            hooksMap.remove(null);
         }
     }
 }
