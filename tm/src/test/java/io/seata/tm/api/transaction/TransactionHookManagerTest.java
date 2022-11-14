@@ -15,6 +15,7 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.core.context.RootContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -40,12 +41,21 @@ public class TransactionHookManagerTest {
         List<TransactionHook> hooks = TransactionHookManager.getHooks();
         assertThat(hooks).isNotEmpty();
         assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
+        RootContext.bind("123456");
+        hooks = TransactionHookManager.getHooks();
+        assertThat(hooks).isNotEmpty();
+        assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
+        hooks = TransactionHookManager.getHooks();
+        assertThat(hooks).isNotEmpty();
+        assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
     }
 
     @Test
     public void testGetHooks() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
         TransactionHookManager.registerHook(new TransactionHookAdapter());
+        assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+        RootContext.bind("123456");
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
     }
 
@@ -56,7 +66,13 @@ public class TransactionHookManagerTest {
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
+        RootContext.bind("123456");
+        TransactionHookManager.registerHook(new TransactionHookAdapter());
+        assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+        TransactionHookManager.clear();
+        assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
+
     @Test
     public void testNPE() {
         Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerHook(null));
