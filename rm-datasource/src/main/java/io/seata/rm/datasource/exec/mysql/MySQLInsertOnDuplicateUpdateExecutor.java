@@ -315,7 +315,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             int finalI = i;
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
-                if (!v.isNonUnique() && isIndexValueNotNull(v,imageParameterMap,finalI)) {
+                if (!v.isNonUnique() && isIndexValueNotNull(v, imageParameterMap, finalI)) {
                     boolean columnIsNull = true;
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
@@ -404,7 +404,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         return imageParameterMap;
     }
 
-    private boolean isIndexValueNotNull(IndexMeta indexMeta, Map<String, ArrayList<Object>> imageParameterMap,int rowIndex) {
+    private boolean isIndexValueNotNull(IndexMeta indexMeta, Map<String, ArrayList<Object>> imageParameterMap, int rowIndex) {
         for (ColumnMeta columnMeta : indexMeta.getValues()) {
             String columnName = columnMeta.getColumnName();
             List<Object> imageParameters = imageParameterMap.get(columnName);
