@@ -65,7 +65,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
 - [[#5047](https://github.com/seata/seata/pull/5047)] remove useless code
 - [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
-
+- [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
