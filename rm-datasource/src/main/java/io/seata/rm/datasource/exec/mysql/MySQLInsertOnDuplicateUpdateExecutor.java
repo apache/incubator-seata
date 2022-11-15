@@ -269,7 +269,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList, List<Object> primaryKeys) throws SQLException {
         if (CollectionUtils.isEmpty(paramAppenderList)) {
-            throw new NotSupportYetException("the SQL statement has no primary key or unique index value,it will not hit any row data.recommend to convert to a normal insert statement");
+            throw new NotSupportYetException("the SQL statement has no primary key or unique index value, it will not hit any row data.recommend to convert to a normal insert statement");
         }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection()
@@ -346,7 +346,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                     }
                 }
             });
-            paramAppenderList.add(paramAppenderTempList);
+            if (CollectionUtils.isNotEmpty(paramAppenderTempList)) {
+                paramAppenderList.add(paramAppenderTempList);
+            }
         }
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
         return selectSQLJoin.toString();
