@@ -268,6 +268,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
      * @throws SQLException then execute fail
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList, List<Object> primaryKeys) throws SQLException {
+        if (CollectionUtils.isEmpty(paramAppenderList)) {
+            throw new NotSupportYetException("the SQL statement has no primary key or unique index value,it will not hit any row data.recommend to convert to a normal insert statement");
+        }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection()
             .prepareStatement(primaryKeys.isEmpty() ? selectSQL + " FOR UPDATE" : selectSQL)) {
