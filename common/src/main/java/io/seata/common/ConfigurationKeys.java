@@ -370,7 +370,7 @@ public interface ConfigurationKeys {
     /**
      * The constant ASYN_COMMITING_RETRY_PERIOD.
      */
-    String ASYN_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asynCommittingRetryPeriod";
+    String ASYNC_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asyncCommittingRetryPeriod";
 
     /**
      * The constant ROLLBACKING_RETRY_PERIOD.
@@ -848,4 +848,10 @@ public interface ConfigurationKeys {
      * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
      */
     String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
+
+    /**
+     * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
+     */
+    String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
+
 }

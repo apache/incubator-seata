@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 /**
  * The type Eureka registry service.
  *
- * @author: rui_849217@163.com
+ * @author rui_849217@163.com
  */
 public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EurekaRegistryServiceImpl.class);

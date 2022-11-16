@@ -1,3 +1,4 @@
+package io.seata.common.loader;
 /*
  *  Copyright 1999-2019 Seata.io Group.
  *
@@ -13,24 +14,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.lock;
 
 /**
- * lock mode
+ * The interface Hello1.
  *
- * @author zhangsen
+ * @author wlx
+ * @date 2022/5/22 11:07 下午
  */
-public enum LockMode {
-
-    /**
-     * store the lock in user's database
-     */
-    LOCAL,
-
-    /**
-     * store the lock in seata's server
-     */
-    REMOTE;
-
-
+public interface Hello1 {
 }

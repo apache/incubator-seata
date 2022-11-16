@@ -27,6 +27,7 @@
     <artifactId>seata-http</artifactId>
     <packaging>jar</packaging>
     <name>seata-http ${project.version}</name>
+    <description>http-client integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -38,6 +39,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -47,6 +49,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
