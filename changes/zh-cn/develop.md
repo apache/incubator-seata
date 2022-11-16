@@ -69,6 +69,7 @@
 - [[#5075](https://github.com/seata/seata/pull/5075)] 拦截没有主键及唯一索引值的insert on duplicate update语句
 
 ### test：
+- [[#4411](https://github.com/seata/seata/pull/4411)] 测试Oracle数据库AT模式下类型支持
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
 
 
@@ -83,6 +84,8 @@
 - [AlexStocks](https://github.com/AlexStocks)
 - [liujunlin5168](https://github.com/liujunlin5168)
 - [pengten](https://github.com/pengten)
+- [YSF-A](https://github.com/YSF-A)
+- [doubleDimple](https://github.com/doubleDimple)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
