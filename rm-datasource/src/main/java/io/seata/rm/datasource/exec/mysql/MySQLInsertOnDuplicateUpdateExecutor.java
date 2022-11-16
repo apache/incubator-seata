@@ -268,6 +268,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
      * @throws SQLException then execute fail
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList, List<Object> primaryKeys) throws SQLException {
+        if (CollectionUtils.isEmpty(paramAppenderList)) {
+            throw new NotSupportYetException("the SQL statement has no primary key or unique index value, it will not hit any row data.recommend to convert to a normal insert statement");
+        }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection()
             .prepareStatement(primaryKeys.isEmpty() ? selectSQL + " FOR UPDATE" : selectSQL)) {
@@ -312,7 +315,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             int finalI = i;
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
-                if (!v.isNonUnique() && isIndexValueNotNull(v,imageParameterMap,finalI)) {
+                if (!v.isNonUnique() && isIndexValueNotNull(v, imageParameterMap, finalI)) {
                     boolean columnIsNull = true;
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
@@ -343,7 +346,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                     }
                 }
             });
-            paramAppenderList.add(paramAppenderTempList);
+            if (CollectionUtils.isNotEmpty(paramAppenderTempList)) {
+                paramAppenderList.add(paramAppenderTempList);
+            }
         }
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
         return selectSQLJoin.toString();
@@ -399,7 +404,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         return imageParameterMap;
     }
 
-    private boolean isIndexValueNotNull(IndexMeta indexMeta, Map<String, ArrayList<Object>> imageParameterMap,int rowIndex) {
+    private boolean isIndexValueNotNull(IndexMeta indexMeta, Map<String, ArrayList<Object>> imageParameterMap, int rowIndex) {
         for (ColumnMeta columnMeta : indexMeta.getValues()) {
             String columnName = columnMeta.getColumnName();
             List<Object> imageParameters = imageParameterMap.get(columnName);
