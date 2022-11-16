@@ -29,11 +29,13 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4874](https://github.com/seata/seata/pull/4874)] fix startup failure of Server1.5.2 by using OpenJDK 11 
 - [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
+- [[#5032](https://github.com/seata/seata/pull/5032)] fix mysql InsertOnDuplicateUpdate sql query error caused by placeholder index calculation error
 - [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
 - [[#5033](https://github.com/seata/seata/pull/5023)] fix mysql InsertOnDuplicateUpdate insert value type recognize error
 - [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
 - [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
-
+- [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
+- [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
 
 
 ### optimize:
@@ -64,7 +66,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
 - [[#5047](https://github.com/seata/seata/pull/5047)] remove useless code
 - [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
-
+- [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -94,5 +96,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [neillee95](https://github.com/neillee95)
 - [crazy-sheep](https://github.com/crazy-sheep)
 - [zhangzq7](https://github.com/zhangzq7)
+- [l81893521](https://github.com/l81893521)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
