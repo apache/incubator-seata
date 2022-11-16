@@ -35,6 +35,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
 - [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
 - [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
+- [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
 
 
 ### optimize:
@@ -97,6 +98,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [neillee95](https://github.com/neillee95)
 - [crazy-sheep](https://github.com/crazy-sheep)
 - [zhangzq7](https://github.com/zhangzq7)
+- [l81893521](https://github.com/l81893521)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
