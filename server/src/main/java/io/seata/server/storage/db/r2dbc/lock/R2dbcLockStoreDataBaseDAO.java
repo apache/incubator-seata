@@ -88,25 +88,15 @@ public class R2dbcLockStoreDataBaseDAO extends LockStoreDataBaseDAO {
     public boolean acquireLock(List<LockDO> lockDOs, boolean autoCommit, boolean skipCheckLock) {
         try {
             String xid = lockDOs.get(0).getXid();
-            Mono<
-                List<
-                    Lock>> mono =
-                        skipCheckLock ? Mono.just(Collections.emptyList())
-                            : r2dbcEntityTemplate
-                                .select(
-                                    Query
-                                        .query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
-                                            .in(lockDOs.parallelStream().map(LockDO::getRowKey)
-                                                .collect(Collectors.toList()))
-                                            .and(Criteria.where(ServerTableColumnsName.LOCK_TABLE_XID).not(xid)))
-                                        .columns(ServerTableColumnsName.LOCK_TABLE_XID,
-                                            ServerTableColumnsName.LOCK_TABLE_BRANCH_ID,
-                                            ServerTableColumnsName.LOCK_TABLE_PK,
-                                            ServerTableColumnsName.LOCK_TABLE_TABLE_NAME,
-                                            ServerTableColumnsName.LOCK_TABLE_STATUS)
-                                        .sort(Sort.by(Sort.Order.desc(ServerTableColumnsName.LOCK_TABLE_STATUS))),
-                                    Lock.class)
-                                .collectList();
+            Mono<List<Lock>> mono = skipCheckLock ? Mono.just(Collections.emptyList()) : r2dbcEntityTemplate.select(
+                Query.query(Criteria.where(ServerTableColumnsName.LOCK_TABLE_ROW_KEY)
+                        .in(lockDOs.parallelStream().map(LockDO::getRowKey).collect(Collectors.toList()))
+                        .and(Criteria.where(ServerTableColumnsName.LOCK_TABLE_XID).not(xid)))
+                    .columns(ServerTableColumnsName.LOCK_TABLE_XID, ServerTableColumnsName.LOCK_TABLE_BRANCH_ID,
+                        ServerTableColumnsName.LOCK_TABLE_PK, ServerTableColumnsName.LOCK_TABLE_TABLE_NAME,
+                        ServerTableColumnsName.LOCK_TABLE_STATUS)
+                    .sort(Sort.by(Sort.Order.desc(ServerTableColumnsName.LOCK_TABLE_STATUS))),
+                Lock.class).collectList();
             return Boolean.TRUE.equals(mono.publishOn(Schedulers.boundedElastic()).map(list -> {
                 if (CollectionUtils.isNotEmpty(list)) {
                     boolean failFast = false;
