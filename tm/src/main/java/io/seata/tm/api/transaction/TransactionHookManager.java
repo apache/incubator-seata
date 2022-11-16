@@ -59,9 +59,10 @@ public final class TransactionHookManager {
         List<TransactionHook> hooks = new ArrayList<>();
         List<TransactionHook> localHooks = hooksMap.get(xid);
         if (StringUtils.isNotBlank(xid)) {
-            List<TransactionHook> virtualHooks = hooksMap.get(null);
+            List<TransactionHook> virtualHooks = hooksMap.remove(null);
             if (virtualHooks != null && !virtualHooks.isEmpty()) {
                 hooks.addAll(virtualHooks);
+                hooksMap.put(xid, hooks);
             }
         }
         if (localHooks != null && !localHooks.isEmpty()) {
