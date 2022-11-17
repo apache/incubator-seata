@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Collections;
 
 import com.google.common.collect.Lists;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -151,6 +152,20 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+    @Test
+    public void testBeforeImageWithNoUnique(){
+        mockImageParameterMap_contain_constant();
+        List<List<Object>> insertRows = new ArrayList<>();
+        insertRows.add(Arrays.asList("?,?,?,userStatus1"));
+        insertRows.add(Arrays.asList("?,?,?,userStatus2"));
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
+        mockInsertColumns();
+        mockAllIndexes();
+        doReturn(tableMeta).when(insertOrUpdateExecutor).getTableMeta();
+        Assertions.assertThrows(NotSupportYetException.class, () -> {
+            insertOrUpdateExecutor.beforeImage();
+        });
     }
 
     private void mockAllIndexes(){
