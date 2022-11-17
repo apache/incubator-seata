@@ -38,6 +38,7 @@
 - [[#5050](https://github.com/seata/seata/pull/5050)] 修复Saga模式下全局状态未正确更改成Committed
 - [[#5052](https://github.com/seata/seata/pull/5052)] 修复update join条件中占位符参数问题
 - [[#5031](https://github.com/seata/seata/pull/5031)] 修复InsertOnDuplicateUpdate中不应该使用null值索引作为查询条件
+- [[#5075](https://github.com/seata/seata/pull/5075)] 修复InsertOnDuplicateUpdate无法拦截无主键和唯一索引的SQL
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -66,8 +67,10 @@
 - [[#4995](https://github.com/seata/seata/pull/4995)] 修复mysql InsertOnDuplicateUpdate后置镜像查询SQL中重复的主键查询条件
 - [[#5047](https://github.com/seata/seata/pull/5047)] 移除无用代码
 - [[#5051](https://github.com/seata/seata/pull/5051)] 回滚时undolog产生脏写需要抛出不再重试(BranchRollbackFailed_Unretriable)的异常
+- [[#5075](https://github.com/seata/seata/pull/5075)] 拦截没有主键及唯一索引值的insert on duplicate update语句
 
 ### test：
+- [[#4411](https://github.com/seata/seata/pull/4411)] 测试Oracle数据库AT模式下类型支持
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
 
 
@@ -82,6 +85,8 @@
 - [AlexStocks](https://github.com/AlexStocks)
 - [liujunlin5168](https://github.com/liujunlin5168)
 - [pengten](https://github.com/pengten)
+- [YSF-A](https://github.com/YSF-A)
+- [doubleDimple](https://github.com/doubleDimple)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yujianfei1986](https://github.com/yujianfei1986)
 - [Bughue](https://github.com/Bughue)
@@ -95,5 +100,6 @@
 - [neillee95](https://github.com/neillee95)
 - [crazy-sheep](https://github.com/crazy-sheep)
 - [zhangzq7](https://github.com/zhangzq7)
+- [l81893521](https://github.com/l81893521)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
