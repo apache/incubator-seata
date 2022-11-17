@@ -23,6 +23,8 @@ import java.util.List;
  * @author sharajava
  */
 public interface SQLUpdateRecognizer extends WhereRecognizer {
+    String MULTI_TABLE_NAME_SEPERATOR = "#";
+
 
     /**
      * Gets update columns.
@@ -44,5 +46,21 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
      * @return the update where columns
      */
     List<String> getWhereColumns();
+
+    /*
+     * Gets update join item table name
+     * @param tableName the update join item table source name
+     * @return the update join item table alias name
+     */
+    default String getTableAlias(String tableName) {
+        return null;
+    }
+
+    /**
+     * Gets update columns is Simplified.
+     *
+     * @return (`a`, `b`, `c`)  ->  (a, b, c)
+     */
+    List<String> getUpdateColumnsIsSimplified();
 
 }

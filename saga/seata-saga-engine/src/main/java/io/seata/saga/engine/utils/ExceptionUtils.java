@@ -72,8 +72,8 @@ public class ExceptionUtils {
     /**
      * getNetExceptionType
      *
-     * @param throwable
-     * @return
+     * @param throwable the throwable
+     * @return the net exception type
      */
     public static NetExceptionType getNetExceptionType(Throwable throwable) {
 
@@ -130,8 +130,8 @@ public class ExceptionUtils {
 
     /**
      * Determine if the it is network exception
-     * @param throwable
-     * @return
+     * @param throwable the throwable
+     * @return the boolean
      */
     public static boolean isNetException(Throwable throwable) {
         NetExceptionType netExceptionType = getNetExceptionType(throwable);

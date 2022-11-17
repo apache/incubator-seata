@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.AbstractConnectionProxy;
@@ -35,7 +34,6 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +49,8 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
 
     protected static final String WHERE = " WHERE ";
+
+    protected static final String GROUP_BY = " GROUP BY ";
 
 
     /**
@@ -95,28 +95,20 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && isMultiPk()) {
-            throw new NotSupportYetException("multi pk only support mysql!");
-        }
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        int updateCount = statementProxy.getUpdateCount();
-        if (updateCount > 0) {
-            if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
-                if (updateCount > beforeImage.size()) {
-                    ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-                    String errorMsg =
-                        "Before image size is not equaled to after image size, probably because you use read committed, please retry transaction.";
-                    if (connectionProxy.getContext().isAutoCommitChanged()) {
-                        throw new TxRetryException(errorMsg);
-                    } else {
-                        throw new ShouldNeverHappenException(errorMsg);
-                    }
-                }
+        if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+            ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+            String errorMsg =
+                "Before image size is not equaled to after image size, probably because you use read committed, please retry transaction.";
+            if (connectionProxy.getContext().isAutoCommitChanged()) {
+                throw new TxRetryException(errorMsg);
+            } else {
+                throw new ShouldNeverHappenException(errorMsg);
             }
-            TableRecords afterImage = afterImage(beforeImage);
-            prepareUndoLog(beforeImage, afterImage);
         }
+        TableRecords afterImage = afterImage(beforeImage);
+        prepareUndoLog(beforeImage, afterImage);
         return result;
     }
 
