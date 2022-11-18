@@ -15,6 +15,8 @@
  */
 package io.seata.server.storage.db.r2dbc.entity;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
@@ -46,9 +48,9 @@ public class BranchTransaction {
 
     private String applicationData;
 
-    private Date gmtCreate;
+    private LocalDateTime gmtCreate;
 
-    private Date gmtModified;
+    private LocalDateTime gmtModified;
 
     /**
      * Gets xid.
@@ -218,7 +220,7 @@ public class BranchTransaction {
      * @return the gmt create
      */
     public Date getGmtCreate() {
-        return gmtCreate;
+        return Date.from(gmtCreate.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     /**
@@ -226,7 +228,7 @@ public class BranchTransaction {
      *
      * @param gmtCreate the gmt create
      */
-    public void setGmtCreate(Date gmtCreate) {
+    public void setGmtCreate(LocalDateTime gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
@@ -236,7 +238,7 @@ public class BranchTransaction {
      * @return the gmt modified
      */
     public Date getGmtModified() {
-        return gmtModified;
+        return Date.from(gmtModified.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     /**
@@ -244,7 +246,7 @@ public class BranchTransaction {
      *
      * @param gmtModified the gmt modified
      */
-    public void setGmtModified(Date gmtModified) {
+    public void setGmtModified(LocalDateTime gmtModified) {
         this.gmtModified = gmtModified;
     }
 
