@@ -17,8 +17,8 @@ package io.seata.at;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.JdbcUtils;
+import io.seata.common.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.SQLException;

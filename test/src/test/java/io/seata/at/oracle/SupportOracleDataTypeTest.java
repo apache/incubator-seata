@@ -16,7 +16,7 @@
 package io.seata.at.oracle;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.JdbcConstants;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -39,7 +39,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import static io.seata.at.DruidDataSourceUtils.ORACLE;
-import static io.seata.at.DruidDataSourceUtils.POSTGRESQL;
 import static io.seata.at.DruidDataSourceUtils.createNewDruidDataSource;
 import static io.seata.at.oracle.OracleSqlConstant.BINARY_TABLE_NAME;
 import static io.seata.at.oracle.OracleSqlConstant.BINARY_TYPE;
@@ -153,7 +152,7 @@ public class SupportOracleDataTypeTest {
         helperStat = helperConn.createStatement();
         helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
         LOGGER.info("the helperRes is:[{}]", helperRes);
-        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(io.seata.sqlparser.util.JdbcConstants.ORACLE)
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE)
             .getTableMeta(dataSourceProxy.getPlainConnection(), tableName, dataSourceProxy.getResourceId());
         TableRecords beforeImage = TableRecords.buildRecords(tableMeta, helperRes);
 

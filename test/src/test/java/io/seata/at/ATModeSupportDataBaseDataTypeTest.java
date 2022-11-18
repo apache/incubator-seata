@@ -18,6 +18,7 @@ package io.seata.at;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import io.seata.common.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -130,7 +131,7 @@ public class ATModeSupportDataBaseDataTypeTest {
         helperStat = helperConn.createStatement();
         helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
         LOGGER.info("the helperRes is:[{}]", helperRes);
-        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(io.seata.sqlparser.util.JdbcConstants.ORACLE)
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE)
             .getTableMeta(dataSourceProxy.getPlainConnection(), tableName, dataSourceProxy.getResourceId());
         TableRecords beforeImage = TableRecords.buildRecords(tableMeta, helperRes);
 
