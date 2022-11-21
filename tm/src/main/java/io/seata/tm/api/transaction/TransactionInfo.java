@@ -38,7 +38,7 @@ public final class TransactionInfo implements Serializable {
 
     private int lockRetryTimes;
 
-    LockStrategyMode lockStrategyMode;
+    private LockStrategyMode lockStrategyMode;
 
     public int getTimeOut() {
         return timeOut;

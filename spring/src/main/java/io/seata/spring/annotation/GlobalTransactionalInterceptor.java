@@ -189,7 +189,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 GlobalLockConfig config = new GlobalLockConfig();
                 config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
                 config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
-                config.setLockStrategyMode(globalLockAnno.lockStrategyMode());
                 return config;
             }
         });

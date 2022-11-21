@@ -66,9 +66,4 @@ public @interface GlobalLock {
      */
     int lockRetryTimes() default -1;
 
-    /**
-     * @return lock strategy mode
-     */
-    LockStrategyMode lockStrategyMode() default LockStrategyMode.PESSIMISTIC;
-
 }
