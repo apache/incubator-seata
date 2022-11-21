@@ -21,7 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.seata.common.LockStrategyMode;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AliasFor;
 
