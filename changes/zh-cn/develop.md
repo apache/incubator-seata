@@ -39,6 +39,7 @@
 - [[#5052](https://github.com/seata/seata/pull/5052)] 修复update join条件中占位符参数问题
 - [[#5031](https://github.com/seata/seata/pull/5031)] 修复InsertOnDuplicateUpdate中不应该使用null值索引作为查询条件
 - [[#5075](https://github.com/seata/seata/pull/5075)] 修复InsertOnDuplicateUpdate无法拦截无主键和唯一索引的SQL
+- [[#5092](https://github.com/seata/seata/pull/5092)] 修复transactionManager创建顺序不正确的问题
 
 ### optimize：
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
@@ -101,5 +102,6 @@
 - [crazy-sheep](https://github.com/crazy-sheep)
 - [zhangzq7](https://github.com/zhangzq7)
 - [l81893521](https://github.com/l81893521)
+- [zhuyoufeng](https://github.com/zhuyoufeng)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
