@@ -34,6 +34,7 @@ import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
+import io.seata.sqlparser.JoinRecognizer;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
@@ -46,7 +47,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
  *
  * @author sharajava
  */
-public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpdateRecognizer {
+public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpdateRecognizer, JoinRecognizer {
 
     private final MySqlUpdateStatement ast;
 
@@ -189,6 +190,15 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         SQLOrderBy sqlOrderBy = ast.getOrderBy();
         return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
+    }
+
+    @Override
+    public String getJoinCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        if (!(ast.getTableSource() instanceof SQLJoinTableSource)) {
+            return "";
+        }
+        SQLExpr joinCondition = ((SQLJoinTableSource) ast.getTableSource()).getCondition();
+        return super.getJoinCondition(joinCondition, parametersHolder, paramAppenderList);
     }
 
     @Override

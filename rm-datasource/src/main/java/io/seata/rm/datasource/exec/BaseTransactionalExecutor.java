@@ -412,7 +412,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sb.append(":");
         int rowSequence = 0;
         List<Map<String, Field>> pksRows = rowsIncludingPK.pkRows();
-        List<String> primaryKeysOnlyName = getTableMeta().getPrimaryKeyOnlyName();
+        List<String> primaryKeysOnlyName = rowsIncludingPK.getTableMeta().getPrimaryKeyOnlyName();
         for (Map<String, Field> rowMap : pksRows) {
             int pkSplitIndex = 0;
             for (String pkName : primaryKeysOnlyName) {
