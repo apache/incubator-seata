@@ -29,9 +29,11 @@ public class TMClient {
      *
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
+     * @param accessKey               the access key
+     * @param secretKey               the secret key
      */
-    public static void init(String applicationId, String transactionServiceGroup) {
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId,transactionServiceGroup);
+    public static void init(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup, accessKey, secretKey);
         tmNettyRemotingClient.init();
     }
 

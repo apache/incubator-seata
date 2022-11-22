@@ -50,7 +50,7 @@ public class TmNettyClientTest {
     public void testGetInstance() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup,null,null);
         Field nettyClientKeyPoolField = getDeclaredField(tmNettyRemotingClient.getClientChannelManager(), "nettyClientKeyPool");
         nettyClientKeyPoolField.setAccessible(true);
         GenericKeyedObjectPool nettyClientKeyPool = (GenericKeyedObjectPool) nettyClientKeyPoolField.get(tmNettyRemotingClient.getClientChannelManager());
@@ -72,7 +72,7 @@ public class TmNettyClientTest {
     public void testInit() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup,null,null);
 
         tmNettyRemotingClient.init();
 

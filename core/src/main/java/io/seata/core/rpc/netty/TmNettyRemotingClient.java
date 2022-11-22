@@ -62,18 +62,26 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 2000;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
-    private String applicationId;
-    private String transactionServiceGroup;
+    private final String applicationId;
+    private final String transactionServiceGroup;
     private final AuthSigner signer;
-    private final String accessKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ACCESS_KEY,null);
-    private final String secretKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECRET_KEY,null);
+    private final String accessKey;
+    private final String secretKey;
 
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
                                   EventExecutorGroup eventExecutorGroup,
-                                  ThreadPoolExecutor messageExecutor) {
+                                  ThreadPoolExecutor messageExecutor,
+                                  String applicationId,
+                                  String transactionServiceGroup,
+                                  String accessKey,
+                                  String secretKey) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
+        this.applicationId = applicationId;
+        this.transactionServiceGroup = transactionServiceGroup;
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
         // set enableClientBatchSendRequest
         this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
                 DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
@@ -94,13 +102,27 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      *
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
+     * @param accessKey               the access key
+     * @param secretKey               the secret key
      * @return the instance
      */
-    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup) {
-        TmNettyRemotingClient tmRpcClient = getInstance();
-        tmRpcClient.setApplicationId(applicationId);
-        tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
-        return tmRpcClient;
+    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
+        if (instance == null) {
+            synchronized (TmNettyRemotingClient.class) {
+                if (instance == null) {
+                    NettyClientConfig nettyClientConfig = new NettyClientConfig();
+                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
+                            nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
+                            KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
+                            new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
+                                    nettyClientConfig.getClientWorkerThreads()),
+                            RejectedPolicies.runsOldestTaskPolicy());
+                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor,applicationId,transactionServiceGroup,accessKey,secretKey);
+                }
+            }
+        }
+        return instance;
     }
 
     /**
@@ -114,35 +136,17 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
-                            nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
-                            KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                            new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
-                                    nettyClientConfig.getClientWorkerThreads()),
-                            RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
+                        nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
+                        KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
+                        new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
+                            nettyClientConfig.getClientWorkerThreads()),
+                        RejectedPolicies.runsOldestTaskPolicy());
+                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor,null,null,null,null);
                 }
             }
         }
         return instance;
-    }
-
-    /**
-     * Sets application id.
-     *
-     * @param applicationId the application id
-     */
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    /**
-     * Sets transaction service group.
-     *
-     * @param transactionServiceGroup the transaction service group
-     */
-    public void setTransactionServiceGroup(String transactionServiceGroup) {
-        this.transactionServiceGroup = transactionServiceGroup;
     }
 
     @Override

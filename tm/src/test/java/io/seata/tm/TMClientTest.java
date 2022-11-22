@@ -31,7 +31,7 @@ public class TMClientTest {
 
     @Test
     public void testInit() {
-        TMClient.init(APPLICATION_ID, SERVICE_GROUP);
+        TMClient.init(APPLICATION_ID, SERVICE_GROUP,null,null);
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance();
         Assertions.assertEquals(tmNettyRemotingClient.getTransactionServiceGroup(), SERVICE_GROUP);
     }
