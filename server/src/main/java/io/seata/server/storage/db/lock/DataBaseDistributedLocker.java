@@ -31,13 +31,11 @@ import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.*;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.DBType;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.distributed.lock.DistributedLockSqlFactory;
-import com.alibaba.druid.pool.DruidDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -248,11 +246,6 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private void init() {
         this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        // fix issue 5030
-        if (distributedLockDataSource instanceof DruidDataSource && Objects.equals(dbType, DBType.ORACLE.name())) {
-            DruidDataSource druidDataSource = (DruidDataSource) distributedLockDataSource;
-            druidDataSource.setUseOracleImplicitCache(false);
-        }
     }
 
 }
