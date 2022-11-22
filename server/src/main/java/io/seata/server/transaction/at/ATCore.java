@@ -41,7 +41,7 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
  */
 public class ATCore extends AbstractCore {
     
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     public ATCore(RemotingServer remotingServer) {
         super(remotingServer);
@@ -59,9 +59,6 @@ public class ATCore extends AbstractCore {
         boolean autoCommit = true;
         boolean skipCheckLock = false;
         if (StringUtils.isNotBlank(applicationData)) {
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper();
-            }
             try {
                 Map<String, Object> data = objectMapper.readValue(applicationData, HashMap.class);
                 Object clientAutoCommit = data.get(AUTO_COMMIT);
