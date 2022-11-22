@@ -17,12 +17,18 @@ package io.seata.server.storage.db.r2dbc.repository;
 
 import io.seata.server.storage.db.r2dbc.entity.DistributedLock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.r2dbc.core.DatabaseClient;
+import reactor.core.publisher.Mono;
 
 /**
  * @author funkye
  */
 @ConditionalOnBean(DatabaseClient.class)
 public interface DistributedLockRepository extends ReactiveCrudRepository<DistributedLock, String> {
+
+    @Query("SELECT * FROM distributed_lock WHERE lock_key = :#{[0]} for update ")
+    Mono<DistributedLock> findByLockKey(String lockKey);
+
 }

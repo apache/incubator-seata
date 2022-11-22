@@ -219,7 +219,7 @@ public class GlobalTransaction {
      * @return the gmt create
      */
     public Date getGmtCreate() {
-        return Date.from(gmtCreate.atZone(ZoneId.systemDefault()).toInstant());
+        return gmtCreate != null ? Date.from(gmtCreate.atZone(ZoneId.systemDefault()).toInstant()) : null;
     }
 
     /**
@@ -237,7 +237,7 @@ public class GlobalTransaction {
      * @return the gmt modified
      */
     public Date getGmtModified() {
-        return Date.from(gmtModified.atZone(ZoneId.systemDefault()).toInstant());
+        return gmtModified != null ? Date.from(gmtModified.atZone(ZoneId.systemDefault()).toInstant()) : null;
     }
 
     /**

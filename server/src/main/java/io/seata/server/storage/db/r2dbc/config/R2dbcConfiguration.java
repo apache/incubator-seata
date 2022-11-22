@@ -85,8 +85,8 @@ public class R2dbcConfiguration extends AbstractDataSourceProvider {
         return new R2dbcEntityTemplate(databaseClient, dialect);
     }
 
-    @Bean(destroyMethod = "dispose")
-    ConnectionPool connectionFactory(R2dbcProperties r2dbcProperties) {
+    @Bean
+    public ConnectionPool connectionFactory(R2dbcProperties r2dbcProperties) {
         String url = getUrl();
         ConnectionInfo connectionInfo = URLParser.parser(url);
         String[] dbPeer = connectionInfo.getDbPeer().split(":");

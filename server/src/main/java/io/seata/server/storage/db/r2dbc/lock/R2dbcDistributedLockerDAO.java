@@ -57,21 +57,21 @@ public class R2dbcDistributedLockerDAO implements DistributedLocker {
     /**
      * Instantiates a new Log store data base dao.
      */
-    public R2dbcDistributedLockerDAO() {}
+    public R2dbcDistributedLockerDAO() {
+    }
 
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
         try {
-            return Boolean.TRUE.equals(distributedLockRepository.findById(distributedLockDO.getLockKey())
+            return Boolean.TRUE.equals(distributedLockRepository.findByLockKey(distributedLockDO.getLockKey())
                 .publishOn(Schedulers.boundedElastic()).map(distributedLock -> {
                     if (distributedLock != null && StringUtils.isNotBlank(distributedLock.getLockValue())
                         && !StringUtils.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())
                         && System.currentTimeMillis() < distributedLock.getExpireTime()) {
                         return false;
                     }
-
+                    distributedLockDO.setExpireTime(distributedLockDO.getExpireTime() + System.currentTimeMillis());
                     if (distributedLock != null) {
-                        distributedLock.setExpireTime(distributedLockDO.getExpireTime());
                         if (!StringUtils.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())) {
                             distributedLock.setLockValue(distributedLockDO.getLockValue());
                         }
@@ -91,13 +91,12 @@ public class R2dbcDistributedLockerDAO implements DistributedLocker {
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
         try {
-            return Boolean.TRUE.equals(distributedLockRepository.findById(distributedLockDO.getLockKey())
+            return Boolean.TRUE.equals(distributedLockRepository.findByLockKey(distributedLockDO.getLockKey())
                 .publishOn(Schedulers.boundedElastic()).map(distributedLock -> {
                     if (null == distributedLock) {
                         throw new ShouldNeverHappenException(
                             "distributedLockDO would not be null when release distribute lock");
                     }
-
                     if (distributedLock.getExpireTime() >= System.currentTimeMillis()
                         && !Objects.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())) {
                         LOGGER.debug("the distribute lock for key :{} is holding by :{}, skip the release lock.",
