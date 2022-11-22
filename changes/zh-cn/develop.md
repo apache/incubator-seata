@@ -36,10 +36,12 @@
 - [[#5033](https://github.com/seata/seata/pull/5023)] 修复InsertOnDuplicateUpdate中插入值解析为String类型导致的类型识别错误
 - [[#5038](https://github.com/seata/seata/pull/5038)] 修复SagaAsyncThreadPoolProperties冲突问题
 - [[#5050](https://github.com/seata/seata/pull/5050)] 修复Saga模式下全局状态未正确更改成Committed
+- [[#5052](https://github.com/seata/seata/pull/5052)] 修复update join条件中占位符参数问题
 - [[#5031](https://github.com/seata/seata/pull/5031)] 修复InsertOnDuplicateUpdate中不应该使用null值索引作为查询条件
 - [[#5075](https://github.com/seata/seata/pull/5075)] 修复InsertOnDuplicateUpdate无法拦截无主键和唯一索引的SQL
 
 ### optimize：
+- [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
 - [[#4750](https://github.com/seata/seata/pull/4750)] 优化AT分支释放全局锁不使用xid
 - [[#4790](https://github.com/seata/seata/pull/4790)] 添加一个 github action，用于自动发布Seata到OSSRH

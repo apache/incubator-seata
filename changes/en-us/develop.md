@@ -34,6 +34,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5033](https://github.com/seata/seata/pull/5023)] fix mysql InsertOnDuplicateUpdate insert value type recognize error
 - [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
 - [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
+- [[#5052](https://github.com/seata/seata/pull/5052)] fix update join condition placeholder param error
 - [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
 - [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
 
@@ -45,6 +46,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4750](https://github.com/seata/seata/pull/4750)] optimize unBranchLock romove xid
 - [[#4797](https://github.com/seata/seata/pull/4797)] optimize the github actions
 - [[#4800](https://github.com/seata/seata/pull/4800)] Add NOTICE as Apache License V2
+- [[#4681](https://github.com/seata/seata/pull/4681)] optimize lock priority attempts to insert
 - [[#4761](https://github.com/seata/seata/pull/4761)] use hget replace hmget because only one field
 - [[#4414](https://github.com/seata/seata/pull/4414)] exclude log4j dependencies
 - [[#4836](https://github.com/seata/seata/pull/4836)] optimize BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) method more readable
@@ -67,6 +69,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5047](https://github.com/seata/seata/pull/5047)] remove useless code
 - [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
 - [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
+
 
 ### test:
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
@@ -97,5 +100,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [crazy-sheep](https://github.com/crazy-sheep)
 - [zhangzq7](https://github.com/zhangzq7)
 - [l81893521](https://github.com/l81893521)
+
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
