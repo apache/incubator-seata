@@ -46,6 +46,7 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
@@ -237,7 +238,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                     primaryValues.add(v);
                 }
             });
-            afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
+            if (wherePrimaryList.size() > 0) {
+                afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
+            }
         }
 
         return buildTableRecords2(tableMeta, afterImageSql.toString(), paramAppenderList, primaryValues);
@@ -265,20 +268,24 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
      * @throws SQLException then execute fail
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList, List<Object> primaryKeys) throws SQLException {
+        if (CollectionUtils.isEmpty(paramAppenderList)) {
+            throw new NotSupportYetException("the SQL statement has no primary key or unique index value, it will not hit any row data.recommend to convert to a normal insert statement");
+        }
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection()
             .prepareStatement(primaryKeys.isEmpty() ? selectSQL + " FOR UPDATE" : selectSQL)) {
+            int paramAppenderCount = 0;
             int ts = CollectionUtils.isEmpty(paramAppenderList) ? 0 : paramAppenderList.size();
-            int ds = ts == 0 ? 0 : paramAppenderList.get(0).size();
             for (int i = 0; i < ts; i++) {
                 List<Object> paramAppender = paramAppenderList.get(i);
-                for (int j = 0; j < ds; j++) {
+                for (int j = 0; j < paramAppender.size(); j++) {
                     Object param = paramAppender.get(j);
-                    ps.setObject(i * ds + j + 1, (param instanceof Null) ? null : param);
+                    ps.setObject(paramAppenderCount + 1, (param instanceof Null) ? null : param);
+                    paramAppenderCount++; 
                 }
             }
             for (int i = 0; i < primaryKeys.size(); i++) {
-                ps.setObject(ts * ds + i + 1, primaryKeys.get(i));
+                ps.setObject(paramAppenderCount + i + 1, primaryKeys.get(i));
             }
 
             rs = ps.executeQuery();
@@ -308,7 +315,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             int finalI = i;
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
-                if (!v.isNonUnique()) {
+                if (!v.isNonUnique() && isIndexValueNotNull(v, imageParameterMap, finalI)) {
                     boolean columnIsNull = true;
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
@@ -321,15 +328,6 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                             }
                             columnIsNull = false;
                             continue;
-                        }
-                        if ((imageParameters == null && m.getColumnDef() == null) || imageParameters.get(finalI) == null || imageParameters.get(finalI) instanceof Null) {
-                            if (!"PRIMARY".equalsIgnoreCase(k)) {
-                                columnIsNull = false;
-                                uniqueList.add(columnName + " is ? ");
-                                paramAppenderTempList.add("NULL");
-                                continue;
-                            }
-                            break;
                         }
                         if ("PRIMARY".equalsIgnoreCase(k)) {
                             primaryKeysInBeforeImageSql.add(columnName);
@@ -348,7 +346,9 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                     }
                 }
             });
-            paramAppenderList.add(paramAppenderTempList);
+            if (CollectionUtils.isNotEmpty(paramAppenderTempList)) {
+                paramAppenderList.add(paramAppenderTempList);
+            }
         }
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
         return selectSQLJoin.toString();
@@ -402,6 +402,19 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             }
         }
         return imageParameterMap;
+    }
+
+    private boolean isIndexValueNotNull(IndexMeta indexMeta, Map<String, ArrayList<Object>> imageParameterMap, int rowIndex) {
+        for (ColumnMeta columnMeta : indexMeta.getValues()) {
+            String columnName = columnMeta.getColumnName();
+            List<Object> imageParameters = imageParameterMap.get(columnName);
+            if (imageParameters == null && columnMeta.getColumnDef() == null) {
+                return false;
+            } else if (imageParameters != null && (imageParameters.get(rowIndex) == null || imageParameters.get(rowIndex) instanceof Null)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
