@@ -22,23 +22,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 import javax.sql.DataSource;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
+import io.seata.config.*;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.distributed.lock.DistributedLockSqlFactory;
+import com.alibaba.druid.pool.DruidDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,6 +203,13 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     }
 
     protected DistributedLockDO getDistributedLockDO(Connection connection, String key) throws SQLException {
+
+        // fix issue 5030
+        if (distributedLockDataSource instanceof DruidDataSource && Objects.equals(dbType, DBType.ORACLE.name())) {
+            DruidDataSource druidDataSource = (DruidDataSource) distributedLockDataSource;
+            druidDataSource.setUseOracleImplicitCache(false);
+        }
+
         try (PreparedStatement pst = connection.prepareStatement(DistributedLockSqlFactory.getDistributedLogStoreSql(dbType)
                 .getSelectDistributeForUpdateSql(distributedLockTable))) {
 
