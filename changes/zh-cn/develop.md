@@ -42,6 +42,7 @@
 - [[#5092](https://github.com/seata/seata/pull/5092)] 修复transactionManager创建顺序不正确的问题
 
 ### optimize：
+- [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
 - [[#4750](https://github.com/seata/seata/pull/4750)] 优化AT分支释放全局锁不使用xid
 - [[#4790](https://github.com/seata/seata/pull/4790)] 添加一个 github action，用于自动发布Seata到OSSRH
