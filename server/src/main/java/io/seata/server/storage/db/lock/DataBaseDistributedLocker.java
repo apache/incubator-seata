@@ -203,13 +203,6 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     }
 
     protected DistributedLockDO getDistributedLockDO(Connection connection, String key) throws SQLException {
-
-        // fix issue 5030
-        if (distributedLockDataSource instanceof DruidDataSource && Objects.equals(dbType, DBType.ORACLE.name())) {
-            DruidDataSource druidDataSource = (DruidDataSource) distributedLockDataSource;
-            druidDataSource.setUseOracleImplicitCache(false);
-        }
-
         try (PreparedStatement pst = connection.prepareStatement(DistributedLockSqlFactory.getDistributedLogStoreSql(dbType)
                 .getSelectDistributeForUpdateSql(distributedLockTable))) {
 
@@ -255,6 +248,11 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private void init() {
         this.distributedLockDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        // fix issue 5030
+        if (distributedLockDataSource instanceof DruidDataSource && Objects.equals(dbType, DBType.ORACLE.name())) {
+            DruidDataSource druidDataSource = (DruidDataSource) distributedLockDataSource;
+            druidDataSource.setUseOracleImplicitCache(false);
+        }
     }
 
 }
