@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.seata.common.DefaultValues;
+import io.seata.common.LockStrategyMode;
 import io.seata.tm.api.transaction.Propagation;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AliasFor;
@@ -127,4 +128,12 @@ public @interface GlobalTransactional {
      * @return int
      */
     int lockRetryTimes() default -1;
+
+    /**
+     * pick the Acquire lock policy
+     *
+     * @return lock strategy mode
+     */
+    LockStrategyMode lockStrategyMode() default LockStrategyMode.PESSIMISTIC;
+
 }

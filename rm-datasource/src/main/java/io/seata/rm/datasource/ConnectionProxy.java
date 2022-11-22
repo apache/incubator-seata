@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.concurrent.Callable;
+import com.alibaba.druid.mock.MockConnection;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -269,9 +270,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
-        
+
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), context.getApplicationData(), context.buildLockKeys());
+            null, context.getXid(), this.targetConnection == null || this.targetConnection instanceof MockConnection
+                ? null : context.getApplicationData(),
+            context.buildLockKeys());
         context.setBranchId(branchId);
     }
 

@@ -18,6 +18,7 @@ package io.seata.tm.api.transaction;
 import java.io.Serializable;
 import java.util.Set;
 
+import io.seata.common.LockStrategyMode;
 import io.seata.common.util.CollectionUtils;
 
 /**
@@ -36,6 +37,8 @@ public final class TransactionInfo implements Serializable {
     private int lockRetryInterval;
 
     private int lockRetryTimes;
+
+    private LockStrategyMode lockStrategyMode;
 
     public int getTimeOut() {
         return timeOut;
@@ -107,4 +110,13 @@ public final class TransactionInfo implements Serializable {
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
     }
+
+    public LockStrategyMode getLockStrategyMode() {
+        return lockStrategyMode;
+    }
+
+    public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
+        this.lockStrategyMode = lockStrategyMode;
+    }
+
 }
