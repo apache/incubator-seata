@@ -41,6 +41,7 @@
 - [[#5075](https://github.com/seata/seata/pull/5075)] 修复InsertOnDuplicateUpdate无法拦截无主键和唯一索引的SQL
 
 ### optimize：
+- [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程
 - [[#4774](https://github.com/seata/seata/pull/4774)] 优化 seataio/seata-server 镜像中的 mysql8 依赖
 - [[#4750](https://github.com/seata/seata/pull/4750)] 优化AT分支释放全局锁不使用xid
 - [[#4790](https://github.com/seata/seata/pull/4790)] 添加一个 github action，用于自动发布Seata到OSSRH
