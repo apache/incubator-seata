@@ -36,7 +36,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
 - [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
 - [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
-
+- [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image

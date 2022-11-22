@@ -100,8 +100,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String applicationId;
     private final String txServiceGroup;
     private final int mode;
-    private static String accessKey;
-    private static String secretKey;
     private volatile boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
     private final AtomicBoolean initialized = new AtomicBoolean(false);
@@ -180,24 +178,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.failureHandlerHook = failureHandlerHook;
     }
 
-    /**
-     * Sets access key.
-     *
-     * @param accessKey the access key
-     */
-    public static void setAccessKey(String accessKey) {
-        GlobalTransactionScanner.accessKey = accessKey;
-    }
-
-    /**
-     * Sets secret key.
-     *
-     * @param secretKey the secret key
-     */
-    public static void setSecretKey(String secretKey) {
-        GlobalTransactionScanner.secretKey = secretKey;
-    }
-
     @Override
     public void destroy() {
         ShutdownHook.getInstance().destroyAll();
@@ -217,7 +197,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             throw new IllegalArgumentException(String.format("applicationId: %s, txServiceGroup: %s", applicationId, txServiceGroup));
         }
         //init TM
-        TMClient.init(applicationId, txServiceGroup, accessKey, secretKey);
+        TMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Transaction Manager Client is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
         }

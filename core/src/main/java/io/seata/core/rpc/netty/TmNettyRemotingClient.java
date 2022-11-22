@@ -47,8 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
-import static io.seata.core.constants.ConfigurationKeys.SEATA_ACCESS_KEY;
-import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
 
 /**
  * The rm netty client.
@@ -67,8 +65,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private String applicationId;
     private String transactionServiceGroup;
     private final AuthSigner signer;
-    private String accessKey;
-    private String secretKey;
+    private final String accessKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ACCESS_KEY,null);
+    private final String secretKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECRET_KEY,null);
 
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
@@ -99,24 +97,9 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @return the instance
      */
     public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup) {
-        return getInstance(applicationId, transactionServiceGroup, null, null);
-    }
-
-    /**
-     * Gets instance.
-     *
-     * @param applicationId           the application id
-     * @param transactionServiceGroup the transaction service group
-     * @param accessKey               the access key
-     * @param secretKey               the secret key
-     * @return the instance
-     */
-    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
         TmNettyRemotingClient tmRpcClient = getInstance();
         tmRpcClient.setApplicationId(applicationId);
         tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
-        tmRpcClient.setAccessKey(accessKey);
-        tmRpcClient.setSecretKey(secretKey);
         return tmRpcClient;
     }
 
@@ -160,32 +143,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      */
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
-    }
-
-    /**
-     * Sets access key.
-     *
-     * @param accessKey the access key
-     */
-    protected void setAccessKey(String accessKey) {
-        if (null != accessKey) {
-            this.accessKey = accessKey;
-            return;
-        }
-        this.accessKey = System.getProperty(SEATA_ACCESS_KEY);
-    }
-
-    /**
-     * Sets secret key.
-     *
-     * @param secretKey the secret key
-     */
-    protected void setSecretKey(String secretKey) {
-        if (null != secretKey) {
-            this.secretKey = secretKey;
-            return;
-        }
-        this.secretKey = System.getProperty(SEATA_SECRET_KEY);
     }
 
     @Override
