@@ -50,6 +50,7 @@ public class DruidDataSourceProvider extends AbstractDataSourceProvider {
         ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setValidationQuery(getValidationQuery(getDBType()));
         ds.setDefaultAutoCommit(true);
+        // fix issue 5030
         ds.setUseOracleImplicitCache(false);
         return ds;
     }
