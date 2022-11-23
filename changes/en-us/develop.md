@@ -101,6 +101,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [crazy-sheep](https://github.com/crazy-sheep)
 - [zhangzq7](https://github.com/zhangzq7)
 - [l81893521](https://github.com/l81893521)
-
+- [xingfudeshi](https://github.com/xingfudeshi)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
