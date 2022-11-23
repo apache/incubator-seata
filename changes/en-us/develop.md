@@ -38,6 +38,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
 - [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
 - [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
+- [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -100,6 +101,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [crazy-sheep](https://github.com/crazy-sheep)
 - [zhangzq7](https://github.com/zhangzq7)
 - [l81893521](https://github.com/l81893521)
+- [zhuyoufeng](https://github.com/zhuyoufeng)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
