@@ -72,8 +72,9 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### test:
+- [[#4411](https://github.com/seata/seata/pull/4411)] add UT for oracle in AT mode
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
-
+- [[#5101](https://github.com/seata/seata/pull/5101)] fix ClassNotFoundException during the zk unit test
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 

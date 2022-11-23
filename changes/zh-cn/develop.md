@@ -73,6 +73,7 @@
 ### test：
 - [[#4411](https://github.com/seata/seata/pull/4411)] 测试Oracle数据库AT模式下类型支持
 - [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
+- [[#5101](https://github.com/seata/seata/pull/5101)] 修复zk注册和配置中心报ClassNotFoundException的问题 `DataSourceProxyTest.getResourceIdTest()`
 
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
