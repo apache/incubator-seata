@@ -70,6 +70,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5047](https://github.com/seata/seata/pull/5047)] remove useless code
 - [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
 - [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
+- [[#5104](https://github.com/seata/seata/pull/5075)] remove the druid dependency in ConnectionProxy
 
 
 ### test:
