@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -38,7 +39,7 @@ import javax.sql.DataSource;
 @ConditionalOnExpression("${seata.enabled:true}")
 @ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})
 @ConditionalOnMissingBean(TCCFenceConfig.class)
-@AutoConfigureAfter({SeataCoreAutoConfiguration.class})
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class, TransactionAutoConfiguration.class})
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataTCCFenceAutoConfiguration {
 
