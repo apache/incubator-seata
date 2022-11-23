@@ -132,19 +132,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      */
     public static TmNettyRemotingClient getInstance() {
         if (instance == null) {
-            synchronized (TmNettyRemotingClient.class) {
-                if (instance == null) {
-                    NettyClientConfig nettyClientConfig = new NettyClientConfig();
-                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
-                        nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
-                        KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                        new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
-                            nettyClientConfig.getClientWorkerThreads()),
-                        RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor,null,null,null,null);
-                }
-            }
+            throw new NullPointerException("instance is null,please create instance by TmNettyRemotingClient#getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) first");
         }
         return instance;
     }
