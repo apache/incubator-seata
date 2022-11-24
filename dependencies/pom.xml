@@ -111,6 +111,7 @@
         <junit-platform.version>1.8.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
+        <jetty-version>9.4.38.v20210224</jetty-version>
     </properties>
 
     <dependencyManagement>
@@ -690,6 +691,16 @@
                         <groupId>org.glassfish.jersey</groupId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-security</artifactId>
+                <version>${jetty-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
