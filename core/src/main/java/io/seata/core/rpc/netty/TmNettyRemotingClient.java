@@ -118,7 +118,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                             new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                                     nettyClientConfig.getClientWorkerThreads()),
                             RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor,applicationId,transactionServiceGroup,accessKey,secretKey);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor, applicationId, transactionServiceGroup, accessKey, secretKey);
                 }
             }
         }
