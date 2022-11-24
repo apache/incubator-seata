@@ -72,7 +72,7 @@ public class TmNettyClientTest {
     public void testInit() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup,null,null);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup, null, null);
 
         tmNettyRemotingClient.init();
 
