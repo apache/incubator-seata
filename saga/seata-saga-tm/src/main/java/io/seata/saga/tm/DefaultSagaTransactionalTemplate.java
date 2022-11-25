@@ -216,7 +216,7 @@ public class DefaultSagaTransactionalTemplate
                 "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
         //init TM
-        TMClient.init(applicationId, txServiceGroup,accessKey,secretKey);
+        TMClient.init(applicationId, txServiceGroup, accessKey, secretKey);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
                 "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
