@@ -238,7 +238,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     }
 
     private static void initClient() {
-        TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP,null,null);
+        TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
         RMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
     }
 

@@ -47,6 +47,8 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+import static io.seata.core.constants.ConfigurationKeys.SEATA_ACCESS_KEY;
+import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
 
 /**
  * The rm netty client.
@@ -62,26 +64,25 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 2000;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
-    private final String applicationId;
-    private final String transactionServiceGroup;
+    private String applicationId;
+    private String transactionServiceGroup;
     private final AuthSigner signer;
-    private final String accessKey;
-    private final String secretKey;
-
+    private String accessKey;
+    private String secretKey;
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
-                                  EventExecutorGroup eventExecutorGroup,
-                                  ThreadPoolExecutor messageExecutor,
-                                  String applicationId,
-                                  String transactionServiceGroup,
-                                  String accessKey,
-                                  String secretKey) {
+        EventExecutorGroup eventExecutorGroup,
+        ThreadPoolExecutor messageExecutor,
+        String applicationId,
+        String transactionServiceGroup,
+        String accessKey,
+        String secretKey) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
-        this.accessKey = accessKey;
-        this.secretKey = secretKey;
+        this.accessKey = (accessKey != null) ? accessKey : System.getProperty(SEATA_ACCESS_KEY);
+        this.secretKey = (secretKey != null) ? secretKey : System.getProperty(SEATA_SECRET_KEY);
         // set enableClientBatchSendRequest
         this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
                 DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
@@ -95,6 +96,17 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                 }
             }
         });
+    }
+
+    /**
+     * Gets instance.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @return the instance
+     */
+    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup) {
+        return getInstance(applicationId, transactionServiceGroup, null, null);
     }
 
     /**
@@ -131,10 +143,47 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @return the instance
      */
     public static TmNettyRemotingClient getInstance() {
-        if (instance == null) {
-            throw new NullPointerException("instance is null,please create instance by TmNettyRemotingClient#getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) first");
+        return getInstance(null, null, null, null);
+    }
+
+    /**
+     * Sets application id.
+     *
+     * @param applicationId the application id
+     */
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    /**
+     * Sets transaction service group.
+     *
+     * @param transactionServiceGroup the transaction service group
+     */
+    public void setTransactionServiceGroup(String transactionServiceGroup) {
+        this.transactionServiceGroup = transactionServiceGroup;
+    }
+
+    /**
+     * Sets access key.
+     *
+     * @param accessKey the access key
+     */
+    protected void setAccessKey(String accessKey) {
+        if (null != accessKey) {
+            this.accessKey = accessKey;
         }
-        return instance;
+    }
+
+    /**
+     * Sets secret key.
+     *
+     * @param secretKey the secret key
+     */
+    protected void setSecretKey(String secretKey) {
+        if (null != secretKey) {
+            this.secretKey = secretKey;
+        }
     }
 
     @Override

@@ -70,7 +70,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup,null,null);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
         tmNettyRemotingClient.init();
         String serverAddress = "0.0.0.0:8091";
@@ -106,7 +106,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
         String applicationId = "app 1";
         String transactionServiceGroup = "default_tx_group";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup,null,null);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
         tmNettyRemotingClient.init();
 
@@ -133,7 +133,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
         String applicationId = "app 1";
         String transactionServiceGroup = "default_tx_group";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup,null,null);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
         tmNettyRemotingClient.init();
 
         String serverAddress = "0.0.0.0:8091";

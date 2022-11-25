@@ -29,6 +29,16 @@ public class TMClient {
      *
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
+     */
+    public static void init(String applicationId, String transactionServiceGroup) {
+        init(applicationId, transactionServiceGroup, null, null);
+    }
+
+    /**
+     * Init.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
      * @param accessKey               the access key
      * @param secretKey               the secret key
      */

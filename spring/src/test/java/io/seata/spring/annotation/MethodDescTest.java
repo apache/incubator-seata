@@ -73,7 +73,6 @@ public class MethodDescTest {
 
     @Test
     public void testGlobalTransactional() throws NoSuchMethodException {
-        TMClient.init("test-app","global-trans-scanner-test",null,null);
         MockClassAnnotation mockClassAnnotation = new MockClassAnnotation();
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTarget(mockClassAnnotation);
