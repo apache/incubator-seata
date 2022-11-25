@@ -20,8 +20,6 @@ import java.lang.reflect.Method;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.DefaultValues;
 import io.seata.core.context.RootContext;
-import io.seata.core.rpc.netty.TmNettyRemotingClient;
-import io.seata.tm.TMClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
