@@ -15,26 +15,18 @@
  */
 package io.seata.server.storage.db.r2dbc.lock;
 
-import java.util.Objects;
-
 import javax.annotation.Resource;
 
-import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
-import io.seata.server.storage.db.r2dbc.repository.DistributedLockRepository;
-import io.seata.server.storage.db.r2dbc.entity.DistributedLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
-import io.seata.core.store.DistributedLockDO;
+import io.seata.server.storage.db.r2dbc.repository.DistributedLockRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
+
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
+import io.seata.core.store.DistributedLockDO;
+import io.seata.core.store.DistributedLocker;
 
 /**
  * @author jianbin.chen
@@ -42,10 +34,7 @@ import reactor.core.publisher.Mono;
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
 @ConditionalOnBean(DatabaseClient.class)
 @Component
-public class R2dbcDistributedLockerDAO {
-    private static final Logger LOGGER = LoggerFactory.getLogger(R2dbcDistributedLockerDAO.class);
-
-    private final BeanCopier distributedLockDOToEntity = BeanCopier.create(DistributedLockDO.class, DistributedLock.class, false);
+public class R2dbcDistributedLockerDAO implements DistributedLocker {
 
     @Resource
     private DistributedLockRepository distributedLockRepository;
@@ -53,59 +42,31 @@ public class R2dbcDistributedLockerDAO {
     /**
      * Instantiates a new Log store data base dao.
      */
-    public R2dbcDistributedLockerDAO() {
-    }
+    public R2dbcDistributedLockerDAO() {}
 
-    @Transactional
-    public Mono<Boolean> acquireLock(DistributedLockDO distributedLockDO) {
+    @Override
+    public boolean acquireLock(DistributedLockDO distributedLockDO) {
         try {
-            return distributedLockRepository.findByLockKey(distributedLockDO.getLockKey()).map(distributedLock -> {
-                    if (distributedLock != null && StringUtils.isNotBlank(distributedLock.getLockValue())
-                        && !StringUtils.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())
-                        && System.currentTimeMillis() < distributedLock.getExpireTime()) {
-                        return Mono.just(false);
-                    }
-                    distributedLockDO.setExpireTime(distributedLockDO.getExpireTime() + System.currentTimeMillis());
-                    if (distributedLock != null) {
-                        if (!StringUtils.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())) {
-                            distributedLock.setLockValue(distributedLockDO.getLockValue());
-                        }
-                        distributedLock.setExpireTime(distributedLockDO.getExpireTime());
-                        distributedLock.setNewLock(false);
-                        return distributedLockRepository.save(distributedLock).then(Mono.just(true));
-                    }
-                    distributedLock = new DistributedLock();
-                    distributedLockDOToEntity.copy(distributedLockDO, distributedLock, null);
-                    return distributedLockRepository.save(distributedLock).then(Mono.just(true));
-                }).flatMap(Mono::from);
+            distributedLockDO.setExpireTime(distributedLockDO.getExpireTime() + System.currentTimeMillis());
+            Integer res = distributedLockRepository.acquireLock(distributedLockDO.getExpireTime(),
+                distributedLockDO.getLockKey(), distributedLockDO.getLockValue(), System.currentTimeMillis()).block();
+            return res != null && res > 0;
         } catch (R2dbcDataIntegrityViolationException e) {
             // being scrambled by other threads to succeed
-            return Mono.just(false);
+            return false;
         }
     }
 
-    @Transactional
-    public Mono<Boolean> releaseLock(DistributedLockDO distributedLockDO) {
+    @Override
+    public boolean releaseLock(DistributedLockDO distributedLockDO) {
         try {
-            return distributedLockRepository.findByLockKey(distributedLockDO.getLockKey()).map(distributedLock -> {
-                if (null == distributedLock) {
-                    throw new ShouldNeverHappenException(
-                        "distributedLockDO would not be null when release distribute lock");
-                }
-                if (distributedLock.getExpireTime() >= System.currentTimeMillis()
-                    && !Objects.equals(distributedLock.getLockValue(), distributedLockDO.getLockValue())) {
-                    LOGGER.debug("the distribute lock for key :{} is holding by :{}, skip the release lock.",
-                        distributedLockDO.getLockKey(), distributedLock.getLockValue());
-                    return Mono.just(true);
-                }
-                distributedLock.setNewLock(false);
-                distributedLock.setLockValue(StringUtils.SPACE);
-                distributedLock.setExpireTime(0L);
-                return distributedLockRepository.save(distributedLock).then(Mono.just(true));
-            }).flatMap(Mono::from);
+            Integer res = distributedLockRepository
+                .releaseLock(distributedLockDO.getLockKey(), StringUtils.SPACE, distributedLockDO.getLockValue())
+                .block();
+            return res != null && res > 0;
         } catch (R2dbcDataIntegrityViolationException e) {
             // being scrambled by other threads to succeed
-            return Mono.just(false);
+            return false;
         }
     }
 

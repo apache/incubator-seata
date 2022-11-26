@@ -17,6 +17,7 @@ package io.seata.server.storage.db.r2dbc.repository;
 
 import io.seata.server.storage.db.r2dbc.entity.DistributedLock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.data.r2dbc.repository.Modifying;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -28,7 +29,14 @@ import reactor.core.publisher.Mono;
 @ConditionalOnBean(DatabaseClient.class)
 public interface DistributedLockRepository extends ReactiveCrudRepository<DistributedLock, String> {
 
-    @Query("SELECT * FROM distributed_lock WHERE lock_key = :#{[0]} for update ")
-    Mono<DistributedLock> findByLockKey(String lockKey);
+    @Modifying
+    @Query("UPDATE distributed_lock SET expire = :#{[0]},lock_value = :#{[2]}"
+        + " where lock_key = :#{[1]} and (lock_value = :#{[2]} or expire=0 or expire < :#{[3]})")
+    Mono<Integer> acquireLock(Long expireTime, String lockKey, String lockValue, Long oldExpireTime);
+
+    @Modifying
+    @Query("UPDATE distributed_lock SET expire = 0,lock_value = :#{[1]}"
+        + " where lock_key = :#{[0]} and lock_value = :#{[2]}")
+    Mono<Integer> releaseLock(String lockKey, String lockValue, String oldLockValue);
 
 }

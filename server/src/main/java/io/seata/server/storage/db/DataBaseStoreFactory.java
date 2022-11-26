@@ -28,7 +28,7 @@ import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.storage.db.jdbc.lock.DataBaseDistributedLockerDAO;
 import io.seata.server.storage.db.jdbc.lock.LockStoreDataBaseDAO;
 import io.seata.server.storage.db.jdbc.store.LogStoreDataBaseDAO;
-import io.seata.server.storage.db.r2dbc.lock.R2dbcDistributedLockerService;
+import io.seata.server.storage.db.r2dbc.lock.R2dbcDistributedLockerDAO;
 import io.seata.server.storage.db.r2dbc.lock.R2dbcLockStoreDataBaseDAO;
 import io.seata.server.storage.db.r2dbc.store.R2dbcLogStoreDataBaseDAO;
 import org.springframework.context.ApplicationContext;
@@ -75,7 +75,7 @@ public class DataBaseStoreFactory {
             ApplicationContext applicationContext =
                 (ApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
             try {
-                return applicationContext.getBean(R2dbcDistributedLockerService.class);
+                return applicationContext.getBean(R2dbcDistributedLockerDAO.class);
             } catch (Exception ignored) {
             }
         }
