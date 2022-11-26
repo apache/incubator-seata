@@ -113,6 +113,7 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <r2dbc-mysql.version>0.8.2.RELEASE</r2dbc-mysql.version>
         <opentracing-jdbc.version>0.1.2</opentracing-jdbc.version>
+        <jetty-version>9.4.38.v20210224</jetty-version>
     </properties>
 
     <dependencyManagement>
@@ -702,6 +703,16 @@
                         <groupId>org.glassfish.jersey</groupId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-security</artifactId>
+                <version>${jetty-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
