@@ -40,6 +40,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
 - [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
 
+
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
 - [[#4790](https://github.com/seata/seata/pull/4790)] Add a github action to publish Seata to OSSRH
