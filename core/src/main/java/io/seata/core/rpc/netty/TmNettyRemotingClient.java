@@ -71,8 +71,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private String secretKey;
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
-        EventExecutorGroup eventExecutorGroup,
-        ThreadPoolExecutor messageExecutor) {
+                                  EventExecutorGroup eventExecutorGroup,
+                                  ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
         // set enableClientBatchSendRequest
