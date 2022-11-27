@@ -72,17 +72,9 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
         EventExecutorGroup eventExecutorGroup,
-        ThreadPoolExecutor messageExecutor,
-        String applicationId,
-        String transactionServiceGroup,
-        String accessKey,
-        String secretKey) {
+        ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
-        this.applicationId = applicationId;
-        this.transactionServiceGroup = transactionServiceGroup;
-        this.accessKey = (accessKey != null) ? accessKey : System.getProperty(SEATA_ACCESS_KEY);
-        this.secretKey = (secretKey != null) ? secretKey : System.getProperty(SEATA_SECRET_KEY);
         // set enableClientBatchSendRequest
         this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
                 DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
@@ -119,6 +111,20 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @return the instance
      */
     public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
+        TmNettyRemotingClient tmRpcClient = getInstance();
+        tmRpcClient.setApplicationId(applicationId);
+        tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
+        tmRpcClient.setAccessKey(accessKey);
+        tmRpcClient.setSecretKey(secretKey);
+        return tmRpcClient;
+    }
+
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
+    public static TmNettyRemotingClient getInstance() {
         if (instance == null) {
             synchronized (TmNettyRemotingClient.class) {
                 if (instance == null) {
@@ -130,20 +136,11 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                             new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                                     nettyClientConfig.getClientWorkerThreads()),
                             RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor, applicationId, transactionServiceGroup, accessKey, secretKey);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
                 }
             }
         }
         return instance;
-    }
-
-    /**
-     * Gets instance.
-     *
-     * @return the instance
-     */
-    public static TmNettyRemotingClient getInstance() {
-        return getInstance(null, null, null, null);
     }
 
     /**
@@ -172,7 +169,9 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     protected void setAccessKey(String accessKey) {
         if (null != accessKey) {
             this.accessKey = accessKey;
+            return;
         }
+        this.accessKey = System.getProperty(SEATA_ACCESS_KEY);
     }
 
     /**
@@ -183,7 +182,9 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     protected void setSecretKey(String secretKey) {
         if (null != secretKey) {
             this.secretKey = secretKey;
+            return;
         }
+        this.secretKey = System.getProperty(SEATA_SECRET_KEY);
     }
 
     @Override
