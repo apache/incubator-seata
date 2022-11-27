@@ -70,6 +70,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private String accessKey;
     private String secretKey;
 
+
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
                                   EventExecutorGroup eventExecutorGroup,
                                   ThreadPoolExecutor messageExecutor) {
