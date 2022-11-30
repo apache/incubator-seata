@@ -41,6 +41,7 @@
 - [[#5075](https://github.com/seata/seata/pull/5075)] 修复InsertOnDuplicateUpdate无法拦截无主键和唯一索引的SQL
 - [[#5093](https://github.com/seata/seata/pull/5093)] 修复seata server重启后access key丢失问题
 - [[#5092](https://github.com/seata/seata/pull/5092)] 修复当seata and jpa共同使用时, AutoConfiguration的顺序不正确的问题
+- [[#5109](https://github.com/seata/seata/pull/5109)] 修复当RM侧没有加@GlobalTransactional报NPE的问题
 
 ### optimize：
 - [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程
