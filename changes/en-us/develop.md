@@ -39,6 +39,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
 - [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
 - [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
+- [[#5109](https://github.com/seata/seata/pull/5109)] fix NPE caused when there is no @GlobalTransactional annotation on the RM side
 
 
 ### optimize:
