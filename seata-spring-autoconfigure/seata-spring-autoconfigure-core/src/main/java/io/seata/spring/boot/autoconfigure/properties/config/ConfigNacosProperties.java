@@ -34,6 +34,7 @@ public class ConfigNacosProperties {
     private String accessKey = "";
     private String secretKey = "";
     private String dataId = "seata.properties";
+    private String contextPath = "";
 
     public String getServerAddr() {
         return serverAddr;
@@ -104,6 +105,15 @@ public class ConfigNacosProperties {
 
     public ConfigNacosProperties setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+        return this;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public ConfigNacosProperties setContextPath(String contextPath) {
+        this.contextPath = contextPath;
         return this;
     }
 }

@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
 - [[#4914](https://github.com/seata/seata/pull/4914)] support mysql update join sql
+- [[#5111](https://github.com/seata/seata/pull/5111)] support passing contextPath parameter to Nacos client
 
 
 ### bugfix:
