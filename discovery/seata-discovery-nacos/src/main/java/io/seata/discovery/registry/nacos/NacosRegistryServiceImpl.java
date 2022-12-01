@@ -269,7 +269,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                 }
             }
         }
-        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPath());
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
         if (StringUtils.isNotBlank(contextPath)) {
             properties.setProperty(CONTEXT_PATH, contextPath);
         }
@@ -328,7 +328,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
     }
 
-    private static String getNacosContextPath() {
+    private static String getNacosContextPathKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, CONTEXT_PATH);
     }
 

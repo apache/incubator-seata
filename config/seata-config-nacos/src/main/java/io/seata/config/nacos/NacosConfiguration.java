@@ -245,7 +245,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                 }
             }
         }
-        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPath());
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
         if (StringUtils.isNotBlank(contextPath)) {
             properties.setProperty(CONTEXT_PATH, contextPath);
         }
@@ -311,7 +311,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         return sb.toString();
     }
 
-    private static String getNacosContextPath() {
+    private static String getNacosContextPathKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
     }
 
