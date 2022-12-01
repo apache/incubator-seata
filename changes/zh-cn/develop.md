@@ -10,7 +10,7 @@
 - [[#4877](https://github.com/seata/seata/pull/4877)] seata client支持jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] 支持kryo 5.3.0
 - [[#4914](https://github.com/seata/seata/pull/4914)] 支持mysql的update join联表更新语法
-
+- [[#5111](https://github.com/seata/seata/pull/5111)] 支持传递contextPath参数给Nacos客户端
 
 
 ### bugfix：
