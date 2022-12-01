@@ -108,5 +108,6 @@
 - [zhangzq7](https://github.com/zhangzq7)
 - [l81893521](https://github.com/l81893521)
 - [zhuyoufeng](https://github.com/zhuyoufeng)
-- [xingfudeshi](https://github.com/xingfudeshi)
+- [xingfudeshi](https://github.com/xingfudeshi)  
+
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
