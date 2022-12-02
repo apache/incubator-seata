@@ -13,8 +13,8 @@ jobs:
       matrix:
         java: [ 8, 11, 17 ]
         springboot: [
-          2.7.2          -Dspring-framework.version=5.3.22,
-          2.6.10         -Dspring-framework.version=5.3.22,
+          2.7.6          -Dspring-framework.version=5.3.24,
+          2.6.14         -Dspring-framework.version=5.3.24,
           2.5.14         -Dspring-framework.version=5.3.20,
           2.4.13         -Dspring-framework.version=5.3.13,
           2.3.12.RELEASE -Dspring-framework.version=5.2.15.RELEASE,
@@ -49,14 +49,14 @@ jobs:
           else
             ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
-  arm64-test: 
+  arm64-test:
      runs-on: ubuntu-latest
      strategy:
       fail-fast: false
       matrix:
         springboot: [
-          2.7.2          -Dspring-framework.version=5.3.22,
-          2.6.10         -Dspring-framework.version=5.3.22,
+          2.7.6          -Dspring-framework.version=5.3.24,
+          2.6.14         -Dspring-framework.version=5.3.24,
           2.5.14         -Dspring-framework.version=5.3.20,
           2.4.13         -Dspring-framework.version=5.3.13,
           2.3.12.RELEASE -Dspring-framework.version=5.2.15.RELEASE,
@@ -69,7 +69,7 @@ jobs:
           #1.2.8.RELEASE,
           #1.1.12.RELEASE,
           #1.0.2.RELEASE
-        ]    
+        ]
      steps:
       - uses: actions/checkout@v2
       - name: Set up QEMU
