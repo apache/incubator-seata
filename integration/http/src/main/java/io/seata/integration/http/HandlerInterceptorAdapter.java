@@ -38,4 +38,19 @@ public interface HandlerInterceptorAdapter extends HandlerInterceptor {
 
     default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
     }
+
+
+    //region Compatible with spring-webmvc:6.x
+
+    default boolean preHandle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler) throws Exception {
+        return true;
+    }
+
+    default void postHandle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+    }
+
+    default void afterCompletion(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
+    }
+
+    //endregion
 }

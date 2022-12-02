@@ -37,7 +37,7 @@ public class HttpHandlerExceptionResolver extends AbstractHandlerExceptionResolv
         return null;
     }
 
-    //support for spring-webmvc:6.x
+    //Compatible with spring-webmvc:6.x
     //@Override
     protected ModelAndView doResolveException(jakarta.servlet.http.HttpServletRequest request,
                                               jakarta.servlet.http.HttpServletResponse httpServletResponse,
