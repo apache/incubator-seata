@@ -31,6 +31,7 @@ public interface StarterConstants {
     String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + ".shutdown";
     String SERVICE_PREFIX = SEATA_PREFIX + ".service";
     String CLIENT_PREFIX = SEATA_PREFIX + ".client";
+    String HTTP_PREFIX = SEATA_PREFIX + ".http";
     String SAGA_PREFIX = SEATA_PREFIX + ".saga";
     String CLIENT_RM_PREFIX = CLIENT_PREFIX + ".rm";
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
