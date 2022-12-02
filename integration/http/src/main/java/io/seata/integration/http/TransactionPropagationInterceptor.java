@@ -22,7 +22,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 
 /**
@@ -30,7 +29,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  *
  * @author wangxb
  */
-public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter {
+public class TransactionPropagationInterceptor implements HandlerInterceptorAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationInterceptor.class);
 
