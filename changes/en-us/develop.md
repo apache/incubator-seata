@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
 - [[#4914](https://github.com/seata/seata/pull/4914)] support mysql update join sql
+- [[#5111](https://github.com/seata/seata/pull/5111)] support passing contextPath parameter to Nacos client
 
 
 ### bugfix:
@@ -37,7 +38,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5052](https://github.com/seata/seata/pull/5052)] fix update join condition placeholder param error
 - [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
 - [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
+- [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
 - [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
+- [[#5109](https://github.com/seata/seata/pull/5109)] fix NPE caused when there is no @GlobalTransactional annotation on the RM side
 
 
 ### optimize:

@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -279,14 +280,17 @@ public class ConnectionContext {
     public String getApplicationData() throws TransactionException {
         GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
         // lock retry times > 1 & skip first check lock / before image is empty
-        if ((globalLockConfig.getLockRetryTimes() == -1 || globalLockConfig.getLockRetryTimes() > 1)
-            && (globalLockConfig.getLockStrategyMode() == LockStrategyMode.OPTIMISTIC || allBeforeImageEmpty())) {
-            if (!applicationData.containsKey(SKIP_CHECK_LOCK)) {
-                this.applicationData.put(SKIP_CHECK_LOCK, true);
-            } else {
-                this.applicationData.put(SKIP_CHECK_LOCK, false);
+        Optional.ofNullable(globalLockConfig).ifPresent(lockConfig -> {
+            if ((lockConfig.getLockRetryTimes() == -1 || lockConfig.getLockRetryTimes() > 1)
+                && (lockConfig.getLockStrategyMode() == LockStrategyMode.OPTIMISTIC || allBeforeImageEmpty())) {
+                if (!applicationData.containsKey(SKIP_CHECK_LOCK)) {
+                    this.applicationData.put(SKIP_CHECK_LOCK, true);
+                } else {
+                    this.applicationData.put(SKIP_CHECK_LOCK, false);
+                }
             }
-        }
+        });
+
         boolean autoCommit = this.isAutoCommitChanged();
         // when transaction are enabled, it must be false
         if (!autoCommit) {
