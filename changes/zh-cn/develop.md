@@ -73,6 +73,7 @@
 - [[#5051](https://github.com/seata/seata/pull/5051)] 回滚时undolog产生脏写需要抛出不再重试(BranchRollbackFailed_Unretriable)的异常
 - [[#5075](https://github.com/seata/seata/pull/5075)] 拦截没有主键及唯一索引值的insert on duplicate update语句
 - [[#5104](https://github.com/seata/seata/pull/5104)] ConnectionProxy脱离对druid的依赖
+- [[#5120](https://github.com/seata/seata/pull/5120)] 统一yml文件中的配置项格式
 
 ### test：
 - [[#4411](https://github.com/seata/seata/pull/4411)] 测试Oracle数据库AT模式下类型支持
