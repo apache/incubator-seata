@@ -325,8 +325,11 @@ public class SessionHelper {
                 throw new TransactionException(e);
             } catch (ExecutionException e) {
                 Throwable throwable = e.getCause();
-                if (throwable instanceof TransactionException) {
-                    throw (TransactionException)throwable;
+                if (throwable instanceof RuntimeException) {
+                    Throwable cause = throwable.getCause();
+                    if (cause instanceof TransactionException) {
+                        throw (TransactionException)cause;
+                    }
                 }
                 throw new TransactionException(e);
             }
