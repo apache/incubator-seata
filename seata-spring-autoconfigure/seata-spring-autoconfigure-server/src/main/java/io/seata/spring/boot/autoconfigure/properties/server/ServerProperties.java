@@ -33,7 +33,8 @@ public class ServerProperties {
     private Duration maxRollbackRetryTimeout = DurationUtil.DEFAULT_DURATION;
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
     private Boolean enableCheckAuth = true;
-    private Boolean enableParallelRequestHandle = false;
+    private Boolean enableParallelRequestHandle = true;
+    private Boolean enableParallelHandleBranch = false;
     private Integer retryDeadThreshold = 130000;
     private Integer servicePort;
     private Integer xaerNotaRetryTimeout = 60000;
@@ -107,4 +108,13 @@ public class ServerProperties {
     public void setEnableParallelRequestHandle(Boolean enableParallelRequestHandle) {
         this.enableParallelRequestHandle = enableParallelRequestHandle;
     }
+
+    public Boolean getEnableParallelHandleBranch() {
+        return enableParallelHandleBranch;
+    }
+
+    public void setEnableParallelHandleBranch(Boolean enableParallelHandleBranch) {
+        this.enableParallelHandleBranch = enableParallelHandleBranch;
+    }
+
 }

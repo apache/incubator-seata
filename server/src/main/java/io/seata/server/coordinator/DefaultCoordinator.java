@@ -318,7 +318,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (!beginGlobalsessions.isEmpty() && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check begin, size: {}", beginGlobalsessions.size());
         }
-        SessionHelper.forEach(beginGlobalsessions, globalSession -> {
+        SessionHelper.parallelForEach(beginGlobalsessions, globalSession -> {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                         globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
@@ -363,7 +363,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
+        SessionHelper.parallelForEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
                 if (rollbackingSession.getStatus() == GlobalStatus.Rollbacking
@@ -404,7 +404,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHelper.forEach(committingSessions, committingSession -> {
+        SessionHelper.parallelForEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
                 if (committingSession.getStatus() == GlobalStatus.Committing
@@ -441,7 +441,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
-        SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
+        SessionHelper.parallelForEach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
@@ -604,7 +604,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 if (branchSession != null) {
                     doRemove(branchSession);
                 } else {
-                    globalSession.getSortedBranches().forEach(this::doRemove);
+                    globalSession.getSortedBranches().parallelStream().forEach(this::doRemove);
                 }
             } catch (Exception unKnowException) {
                 LOGGER.error("Asynchronous delete branchSession error, xid = {}", globalSession.getXid(), unKnowException);

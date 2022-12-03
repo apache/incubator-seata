@@ -15,9 +15,16 @@
  */
 package io.seata.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.Configuration;
@@ -239,17 +246,38 @@ public class SessionHelper {
     }
 
     /**
+     * Parallel foreach global sessions.
+     *
+     * @param sessions the global sessions
+     * @param handler  the handler
+     */
+    public static void parallelForEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        forEach(sessions, handler, true);
+    }
+
+    /**
+     * Single foreach global sessions.
+     *
+     * @param sessions the global sessions
+     * @param handler  the handler
+     */
+    public static void singleForEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        forEach(sessions, handler, false);
+    }
+
+    /**
      * Foreach global sessions.
      *
      * @param sessions the global sessions
      * @param handler  the handler
-     * @since 1.5.0
+     * @param parallel  the parallel
      */
-    public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+    public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler, boolean parallel) {
         if (CollectionUtils.isEmpty(sessions)) {
             return;
         }
-        sessions.parallelStream().forEach(globalSession -> {
+        Stream<GlobalSession> stream = StreamSupport.stream(sessions.spliterator(), parallel);
+        stream.forEach(globalSession -> {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
                 handler.handle(globalSession);
@@ -266,23 +294,78 @@ public class SessionHelper {
      *
      * @param sessions the branch session
      * @param handler  the handler
-     * @since 1.5.0
      */
-    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler, boolean parallel) throws TransactionException {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return true;
+        }
         Boolean result;
-        for (BranchSession branchSession : sessions) {
-            try {
-                MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
-                result = handler.handle(branchSession);
-                if (result == null) {
-                    continue;
+        if (parallel) {
+            Map<String, List<BranchSession>> map = new HashMap<>(4);
+            for (BranchSession session : sessions) {
+                map.computeIfAbsent(session.getResourceId(), k -> new ArrayList<>()).add(session);
+            }
+            List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>(map.size());
+            map.forEach((k, v) -> completableFutures.add(CompletableFuture.supplyAsync(() -> {
+                try {
+                    return SessionHelper.forEach(v, handler, false);
+                } catch (TransactionException e) {
+                    throw new RuntimeException(e);
                 }
-                return result;
-            } finally {
-                MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
+            })));
+            try {
+                for (CompletableFuture<Boolean> completableFuture : completableFutures) {
+                    result = completableFuture.get();
+                    if (result == null) {
+                        continue;
+                    }
+                    return result;
+                }
+            } catch (InterruptedException e) {
+                throw new TransactionException(e);
+            } catch (ExecutionException e) {
+                Throwable throwable = e.getCause();
+                if (throwable instanceof TransactionException) {
+                    throw (TransactionException)throwable;
+                }
+                throw new TransactionException(e);
+            }
+        } else {
+            for (BranchSession branchSession : sessions) {
+                try {
+                    MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
+                    result = handler.handle(branchSession);
+                    if (result == null) {
+                        continue;
+                    }
+                    return result;
+                } finally {
+                    MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
+                }
             }
         }
         return null;
+    }
+
+    /**
+     * Single foreach branch sessions.
+     *
+     * @param sessions the branch session
+     * @param handler  the handler
+     * @since 1.5.0
+     */
+    public static Boolean singleForEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+        return SessionHelper.forEach(sessions, handler, false);
+    }
+
+    /**
+     * Parallel foreach branch sessions.
+     *
+     * @param sessions the branch session
+     * @param handler  the handler
+     */
+    public static Boolean parallelForEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+        return SessionHelper.forEach(sessions, handler, true);
     }
 
 
