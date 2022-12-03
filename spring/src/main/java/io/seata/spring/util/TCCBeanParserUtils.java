@@ -113,8 +113,8 @@ public class TCCBeanParserUtils {
         }
         //check if it is TCC bean
         boolean isTccClazz = false;
-        Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-        Method[] methods = tccInterfaceClazz.getMethods();
+        Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+        Method[] methods = tccServiceClazz.getMethods();
         TwoPhaseBusinessAction twoPhaseBusinessAction;
         for (Method method : methods) {
             twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
@@ -151,8 +151,8 @@ public class TCCBeanParserUtils {
             if (tccFenceConfig == null || tccFenceConfig.getInitialized().get()) {
                 return;
             }
-            Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-            Method[] methods = tccInterfaceClazz.getMethods();
+            Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+            Method[] methods = tccServiceClazz.getMethods();
             for (Method method : methods) {
                 TwoPhaseBusinessAction twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
                 if (twoPhaseBusinessAction != null && twoPhaseBusinessAction.useTCCFence()) {
@@ -194,10 +194,10 @@ public class TCCBeanParserUtils {
     /**
      * Create a proxy bean for tcc service
      *
-     * @param interfaceClass
-     * @param fieldValue
-     * @param actionInterceptor
-     * @return
+     * @param interfaceClass the interface class
+     * @param fieldValue the field value
+     * @param actionInterceptor the action interceptor
+     * @return the service proxy bean
      */
     public static <T> T createProxy(Class<T> interfaceClass, Object fieldValue, TccActionInterceptor actionInterceptor) {
         ProxyFactory factory = new ProxyFactory();

@@ -2,6 +2,8 @@ seata:
   enabled: true
   application-id: applicationName
   tx-service-group: default_tx_group
+  access-key: aliyunAccessKey
+  secret-key: aliyunSecretKey
   enable-auto-data-source-proxy: true
   data-source-proxy-mode: AT
   use-jdk-proxy: false
@@ -90,6 +92,7 @@ seata:
       group: SEATA_GROUP
       username: ""
       password: ""
+      context-path: ""
       ##if use MSE Nacos with auth, mutex with username/password attribute
       #access-key: ""
       #secret-key: ""
@@ -122,9 +125,12 @@ seata:
       namespace: ""
       username: ""
       password: ""
+      context-path: ""
       ##if use MSE Nacos with auth, mutex with username/password attribute
       #access-key: ""
       #secret-key: ""
+      ##if use Nacos naming meta-data for SLB service registry, specify nacos address pattern rules here
+      #slbPattern = ""
     redis:
       server-addr: localhost:6379
       db: 0

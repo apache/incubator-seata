@@ -36,25 +36,26 @@ import org.yaml.snakeyaml.Yaml;
 public class PortHelper {
 
     public static int getPortFromEnvOrStartup(String[] args) {
-        if (ContainerHelper.isRunningInContainer()) {
-            return ContainerHelper.getPort();
-        } else if (args != null && args.length >= 2) {
+        int port = 0;
+        if (args != null && args.length >= 2) {
             for (int i = 0; i < args.length; ++i) {
                 if ("-p".equalsIgnoreCase(args[i]) && i < args.length - 1) {
-                    return NumberUtils.toInt(args[i + 1], 0);
+                    port = NumberUtils.toInt(args[i + 1], 0);
                 }
             }
         }
-
-        return 0;
+        if (port == 0) {
+            port = ContainerHelper.getPort();
+        }
+        return port;
     }
 
     /**
      * get config from configFile
      * -Dspring.config.location > classpath:application.properties > classpath:application.yml
      *
-     * @return
-     * @throws IOException
+     * @return the port
+     * @throws IOException the io exception
      */
     public static int getPortFromConfigFile() throws IOException {
 

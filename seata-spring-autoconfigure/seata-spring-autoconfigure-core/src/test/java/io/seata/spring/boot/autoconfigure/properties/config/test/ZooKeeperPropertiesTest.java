@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -36,7 +35,7 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class ZooKeeperPropertiesTest extends BasePropertiesTest {
-    @Bean
+    @Bean("testConfigZooKeeperProperties")
     public ConfigZooKeeperProperties configZooKeeperProperties() {
         return new ConfigZooKeeperProperties().setNodePath(STR_TEST_AAA).setServerAddr(STR_TEST_BBB).setUsername(STR_TEST_CCC).setPassword(STR_TEST_DDD).setConnectTimeout(LONG_TEST_ONE).setSessionTimeout(LONG_TEST_TWO);
     }

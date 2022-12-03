@@ -25,7 +25,7 @@ import java.sql.Statement;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -115,7 +115,8 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
          */
 
         try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
-             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
+             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
+             ResultSet onUpdateColumns = dbmd.getVersionColumns(catalogName, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -141,6 +142,10 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
                 }
                 tm.getAllColumns().put(col.getColumnName(), col);
+            }
+
+            while (onUpdateColumns.next()) {
+                tm.getAllColumns().get(onUpdateColumns.getString("COLUMN_NAME")).setOnUpdate(true);
             }
 
             while (rsIndex.next()) {

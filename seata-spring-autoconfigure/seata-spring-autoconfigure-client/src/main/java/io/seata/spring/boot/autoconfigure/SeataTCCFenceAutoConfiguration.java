@@ -19,13 +19,14 @@ import io.seata.rm.tcc.config.TCCFenceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -36,15 +37,16 @@ import javax.sql.DataSource;
  * @author kaka2code
  */
 @ConditionalOnExpression("${seata.enabled:true}")
-@AutoConfigureAfter({SeataCoreAutoConfiguration.class, DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
+@ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})
+@ConditionalOnMissingBean(TCCFenceConfig.class)
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class, TransactionAutoConfiguration.class})
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataTCCFenceAutoConfiguration {
 
     public static final String TCC_FENCE_DATA_SOURCE_BEAN_NAME = "seataTCCFenceDataSource";
     public static final String TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataTCCFenceTransactionManager";
 
     @Bean
-    @ConditionalOnMissingBean(TCCFenceConfig.class)
-    @ConditionalOnBean({DataSource.class, PlatformTransactionManager.class})
     @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
     public TCCFenceConfig tccFenceConfig(
             DataSource dataSource,

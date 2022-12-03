@@ -18,13 +18,17 @@ import { ILocale } from './index.d';
 
 const zhCn: ILocale = {
   MenuRouter: {
-    overview: '概览'
+    overview: '概览',
+    transactionInfo: '事务信息',
+    globalLockInfo: '全局锁信息',
   },
   Header: {
     home: '首页',
+    cloud: 'Seata企业版',
     docs: '文档',
     blog: '博客',
     community: '社区',
+    download: '下载',
     languageSwitchButton: 'En',
     logout: '登出',
   },
@@ -42,7 +46,29 @@ const zhCn: ILocale = {
     title: '概览',
     subTitle: '基础列表页',
     search: '搜索',
-  }
+  },
+  TransactionInfo: {
+    title: '事务信息',
+    subTitle: '基础列表页',
+    createTimeLabel: '创建时间',
+    selectFilerPlaceholder: '请选择筛选条件',
+    inputFilterPlaceholder: '请输入筛选条件',
+    branchSessionSwitchLabel: '是否包含分支事务',
+    resetButtonLabel: '重置',
+    searchButtonLabel: '搜索',
+    operateTitle: '操作',
+    showBranchSessionTitle: '查看分支信息',
+    showGlobalLockTitle: '查看全局锁',
+    branchSessionDialogTitle: '分支事务信息',
+  },
+  GlobalLockInfo: {
+    title: '全局锁信息',
+    subTitle: '基础列表页',
+    createTimeLabel: '创建时间',
+    inputFilterPlaceholder: '请输入筛选条件',
+    resetButtonLabel: '重置',
+    searchButtonLabel: '搜索',
+  },
 };
 
 export default zhCn;

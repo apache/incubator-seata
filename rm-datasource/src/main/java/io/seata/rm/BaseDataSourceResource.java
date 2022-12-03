@@ -54,10 +54,12 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
 
     protected Driver driver;
 
+    private boolean shouldBeHeld = false;
+
     private Map<String, T> keeper = new ConcurrentHashMap<>();
 
     private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
-        CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
+            CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
     /**
      * Gets target data source.
@@ -213,4 +215,15 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
         }
     }
 
+    public Map<String, T> getKeeper() {
+        return keeper;
+    }
+
+    public boolean isShouldBeHeld() {
+        return shouldBeHeld;
+    }
+
+    public void setShouldBeHeld(boolean shouldBeHeld) {
+        this.shouldBeHeld = shouldBeHeld;
+    }
 }

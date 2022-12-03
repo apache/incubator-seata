@@ -23,11 +23,11 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.server.ServerApplication;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author zhimo.xiao @gmail.com
  */
-@SpringBootTest(classes = ServerApplication.class)
+@SpringBootTest
 public class DefaultCoreTest {
 
     private static DefaultCore core;
@@ -77,7 +77,7 @@ public class DefaultCoreTest {
      */
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
-        SessionHolder.init(null);
+        SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);
     }
