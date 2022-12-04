@@ -290,60 +290,79 @@ public class SessionHelper {
     }
 
     /**
+     * Foreach global sessions.
+     *
+     * @param sessions the global sessions
+     * @param handler  the handler
+     */
+    public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        forEach(sessions, handler, true);
+    }
+
+    /**
+     * Foreach branch sessions.
+     *
+     * @param sessions the branch session
+     * @param handler  the handler
+     */
+    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+        return forEach(sessions, handler, false);
+    }
+    
+    /**
      * Foreach branch sessions.
      *
      * @param sessions the branch session
      * @param handler  the handler
      */
     public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler, boolean parallel) throws TransactionException {
-        if (CollectionUtils.isEmpty(sessions)) {
-            return true;
-        }
-        Boolean result;
-        if (parallel) {
-            Map<String, List<BranchSession>> map = new HashMap<>(4);
-            for (BranchSession session : sessions) {
-                map.computeIfAbsent(session.getResourceId(), k -> new ArrayList<>()).add(session);
-            }
-            List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>(map.size());
-            map.forEach((k, v) -> completableFutures.add(CompletableFuture.supplyAsync(() -> {
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            Boolean result;
+            if (parallel) {
+                Map<String, List<BranchSession>> map = new HashMap<>(4);
+                for (BranchSession session : sessions) {
+                    map.computeIfAbsent(session.getResourceId(), k -> new ArrayList<>()).add(session);
+                }
+                List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>(map.size());
+                map.forEach((k, v) -> completableFutures.add(CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return SessionHelper.forEach(v, handler, false);
+                    } catch (TransactionException e) {
+                        throw new RuntimeException(e);
+                    }
+                })));
                 try {
-                    return SessionHelper.forEach(v, handler, false);
-                } catch (TransactionException e) {
-                    throw new RuntimeException(e);
-                }
-            })));
-            try {
-                for (CompletableFuture<Boolean> completableFuture : completableFutures) {
-                    result = completableFuture.get();
-                    if (result == null) {
-                        continue;
+                    for (CompletableFuture<Boolean> completableFuture : completableFutures) {
+                        result = completableFuture.get();
+                        if (result == null) {
+                            continue;
+                        }
+                        return result;
                     }
-                    return result;
-                }
-            } catch (InterruptedException e) {
-                throw new TransactionException(e);
-            } catch (ExecutionException e) {
-                Throwable throwable = e.getCause();
-                if (throwable instanceof RuntimeException) {
-                    Throwable cause = throwable.getCause();
-                    if (cause instanceof TransactionException) {
-                        throw (TransactionException)cause;
+                } catch (InterruptedException e) {
+                    throw new TransactionException(e);
+                } catch (ExecutionException e) {
+                    Throwable throwable = e.getCause();
+                    if (throwable instanceof RuntimeException) {
+                        Throwable cause = throwable.getCause();
+                        if (cause instanceof TransactionException) {
+                            throw (TransactionException)cause;
+                        }
                     }
+                    throw new TransactionException(e);
                 }
-                throw new TransactionException(e);
-            }
-        } else {
-            for (BranchSession branchSession : sessions) {
-                try {
-                    MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
-                    result = handler.handle(branchSession);
-                    if (result == null) {
-                        continue;
+            } else {
+                for (BranchSession branchSession : sessions) {
+                    try {
+                        MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
+                        result = handler.handle(branchSession);
+                        if (result == null) {
+                            continue;
+                        }
+                        return result;
+                    } finally {
+                        MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
                     }
-                    return result;
-                } finally {
-                    MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
                 }
             }
         }
