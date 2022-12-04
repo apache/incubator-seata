@@ -318,7 +318,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (!beginGlobalsessions.isEmpty() && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check begin, size: {}", beginGlobalsessions.size());
         }
-        SessionHelper.parallelForEach(beginGlobalsessions, globalSession -> {
+        SessionHelper.forEach(beginGlobalsessions, globalSession -> {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                         globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
@@ -363,7 +363,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHelper.parallelForEach(rollbackingSessions, rollbackingSession -> {
+        SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
                 if (rollbackingSession.getStatus() == GlobalStatus.Rollbacking
@@ -404,7 +404,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHelper.parallelForEach(committingSessions, committingSession -> {
+        SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
                 if (committingSession.getStatus() == GlobalStatus.Committing
@@ -441,7 +441,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
-        SessionHelper.parallelForEach(asyncCommittingSessions, asyncCommittingSession -> {
+        SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
