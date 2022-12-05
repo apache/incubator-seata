@@ -321,8 +321,8 @@ public class TCCFenceHandler {
 
     private static boolean isOracle(Connection connection) {
         try {
-            String driverName = connection.getMetaData().getDriverName();
-            return driverName.toUpperCase().contains("ORACLE");
+            String url = connection.getMetaData().getURL();
+            return url.toLowerCase().contains(":oracle:");
         } catch (SQLException e) {
             LOGGER.error("get db type fail", e);
         }
