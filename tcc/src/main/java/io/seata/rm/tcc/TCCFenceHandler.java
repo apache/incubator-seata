@@ -295,8 +295,8 @@ public class TCCFenceHandler {
         int total = 0;
         try {
             connection = DataSourceUtils.getConnection(dataSource);
-            if(isOracle(connection)){
-                //delete by date if DB is oracle
+            if (isOracle(connection)) {
+                // delete by date if DB is oracle
                 return TCC_FENCE_DAO.deleteTCCFenceDOByDate(connection, datetime);
             }
 
@@ -324,7 +324,7 @@ public class TCCFenceHandler {
             String driverName = connection.getMetaData().getDriverName();
             return driverName.toUpperCase().contains("ORACLE");
         } catch (SQLException e) {
-            LOGGER.error("get db type fail",e);
+            LOGGER.error("get db type fail", e);
         }
         return false;
     }
