@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
  * Http exception handle.
  *
  * @author wangxb
+ * @author wang.liang
  */
 public class HttpHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
