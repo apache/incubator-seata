@@ -36,32 +36,32 @@ seata:
     type: file
     nacos:
       server-addr: 127.0.0.1:8848
-      namespace: ""
+      namespace:
       group: SEATA_GROUP
-      username: ""
-      password: ""
-      context-path: ""
+      username:
+      password:
+      context-path:
       ##if use MSE Nacos with auth, mutex with username/password attribute
-      #access-key: ""
-      #secret-key: ""
+      #access-key:
+      #secret-key:
       data-id: seataServer.properties
     consul:
       server-addr: 127.0.0.1:8500
-      acl-token: ""
+      acl-token:
       key: seata.properties
     apollo:
       appId: seata-server
       apollo-meta: http://192.168.1.204:8801
       apollo-config-service: http://192.168.1.204:8080
       namespace: application
-      apollo-access-key-secret: ""
+      apollo-access-key-secret:
       cluster: seata
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
-      username: ""
-      password: ""
+      username:
+      password:
       node-path: /seata/seata.properties
     etcd3:
       server-addr: http://localhost:2379
@@ -74,14 +74,14 @@ seata:
       application: seata-server
       server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
-      namespace: ""
+      namespace:
       cluster: default
-      username: ""
-      password: ""
-      context-path: ""
+      username:
+      password:
+      context-path:
       ##if use MSE Nacos with auth, mutex with username/password attribute
-      #access-key: ""
-      #secret-key: ""
+      #access-key:
+      #secret-key:
     eureka:
       service-url: http://localhost:8761/eureka
       application: default
@@ -89,7 +89,7 @@ seata:
     redis:
       server-addr: localhost:6379
       db: 0
-      password: ""
+      password:
       cluster: default
       timeout: 0
     zk:
@@ -97,12 +97,12 @@ seata:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
-      username: ""
-      password: ""
+      username:
+      password:
     consul:
       cluster: default
       server-addr: 127.0.0.1:8500
-      acl-token: ""
+      acl-token:
     etcd3:
       cluster: default
       server-addr: http://localhost:2379
@@ -169,15 +169,15 @@ seata:
       database: 0
       min-conn: 1
       max-conn: 10
-      password: ""
+      password:
       max-total: 100
       query-limit: 100
       single:
         host: 127.0.0.1
         port: 6379
       sentinel:
-        master-name: ""
-        sentinel-hosts: ""
+        master-name:
+        sentinel-hosts:
   metrics:
     enabled: false
     registry-type: compact
