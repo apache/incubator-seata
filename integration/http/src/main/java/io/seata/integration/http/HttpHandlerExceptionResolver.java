@@ -37,7 +37,9 @@ public class HttpHandlerExceptionResolver extends AbstractHandlerExceptionResolv
         return null;
     }
 
-    //Compatible with spring-webmvc:6.x
+
+    //region Compatible with spring-webmvc:6.x
+
     //@Override
     protected ModelAndView doResolveException(jakarta.servlet.http.HttpServletRequest request,
                                               jakarta.servlet.http.HttpServletResponse httpServletResponse,
@@ -45,4 +47,6 @@ public class HttpHandlerExceptionResolver extends AbstractHandlerExceptionResolv
         XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
         return null;
     }
+
+    //endregion
 }

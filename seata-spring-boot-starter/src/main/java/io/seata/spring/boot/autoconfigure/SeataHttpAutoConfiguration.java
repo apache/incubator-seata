@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Auto bean add for spring context if in springboot env.
+ * Auto bean add for spring webmvc if in springboot env.
  *
  * @author wangxb
  */
