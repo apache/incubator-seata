@@ -17,6 +17,7 @@ package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
@@ -294,6 +295,12 @@ public class TCCFenceHandler {
         int total = 0;
         try {
             connection = DataSourceUtils.getConnection(dataSource);
+            if (isOracle(connection)) {
+                // delete by date if DB is oracle
+                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(connection, datetime);
+            }
+
+            //delete by id if DB is not oracle
             while (true) {
                 Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(connection, datetime, LIMIT_DELETE);
                 if (xidSet.isEmpty()) {
@@ -310,6 +317,16 @@ public class TCCFenceHandler {
         }
         return total;
 
+    }
+
+    private static boolean isOracle(Connection connection) {
+        try {
+            String url = connection.getMetaData().getURL();
+            return url.toLowerCase().contains(":oracle:");
+        } catch (SQLException e) {
+            LOGGER.error("get db type fail", e);
+        }
+        return false;
     }
 
     private static void initLogCleanExecutor() {
