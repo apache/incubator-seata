@@ -7,7 +7,7 @@ on:
     branches: [ develop ]
 
 jobs:
-  test-springboot3.x:
+  test-springboot3x:
     name: "test-springboot3.x"
     runs-on: ubuntu-latest
     strategy:
