@@ -5,6 +5,7 @@ on:
     branches: [ test*, "*.*.*" ]
 
 jobs:
+  # job 1
   test:
     name: "test"
     runs-on: ubuntu-latest
@@ -32,14 +33,12 @@ jobs:
       # step 1
       - name: "Checkout"
         uses: actions/checkout@v2.4.0
-
       # step 2
       - name: "Set up Java JDK"
         uses: actions/setup-java@v2.5.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-
       # step 3
       - name: "Test with Maven"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
@@ -49,6 +48,34 @@ jobs:
           else
             ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
+
+  # job 2
+  test-springboot3.x:
+    name: "test-springboot3.x"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17 ]
+        springboot: [
+          3.0.0 -Dspring-framework.version=6.0.2 -Dspring-boot-for-server.version=2.4.13 -Dspring-framework-for-server.version=5.3.18 -Dkotlin-maven-plugin.version=1.7.22
+        ]
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v2.4.0
+      # step 2
+      - name: "Set up Java JDK"
+        uses: actions/setup-java@v2.5.0
+        with:
+          distribution: 'zulu'
+          java-version: ${{ matrix.java }}
+      # step 3
+      - name: "Test with Maven"
+        run: |
+          ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+
+  # job 3
   arm64-test:
      runs-on: ubuntu-latest
      strategy:
