@@ -139,7 +139,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             xaRollback(xaXid);
         } catch (XAException e) {
             if (e.errorCode == XAException.XAER_RMFAIL && e.getMessage().trim().endsWith("ACTIVE state")) {
-                xaResource.end(xaBranchXid, XAResource.TMFAIL);
+                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
                 xaRollback(xaBranchXid);
             } else {
                 throw e;
@@ -252,7 +252,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             if (!rollBacked) {
                 // XA End: Fail
-                end(XAResource.TMFAIL);
+                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
