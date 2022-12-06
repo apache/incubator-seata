@@ -335,6 +335,9 @@ public class LockStoreDataBaseDAO implements LockStore {
             ps.setInt(8, LockStatus.Locked.getCode());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            if (e instanceof SQLIntegrityConstraintViolationException) {
+                return false;
+            }
             throw new StoreException(e);
         } finally {
             IOUtil.close(ps);
