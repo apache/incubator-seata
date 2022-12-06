@@ -244,7 +244,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             if (!rollBacked) {
                 // XA End: Fail
-                end(XAResource.TMFAIL);
+                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
