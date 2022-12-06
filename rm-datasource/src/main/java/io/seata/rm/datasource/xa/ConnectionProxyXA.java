@@ -135,16 +135,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     public synchronized void xaRollback(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
-        try {
-            xaRollback(xaXid);
-        } catch (XAException e) {
-            if (e.errorCode == XAException.XAER_RMFAIL && e.getMessage().trim().endsWith("ACTIVE state")) {
-                xaResource.end(xaXid, XAResource.TMFAIL);
-                xaRollback(xaXid);
-            } else {
-                throw e;
-            }
-        }
+        xaRollback(xaXid);
     }
 
     /**
@@ -217,6 +208,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT commit on an inactive session", SQLSTATE_XA_NOT_END);
         }
         try {
+            // XA End: Success
             end(XAResource.TMSUCCESS);
             long now = System.currentTimeMillis();
             checkTimeout(now);
@@ -252,7 +244,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             if (!rollBacked) {
                 // XA End: Fail
-                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
+                end(XAResource.TMFAIL);
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
@@ -285,9 +277,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private synchronized void end(int flags) throws XAException, SQLException {
-        termination();
-        // XA End: Success
         xaResource.end(xaBranchXid, flags);
+        termination();
     }
 
     private void cleanXABranchContext() {
