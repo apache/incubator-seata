@@ -132,7 +132,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param xid global transaction xid
      * @param branchId transaction branch id
      * @param applicationData application data
-     * @throws SQLException  SQLException
      */
     public synchronized void xaRollback(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
@@ -209,6 +208,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT commit on an inactive session", SQLSTATE_XA_NOT_END);
         }
         try {
+            // XA End: Success
             end(XAResource.TMSUCCESS);
             long now = System.currentTimeMillis();
             checkTimeout(now);
@@ -277,9 +277,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private synchronized void end(int flags) throws XAException, SQLException {
-        termination();
-        // XA End: Success
         xaResource.end(xaBranchXid, flags);
+        termination();
     }
 
     private void cleanXABranchContext() {
