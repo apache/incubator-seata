@@ -139,8 +139,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             xaRollback(xaXid);
         } catch (XAException e) {
             if (e.errorCode == XAException.XAER_RMFAIL && e.getMessage().trim().endsWith("ACTIVE state")) {
-                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
-                xaRollback(xaBranchXid);
+                xaResource.end(xaXid, XAResource.TMFAIL);
+                xaRollback(xaXid);
             } else {
                 throw e;
             }
