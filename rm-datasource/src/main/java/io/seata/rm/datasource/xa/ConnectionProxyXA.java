@@ -132,11 +132,19 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param xid global transaction xid
      * @param branchId transaction branch id
      * @param applicationData application data
-     * @throws SQLException  SQLException
      */
     public synchronized void xaRollback(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
-        xaRollback(xaXid);
+        try {
+            xaRollback(xaXid);
+        } catch (XAException e) {
+            if (e.errorCode == XAException.XAER_RMFAIL && e.getMessage().trim().endsWith("ACTIVE state")) {
+                xaResource.end(xaBranchXid, XAResource.TMFAIL);
+                xaRollback(xaBranchXid);
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -244,7 +252,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             if (!rollBacked) {
                 // XA End: Fail
-                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
+                end(XAResource.TMFAIL);
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
