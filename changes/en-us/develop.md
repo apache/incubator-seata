@@ -78,6 +78,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5115](https://github.com/seata/seata/pull/5115)] compatible with the `spring-boot:3.x`
 - [[#5124](https://github.com/seata/seata/pull/5124)] support oracle on delete tccfence logs
 
+
 ### test:
 - [[#4411](https://github.com/seata/seata/pull/4411)] add UT for oracle in AT mode
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
