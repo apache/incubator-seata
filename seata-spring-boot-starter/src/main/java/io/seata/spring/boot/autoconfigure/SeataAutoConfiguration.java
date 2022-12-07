@@ -30,6 +30,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
 
@@ -43,6 +44,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
  * @author xingfudeshi@gmail.com
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@EnableConfigurationProperties(SeataProperties.class)
 @AutoConfigureAfter({SeataCoreAutoConfiguration.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
