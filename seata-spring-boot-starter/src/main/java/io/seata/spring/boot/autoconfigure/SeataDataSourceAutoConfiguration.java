@@ -15,13 +15,16 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import javax.sql.DataSource;
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.PriorityOrdered;
 
 import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR;
 
@@ -30,9 +33,11 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
  *
  * @author xingfudeshi@gmail.com
  */
+@ConditionalOnBean(DataSource.class)
 @ConditionalOnExpression("${seata.enabled:true} && ${seata.enableAutoDataSourceProxy:true} && ${seata.enable-auto-data-source-proxy:true}")
-@AutoConfigureBefore(name = {"org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"})
-@AutoConfigureAfter({SeataCoreAutoConfiguration.class, SeataAutoConfiguration.class})
+@AutoConfigureOrder(PriorityOrdered.LOWEST_PRECEDENCE)
+@AutoConfigureAfter(value = {SeataCoreAutoConfiguration.class},
+    name = "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration")
 public class SeataDataSourceAutoConfiguration {
 
     /**
