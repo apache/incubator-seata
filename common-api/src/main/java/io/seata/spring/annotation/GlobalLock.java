@@ -21,8 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.core.annotation.AliasFor;
 
 /**
  * declare the transaction only execute in single local RM
@@ -54,7 +52,6 @@ public @interface GlobalLock {
      * @return lock retry interval
      */
     @Deprecated
-    @AliasFor("lockRetryInterval")
     int lockRetryInternal() default 0;
 
     /**

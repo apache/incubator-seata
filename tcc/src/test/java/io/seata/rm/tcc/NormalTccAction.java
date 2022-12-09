@@ -28,7 +28,7 @@ import java.util.List;
  * @author zhangsen
  */
 @LocalTCC
-public interface TccAction {
+public interface NormalTccAction {
 
     /**
      * Prepare boolean.
@@ -39,7 +39,7 @@ public interface TccAction {
      * @param tccParam      the tcc param
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class, Integer.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
+    @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
     boolean prepare(BusinessActionContext actionContext,
                     @BusinessActionContextParameter("a") int a,
                     @BusinessActionContextParameter(paramName = "b", index = 0) List b,
@@ -52,7 +52,7 @@ public interface TccAction {
      * @return the boolean
      */
     boolean commit(BusinessActionContext actionContext,
-                   @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a);
+                   @BusinessActionContextParameter("tccParam") TccParam param);
 
     /**
      * Rollback boolean.

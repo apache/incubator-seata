@@ -23,8 +23,6 @@ import java.lang.annotation.Target;
 
 import io.seata.common.DefaultValues;
 import io.seata.tm.api.transaction.Propagation;
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.core.annotation.AliasFor;
 
 /**
  * The interface Global transactional.
@@ -116,7 +114,6 @@ public @interface GlobalTransactional {
      * @return int
      */
     @Deprecated
-    @AliasFor("lockRetryInterval")
     int lockRetryInternal() default 0;
 
     /**

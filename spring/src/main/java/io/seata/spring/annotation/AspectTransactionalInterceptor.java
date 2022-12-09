@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.commonapi.annotation.AspectTransactional;
 import io.seata.tm.api.FailureHandler;
 
 /**

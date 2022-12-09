@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+package io.seata.commonapi.annotation;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.util.StringUtils;

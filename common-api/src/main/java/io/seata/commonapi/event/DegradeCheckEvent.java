@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.event;
+package io.seata.commonapi.event;
 
 import io.seata.core.event.Event;
 
