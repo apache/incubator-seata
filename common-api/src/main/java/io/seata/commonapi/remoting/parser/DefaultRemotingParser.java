@@ -47,7 +47,7 @@ public class DefaultRemotingParser {
     /**
      * all remoting beans beanName -> RemotingDesc
      */
-    protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<>();
+    protected static Map<Object, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<>();
 
     private static class SingletonHolder {
         private static final DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
@@ -161,12 +161,14 @@ public class DefaultRemotingParser {
      * @return remoting desc
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName, RemotingParser remotingParser) {
+        if (remotingServiceMap.containsKey(bean)){
+            return remotingServiceMap.get(bean);
+        }
         RemotingDesc remotingBeanDesc = remotingParser.getServiceDesc(bean, beanName);
         if (remotingBeanDesc == null) {
             return null;
         }
-        remotingServiceMap.put(beanName, remotingBeanDesc);
-
+        remotingServiceMap.put(bean, remotingBeanDesc);
         if (remotingParser.isReference(bean, beanName)) {
             //reference bean, TCC proxy
             remotingBeanDesc.setReference(true);
@@ -203,11 +205,11 @@ public class DefaultRemotingParser {
     /**
      * Get remoting bean desc remoting desc.
      *
-     * @param beanName the bean name
+     * @param bean the bean
      * @return the remoting desc
      */
-    public RemotingDesc getRemotingBeanDesc(String beanName) {
-        return remotingServiceMap.get(beanName);
+    public RemotingDesc getRemotingBeanDesc(Object bean) {
+        return remotingServiceMap.get(bean);
     }
 
 }

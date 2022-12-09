@@ -10,6 +10,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.lang.reflect.Method;
@@ -24,6 +26,7 @@ import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
  * @date 2022/11/26
  */
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorHandler.class);
 
     private volatile boolean disable = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
@@ -50,7 +53,6 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
 
     @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
-
         if (!RootContext.inGlobalTransaction() || disable || RootContext.inSagaBranch()) {
             //not in transaction, or this interceptor is disabled
             return invocation.proceed();

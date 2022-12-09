@@ -43,35 +43,36 @@ public class TxBeanParserUtils {
      *
      * @param bean               the bean
      * @param beanName           the bean name
-     * @param applicationContext the application context
      * @return boolean boolean
      */
-    public static boolean isTxAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
+    public static boolean isTxRemotingBean(Object bean, String beanName) {
         boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
+        return isRemotingBean;
         //get RemotingBean description
-        RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-        //is remoting bean
-        if (isRemotingBean) {
-            if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
-                //LocalService
-                return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-            } else {
-                // sofa:reference / dubbo:reference, factory bean
-                return false;
-            }
-        } else {
-            if (remotingDesc == null) {
-                //check FactoryBean
-                if (isRemotingFactoryBean(bean, beanName, applicationContext)) {
-                    remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                    return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-                } else {
-                    return false;
-                }
-            } else {
-                return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-            }
-        }
+//        RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+//        //is remoting bean
+//        if (isRemotingBean) {
+//            if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
+//                //LocalService
+//                return isTccProxyTargetBean(remotingDesc);
+//                //return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
+//            } else {
+//                // sofa:reference / dubbo:reference, factory bean
+//                return false;
+//            }
+//        } else {
+//            if (remotingDesc == null) {
+//                //check FactoryBean
+//                if (isRemotingFactoryBean(bean, beanName, applicationContext)) {
+//                    remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+//                    return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
+//                } else {
+//                    return false;
+//                }
+//            } else {
+//                return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
+//            }
+//        }
     }
     
     public static IsTransactionProxyResult getManualProxyResult(Object bean, String beanName) {
@@ -143,7 +144,7 @@ public class TxBeanParserUtils {
      * @param beanName the bean name
      * @return if sofa:service, sofa:reference, dubbo:reference, dubbo:service return true, else return false
      */
-    protected static boolean parserRemotingServiceInfo(Object bean, String beanName) {
+    public static boolean parserRemotingServiceInfo(Object bean, String beanName) {
         RemotingParser remotingParser = DefaultRemotingParser.get().isRemoting(bean, beanName);
         if (remotingParser != null) {
             return DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName, remotingParser) != null;
