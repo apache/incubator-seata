@@ -41,6 +41,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
 - [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
 - [[#5109](https://github.com/seata/seata/pull/5109)] fix NPE caused when there is no @GlobalTransactional annotation on the RM side
+- [[#5131](https://github.com/seata/seata/pull/5131)] rollback active xa connection fail
 
 
 ### optimize:
@@ -74,6 +75,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
 - [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
 - [[#5104](https://github.com/seata/seata/pull/5104)] remove the druid dependency in ConnectionProxy
+- [[#5124](https://github.com/seata/seata/pull/5124)] support oracle on delete tccfence logs
 
 
 ### test:
