@@ -84,17 +84,12 @@ public class TCCFenceHandler {
         }
     }
 
-    public static DataSource getDataSource() {
-        return TCCFenceHandler.dataSource;
-    }
-
     public static void setDataSource(DataSource dataSource) {
         TCCFenceHandler.dataSource = dataSource;
     }
 
     /**
      * get the tcc DataSource
-     * @param dataSource the dataSource
      * @return the DataSource
      */
     public static DataSource getDataSource() {

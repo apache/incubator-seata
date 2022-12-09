@@ -17,12 +17,10 @@ package io.seata.rm.tcc.context.store;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.constant.ContextStoreConstant;
 import io.seata.rm.tcc.store.TCCFenceStore;
 import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -44,11 +42,6 @@ public class FenceLogContextStoreManager extends AbstractContextStoreManager {
 
     @Override
     protected boolean doStore(BusinessActionContext context) {
-        // if not support, save context to TC
-        if (!isSupport(context)) {
-            ContextStoreManager tcStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, ContextStoreConstant.STORE_TYPE_TC);
-            return tcStoreManager.storeContext(context);
-        }
 
         // save context to fenceLog
         DataSource dataSource = TCCFenceHandler.getDataSource();
@@ -66,11 +59,6 @@ public class FenceLogContextStoreManager extends AbstractContextStoreManager {
 
     @Override
     protected BusinessActionContext doSearch(BusinessActionContext context) {
-        // return if tcc context exist in tc
-        if (context.getActionContext(Constants.USE_TCC_FENCE) != null) {
-            return context;
-        }
-
         // search tcc context from fenceLog
         DataSource dataSource = TCCFenceHandler.getDataSource();
         Connection connection = null;
@@ -90,6 +78,7 @@ public class FenceLogContextStoreManager extends AbstractContextStoreManager {
         }
     }
 
+    @Override
     protected boolean isSupport(BusinessActionContext context) {
         return Boolean.TRUE.equals(context.getActionContext(Constants.USE_TCC_FENCE));
     }

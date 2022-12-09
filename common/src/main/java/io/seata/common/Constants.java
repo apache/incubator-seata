@@ -97,6 +97,11 @@ public interface Constants {
     String TCC_ACTION_CONTEXT = "actionContext";
 
     /**
+     * where is the tcc actionContext stored
+     */
+    String TCC_ACTION_CONTEXT_STORE_TYPE = "actionContextStoreType";
+
+    /**
      * default charset name
      */
     String DEFAULT_CHARSET_NAME = "UTF-8";

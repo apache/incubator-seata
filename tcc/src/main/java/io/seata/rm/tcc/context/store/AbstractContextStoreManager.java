@@ -15,7 +15,9 @@
  */
 package io.seata.rm.tcc.context.store;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.constant.ContextStoreConstant;
 
 /**
  * abstract context store manager
@@ -24,11 +26,17 @@ import io.seata.rm.tcc.api.BusinessActionContext;
  */
 public abstract class AbstractContextStoreManager implements ContextStoreManager {
 
+    private static final ContextStoreManager DEFAULT_STORE_MANAGER = EnhancedServiceLoader.load(ContextStoreManager.class, ContextStoreConstant.STORE_TYPE_TC);
+
     @Override
     public boolean storeContext(BusinessActionContext context) {
         // check is updated
         if (!Boolean.TRUE.equals(context.getUpdated())) {
             return false;
+        }
+        // if not support, save context to TC
+        if (!isSupport(context)) {
+            return DEFAULT_STORE_MANAGER.storeContext(context);
         }
         // do store
         if (doStore(context)) {
@@ -41,6 +49,9 @@ public abstract class AbstractContextStoreManager implements ContextStoreManager
 
     @Override
     public BusinessActionContext searchContext(BusinessActionContext context) {
+        if (!isSupport(context)) {
+            return DEFAULT_STORE_MANAGER.searchContext(context);
+        }
         // do search
         return doSearch(context);
     }
@@ -60,4 +71,14 @@ public abstract class AbstractContextStoreManager implements ContextStoreManager
      * @return the final BusinessActionContext
      */
     protected abstract BusinessActionContext doSearch(BusinessActionContext context);
+
+    /**
+     * is support store?
+     *
+     * @param context the context
+     * @return the boolean
+     */
+    protected boolean isSupport(BusinessActionContext context) {
+        return true;
+    }
 }

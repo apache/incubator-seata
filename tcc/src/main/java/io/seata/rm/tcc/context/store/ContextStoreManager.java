@@ -17,6 +17,11 @@ package io.seata.rm.tcc.context.store;
 
 import io.seata.rm.tcc.api.BusinessActionContext;
 
+/**
+ * manage the actionContext store
+ * see {@link FenceLogContextStoreManager} and {@link ReportContextStoreManager}
+ * @author pengten
+ */
 public interface ContextStoreManager {
 
     /**

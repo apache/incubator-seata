@@ -57,6 +57,9 @@ public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
 
+    /**
+     * the context store type
+     */
     private static final String CONTEXT_STORE_TYPE = ConfigurationFactory.getInstance().getConfig(TCC_CONTEXT_STORE, DEFAULT_TCC_CONTEXT_STORE);
     /**
      * Handler the TCC Aspect
@@ -96,12 +99,6 @@ public class ActionInterceptorHandler {
         try {
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
-
-            //if not store in TC, init report Context
-            if (Boolean.FALSE.equals(actionContext.getDelayReport())
-                    && !CONTEXT_STORE_TYPE.equals(ContextStoreConstant.STORE_TYPE_TC)) {
-                BusinessActionContextUtil.reportContext();
-            }
 
             if (businessAction.useTCCFence()) {
                 try {
@@ -206,12 +203,10 @@ public class ActionInterceptorHandler {
         }
 
         //endregion
-        String applicationContextStr = null;
-        if (ContextStoreConstant.STORE_TYPE_TC.equals(CONTEXT_STORE_TYPE)) {
-            //Init applicationData when contextStoreType is 'tc'
-            Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
-            applicationContextStr = JSON.toJSONString(applicationContext);
-        }
+
+        //Init applicationData
+        Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
+        String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, xid,
@@ -232,6 +227,7 @@ public class ActionInterceptorHandler {
     protected void initFrameworkContext(Map<String, Object> context) {
         try {
             context.put(Constants.HOST_NAME, NetUtil.getLocalIp());
+            context.put(Constants.TCC_ACTION_CONTEXT_STORE_TYPE, CONTEXT_STORE_TYPE);
         } catch (Throwable t) {
             LOGGER.warn("getLocalIP error", t);
         }
