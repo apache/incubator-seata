@@ -90,6 +90,13 @@ public class ActionInterceptorHandler {
         //Creating Branch Record
         String branchId = doTccActionLogStore(method, arguments, businessAction, actionContext);
         actionContext.setBranchId(branchId);
+        /*
+            Set the updated attribute to true, otherwise when the "CONTEXT_STORE_TYPE" configuration is not "TC"
+            , the actionContext will not be stored.
+            ActionContext has reported to TC in the method "doTccActionLogStore"
+            , so this is unnecessary in the old version
+            , because CONTEXT_ STORE_ TYPE was only TC in the old version, but it is not now.
+         */
         actionContext.setUpdated(true);
         //MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
