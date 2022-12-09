@@ -15,20 +15,10 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nullable;
-
-import io.seata.commonapi.autoproxy.DefaultTransactionAutoProxy;
-import io.seata.commonapi.autoproxy.IsTransactionProxyResult;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.commonapi.annotation.AspectTransactional;
+import io.seata.commonapi.util.ProxyUtil;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -37,11 +27,9 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
-import io.seata.commonapi.interceptor.TxBeanParserUtils;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.util.OrderUtil;
-import io.seata.commonapi.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.aop.Advice;
@@ -54,7 +42,6 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -65,9 +52,12 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 
-import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
+import javax.annotation.Nullable;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.seata.common.DefaultValues.*;
 
 /**
  * The type Global transaction scanner.
@@ -249,12 +239,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * <p>
      * TM:
      *
-     * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
+     * @see GlobalTransactional // TM annotation
      * Corresponding interceptor:
      * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, AspectTransactional) // TM handler
      * <p>
      * GlobalLock:
-     * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
+     * @see GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
      * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // GlobalLock handler
      * <p>
@@ -277,49 +267,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                interceptor = null;
-                //check Transaction proxy
-                if (TxBeanParserUtils.isTxAutoProxy(bean, beanName, applicationContext)) {
-                    IsTransactionProxyResult isTransactionProxyResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
-                    // init tcc fence clean task if enable useTccFence
-                    TxBeanParserUtils.initCommonFenceCleanTask(TxBeanParserUtils.getRemotingDesc(beanName), applicationContext, isTransactionProxyResult.isUseCommonFence());
-                    //transaction interceptor(TCC/SAGA), proxy bean of sofa:reference/dubbo:reference, LocalTCC and LocalService
-                    interceptor = isTransactionProxyResult.getMethodInterceptor();
-                    ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                            (ConfigurationChangeListener) interceptor);
-                } else {
-                    Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
-                    Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
-
-                    if (!existsAnnotation(new Class[]{serviceInterface})
-                            && !existsAnnotation(interfacesIfJdk)) {
-                        return bean;
-                    }
-
-                    if (globalTransactionalInterceptor == null) {
-                        globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                        ConfigurationCache.addConfigListener(
-                                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                                (ConfigurationChangeListener) globalTransactionalInterceptor);
-                    }
-                    interceptor = globalTransactionalInterceptor;
+                Object resultBean = ProxyUtil.createProxy(bean);
+                if (bean != resultBean) {
+                    PROXYED_SET.add(beanName);
                 }
-
-                LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
-                if (!AopUtils.isAopProxy(bean)) {
-                    bean = super.wrapIfNecessary(bean, beanName, cacheKey);
-                } else {
-                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
-                    Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
-                    int pos;
-                    for (Advisor avr : advisor) {
-                        // Find the position based on the advisor's order, and add to advisors by pos
-                        pos = findAddSeataAdvisorPosition(advised, avr);
-                        advised.addAdvisor(pos, avr);
-                    }
-                }
-                PROXYED_SET.add(beanName);
-                return bean;
+                return resultBean;
             }
         } catch (Exception exx) {
             throw new RuntimeException(exx);
