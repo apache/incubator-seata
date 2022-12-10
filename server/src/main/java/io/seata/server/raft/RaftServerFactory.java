@@ -16,7 +16,11 @@
 package io.seata.server.raft;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
 import com.alipay.sofa.jraft.Status;
@@ -27,24 +31,24 @@ import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.option.RaftOptions;
 import com.alipay.sofa.jraft.rpc.CliClientService;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.StoreMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_AUTO_JOIN;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_RAFT_GROUP;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_AUTO_JOIN;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
 import static java.io.File.separator;
 
 /**
@@ -54,9 +58,7 @@ public class RaftServerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerFactory.class);
 
-    private RaftServer raftServer;
-
-    private RaftStateMachine stateMachine;
+    private static final Map<String/*group*/,RaftServer/*raft-group-cluster*/> RAFT_SERVER_MAP = new HashMap<>();
 
     private Boolean raftMode = false;
 
@@ -101,23 +103,25 @@ public class RaftServerFactory {
             + separator + serverIdStr.split(":")[1];
         final NodeOptions nodeOptions = initNodeOptions(initConf);
         try {
-            raftServer = new RaftServer(dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions);
+            // as the foundation for multi raft group in the future
+            RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_RAFT_GROUP, serverId, nodeOptions);
+            RAFT_SERVER_MAP.put(DEFAULT_SEATA_RAFT_GROUP,raftServer );
+           RaftStateMachine stateMachine = raftServer.getRaftStateMachine();
+            LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
         }
-        stateMachine = raftServer.getRaftStateMachine();
-        LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         // whether to join an existing cluster
         if (CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false)) {
             List<PeerId> currentPeers = null;
             try {
-                currentPeers = getCliServiceInstance().getPeers(SEATA_RAFT_GROUP, initConf);
+                currentPeers = getCliServiceInstance().getPeers(DEFAULT_SEATA_RAFT_GROUP, initConf);
             } catch (Exception e) {
                 // In the first deployment, the leader cannot be found
             }
             if (CollectionUtils.isNotEmpty(currentPeers)) {
                 if (!currentPeers.contains(serverId)) {
-                    Status status = getCliServiceInstance().addPeer(SEATA_RAFT_GROUP, initConf, serverId);
+                    Status status = getCliServiceInstance().addPeer(DEFAULT_SEATA_RAFT_GROUP, initConf, serverId);
                     if (!status.isOk()) {
                         LOGGER.error("failed to join the RAFT cluster: {}. Please check the status of the cluster",
                             initConfStr);
@@ -128,23 +132,33 @@ public class RaftServerFactory {
     }
 
     public RaftServer getRaftServer() {
-        return raftServer;
+        return getRaftServer(DEFAULT_SEATA_RAFT_GROUP);
     }
 
-    public void setRaftServer(RaftServer raftServer) {
-        this.raftServer = raftServer;
+    public RaftServer getRaftServer(String group) {
+        return RAFT_SERVER_MAP.get(group);
     }
 
     public RaftStateMachine getStateMachine() {
-        return stateMachine;
+        return getStateMachine(DEFAULT_SEATA_RAFT_GROUP);
     }
 
-    public void setStateMachine(RaftStateMachine stateMachine) {
-        this.stateMachine = stateMachine;
+    public RaftStateMachine getStateMachine(String group) {
+        return RAFT_SERVER_MAP.get(group).getRaftStateMachine();
     }
+
 
     public Boolean isLeader() {
-        return !isRaftMode() && raftServer == null || (stateMachine != null && stateMachine.isLeader());
+        return isLeader(DEFAULT_SEATA_RAFT_GROUP);
+    }
+
+    public Boolean isLeader(String group) {
+        AtomicReference<RaftStateMachine> stateMachine = new AtomicReference<>();
+        Optional.ofNullable(RAFT_SERVER_MAP.get(group)).ifPresent(raftServer -> {
+            stateMachine.set(raftServer.getRaftStateMachine());
+        });
+        RaftStateMachine raftStateMachine = stateMachine.get();
+        return !isRaftMode() && RAFT_SERVER_MAP.isEmpty() || (raftStateMachine != null && raftStateMachine.isLeader());
     }
 
     public Boolean isRaftMode() {
@@ -152,7 +166,11 @@ public class RaftServerFactory {
     }
 
     public Boolean isNotRaftModeLeader() {
-        return !isLeader() && isRaftMode();
+        return isNotRaftModeLeader(DEFAULT_SEATA_RAFT_GROUP);
+    }
+
+    public Boolean isNotRaftModeLeader(String group) {
+        return !isLeader(group) && isRaftMode();
     }
 
     private RaftOptions initRaftOptions() {

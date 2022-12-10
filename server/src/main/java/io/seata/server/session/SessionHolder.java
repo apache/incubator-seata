@@ -17,7 +17,9 @@ package io.seata.server.session;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import io.seata.common.ConfigurationKeys;
@@ -44,6 +46,8 @@ import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_RAFT_GROUP;
 import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
@@ -92,6 +96,8 @@ public class SessionHolder {
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
+    
+    private static final Map<String, SessionManager> SESSION_MANAGER_MAP = new HashMap<>();
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
@@ -132,6 +138,7 @@ public class SessionHolder {
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
+            SESSION_MANAGER_MAP.put(DEFAULT_SEATA_RAFT_GROUP, ROOT_SESSION_MANAGER);
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -337,6 +344,10 @@ public class SessionHolder {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
         }
         return ROOT_SESSION_MANAGER;
+    }
+
+    public static SessionManager getRootSessionManager(String group) {
+        return SESSION_MANAGER_MAP.get(group);
     }
 
     /**

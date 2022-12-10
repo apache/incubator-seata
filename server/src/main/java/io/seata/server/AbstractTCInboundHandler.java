@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
-import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_RAFT_GROUP;
 
 /**
  * The type Abstract tc inbound handler.
@@ -355,7 +355,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
     protected ClusterMetaDataResponse getCluster(ClusterMetaDataResponse response, String group) {
         String currentConf = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (!StringUtils.isBlank(currentConf)) {
-            String raftGroup = StringUtils.isNotBlank(group) ? group : SEATA_RAFT_GROUP;
+            String raftGroup = StringUtils.isNotBlank(group) ? group : DEFAULT_SEATA_RAFT_GROUP;
             final Configuration currentClusters = new Configuration();
             if (!currentClusters.parse(currentConf)) {
                 throw new IllegalArgumentException("fail to parse initConf:" + currentConf);

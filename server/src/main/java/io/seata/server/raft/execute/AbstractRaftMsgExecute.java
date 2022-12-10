@@ -32,6 +32,4 @@ public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> 
 
     protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
 
-    protected RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-
 }

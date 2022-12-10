@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_RAFT_GROUP;
 
 @RestController
 public class ClusterController {
@@ -49,7 +49,7 @@ public class ClusterController {
         if (!initConf.parse(initConfStr)) {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
-        List<PeerId> currentPeers = RaftServerFactory.getCliServiceInstance().getAlivePeers(SEATA_RAFT_GROUP, initConf);
+        List<PeerId> currentPeers = RaftServerFactory.getCliServiceInstance().getAlivePeers(DEFAULT_SEATA_RAFT_GROUP, initConf);
         return currentPeers;
     }
 

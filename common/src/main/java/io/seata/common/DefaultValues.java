@@ -124,7 +124,7 @@ public interface DefaultValues {
     String DEFAULT_LOAD_BALANCE = "XID";
     int VIRTUAL_NODES_DEFAULT = 10;
 
-    String SEATA_RAFT_GROUP = "default";
+    String DEFAULT_SEATA_RAFT_GROUP = "default";
 
     /**
      * the constant DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE

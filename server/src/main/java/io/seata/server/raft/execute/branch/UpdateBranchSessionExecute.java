@@ -19,7 +19,9 @@ import io.seata.core.model.BranchStatus;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
@@ -28,9 +30,10 @@ public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
+        RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
-        BranchStatus status = sessionSyncMsg.getBranchStatus();
+        BranchStatus status = BranchStatus.get(sessionSyncMsg.getBranchSession().getStatus());
         branchSession.setStatus(status);
         if (logger.isDebugEnabled()) {
             logger.debug("update branch: {} , status: {}", branchSession.getBranchId(), branchSession.getStatus());
