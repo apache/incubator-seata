@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.util.List;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 
@@ -53,22 +54,22 @@ public final class TransactionHookManager {
      */
     public static List<TransactionHook> getHooks(String xid) {
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-        if (hooksMap == null || hooksMap.isEmpty()) {
+        if (CollectionUtils.isEmpty(hooksMap)) {
             return Collections.emptyList();
         }
         List<TransactionHook> hooks = new ArrayList<>();
         List<TransactionHook> localHooks = hooksMap.get(xid);
         if (StringUtils.isNotBlank(xid)) {
             List<TransactionHook> virtualHooks = hooksMap.remove(null);
-            if (virtualHooks != null && !virtualHooks.isEmpty()) {
+            if (CollectionUtils.isNotEmpty(virtualHooks)) {
                 hooks.addAll(virtualHooks);
                 hooksMap.put(xid, hooks);
             }
         }
-        if (localHooks != null && !localHooks.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(localHooks)) {
             hooks.addAll(localHooks);
         }
-        if (hooks.isEmpty()) {
+        if (CollectionUtils.isEmpty(hooks)) {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(hooks);
@@ -104,7 +105,7 @@ public final class TransactionHookManager {
      */
     public static void clear(String xid) {
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
-        if (hooksMap == null || hooksMap.isEmpty()) {
+        if (CollectionUtils.isEmpty(hooksMap)) {
             return;
         }
         hooksMap.remove(xid);
