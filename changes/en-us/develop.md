@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
 - [[#4914](https://github.com/seata/seata/pull/4914)] support mysql update join sql
+- [[#5111](https://github.com/seata/seata/pull/5111)] support passing contextPath parameter to Nacos client
 
 
 ### bugfix:
@@ -26,11 +27,22 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
 - [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
 - [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
+- [[#4874](https://github.com/seata/seata/pull/4874)] fix startup failure of Server1.5.2 by using OpenJDK 11 
 - [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
 - [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
+- [[#5032](https://github.com/seata/seata/pull/5032)] fix mysql InsertOnDuplicateUpdate sql query error caused by placeholder index calculation error
 - [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
+- [[#5033](https://github.com/seata/seata/pull/5023)] fix mysql InsertOnDuplicateUpdate insert value type recognize error
 - [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
-
+- [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
+- [[#5052](https://github.com/seata/seata/pull/5052)] fix update join condition placeholder param error
+- [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
+- [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
+- [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
+- [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
+- [[#5109](https://github.com/seata/seata/pull/5109)] fix NPE caused when there is no @GlobalTransactional annotation on the RM side
+- [[#5131](https://github.com/seata/seata/pull/5131)] rollback active xa connection fail
+- [[#5134](https://github.com/seata/seata/pull/5134)] hikari datasource auto proxy fail
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -39,6 +51,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4750](https://github.com/seata/seata/pull/4750)] optimize unBranchLock romove xid
 - [[#4797](https://github.com/seata/seata/pull/4797)] optimize the github actions
 - [[#4800](https://github.com/seata/seata/pull/4800)] Add NOTICE as Apache License V2
+- [[#4681](https://github.com/seata/seata/pull/4681)] optimize the check lock during global transaction
 - [[#4761](https://github.com/seata/seata/pull/4761)] use hget replace hmget because only one field
 - [[#4414](https://github.com/seata/seata/pull/4414)] exclude log4j dependencies
 - [[#4836](https://github.com/seata/seata/pull/4836)] optimize BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) method more readable
@@ -58,11 +71,17 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
 - [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
 - [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
+- [[#5047](https://github.com/seata/seata/pull/5047)] remove useless code
+- [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
+- [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
+- [[#5104](https://github.com/seata/seata/pull/5104)] remove the druid dependency in ConnectionProxy
+- [[#5124](https://github.com/seata/seata/pull/5124)] support oracle on delete tccfence logs
 
 
 ### test:
+- [[#4411](https://github.com/seata/seata/pull/4411)] add UT for oracle in AT mode
 - [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
-
+- [[#5101](https://github.com/seata/seata/pull/5101)] fix ClassNotFoundException during the zk unit test
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
@@ -87,5 +106,9 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [renliangyu857](https://github.com/renliangyu857)
 - [neillee95](https://github.com/neillee95)
 - [crazy-sheep](https://github.com/crazy-sheep)
+- [zhangzq7](https://github.com/zhangzq7)
+- [l81893521](https://github.com/l81893521)
+- [zhuyoufeng](https://github.com/zhuyoufeng)
+- [xingfudeshi](https://github.com/xingfudeshi)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
