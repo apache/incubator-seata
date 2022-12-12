@@ -108,9 +108,10 @@ public final class TransactionHookManager {
         if (CollectionUtils.isEmpty(hooksMap)) {
             return;
         }
-        hooksMap.remove(xid);
-        if (StringUtils.isNotBlank(xid)) {
+        if (StringUtils.isBlank(xid)) {
             hooksMap.remove(null);
+        } else {
+            hooksMap.remove(xid);
         }
     }
 }
