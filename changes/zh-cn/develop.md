@@ -43,6 +43,7 @@
 - [[#5092](https://github.com/seata/seata/pull/5092)] 修复当seata and jpa共同使用时, AutoConfiguration的顺序不正确的问题
 - [[#5109](https://github.com/seata/seata/pull/5109)] 修复当RM侧没有加@GlobalTransactional报NPE的问题
 - [[#5131](https://github.com/seata/seata/pull/5131)] 修复xaconnection处于active状态时无法回滚的问题
+- [[#5134](https://github.com/seata/seata/pull/5134)] 修复hikariDataSource 自动代理在某些情况下失效的问题
 
 ### optimize：
 - [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程

@@ -42,7 +42,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
 - [[#5109](https://github.com/seata/seata/pull/5109)] fix NPE caused when there is no @GlobalTransactional annotation on the RM side
 - [[#5131](https://github.com/seata/seata/pull/5131)] rollback active xa connection fail
-
+- [[#5134](https://github.com/seata/seata/pull/5134)] hikari datasource auto proxy fail
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
