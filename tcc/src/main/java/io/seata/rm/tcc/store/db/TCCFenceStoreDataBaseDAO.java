@@ -192,13 +192,12 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public int deleteTCCFenceDOByDate(Connection conn, Date datetime, int limit) {
+    public int deleteTCCFenceDOByDate(Connection conn, Date datetime) {
         PreparedStatement ps = null;
         try {
             String sql = TCCFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setTimestamp(1, new Timestamp(datetime.getTime()));
-            ps.setInt(2, limit);
             return ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
