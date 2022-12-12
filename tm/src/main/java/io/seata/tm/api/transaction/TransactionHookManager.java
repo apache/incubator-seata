@@ -49,7 +49,7 @@ public final class TransactionHookManager {
     /**
      * get hooks by xid
      * 
-     * @param xid
+     * @param xid global transaction id
      * @return TransactionHook list
      */
     public static List<TransactionHook> getHooks(String xid) {
@@ -90,18 +90,14 @@ public final class TransactionHookManager {
             LOCAL_HOOKS.set(hooksMap);
         }
         String xid = RootContext.getXID();
-        List<TransactionHook> hooks = hooksMap.get(xid);
-        if (hooks == null) {
-            hooks = new ArrayList<>();
-            hooksMap.put(xid, hooks);
-        }
+        List<TransactionHook> hooks = hooksMap.computeIfAbsent(xid, key -> new ArrayList<>());
         hooks.add(transactionHook);
     }
 
     /**
      * clear hooks by xid
      * 
-     * @param xid
+     * @param xid global transaction id
      */
     public static void clear(String xid) {
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
