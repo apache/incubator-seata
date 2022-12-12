@@ -13,24 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.lock;
+package io.seata.sqlparser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * lock mode
+ * The interface Where recognizer.
  *
- * @author zhangsen
+ * @author renliangyu857
  */
-public enum LockMode {
-
+public interface JoinRecognizer {
     /**
-     * store the lock in user's database
+     * Gets join condition.
+     * @param parametersHolder the parameters holder
+     * @param paramAppenderList the param appender list
+     * @return the join condition
      */
-    LOCAL,
-
-    /**
-     * store the lock in seata's server
-     */
-    REMOTE;
-
-
+    String getJoinCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList);
 }

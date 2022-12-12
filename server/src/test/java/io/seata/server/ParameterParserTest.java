@@ -48,7 +48,7 @@ public class ParameterParserTest {
         parameterParser.cleanUp();
         parameterParser = new ParameterParser(args);
         //always set store.mode=file in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
-        Assertions.assertEquals("file", parameterParser.getStoreMode());
+        Assertions.assertNull(parameterParser.getStoreMode());
     }
 
     /**
