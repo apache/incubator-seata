@@ -44,7 +44,7 @@ public class FileTransactionStoreManagerTest {
 
     @BeforeAll
     public static void init(){
-        SessionHolder.init("file");
+        SessionHolder.init(StoreConfig.SessionMode.FILE);
     }
     @AfterAll
     public static void destroy(){
