@@ -150,10 +150,23 @@ public class SessionHelper {
     }
 
     /**
-     * End commit failed.
+     * End saga global session
      *
      * @param globalSession the global session
-     * @param retryGlobal the retry global
+     * @param globalStatus  the global status
+     * @throws TransactionException the transaction exception
+     */
+    public static void endSagaGlobalSession(GlobalSession globalSession, GlobalStatus globalStatus) throws TransactionException {
+        globalSession.changeGlobalStatus(globalStatus);
+        globalSession.end();
+        MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+    }
+
+    /**
+     * End commit failed.
+     *
+     * @param globalSession  the global session
+     * @param retryGlobal    the retry global
      * @param isRetryTimeout is retry timeout
      * @throws TransactionException the transaction exception
      */
