@@ -73,12 +73,12 @@ public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
     }
 
     @Override
-    public void triggerAfterCompletion() {
+    public void triggerAfterCompletion(String xid) {
 
     }
 
     @Override
-    public void cleanUp() {
+    public void cleanUp(String xid) {
 
     }
 }
