@@ -141,8 +141,8 @@ public class TransactionalTemplate {
             } finally {
                 //5. clear
                 resumeGlobalLockConfig(previousConfig);
-                triggerAfterCompletion();
-                cleanUp();
+                triggerAfterCompletion(tx.getXid());
+                cleanUp(tx.getXid());
             }
         } finally {
             // If the transaction is suspended, resume it.
@@ -219,7 +219,7 @@ public class TransactionalTemplate {
                         TransactionalExecutor.Code.TimeoutRollback);
             }
 
-            triggerAfterCommit();
+            triggerAfterCommit(tx.getXid());
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -232,7 +232,7 @@ public class TransactionalTemplate {
         try {
             triggerBeforeRollback();
             tx.rollback();
-            triggerAfterRollback();
+            triggerAfterRollback(tx.getXid());
         } catch (TransactionException txe) {
             // Failed to rollback
             throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -286,8 +286,8 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerAfterRollback() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    private void triggerAfterRollback(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterRollback();
             } catch (Exception e) {
@@ -306,8 +306,8 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerAfterCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    private void triggerAfterCommit(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterCommit();
             } catch (Exception e) {
@@ -316,8 +316,8 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerAfterCompletion() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    private void triggerAfterCompletion(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterCompletion();
             } catch (Exception e) {
@@ -326,11 +326,15 @@ public class TransactionalTemplate {
         }
     }
 
-    private void cleanUp() {
-        TransactionHookManager.clear();
+    private void cleanUp(String xid) {
+        TransactionHookManager.clear(xid);
     }
 
     private List<TransactionHook> getCurrentHooks() {
         return TransactionHookManager.getHooks();
+    }
+
+    private List<TransactionHook> getCurrentHooks(String xid) {
+        return TransactionHookManager.getHooks(xid);
     }
 }
