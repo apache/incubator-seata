@@ -19,6 +19,8 @@ import io.seata.core.context.RootContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -28,6 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author guoyao
  */
 public class TransactionHookManagerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionHookManagerTest.class);
 
     @AfterEach
     public void clear() {
@@ -52,6 +56,7 @@ public class TransactionHookManagerTest {
 
     @Test
     public void testGetHooks() {
+        LOGGER.info("current thread name is {}", Thread.currentThread().getName());
         assertThat(TransactionHookManager.getHooks()).isEmpty();
         TransactionHookManager.registerHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
