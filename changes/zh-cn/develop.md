@@ -44,6 +44,7 @@
 - [[#5109](https://github.com/seata/seata/pull/5109)] 修复当RM侧没有加@GlobalTransactional报NPE的问题
 - [[#5131](https://github.com/seata/seata/pull/5131)] 修复xaconnection处于active状态时无法回滚的问题
 - [[#5134](https://github.com/seata/seata/pull/5134)] 修复hikariDataSource 自动代理在某些情况下失效的问题
+- [[#5076](https://github.com/seata/seata/pull/5076)] 修复不同全局事务下TransactionHook被前面事务线程移除掉导致失效的问题
 
 ### optimize：
 - [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程
