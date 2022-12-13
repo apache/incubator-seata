@@ -232,10 +232,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     e.getCode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
             } finally {
                 // clear
+                String xid = RootContext.getXID();
                 RootContext.unbind();
                 RootContext.unbindBranchType();
-                sagaTransactionalTemplate.triggerAfterCompletion();
-                sagaTransactionalTemplate.cleanUp();
+                sagaTransactionalTemplate.triggerAfterCompletion(xid);
+                sagaTransactionalTemplate.cleanUp(xid);
             }
         }
     }
@@ -729,10 +730,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
     @Override
     public void clearUp() {
+        String xid = RootContext.getXID();
         RootContext.unbind();
         RootContext.unbindBranchType();
         if (sagaTransactionalTemplate != null) {
-            sagaTransactionalTemplate.cleanUp();
+            sagaTransactionalTemplate.cleanUp(xid);
         }
     }
 
