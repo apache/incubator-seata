@@ -60,7 +60,7 @@ public final class TransactionHookManager {
     public static List<TransactionHook> getHooks(String xid) {
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
         if (CollectionUtils.isEmpty(hooksMap)) {
-            LOGGER.info("hooksMap is empty, current thread name is {}", Thread.currentThread().getName());
+            LOGGER.info("hooksMap is empty, xid is {}, current thread name is {}", xid, Thread.currentThread().getName());
             return Collections.emptyList();
         }
         List<TransactionHook> hooks = hooksMap.computeIfAbsent(xid, value -> new ArrayList<>());
