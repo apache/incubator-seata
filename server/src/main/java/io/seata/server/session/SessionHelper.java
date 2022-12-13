@@ -15,6 +15,10 @@
  */
 package io.seata.server.session;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -32,10 +36,6 @@ import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
 
