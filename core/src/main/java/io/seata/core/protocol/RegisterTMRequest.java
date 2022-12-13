@@ -34,6 +34,7 @@ public class RegisterTMRequest extends AbstractIdentifyRequest implements Serial
     public static final String UDATA_DIGEST = "digest";
     public static final String UDATA_IP = "ip";
     public static final String UDATA_TIMESTAMP = "timestamp";
+    public static final String UDATA_AUTH_VERSION = "authVersion";
 
     /**
      * Instantiates a new Register tm request.

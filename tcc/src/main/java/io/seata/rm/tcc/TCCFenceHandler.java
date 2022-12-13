@@ -17,7 +17,10 @@ package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -62,6 +65,11 @@ public class TCCFenceHandler {
 
     private static final int MAX_QUEUE_SIZE = 500;
 
+    /**
+     * limit of delete record by date (per sql)
+     */
+    private static final int LIMIT_DELETE = 1000;
+
     private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
 
     private static FenceLogCleanRunnable fenceLogCleanRunnable;
@@ -74,6 +82,10 @@ public class TCCFenceHandler {
         } catch (Exception e) {
             LOGGER.error("init fence log clean executor error", e);
         }
+    }
+
+    public static DataSource getDataSource() {
+        return TCCFenceHandler.dataSource;
     }
 
     public static void setDataSource(DataSource dataSource) {
@@ -137,7 +149,7 @@ public class TCCFenceHandler {
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
                 if (tccFenceDO == null) {
                     throw new TCCFenceException(String.format("TCC fence record not exists, commit fence method failed. xid= %s, branchId= %s", xid, branchId),
-                            FrameworkErrorCode.RecordAlreadyExists);
+                            FrameworkErrorCode.RecordNotExists);
                 }
                 if (TCCFenceConstant.STATUS_COMMITTED == tccFenceDO.getStatus()) {
                     LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
@@ -275,22 +287,46 @@ public class TCCFenceHandler {
         });
     }
 
-    /**
-     * Delete TCC Fence By Datetime
-     *
-     * @param datetime datetime
-     * @return the deleted row count
-     */
+
+
     public static int deleteFenceByDate(Date datetime) {
-        return transactionTemplate.execute(status -> {
-            try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
-            } catch (RuntimeException e) {
-                status.setRollbackOnly();
-                throw e;
+        DataSource dataSource = TCCFenceHandler.getDataSource();
+        Connection connection = null;
+        int total = 0;
+        try {
+            connection = DataSourceUtils.getConnection(dataSource);
+            if (isOracle(connection)) {
+                // delete by date if DB is oracle
+                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(connection, datetime);
             }
-        });
+
+            //delete by id if DB is not oracle
+            while (true) {
+                Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(connection, datetime, LIMIT_DELETE);
+                if (xidSet.isEmpty()) {
+                    break;
+                }
+                total += TCC_FENCE_DAO.deleteTCCFenceDO(connection, new ArrayList<>(xidSet));
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error("delete fence log failed ", e);
+        } finally {
+            if (connection != null) {
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
+        }
+        return total;
+
+    }
+
+    private static boolean isOracle(Connection connection) {
+        try {
+            String url = connection.getMetaData().getURL();
+            return url.toLowerCase().contains(":oracle:");
+        } catch (SQLException e) {
+            LOGGER.error("get db type fail", e);
+        }
+        return false;
     }
 
     private static void initLogCleanExecutor() {

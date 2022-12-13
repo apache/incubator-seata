@@ -132,11 +132,6 @@ public interface Constants {
     String RETRY_ROLLBACKING = "RetryRollbacking";
 
     /**
-     * The constant HANDLE_ALL_SESSION
-     */
-    String HANDLE_ALL_SESSION = "HandleAllSession";
-
-    /**
      * The constant RETRY_COMMITTING
      */
     String RETRY_COMMITTING = "RetryCommitting";
@@ -165,5 +160,10 @@ public interface Constants {
      * The constant SKIP_CHECK_LOCK
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
+
+    /**
+     * The constant REGISTRY_TYPE_SPLIT_CHAR.
+     */
+    String REGISTRY_TYPE_SPLIT_CHAR = ",";
 
 }

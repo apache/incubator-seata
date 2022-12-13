@@ -25,16 +25,16 @@ public interface Serializer<S, T> {
     /**
      * serialize
      *
-     * @param object
-     * @return
+     * @param object serialize input
+     * @return the serialize result
      */
     T serialize(S object);
 
     /**
      * deserialize
      *
-     * @param obj
-     * @return
+     * @param obj deserialize input
+     * @return the deserialize result
      */
     S deserialize(T obj);
 }
