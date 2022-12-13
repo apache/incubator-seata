@@ -57,15 +57,12 @@ public final class TransactionHookManager {
         if (CollectionUtils.isEmpty(hooksMap)) {
             return Collections.emptyList();
         }
-        List<TransactionHook> hooks = hooksMap.computeIfAbsent(xid, key -> new ArrayList<>());
+        List<TransactionHook> hooks = hooksMap.computeIfAbsent(xid, value -> new ArrayList<>());
         if (StringUtils.isNotBlank(xid)) {
             List<TransactionHook> virtualHooks = hooksMap.remove(null);
             if (CollectionUtils.isNotEmpty(virtualHooks)) {
                 hooks.addAll(virtualHooks);
             }
-        }
-        if (CollectionUtils.isEmpty(hooks)) {
-            return Collections.emptyList();
         }
         return Collections.unmodifiableList(hooks);
     }
