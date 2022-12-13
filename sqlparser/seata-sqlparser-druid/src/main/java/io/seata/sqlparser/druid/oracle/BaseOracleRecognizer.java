@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
@@ -36,6 +39,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author will
@@ -126,6 +130,24 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
             }
 
             @Override
+            public boolean visit(OracleUpdateStatement x) {
+                if (x.getTableSource() instanceof OracleSelectSubqueryTableSource) {
+                    //just like: "update (select a.id,a.name from a inner join b on a.id = b.id) t set t.name = 'xxx'"
+                    throw new NotSupportYetException("not support the sql syntax with join table:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                }
+                List<SQLUpdateSetItem> updateSetItems = x.getItems();
+                for (SQLUpdateSetItem updateSetItem : updateSetItems) {
+                    if (updateSetItem.getValue() instanceof SQLQueryExpr) {
+                        //just like: "update a set a.id = (select id from b where a.pid = b.pid)"
+                        throw new NotSupportYetException("not support the sql syntax with join table:" + x
+                            + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                    }
+                }
+                return true;
+            }
+
+            @Override
             public boolean visit(SQLInSubQueryExpr x) {
                 //just like: ...where id in (select id from t)
                 throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
@@ -134,7 +156,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
             @Override
             public boolean visit(OracleSelectSubqueryTableSource x) {
-                //just like: select * from (select * from t)
+                //just like: select * from (select * from t) for update
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
                         + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
@@ -165,5 +187,9 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
         };
         getAst().accept(visitor);
         return true;
+    }
+
+    public String getDbType() {
+        return JdbcConstants.ORACLE;
     }
 }

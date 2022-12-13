@@ -48,7 +48,7 @@ public interface SagaTransactionalTemplate {
     void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
         throws TransactionException;
 
-    void triggerAfterCompletion();
+    void triggerAfterCompletion(String xid);
 
-    void cleanUp();
+    void cleanUp(String xid);
 }

@@ -15,11 +15,14 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.core.context.RootContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +33,7 @@ public class TransactionHookManagerTest {
 
     @AfterEach
     public void clear() {
-        TransactionHookManager.clear();
+        TransactionHookManager.clear(RootContext.getXID());
     }
 
     @Test
@@ -40,13 +43,26 @@ public class TransactionHookManagerTest {
         List<TransactionHook> hooks = TransactionHookManager.getHooks();
         assertThat(hooks).isNotEmpty();
         assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
+        RootContext.bind("123456");
+        hooks = TransactionHookManager.getHooks();
+        assertThat(hooks).isNotEmpty();
+        assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
+        hooks = TransactionHookManager.getHooks();
+        assertThat(hooks).isNotEmpty();
+        assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
     }
 
     @Test
-    public void testGetHooks() {
-        assertThat(TransactionHookManager.getHooks()).isEmpty();
-        TransactionHookManager.registerHook(new TransactionHookAdapter());
-        assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+    public void testGetHooks() throws ExecutionException, InterruptedException {
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            assertThat(TransactionHookManager.getHooks()).isEmpty();
+            TransactionHookManager.registerHook(new TransactionHookAdapter());
+            assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+            RootContext.bind("98765");
+            assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+            return "success";
+        });
+        assertThat(future.get()).isEqualTo("success");
     }
 
     @Test
@@ -54,9 +70,15 @@ public class TransactionHookManagerTest {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
         TransactionHookManager.registerHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
-        TransactionHookManager.clear();
+        TransactionHookManager.clear(RootContext.getXID());
+        assertThat(TransactionHookManager.getHooks()).isEmpty();
+        RootContext.bind("123456");
+        TransactionHookManager.registerHook(new TransactionHookAdapter());
+        assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+        TransactionHookManager.clear(RootContext.getXID());
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
+
     @Test
     public void testNPE() {
         Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerHook(null));

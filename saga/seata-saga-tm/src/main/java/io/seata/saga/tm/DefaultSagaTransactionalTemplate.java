@@ -56,6 +56,8 @@ public class DefaultSagaTransactionalTemplate
 
     private String applicationId;
     private String txServiceGroup;
+    private String accessKey;
+    private String secretKey;
     private ApplicationContext applicationContext;
 
     @Override
@@ -63,7 +65,7 @@ public class DefaultSagaTransactionalTemplate
         try {
             triggerBeforeCommit();
             tx.commit();
-            triggerAfterCommit();
+            triggerAfterCommit(tx.getXid());
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
@@ -75,7 +77,7 @@ public class DefaultSagaTransactionalTemplate
         throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         tx.rollback();
-        triggerAfterRollback();
+        triggerAfterRollback(tx.getXid());
         // Successfully rolled back
     }
 
@@ -103,7 +105,7 @@ public class DefaultSagaTransactionalTemplate
         throws TransactionalExecutor.ExecutionException {
         try {
             tx.globalReport(globalStatus);
-            triggerAfterCompletion();
+            triggerAfterCompletion(tx.getXid());
         } catch (TransactionException txe) {
 
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
@@ -153,8 +155,8 @@ public class DefaultSagaTransactionalTemplate
         }
     }
 
-    protected void triggerAfterRollback() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    protected void triggerAfterRollback(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterRollback();
             } catch (Exception e) {
@@ -173,8 +175,8 @@ public class DefaultSagaTransactionalTemplate
         }
     }
 
-    protected void triggerAfterCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    protected void triggerAfterCommit(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterCommit();
             } catch (Exception e) {
@@ -184,8 +186,8 @@ public class DefaultSagaTransactionalTemplate
     }
 
     @Override
-    public void triggerAfterCompletion() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    public void triggerAfterCompletion(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterCompletion();
             } catch (Exception e) {
@@ -214,7 +216,7 @@ public class DefaultSagaTransactionalTemplate
                 "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
         //init TM
-        TMClient.init(applicationId, txServiceGroup);
+        TMClient.init(applicationId, txServiceGroup, accessKey, secretKey);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
                 "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
@@ -246,7 +248,7 @@ public class DefaultSagaTransactionalTemplate
             ((ConfigurableApplicationContext)applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
@@ -256,12 +258,16 @@ public class DefaultSagaTransactionalTemplate
     }
 
     @Override
-    public void cleanUp() {
-        TransactionHookManager.clear();
+    public void cleanUp(String xid) {
+        TransactionHookManager.clear(xid);
     }
 
     protected List<TransactionHook> getCurrentHooks() {
         return TransactionHookManager.getHooks();
+    }
+
+    protected List<TransactionHook> getCurrentHooks(String xid) {
+        return TransactionHookManager.getHooks(xid);
     }
 
     public String getApplicationId() {
@@ -278,5 +284,21 @@ public class DefaultSagaTransactionalTemplate
 
     public void setTxServiceGroup(String txServiceGroup) {
         this.txServiceGroup = txServiceGroup;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 }

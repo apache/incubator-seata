@@ -16,8 +16,14 @@
 package io.seata.tm.api.transaction;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.List;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.core.context.RootContext;
 
 /**
  * @author guoyao
@@ -28,19 +34,35 @@ public final class TransactionHookManager {
 
     }
 
-    private static final ThreadLocal<List<TransactionHook>> LOCAL_HOOKS = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, List<TransactionHook>>> LOCAL_HOOKS = new ThreadLocal<>();
 
     /**
      * get the current hooks
      *
      * @return TransactionHook list
-     * @throws IllegalStateException IllegalStateException
      */
-    public static List<TransactionHook> getHooks() throws IllegalStateException {
-        List<TransactionHook> hooks = LOCAL_HOOKS.get();
+    public static List<TransactionHook> getHooks() {
+        String xid = RootContext.getXID();
+        return getHooks(xid);
+    }
 
-        if (hooks == null || hooks.isEmpty()) {
+    /**
+     * get hooks by xid
+     * 
+     * @param xid global transaction id
+     * @return TransactionHook list
+     */
+    public static List<TransactionHook> getHooks(String xid) {
+        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        if (CollectionUtils.isEmpty(hooksMap)) {
             return Collections.emptyList();
+        }
+        List<TransactionHook> hooks = hooksMap.computeIfAbsent(xid, value -> new ArrayList<>());
+        if (StringUtils.isNotBlank(xid)) {
+            List<TransactionHook> virtualHooks = hooksMap.remove(null);
+            if (CollectionUtils.isNotEmpty(virtualHooks)) {
+                hooks.addAll(virtualHooks);
+            }
         }
         return Collections.unmodifiableList(hooks);
     }
@@ -54,17 +76,29 @@ public final class TransactionHookManager {
         if (transactionHook == null) {
             throw new NullPointerException("transactionHook must not be null");
         }
-        List<TransactionHook> transactionHooks = LOCAL_HOOKS.get();
-        if (transactionHooks == null) {
-            LOCAL_HOOKS.set(new ArrayList<>());
+        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        if (hooksMap == null) {
+            hooksMap = new HashMap<>(2);
+            LOCAL_HOOKS.set(hooksMap);
         }
-        LOCAL_HOOKS.get().add(transactionHook);
+        String xid = RootContext.getXID();
+        List<TransactionHook> hooks = hooksMap.computeIfAbsent(xid, key -> new ArrayList<>());
+        hooks.add(transactionHook);
     }
 
     /**
-     * clear hooks
+     * clear hooks by xid
+     * 
+     * @param xid global transaction id
      */
-    public static void clear() {
-        LOCAL_HOOKS.remove();
+    public static void clear(String xid) {
+        Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
+        if (CollectionUtils.isEmpty(hooksMap)) {
+            return;
+        }
+        if (StringUtils.isNotBlank(xid)) {
+            hooksMap.remove(xid);
+        }
+        hooksMap.remove(null);
     }
 }

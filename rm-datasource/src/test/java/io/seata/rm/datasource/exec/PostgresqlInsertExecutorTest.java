@@ -45,7 +45,8 @@ public class PostgresqlInsertExecutorTest {
     private static final String USER_ID_COLUMN = "user_id";
     private static final String USER_NAME_COLUMN = "user_name";
     private static final String USER_STATUS_COLUMN = "user_status";
-    private static final Integer PK_VALUE = 100;
+    private static final Integer PK_VALUE_ID = 100;
+    private static final Integer PK_VALUE_USER_ID = 200;
 
     private StatementProxy statementProxy;
 
@@ -55,8 +56,10 @@ public class PostgresqlInsertExecutorTest {
 
     private PostgresqlInsertExecutor insertExecutor;
 
-    private final int pkIndex = 0;
+    private final int pkIndexId = 0;
+    private final int pkIndexUserId = 1;
     private HashMap<String, Integer> pkIndexMap;
+    private HashMap<String, Integer> multiPkIndexMap;
 
     @BeforeEach
     public void init() {
@@ -73,7 +76,14 @@ public class PostgresqlInsertExecutorTest {
 
         pkIndexMap = new HashMap<String, Integer>() {
             {
-                put(ID_COLUMN, pkIndex);
+                put(ID_COLUMN, pkIndexId);
+            }
+        };
+
+        multiPkIndexMap = new HashMap<String, Integer>() {
+            {
+                put(ID_COLUMN, pkIndexId);
+                put(USER_ID_COLUMN, pkIndexUserId);
             }
         };
     }
@@ -92,23 +102,73 @@ public class PostgresqlInsertExecutorTest {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 
         List<Object> pkValuesAuto = new ArrayList<>();
-        pkValuesAuto.add(PK_VALUE);
+        pkValuesAuto.add(PK_VALUE_ID);
         //mock getPkValuesByAuto
-        doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
-        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys(ID_COLUMN);
+        Map<String, List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
         //pk value = DEFAULT so getPkValuesByDefault
-        doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault();
+        doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault(ID_COLUMN);
 
-        verify(insertExecutor).getPkValuesByDefault();
+        verify(insertExecutor).getPkValuesByDefault(ID_COLUMN);
         Assertions.assertEquals(pkValuesMap.get(ID_COLUMN), pkValuesAuto);
     }
 
+    @Test
+    public void testInsertDefault_ByDefault_MultiPk() throws Exception {
+        mockInsertColumns_MultiPk();
+        mockInsertRows_MultiPk();
+        mockParametersPkWithDefault_MultiPk();
+
+        Map<String, ColumnMeta> pkMap = new HashMap<>();
+        ColumnMeta columnMeta = mock(ColumnMeta.class);
+        doReturn("nextval('test_id_seq'::regclass)").when(columnMeta).getColumnDef();
+        pkMap.put(ID_COLUMN, columnMeta);
+        pkMap.put(USER_ID_COLUMN, columnMeta);
+        doReturn(pkMap).when(tableMeta).getPrimaryKeyMap();
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+
+        List<Object> pkValuesAutoId = new ArrayList<>();
+        pkValuesAutoId.add(PK_VALUE_ID);
+        List<Object> pkValuesAutoUserId = new ArrayList<>();
+        pkValuesAutoUserId.add(PK_VALUE_USER_ID);
+        //mock getPkValuesByAuto
+        doReturn(pkValuesAutoId).when(insertExecutor).getGeneratedKeys(ID_COLUMN);
+        doReturn(pkValuesAutoUserId).when(insertExecutor).getGeneratedKeys(USER_ID_COLUMN);
+        Map<String, List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        //pk value = DEFAULT so getPkValuesByDefault
+        doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault(ID_COLUMN);
+        doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault(USER_ID_COLUMN);
+
+        verify(insertExecutor).getPkValuesByDefault(ID_COLUMN);
+        verify(insertExecutor).getPkValuesByDefault(USER_ID_COLUMN);
+        Assertions.assertEquals(pkValuesMap.get(ID_COLUMN), pkValuesAutoId);
+        Assertions.assertEquals(pkValuesMap.get(USER_ID_COLUMN), pkValuesAutoUserId);
+    }
+
     private void mockParametersPkWithDefault() {
-        Map<Integer,ArrayList<Object>> parameters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(SqlDefaultExpr.get());
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userId1");
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(parameters);
+    }
+
+    private void mockParametersPkWithDefault_MultiPk() {
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add(SqlDefaultExpr.get());
+        ArrayList arrayList1 = new ArrayList<>();
+        arrayList1.add(SqlDefaultExpr.get());
         ArrayList arrayList2 = new ArrayList<>();
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
@@ -127,6 +187,12 @@ public class PostgresqlInsertExecutorTest {
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 
+    private void mockInsertRows_MultiPk() {
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("?", "?"));
+        when(sqlInsertRecognizer.getInsertRows(multiPkIndexMap.values())).thenReturn(rows);
+    }
+
     private List<String> mockInsertColumns() {
         List<String> columns = new ArrayList<>();
         columns.add(ID_COLUMN);
@@ -135,6 +201,17 @@ public class PostgresqlInsertExecutorTest {
         columns.add(USER_STATUS_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
+        return columns;
+    }
+
+    private List<String> mockInsertColumns_MultiPk() {
+        List<String> columns = new ArrayList<>();
+        columns.add(ID_COLUMN);
+        columns.add(USER_ID_COLUMN);
+        columns.add(USER_NAME_COLUMN);
+        columns.add(USER_STATUS_COLUMN);
+        when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
+        doReturn(multiPkIndexMap).when(insertExecutor).getPkIndex();
         return columns;
     }
 
