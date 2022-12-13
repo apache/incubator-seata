@@ -64,4 +64,5 @@ public @interface GlobalLock {
      * @return lock retry times
      */
     int lockRetryTimes() default -1;
+
 }

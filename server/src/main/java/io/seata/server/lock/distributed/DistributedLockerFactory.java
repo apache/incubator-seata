@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Distributed locker factory
  * @author zhongxiang.wang
- * @description Distributed locker factory
  */
 public class DistributedLockerFactory {
 

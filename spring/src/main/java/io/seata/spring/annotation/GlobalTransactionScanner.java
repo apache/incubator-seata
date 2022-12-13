@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
@@ -99,8 +100,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String applicationId;
     private final String txServiceGroup;
     private final int mode;
-    private String accessKey;
-    private String secretKey;
+    private static String accessKey;
+    private static String secretKey;
     private volatile boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
     private final AtomicBoolean initialized = new AtomicBoolean(false);
@@ -184,8 +185,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      *
      * @param accessKey the access key
      */
-    public void setAccessKey(String accessKey) {
-        this.accessKey = accessKey;
+    public static void setAccessKey(String accessKey) {
+        GlobalTransactionScanner.accessKey = accessKey;
     }
 
     /**
@@ -193,8 +194,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      *
      * @param secretKey the secret key
      */
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
+    public static void setSecretKey(String secretKey) {
+        GlobalTransactionScanner.secretKey = secretKey;
     }
 
     @Override
@@ -238,7 +239,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 

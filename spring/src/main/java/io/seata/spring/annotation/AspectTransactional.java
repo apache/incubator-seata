@@ -16,6 +16,7 @@
 package io.seata.spring.annotation;
 
 import io.seata.common.DefaultValues;
+import io.seata.common.LockStrategyMode;
 import io.seata.common.util.StringUtils;
 import io.seata.tm.api.transaction.Propagation;
 
@@ -23,52 +24,39 @@ import io.seata.tm.api.transaction.Propagation;
  * @author funkye
  */
 public class AspectTransactional {
+    
     /**
      * Global transaction timeoutMills in MILLISECONDS.
-     *
-     * @return timeoutMills in MILLISECONDS.
      */
     private int timeoutMills = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 
     /**
      * Given name of the global transaction instance.
-     *
-     * @return Given name.
      */
     private String name = "";
 
     /**
      * roll back for the Class
-     * 
-     * @return
      */
     private Class<? extends Throwable>[] rollbackFor = new Class[] {};
 
     /**
      * roll back for the class name
-     * 
-     * @return
      */
     private String[] rollbackForClassName = {};
 
     /**
      * not roll back for the Class
-     * 
-     * @return
      */
     private Class<? extends Throwable>[] noRollbackFor = new Class[] {};
 
     /**
      * not roll back for the class name
-     * 
-     * @return
      */
     private String[] noRollbackForClassName = {};
 
     /**
      * the propagation of the global transaction
-     * 
-     * @return
      */
     private Propagation propagation = Propagation.REQUIRED;
 
@@ -76,8 +64,6 @@ public class AspectTransactional {
      * customized global lock retry interval(unit: ms)
      * you may use this to override global config of "client.rm.lock.retryInterval"
      * note: 0 or negative number will take no effect(which mean fall back to global config)
-     *
-     * @return int
      */
     int lockRetryInterval = 0;
 
@@ -85,16 +71,19 @@ public class AspectTransactional {
      * customized global lock retry times
      * you may use this to override global config of "client.rm.lock.retryTimes"
      * note: negative number will take no effect(which mean fall back to global config)
-     *
-     * @return int
      */
     int lockRetryTimes = -1;
+
+    /**
+     * lock strategy mode
+     */
+    LockStrategyMode lockStrategyMode;
 
     public AspectTransactional() {}
 
     public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
         String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
-        Propagation propagation, int lockRetryInterval, int lockRetryTimes) {
+        Propagation propagation, int lockRetryInterval, int lockRetryTimes, LockStrategyMode lockStrategyMode) {
         this.timeoutMills = timeoutMills;
         this.name = name;
         this.rollbackFor = rollbackFor;
@@ -104,6 +93,7 @@ public class AspectTransactional {
         this.propagation = propagation;
         this.lockRetryInterval = lockRetryInterval;
         this.lockRetryTimes = lockRetryTimes;
+        this.lockStrategyMode = lockStrategyMode;
     }
 
     public int getTimeoutMills() {
@@ -176,6 +166,14 @@ public class AspectTransactional {
 
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
+    }
+
+    public LockStrategyMode getLockStrategyMode() {
+        return lockStrategyMode;
+    }
+
+    public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
+        this.lockStrategyMode = lockStrategyMode;
     }
 
     @Override
