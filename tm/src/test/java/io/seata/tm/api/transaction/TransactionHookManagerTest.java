@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,8 +53,8 @@ public class TransactionHookManagerTest {
     }
 
     @Test
-    public void testGetHooks() {
-        CompletableFuture future = CompletableFuture.runAsync(() -> {
+    public void testGetHooks() throws ExecutionException, InterruptedException {
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
             assertThat(TransactionHookManager.getHooks()).isEmpty();
             TransactionHookManager.registerHook(new TransactionHookAdapter());
             assertThat(TransactionHookManager.getHooks()).isNotEmpty();
@@ -62,8 +63,9 @@ public class TransactionHookManagerTest {
             assertThat(TransactionHookManager.getHooks()).isNotEmpty();
             RootContext.bind("98765");
             assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+            return "success";
         });
-        assertThat(future.join());
+        assertThat(future.get()).isEqualTo("success");
     }
 
     @Test
