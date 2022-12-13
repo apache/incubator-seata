@@ -65,7 +65,7 @@ public class DefaultSagaTransactionalTemplate
         try {
             triggerBeforeCommit();
             tx.commit();
-            triggerAfterCommit();
+            triggerAfterCommit(tx.getXid());
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
@@ -74,10 +74,10 @@ public class DefaultSagaTransactionalTemplate
 
     @Override
     public void rollbackTransaction(GlobalTransaction tx, Throwable ex)
-        throws TransactionException, TransactionalExecutor.ExecutionException {
+            throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         tx.rollback();
-        triggerAfterRollback();
+        triggerAfterRollback(tx.getXid());
         // Successfully rolled back
     }
 
@@ -102,10 +102,10 @@ public class DefaultSagaTransactionalTemplate
 
     @Override
     public void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus)
-        throws TransactionalExecutor.ExecutionException {
+            throws TransactionalExecutor.ExecutionException {
         try {
             tx.globalReport(globalStatus);
-            triggerAfterCompletion();
+            triggerAfterCompletion(tx.getXid());
         } catch (TransactionException txe) {
 
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
@@ -155,8 +155,8 @@ public class DefaultSagaTransactionalTemplate
         }
     }
 
-    protected void triggerAfterRollback() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    protected void triggerAfterRollback(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterRollback();
             } catch (Exception e) {
@@ -175,8 +175,8 @@ public class DefaultSagaTransactionalTemplate
         }
     }
 
-    protected void triggerAfterCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    protected void triggerAfterCommit(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterCommit();
             } catch (Exception e) {
@@ -186,8 +186,8 @@ public class DefaultSagaTransactionalTemplate
     }
 
     @Override
-    public void triggerAfterCompletion() {
-        for (TransactionHook hook : getCurrentHooks()) {
+    public void triggerAfterCompletion(String xid) {
+        for (TransactionHook hook : getCurrentHooks(xid)) {
             try {
                 hook.afterCompletion();
             } catch (Exception e) {
@@ -258,12 +258,16 @@ public class DefaultSagaTransactionalTemplate
     }
 
     @Override
-    public void cleanUp() {
-        TransactionHookManager.clear();
+    public void cleanUp(String xid) {
+        TransactionHookManager.clear(xid);
     }
 
     protected List<TransactionHook> getCurrentHooks() {
         return TransactionHookManager.getHooks();
+    }
+
+    protected List<TransactionHook> getCurrentHooks(String xid) {
+        return TransactionHookManager.getHooks(xid);
     }
 
     public String getApplicationId() {
