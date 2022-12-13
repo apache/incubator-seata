@@ -24,15 +24,11 @@ import java.util.List;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author guoyao
  */
 public final class TransactionHookManager {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionHookManager.class);
 
     private TransactionHookManager() {
 
@@ -47,7 +43,6 @@ public final class TransactionHookManager {
      */
     public static List<TransactionHook> getHooks() {
         String xid = RootContext.getXID();
-        LOGGER.info("current xid={}, current thread name is {}", xid, Thread.currentThread().getName());
         return getHooks(xid);
     }
 
@@ -60,7 +55,6 @@ public final class TransactionHookManager {
     public static List<TransactionHook> getHooks(String xid) {
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
         if (CollectionUtils.isEmpty(hooksMap)) {
-            LOGGER.info("hooksMap is empty, xid is {}, current thread name is {}", xid, Thread.currentThread().getName());
             return Collections.emptyList();
         }
         List<TransactionHook> hooks = hooksMap.computeIfAbsent(xid, value -> new ArrayList<>());
