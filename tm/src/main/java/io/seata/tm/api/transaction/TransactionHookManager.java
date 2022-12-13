@@ -78,7 +78,7 @@ public final class TransactionHookManager {
         }
         Map<String, List<TransactionHook>> hooksMap = LOCAL_HOOKS.get();
         if (hooksMap == null) {
-            hooksMap = new HashMap<>();
+            hooksMap = new HashMap<>(2);
             LOCAL_HOOKS.set(hooksMap);
         }
         String xid = RootContext.getXID();
