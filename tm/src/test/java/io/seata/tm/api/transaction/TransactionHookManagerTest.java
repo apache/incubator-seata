@@ -52,13 +52,12 @@ public class TransactionHookManagerTest {
 
     @Test
     public void testGetHooks() {
-        synchronized (TransactionHookManagerTest.class) {
-            assertThat(TransactionHookManager.getHooks()).isEmpty();
-            TransactionHookManager.registerHook(new TransactionHookAdapter());
-            assertThat(TransactionHookManager.getHooks()).isNotEmpty();
-            RootContext.bind("123456");
-            assertThat(TransactionHookManager.getHooks()).isNotEmpty();
-        }
+        assertThat(TransactionHookManager.getHooks()).isEmpty();
+        TransactionHookManager.registerHook(new TransactionHookAdapter());
+        assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+        RootContext.bind("123456");
+        TransactionHookManager.registerHook(new TransactionHookAdapter());
+        assertThat(TransactionHookManager.getHooks()).isNotEmpty();
     }
 
     @Test
