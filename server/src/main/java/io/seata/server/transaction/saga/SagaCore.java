@@ -15,9 +15,6 @@
  */
 package io.seata.server.transaction.saga;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import io.netty.channel.Channel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.GlobalTransactionException;
@@ -36,6 +33,10 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type saga core.
@@ -194,12 +195,12 @@ public class SagaCore extends AbstractCore {
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
         if (GlobalStatus.Committed.equals(globalStatus)) {
             SessionHelper.removeAllBranch(globalSession, false);
-            SessionHelper.endSagaGlobalSession(globalSession, globalStatus);
+            SessionHelper.endSagaGlobalSession(globalSession, GlobalStatus.Committing);
             LOGGER.info("Global[{}] committed", globalSession.getXid());
         } else if (GlobalStatus.Rollbacked.equals(globalStatus)
                 || GlobalStatus.Finished.equals(globalStatus)) {
             SessionHelper.removeAllBranch(globalSession, false);
-            SessionHelper.endSagaGlobalSession(globalSession, GlobalStatus.Rollbacked);
+            SessionHelper.endSagaGlobalSession(globalSession, GlobalStatus.Rollbacking);
             LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
         } else {
             globalSession.changeGlobalStatus(globalStatus);
