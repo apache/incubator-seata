@@ -55,8 +55,8 @@ public class TransactionHookManagerTest {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
         TransactionHookManager.registerHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
-        RootContext.bind("34567");
-        assertThat(TransactionHookManager.getHooks()).isEmpty();
+        RootContext.bind("123456");
+        assertThat(TransactionHookManager.getHooks()).isNotEmpty();
     }
 
     @Test
