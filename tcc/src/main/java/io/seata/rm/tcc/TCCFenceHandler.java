@@ -17,6 +17,7 @@ package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
@@ -148,7 +149,7 @@ public class TCCFenceHandler {
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
                 if (tccFenceDO == null) {
                     throw new TCCFenceException(String.format("TCC fence record not exists, commit fence method failed. xid= %s, branchId= %s", xid, branchId),
-                            FrameworkErrorCode.RecordAlreadyExists);
+                            FrameworkErrorCode.RecordNotExists);
                 }
                 if (TCCFenceConstant.STATUS_COMMITTED == tccFenceDO.getStatus()) {
                     LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
@@ -294,6 +295,12 @@ public class TCCFenceHandler {
         int total = 0;
         try {
             connection = DataSourceUtils.getConnection(dataSource);
+            if (isOracle(connection)) {
+                // delete by date if DB is oracle
+                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(connection, datetime);
+            }
+
+            //delete by id if DB is not oracle
             while (true) {
                 Set<String> xidSet = TCC_FENCE_DAO.queryEndStatusXidsByDate(connection, datetime, LIMIT_DELETE);
                 if (xidSet.isEmpty()) {
@@ -310,6 +317,16 @@ public class TCCFenceHandler {
         }
         return total;
 
+    }
+
+    private static boolean isOracle(Connection connection) {
+        try {
+            String url = connection.getMetaData().getURL();
+            return url.toLowerCase().contains(":oracle:");
+        } catch (SQLException e) {
+            LOGGER.error("get db type fail", e);
+        }
+        return false;
     }
 
     private static void initLogCleanExecutor() {

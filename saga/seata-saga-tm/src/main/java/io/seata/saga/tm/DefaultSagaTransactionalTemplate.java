@@ -56,6 +56,8 @@ public class DefaultSagaTransactionalTemplate
 
     private String applicationId;
     private String txServiceGroup;
+    private String accessKey;
+    private String secretKey;
     private ApplicationContext applicationContext;
 
     @Override
@@ -214,7 +216,7 @@ public class DefaultSagaTransactionalTemplate
                 "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
         //init TM
-        TMClient.init(applicationId, txServiceGroup);
+        TMClient.init(applicationId, txServiceGroup, accessKey, secretKey);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
                 "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
@@ -246,7 +248,7 @@ public class DefaultSagaTransactionalTemplate
             ((ConfigurableApplicationContext)applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
@@ -278,5 +280,21 @@ public class DefaultSagaTransactionalTemplate
 
     public void setTxServiceGroup(String txServiceGroup) {
         this.txServiceGroup = txServiceGroup;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 }

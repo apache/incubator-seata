@@ -15,12 +15,15 @@
  */
 package io.seata.server.store;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.server.env.ContainerHelper;
 import io.seata.server.storage.file.FlushDiskMode;
 
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
-
 
 /**
  * @author lizhao
@@ -28,7 +31,28 @@ import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 public class StoreConfig {
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
+    private static StoreMode storeMode;
+    private static SessionMode sessionMode;
+    private static LockMode lockMode;
 
+    /**
+     * set storeMode sessionMode lockMode from StartupParameter
+     *
+     * @param storeMode   storeMode
+     * @param sessionMode sessionMode
+     * @param lockMode    lockMode
+     */
+    public static void setStartupParameter(String storeMode, String sessionMode, String lockMode) {
+        if (StringUtils.isNotBlank(storeMode)) {
+            StoreConfig.storeMode = StoreMode.get(storeMode);
+        }
+        if (StringUtils.isNotBlank(sessionMode)) {
+            StoreConfig.sessionMode = SessionMode.get(sessionMode);
+        }
+        if (StringUtils.isNotBlank(lockMode)) {
+            StoreConfig.lockMode = LockMode.get(lockMode);
+        }
+    }
 
     /**
      * Default 16kb.
@@ -60,4 +84,165 @@ public class StoreConfig {
     public static FlushDiskMode getFlushDiskMode() {
         return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flushDiskMode"));
     }
+
+    /**
+     * only for inner call
+     *
+     * @return
+     */
+    private static StoreMode getStoreMode() {
+        //startup
+        if (null != storeMode) {
+            return storeMode;
+        }
+        //env
+        String storeModeEnv = ContainerHelper.getStoreMode();
+        if (StringUtils.isNotBlank(storeModeEnv)) {
+            return StoreMode.get(storeModeEnv);
+        }
+        //config
+        String storeModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+        return StoreMode.get(storeModeConfig);
+    }
+
+    public static SessionMode getSessionMode() {
+        //startup
+        if (null != sessionMode) {
+            return sessionMode;
+        }
+        //env
+        String sessionModeEnv = ContainerHelper.getSessionStoreMode();
+        if (StringUtils.isNotBlank(sessionModeEnv)) {
+            return SessionMode.get(sessionModeEnv);
+        }
+        //config
+        String sessionModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_SESSION_MODE);
+        if (StringUtils.isNotBlank(sessionModeConfig)) {
+            return SessionMode.get(sessionModeConfig);
+        }
+        // complication old config
+        return SessionMode.get(getStoreMode().name());
+    }
+
+    public static LockMode getLockMode() {
+        //startup
+        if (null != lockMode) {
+            return lockMode;
+        }
+        //env
+        String lockModeEnv = ContainerHelper.getLockStoreMode();
+        if (StringUtils.isNotBlank(lockModeEnv)) {
+            return LockMode.get(lockModeEnv);
+        }
+        //config
+        String lockModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_LOCK_MODE);
+        if (StringUtils.isNotBlank(lockModeConfig)) {
+            return LockMode.get(lockModeConfig);
+        }
+        // complication old config
+        return LockMode.get(getStoreMode().name());
+    }
+
+    public enum StoreMode {
+        /**
+         * The File store mode.
+         */
+        FILE("file"),
+        /**
+         * The Db store mode.
+         */
+        DB("db"),
+        /**
+         * The Redis store mode.
+         */
+        REDIS("redis");
+
+        private String name;
+
+        StoreMode(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static StoreMode get(String name) {
+            for (StoreMode mode : StoreMode.values()) {
+                if (mode.getName().equalsIgnoreCase(name)) {
+                    return mode;
+                }
+            }
+            throw new IllegalArgumentException("unknown store mode:" + name);
+        }
+    }
+
+    public enum SessionMode {
+        /**
+         * The File store mode.
+         */
+        FILE("file"),
+        /**
+         * The Db store mode.
+         */
+        DB("db"),
+        /**
+         * The Redis store mode.
+         */
+        REDIS("redis");
+
+        private String name;
+
+        SessionMode(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static SessionMode get(String name) {
+            for (SessionMode mode : SessionMode.values()) {
+                if (mode.getName().equalsIgnoreCase(name)) {
+                    return mode;
+                }
+            }
+            throw new IllegalArgumentException("unknown session mode:" + name);
+        }
+    }
+
+    public enum LockMode {
+        /**
+         * The File store mode.
+         */
+        FILE("file"),
+        /**
+         * The Db store mode.
+         */
+        DB("db"),
+        /**
+         * The Redis store mode.
+         */
+        REDIS("redis");
+
+        private String name;
+
+        LockMode(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static LockMode get(String name) {
+            for (LockMode mode : LockMode.values()) {
+                if (mode.getName().equalsIgnoreCase(name)) {
+                    return mode;
+                }
+            }
+            throw new IllegalArgumentException("unknown lock mode:" + name);
+        }
+    }
+
 }
