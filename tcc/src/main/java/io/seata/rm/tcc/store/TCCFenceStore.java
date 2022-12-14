@@ -29,6 +29,7 @@ public interface TCCFenceStore {
 
     /**
      * Query tcc fence do.
+     * @param conn the connection
      * @param xid the global transaction id
      * @param branchId the branch transaction id
      * @return the tcc fence do
@@ -37,6 +38,7 @@ public interface TCCFenceStore {
 
     /**
      * Query xid.
+     * @param conn the connection
      * @param datetime the datetime
      * @param limit the limit size
      * @return the tcc fence do
@@ -45,6 +47,7 @@ public interface TCCFenceStore {
 
     /**
      * Insert tcc fence do boolean.
+     * @param conn the connection
      * @param tccFenceDO the tcc fence do
      * @return the boolean
      */
@@ -52,15 +55,18 @@ public interface TCCFenceStore {
 
     /**
      * Update tcc fence do boolean.
+     * @param conn the connection
      * @param xid the global transaction id
      * @param branchId the branch transaction id
      * @param newStatus the new status
+     * @param oldStatus the old status
      * @return the boolean
      */
     boolean updateTCCFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus);
 
     /**
      * Delete tcc fence do boolean.
+     * @param conn the connection
      * @param xid the global transaction id
      * @param branchId the branch transaction id
      * @return the boolean
@@ -69,6 +75,7 @@ public interface TCCFenceStore {
 
     /**
      * Delete tcc fence do boolean.
+     * @param conn the connection
      * @param xids the global transaction ids
      * @return the boolean
      */
@@ -76,11 +83,12 @@ public interface TCCFenceStore {
 
     /**
      * Delete tcc fence by datetime.
+     * @param conn the connection
      * @param datetime datetime
-     * @param limit limit
      * @return the deleted row count
      */
-    int deleteTCCFenceDOByDate(Connection conn, Date datetime, int limit);
+    int deleteTCCFenceDOByDate(Connection conn, Date datetime);
+
 
     /**
      * Set LogTable Name

@@ -87,8 +87,8 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
 
     /**
      * get primary key values by default
-     * @return
-     * @throws SQLException
+     * @return the pk values
+     * @throws SQLException the sql exception
      */
     @Override
     @Deprecated
@@ -110,8 +110,8 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
      * get primary key values by default
      *
      * @param pkKey the pk key
-     * @return
-     * @throws SQLException
+     * @return the primary values
+     * @throws SQLException the sql exception
      */
     @Override
     public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
