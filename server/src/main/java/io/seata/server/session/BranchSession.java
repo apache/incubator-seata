@@ -297,7 +297,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return true;
     }
 
-    public boolean isAT(){
+    public boolean isAT() {
         return this.getBranchType() == BranchType.AT;
     }
 
