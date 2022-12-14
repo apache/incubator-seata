@@ -26,28 +26,14 @@ import javax.servlet.http.HttpServletResponse;
  * Http exception handle.
  *
  * @author wangxb
- * @author wang.liang
  */
 public class HttpHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
-    //@Override
-    protected ModelAndView doResolveException(HttpServletRequest request,
-                                              HttpServletResponse httpServletResponse,
-                                              Object o, Exception e) {
+
+    @Override
+    protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse httpServletResponse, Object o, Exception e) {
+
         XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
         return null;
     }
-
-
-    //region Compatible with spring-webmvc:6.x
-
-    //@Override
-    protected ModelAndView doResolveException(jakarta.servlet.http.HttpServletRequest request,
-                                              jakarta.servlet.http.HttpServletResponse httpServletResponse,
-                                              Object o, Exception e) {
-        XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
-        return null;
-    }
-
-    //endregion
 }

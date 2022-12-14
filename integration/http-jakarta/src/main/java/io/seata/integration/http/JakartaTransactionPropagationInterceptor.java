@@ -15,24 +15,23 @@
  */
 package io.seata.integration.http;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Springmvc Intercepter.
  *
  * @author wangxb
  */
-public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter {
+public class JakartaTransactionPropagationInterceptor implements HandlerInterceptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationInterceptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JakartaTransactionPropagationInterceptor.class);
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

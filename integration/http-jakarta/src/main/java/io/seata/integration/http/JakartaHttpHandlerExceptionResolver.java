@@ -15,27 +15,25 @@
  */
 package io.seata.integration.http;
 
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.List;
+import io.seata.core.context.RootContext;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 
 /**
- * The seata web mvc configurer.
+ * Http exception handle.
  *
  * @author wangxb
  */
-public class SeataWebMvcConfigurer extends WebMvcConfigurerAdapter {
+public class JakartaHttpHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
+
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new TransactionPropagationInterceptor());
-    }
+    protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse httpServletResponse, Object o, Exception e) {
 
-    @Override
-    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-        exceptionResolvers.add(new HttpHandlerExceptionResolver());
+        XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
+        return null;
     }
-
 }
