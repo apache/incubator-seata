@@ -34,7 +34,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.serial.SerialArray;
@@ -273,7 +273,7 @@ public abstract class AbstractUndoExecutor {
                             "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
                             "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
                 }
-                throw new SQLException("Has dirty records when undo.");
+                throw new SQLUndoDirtyException("Has dirty records when undo.");
             }
         }
         return true;
