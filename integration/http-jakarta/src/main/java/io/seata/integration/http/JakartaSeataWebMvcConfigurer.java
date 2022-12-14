@@ -22,7 +22,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
  *
  * @author wang.liang
  */
-public class JakartaSeataWebMvcConfigurer implements WebMvcConfigurerAdapter {
+public class JakartaSeataWebMvcConfigurer extends SeataWebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

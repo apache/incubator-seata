@@ -17,11 +17,13 @@ package io.seata.spring.boot.autoconfigure;
 
 import io.seata.integration.http.JakartaSeataWebMvcConfigurer;
 import io.seata.integration.http.SeataWebMvcConfigurer;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 
 /**
  * Auto bean add for spring webmvc if in springboot env.
@@ -32,6 +34,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 @ConditionalOnMissingBean(SeataWebMvcConfigurer.class)
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataHttpAutoConfiguration {
 
     /**
@@ -51,7 +54,6 @@ public class SeataHttpAutoConfiguration {
      * @return the seata web mvc configurer
      */
     @Bean
-    @ConditionalOnClass(name = "javax.servlet.http.HttpServletRequest")
     @ConditionalOnMissingBean(JakartaSeataWebMvcConfigurer.class)
     public SeataWebMvcConfigurer seataWebMvcConfigurer() {
         return new SeataWebMvcConfigurer();
