@@ -15,25 +15,25 @@
  */
 package io.seata.integration.http;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Springmvc Intercepter.
  *
  * @author wangxb
  */
-public class JakartaTransactionPropagationInterceptor implements JakartaHandlerInterceptorAdapter {
+public class JakartaTransactionPropagationInterceptor implements HandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JakartaTransactionPropagationInterceptor.class);
 
     //@Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(jakarta.servlet.http.HttpServletRequest request,
+                             jakarta.servlet.http.HttpServletResponse response,
+                             Object handler) {
         String xid = RootContext.getXID();
         String rpcXid = request.getHeader(RootContext.KEY_XID);
 
@@ -51,7 +51,10 @@ public class JakartaTransactionPropagationInterceptor implements JakartaHandlerI
     }
 
     //@Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(jakarta.servlet.http.HttpServletRequest request,
+                                jakarta.servlet.http.HttpServletResponse response,
+                                Object handler,
+                                Exception ex) throws Exception {
         if (RootContext.inGlobalTransaction()) {
             XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
         }
