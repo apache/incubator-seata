@@ -20,10 +20,13 @@ import io.seata.integration.http.SeataWebMvcConfigurer;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+
+import static io.seata.spring.boot.autoconfigure.StarterConstants.HTTP_PREFIX;
 
 /**
  * Auto bean add for spring webmvc if in springboot env.
@@ -34,6 +37,7 @@ import org.springframework.core.Ordered;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 @ConditionalOnMissingBean(SeataWebMvcConfigurer.class)
+@ConditionalOnProperty(prefix = HTTP_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataHttpAutoConfiguration {
 
