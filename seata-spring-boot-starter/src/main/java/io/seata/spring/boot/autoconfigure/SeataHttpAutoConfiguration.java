@@ -40,7 +40,7 @@ public class SeataHttpAutoConfiguration {
      * @return the seata web mvc configurer
      */
     @Bean
-    @ConditionalOnClass(jakarta.servlet.http.HttpServletRequest.class)
+    @ConditionalOnClass(name = "jakarta.servlet.http.HttpServletRequest")
     public JakartaSeataWebMvcConfigurer jakartaSeataWebMvcConfigurer() {
         return new JakartaSeataWebMvcConfigurer();
     }
@@ -51,7 +51,7 @@ public class SeataHttpAutoConfiguration {
      * @return the seata web mvc configurer
      */
     @Bean
-    @ConditionalOnClass(javax.servlet.http.HttpServletRequest.class)
+    @ConditionalOnClass(name = "javax.servlet.http.HttpServletRequest")
     @ConditionalOnMissingBean(JakartaSeataWebMvcConfigurer.class)
     public SeataWebMvcConfigurer seataWebMvcConfigurer() {
         return new SeataWebMvcConfigurer();
