@@ -49,6 +49,7 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
+            <optional>true</optional>
             <scope>test</scope>
         </dependency>
         <dependency>
