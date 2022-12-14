@@ -22,22 +22,54 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-
 
 /**
  * Springmvc Intercepter.
  *
  * @author wangxb
+ * @author wang.liang
  */
-public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter {
+public class TransactionPropagationInterceptor implements HandlerInterceptorAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationInterceptor.class);
 
-    @Override
+
+    //@Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String xid = RootContext.getXID();
         String rpcXid = request.getHeader(RootContext.KEY_XID);
+        return this.bindXid(rpcXid);
+    }
+
+    //@Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if (RootContext.inGlobalTransaction()) {
+            String rpcXid = request.getHeader(RootContext.KEY_XID);
+            this.cleanXid(rpcXid);
+        }
+    }
+
+
+    //region Compatible with spring-webmvc:6.x
+
+    //@Override
+    public boolean preHandle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler) {
+        String rpcXid = request.getHeader(RootContext.KEY_XID);
+        return this.bindXid(rpcXid);
+    }
+
+    //@Override
+    public void afterCompletion(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if (RootContext.inGlobalTransaction()) {
+            String rpcXid = request.getHeader(RootContext.KEY_XID);
+            this.cleanXid(rpcXid);
+        }
+    }
+
+    //endregion
+
+
+    private boolean bindXid(String rpcXid) {
+        String xid = RootContext.getXID();
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in HttpContext[{}]", xid, rpcXid);
@@ -52,11 +84,8 @@ public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter
         return true;
     }
 
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        if (RootContext.inGlobalTransaction()) {
-            XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
-        }
+    private void cleanXid(String rpcXid) {
+        XidResource.cleanXid(rpcXid);
     }
 
 }

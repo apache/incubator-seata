@@ -56,8 +56,6 @@ public class MockWebServer {
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             } finally {
                 if (serverSocket != null) {
                     try {
@@ -77,40 +75,35 @@ public class MockWebServer {
         }
     }
 
-    public void dispatch(MockRequest myRequest, MockResponse mockResponse) throws Exception {
+    public String dispatch(MockRequest myRequest, MockResponse mockResponse) {
         String clazz = urlServletMap.get(myRequest.getPath()).split("_")[0];
         String methodName = urlServletMap.get(myRequest.getPath()).split("_")[1];
         HttpServletRequest request = new MockHttpServletRequest(myRequest);
-
-        /* mock request interceptor */
-        TransactionPropagationInterceptor interceptor = new TransactionPropagationInterceptor();
         try {
             Class<MockController> myServletClass = (Class<MockController>) Class.forName(clazz);
             MockController myServlet = myServletClass.newInstance();
             HttpTest.Person person = boxing(myRequest);
             Method method = myServletClass.getDeclaredMethod(methodName, HttpTest.Person.class);
 
-            // pre
-            interceptor.preHandle(request, null, null);
+            /* mock request intercepter */
+            TransactionPropagationInterceptor intercepter = new TransactionPropagationInterceptor();
 
+            intercepter.preHandle(request, null, null);
             Object result = method.invoke(myServlet, person);
-            mockResponse.write(result.toString());
 
-            // post
-            interceptor.postHandle(request, null, null, null);
+            return mockResponse.write(result.toString());
         } catch (Exception e) {
-            interceptor.afterCompletion(request, null, null, e);
+            HttpHandlerExceptionResolver resolver = new HttpHandlerExceptionResolver();
+            resolver.doResolveException(request, null, null, e);
             if (RootContext.getXID() == null) {
                 try {
-                    mockResponse.write("Callee remove local xid success");
-                    return;
+                    return mockResponse.write("Callee remove local xid success");
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
             }
             throw new RuntimeException(e);
         }
-        interceptor.afterCompletion(request, null, null, null);
     }
 
     private HttpTest.Person boxing(MockRequest myRequest) {

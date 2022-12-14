@@ -15,8 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.integration.http.JakartaSeataWebMvcConfigurer;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import io.seata.integration.http.SeataWebMvcConfigurer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -30,28 +29,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
-@ConditionalOnMissingBean(JakartaSeataWebMvcConfigurer.class)
+@ConditionalOnMissingBean(SeataWebMvcConfigurer.class)
 public class SeataHttpAutoConfiguration {
 
-    /**
-     * The bean by javax
-     *
-     * @return webMvcConfigurer
-     */
     @Bean
-    @ConditionalOnClass(javax.servlet.http.HttpServletRequest.class)
-    public JakartaSeataWebMvcConfigurer seataWebMvcConfigurer() {
-        return new JakartaSeataWebMvcConfigurer();
-    }
-
-    /**
-     * The bean by jakarta
-     *
-     * @return webMvcConfigurer
-     */
-    @Bean
-    @ConditionalOnClass(jakarta.servlet.http.HttpServletRequest.class)
-    public JakartaSeataWebMvcConfigurer jakartaSeataWebMvcConfigurer() {
-        return new JakartaSeataWebMvcConfigurer();
+    public SeataWebMvcConfigurer seataWebMvcConfigurer() {
+        return new SeataWebMvcConfigurer();
     }
 }

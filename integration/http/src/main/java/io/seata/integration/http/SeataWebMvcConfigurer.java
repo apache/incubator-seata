@@ -15,19 +15,26 @@
  */
 package io.seata.integration.http;
 
+import java.util.List;
+
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * The seata web mvc configurer.
+ * The Seata Web Mvc Configurer
  *
  * @author wangxb
+ * @author wang.liang
  */
-public class SeataWebMvcConfigurer extends WebMvcConfigurerAdapter {
+public class SeataWebMvcConfigurer implements WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new TransactionPropagationInterceptor());
     }
 
+    @Override
+    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+        exceptionResolvers.add(new HttpHandlerExceptionResolver());
+    }
 }
