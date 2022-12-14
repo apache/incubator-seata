@@ -15,12 +15,12 @@
  */
 package io.seata.integration.http;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * The Handler Interceptor Adapter
@@ -38,19 +38,4 @@ public interface HandlerInterceptorAdapter extends HandlerInterceptor {
 
     default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
     }
-
-
-    //region Compatible with spring-webmvc:6.x
-
-    default boolean preHandle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler) throws Exception {
-        return true;
-    }
-
-    default void postHandle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
-    }
-
-    default void afterCompletion(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
-    }
-
-    //endregion
 }

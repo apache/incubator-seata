@@ -56,6 +56,8 @@ public class MockWebServer {
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             } finally {
                 if (serverSocket != null) {
                     try {
@@ -88,11 +90,24 @@ public class MockWebServer {
             HttpTest.Person person = boxing(myRequest);
             Method method = myServletClass.getDeclaredMethod(methodName, HttpTest.Person.class);
 
+            // pre
             interceptor.preHandle(request, null, null);
-            Object result = method.invoke(myServlet, person);
 
-            return mockResponse.write(result.toString());
+            Object result = method.invoke(myServlet, person);
+            String response = mockResponse.write(result.toString());
+
+            // post
+            interceptor.postHandle(request, null, null, null);
+            // afterCompletion without exception
+            try {
+                interceptor.afterCompletion(request, null, null, null);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+
+            return response;
         } catch (Exception e) {
+            // afterCompletion with exception
             try {
                 interceptor.afterCompletion(request, null, null, e);
             } catch (Exception ex) {
