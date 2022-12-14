@@ -98,11 +98,11 @@ public class MysqlUpdateJoinTest {
         table1HelperRes = helperStat.executeQuery("select * from t where id = " + testRecordId );
         TableMeta table1Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
                 "t", dataSourceProxy.getResourceId());
-        TableRecords table1BeforeImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
+        TableRecords table1BeforeImage = TableRecords.buildRecords(table1Meta, table1HelperRes, null);
         table2HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId1);
         TableMeta table2Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
                 "t1", dataSourceProxy.getResourceId());
-        TableRecords table2BeforeImage = TableRecords.buildRecords(table2Meta, table2HelperRes);
+        TableRecords table2BeforeImage = TableRecords.buildRecords(table2Meta, table2HelperRes, null);
         // >>> update record should not throw exception
         Assertions.assertDoesNotThrow(() -> testStat.execute(updateSql));
         // >>> close the statement and connection
@@ -120,9 +120,9 @@ public class MysqlUpdateJoinTest {
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
             table1HelperRes = helperStat.executeQuery("select * from t where id = " + testRecordId);
-            TableRecords table1CurrentImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
+            TableRecords table1CurrentImage = TableRecords.buildRecords(table1Meta, table1HelperRes, null);
             table2HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId1);
-            TableRecords table2CurrentImage = TableRecords.buildRecords(table2Meta, table2HelperRes);
+            TableRecords table2CurrentImage = TableRecords.buildRecords(table2Meta, table2HelperRes, null);
             Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table1BeforeImage, table1CurrentImage).getResult());
             Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table2BeforeImage, table2CurrentImage).getResult());
             table1HelperRes.close();
