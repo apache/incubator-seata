@@ -22,18 +22,17 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Springmvc Intercepter.
  *
  * @author wangxb
  */
-public class JakartaTransactionPropagationInterceptor implements HandlerInterceptor {
+public class JakartaTransactionPropagationInterceptor implements JakartaHandlerInterceptorAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JakartaTransactionPropagationInterceptor.class);
 
-    @Override
+    //@Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String xid = RootContext.getXID();
         String rpcXid = request.getHeader(RootContext.KEY_XID);
@@ -51,7 +50,7 @@ public class JakartaTransactionPropagationInterceptor implements HandlerIntercep
         return true;
     }
 
-    @Override
+    //@Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         if (RootContext.inGlobalTransaction()) {
             XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
