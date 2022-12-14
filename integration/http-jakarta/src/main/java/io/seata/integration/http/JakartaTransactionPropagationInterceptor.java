@@ -18,7 +18,7 @@ package io.seata.integration.http;
 import io.seata.core.context.RootContext;
 
 /**
- * Springmvc Intercepter.
+ * The Jakarta SpringMVC Interceptor.
  *
  * @author wangxb
  * @author wang.liang

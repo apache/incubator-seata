@@ -18,7 +18,7 @@ package io.seata.integration.http;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 
 /**
- * The Seata Web Mvc Configurer
+ * The Jakarta Seata Web Mvc Configurer
  *
  * @author wang.liang
  */
