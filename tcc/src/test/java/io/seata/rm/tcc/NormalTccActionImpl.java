@@ -11,8 +11,8 @@ import java.util.List;
 public class NormalTccActionImpl implements NormalTccAction {
 
     @Override
-    public boolean prepare(BusinessActionContext actionContext, int a, List b, TccParam tccParam) {
-        return false;
+    public String prepare(BusinessActionContext actionContext, int a, List b, TccParam tccParam) {
+        return "a";
     }
 
     @Override

@@ -36,7 +36,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         Class<?> serviceInterface = SpringProxyUtils.findTargetClass(target);
         Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(target);
 
-        if (!existsAnnotation(new Class[]{serviceInterface}) && !existsAnnotation(interfacesIfJdk)) {
+        if (existsAnnotation(new Class[]{serviceInterface}) || existsAnnotation(interfacesIfJdk)) {
             Class[] interfaceToProxy = target.getClass().getInterfaces();
             ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(new DefaultFailureHandlerImpl(), interfaceToProxy, null);
             return proxyInvocationHandler;

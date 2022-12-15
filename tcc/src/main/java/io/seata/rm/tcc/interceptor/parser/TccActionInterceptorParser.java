@@ -34,7 +34,8 @@ public class TccActionInterceptorParser implements InterfaceParser {
             if (remotingDesc != null) {
                 if (remotingDesc.isService()) {
                     tryToRegisterResource(remotingDesc);
-                }else{
+                }
+                if (remotingDesc.isReference()) {
                     //if it is a tcc remote reference
                     Set<String> methodsToProxy = tccProxyTargetMethod(remotingDesc);
                     if (remotingDesc != null && !methodsToProxy.isEmpty()) {
@@ -119,7 +120,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
      * @return boolean boolean
      */
     private Set<String> tccProxyTargetMethod(RemotingDesc remotingDesc) {
-        if (remotingDesc.isReference() || remotingDesc == null) {
+        if (!remotingDesc.isReference() || remotingDesc == null) {
             return Collections.emptySet();
         }
         Set<String> methodsToProxy = new HashSet<>();
