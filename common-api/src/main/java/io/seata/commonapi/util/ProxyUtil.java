@@ -28,9 +28,8 @@ public class ProxyUtil {
                 c.getGenericInterfaces();
             }
 
-            Type t = proxyInvocationHandler.getInterfaceToProxy().getClass().getGenericSuperclass();
             T proxy = (T) new ByteBuddy().subclass(Object.class)
-                    .implement(proxyInvocationHandler.getInterfaceToProxy().getClass().getGenericSuperclass())
+                    .implement(proxyInvocationHandler.getInterfaceToProxy())
                     .intercept(InvocationHandlerAdapter.of(new DefaultInvocationHandler(proxyInvocationHandler, target)))
                     .make()
                     .load(target.getClass().getClassLoader())
