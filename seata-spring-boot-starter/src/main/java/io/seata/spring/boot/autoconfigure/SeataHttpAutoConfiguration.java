@@ -37,7 +37,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.HTTP_PREFIX;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 @ConditionalOnMissingBean(SeataWebMvcConfigurer.class)
-@ConditionalOnProperty(prefix = HTTP_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = HTTP_PREFIX, name = "interceptor-enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataHttpAutoConfiguration {
 
