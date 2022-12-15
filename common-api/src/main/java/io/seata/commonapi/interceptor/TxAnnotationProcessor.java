@@ -15,8 +15,6 @@
  */
 package io.seata.commonapi.interceptor;
 
-import io.seata.commonapi.autoproxy.DefaultTransactionAutoProxy;
-import io.seata.commonapi.autoproxy.IsTransactionProxyResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -93,13 +91,13 @@ public class TxAnnotationProcessor implements BeanPostProcessor {
             return;
         }
 
-        IsTransactionProxyResult isProxyTargetBeanResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
-        if (isProxyTargetBeanResult.isProxyTargetBean()) {
-            Object proxyBean = TxBeanParserUtils.createProxy(serviceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
-            field.setAccessible(true);
-            field.set(bean, proxyBean);
-            LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy [" + isProxyTargetBeanResult.getMethodInterceptor().getClass().getName() + "]");
-        }
+//        IsTransactionProxyResult isProxyTargetBeanResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
+//        if (isProxyTargetBeanResult.isProxyTargetBean()) {
+//            Object proxyBean = TxBeanParserUtils.createProxy(serviceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
+//            field.setAccessible(true);
+//            field.set(bean, proxyBean);
+//            LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy [" + isProxyTargetBeanResult.getMethodInterceptor().getClass().getName() + "]");
+//        }
     }
 
 

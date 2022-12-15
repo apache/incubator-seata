@@ -21,8 +21,8 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.commonapi.interceptor.ActionContextUtil;
 import io.seata.commonapi.remoting.RemotingDesc;
 import io.seata.commonapi.remoting.RemotingParser;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContext;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

@@ -15,15 +15,12 @@
  */
 package io.seata.commonapi.interceptor;
 
-import io.seata.commonapi.autoproxy.DefaultTransactionAutoProxy;
-import io.seata.commonapi.autoproxy.IsTransactionProxyResult;
 import io.seata.common.DefaultValues;
 import io.seata.commonapi.fence.config.CommonFenceConfig;
-import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
-import io.seata.commonapi.util.SpringProxyUtils;
-import io.seata.commonapi.remoting.Protocols;
 import io.seata.commonapi.remoting.RemotingDesc;
 import io.seata.commonapi.remoting.RemotingParser;
+import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
+import io.seata.commonapi.util.SpringProxyUtils;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
@@ -73,18 +70,6 @@ public class TxBeanParserUtils {
 //                return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
 //            }
 //        }
-    }
-    
-    public static IsTransactionProxyResult getManualProxyResult(Object bean, String beanName) {
-        parserRemotingServiceInfo(bean, beanName);
-        RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-        if(remotingDesc == null) {
-            return new IsTransactionProxyResult();
-        }
-        if(!DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc)) {
-            return new IsTransactionProxyResult();
-        }
-        return DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
     }
 
     /**

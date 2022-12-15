@@ -15,9 +15,6 @@
  */
 package io.seata.rm.tcc.api;
 
-import io.seata.commonapi.rm.tcc.api.BusinessActionContext;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContextParameter;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.interceptor.TccActionInterceptor;
 
 import java.lang.annotation.ElementType;

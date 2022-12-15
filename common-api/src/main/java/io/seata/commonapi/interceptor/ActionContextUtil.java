@@ -28,9 +28,9 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContext;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContextParameter;
-import io.seata.commonapi.rm.tcc.api.ParamType;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.ParamType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

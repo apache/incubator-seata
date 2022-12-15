@@ -1,6 +1,6 @@
 package io.seata.rm.tcc;
 
-import io.seata.commonapi.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContext;
 
 import java.util.List;
 

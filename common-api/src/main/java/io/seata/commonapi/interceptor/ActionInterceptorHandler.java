@@ -22,10 +22,10 @@ import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContext;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContextParameter;
-import io.seata.commonapi.rm.tcc.api.BusinessActionContextUtil;
-import io.seata.commonapi.rm.tcc.api.ParamType;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
+import io.seata.rm.tcc.api.ParamType;
 import io.seata.commonapi.fence.CommonFenceHandler;
 import io.seata.commonapi.util.DubboUtil;
 import io.seata.commonapi.util.SpringProxyUtils;
@@ -123,46 +123,6 @@ public class ActionInterceptorHandler {
                     BusinessActionContextUtil.clear();
                 }
             }
-        }
-    }
-
-    public Object proceedManual(Method method, Object[] arguments, String xid, TwoPhaseBusinessActionParam businessActionParam) throws Throwable {
-        //Get action context from arguments, or create a new one and then reset to arguments
-        BusinessActionContext actionContext = getOrCreateActionContextAndResetToArguments(method.getParameterTypes(), arguments);
-
-        //Set the xid
-        actionContext.setXid(xid);
-        //Set the action name
-        String actionName = businessActionParam.getActionName();
-        actionContext.setActionName(actionName);
-        //Set the delay report
-        actionContext.setDelayReport(businessActionParam.getDelayReport());
-        //Set branch type
-        actionContext.setBranchType(businessActionParam.getBranchType());
-
-        //Creating Branch Record
-        String branchId = doTxActionLogStore(method, arguments, businessActionParam, actionContext);
-        actionContext.setBranchId(branchId);
-        //MDC put branchId
-        MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
-
-        //share actionContext implicitly
-        BusinessActionContextUtil.setContext(actionContext);
-
-        if (businessActionParam.getUseCommonFence()) {
-            try {
-                // Use common Fence, and return the business result
-                EmptyCallBack emptyCallBack = new EmptyCallBack();
-                return CommonFenceHandler.prepareFence(xid, Long.valueOf(branchId), actionName, emptyCallBack);
-            } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
-                Throwable originException = e.getCause();
-                if (originException instanceof FrameworkException) {
-                    LOGGER.error("[{}] prepare common fence error: {}", xid, originException.getMessage());
-                }
-                throw originException;
-            }
-        } else {
-            return null;
         }
     }
 

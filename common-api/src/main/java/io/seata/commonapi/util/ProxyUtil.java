@@ -6,6 +6,8 @@ import io.seata.commonapi.interceptor.parser.DefaultInterfaceParser;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 
+import java.lang.reflect.Type;
+
 /**
  * @author leezongjie
  * @date 2022/11/26
@@ -19,8 +21,16 @@ public class ProxyUtil {
                 //no need to set
                 return target;
             }
+
+            Class[] cList = proxyInvocationHandler.getInterfaceToProxy();
+            for (Class c:
+                 cList) {
+                c.getGenericInterfaces();
+            }
+
+            Type t = proxyInvocationHandler.getInterfaceToProxy().getClass().getGenericSuperclass();
             T proxy = (T) new ByteBuddy().subclass(Object.class)
-                    .implement(proxyInvocationHandler.getInterfaceToProxy())
+                    .implement(proxyInvocationHandler.getInterfaceToProxy().getClass().getGenericSuperclass())
                     .intercept(InvocationHandlerAdapter.of(new DefaultInvocationHandler(proxyInvocationHandler, target)))
                     .make()
                     .load(target.getClass().getClassLoader())
