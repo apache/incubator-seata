@@ -16,12 +16,14 @@ class TccActionInterceptorParserTest {
     @Test
     void parserInterfaceToProxy() {
 
+        //given
         TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
-
         NormalTccActionImpl tccAction = new NormalTccActionImpl();
 
+        //when
         ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(tccAction);
 
+        //then
         Assertions.assertNotNull(proxyInvocationHandler);
 
     }

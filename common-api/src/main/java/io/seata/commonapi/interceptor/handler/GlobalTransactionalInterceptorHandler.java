@@ -73,7 +73,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
 
     @Override
     public Class[] getInterfaceToProxy() {
-        return null;
+        return interfaceToProxy;
     }
 
     @Override
