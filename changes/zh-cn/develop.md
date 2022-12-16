@@ -10,7 +10,7 @@
 - [[#4877](https://github.com/seata/seata/pull/4877)] seata client支持jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] 支持kryo 5.3.0
 - [[#4914](https://github.com/seata/seata/pull/4914)] 支持mysql的update join联表更新语法
-
+- [[#5111](https://github.com/seata/seata/pull/5111)] 支持传递contextPath参数给Nacos客户端
 
 
 ### bugfix：
@@ -41,6 +41,9 @@
 - [[#5075](https://github.com/seata/seata/pull/5075)] 修复InsertOnDuplicateUpdate无法拦截无主键和唯一索引的SQL
 - [[#5093](https://github.com/seata/seata/pull/5093)] 修复seata server重启后access key丢失问题
 - [[#5092](https://github.com/seata/seata/pull/5092)] 修复当seata and jpa共同使用时, AutoConfiguration的顺序不正确的问题
+- [[#5109](https://github.com/seata/seata/pull/5109)] 修复当RM侧没有加@GlobalTransactional报NPE的问题
+- [[#5131](https://github.com/seata/seata/pull/5131)] 修复xaconnection处于active状态时无法回滚的问题
+- [[#5134](https://github.com/seata/seata/pull/5134)] 修复hikariDataSource 自动代理在某些情况下失效的问题
 
 ### optimize：
 - [[#4681](https://github.com/seata/seata/pull/4681)] 优化竞争锁过程
@@ -72,6 +75,7 @@
 - [[#5051](https://github.com/seata/seata/pull/5051)] 回滚时undolog产生脏写需要抛出不再重试(BranchRollbackFailed_Unretriable)的异常
 - [[#5075](https://github.com/seata/seata/pull/5075)] 拦截没有主键及唯一索引值的insert on duplicate update语句
 - [[#5104](https://github.com/seata/seata/pull/5104)] ConnectionProxy脱离对druid的依赖
+- [[#5124](https://github.com/seata/seata/pull/5124)] 支持oracle删除tccfence记录表
 
 ### test：
 - [[#4411](https://github.com/seata/seata/pull/4411)] 测试Oracle数据库AT模式下类型支持
@@ -107,5 +111,6 @@
 - [zhangzq7](https://github.com/zhangzq7)
 - [l81893521](https://github.com/l81893521)
 - [zhuyoufeng](https://github.com/zhuyoufeng)
-- [xingfudeshi](https://github.com/xingfudeshi)
+- [xingfudeshi](https://github.com/xingfudeshi)  
+
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

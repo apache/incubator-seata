@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
 - [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
 - [[#4914](https://github.com/seata/seata/pull/4914)] support mysql update join sql
+- [[#5111](https://github.com/seata/seata/pull/5111)] support passing contextPath parameter to Nacos client
 
 
 ### bugfix:
@@ -39,7 +40,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
 - [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
 - [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
-
+- [[#5109](https://github.com/seata/seata/pull/5109)] fix NPE caused when there is no @GlobalTransactional annotation on the RM side
+- [[#5131](https://github.com/seata/seata/pull/5131)] rollback active xa connection fail
+- [[#5134](https://github.com/seata/seata/pull/5134)] hikari datasource auto proxy fail
 
 ### optimize:
 - [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
@@ -72,6 +75,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
 - [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
 - [[#5104](https://github.com/seata/seata/pull/5104)] remove the druid dependency in ConnectionProxy
+- [[#5124](https://github.com/seata/seata/pull/5124)] support oracle on delete tccfence logs
 
 
 ### test:
