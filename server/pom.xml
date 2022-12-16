@@ -292,7 +292,6 @@
                             <!--gc-->
                             <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
                             <jvmFlag>-XX:+UseG1GC</jvmFlag>
-                            <jvmFlag>-verbose:gc</jvmFlag>
                             <!--netty-->
                             <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
                             <!--log-->
