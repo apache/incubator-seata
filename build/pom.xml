@@ -73,8 +73,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
-        <spring-boot.version>2.4.13</spring-boot.version>
-        <spring-framework.version>5.3.18</spring-framework.version>
+        <spring-boot.version>2.5.14</spring-boot.version>
+        <spring-framework.version>5.3.22</spring-framework.version>
 
         <!-- Maven plugin versions -->
         <!-- Build -->
