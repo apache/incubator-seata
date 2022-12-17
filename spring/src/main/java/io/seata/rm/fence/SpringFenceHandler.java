@@ -13,12 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.commonapi.fence;
+package io.seata.rm.fence;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.commonapi.fence.DefaultCommonFenceHandler;
+import io.seata.commonapi.fence.FenceHandler;
 import io.seata.commonapi.fence.constant.CommonFenceConstant;
 import io.seata.commonapi.fence.exception.CommonFenceException;
 import io.seata.commonapi.fence.store.CommonFenceDO;
@@ -47,13 +49,13 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kaka2code
  */
-public class CommonFenceHandler {
+public class SpringFenceHandler implements FenceHandler {
 
-    private CommonFenceHandler() {
+    private SpringFenceHandler() {
         throw new IllegalStateException("Utility class");
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommonFenceHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringFenceHandler.class);
 
     private static final CommonFenceStore COMMON_FENCE_DAO = CommonFenceStoreDataBaseDAO.getInstance();
 
@@ -79,21 +81,22 @@ public class CommonFenceHandler {
     static {
         try {
             initLogCleanExecutor();
+            DefaultCommonFenceHandler.get().setFenceHandler(new SpringFenceHandler());
         } catch (Exception e) {
             LOGGER.error("init fence log clean executor error", e);
         }
     }
 
     public static DataSource getDataSource() {
-        return CommonFenceHandler.dataSource;
+        return SpringFenceHandler.dataSource;
     }
 
     public static void setDataSource(DataSource dataSource) {
-        CommonFenceHandler.dataSource = dataSource;
+        SpringFenceHandler.dataSource = dataSource;
     }
 
     public static void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-        CommonFenceHandler.transactionTemplate = transactionTemplate;
+        SpringFenceHandler.transactionTemplate = transactionTemplate;
     }
 
     /**
@@ -105,7 +108,8 @@ public class CommonFenceHandler {
      * @param targetCallback the target callback
      * @return the boolean
      */
-    public static Object prepareFence(String xid, Long branchId, String actionName, Callback<Object> targetCallback) {
+    @Override
+    public Object prepareFence(String xid, Long branchId, String actionName, Callback<Object> targetCallback) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
@@ -141,7 +145,8 @@ public class CommonFenceHandler {
      * @param args                  commit method's parameters
      * @return the boolean
      */
-    public static boolean commitFence(Method commitMethod, Object targetTCCBean,
+    @Override
+    public boolean commitFence(Method commitMethod, Object targetTCCBean,
                                       String xid, Long branchId, Object[] args) {
         return transactionTemplate.execute(status -> {
             try {
@@ -180,7 +185,8 @@ public class CommonFenceHandler {
      * @param actionName            the action name
      * @return the boolean
      */
-    public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
+    @Override
+    public boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
                                         String xid, Long branchId, Object[] args, String actionName) {
         return transactionTemplate.execute(status -> {
             try {
@@ -287,16 +293,15 @@ public class CommonFenceHandler {
         });
     }
 
-
-
     /**
      * Delete Common Fence By Datetime
      *
      * @param datetime datetime
      * @return the deleted row count
      */
-    public static int deleteFenceByDate(Date datetime) {
-        DataSource dataSource = CommonFenceHandler.getDataSource();
+    @Override
+    public int deleteFenceByDate(Date datetime) {
+        DataSource dataSource = SpringFenceHandler.getDataSource();
         Connection connection = null;
         int total = 0;
         try {
@@ -351,7 +356,7 @@ public class CommonFenceHandler {
 
                 try {
                     FenceLogIdentity logIdentity = LOG_QUEUE.take();
-                    boolean ret = CommonFenceHandler.deleteFence(logIdentity.getXid(), logIdentity.getBranchId());
+                    boolean ret = SpringFenceHandler.deleteFence(logIdentity.getXid(), logIdentity.getBranchId());
                     if (!ret) {
                         LOGGER.error("delete fence log failed, xid: {}, branchId: {}", logIdentity.getXid(), logIdentity.getBranchId());
                     }

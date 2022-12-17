@@ -3,11 +3,9 @@ package io.seata.commonapi.interceptor.parser;
 import io.seata.common.util.CollectionUtils;
 import io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.commonapi.interceptor.handler.ProxyInvocationHandler;
-import io.seata.commonapi.util.SpringProxyUtils;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
-import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -22,19 +20,18 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
     private Set<String> methodsToProxy = new HashSet<>();
 
     /**
+     * @param target
+     * @return
+     * @throws Exception
      * @see GlobalTransactional // TM annotation
      * <p>
      * GlobalLock:
      * @see GlobalLock // GlobalLock annotation
-     *
-     * @param target
-     * @return
-     * @throws Exception
      */
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target) throws Exception {
-        Class<?> serviceInterface = SpringProxyUtils.findTargetClass(target);
-        Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(target);
+        Class<?> serviceInterface = DefaultTargetClassParser.get().findTargetClass(target);
+        Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
 
         if (existsAnnotation(new Class[]{serviceInterface}) || existsAnnotation(interfacesIfJdk)) {
             Class[] interfaceToProxy = target.getClass().getInterfaces();

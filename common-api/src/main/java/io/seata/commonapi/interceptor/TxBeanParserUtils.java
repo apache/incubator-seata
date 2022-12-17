@@ -15,15 +15,9 @@
  */
 package io.seata.commonapi.interceptor;
 
-import io.seata.common.DefaultValues;
-import io.seata.commonapi.fence.config.CommonFenceConfig;
 import io.seata.commonapi.remoting.RemotingDesc;
 import io.seata.commonapi.remoting.RemotingParser;
 import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
-import io.seata.commonapi.util.SpringProxyUtils;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.context.ApplicationContext;
 
 /**
  * parser transaction bean
@@ -43,84 +37,9 @@ public class TxBeanParserUtils {
      * @return boolean boolean
      */
     public static boolean isTxRemotingBean(Object bean, String beanName) {
-        boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
-        return isRemotingBean;
-        //get RemotingBean description
-//        RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-//        //is remoting bean
-//        if (isRemotingBean) {
-//            if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
-//                //LocalService
-//                return isTccProxyTargetBean(remotingDesc);
-//                //return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-//            } else {
-//                // sofa:reference / dubbo:reference, factory bean
-//                return false;
-//            }
-//        } else {
-//            if (remotingDesc == null) {
-//                //check FactoryBean
-//                if (isRemotingFactoryBean(bean, beanName, applicationContext)) {
-//                    remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-//                    return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-//                } else {
-//                    return false;
-//                }
-//            } else {
-//                return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-//            }
-//        }
+        return parserRemotingServiceInfo(bean, beanName);
     }
 
-    /**
-     * if it is proxy bean, check if the FactoryBean is Remoting bean
-     *
-     * @param bean               the bean
-     * @param beanName           the bean name
-     * @param applicationContext the application context
-     * @return boolean boolean
-     */
-    protected static boolean isRemotingFactoryBean(Object bean, String beanName,
-                                                   ApplicationContext applicationContext) {
-        if (!SpringProxyUtils.isProxy(bean)) {
-            return false;
-        }
-        //the FactoryBean of proxy bean
-        String factoryBeanName = "&" + beanName;
-        Object factoryBean = null;
-        if (applicationContext != null && applicationContext.containsBean(factoryBeanName)) {
-            factoryBean = applicationContext.getBean(factoryBeanName);
-        }
-        //not factory bean, needn't proxy
-        if (factoryBean == null) {
-            return false;
-        }
-        //get FactoryBean info
-        return parserRemotingServiceInfo(factoryBean, beanName);
-    }
-
-    /**
-     * init common fence clean task if enable useCommonFence
-     *
-     * @param remotingDesc the remoting desc
-     * @param applicationContext applicationContext
-     */
-    public static void initCommonFenceCleanTask(RemotingDesc remotingDesc, ApplicationContext applicationContext, boolean useCommonFence) {
-        if (remotingDesc == null) {
-            return;
-        }
-        if (applicationContext != null && applicationContext.containsBean(DefaultValues.COMMON_FENCE_BEAN_NAME)) {
-            CommonFenceConfig commonFenceConfig = (CommonFenceConfig) applicationContext.getBean(DefaultValues.COMMON_FENCE_BEAN_NAME);
-            if (commonFenceConfig == null || commonFenceConfig.getInitialized().get()) {
-                return;
-            }
-
-            if (useCommonFence && commonFenceConfig.getInitialized().compareAndSet(false, true)) {
-                // init common fence clean task if enable useCommonFence
-                commonFenceConfig.initCleanTask();
-            }
-        }
-    }
 
     /**
      * get remoting bean info: sofa:service, sofa:reference, dubbo:reference, dubbo:service
@@ -147,20 +66,4 @@ public class TxBeanParserUtils {
         return DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
     }
 
-    /**
-     * Create a proxy bean for transaction service
-     *
-     * @param interfaceClass the interface class
-     * @param fieldValue the field value
-     * @param actionInterceptor the action interceptor
-     * @return the service proxy bean
-     */
-    public static <T> T createProxy(Class<T> interfaceClass, Object fieldValue, MethodInterceptor actionInterceptor) {
-        ProxyFactory factory = new ProxyFactory();
-        factory.setTarget(fieldValue);
-        factory.setInterfaces(interfaceClass);
-        factory.addAdvice(actionInterceptor);
-
-        return (T) factory.getProxy();
-    }
 }
