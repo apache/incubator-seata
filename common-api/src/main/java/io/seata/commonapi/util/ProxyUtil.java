@@ -22,12 +22,6 @@ public class ProxyUtil {
                 return target;
             }
 
-            Class[] cList = proxyInvocationHandler.getInterfaceToProxy();
-            for (Class c:
-                 cList) {
-                c.getGenericInterfaces();
-            }
-
             T proxy = (T) new ByteBuddy().subclass(Object.class)
                     .implement(proxyInvocationHandler.getInterfaceToProxy())
                     .intercept(InvocationHandlerAdapter.of(new DefaultInvocationHandler(proxyInvocationHandler, target)))
