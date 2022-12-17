@@ -43,60 +43,7 @@ public class TxBeanParserUtils {
      * @return boolean boolean
      */
     public static boolean isTxRemotingBean(Object bean, String beanName) {
-        boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
-        return isRemotingBean;
-        //get RemotingBean description
-//        RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-//        //is remoting bean
-//        if (isRemotingBean) {
-//            if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
-//                //LocalService
-//                return isTccProxyTargetBean(remotingDesc);
-//                //return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-//            } else {
-//                // sofa:reference / dubbo:reference, factory bean
-//                return false;
-//            }
-//        } else {
-//            if (remotingDesc == null) {
-//                //check FactoryBean
-//                if (isRemotingFactoryBean(bean, beanName, applicationContext)) {
-//                    remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-//                    return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-//                } else {
-//                    return false;
-//                }
-//            } else {
-//                return DefaultTransactionAutoProxy.get().isTransactionAutoProxy(beanName, remotingDesc);
-//            }
-//        }
-    }
-
-    /**
-     * if it is proxy bean, check if the FactoryBean is Remoting bean
-     *
-     * @param bean               the bean
-     * @param beanName           the bean name
-     * @param applicationContext the application context
-     * @return boolean boolean
-     */
-    protected static boolean isRemotingFactoryBean(Object bean, String beanName,
-                                                   ApplicationContext applicationContext) {
-        if (!SpringProxyUtils.isProxy(bean)) {
-            return false;
-        }
-        //the FactoryBean of proxy bean
-        String factoryBeanName = "&" + beanName;
-        Object factoryBean = null;
-        if (applicationContext != null && applicationContext.containsBean(factoryBeanName)) {
-            factoryBean = applicationContext.getBean(factoryBeanName);
-        }
-        //not factory bean, needn't proxy
-        if (factoryBean == null) {
-            return false;
-        }
-        //get FactoryBean info
-        return parserRemotingServiceInfo(factoryBean, beanName);
+        return parserRemotingServiceInfo(bean, beanName);
     }
 
     /**

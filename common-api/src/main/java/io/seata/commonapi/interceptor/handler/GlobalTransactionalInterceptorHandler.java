@@ -77,8 +77,13 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
     @Override
-    protected Set<String> methodsToProxy() {
+    public Set<String> getMethodsToProxy() {
         return methodsToProxy;
+    }
+
+    @Override
+    public boolean interfaceProxyMode() {
+        return false;
     }
 
     @Override
