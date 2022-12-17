@@ -13,8 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.commonapi.interceptor;
+package io.seata.spring.tcc;
 
+import io.seata.commonapi.remoting.RemotingDesc;
+import io.seata.commonapi.util.ProxyUtil;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.interceptor.TccActionInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -23,16 +27,17 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
- * An annotation adapter for transaction annotation
+ * An annotation adapter for TCC
  *
  * @author ppf
  */
-public class TxAnnotationProcessor implements BeanPostProcessor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TxAnnotationProcessor.class);
+public class TccAnnotationProcessor implements BeanPostProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccAnnotationProcessor.class);
 
     private static final List<Class<? extends Annotation>> ANNOTATIONS = new ArrayList<>(4);
     private static final Set<String> PROXIED_SET = new HashSet<>();
@@ -68,7 +73,7 @@ public class TxAnnotationProcessor implements BeanPostProcessor {
                 return;
             }
 
-            addTxAdvise(bean, beanName, field, field.getType());
+            addTccAdvise(bean, beanName, field, field.getType());
 
         }, field -> !Modifier.isStatic(field.getModifiers())
                 && (field.isAnnotationPresent(annotation)));
@@ -77,7 +82,7 @@ public class TxAnnotationProcessor implements BeanPostProcessor {
     }
 
     /**
-     * Add transaction interceptor for common transaction proxy bean
+     * Add TCC interceptor for tcc proxy bean
      *
      * @param bean           the bean
      * @param beanName       the bean name
@@ -85,19 +90,23 @@ public class TxAnnotationProcessor implements BeanPostProcessor {
      * @param serviceClass   the serviceClass
      * @throws IllegalAccessException the illegal access exception
      */
-    public void addTxAdvise(Object bean, String beanName, Field field, Class serviceClass) throws IllegalAccessException {
+    public void addTccAdvise(Object bean, String beanName, Field field, Class serviceClass) throws IllegalAccessException {
         Object fieldValue = field.get(bean);
         if (fieldValue == null) {
             return;
         }
+        for (Method method : field.getType().getMethods()) {
+            if (!Modifier.isStatic(method.getModifiers()) && (method.isAnnotationPresent(TwoPhaseBusinessAction.class))) {
+                RemotingDesc remotingDesc = new RemotingDesc();
+                remotingDesc.setServiceClass(serviceClass);
 
-//        IsTransactionProxyResult isProxyTargetBeanResult = DefaultTransactionAutoProxy.get().getIsProxyTargetBeanResult(beanName);
-//        if (isProxyTargetBeanResult.isProxyTargetBean()) {
-//            Object proxyBean = TxBeanParserUtils.createProxy(serviceClass, fieldValue, isProxyTargetBeanResult.getMethodInterceptor());
-//            field.setAccessible(true);
-//            field.set(bean, proxyBean);
-//            LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy [" + isProxyTargetBeanResult.getMethodInterceptor().getClass().getName() + "]");
-//        }
+                TccActionInterceptor actionInterceptor = new TccActionInterceptor(remotingDesc);
+                Object proxyBean = ProxyUtil.createProxy(bean);
+                field.setAccessible(true);
+                field.set(bean, proxyBean);
+                LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy [" + actionInterceptor.getClass().getName() + "]");
+            }
+        }
     }
 
 
@@ -115,3 +124,4 @@ public class TxAnnotationProcessor implements BeanPostProcessor {
     }
 
 }
+

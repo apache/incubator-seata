@@ -22,25 +22,18 @@ import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.commonapi.fence.DefaultCommonFenceHandler;
+import io.seata.core.context.RootContext;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.api.ParamType;
-import io.seata.commonapi.fence.CommonFenceHandler;
-import io.seata.commonapi.util.DubboUtil;
-import io.seata.commonapi.util.SpringProxyUtils;
-import io.seata.core.context.RootContext;
-import io.seata.commonapi.remoting.RemotingDesc;
-import io.seata.rm.DefaultResourceManager;
-
-
-import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -98,7 +91,7 @@ public class ActionInterceptorHandler {
             if (businessActionParam.getUseCommonFence()) {
                 try {
                     // Use common Fence, and return the business result
-                    return CommonFenceHandler.prepareFence(xid, Long.valueOf(branchId), actionName, targetCallback);
+                    return DefaultCommonFenceHandler.get().prepareFence(xid, Long.valueOf(branchId), actionName, targetCallback);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     Throwable originException = e.getCause();
                     if (originException instanceof FrameworkException) {
@@ -280,55 +273,4 @@ public class ActionInterceptorHandler {
         return context;
     }
 
-    /**
-     * get the method from interface
-     *
-     * @param invocation the invocation
-     * @return the action interface method
-     */
-    public Method getActionInterfaceMethod(MethodInvocation invocation, RemotingDesc remotingDesc) {
-        Class<?> serviceType = null;
-        try {
-            if (remotingDesc == null) {
-                serviceType = getProxyInterface(invocation.getThis());
-            } else {
-                serviceType = remotingDesc.getServiceClass();
-            }
-            if (serviceType == null && remotingDesc != null && remotingDesc.getServiceClassName() != null) {
-                serviceType = Class.forName(remotingDesc.getServiceClassName(), true,
-                        Thread.currentThread().getContextClassLoader());
-            }
-            if (serviceType == null) {
-                return invocation.getMethod();
-            }
-            return serviceType.getMethod(invocation.getMethod().getName(),
-                    invocation.getMethod().getParameterTypes());
-        } catch (NoSuchMethodException e) {
-            if (serviceType != null && !"toString".equals(invocation.getMethod().getName())) {
-                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), serviceType.getName());
-            }
-            return invocation.getMethod();
-        } catch (Exception e) {
-            LOGGER.warn("get Method from interface failed", e);
-            return invocation.getMethod();
-        }
-    }
-
-    /**
-     * get the interface of proxy
-     *
-     * @param proxyBean the proxy bean
-     * @return proxy interface
-     * @throws Exception the exception
-     */
-    @Nullable
-    protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
-        if (DubboUtil.isDubboProxyName(proxyBean.getClass().getName())) {
-            //dubbo javaassist proxy
-            return DubboUtil.getAssistInterface(proxyBean);
-        } else {
-            //jdk/cglib proxy
-            return SpringProxyUtils.getTargetInterface(proxyBean);
-        }
-    }
 }
