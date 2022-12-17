@@ -18,11 +18,11 @@ package io.seata.rm.tcc;
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.SkipCallbackWrapperException;
+import io.seata.commonapi.fence.DefaultCommonFenceHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-import io.seata.commonapi.fence.CommonFenceHandler;
 import io.seata.commonapi.remoting.TwoPhaseResult;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
@@ -104,7 +104,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
-                    result = CommonFenceHandler.commitFence(commitMethod, targetTCCBean, xid, branchId, args);
+                    result = DefaultCommonFenceHandler.get().commitFence(commitMethod, targetTCCBean, xid, branchId, args);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
@@ -162,7 +162,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
-                    result = CommonFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, xid, branchId,
+                    result = DefaultCommonFenceHandler.get().rollbackFence(rollbackMethod, targetTCCBean, xid, branchId,
                             args, tccResource.getActionName());
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
