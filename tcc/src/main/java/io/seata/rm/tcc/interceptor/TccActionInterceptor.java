@@ -84,7 +84,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
             //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
-        Method method = actionInterceptorHandler.getActionInterfaceMethod(invocation, this.remotingDesc);
+        Method method = invocation.getMethod();
         TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
         //try method
         if (businessAction != null) {
