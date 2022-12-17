@@ -15,15 +15,9 @@
  */
 package io.seata.commonapi.interceptor;
 
-import io.seata.common.DefaultValues;
-import io.seata.commonapi.fence.config.CommonFenceConfig;
 import io.seata.commonapi.remoting.RemotingDesc;
 import io.seata.commonapi.remoting.RemotingParser;
 import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
-import io.seata.commonapi.util.SpringProxyUtils;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.context.ApplicationContext;
 
 /**
  * parser transaction bean
@@ -46,28 +40,6 @@ public class TxBeanParserUtils {
         return parserRemotingServiceInfo(bean, beanName);
     }
 
-    /**
-     * init common fence clean task if enable useCommonFence
-     *
-     * @param remotingDesc the remoting desc
-     * @param applicationContext applicationContext
-     */
-    public static void initCommonFenceCleanTask(RemotingDesc remotingDesc, ApplicationContext applicationContext, boolean useCommonFence) {
-        if (remotingDesc == null) {
-            return;
-        }
-        if (applicationContext != null && applicationContext.containsBean(DefaultValues.COMMON_FENCE_BEAN_NAME)) {
-            CommonFenceConfig commonFenceConfig = (CommonFenceConfig) applicationContext.getBean(DefaultValues.COMMON_FENCE_BEAN_NAME);
-            if (commonFenceConfig == null || commonFenceConfig.getInitialized().get()) {
-                return;
-            }
-
-            if (useCommonFence && commonFenceConfig.getInitialized().compareAndSet(false, true)) {
-                // init common fence clean task if enable useCommonFence
-                commonFenceConfig.initCleanTask();
-            }
-        }
-    }
 
     /**
      * get remoting bean info: sofa:service, sofa:reference, dubbo:reference, dubbo:service
@@ -94,20 +66,4 @@ public class TxBeanParserUtils {
         return DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
     }
 
-    /**
-     * Create a proxy bean for transaction service
-     *
-     * @param interfaceClass the interface class
-     * @param fieldValue the field value
-     * @param actionInterceptor the action interceptor
-     * @return the service proxy bean
-     */
-    public static <T> T createProxy(Class<T> interfaceClass, Object fieldValue, MethodInterceptor actionInterceptor) {
-        ProxyFactory factory = new ProxyFactory();
-        factory.setTarget(fieldValue);
-        factory.setInterfaces(interfaceClass);
-        factory.addAdvice(actionInterceptor);
-
-        return (T) factory.getProxy();
-    }
 }

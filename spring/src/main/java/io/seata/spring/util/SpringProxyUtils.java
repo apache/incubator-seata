@@ -13,19 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.commonapi.util;
+package io.seata.spring.util;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.commonapi.util.DubboUtil;
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AdvisedSupport;
+import org.springframework.aop.support.AopUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import io.seata.common.util.CollectionUtils;
-import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.AdvisedSupport;
-import org.springframework.aop.support.AopUtils;
 
 /**
  * Proxy tools base on spring
@@ -121,7 +122,7 @@ public class SpringProxyUtils {
      */
     public static Class<?> getTargetInterface(Object proxy) throws Exception {
         if (proxy == null) {
-            throw new java.lang.IllegalArgumentException("proxy can not be null");
+            throw new IllegalArgumentException("proxy can not be null");
         }
 
         //jdk proxy
@@ -142,7 +143,7 @@ public class SpringProxyUtils {
      */
     protected static Class<?> getTargetClass(Object proxy) throws Exception {
         if (proxy == null) {
-            throw new java.lang.IllegalArgumentException("proxy can not be null");
+            throw new IllegalArgumentException("proxy can not be null");
         }
         //not proxy
         if (!AopUtils.isAopProxy(proxy)) {

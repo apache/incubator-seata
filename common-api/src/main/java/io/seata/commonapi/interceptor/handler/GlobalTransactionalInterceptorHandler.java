@@ -23,7 +23,6 @@ import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.BridgeMethodResolver;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -91,7 +90,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         Class targetClass = invocation.getTarget().getClass();
         Method specificMethod = invocation.getMethod();
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
-            final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            final Method method = invocation.getMethod();
             final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
             boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
