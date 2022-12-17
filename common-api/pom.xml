@@ -54,8 +54,8 @@
             <artifactId>seata-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-        
+
+
         <!-- spring  -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -74,7 +74,6 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.17</version>
         </dependency>
         
     </dependencies>
