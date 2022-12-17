@@ -15,18 +15,18 @@
  */
 package io.seata.server.session.redis;
 
-import org.junit.jupiter.api.Assertions;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolAbstract;
-import redis.clients.jedis.JedisPoolConfig;
 import java.io.IOException;
 
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
-import io.seata.core.store.StoreMode;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.server.store.StoreConfig.SessionMode;
+import org.junit.jupiter.api.Assertions;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @description redis distributed lock test
@@ -53,7 +53,7 @@ public class RedisDistributedLockerTest {
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
         jedisPoolInstance = JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000));
-        distributedLocker = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
+        distributedLocker = DistributedLockerFactory.getDistributedLocker(SessionMode.REDIS.getName());
     }
 
 //    @Test
@@ -69,7 +69,7 @@ public class RedisDistributedLockerTest {
 
 //    @Test
     public void test_acquireScheduledLock_success_() {
-        SessionHolder.init(StoreMode.REDIS.getName());
+        SessionHolder.init(SessionMode.REDIS);
         boolean accquire = SessionHolder.acquireDistributedLock(retryRollbacking);
         Assertions.assertEquals(true,accquire);
         String lockValueExisted = jedisPoolInstance.getResource().get(retryRollbacking);
@@ -99,11 +99,11 @@ public class RedisDistributedLockerTest {
        Assertions.assertNull(jedisPoolInstance.getResource().get(retryRollbacking));
 
        // other acquire the lock success
-       boolean c = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 1, 60000l));
+       boolean c = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 1, 60000L));
        Assertions.assertEquals(true,c);
 
         //other2 acquire the lock failed
-        boolean d = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000l));
+        boolean d = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000L));
         Assertions.assertEquals(false,d);
 
        //sleep 60s
@@ -125,7 +125,7 @@ public class RedisDistributedLockerTest {
     public void test_acquireLock_false() {
         String set = jedisPoolInstance.getResource().set(retryCommiting, lockValue);
         Assertions.assertEquals("OK",set);
-        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
+        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000L));
         Assertions.assertEquals(false,acquire);
     }
 }
