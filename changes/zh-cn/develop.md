@@ -8,8 +8,8 @@
 ### bugfix:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 修复 xxx
 
-### optimize:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 优化 xxx
+### optimize：
+- [[#5115](https://github.com/seata/seata/pull/5115)] 兼容 `spring-boot:3.x`
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
@@ -18,5 +18,6 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [wangliang181230](https://github.com/wangliang181230)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

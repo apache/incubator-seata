@@ -9,7 +9,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] fix xxx
 
 ### optimize:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] optimize xxx
+- [[#5115](https://github.com/seata/seata/pull/5115)] compatible with the `spring-boot:3.x`
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
@@ -18,5 +18,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
+- [wangliang181230](https://github.com/wangliang181230)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
