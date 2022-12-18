@@ -47,6 +47,7 @@
         <module>integration/motan</module>
         <module>integration/grpc</module>
         <module>integration/http</module>
+        <module>integration/http-jakarta</module>
         <module>integration/hsf</module>
         <module>integration/brpc</module>
         <module>rm</module>
