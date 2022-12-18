@@ -15,7 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.rm.tcc.config.TCCFenceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -53,7 +52,7 @@ public class SeataTCCFenceAutoConfiguration {
             PlatformTransactionManager transactionManager,
             @Qualifier(TCC_FENCE_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource tccFenceDataSource,
             @Qualifier(TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME) @Autowired(required = false) PlatformTransactionManager tccFenceTransactionManager) {
-        return new TCCFenceConfig(tccFenceDataSource != null ? tccFenceDataSource : dataSource,
+        return new  TCCFenceConfig(tccFenceDataSource != null ? tccFenceDataSource : dataSource,
                 tccFenceTransactionManager != null ? tccFenceTransactionManager : transactionManager);
     }
 
