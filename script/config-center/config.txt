@@ -24,6 +24,11 @@ transport.compressor=none
 
 #Transaction routing rules configuration, only for the client
 service.vgroupMapping.default_tx_group=default
+service.vgroupMapping.account-group=default
+service.vgroupMapping.business-group=default
+service.vgroupMapping.order-group=default
+service.vgroupMapping.storage-group=default
+
 #If you use a registry, you can ignore it
 service.default.grouplist=127.0.0.1:8091
 service.enableDegrade=false
@@ -66,7 +71,7 @@ tcc.fence.cleanPeriod=1h
 log.exceptionRate=100
 
 #Transaction storage configuration, only for the server. The file, db, and redis configuration values are optional.
-store.mode=file
+store.mode=db
 store.lock.mode=file
 store.session.mode=file
 #Used for password encryption
@@ -84,9 +89,9 @@ store.file.sessionReloadReadSize=100
 store.db.datasource=druid
 store.db.dbType=mysql
 store.db.driverClassName=com.mysql.jdbc.Driver
-store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true&rewriteBatchedStatements=true
-store.db.user=username
-store.db.password=password
+store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+store.db.user=root
+store.db.password=123456
 store.db.minConn=5
 store.db.maxConn=30
 store.db.globalTable=global_table
