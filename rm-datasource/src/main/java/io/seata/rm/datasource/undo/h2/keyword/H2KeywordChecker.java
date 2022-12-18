@@ -16,7 +16,7 @@
 package io.seata.rm.datasource.undo.h2.keyword;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.KeywordChecker;
 import io.seata.sqlparser.util.JdbcConstants;
 import java.util.Arrays;
 import java.util.Set;

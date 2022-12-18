@@ -134,4 +134,8 @@ public class H2DeleteRecognizer extends BaseH2Recognizer implements SQLDeleteRec
         return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

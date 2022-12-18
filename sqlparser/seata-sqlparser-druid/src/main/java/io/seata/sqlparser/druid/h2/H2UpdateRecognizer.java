@@ -30,6 +30,9 @@ import com.alibaba.druid.sql.dialect.h2.visitor.H2OutputVisitor;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
+import io.seata.sqlparser.util.ColumnUtils;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +96,12 @@ public class H2UpdateRecognizer extends BaseH2Recognizer implements SQLUpdateRec
     }
 
     @Override
+    public List<String> getUpdateColumnsIsSimplified() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, getDbType());
+    }
+
+    @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = this.ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
@@ -146,5 +155,14 @@ public class H2UpdateRecognizer extends BaseH2Recognizer implements SQLUpdateRec
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         SQLOrderBy sqlOrderBy = ast.getOrderBy();
         return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
+    }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
+
+    public String getDbType() {
+        return JdbcConstants.H2;
     }
 }

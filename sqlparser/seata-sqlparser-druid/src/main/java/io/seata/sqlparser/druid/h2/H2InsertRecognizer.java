@@ -31,6 +31,9 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.util.ColumnUtils;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -150,5 +153,19 @@ public class H2InsertRecognizer extends BaseH2Recognizer implements SQLInsertRec
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
+    }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
+    public String getDbType() {
+        return JdbcConstants.H2;
     }
 }

@@ -124,5 +124,10 @@ public class H2SelectForUpdateRecognizer extends BaseH2Recognizer implements SQL
         SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
         return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }
 

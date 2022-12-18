@@ -103,8 +103,16 @@ public class H2InsertExecutor extends BaseInsertExecutor  implements Sequenceabl
     @Override
     public List<Object> getPkValuesByDefault() throws SQLException {
         // h2 default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        LOGGER.error("h2 not support default keyword");
         throw new NotSupportYetException();
     }
+
+    @Override
+    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
+        // h2 default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        throw new NotSupportYetException();
+    }
+
     @Override
     public String getSequenceSql(SqlSequenceExpr expr) {
         return "SELECT " + expr.getSequence() + ".currval FROM DUAL";
