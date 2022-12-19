@@ -35,7 +35,7 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE # Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE
 
       # step 3 for type=OSSRH
-      - name: "Import GPG-SECRET-KEY, Package and Publish-To-OSSRH"
+      - name: "Publish-To-OSSRH"
         if: matrix.type == 'OSSRH'
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USER }}
@@ -44,8 +44,8 @@ jobs:
         run: |
           ./mvnw -T 4C clean deploy -Prelease,release-by-github-actions -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
-      # step 4 for type=image
-      - name: "Package and Publish-Image-To-DockerHub"
+      # step 3 for type=image
+      - name: "Publish-Image-To-DockerHub"
         if: matrix.type == 'image'
         env:
           IMAGE_NAME: openjdk:8u342
