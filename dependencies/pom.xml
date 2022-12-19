@@ -90,7 +90,7 @@
 
         <!-- # for database -->
         <!-- db -->
-        <mysql.version>5.1.42-1</mysql.version>
+        <mysql.version>5.1.42</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <postgresql.version>42.3.3</postgresql.version>
         <h2.version>1.4.181</h2.version>
