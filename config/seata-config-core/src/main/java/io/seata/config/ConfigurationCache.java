@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.StringUtils;
@@ -37,7 +36,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
 
-    private static final ConcurrentHashMap<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
 
