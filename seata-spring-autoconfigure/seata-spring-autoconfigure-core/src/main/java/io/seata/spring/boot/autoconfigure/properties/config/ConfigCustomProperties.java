@@ -26,7 +26,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_
 @Component
 @ConfigurationProperties(prefix = CONFIG_CUSTOM_PREFIX)
 public class ConfigCustomProperties {
-    private String name = "";
+    private String name;
 
     public String getName() {
         return name;
