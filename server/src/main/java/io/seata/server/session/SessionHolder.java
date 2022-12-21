@@ -184,7 +184,7 @@ public class SessionHolder {
         reload(allSessions, storeMode, true);
     }
 
-    public static void reload(Collection<GlobalSession> allSessions,SessionMode storeMode, boolean acquireLock) {
+    public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
         if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
             && CollectionUtils.isNotEmpty(allSessions)) {
             for (GlobalSession globalSession : allSessions) {
@@ -279,8 +279,7 @@ public class SessionHolder {
     private static void removeInErrorState(GlobalSession globalSession) {
         try {
             LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
-            globalSession.addSessionLifecycleListener(getRootSessionManager());
-            globalSession.end();
+            getRootSessionManager().onSuccessEnd(globalSession);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Remove global session succeed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
             }

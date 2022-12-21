@@ -272,7 +272,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) {
-        RaftMsgExecute execute = EXECUTES.get(msg.getMsgType());
+        RaftMsgExecute<?> execute = EXECUTES.get(msg.getMsgType());
         if (execute == null) {
             throw new RuntimeException(
                 "the state machine does not allow events that cannot be executed, please feedback the information to the Seata community !!! msg: "
