@@ -34,6 +34,7 @@
   - [[#4626](https://github.com/seata/seata/pull/4626)] 使用 `easyj-maven-plugin` 插件代替 `flatten-maven-plugin`插件，以修复`shade` 插件与 `flatten` 插件不兼容的问题
   - [[#4629](https://github.com/seata/seata/pull/4629)] 更新globalSession状态时检查更改前后的约束关系
   - [[#4662](https://github.com/seata/seata/pull/4662)] 优化 EnhancedServiceLoader 可读性
+  - [[#4662](https://github.com/seata/seata/pull/5178)] GlobalTransactionScanner、SeataAutoDataSourceProxyCreator创建时增加static修饰
 
 
 ### test：
@@ -62,5 +63,6 @@
 - [AYue-94](https://github.com/AYue-94)
 - [lingxiao-wu](https://github.com/lingxiao-wu)
 - [caohdgege](https://github.com/caohdgege)
+- [whxxxxx](https://github.com/whxxxxx)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

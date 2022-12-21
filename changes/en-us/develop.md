@@ -35,6 +35,7 @@ Add changes here for all PR submitted to the develop branch.
   - [[#4626](https://github.com/seata/seata/pull/4626)] Replace `flatten-maven-plugin` with `easyj-maven-plugin` to fix the conflict between `shade` and `flatten`
   - [[#4629](https://github.com/seata/seata/pull/4629)] check relation of before status and after status when updating global session
   - [[#4662](https://github.com/seata/seata/pull/4662)] make EnhancedServiceLoader more readable
+  - [[#4662](https://github.com/seata/seata/pull/5178)] GlobalTransactionScanner、SeataAutoDataSourceProxyCreator declare @Bean methods as static
 
 ### test:
 
@@ -61,6 +62,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [AYue-94](https://github.com/AYue-94)
 - [lingxiao-wu](https://github.com/lingxiao-wu)
 - [caohdgege](https://github.com/caohdgege)
+- [whxxxxx](https://github.com/whxxxxx)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
