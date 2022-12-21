@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_RAFT_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_AUTO_JOIN;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
@@ -104,8 +104,8 @@ public class RaftServerFactory {
         final NodeOptions nodeOptions = initNodeOptions(initConf);
         try {
             // as the foundation for multi raft group in the future
-            RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_RAFT_GROUP, serverId, nodeOptions);
-            RAFT_SERVER_MAP.put(DEFAULT_SEATA_RAFT_GROUP,raftServer );
+            RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_GROUP, serverId, nodeOptions);
+            RAFT_SERVER_MAP.put(DEFAULT_SEATA_GROUP,raftServer );
            RaftStateMachine stateMachine = raftServer.getRaftStateMachine();
             LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         } catch (IOException e) {
@@ -115,13 +115,13 @@ public class RaftServerFactory {
         if (CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false)) {
             List<PeerId> currentPeers = null;
             try {
-                currentPeers = getCliServiceInstance().getPeers(DEFAULT_SEATA_RAFT_GROUP, initConf);
+                currentPeers = getCliServiceInstance().getPeers(DEFAULT_SEATA_GROUP, initConf);
             } catch (Exception e) {
                 // In the first deployment, the leader cannot be found
             }
             if (CollectionUtils.isNotEmpty(currentPeers)) {
                 if (!currentPeers.contains(serverId)) {
-                    Status status = getCliServiceInstance().addPeer(DEFAULT_SEATA_RAFT_GROUP, initConf, serverId);
+                    Status status = getCliServiceInstance().addPeer(DEFAULT_SEATA_GROUP, initConf, serverId);
                     if (!status.isOk()) {
                         LOGGER.error("failed to join the RAFT cluster: {}. Please check the status of the cluster",
                             initConfStr);
@@ -132,7 +132,7 @@ public class RaftServerFactory {
     }
 
     public RaftServer getRaftServer() {
-        return getRaftServer(DEFAULT_SEATA_RAFT_GROUP);
+        return getRaftServer(DEFAULT_SEATA_GROUP);
     }
 
     public RaftServer getRaftServer(String group) {
@@ -140,7 +140,7 @@ public class RaftServerFactory {
     }
 
     public RaftStateMachine getStateMachine() {
-        return getStateMachine(DEFAULT_SEATA_RAFT_GROUP);
+        return getStateMachine(DEFAULT_SEATA_GROUP);
     }
 
     public RaftStateMachine getStateMachine(String group) {
@@ -149,7 +149,7 @@ public class RaftServerFactory {
 
 
     public Boolean isLeader() {
-        return isLeader(DEFAULT_SEATA_RAFT_GROUP);
+        return isLeader(DEFAULT_SEATA_GROUP);
     }
 
     public Boolean isLeader(String group) {
@@ -166,7 +166,7 @@ public class RaftServerFactory {
     }
 
     public Boolean isNotRaftModeLeader() {
-        return isNotRaftModeLeader(DEFAULT_SEATA_RAFT_GROUP);
+        return isNotRaftModeLeader(DEFAULT_SEATA_GROUP);
     }
 
     public Boolean isNotRaftModeLeader(String group) {

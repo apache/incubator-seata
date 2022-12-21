@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_RAFT_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
@@ -138,7 +138,7 @@ public class SessionHolder {
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-            SESSION_MANAGER_MAP.put(DEFAULT_SEATA_RAFT_GROUP, ROOT_SESSION_MANAGER);
+            SESSION_MANAGER_MAP.put(DEFAULT_SEATA_GROUP, ROOT_SESSION_MANAGER);
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,

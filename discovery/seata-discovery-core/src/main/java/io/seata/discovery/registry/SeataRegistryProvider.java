@@ -13,27 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.loadbalance;
+package io.seata.discovery.registry;
 
-import java.util.List;
+import io.seata.common.loader.LoadLevel;
 
 /**
- * The interface Load balance.
- *
  * @author slievrly
  */
-public interface LoadBalance {
+@LoadLevel(name = "Seata", order = 1)
+public class SeataRegistryProvider implements RegistryProvider {
 
-    String SPLIT = ":";
-
-    /**
-     * Select t.
-     *
-     * @param <T>      the type parameter
-     * @param invokers the invokers
-     * @param xid      the xid
-     * @return the t
-     * @throws Exception the exception
-     */
-    <T> T select(List<T> invokers, String xid) throws Exception;
+    @Override
+    public RegistryService provide() {
+        return SeataRegistryServiceImpl.getInstance();
+    }
 }

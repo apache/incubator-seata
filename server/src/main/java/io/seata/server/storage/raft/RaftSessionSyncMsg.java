@@ -18,8 +18,7 @@ package io.seata.server.storage.raft;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 
-
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_RAFT_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * @author funkye
@@ -32,7 +31,7 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
 
     private BranchTransactionDO branchSession;
 
-    private String group = DEFAULT_SEATA_RAFT_GROUP;
+    private String group = DEFAULT_SEATA_GROUP;
 
     private MsgType msgType;
 

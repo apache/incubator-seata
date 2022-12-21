@@ -41,8 +41,6 @@ public class XIDLoadBalance implements LoadBalance {
     private static final LoadBalance RANDOM_LOAD_BALANCE = EnhancedServiceLoader.load(LoadBalance.class,
         LoadBalanceFactory.RANDOM_LOAD_BALANCE);
 
-    private static final String SPLIT = ":";
-
     @Override
     public <T> T select(List<T> invokers, String xid) throws Exception {
         if (StringUtils.isNotBlank(xid) && xid.contains(SPLIT)) {

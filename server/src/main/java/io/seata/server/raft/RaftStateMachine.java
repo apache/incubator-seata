@@ -40,7 +40,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
-import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
@@ -250,11 +249,6 @@ public class RaftStateMachine extends StateMachineAdapter {
                 LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
                 SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreConfig.SessionMode.RAFT,
                     false);
-                NettyRemotingServer nettyRemotingServer =
-                    (NettyRemotingServer)DefaultCoordinator.getInstance().getRemotingServer();
-                LeaderNotifyRequest leaderNotifyRequest = new LeaderNotifyRequest();
-                leaderNotifyRequest.setAddress(XID.getIpAddressAndPort());
-                nettyRemotingServer.sendSyncRequestAll(leaderNotifyRequest);
             });
         }
     }
