@@ -294,6 +294,7 @@ public class SessionHelper {
      */
     public static void removeBranch(GlobalSession globalSession, BranchSession branchSession, boolean isAsync)
             throws TransactionException {
+        globalSession.unlockBranch(branchSession);
         if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
             COORDINATOR.doBranchRemoveAsync(globalSession, branchSession);
         } else {
@@ -312,12 +313,15 @@ public class SessionHelper {
         if (branchSessions == null || branchSessions.isEmpty()) {
             return;
         }
-        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
-            COORDINATOR.doBranchRemoveAllAsync(globalSession);
-        } else {
-            for (BranchSession branchSession : branchSessions) {
+        boolean isAsyncRemove = Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync;
+        for (BranchSession branchSession : branchSessions) {
+            globalSession.unlockBranch(branchSession);
+            if (!isAsyncRemove) {
                 globalSession.removeBranch(branchSession);
             }
+        }
+        if (isAsyncRemove) {
+            COORDINATOR.doBranchRemoveAllAsync(globalSession);
         }
     }
 }

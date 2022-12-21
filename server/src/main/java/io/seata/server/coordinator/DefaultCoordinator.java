@@ -582,6 +582,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
          */
         public BranchRemoveTask(GlobalSession globalSession, BranchSession branchSession) {
             this.globalSession = globalSession;
+            if (branchSession == null) {
+                throw new IllegalArgumentException("BranchSession can`t be null!");
+            }
             this.branchSession = branchSession;
         }
 
