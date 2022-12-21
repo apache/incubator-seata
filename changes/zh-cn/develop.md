@@ -3,20 +3,15 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 支持 xxx
+- [[#5115](https://github.com/seata/seata/pull/5115)] 支持 `spring-boot:3.x`
 
 ### bugfix:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 修复 xxx
+- [[#5179](https://github.com/seata/seata/pull/5179)] 修复使用Eureka作为注册中心ClassNotFoundException问题
 
 ### optimize：
 - [[#5120](https://github.com/seata/seata/pull/5120)] 统一yml文件中的配置项格式
-- [[#5115](https://github.com/seata/seata/pull/5115)] 兼容 `spring-boot:3.x`
 - [[#5180](https://github.com/seata/seata/pull/5180)] GlobalTransactionScanner,SeataAutoDataSourceProxyCreator 创建bean用static修饰
-
-### test：
-- [[#4411](https://github.com/seata/seata/pull/4411)] 测试Oracle数据库AT模式下类型支持
-- [[#4794](https://github.com/seata/seata/pull/4794)] 重构代码，尝试修复单元测试 `DataSourceProxyTest.getResourceIdTest()`
-- [[#5101](https://github.com/seata/seata/pull/5101)] 修复zk注册和配置中心报ClassNotFoundException的问题 `DataSourceProxyTest.getResourceIdTest()`
+- [[#5182](https://github.com/seata/seata/pull/5182)] 修复 Saga 可视化设计器 GGEditor 安全漏洞
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
