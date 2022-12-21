@@ -269,4 +269,8 @@ public interface DefaultValues {
      * DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE
      */
     boolean DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE = false;
+    /**
+     * The constant DEFAULT_TCC_CONTEXT_STORE
+     */
+    String DEFAULT_TCC_CONTEXT_STORE = "tc";
 }

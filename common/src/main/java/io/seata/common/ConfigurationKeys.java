@@ -810,6 +810,11 @@ public interface ConfigurationKeys {
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 
     /**
+     * The constant TCC_CONTEXT_STORE
+     */
+    String TCC_CONTEXT_STORE = CLIENT_RM_PREFIX + "tccContextStore";
+
+    /**
      * The constant rpcRmRequestTimeout
      */
     String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";

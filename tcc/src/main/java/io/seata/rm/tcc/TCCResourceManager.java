@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.SkipCallbackWrapperException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -32,6 +33,9 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.context.store.ContextStoreManager;
+
+import static io.seata.rm.tcc.constant.ContextStoreConstant.STORE_TYPE_TC;
 
 /**
  * TCC resource manager
@@ -73,7 +77,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     /**
      * TCC branch commit
      *
-     * @param branchType
+     * @param branchType      Branch type.
      * @param xid             Transaction id.
      * @param branchId        Branch id.
      * @param resourceId      Resource id.
@@ -137,11 +141,10 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @param resourceId      Resource id.
      * @param applicationData Application data bind with this branch.
      * @return BranchStatus
-     * @throws TransactionException TransactionException
      */
     @Override
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+                                       String applicationData) {
         TCCResource tccResource = (TCCResource)tccResourceCache.get(resourceId);
         if (tccResource == null) {
             throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
@@ -211,6 +214,16 @@ public class TCCResourceManager extends AbstractResourceManager {
         BusinessActionContext businessActionContext = new BusinessActionContext(
             xid, String.valueOf(branchId), actionContextMap);
         businessActionContext.setActionName(resourceId);
+
+        // get store manager
+        String storeType = businessActionContext.getActionContext(Constants.TCC_ACTION_CONTEXT_STORE_TYPE, String.class);
+        // default use TC if the storeType not found
+        if (StringUtils.isBlank(storeType)) {
+            storeType = STORE_TYPE_TC;
+        }
+        ContextStoreManager contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, storeType);
+        //use the context that in TC to search from storeManager
+        businessActionContext = contextStoreManager.searchContext(businessActionContext);
         return businessActionContext;
     }
 

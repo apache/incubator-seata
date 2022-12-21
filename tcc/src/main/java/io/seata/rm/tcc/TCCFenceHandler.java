@@ -31,6 +31,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
@@ -84,12 +85,16 @@ public class TCCFenceHandler {
         }
     }
 
-    public static DataSource getDataSource() {
-        return TCCFenceHandler.dataSource;
-    }
-
     public static void setDataSource(DataSource dataSource) {
         TCCFenceHandler.dataSource = dataSource;
+    }
+
+    /**
+     * get the tcc DataSource
+     * @return the DataSource
+     */
+    public static DataSource getDataSource() {
+        return TCCFenceHandler.dataSource;
     }
 
     public static void setTransactionTemplate(TransactionTemplate transactionTemplate) {
@@ -127,6 +132,9 @@ public class TCCFenceHandler {
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
+            } finally {
+                // save context in the same transaction
+                BusinessActionContextUtil.reportContext();
             }
         });
     }

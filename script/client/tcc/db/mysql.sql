@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `tcc_fence_log`
     `branch_id`     BIGINT        NOT NULL COMMENT 'branch id',
     `action_name`   VARCHAR(64)   NOT NULL COMMENT 'action name',
     `status`        TINYINT       NOT NULL COMMENT 'status(tried:1;committed:2;rollbacked:3;suspended:4)',
+    `application_data` varchar(2000) DEFAULT NULL COMMENT 'the application context',
     `gmt_create`    DATETIME(3)   NOT NULL COMMENT 'create time',
     `gmt_modified`  DATETIME(3)   NOT NULL COMMENT 'update time',
     PRIMARY KEY (`xid`, `branch_id`),
