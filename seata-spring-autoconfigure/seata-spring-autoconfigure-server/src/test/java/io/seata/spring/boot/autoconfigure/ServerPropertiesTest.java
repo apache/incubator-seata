@@ -95,7 +95,7 @@ public class ServerPropertiesTest {
 
     @Test
     public void testStoreRedisPropertiesSentinel() {
-        assertEquals(context.getBean(StoreRedisProperties.Sentinel.class).getSentinelHosts(), "");
+        assertEquals(context.getBean(StoreRedisProperties.Sentinel.class).getSentinelHosts(), null);
     }
 
     @AfterAll

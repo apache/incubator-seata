@@ -29,7 +29,7 @@ public class ConfigApolloProperties {
     private String appId = "seata-server";
     private String apolloMeta;
     private String namespace = "application";
-    private String apolloAccessKeySecret = "";
+    private String apolloAccessKeySecret;
     private String apolloConfigService;
     private String cluster;
 
