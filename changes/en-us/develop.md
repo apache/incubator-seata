@@ -3,16 +3,13 @@ Add changes here for all PR submitted to the develop branch.
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
 ### feature:
-- [[#5115](https://github.com/seata/seata/pull/5115)] support for `spring-boot:3.x`
+- [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
-- [[#5179](https://github.com/seata/seata/pull/5179)] fix ClassNotFoundException when server starts using Eureka
+- [[#xxx](https://github.com/seata/seata/pull/xxx)] fix xxx
 
 ### optimize:
-- [[#5120](https://github.com/seata/seata/pull/5120)] unify the format of configuration items in yml files
-- [[#5180](https://github.com/seata/seata/pull/5180)] GlobalTransactionScanner,SeataAutoDataSourceProxyCreator declare @bean methods as static
-- [[#5182](https://github.com/seata/seata/pull/5182)] fix some security vulnerabilities in GGEditor
-- [[#5183](https://github.com/seata/seata/pull/5183)] optimize the default values for some switches
+- [[#xxx](https://github.com/seata/seata/pull/xxx)] optimize xxx
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
@@ -21,8 +18,5 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
-- [wangliang181230](https://github.com/wangliang181230)
-- [xingfudeshi](https://github.com/xingfudeshi)
-- [whxxxxx](https://github.com/whxxxxx)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
