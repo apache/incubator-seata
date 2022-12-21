@@ -138,7 +138,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     /**
      * the pool size of branch asynchronous remove thread pool
      */
-    private static final int BRANCH_ASYNC_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+    private static final int BRANCH_ASYNC_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
             ConfigurationKeys.MAX_COMMIT_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, DEFAULT_MAX_COMMIT_RETRY_TIMEOUT);
