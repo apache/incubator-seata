@@ -32,7 +32,7 @@ public class StoreRedisProperties {
      * single, sentinel
      */
     private String mode = "single";
-    private String password = null;
+    private String password;
     private Integer maxConn = 10;
     private Integer minConn = 1;
     private Integer database = 0;
@@ -133,11 +133,11 @@ public class StoreRedisProperties {
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SENTINEL_PREFIX)
     public static class Sentinel {
-        private String masterName = "";
+        private String masterName;
         /**
          * such as "10.28.235.65:26379,10.28.235.65:26380,10.28.235.65:26381"
          */
-        private String sentinelHosts = "";
+        private String sentinelHosts;
 
         public String getMasterName() {
             return masterName;

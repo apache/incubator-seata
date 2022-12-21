@@ -29,8 +29,8 @@ public class ConfigZooKeeperProperties {
     private String serverAddr;
     private long sessionTimeout = 6000L;
     private long connectTimeout = 2000L;
-    private String username = "";
-    private String password = "";
+    private String username;
+    private String password;
     private String nodePath = "/seata/seata.properties";
 
     public String getServerAddr() {
