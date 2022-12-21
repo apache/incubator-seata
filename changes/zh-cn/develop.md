@@ -12,6 +12,7 @@
 - [[#5120](https://github.com/seata/seata/pull/5120)] 统一yml文件中的配置项格式
 - [[#5180](https://github.com/seata/seata/pull/5180)] GlobalTransactionScanner,SeataAutoDataSourceProxyCreator 创建bean用static修饰
 - [[#5182](https://github.com/seata/seata/pull/5182)] 修复 Saga 可视化设计器 GGEditor 安全漏洞
+- [[#5183](https://github.com/seata/seata/pull/5183)] 优化配置开关的默认值
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试

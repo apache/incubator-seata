@@ -33,6 +33,10 @@ import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 
+import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
+import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_TOTAL;
+import static io.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;
+
 /**
  * @author funkye
  */
@@ -47,13 +51,6 @@ public class JedisPooledFactory {
     private static final String HOST = "127.0.0.1";
 
     private static final int PORT = 6379;
-
-    private static final int MINCONN = 1;
-
-    private static final int MAXCONN = 10;
-
-    private static final int MAXTOTAL = 100;
-
     private static final int DATABASE = 0;
 
     private static final int SENTINEL_HOST_NUMBER = 3;
@@ -87,9 +84,11 @@ public class JedisPooledFactory {
                             }
                         }
                         JedisPoolConfig poolConfig = new JedisPoolConfig();
-                        poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
-                        poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
-                        poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, MAXTOTAL));
+                        poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN,
+                            DEFAULT_REDIS_MIN_IDLE));
+                        poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN,
+                            DEFAULT_REDIS_MAX_IDLE));
+                        poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, DEFAULT_REDIS_MAX_TOTAL));
                         String mode = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_MODE,ConfigurationKeys.REDIS_SINGLE_MODE);
                         if (mode.equals(ConfigurationKeys.REDIS_SENTINEL_MODE)) {
                             String masterName = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_MASTERNAME);

@@ -12,6 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5120](https://github.com/seata/seata/pull/5120)] unify the format of configuration items in yml files
 - [[#5180](https://github.com/seata/seata/pull/5180)] GlobalTransactionScanner,SeataAutoDataSourceProxyCreator declare @bean methods as static
 - [[#5182](https://github.com/seata/seata/pull/5182)] fix some security vulnerabilities in GGEditor
+- [[#5183](https://github.com/seata/seata/pull/5183)] optimize the default values for some switches
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
