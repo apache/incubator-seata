@@ -363,10 +363,6 @@
                         <groupId>javax.servlet</groupId>
                         <artifactId>servlet-api</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>com.github.andrewoma.dexx</groupId>
-                        <artifactId>dexx-collections</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
