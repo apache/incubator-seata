@@ -295,7 +295,7 @@ public class SessionHelper {
     public static void removeBranch(GlobalSession globalSession, BranchSession branchSession, boolean isAsync)
             throws TransactionException {
         globalSession.unlockBranch(branchSession);
-        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
+        if (isEnableBranchRemoveAsync() && isAsync) {
             COORDINATOR.doBranchRemoveAsync(globalSession, branchSession);
         } else {
             globalSession.removeBranch(branchSession);
@@ -313,7 +313,7 @@ public class SessionHelper {
         if (branchSessions == null || branchSessions.isEmpty()) {
             return;
         }
-        boolean isAsyncRemove = Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync;
+        boolean isAsyncRemove = isEnableBranchRemoveAsync() && isAsync;
         for (BranchSession branchSession : branchSessions) {
             if (isAsyncRemove) {
                 globalSession.unlockBranch(branchSession);
@@ -324,5 +324,15 @@ public class SessionHelper {
         if (isAsyncRemove) {
             COORDINATOR.doBranchRemoveAllAsync(globalSession);
         }
+    }
+
+    /**
+     * if true, enable delete the branch asynchronously
+     *
+     * @return the boolean
+     */
+    private static boolean isEnableBranchRemoveAsync() {
+        return Objects.equals(Boolean.TRUE, DELAY_HANDLE_SESSION)
+                && Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE);
     }
 }
