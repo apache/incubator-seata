@@ -2,7 +2,9 @@ name: "test"
 
 on:
   push:
-    branches: [ test*, "*.*.*" ]
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ] #暂时先这么配置，为了执行test.yml，等执行通过，此变更将被撤回
 
 jobs:
   # job 1
