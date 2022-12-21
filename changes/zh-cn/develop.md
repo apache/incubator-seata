@@ -36,5 +36,6 @@
 - [yuruixin](https://github.com/yuruixin)
 - [xingfudeshi](https://github.com/xingfudeshi)
 - [Bughue](https://github.com/Bughue)
+- [pengten](https://github.com/pengten)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
