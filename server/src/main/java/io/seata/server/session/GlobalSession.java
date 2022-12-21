@@ -330,6 +330,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         remove(branchSession);
     }
 
+    @Override
+    public void removeAndUnlockBranch(BranchSession branchSession) throws TransactionException {
+        unlockBranch(branchSession);
+        removeBranch(branchSession);
+    }
+
     /**
      * Gets branch.
      *

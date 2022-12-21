@@ -315,9 +315,10 @@ public class SessionHelper {
         }
         boolean isAsyncRemove = Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync;
         for (BranchSession branchSession : branchSessions) {
-            globalSession.unlockBranch(branchSession);
-            if (!isAsyncRemove) {
-                globalSession.removeBranch(branchSession);
+            if (isAsyncRemove) {
+                globalSession.unlockBranch(branchSession);
+            } else {
+                globalSession.removeAndUnlockBranch(branchSession);
             }
         }
         if (isAsyncRemove) {

@@ -74,6 +74,13 @@ public interface SessionLifecycle {
     void removeBranch(BranchSession branchSession) throws TransactionException;
 
     /**
+     * Remove branch and release the lock of branch.
+     * @param branchSession the branchSession
+     * @throws TransactionException the TransactionException
+     */
+    void removeAndUnlockBranch(BranchSession branchSession) throws TransactionException;
+
+    /**
      * Is active boolean.
      *
      * @return the boolean
