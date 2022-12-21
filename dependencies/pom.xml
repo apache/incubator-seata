@@ -110,8 +110,6 @@
         <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 
         <!-- # for test -->
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
-        <junit-platform.version>1.8.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
