@@ -199,6 +199,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                             CONFIG.getInt(ConfigurationKeys.SESSION_BRANCH_ASYNC_QUEUE_SIZE, DEFAULT_BRANCH_ASYNC_QUEUE_SIZE)
                     ), new NamedThreadFactory("branchSessionRemove", BRANCH_ASYNC_POOL_SIZE),
                     new ThreadPoolExecutor.CallerRunsPolicy());
+        } else {
+            branchRemoveExecutor = null;
         }
     }
 
