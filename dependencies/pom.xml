@@ -96,14 +96,14 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
-        <druid.version>1.2.6</druid.version>
+        <druid.version>1.2.12</druid.version>
         <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
-        <hikari.version>3.4.3</hikari.version>
+        <hikari.version>4.0.3</hikari.version>
         <!-- sql parser -->
         <antlr4.version>4.8</antlr4.version>
         <!-- for jdbc driver when package -->
         <mysql5.version>${mysql.version}</mysql5.version>
-        <mysql8.version>8.0.27</mysql8.version>
+        <mysql8.version>8.0.31</mysql8.version>
 
         <!-- # for kotlin -->
         <kotlin.version>1.4.32</kotlin.version>
