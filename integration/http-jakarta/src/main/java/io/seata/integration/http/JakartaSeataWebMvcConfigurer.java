@@ -13,27 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.config;
+package io.seata.integration.http;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 
 /**
- * @author jrial95@gmail.com
+ * The Jakarta Seata Web Mvc Configurer
+ *
+ * @author wang.liang
  */
-@Component
-@ConfigurationProperties(prefix = CONFIG_CUSTOM_PREFIX)
-public class ConfigCustomProperties {
-    private String name;
+public class JakartaSeataWebMvcConfigurer extends SeataWebMvcConfigurer {
 
-    public String getName() {
-        return name;
-    }
-
-    public ConfigCustomProperties setName(String name) {
-        this.name = name;
-        return this;
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new JakartaTransactionPropagationInterceptor());
     }
 }
