@@ -53,7 +53,7 @@ public class KryoSerializerFactory {
             kryo.setRegistrationRequired(false);
 
             // register serializer
-            kryo.register(ArrayList.class);
+            kryo.register(Collections.singletonList("").getClass());
             kryo.register(GregorianCalendar.class);
             kryo.register(InvocationHandler.class, new JdkProxySerializer());
             kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
