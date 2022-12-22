@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationHandler;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -52,8 +53,8 @@ public class KryoSerializerFactory {
             kryo.setRegistrationRequired(false);
 
             // register serializer
-            kryo.register(Collections.singletonList("").getClass(), new ArraysAsListSerializer());
-            kryo.register(GregorianCalendar.class, new GregorianCalendarSerializer());
+            kryo.register(ArrayList.class);
+            kryo.register(GregorianCalendar.class);
             kryo.register(InvocationHandler.class, new JdkProxySerializer());
             kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
             kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
