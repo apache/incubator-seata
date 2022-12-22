@@ -7,6 +7,7 @@
 
 ### bugfix:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 修复 xxx
+- [[#5194](https://github.com/seata/seata/pull/5194)] 修复使用Oracle作为服务端DB存储时的建表失败问题
 
 ### optimize:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 优化 xxx
@@ -18,5 +19,6 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [xssdpgy](https://github.com/xssdpgy)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
