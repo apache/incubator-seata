@@ -66,6 +66,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -170,12 +171,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final GlobalStatus[] retryCommittingStatuses =
         new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying};
 
-    private final ThreadPoolExecutor branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-            new ArrayBlockingQueue<>(
-                    CONFIG.getInt(ConfigurationKeys.SESSION_BRANCH_ASYNC_QUEUE_SIZE, DEFAULT_BRANCH_ASYNC_QUEUE_SIZE)
-            ), new NamedThreadFactory("branchSessionRemove", BRANCH_ASYNC_POOL_SIZE),
-            new ThreadPoolExecutor.CallerRunsPolicy());
+    private final ThreadPoolExecutor branchRemoveExecutor;
 
     private RemotingServer remotingServer;
 
@@ -194,6 +190,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         this.remotingServer = remotingServer;
         this.core = new DefaultCore(remotingServer);
+
+        // create branchRemoveExecutor
+        if (StoreConfig.getSessionMode() != StoreConfig.SessionMode.FILE) {
+            branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
+                    Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(
+                            CONFIG.getInt(ConfigurationKeys.SESSION_BRANCH_ASYNC_QUEUE_SIZE, DEFAULT_BRANCH_ASYNC_QUEUE_SIZE)
+                    ), new NamedThreadFactory("branchSessionRemove", BRANCH_ASYNC_POOL_SIZE),
+                    new ThreadPoolExecutor.CallerRunsPolicy());
+        }
     }
 
     public static DefaultCoordinator getInstance(RemotingServer remotingServer) {
