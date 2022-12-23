@@ -594,11 +594,6 @@
             <artifactId>lz4-java</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>jraft-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

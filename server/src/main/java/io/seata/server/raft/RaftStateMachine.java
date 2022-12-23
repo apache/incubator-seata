@@ -79,13 +79,13 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
-    private String mode;
+    private final String mode;
 
     private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
 
     private static final String GLOBAL_SESSION_MAP_KEY = "globalSessionMap";
 
-    private static final Map<MsgType, RaftMsgExecute> EXECUTES = new HashMap<>();
+    private static final Map<MsgType, RaftMsgExecute<?>> EXECUTES = new HashMap<>();
 
     /**
      * Leader term
