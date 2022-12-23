@@ -26,7 +26,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.RaftTaskUtil;
+import io.seata.server.raft.util.RaftTaskUtil;
 
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;

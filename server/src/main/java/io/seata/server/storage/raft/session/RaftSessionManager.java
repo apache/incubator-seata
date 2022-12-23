@@ -31,7 +31,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.RaftTaskUtil;
+import io.seata.server.raft.util.RaftTaskUtil;
 
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
