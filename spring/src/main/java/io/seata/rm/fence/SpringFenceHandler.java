@@ -154,7 +154,7 @@ public class SpringFenceHandler implements FenceHandler {
                 CommonFenceDO commonFenceDO = COMMON_FENCE_DAO.queryCommonFenceDO(conn, xid, branchId);
                 if (commonFenceDO == null) {
                     throw new CommonFenceException(String.format("Common fence record not exists, commit fence method failed. xid= %s, branchId= %s", xid, branchId),
-                            FrameworkErrorCode.RecordAlreadyExists);
+                            FrameworkErrorCode.RecordNotExists);
                 }
                 if (CommonFenceConstant.STATUS_COMMITTED == commonFenceDO.getStatus()) {
                     LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());

@@ -24,7 +24,6 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -60,8 +59,6 @@ public class Server {
         //initialize the metrics
         MetricsManager.get().init();
 
-        System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
-
         ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
                 NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
@@ -83,8 +80,8 @@ public class Server {
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db, redis
-        SessionHolder.init(parameterParser.getSessionStoreMode());
-        LockerManagerFactory.init(parameterParser.getLockStoreMode());
+        SessionHolder.init();
+        LockerManagerFactory.init();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
