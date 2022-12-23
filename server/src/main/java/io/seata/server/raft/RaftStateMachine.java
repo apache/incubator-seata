@@ -32,7 +32,6 @@ import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import io.seata.common.XID;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -40,7 +39,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
-import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.raft.execute.RaftMsgExecute;
@@ -64,7 +62,6 @@ import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
@@ -84,7 +81,9 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private String mode;
 
-    private static final String BRANCH_SESSION_MAP = "branchSessionMap";
+    private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
+
+    private static final String GLOBAL_SESSION_MAP_KEY = "globalSessionMap";
 
     private static final Map<MsgType, RaftMsgExecute> EXECUTES = new HashMap<>();
 
@@ -142,7 +141,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         Map<String, Object> maps = new HashMap<>(2);
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
-        Integer initialCapacity = sessionMap.size();
+        int initialCapacity = sessionMap.size();
         Map<String, byte[]> globalSessionByteMap = new HashMap<>(initialCapacity);
         // each transaction is expected to have two branches
         Map<Long, byte[]> branchSessionByteMap = new HashMap<>(initialCapacity * 2);
@@ -152,8 +151,8 @@ public class RaftStateMachine extends StateMachineAdapter {
             branchSessions.forEach(
                 branchSession -> branchSessionByteMap.put(branchSession.getBranchId(), branchSession.encode()));
         });
-        maps.put(ROOT_SESSION_MANAGER_NAME, globalSessionByteMap);
-        maps.put(BRANCH_SESSION_MAP, branchSessionByteMap);
+        maps.put(GLOBAL_SESSION_MAP_KEY, globalSessionByteMap);
+        maps.put(BRANCH_SESSION_MAP_KEY, branchSessionByteMap);
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         raftSnapshot.setBody(maps);
         LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
@@ -192,8 +191,8 @@ public class RaftStateMachine extends StateMachineAdapter {
             }
             Map<String, Object> maps = RaftSnapshotFile.load(path);
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-            Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
-            Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP);
+            Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(GLOBAL_SESSION_MAP_KEY);
+            Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP_KEY);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
             // be sure to clear the data before loading it, because this is a full overwrite update
             LockerManagerFactory.getLockManager().cleanAllLocks();

@@ -133,7 +133,7 @@ server.raft.disruptorBufferSize=16384
 server.raft.electionTimeoutMs=2000
 server.raft.reporterEnabled=false
 server.raft.reporterInitialDelay=30
-server.raft.serialization=fst
+server.raft.serialization=kryo
 server.raft.compressor=none
 server.enableParallelRequestHandle=false
 
