@@ -15,7 +15,7 @@
  */
 package io.seata.commonapi.interceptor;
 
-import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.commonapi.annotation.BusinessActionContextParameter;
 
 /**
  * The interface Action context filter.

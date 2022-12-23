@@ -13,29 +13,59 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.api;
+package io.seata.commonapi.api;
 
-import io.seata.commonapi.api.BusinessActionContextUtil;
-import io.seata.core.model.BranchType;
-
+import java.io.Serializable;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
+
+import io.seata.core.model.BranchType;
+import io.seata.commonapi.interceptor.ActionContextUtil;
+
 
 /**
  * The type Business action context.
  */
-@Deprecated
-public class BusinessActionContext extends io.seata.commonapi.api.BusinessActionContext {
+public class BusinessActionContext implements Serializable {
 
-    private io.seata.commonapi.api.BusinessActionContext businessActionContext;
+    private static final long serialVersionUID = 6539226288677737991L;
+
+    private String xid;
+
+    private String branchId;
+
+    private String actionName;
+
+    /**
+     * delay branch report while sharing params to tcc phase 2 to enhance performance
+     *
+     * @see BusinessActionContextUtil
+     * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction
+     */
+    private Boolean isDelayReport;
+
+    /**
+     * mark that actionContext has been updated by business
+     *
+     * @see BusinessActionContextUtil
+     */
+    private Boolean isUpdated;
+
+    /**
+     * branch Type
+     */
+    private BranchType branchType;
+
+    /**
+     * action context
+     */
+    private Map<String, Object> actionContext;
 
     /**
      * Instantiates a new Business action context.
      */
-    @Deprecated
     public BusinessActionContext() {
-        this.businessActionContext = new io.seata.commonapi.api.BusinessActionContext();
     }
 
     /**
@@ -45,14 +75,10 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @param branchId      the branch id
      * @param actionContext the action context
      */
-    @Deprecated
     public BusinessActionContext(String xid, String branchId, Map<String, Object> actionContext) {
-        this.businessActionContext = new io.seata.commonapi.api.BusinessActionContext(xid, branchId, actionContext);
-    }
-
-    @Deprecated
-    public BusinessActionContext(io.seata.commonapi.api.BusinessActionContext businessActionContext) {
-        this.businessActionContext = businessActionContext;
+        this.xid = xid;
+        this.branchId = branchId;
+        this.actionContext = actionContext;
     }
 
     /**
@@ -63,7 +89,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      */
     @Nullable
     public Object getActionContext(String key) {
-        return businessActionContext.getActionContext(key);
+        return actionContext.get(key);
     }
 
     /**
@@ -76,7 +102,8 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      */
     @Nullable
     public <T> T getActionContext(String key, @Nonnull Class<T> targetClazz) {
-        return businessActionContext.getActionContext(key, targetClazz);
+        Object value = actionContext.get(key);
+        return ActionContextUtil.convertActionContext(key, value, targetClazz);
     }
 
     /**
@@ -85,7 +112,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @return the branch id
      */
     public long getBranchId() {
-        return businessActionContext.getBranchId();
+        return branchId != null ? Long.parseLong(branchId) : -1;
     }
 
     /**
@@ -94,7 +121,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @param branchId the branch id
      */
     public void setBranchId(long branchId) {
-        businessActionContext.setBranchId(branchId);
+        this.branchId = String.valueOf(branchId);
     }
 
     /**
@@ -103,7 +130,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @param branchId the branch id
      */
     public void setBranchId(String branchId) {
-        businessActionContext.setBranchId(branchId);
+        this.branchId = branchId;
     }
 
     /**
@@ -112,7 +139,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @return the action context
      */
     public Map<String, Object> getActionContext() {
-        return businessActionContext.getActionContext();
+        return actionContext;
     }
 
     /**
@@ -121,7 +148,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @param actionContext the action context
      */
     public void setActionContext(Map<String, Object> actionContext) {
-        businessActionContext.setActionContext(actionContext);
+        this.actionContext = actionContext;
     }
 
     /**
@@ -130,7 +157,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @return the xid
      */
     public String getXid() {
-        return businessActionContext.getXid();
+        return xid;
     }
 
     /**
@@ -139,7 +166,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @param xid the xid
      */
     public void setXid(String xid) {
-        businessActionContext.setXid(xid);
+        this.xid = xid;
     }
 
     /**
@@ -148,7 +175,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @return the action name
      */
     public String getActionName() {
-        return businessActionContext.getActionName();
+        return actionName;
     }
 
     /**
@@ -157,7 +184,7 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @param actionName the action name
      */
     public void setActionName(String actionName) {
-        businessActionContext.setActionName(actionName);
+        this.actionName = actionName;
     }
 
     /**
@@ -166,37 +193,58 @@ public class BusinessActionContext extends io.seata.commonapi.api.BusinessAction
      * @param key   the action context's key
      * @param value biz value
      * @return the action context is changed
-     * @see io.seata.commonapi.api.BusinessActionContextUtil // the TCC API utils
+     * @see BusinessActionContextUtil // the TCC API utils
      * @deprecated Don't use this method in the `Try` method. Please use {@link BusinessActionContextUtil#addContext}
      */
     @Deprecated
     public boolean addActionContext(String key, Object value) {
-        return businessActionContext.addActionContext(key, value);
+        if (value == null) {
+            return false;
+        }
+
+        Object previousValue = this.actionContext.put(key, value);
+        boolean isChanged = !value.equals(previousValue);
+        if (isChanged) {
+            this.setUpdated(true);
+        }
+        return isChanged;
     }
 
     public Boolean getDelayReport() {
-        return businessActionContext.getDelayReport();
+        return isDelayReport;
     }
 
     public void setDelayReport(Boolean delayReport) {
-        businessActionContext.setDelayReport(delayReport);
+        isDelayReport = delayReport;
     }
 
     public Boolean getUpdated() {
-        return businessActionContext.getUpdated();
+        return isUpdated;
     }
 
     public void setUpdated(Boolean updated) {
-        businessActionContext.setUpdated(updated);
+        isUpdated = updated;
     }
 
     public BranchType getBranchType() {
-        return businessActionContext.getBranchType();
+        return branchType;
     }
 
     public void setBranchType(BranchType branchType) {
-        businessActionContext.setBranchType(branchType);
+        this.branchType = branchType;
     }
 
-
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[xid:").append(xid)
+                .append(",branch_Id:").append(branchId)
+                .append(",action_name:").append(actionName)
+                .append(",is_delay_report:").append(isDelayReport)
+                .append(",is_updated:").append(isDelayReport)
+                .append(",branch_type:").append(branchType)
+                .append(",action_context:")
+                .append(actionContext).append("]");
+        return sb.toString();
+    }
 }

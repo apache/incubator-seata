@@ -15,24 +15,25 @@
  */
 package io.seata.commonapi.interceptor;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.commonapi.annotation.BusinessActionContextParameter;
+import io.seata.commonapi.annotation.BusinessActionContextParameterDesc;
+import io.seata.commonapi.api.BusinessActionContext;
 import io.seata.rm.tcc.api.ParamType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Extracting TCC Context from Method
@@ -69,8 +70,11 @@ public final class ActionContextUtil {
             Map<String, Object> context = new HashMap<>(8);
             for (Field f : fields) {
                 // get annotation
-                BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
-                if (annotation == null) {
+                BusinessActionContextParameterDesc businessActionContextParameterDesc = BusinessActionContextParameterDesc.createFromBusinessActionContextParameter(f.getAnnotation(BusinessActionContextParameter.class));
+                if (businessActionContextParameterDesc == null) {
+                    businessActionContextParameterDesc = BusinessActionContextParameterDesc.createFromBusinessActionContextParameter(f.getAnnotation(io.seata.rm.tcc.api.BusinessActionContextParameter .class));
+                }
+                if (businessActionContextParameterDesc == null) {
                     continue;
                 }
 
@@ -80,7 +84,7 @@ public final class ActionContextUtil {
 
                 // load param by the config of annotation, and then put into the context
                 String fieldName = f.getName();
-                loadParamByAnnotationAndPutToContext(ParamType.FIELD, fieldName, fieldValue, annotation, context);
+                loadParamByAnnotationAndPutToContext(ParamType.FIELD, fieldName, fieldValue, businessActionContextParameterDesc, context);
             }
             return context;
         } catch (Exception e) {
@@ -94,17 +98,17 @@ public final class ActionContextUtil {
      * @param paramType     the param type, 'param' or 'field'
      * @param paramName     the param name
      * @param paramValue    the param value
-     * @param annotation    the annotation on the param or field
+     * @param businessActionContextParameterDesc    the annotation on the param or field
      * @param actionContext the action context
      */
     public static void loadParamByAnnotationAndPutToContext(@Nonnull final ParamType paramType, @Nonnull String paramName, Object paramValue,
-            @Nonnull final BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
+                                                            @Nonnull final BusinessActionContextParameterDesc businessActionContextParameterDesc, @Nonnull final Map<String, Object> actionContext) {
         if (paramValue == null) {
             return;
         }
 
         // If {@code index >= 0}, get by index from the list param or field
-        int index = annotation.index();
+        int index = businessActionContextParameterDesc.getIndex();
         if (index >= 0) {
             paramValue = getByIndex(paramType, paramName, paramValue, index);
             if (paramValue == null) {
@@ -113,14 +117,14 @@ public final class ActionContextUtil {
         }
 
         // if {@code isParamInProperty == true}, fetch context from paramValue
-        if (annotation.isParamInProperty()) {
+        if (businessActionContextParameterDesc.isParamInProperty()) {
             Map<String, Object> paramContext = fetchContextFromObject(paramValue);
             if (CollectionUtils.isNotEmpty(paramContext)) {
                 actionContext.putAll(paramContext);
             }
         } else {
             // get param name from the annotation
-            String paramNameFromAnnotation = getParamNameFromAnnotation(annotation);
+            String paramNameFromAnnotation = businessActionContextParameterDesc.getParamName();
             if (StringUtils.isNotBlank(paramNameFromAnnotation)) {
                 paramName = paramNameFromAnnotation;
             }
@@ -153,6 +157,14 @@ public final class ActionContextUtil {
     }
 
     public static String getParamNameFromAnnotation(@Nonnull BusinessActionContextParameter annotation) {
+        String paramName = annotation.paramName();
+        if (StringUtils.isBlank(paramName)) {
+            paramName = annotation.value();
+        }
+        return paramName;
+    }
+
+    public static String getParamNameFromAnnotation(@Nonnull io.seata.rm.tcc.api.BusinessActionContextParameter annotation) {
         String paramName = annotation.paramName();
         if (StringUtils.isBlank(paramName)) {
             paramName = annotation.value();

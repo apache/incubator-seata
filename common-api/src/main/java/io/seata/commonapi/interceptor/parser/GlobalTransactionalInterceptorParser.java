@@ -1,12 +1,16 @@
 package io.seata.commonapi.interceptor.parser;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.commonapi.annotation.GlobalLock;
+import io.seata.commonapi.annotation.GlobalTransactional;
 import io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.commonapi.interceptor.handler.ProxyInvocationHandler;
-import io.seata.spring.annotation.GlobalLock;
-import io.seata.spring.annotation.GlobalTransactional;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,9 +40,9 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         if (existsAnnotation(new Class[]{serviceInterface}) || existsAnnotation(interfacesIfJdk)) {
             Class[] interfaceToProxy = target.getClass().getInterfaces();
             ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(new DefaultFailureHandlerImpl(), interfaceToProxy, null);
+            ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
             return proxyInvocationHandler;
         }
-
         return null;
     }
 
@@ -49,7 +53,11 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                 if (clazz == null) {
                     continue;
                 }
-                GlobalTransactional trxAnno = clazz.getAnnotation(GlobalTransactional.class);
+                Annotation trxAnno = clazz.getAnnotation(GlobalTransactional.class);
+                if (trxAnno != null) {
+                    return true;
+                }
+                trxAnno = clazz.getAnnotation(io.seata.spring.annotation.GlobalTransactional.class);
                 if (trxAnno != null) {
                     return true;
                 }
@@ -59,12 +67,23 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                     if (trxAnno != null) {
                         methodsToProxy.add(method.getName());
                         result = true;
+                    } else {
+                        trxAnno = method.getAnnotation(io.seata.spring.annotation.GlobalTransactional.class);
+                        if (trxAnno != null) {
+                            methodsToProxy.add(method.getName());
+                            result = true;
+                        }
                     }
-
-                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
+                    Annotation lockAnno = method.getAnnotation(GlobalLock.class);
                     if (lockAnno != null) {
                         methodsToProxy.add(method.getName());
                         result = true;
+                    } else {
+                        lockAnno = method.getAnnotation(io.seata.spring.annotation.GlobalLock.class);
+                        if (lockAnno != null) {
+                            methodsToProxy.add(method.getName());
+                            result = true;
+                        }
                     }
                 }
             }

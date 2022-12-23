@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.api;
+package io.seata.commonapi.annotation;
 
 import io.seata.commonapi.interceptor.ActionContextUtil;
 
@@ -32,7 +32,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.FIELD})
-@Deprecated
 public @interface BusinessActionContextParameter {
 
     /**

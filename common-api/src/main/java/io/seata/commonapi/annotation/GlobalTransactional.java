@@ -13,13 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+package io.seata.commonapi.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import io.seata.common.DefaultValues;
-import io.seata.commonapi.annotation.AspectTransactional;
 import io.seata.tm.api.transaction.Propagation;
-
-import java.lang.annotation.*;
 
 /**
  * The interface Global transactional.
@@ -41,7 +44,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Inherited
-@Deprecated
 public @interface GlobalTransactional {
 
     /**

@@ -5,6 +5,8 @@ import io.seata.commonapi.interceptor.ActionInterceptorHandler;
 import io.seata.commonapi.interceptor.InvocationWrapper;
 import io.seata.commonapi.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.commonapi.interceptor.handler.AbstractProxyInvocationHandler;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -25,7 +27,7 @@ import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
  * @author leezongjie
  * @date 2022/11/26
  */
-public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
+public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler implements ConfigurationChangeListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorHandler.class);
 
     private volatile boolean disable = ConfigurationFactory.getInstance().getBoolean(
@@ -104,5 +106,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         return invocation.proceed();
     }
 
-
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                    disable, event.getNewValue());
+            disable = Boolean.parseBoolean(event.getNewValue().trim());
+        }
+    }
 }

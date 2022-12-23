@@ -6,6 +6,9 @@ import io.seata.commonapi.interceptor.parser.DefaultResourceRegisterParser;
 import io.seata.commonapi.interceptor.parser.InterfaceParser;
 import io.seata.commonapi.remoting.RemotingDesc;
 import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 
@@ -35,6 +38,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
                     if (remotingDesc != null && !methodsToProxy.isEmpty()) {
                         Class[] interfaceToProxy = target.getClass().getInterfaces();
                         ProxyInvocationHandler proxyInvocationHandler = new TccActionInterceptorHandler(interfaceToProxy, methodsToProxy);
+                        ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
                         return proxyInvocationHandler;
                     }
                 }

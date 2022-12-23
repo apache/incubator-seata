@@ -15,7 +15,7 @@
  */
 package io.seata.rm.tcc.spring.tcc;
 
-import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.commonapi.api.BusinessActionContext;
 
 /**
  * The type Tcc action.
