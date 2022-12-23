@@ -48,7 +48,7 @@ CREATE TABLE lock_table
     resource_id    VARCHAR2(256),
     table_name     VARCHAR2(32),
     pk             VARCHAR2(36),
-    status         NUMBER(3)     NOT NULL DEFAULT 0,
+    status         NUMBER(3)   DEFAULT 0 NOT NULL,
     gmt_create     TIMESTAMP(0),
     gmt_modified   TIMESTAMP(0),
     PRIMARY KEY (row_key)
