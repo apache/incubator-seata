@@ -8,8 +8,8 @@ import io.seata.commonapi.remoting.RemotingDesc;
 import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.commonapi.api.BusinessActionContext;
+import io.seata.commonapi.annotation.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
 import java.lang.annotation.Annotation;
@@ -83,8 +83,14 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
                     keys[i] = key;
                     break;
                 }
+                if (parameterAnnotations[i][j] instanceof io.seata.rm.tcc.api.BusinessActionContextParameter ) {
+                    io.seata.rm.tcc.api.BusinessActionContextParameter  param = (io.seata.rm.tcc.api.BusinessActionContextParameter ) parameterAnnotations[i][j];
+                    String key = ActionContextUtil.getParamNameFromAnnotation(param);
+                    keys[i] = key;
+                    break;
+                }
             }
-            if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
+            if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class) || argsClasses[i].equals(io.seata.rm.tcc.api.BusinessActionContext .class))) {
                 throw new IllegalArgumentException("non-BusinessActionContext parameter should use annotation " +
                         "BusinessActionContextParameter");
             }

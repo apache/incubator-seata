@@ -45,7 +45,7 @@ public class DefaultTargetClassParser implements TargetClassParser {
                 return result;
             }
         }
-        return null;
+        return target.getClass();
     }
 
     @Override
@@ -56,6 +56,6 @@ public class DefaultTargetClassParser implements TargetClassParser {
                 return result;
             }
         }
-        return null;
+        return target.getClass().getInterfaces();
     }
 }
