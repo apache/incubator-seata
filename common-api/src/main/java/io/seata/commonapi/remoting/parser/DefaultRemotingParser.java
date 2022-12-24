@@ -156,7 +156,7 @@ public class DefaultRemotingParser {
      * @return remoting desc
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName, RemotingParser remotingParser) {
-        if (remotingServiceMap.containsKey(bean)){
+        if (remotingServiceMap.containsKey(bean)) {
             return remotingServiceMap.get(bean);
         }
         RemotingDesc remotingBeanDesc = remotingParser.getServiceDesc(bean, beanName);

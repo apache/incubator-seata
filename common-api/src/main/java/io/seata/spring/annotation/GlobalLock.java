@@ -15,8 +15,11 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.annotation.*;
-
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * declare the transaction only execute in single local RM

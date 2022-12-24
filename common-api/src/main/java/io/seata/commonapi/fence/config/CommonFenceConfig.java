@@ -108,7 +108,7 @@ public class CommonFenceConfig implements Disposable {
         tccFenceClean.shutdown();
     }
 
-    public void init(){
+    public void init() {
         // set log table name
         if (logTableName != null) {
             CommonFenceStoreDataBaseDAO.getInstance().setLogTableName(logTableName);

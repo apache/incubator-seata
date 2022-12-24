@@ -17,6 +17,7 @@ package io.seata.commonapi.interceptor.handler;
 
 import io.seata.commonapi.interceptor.DefaultInvocationWrapper;
 import io.seata.commonapi.interceptor.InvocationWrapper;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -27,6 +28,8 @@ import java.lang.reflect.Method;
  */
 public class DefaultInvocationHandler implements InvocationHandler {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultInvocationHandler.class);
+
     private ProxyInvocationHandler proxyInvocationHandler;
     private Object delegate;
 
@@ -36,16 +39,15 @@ public class DefaultInvocationHandler implements InvocationHandler {
     }
 
     /**
-     * 动态代理调用方法
+     * Dynamic proxy calls methods
      *
-     * @param proxy  生成的代理对象
-     * @param method 代理的方法
-     * @param args   方法参数
+     * @param proxy  The generated proxy object
+     * @param method Method of agency
+     * @param args   Method parameter
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        //TODO log
-        System.out.println("bytebuddy proxy before");
+        LOGGER.info("bytebuddy proxy before");
         InvocationWrapper invocation = new DefaultInvocationWrapper(proxy, delegate, method, args);
         Object result;
         if (proxyInvocationHandler != null) {
@@ -53,7 +55,7 @@ public class DefaultInvocationHandler implements InvocationHandler {
         } else {
             result = invocation.proceed();
         }
-        System.out.println("bytebuddy proxy after");
+        LOGGER.info("bytebuddy proxy after");
         return result;
     }
 }

@@ -43,9 +43,9 @@ public class BusinessActionContextParameterDesc {
             businessActionContextParameterDesc.setParamInProperty(businessActionContextParameter.isParamInProperty());
             businessActionContextParameterDesc.setParamName(StringUtils.isNotBlank(businessActionContextParameter.paramName()) ? businessActionContextParameter.paramName() : businessActionContextParameter.value());
 
-        } else if (annotation instanceof io.seata.rm.tcc.api.BusinessActionContextParameter ) {
+        } else if (annotation instanceof io.seata.rm.tcc.api.BusinessActionContextParameter) {
             businessActionContextParameterDesc = new BusinessActionContextParameterDesc();
-            io.seata.rm.tcc.api.BusinessActionContextParameter  businessActionContextParameter = (io.seata.rm.tcc.api.BusinessActionContextParameter ) annotation;
+            io.seata.rm.tcc.api.BusinessActionContextParameter businessActionContextParameter = (io.seata.rm.tcc.api.BusinessActionContextParameter) annotation;
             businessActionContextParameterDesc.setIndex(businessActionContextParameter.index());
             businessActionContextParameterDesc.setParamInProperty(businessActionContextParameter.isParamInProperty());
             businessActionContextParameterDesc.setParamName(StringUtils.isNotBlank(businessActionContextParameter.paramName()) ? businessActionContextParameter.paramName() : businessActionContextParameter.value());
