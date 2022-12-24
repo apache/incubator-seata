@@ -11,6 +11,7 @@
 
 ### optimize:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 优化 xxx
+- [[#5196](https://github.com/seata/seata/pull/5196)] 调整过短的lock_table.row_key表字段长度
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试

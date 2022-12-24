@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### optimize:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] optimize xxx
+- [[#5196](https://github.com/seata/seata/pull/5196)] optimize too short length of table field lock_table.row_key
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
