@@ -41,7 +41,7 @@ CREATE INDEX idx_xid ON branch_table (xid);
 -- the table to store lock data
 CREATE TABLE lock_table
 (
-    row_key        VARCHAR2(128) NOT NULL,
+    row_key        VARCHAR2(330) NOT NULL,
     xid            VARCHAR2(128),
     transaction_id NUMBER(19),
     branch_id      NUMBER(19)    NOT NULL,

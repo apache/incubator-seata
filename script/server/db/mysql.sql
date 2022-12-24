@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `branch_table`
 -- the table to store lock data
 CREATE TABLE IF NOT EXISTS `lock_table`
 (
-    `row_key`        VARCHAR(128) NOT NULL,
+    `row_key`        VARCHAR(330) NOT NULL,
     `xid`            VARCHAR(128),
     `transaction_id` BIGINT,
     `branch_id`      BIGINT       NOT NULL,
