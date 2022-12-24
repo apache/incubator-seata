@@ -1,5 +1,6 @@
 package io.seata.commonapi.interceptor.handler;
 
+import io.seata.common.LockStrategyMode;
 import io.seata.commonapi.annotation.GlobalTransactional;
 import io.seata.tm.api.transaction.Propagation;
 
@@ -22,6 +23,7 @@ public class GlobalTransactionalDesc {
     private Propagation propagation;
     private int lockRetryInterval;
     private int lockRetryTimes;
+    private LockStrategyMode lockStrategyMode;
 
     private GlobalTransactionalDesc() {
     }
@@ -39,6 +41,7 @@ public class GlobalTransactionalDesc {
             globalTransactionalDesc.setPropagation(globalLockAnnotation.propagation());
             globalTransactionalDesc.setLockRetryInterval(globalLockAnnotation.lockRetryInterval());
             globalTransactionalDesc.setLockRetryTimes(globalLockAnnotation.lockRetryTimes());
+            globalTransactionalDesc.setLockStrategyMode(globalLockAnnotation.lockStrategyMode());
             return globalTransactionalDesc;
         }
 
@@ -135,5 +138,13 @@ public class GlobalTransactionalDesc {
 
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
+    }
+
+    public LockStrategyMode getLockStrategyMode() {
+        return lockStrategyMode;
+    }
+
+    public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
+        this.lockStrategyMode = lockStrategyMode;
     }
 }

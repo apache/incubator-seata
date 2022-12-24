@@ -309,7 +309,7 @@ public class SpringFenceHandler implements FenceHandler {
             connection = DataSourceUtils.getConnection(dataSource);
             if (isOracle(connection)) {
                 // delete by date if DB is oracle
-                return TCC_FENCE_DAO.deleteTCCFenceDOByDate(connection, datetime);
+                return COMMON_FENCE_DAO.deleteCommonFenceDOByDate(connection, datetime);
             }
 
             //delete by id if DB is not oracle
