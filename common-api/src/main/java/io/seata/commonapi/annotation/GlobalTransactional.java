@@ -15,15 +15,15 @@
  */
 package io.seata.commonapi.annotation;
 
+import io.seata.common.DefaultValues;
+import io.seata.common.LockStrategyMode;
+import io.seata.tm.api.transaction.Propagation;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import io.seata.common.DefaultValues;
-import io.seata.common.LockStrategyMode;
-import io.seata.tm.api.transaction.Propagation;
 
 /**
  * The interface Global transactional.
