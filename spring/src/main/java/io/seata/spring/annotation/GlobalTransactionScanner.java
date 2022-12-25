@@ -51,6 +51,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -303,6 +304,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
 
         return true;
+    }
+
+    private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
+        return new MethodDesc(anno, method);
     }
 
     @Override
