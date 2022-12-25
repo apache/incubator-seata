@@ -54,7 +54,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.seata.common.DefaultValues.*;
+import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
+
 
 /**
  * The type Global transaction scanner.
