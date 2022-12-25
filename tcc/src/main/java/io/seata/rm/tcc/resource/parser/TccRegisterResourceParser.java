@@ -98,8 +98,8 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
                     keys[i] = key;
                     break;
                 }
-                if (parameterAnnotations[i][j] instanceof io.seata.rm.tcc.api.BusinessActionContextParameter ) {
-                    io.seata.rm.tcc.api.BusinessActionContextParameter  param = (io.seata.rm.tcc.api.BusinessActionContextParameter ) parameterAnnotations[i][j];
+                if (parameterAnnotations[i][j] instanceof io.seata.rm.tcc.api.BusinessActionContextParameter) {
+                    io.seata.rm.tcc.api.BusinessActionContextParameter param = (io.seata.rm.tcc.api.BusinessActionContextParameter) parameterAnnotations[i][j];
                     String key = ActionContextUtil.getParamNameFromAnnotation(param);
                     keys[i] = key;
                     break;
