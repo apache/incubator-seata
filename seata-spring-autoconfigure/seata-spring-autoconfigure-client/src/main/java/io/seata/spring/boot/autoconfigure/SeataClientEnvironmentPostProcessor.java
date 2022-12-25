@@ -20,14 +20,32 @@ import io.seata.commonapi.fence.config.CommonFenceConfig;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.*;
+import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MACHINE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
+
 
 /**
  * @author xingfudeshi@gmail.com
