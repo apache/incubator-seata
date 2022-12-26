@@ -116,6 +116,7 @@
         <os-maven-plugin.version>1.5.0.Final</os-maven-plugin.version>
 
         <!-- Default values of the Maven plugins -->
+        <jib.image-name>${IMAGE_NAME}</jib.image-name>
         <checkstyle.skip>true</checkstyle.skip>
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
