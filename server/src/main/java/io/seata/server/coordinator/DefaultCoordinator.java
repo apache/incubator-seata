@@ -78,6 +78,7 @@ import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
 import static io.seata.common.DefaultValues.DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
 import static io.seata.common.DefaultValues.DEFAULT_COMMITING_RETRY_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
 import static io.seata.common.DefaultValues.DEFAULT_MAX_COMMIT_RETRY_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PERIOD;
@@ -190,9 +191,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         this.remotingServer = remotingServer;
         this.core = new DefaultCore(remotingServer);
-
+        boolean enableBranchAsyncRemove = CONFIG.getBoolean(
+                ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
         // create branchRemoveExecutor
-        if (StoreConfig.getSessionMode() != StoreConfig.SessionMode.FILE) {
+        if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != StoreConfig.SessionMode.FILE) {
             branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
                     Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<>(
