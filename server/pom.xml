@@ -302,7 +302,7 @@
                         </platforms>
                     </from>
                     <to>
-                        <image>docker.io/easyj/seata-server</image>
+                        <image>docker.io/seataio/seata-server</image>
                         <tags>${jib.image.tags}</tags>
                         <auth>
                             <username>${REGISTRY_USERNAME}</username>
