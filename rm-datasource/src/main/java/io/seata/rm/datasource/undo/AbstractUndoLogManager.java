@@ -49,6 +49,7 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_TYPE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD;
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
+import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Unretriable;
 
 /**
  * @author jsbxyyx
@@ -358,9 +359,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new BranchTransactionException(BranchRollbackFailed_Retriable, String
-                    .format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid,
-                        branchId, e.getMessage()), e);
+                if (e instanceof SQLUndoDirtyException) {
+                    throw new BranchTransactionException(BranchRollbackFailed_Unretriable, String.format(
+                        "Branch session rollback failed because of dirty undo log, please delete the relevant undolog after manually calibrating the data. xid = %s branchId = %s",
+                        xid, branchId), e);
+                }
+                throw new BranchTransactionException(BranchRollbackFailed_Retriable,
+                    String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid,
+                        branchId, e.getMessage()),
+                    e);
 
             } finally {
                 try {
