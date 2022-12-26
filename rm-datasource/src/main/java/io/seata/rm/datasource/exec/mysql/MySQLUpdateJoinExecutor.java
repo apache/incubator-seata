@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
-import io.seata.sqlparser.util.ColumnUtils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
