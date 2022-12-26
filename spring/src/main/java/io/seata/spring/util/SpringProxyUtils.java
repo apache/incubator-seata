@@ -15,18 +15,18 @@
  */
 package io.seata.spring.util;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.tcc.remoting.parser.DubboUtil;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Proxy tools base on spring
@@ -85,14 +85,14 @@ public class SpringProxyUtils {
      * @throws Exception the exception
      */
     public static AdvisedSupport getAdvisedSupport(Object proxy) throws Exception {
-        Field h;
+        Object dynamicAdvisedInterceptor;
         if (AopUtils.isJdkDynamicProxy(proxy)) {
-            h = proxy.getClass().getSuperclass().getDeclaredField("h");
+            dynamicAdvisedInterceptor = Proxy.getInvocationHandler(proxy);
         } else {
-            h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+            Field h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+            h.setAccessible(true);
+            dynamicAdvisedInterceptor = h.get(proxy);
         }
-        h.setAccessible(true);
-        Object dynamicAdvisedInterceptor = h.get(proxy);
         Field advised = dynamicAdvisedInterceptor.getClass().getDeclaredField("advised");
         advised.setAccessible(true);
         return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);
