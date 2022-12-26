@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@v2.4.0
       # step 2
       - name: "Setup Java JDK"
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v3.9.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
