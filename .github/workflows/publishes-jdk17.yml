@@ -1,4 +1,4 @@
-name: "Publishes"
+name: "Publishes-jdk17"
 
 on:
   push:
