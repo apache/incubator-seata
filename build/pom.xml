@@ -126,7 +126,8 @@
 
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
-        <image.tags>latest</image.tags>
+        <jib.image.tags>latest</jib.image.tags>
+        <jib.image-name>${IMAGE_NAME}</jib.image-name>
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
     </properties>
@@ -295,9 +296,6 @@
         <!-- profile: release -->
         <profile>
             <id>release</id>
-            <properties>
-                <image.tags>${project.version},latest</image.tags>
-            </properties>
             <build>
                 <plugins>
                     <!-- Javadoc -->

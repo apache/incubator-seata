@@ -7,6 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### bugfix:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] fix xxx
+- [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 
 ### optimize:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] optimize xxx
@@ -18,5 +19,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
+- [xssdpgy](https://github.com/xssdpgy)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
