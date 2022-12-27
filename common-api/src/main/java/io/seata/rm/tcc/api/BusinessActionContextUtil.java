@@ -15,6 +15,20 @@
  */
 package io.seata.rm.tcc.api;
 
+import com.alibaba.fastjson.JSON;
+import io.seata.common.Constants;
+import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.commonapi.interceptor.ActionContextUtil;
+import io.seata.rm.DefaultResourceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,11 +36,14 @@ import java.util.Map;
  *
  * @author tanzj
  */
-@Deprecated
 public final class BusinessActionContextUtil {
 
     private BusinessActionContextUtil() {
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessActionContextUtil.class);
+
+    private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
 
     /**
      * add business action context and share it to tcc phase2
@@ -36,7 +53,12 @@ public final class BusinessActionContextUtil {
      * @return branch report succeed
      */
     public static boolean addContext(String key, Object value) {
-        return io.seata.commonapi.api.BusinessActionContextUtil.addContext(key, value);
+        if (value == null) {
+            return false;
+        }
+
+        Map<String, Object> newContext = Collections.singletonMap(key, value);
+        return addContext(newContext);
     }
 
     /**
@@ -47,7 +69,26 @@ public final class BusinessActionContextUtil {
      */
     @SuppressWarnings("deprecation")
     public static boolean addContext(Map<String, Object> context) {
-        return io.seata.commonapi.api.BusinessActionContextUtil.addContext(context);
+        if (CollectionUtils.isEmpty(context)) {
+            return false;
+        }
+
+        // put action context
+        BusinessActionContext actionContext = BusinessActionContextUtil.getContext();
+        if (!ActionContextUtil.putActionContext(actionContext.getActionContext(), context)) {
+            // the action context is not changed, do not report
+            return false;
+        }
+        // set updated
+        actionContext.setUpdated(true);
+
+        // if delay report, params will be finally reported after phase 1 execution
+        if (Boolean.TRUE.equals(actionContext.getDelayReport())) {
+            return false;
+        }
+
+        // do branch report
+        return reportContext(actionContext);
     }
 
     /**
@@ -57,19 +98,41 @@ public final class BusinessActionContextUtil {
      * @return branch report succeed
      */
     public static boolean reportContext(BusinessActionContext actionContext) {
-        return io.seata.commonapi.api.BusinessActionContextUtil.reportContext(actionContext);
+        // check is updated
+        if (!Boolean.TRUE.equals(actionContext.getUpdated())) {
+            return false;
+        }
+
+        try {
+            // branch report
+            DefaultResourceManager.get().branchReport(
+                    actionContext.getBranchType(),
+                    actionContext.getXid(),
+                    actionContext.getBranchId(),
+                    BranchStatus.Registered,
+                    JSON.toJSONString(Collections.singletonMap(Constants.TX_ACTION_CONTEXT, actionContext.getActionContext()))
+            );
+
+            // reset to un_updated
+            actionContext.setUpdated(null);
+            return true;
+        } catch (TransactionException e) {
+            String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
+            LOGGER.error("{}, error: {}", msg, e.getMessage());
+            throw new FrameworkException(e, msg);
+        }
     }
 
     public static BusinessActionContext getContext() {
-        return new BusinessActionContext(io.seata.commonapi.api.BusinessActionContextUtil.getContext());
+        return CONTEXT_HOLDER.get();
     }
 
     public static void setContext(BusinessActionContext context) {
-        io.seata.commonapi.api.BusinessActionContextUtil.setContext(context);
+        CONTEXT_HOLDER.set(context);
     }
 
     public static void clear() {
-        io.seata.commonapi.api.BusinessActionContextUtil.clear();
+        CONTEXT_HOLDER.remove();
     }
 
     /**
@@ -81,11 +144,33 @@ public final class BusinessActionContextUtil {
      * @param applicationData the application data
      * @return business action context
      */
-    public static BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId, String applicationData) {
-        return new BusinessActionContext(io.seata.commonapi.api.BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId, applicationData));
+    public static BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId,
+                                                                 String applicationData) {
+        Map actionContextMap = null;
+        if (StringUtils.isNotBlank(applicationData)) {
+            Map tccContext = JSON.parseObject(applicationData, Map.class);
+            actionContextMap = (Map) tccContext.get(Constants.TX_ACTION_CONTEXT);
+        }
+        if (actionContextMap == null) {
+            actionContextMap = new HashMap<>(2);
+        }
+
+        //instance the action context
+        BusinessActionContext businessActionContext = new BusinessActionContext(
+                xid, String.valueOf(branchId), actionContextMap);
+        businessActionContext.setActionName(resourceId);
+        return businessActionContext;
     }
 
     public static Object[] getTwoPhaseMethodParams(String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
-        return io.seata.commonapi.api.BusinessActionContextUtil.getTwoPhaseMethodParams(keys, argsClasses, businessActionContext);
+        Object[] args = new Object[argsClasses.length];
+        for (int i = 0; i < argsClasses.length; i++) {
+            if (argsClasses[i].equals(BusinessActionContext.class)) {
+                args[i] = businessActionContext;
+            } else {
+                args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
+            }
+        }
+        return args;
     }
 }

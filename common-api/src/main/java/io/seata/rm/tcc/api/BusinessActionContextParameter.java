@@ -15,8 +15,6 @@
  */
 package io.seata.rm.tcc.api;
 
-import io.seata.commonapi.interceptor.ActionContextUtil;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,18 +26,17 @@ import java.lang.annotation.Target;
  * add this annotation on the parameters of the try method, and the parameters will be passed to the action context
  *
  * @author zhangsen
- * @see ActionContextUtil
+ * @see io.seata.spring.interceptor.ActionContextUtil
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.FIELD})
-@Deprecated
 public @interface BusinessActionContextParameter {
 
     /**
      * parameter's name. Synonym for {@link #paramName()}.
      *
      * @return the name of the param or field
-     * @see ActionContextUtil#getParamNameFromAnnotation
+     * @see io.seata.spring.interceptor.ActionContextUtil#getParamNameFromAnnotation
      */
     String value() default "";
 
@@ -47,7 +44,7 @@ public @interface BusinessActionContextParameter {
      * parameter's name. Synonym for {@link #value()}.
      *
      * @return the name of the param or field
-     * @see ActionContextUtil#getParamNameFromAnnotation
+     * @see io.seata.spring.interceptor.ActionContextUtil#getParamNameFromAnnotation
      */
     String paramName() default "";
 
@@ -64,7 +61,7 @@ public @interface BusinessActionContextParameter {
      * Specify the index of the parameter in the List
      *
      * @return the index of the List
-     * @see ActionContextUtil#getByIndex
+     * @see io.seata.spring.interceptor.ActionContextUtil#getByIndex
      */
     int index() default -1;
 
@@ -73,8 +70,8 @@ public @interface BusinessActionContextParameter {
      * if {@code index >= 0}, the object get from the List and then do get the parameter from the property of the object
      *
      * @return the boolean
-     * @see ActionContextUtil#loadParamByAnnotationAndPutToContext
-     * @see ActionContextUtil#fetchContextFromObject
+     * @see io.seata.spring.interceptor.ActionContextUtil#loadParamByAnnotationAndPutToContext
+     * @see io.seata.spring.interceptor.ActionContextUtil#fetchContextFromObject
      */
     boolean isParamInProperty() default false;
 }

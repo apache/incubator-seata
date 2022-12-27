@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
  * declare the transaction only execute in single local RM
  * but the transaction need to ensure records to update(or select for update) is not in global transaction middle
@@ -35,7 +36,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Inherited
-@Deprecated
 public @interface GlobalLock {
     /**
      * customized global lock retry interval(unit: ms)

@@ -16,6 +16,8 @@
 package io.seata.spring.annotation;
 
 import io.seata.common.DefaultValues;
+import io.seata.common.LockStrategyMode;
+import io.seata.commonapi.annotation.AspectTransactional;
 import io.seata.tm.api.transaction.Propagation;
 
 import java.lang.annotation.ElementType;
@@ -44,7 +46,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.TYPE})
 @Inherited
-@Deprecated
 public @interface GlobalTransactional {
 
     /**
@@ -125,4 +126,12 @@ public @interface GlobalTransactional {
      * @return int
      */
     int lockRetryTimes() default -1;
+
+    /**
+     * pick the Acquire lock policy
+     *
+     * @return lock strategy mode
+     */
+    LockStrategyMode lockStrategyMode() default LockStrategyMode.PESSIMISTIC;
+
 }

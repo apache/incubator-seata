@@ -15,8 +15,6 @@
  */
 package io.seata.spring.annotation;
 
-import io.seata.commonapi.annotation.GlobalTransactional;
-
 import java.lang.reflect.Method;
 
 /**

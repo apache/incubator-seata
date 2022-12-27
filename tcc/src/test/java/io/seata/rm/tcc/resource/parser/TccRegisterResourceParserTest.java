@@ -15,8 +15,8 @@
  */
 package io.seata.rm.tcc.resource.parser;
 
-import io.seata.commonapi.api.BusinessActionContext;
 import io.seata.rm.tcc.TccParam;
+import io.seata.rm.tcc.api.BusinessActionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

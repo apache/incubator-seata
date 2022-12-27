@@ -20,9 +20,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.commonapi.annotation.GlobalLock;
+import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactionScanner;
-import io.seata.commonapi.annotation.GlobalTransactional;
+import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.spring.annotation.ScannerChecker;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;

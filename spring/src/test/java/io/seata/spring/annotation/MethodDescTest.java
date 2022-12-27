@@ -16,8 +16,7 @@
 package io.seata.spring.annotation;
 
 import io.seata.common.DefaultValues;
-import io.seata.commonapi.annotation.GlobalTransactional;
-import io.seata.commonapi.interceptor.handler.GlobalTransactionalDesc;
+import io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -45,25 +44,26 @@ public class MethodDescTest {
 
     @Test
     public void testGetAnnotation() throws NoSuchMethodException {
+        GlobalTransactionalInterceptorHandler globalTransactionalInterceptor = new GlobalTransactionalInterceptorHandler(null, null, null);
         Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         targetClass = Mockito.mock(MockBusiness.class).getClass();
-        transactional = GlobalTransactionalDesc.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertEquals(transactional.timeoutMills(), 300000);
         method = null;
-        transactional = GlobalTransactionalDesc.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertEquals(transactional.timeoutMills(), DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT * 2);
         targetClass = null;
-        transactional = GlobalTransactionalDesc.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertNull(transactional);
         // only class has Annotation, method is not null
         targetClass = Mockito.mock(MockMethodAnnotation.class).getClass();
         method = MockMethodAnnotation.class.getDeclaredMethod("doBiz", String.class);
-        transactional = GlobalTransactionalDesc.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertEquals(transactional.name(), "doBiz");
         // only method has Annotation, class is not null
         targetClass = Mockito.mock(MockClassAnnotation.class).getClass();
         method = MockClassAnnotation.class.getDeclaredMethod("doBiz", String.class);
-        transactional = GlobalTransactionalDesc.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertEquals(transactional.name(), "MockClassAnnotation");
     }
 

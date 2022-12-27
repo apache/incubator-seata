@@ -22,13 +22,12 @@ import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
-import io.seata.commonapi.annotation.BusinessActionContextParameter;
-import io.seata.commonapi.annotation.BusinessActionContextParameterDesc;
-import io.seata.commonapi.api.BusinessActionContext;
-import io.seata.commonapi.api.BusinessActionContextUtil;
 import io.seata.commonapi.fence.DefaultCommonFenceHandler;
 import io.seata.core.context.RootContext;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.api.ParamType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,9 +139,6 @@ public class ActionInterceptorHandler {
                 if (actionContext == null) {
                     // If the action context exists in arguments but is null, create a new one and reset the action context to the arguments
                     actionContext = new BusinessActionContext();
-                    if (io.seata.rm.tcc.api.BusinessActionContext.class.isAssignableFrom(parameterType)) {
-                        actionContext = new io.seata.rm.tcc.api.BusinessActionContext(actionContext);
-                    }
                     arguments[argIndex] = actionContext;
                 } else {
                     // Reset the updated, avoid unnecessary reporting
@@ -256,13 +252,13 @@ public class ActionInterceptorHandler {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter || parameterAnnotations[i][j] instanceof io.seata.rm.tcc.api.BusinessActionContextParameter) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
+                    // get annotation
+                    BusinessActionContextParameter annotation = (BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
-                    // get annotation
-                    Annotation annotation = parameterAnnotations[i][j];
-                    BusinessActionContextParameterDesc businessActionContextParameterDesc = BusinessActionContextParameterDesc.createFromBusinessActionContextParameter(annotation);
+
                     // get param
                     Object paramObject = arguments[i];
                     if (paramObject == null) {
@@ -270,7 +266,7 @@ public class ActionInterceptorHandler {
                     }
 
                     // load param by the config of annotation, and then put into the context
-                    ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, businessActionContextParameterDesc, context);
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, annotation, context);
                 }
             }
         }
