@@ -47,7 +47,6 @@ public class DefaultInvocationHandler implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        LOGGER.info("bytebuddy proxy before");
         InvocationWrapper invocation = new DefaultInvocationWrapper(proxy, delegate, method, args);
         Object result;
         if (proxyInvocationHandler != null) {
@@ -55,7 +54,6 @@ public class DefaultInvocationHandler implements InvocationHandler {
         } else {
             result = invocation.proceed();
         }
-        LOGGER.info("bytebuddy proxy after");
         return result;
     }
 }
