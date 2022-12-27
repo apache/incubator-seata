@@ -15,8 +15,6 @@
  */
 package io.seata.sqlparser.druid;
 
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
@@ -24,19 +22,12 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
-import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
 import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
-import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
-import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
 import io.seata.common.exception.NotSupportYetException;
@@ -101,7 +92,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         String errorMsg;
         try {
             errorMsg =
-                    new StringBuilder("Unknown SQLExpr: ").append(expr.getClass()).append(" ").append(expr).toString();
+                new StringBuilder("Unknown SQLExpr: ").append(expr.getClass()).append(" ").append(expr).toString();
         } catch (Exception e) {
             // druid 1.2.6 SQLObjectImpl#toString exist NPE https://github.com/alibaba/druid/issues/4290
             throw new SQLParsingException("Unknown SQLExpr: " + e.getMessage(), e);
@@ -128,86 +119,34 @@ public abstract class BaseRecognizer implements SQLRecognizer {
     public boolean isSqlSyntaxSupports() {
         SQLASTVisitor visitor = new SQLASTVisitorAdapter() {
             @Override
-            public boolean visit(SQLJoinTableSource x) {
-                //just like: UPDATE table a INNER JOIN table b ON a.id = b.pid ...
-                throw new NotSupportYetException("not support the sql syntax with join table:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-            }
-
-            @Override
             public boolean visit(SQLInSubQueryExpr x) {
                 //just like: ...where id in (select id from t)
                 throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
 
             @Override
             public boolean visit(SQLSubqueryTableSource x) {
                 //just like: select * from (select * from t)
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
 
             @Override
             public boolean visit(SQLReplaceStatement x) {
                 //just like: replace into t (id,dr) values (1,'2'), (2,'3')
                 throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
 
             @Override
             public boolean visit(SQLMergeStatement x) {
                 //just like: merge into ... WHEN MATCHED THEN ...
                 throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
         };
         getAst().accept(visitor);
         return true;
-    }
-
-
-
-    protected void parseInsertSelectColumns(SQLSelectQuery selectQuery, List<String> columns) {
-        if (selectQuery == null) {
-            return;
-        }
-        if (selectQuery instanceof SQLUnionQuery) {
-            //a: get left(SQLSelectQueryBlock)
-            List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) ((SQLUnionQuery)selectQuery).getLeft()).getSelectList();
-            this.getColumnNames(selectItems,columns);
-            //b:  get right(SQLUnionQuery)
-            if (((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
-                this.parseInsertSelectColumns(((SQLUnionQuery)selectQuery).getRight(),columns);
-            } else {
-                //b:  get right(SQLSelectQueryBlock)
-                selectItems = ((SQLSelectQueryBlock)((SQLUnionQuery)selectQuery).getRight()).getSelectList();
-                this.getColumnNames(selectItems,columns);
-            }
-        }
-        //SQLSelectQueryBlock
-        else {
-            //select * from (select * from dual union select * from dual)
-            if (((SQLSelectQueryBlock) selectQuery).getFrom() instanceof SQLSubqueryTableSource) {
-                this.parseInsertSelectColumns(((SQLSubqueryTableSource)((SQLSelectQueryBlock) selectQuery).getFrom()).getSelect().getQuery(),columns);
-            } else {
-                //select * from dual
-                List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) selectQuery).getSelectList();
-                this.getColumnNames(selectItems, columns);
-            }
-        }
-    }
-
-    protected void getColumnNames(List<SQLSelectItem> selectItems, List<String> columns) {
-        for (SQLSelectItem columnClause : selectItems) {
-            SQLExpr expr = columnClause.getExpr();
-            if (expr instanceof SQLPropertyExpr) {
-                columns.add(((SQLPropertyExpr) expr).getName());
-            } else if (expr instanceof SQLIdentifierExpr) {
-                columns.add(((SQLIdentifierExpr) expr).getName());
-            } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
-            }
-        }
     }
 }

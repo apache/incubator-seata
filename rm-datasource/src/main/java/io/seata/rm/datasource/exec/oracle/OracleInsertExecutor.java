@@ -85,4 +85,5 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     public String getSequenceSql(SqlSequenceExpr expr) {
         return "SELECT " + expr.getSequence() + ".currval FROM DUAL";
     }
+
 }

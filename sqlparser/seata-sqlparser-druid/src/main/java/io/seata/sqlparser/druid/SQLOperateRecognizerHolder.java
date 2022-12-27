@@ -15,8 +15,6 @@
  */
 package io.seata.sqlparser.druid;
 
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.SQLRecognizer;
 
@@ -62,4 +60,5 @@ public interface SQLOperateRecognizerHolder {
      * @return the SelectForUpdate recognizer
      */
     SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
+
 }

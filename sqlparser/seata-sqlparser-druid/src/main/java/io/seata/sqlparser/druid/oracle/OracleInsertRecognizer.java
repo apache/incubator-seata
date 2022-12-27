@@ -61,7 +61,11 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.INSERT;
+        if (ast.getQuery() != null) {
+            return SQLType.INSERT_SELECT;
+        } else {
+            return SQLType.INSERT;
+        }
     }
 
     @Override
@@ -92,24 +96,19 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     @Override
     public List<String> getInsertColumns() {
         List<SQLExpr> columnSQLExprs = ast.getColumns();
-        List<String> columns = new ArrayList<>();
         if (columnSQLExprs.isEmpty()) {
-            if (ast.getQuery() != null) {
-                //just like "insert into table1 select * from table2"
-                parseInsertSelectColumns(ast.getQuery().getQuery(), columns);
-                return columns;
-            } else {
-                return null;
-            }
+            // INSERT INTO ta VALUES (...), without fields clarified
+            return null;
         }
+        List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                columns.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr)expr).getName());
             } else {
                 wrapSQLParsingException(expr);
             }
         }
-        return columns;
+        return list;
     }
 
     @Override

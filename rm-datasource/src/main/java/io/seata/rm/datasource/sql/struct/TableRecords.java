@@ -189,66 +189,13 @@ public class TableRecords implements java.io.Serializable {
     public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
         int columnCount = resultSetMetaData.getColumnCount();
 
         while (resultSet.next()) {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
-                ColumnMeta col = tmeta.getColumnMeta(colName);
-                int dataType = col.getDataType();
-                Field field = new Field();
-                field.setName(col.getColumnName());
-                if (primaryKeyMap.containsKey(colName)) {
-                    field.setKeyType(KeyType.PRIMARY_KEY);
-                }
-                field.setType(dataType);
-                // mysql will not run in this code
-                // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
-                if (dataType == Types.BLOB) {
-                    Blob blob = resultSet.getBlob(i);
-                    if (blob != null) {
-                        field.setValue(new SerialBlob(blob));
-                    }
-                } else if (dataType == Types.CLOB) {
-                    Clob clob = resultSet.getClob(i);
-                    if (clob != null) {
-                        field.setValue(new SerialClob(clob));
-                    }
-                } else if (dataType == Types.NCLOB) {
-                    NClob object = resultSet.getNClob(i);
-                    if (object != null) {
-                        field.setValue(new SerialClob(object));
-                    }
-                } else if (dataType == Types.ARRAY) {
-                    Array array = resultSet.getArray(i);
-                    if (array != null) {
-                        field.setValue(new SerialArray(array));
-                    }
-                } else if (dataType == Types.REF) {
-                    Ref ref = resultSet.getRef(i);
-                    if (ref != null) {
-                        field.setValue(new SerialRef(ref));
-                    }
-                } else if (dataType == Types.DATALINK) {
-                    java.net.URL url = resultSet.getURL(i);
-                    if (url != null) {
-                        field.setValue(new SerialDatalink(url));
-                    }
-                } else if (dataType == Types.JAVA_OBJECT) {
-                    Object object = resultSet.getObject(i);
-                    if (object != null) {
-                        field.setValue(new SerialJavaObject(object));
-                    }
-                } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
-                    field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
-                } else {
-                    // JDBCType.DISTINCT, JDBCType.STRUCT etc...
-                    field.setValue(holdSerialDataType(resultSet.getObject(i)));
-                }
-
-                fields.add(field);
+                fields.add(parseResultSetField(tmeta,resultSet,i,colName));
             }
 
             Row row = new Row();
@@ -257,6 +204,72 @@ public class TableRecords implements java.io.Serializable {
             records.add(row);
         }
         return records;
+    }
+
+    /**
+     * parse result set field.
+     *
+     * @param tmeta     the tmeta for result set
+     * @param resultSet the result set
+     * @param index the field index in result set
+     * @param colName the col name in field index
+     * @return the table records
+     * @throws SQLException the sql exception
+     */
+    public static Field parseResultSetField(TableMeta tmeta, ResultSet resultSet, int index, String colName) throws SQLException {
+        ColumnMeta col = tmeta.getColumnMeta(colName);
+        Field field = new Field();
+        field.setName(col.getColumnName());
+        Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
+        if (primaryKeyMap.containsKey(colName)) {
+            field.setKeyType(KeyType.PRIMARY_KEY);
+        }
+        int dataType = col.getDataType();
+        field.setType(dataType);
+        // mysql will not run in this code
+        // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
+        if (dataType == Types.BLOB) {
+            Blob blob = resultSet.getBlob(index);
+            if (blob != null) {
+                field.setValue(new SerialBlob(blob));
+            }
+        } else if (dataType == Types.CLOB) {
+            Clob clob = resultSet.getClob(index);
+            if (clob != null) {
+                field.setValue(new SerialClob(clob));
+            }
+        } else if (dataType == Types.NCLOB) {
+            NClob object = resultSet.getNClob(index);
+            if (object != null) {
+                field.setValue(new SerialClob(object));
+            }
+        } else if (dataType == Types.ARRAY) {
+            Array array = resultSet.getArray(index);
+            if (array != null) {
+                field.setValue(new SerialArray(array));
+            }
+        } else if (dataType == Types.REF) {
+            Ref ref = resultSet.getRef(index);
+            if (ref != null) {
+                field.setValue(new SerialRef(ref));
+            }
+        } else if (dataType == Types.DATALINK) {
+            java.net.URL url = resultSet.getURL(index);
+            if (url != null) {
+                field.setValue(new SerialDatalink(url));
+            }
+        } else if (dataType == Types.JAVA_OBJECT) {
+            Object object = resultSet.getObject(index);
+            if (object != null) {
+                field.setValue(new SerialJavaObject(object));
+            }
+        } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
+            field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(index))));
+        } else {
+            // JDBCType.DISTINCT, JDBCType.STRUCT etc...
+            field.setValue(holdSerialDataType(resultSet.getObject(index)));
+        }
+        return field;
     }
 
     /**

@@ -524,23 +524,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
-     * build TableRecords for 'insert into...select' sql when values is empty
-     *
-     * @return return TableRecords;
-     * @throws SQLException the sql exception
-     */
-    protected TableRecords buildTableRecordsForValueEmpty(SQLInsertRecognizer recognizer) throws SQLException {
-        String querySql = recognizer.getSubQuerySql();
-        ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(querySql)) {
-            rs = ps.executeQuery();
-            return TableRecords.buildRecords(getTableMeta(recognizer.getTableName()), rs);
-        } finally {
-            IOUtil.close(rs);
-        }
-    }
-
-    /**
      * get db type
      *
      * @return db type

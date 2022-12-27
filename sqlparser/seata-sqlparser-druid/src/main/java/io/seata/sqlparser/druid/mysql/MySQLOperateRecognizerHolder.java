@@ -15,9 +15,6 @@
  */
 package io.seata.sqlparser.druid.mysql;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import io.seata.common.loader.LoadLevel;

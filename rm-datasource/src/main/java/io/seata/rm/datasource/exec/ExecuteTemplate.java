@@ -124,6 +124,9 @@ public class ExecuteTemplate {
                                 throw new NotSupportYetException(dbType + " not support to " + SQLType.UPDATE_JOIN.name());
                         }
                         break;
+                    case INSERT_SELECT:
+                        executor = new InsertBySelectExecutor<>(statementProxy,statementCallback,sqlRecognizer);
+                        break;
                     default:
                         executor = new PlainExecutor<>(statementProxy, statementCallback);
                         break;
