@@ -9,6 +9,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] fix xxx
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
+- [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
 
 ### optimize:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] optimize xxx
