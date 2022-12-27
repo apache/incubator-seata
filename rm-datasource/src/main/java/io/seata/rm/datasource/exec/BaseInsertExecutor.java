@@ -64,7 +64,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @param sqlRecognizer     the sql recognizer
      */
     public BaseInsertExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-        SQLRecognizer sqlRecognizer) {
+                              SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -294,7 +294,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
         Connection conn = statementProxy.getConnection();
         try (Statement ps = conn.createStatement();
-            ResultSet genKeys = ps.executeQuery(sql)) {
+             ResultSet genKeys = ps.executeQuery(sql)) {
 
             pkValues = new ArrayList<>();
             while (genKeys.next()) {
@@ -330,7 +330,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
         Connection conn = statementProxy.getConnection();
         try (Statement ps = conn.createStatement();
-            ResultSet genKeys = ps.executeQuery(sql)) {
+             ResultSet genKeys = ps.executeQuery(sql)) {
 
             pkValues = new ArrayList<>();
             while (genKeys.next()) {

@@ -653,4 +653,3 @@ public class MySQLInsertExecutorTest {
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 }
-

@@ -97,11 +97,11 @@ public class MysqlUpdateJoinTest {
         helperStat = helperConn.createStatement();
         table1HelperRes = helperStat.executeQuery("select * from t where id = " + testRecordId );
         TableMeta table1Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
-            "t", dataSourceProxy.getResourceId());
+                "t", dataSourceProxy.getResourceId());
         TableRecords table1BeforeImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
         table2HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId1);
         TableMeta table2Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
-            "t1", dataSourceProxy.getResourceId());
+                "t1", dataSourceProxy.getResourceId());
         TableRecords table2BeforeImage = TableRecords.buildRecords(table2Meta, table2HelperRes);
         // >>> update record should not throw exception
         Assertions.assertDoesNotThrow(() -> testStat.execute(updateSql));
@@ -113,7 +113,7 @@ public class MysqlUpdateJoinTest {
         if (globalCommit) {
             // >>> Global Tx Phase 2: commit should not throw exception
             Assertions.assertDoesNotThrow(() -> DefaultResourceManager.get().branchCommit(dataSourceProxy.getBranchType(), mockXid, mockBranchId,
-                dataSourceProxy.getResourceId(), null));
+                    dataSourceProxy.getResourceId(), null));
         } else {
             DefaultResourceManager.get().branchRollback(dataSourceProxy.getBranchType(), mockXid, mockBranchId, dataSourceProxy.getResourceId(), null);
             // >>> Global Tx Phase 2: rollback have a check,rollbacked record must equal to before image
