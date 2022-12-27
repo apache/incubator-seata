@@ -19,7 +19,7 @@ import io.seata.core.context.RootContext
 import io.seata.core.exception.TransactionException
 import io.seata.core.model.GlobalStatus
 import io.seata.core.model.TransactionManager
-import io.seata.commonapi.annotation.GlobalTransactional
+import io.seata.spring.annotation.GlobalTransactional
 import io.seata.spring.kt.support.transactionScope
 import io.seata.tm.TransactionManagerHolder
 import io.seata.tm.api.GlobalTransactionContext

@@ -15,7 +15,7 @@
  */
 package io.seata.commonapi.interceptor.parser;
 
-import io.seata.commonapi.annotation.GlobalTransactional;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

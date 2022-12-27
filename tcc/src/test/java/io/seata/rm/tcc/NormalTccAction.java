@@ -15,8 +15,8 @@
  */
 package io.seata.rm.tcc;
 
-import io.seata.commonapi.api.BusinessActionContext;
-import io.seata.commonapi.annotation.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 

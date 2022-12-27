@@ -15,7 +15,7 @@
  */
 package io.seata.rm.tcc;
 
-import io.seata.commonapi.annotation.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
  * The type Tcc param.

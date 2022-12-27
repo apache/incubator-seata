@@ -18,8 +18,6 @@ package io.seata.spring.annotation;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.commonapi.annotation.AspectTransactional;
-import io.seata.commonapi.annotation.GlobalLock;
-import io.seata.commonapi.annotation.GlobalTransactional;
 import io.seata.commonapi.remoting.RemotingParser;
 import io.seata.commonapi.util.ProxyUtil;
 import io.seata.config.ConfigurationCache;

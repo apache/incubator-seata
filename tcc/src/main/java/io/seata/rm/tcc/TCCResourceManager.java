@@ -25,8 +25,8 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.commonapi.remoting.TwoPhaseResult;
 import io.seata.rm.AbstractResourceManager;
-import io.seata.commonapi.api.BusinessActionContext;
-import io.seata.commonapi.api.BusinessActionContextUtil;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
