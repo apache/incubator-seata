@@ -6,12 +6,11 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] fix xxx
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
 
 ### optimize:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] optimize xxx
+- [[#5204](https://github.com/seata/seata/pull/5204)] optimize throwable getCause once more
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
