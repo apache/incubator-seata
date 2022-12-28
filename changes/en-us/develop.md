@@ -7,9 +7,11 @@ Add changes here for all PR submitted to the develop branch.
 
 ### bugfix:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] fix xxx
+- [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
+- [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
 
 ### optimize:
-- [[#5115](https://github.com/seata/seata/pull/5115)] compatible with the `spring-boot:3.x`
+- [[#xxx](https://github.com/seata/seata/pull/xxx)] optimize xxx
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
@@ -18,6 +20,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
-- [wangliang181230](https://github.com/wangliang181230)
+- [xssdpgy](https://github.com/xssdpgy)
+- [albumenj](https://github.com/albumenj)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
