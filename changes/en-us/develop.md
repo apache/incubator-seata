@@ -10,7 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
 
 ### optimize:
-- [[#5209](https://github.com/seata/seata/pull/5209)] optimize log message level
+- [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
