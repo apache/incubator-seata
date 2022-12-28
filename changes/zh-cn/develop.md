@@ -10,7 +10,7 @@
 - [[#5021](https://github.com/seata/seata/pull/5201)] 修复 JDK17 下获取 Spring 原始代理对象失败的问题
 
 ### optimize:
-- [[#5208](https://github.com/seata/seata/pull/5204)] 优化多次重复获取Throwable#getCause问题
+- [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
