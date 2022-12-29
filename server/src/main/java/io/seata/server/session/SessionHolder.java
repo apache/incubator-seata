@@ -399,7 +399,7 @@ public class SessionHolder {
                 func.call();
             }
         } catch (Exception e) {
-            LOGGER.info("Exception running function with key = {}", key, e);
+            LOGGER.error("Exception running function with key = {}", key, e);
         } finally {
             if (lock) {
                 try {
