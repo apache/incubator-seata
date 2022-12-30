@@ -126,8 +126,8 @@
 
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
-        <jib.image.name>${IMAGE_NAME}</jib.image.name>
-        <jib.image.tags>latest</jib.image.tags>
+        <image.name>${IMAGE_NAME}</image.name>
+        <image.tags>latest</image.tags>
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
     </properties>
