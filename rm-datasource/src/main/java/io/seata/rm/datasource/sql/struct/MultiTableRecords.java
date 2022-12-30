@@ -31,10 +31,11 @@ public class MultiTableRecords extends TableRecordsAware {
 
     /**
      * add table records
-     * @param tableRecords
+     * @param tableName the table's name
+     * @param tableRecords the table's records
      */
-    public void addTableRecords(TableRecords tableRecords) {
-        multiTableRecords.put(tableRecords.getTableName(), tableRecords);
+    public void addTableRecords(String tableName,TableRecords tableRecords) {
+        multiTableRecords.put(tableName, tableRecords);
     }
 
     /**

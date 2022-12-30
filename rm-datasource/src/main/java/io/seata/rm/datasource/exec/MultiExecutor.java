@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.MultiTableRecords;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -79,7 +80,7 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
                     throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
             }
             TableRecords beforeImage = executor.beforeImage();
-            result.addTableRecords(beforeImage);
+            result.addTableRecords(value.get(0).getTableName(), beforeImage);
         }
         return result;
     }
@@ -101,9 +102,26 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
             }
             TableRecords tableBeforeImage = beforeImage.getTableRecordsByTableName(value.get(0).getTableName());
             TableRecords afterImage = executor.afterImage(tableBeforeImage);
-            result.addTableRecords(afterImage);
+            result.addTableRecords(value.get(0).getTableName(), afterImage);
         }
         return result;
+    }
+
+    @Override
+    protected void prepareMultiTableUndoLog(MultiTableRecords multiTableBeforeImage, MultiTableRecords multiTableAfterImage) throws SQLException {
+        Map<String,TableRecords> beforeImagesMap = multiTableBeforeImage.getMultiTableRecords();
+        Map<String,TableRecords> afterImagesMap = multiTableAfterImage.getMultiTableRecords();
+        if (CollectionUtils.isEmpty(beforeImagesMap) || CollectionUtils.isEmpty(afterImagesMap)) {
+            throw new IllegalStateException("images can not be null");
+        }
+        for (Map.Entry<String, TableRecords> entry : beforeImagesMap.entrySet()) {
+            String tableName = entry.getKey();
+            List<SQLRecognizer> sqlRecognizers = multiSqlGroup.get(tableName);
+            sqlRecognizer = sqlRecognizers.get(0);
+            TableRecords tableBeforeImage = entry.getValue();
+            TableRecords tableAfterImage = afterImagesMap.get(tableName);
+            prepareSingleTableUndoLog(tableBeforeImage, tableAfterImage);
+        }
     }
 
     public Map<String, List<SQLRecognizer>> getMultiSqlGroup() {

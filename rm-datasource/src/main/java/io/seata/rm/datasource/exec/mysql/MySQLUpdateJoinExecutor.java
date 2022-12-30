@@ -92,7 +92,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends AbstractDML
             }
             String selectSQL = buildBeforeImageSQL(joinTable, tableItems[i], suffixCommonCondition, itemTableUpdateColumns);
             TableRecords tableRecords = buildTableRecords(getTableMeta(tableItems[i]), selectSQL, paramAppenderList);
-            result.addTableRecords(tableRecords);
+            result.addTableRecords(tableItems[i], tableRecords);
         }
         return result;
     }
@@ -162,7 +162,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends AbstractDML
                 setAfterImageSQLPlaceHolderParams(joinConditionParams,tableBeforeImage.pkRows(), getTableMeta(tableItems[i]).getPrimaryKeyOnlyName(), pst);
                 rs = pst.executeQuery();
                 TableRecords afterImage = TableRecords.buildRecords(getTableMeta(tableItems[i]), rs);
-                result.addTableRecords(afterImage);
+                result.addTableRecords(tableItems[i], afterImage);
             } finally {
                 IOUtil.close(rs);
             }
