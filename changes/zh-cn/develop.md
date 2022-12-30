@@ -12,7 +12,7 @@
 - [[#5023](https://github.com/seata/seata/pull/5203)] 修复 `seata-core` 模块传递依赖冲突
 
 ### optimize:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 优化 xxx
+- [[#5212](https://github.com/seata/seata/pull/5212)] 优化不合理的日志信息级别
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
