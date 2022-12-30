@@ -34,8 +34,19 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.dubbo.extensions</groupId>
             <artifactId>dubbo-filter-seata</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
