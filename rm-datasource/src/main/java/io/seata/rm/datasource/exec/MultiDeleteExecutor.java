@@ -39,7 +39,7 @@ import java.util.StringJoiner;
  * @param <S> the type parameter
  * @author wangwei.ying
  */
-public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S, TableRecords> {
     public MultiDeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {
         super(statementProxy, statementCallback, sqlRecognizers);
     }

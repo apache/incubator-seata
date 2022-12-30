@@ -45,7 +45,7 @@ import io.seata.common.util.CollectionUtils;
  * @param <S> the type parameter
  * @author sharajava
  */
-public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S, TableRecords> {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
@@ -127,7 +127,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return selectSQLJoiner.toString();
     }
 
-    protected List<String> getNeedUpdateColumns(String table, String tableAlias, List<String> originUpdateColumns) {
+    public List<String> getNeedUpdateColumns(String table, String tableAlias, List<String> originUpdateColumns) {
         List<String> needUpdateColumns = new ArrayList<>();
         TableMeta tableMeta = getTableMeta(table);
         if (ONLY_CARE_UPDATE_COLUMNS) {

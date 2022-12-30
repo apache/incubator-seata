@@ -32,7 +32,7 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.MultiTableRecords;
 import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -62,16 +62,17 @@ public class UpdateJoinExecutorTest {
         String sql = "update t1 inner join t2 on t1.id = t2.id set t1.name = 'WILL',t2.name = 'WILL'";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
-        UpdateExecutor mySQLUpdateJoinExecutor = new MySQLUpdateJoinExecutor(beforeMockStatementProxy, (statement, args) -> {
+        AbstractDMLBaseExecutor mySQLUpdateJoinExecutor = new MySQLUpdateJoinExecutor(beforeMockStatementProxy, (statement, args) -> {
             return null;
         }, recognizer);
-        TableRecords beforeImage = mySQLUpdateJoinExecutor.beforeImage();
+
+        MultiTableRecords beforeImage = (MultiTableRecords) mySQLUpdateJoinExecutor.beforeImage();
         Object[][] afterReturnValue = new Object[][]{
                 new Object[]{1, "WILL"},
         };
         StatementProxy afterMockStatementProxy = mockStatementProxy(returnValueColumnLabels, afterReturnValue, columnMetas, indexMetas);
         mySQLUpdateJoinExecutor.statementProxy = afterMockStatementProxy;
-        TableRecords afterImage = mySQLUpdateJoinExecutor.afterImage(beforeImage);
+        MultiTableRecords afterImage = (MultiTableRecords) mySQLUpdateJoinExecutor.afterImage(beforeImage);
         Assertions.assertDoesNotThrow(()->mySQLUpdateJoinExecutor.prepareUndoLog(beforeImage, afterImage));
     }
 

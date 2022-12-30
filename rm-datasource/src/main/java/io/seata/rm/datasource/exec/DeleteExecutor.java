@@ -37,7 +37,7 @@ import io.seata.sqlparser.SQLRecognizer;
  * @param <T> the type parameter
  * @param <S> the type parameter
  */
-public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S,TableRecords> {
 
     /**
      * Instantiates a new Delete executor.

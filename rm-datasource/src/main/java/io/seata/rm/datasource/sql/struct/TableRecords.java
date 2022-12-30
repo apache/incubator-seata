@@ -45,7 +45,7 @@ import static io.seata.rm.datasource.util.OffsetTimeUtils.timeToOffsetDateTime;
  *
  * @author sharajava
  */
-public class TableRecords implements java.io.Serializable {
+public class TableRecords extends TableRecordsAware implements java.io.Serializable {
 
     private static final long serialVersionUID = 4441667803166771721L;
 

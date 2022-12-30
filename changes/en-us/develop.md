@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### optimize:
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
+- [[#5219](https://github.com/seata/seata/pull/5219)] optimize executor image return type to be compatible with single table and multiple tables
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx

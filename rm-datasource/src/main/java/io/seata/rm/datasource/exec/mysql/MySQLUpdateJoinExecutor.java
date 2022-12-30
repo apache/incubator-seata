@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,20 +28,21 @@ import java.util.StringJoiner;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.protocol.Version;
 import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.exec.UpdateExecutor;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.MultiTableRecords;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.exec.UpdateExecutor;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.exec.AbstractDMLBaseExecutor;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.sqlparser.util.ColumnUtils;
@@ -54,13 +54,12 @@ import org.slf4j.LoggerFactory;
 /**
  * @author renliangyu857
  */
-public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
+public class MySQLUpdateJoinExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S,MultiTableRecords> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUpdateJoinExecutor.class);
     private static final String DOT = ".";
-    private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
-    private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
     private final boolean isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
     private String sqlMode = "";
+    private final UpdateExecutor<T,S> updateExecutor;
 
     /**
      * Instantiates a new Update executor.
@@ -72,15 +71,17 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     public MySQLUpdateJoinExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
         SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+        updateExecutor = new UpdateExecutor<>(statementProxy, statementCallback, null);
     }
 
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    protected MultiTableRecords beforeImage() throws SQLException {
+        MultiTableRecords result = new MultiTableRecords();
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
         // update join sql,like update t1 inner join t2 on t1.id = t2.id set t1.name = ?; tableItems = {"update t1 inner join t2","t1","t2"}
-        String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
+        String[] tableItems = tableNames.split(SQLUpdateRecognizer.MULTI_TABLE_NAME_SEPERATOR);
         String joinTable = tableItems[0];
         final int itemTableIndex = 1;
         String suffixCommonCondition = buildBeforeImageSQLCommonConditionSuffix(paramAppenderList);
@@ -91,9 +92,9 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             }
             String selectSQL = buildBeforeImageSQL(joinTable, tableItems[i], suffixCommonCondition, itemTableUpdateColumns);
             TableRecords tableRecords = buildTableRecords(getTableMeta(tableItems[i]), selectSQL, paramAppenderList);
-            beforeImagesMap.put(tableItems[i], tableRecords);
+            result.addTableRecords(tableRecords);
         }
-        return null;
+        return result;
     }
 
     private String buildBeforeImageSQLCommonConditionSuffix(ArrayList<List<Object>> paramAppenderList) {
@@ -130,7 +131,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix.append(GROUP_BY);
         List<String> pkColumnNames = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        List<String> needUpdateColumns = updateExecutor.getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
@@ -141,16 +142,17 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     }
 
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+    protected MultiTableRecords afterImage(MultiTableRecords beforeImage) throws SQLException {
+        MultiTableRecords result = new MultiTableRecords();
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
-        String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
+        String[] tableItems = tableNames.split(SQLUpdateRecognizer.MULTI_TABLE_NAME_SEPERATOR);
         String joinTable = tableItems[0];
         final int itemTableIndex = 1;
         ArrayList<List<Object>> joinConditionParams = new ArrayList<>();
         buildJoinCondition(recognizer,joinConditionParams);
         for (int i = itemTableIndex; i < tableItems.length; i++) {
-            TableRecords tableBeforeImage = beforeImagesMap.get(tableItems[i]);
+            TableRecords tableBeforeImage = beforeImage.getTableRecordsByTableName(tableItems[i]);
             if (tableBeforeImage == null || CollectionUtils.isEmpty(tableBeforeImage.getRows())) {
                 continue;
             }
@@ -160,12 +162,12 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
                 setAfterImageSQLPlaceHolderParams(joinConditionParams,tableBeforeImage.pkRows(), getTableMeta(tableItems[i]).getPrimaryKeyOnlyName(), pst);
                 rs = pst.executeQuery();
                 TableRecords afterImage = TableRecords.buildRecords(getTableMeta(tableItems[i]), rs);
-                afterImagesMap.put(tableItems[i], afterImage);
+                result.addTableRecords(afterImage);
             } finally {
                 IOUtil.close(rs);
             }
         }
-        return null;
+        return result;
     }
 
     private void setAfterImageSQLPlaceHolderParams(ArrayList<List<Object>> joinConditionParams,
@@ -202,7 +204,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix += GROUP_BY;
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        List<String> needUpdateColumns = updateExecutor.getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix += buildGroupBy(pkColumns,needUpdateColumns);
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         for (String needUpdateColumn : needUpdateColumns) {
@@ -232,22 +234,6 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     }
 
     @Override
-    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if (CollectionUtils.isEmpty(beforeImagesMap) || CollectionUtils.isEmpty(afterImagesMap)) {
-            throw new IllegalStateException("images can not be null");
-        }
-        for (Map.Entry<String, TableRecords> entry : beforeImagesMap.entrySet()) {
-            String tableName = entry.getKey();
-            TableRecords tableBeforeImage = entry.getValue();
-            TableRecords tableAfterImage = afterImagesMap.get(tableName);
-            if (tableBeforeImage.getRows().size() != tableAfterImage.getRows().size()) {
-                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
-            }
-            super.prepareUndoLog(tableBeforeImage, tableAfterImage);
-        }
-    }
-
-    @Override
     protected TableMeta getTableMeta(String tableName) {
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         return TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
@@ -261,6 +247,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
      * @param afterImage  the after image
      * @return sql undo log
      */
+    @Override
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();
         String tableName = beforeImage.getTableName();
