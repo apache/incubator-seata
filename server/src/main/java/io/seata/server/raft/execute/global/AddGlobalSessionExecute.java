@@ -20,6 +20,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
@@ -28,6 +29,7 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
+        RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         raftSessionManager.addGlobalSession(globalSession);

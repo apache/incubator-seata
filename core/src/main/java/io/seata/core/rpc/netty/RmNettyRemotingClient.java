@@ -46,11 +46,9 @@ import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
 import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
-import io.seata.core.rpc.processor.client.RmModifyLeaderProcessor;
 import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT;
@@ -81,12 +79,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
-            // Found one or more resources that were registered before initialization
-            if (resourceManager != null
-                    && !resourceManager.getManagedResources().isEmpty()
-                    && StringUtils.isNotBlank(transactionServiceGroup)) {
-                initConnection();
-            }
         }
     }
 
@@ -213,7 +205,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
 
         if (getClientChannelManager().getChannels().isEmpty()) {
-            initConnection();
             return;
         }
         synchronized (getClientChannelManager().getChannels()) {
@@ -312,7 +303,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         // 2.registry rm client handle branch rollback processor
         RmBranchRollbackProcessor rmBranchRollbackProcessor = new RmBranchRollbackProcessor(getTransactionMessageHandler(), this);
         super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK, rmBranchRollbackProcessor, messageExecutor);
-        super.registerProcessor(MessageType.TYPE_NOTIFY_LEADER, new RmModifyLeaderProcessor(), messageExecutor);
         // 3.registry rm handler undo log processor
         RmUndoLogProcessor rmUndoLogProcessor = new RmUndoLogProcessor(getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_RM_DELETE_UNDOLOG, rmUndoLogProcessor, messageExecutor);
@@ -320,7 +310,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         ClientOnResponseProcessor onResponseProcessor =
             new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
-        super.registerProcessor(MessageType.TYPE_RAFT_METADATA_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor, null);
@@ -329,11 +318,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         // 5.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
-    }
-
-    private void initConnection() {
-        getClientChannelManager().reconnect(transactionServiceGroup);
-        super.initClusterMetaData();
     }
 
 }

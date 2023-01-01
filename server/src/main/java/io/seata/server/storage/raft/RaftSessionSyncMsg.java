@@ -15,10 +15,10 @@
  */
 package io.seata.server.storage.raft;
 
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
+
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * @author funkye
@@ -31,21 +31,13 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
 
     private BranchTransactionDO branchSession;
 
-    private GlobalStatus globalStatus;
-
-    private BranchStatus branchStatus;
+    private String group = DEFAULT_SEATA_GROUP;
 
     private MsgType msgType;
 
     public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
         this.globalSession = globalSession;
-    }
-
-    public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession, GlobalStatus globalStatus) {
-        this.msgType = msgType;
-        this.globalSession = globalSession;
-        this.globalStatus = globalStatus;
     }
 
     public RaftSessionSyncMsg(MsgType msgType, BranchTransactionDO branchSession) {
@@ -60,12 +52,6 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
     }
 
     public RaftSessionSyncMsg() {}
-
-    public RaftSessionSyncMsg(MsgType msgType, BranchTransactionDO branchSession, BranchStatus branchStatus) {
-        this.msgType = msgType;
-        this.branchSession = branchSession;
-        this.branchStatus = branchStatus;
-    }
 
     public GlobalTransactionDO getGlobalSession() {
         return globalSession;
@@ -83,28 +69,20 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
         this.branchSession = branchSession;
     }
 
-    public GlobalStatus getGlobalStatus() {
-        return globalStatus;
-    }
-
-    public void setGlobalStatus(GlobalStatus globalStatus) {
-        this.globalStatus = globalStatus;
-    }
-
-    public BranchStatus getBranchStatus() {
-        return branchStatus;
-    }
-
-    public void setBranchStatus(BranchStatus branchStatus) {
-        this.branchStatus = branchStatus;
-    }
-
     public MsgType getMsgType() {
         return this.msgType;
     }
 
     public void setMsgType(MsgType msgType) {
         this.msgType = msgType;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public enum MsgType {
@@ -149,7 +127,7 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
     @Override
     public String toString() {
         return "RaftSessionSyncMsg{" + "globalSession=" + globalSession + ", branchSession=" + branchSession
-            + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", msgType=" + msgType.name() + '}';
+            + ", group='" + group + '\'' + ", msgType=" + msgType + '}';
     }
-    
+
 }

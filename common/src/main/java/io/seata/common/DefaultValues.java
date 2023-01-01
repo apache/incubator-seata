@@ -41,7 +41,7 @@ public interface DefaultValues {
     String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
     boolean DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = false;
     boolean DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = false;
-    String DEFAULT_RAFT_SERIALIZATION = "fst";
+    String DEFAULT_RAFT_SERIALIZATION = "kryo";
     String DEFAULT_RAFT_COMPRESSOR = "none";
 
     /**
@@ -124,7 +124,7 @@ public interface DefaultValues {
     String DEFAULT_LOAD_BALANCE = "XID";
     int VIRTUAL_NODES_DEFAULT = 10;
 
-    String SEATA_RAFT_GROUP = "default";
+    String DEFAULT_SEATA_GROUP = "default";
 
     /**
      * the constant DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE

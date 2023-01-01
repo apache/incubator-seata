@@ -18,8 +18,6 @@ package io.seata.serializer.seata;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import io.seata.core.protocol.client.ClusterMetaDataRequest;
-import io.seata.core.protocol.client.ClusterMetaDataResponse;
 import io.seata.serializer.seata.protocol.BatchResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
@@ -47,12 +45,8 @@ import io.seata.serializer.seata.protocol.transaction.GlobalRollbackRequestCodec
 import io.seata.serializer.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.ClusterMetaDataRequestCodec;
-import io.seata.serializer.seata.protocol.transaction.ClusterMetaDataResponseCodec;
-import io.seata.serializer.seata.protocol.transaction.LeaderNotifyRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.LeaderNotifyRequest;
 import io.seata.core.protocol.BatchResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
@@ -189,8 +183,6 @@ public class MessageCodecFactory {
                 return new BranchReportRequestCodec();
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequestCodec();
-            case MessageType.TYPE_RAFT_METADATA:
-                return new ClusterMetaDataRequestCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -216,8 +208,6 @@ public class MessageCodecFactory {
                 return new GlobalLockQueryResponseCodec();
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponseCodec();
-            case MessageType.TYPE_RAFT_METADATA_RESULT:
-                return new ClusterMetaDataResponseCodec();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponseCodec();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:
@@ -226,8 +216,6 @@ public class MessageCodecFactory {
                 return new BranchRollbackResponseCodec();
             case MessageType.TYPE_RM_DELETE_UNDOLOG:
                 return new UndoLogDeleteRequestCodec();
-            case MessageType.TYPE_NOTIFY_LEADER:
-                return new LeaderNotifyRequestCodec();
             case MessageType.TYPE_GLOBAL_REPORT_RESULT:
                 return new GlobalReportResponseCodec();
             default:
@@ -270,9 +258,6 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_RM_DELETE_UNDOLOG:
                 abstractMessage = new UndoLogDeleteRequest();
-                break;
-            case MessageType.TYPE_NOTIFY_LEADER:
-                abstractMessage = new LeaderNotifyRequest();
                 break;
             case MessageType.TYPE_GLOBAL_REPORT:
                 abstractMessage = new GlobalReportRequest();
@@ -327,8 +312,6 @@ public class MessageCodecFactory {
                 return new BranchReportRequest();
             case MessageType.TYPE_GLOBAL_REPORT:
                 return new GlobalReportRequest();
-            case MessageType.TYPE_RAFT_METADATA:
-                return new ClusterMetaDataRequest();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -354,8 +337,6 @@ public class MessageCodecFactory {
                 return new GlobalLockQueryResponse();
             case MessageType.TYPE_BRANCH_REGISTER_RESULT:
                 return new BranchRegisterResponse();
-            case MessageType.TYPE_RAFT_METADATA_RESULT:
-                return new ClusterMetaDataResponse();
             case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
                 return new BranchReportResponse();
             case MessageType.TYPE_BRANCH_COMMIT_RESULT:

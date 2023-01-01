@@ -26,6 +26,10 @@ public enum RegistryType {
      */
     File,
     /**
+     * Seata registry type.
+     */
+    Seata,
+    /**
      * ZK registry type.
      */
     ZK,

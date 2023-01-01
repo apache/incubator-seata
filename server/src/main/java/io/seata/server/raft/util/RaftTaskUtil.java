@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.storage.raft;
+package io.seata.server.raft.util;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -27,6 +27,7 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.raft.msg.RaftSyncMsgSerializer;
 import io.seata.server.raft.msg.RaftSyncMsg;
+import io.seata.server.storage.raft.RaftSessionSyncMsg;
 
 /**
  * @author funkye

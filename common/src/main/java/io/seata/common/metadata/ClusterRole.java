@@ -13,27 +13,39 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.loadbalance;
+package io.seata.common.metadata;
 
-import java.util.List;
-
-/**
- * The interface Load balance.
- *
- * @author slievrly
- */
-public interface LoadBalance {
-
-    String SPLIT = ":";
+public enum ClusterRole {
 
     /**
-     * Select t.
-     *
-     * @param <T>      the type parameter
-     * @param invokers the invokers
-     * @param xid      the xid
-     * @return the t
-     * @throws Exception the exception
+     * raft mode leader
      */
-    <T> T select(List<T> invokers, String xid) throws Exception;
+    LEADER(0),
+    /**
+     * raft mode follower
+     */
+    FOLLOWER(1),
+    /**
+     * raft mode learner
+     */
+    LEARNER(2),
+    /**
+     * cluster mode member
+     */
+    MEMBER(3);
+    
+    private int roleCode;
+
+    ClusterRole(int roleCode) {
+        this.roleCode = roleCode;
+    }
+
+    public int getRoleCode() {
+        return roleCode;
+    }
+
+    public void setRoleCode(int roleCode) {
+        this.roleCode = roleCode;
+    }
+
 }

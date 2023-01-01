@@ -46,9 +46,9 @@ public class ServerRaftProperties {
 
     private boolean reporterEnabled = false;
 
-    private Integer reporterInitialDelay = 30;
+    private Integer reporterInitialDelay = 60;
 
-    private String serialization = "fst";
+    private String serialization = "kryo";
 
     private String compressor = "none";
 

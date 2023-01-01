@@ -37,7 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_CLUSTER;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
@@ -107,7 +107,7 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
                 Node node = getNode();
                 if (node != null && node.isLeader()) {
                     CliService cliService = getCliService();
-                    cliService.changePeers(SEATA_RAFT_GROUP, getNode().getOptions().getInitialConf(), newConf);
+                    cliService.changePeers(DEFAULT_SEATA_GROUP, getNode().getOptions().getInitialConf(), newConf);
                 }
             }
         }

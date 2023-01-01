@@ -125,8 +125,8 @@ seata:
       disruptor-buffer-size: 16384
       election-timeout-ms: 1000
       reporter-enabled: false
-      reporter-initial-delay: 30
-      serialization: fst
+      reporter-initial-delay: 60
+      serialization: kryo
       compressor: none
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1

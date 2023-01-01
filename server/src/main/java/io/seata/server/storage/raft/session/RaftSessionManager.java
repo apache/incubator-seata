@@ -31,7 +31,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.RaftTaskUtil;
+import io.seata.server.raft.util.RaftTaskUtil;
 
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
@@ -100,8 +100,9 @@ public class RaftSessionManager extends FileSessionManager {
             }
         };
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(globalSession.getXid());
+        globalTransactionDO.setStatus(globalStatus.getCode());
         RaftSessionSyncMsg raftSyncMsg =
-            new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, globalStatus);
+            new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
@@ -119,8 +120,9 @@ public class RaftSessionManager extends FileSessionManager {
             }
         };
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
+        branchTransactionDO.setStatus(branchStatus.getCode());
         RaftSessionSyncMsg raftSyncMsg =
-                new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
+                new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
