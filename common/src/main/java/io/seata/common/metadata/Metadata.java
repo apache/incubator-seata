@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 
 
@@ -34,6 +35,8 @@ public class Metadata {
     private final Map<String, Node> leaders = new HashMap<>();
     private final Map<String, Long> leaderUpdateTimes = new HashMap<>();
     private final Map<String, List<Node>> nodes = new HashMap<>();
+
+    private StoreMode storeMode = StoreMode.FILE;
 
     public Node getLeader() {
         return getLeader(DEFAULT_SEATA_GROUP);
@@ -93,6 +96,14 @@ public class Metadata {
 
     public Set<String> groups() {
         return nodes.keySet();
+    }
+
+    public StoreMode getStoreMode() {
+        return storeMode;
+    }
+
+    public void setStoreMode(StoreMode storeMode) {
+        this.storeMode = storeMode;
     }
 
     @Override

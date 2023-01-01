@@ -32,6 +32,7 @@ import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import io.seata.common.store.StoreMode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -98,14 +99,16 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
-        EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
-        EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
-        EXECUTES.put(REMOVE_BRANCH_SESSION, new RemoveBranchSessionExecute());
-        EXECUTES.put(UPDATE_GLOBAL_SESSION_STATUS, new UpdateGlobalSessionExecute());
-        EXECUTES.put(RELEASE_GLOBAL_SESSION_LOCK, new GlobalReleaseLockExecute());
-        EXECUTES.put(REMOVE_GLOBAL_SESSION, new RemoveGlobalSessionExecute());
-        EXECUTES.put(UPDATE_BRANCH_SESSION_STATUS, new UpdateBranchSessionExecute());
-        EXECUTES.put(RELEASE_BRANCH_SESSION_LOCK, new BranchReleaseLockExecute());
+        if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
+            EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
+            EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
+            EXECUTES.put(REMOVE_BRANCH_SESSION, new RemoveBranchSessionExecute());
+            EXECUTES.put(UPDATE_GLOBAL_SESSION_STATUS, new UpdateGlobalSessionExecute());
+            EXECUTES.put(RELEASE_GLOBAL_SESSION_LOCK, new GlobalReleaseLockExecute());
+            EXECUTES.put(REMOVE_GLOBAL_SESSION, new RemoveGlobalSessionExecute());
+            EXECUTES.put(UPDATE_BRANCH_SESSION_STATUS, new UpdateBranchSessionExecute());
+            EXECUTES.put(RELEASE_BRANCH_SESSION_LOCK, new BranchReleaseLockExecute());
+        }
     }
 
     @Override

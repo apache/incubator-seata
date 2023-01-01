@@ -135,6 +135,8 @@ public class RedisSessionManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setClientId("storage-server:192.168.158.80:11934");
+        System.out.println(globalSession.encode().length);
+        System.out.println(branchSession.encode().length);
         sessionManager.addBranchSession(globalSession,branchSession);
 
         sessionManager.removeBranchSession(globalSession,branchSession);

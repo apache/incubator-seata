@@ -24,7 +24,7 @@ import io.seata.common.loader.LoadLevel;
 public class SeataRegistryProvider implements RegistryProvider {
 
     @Override
-    public RegistryService provide() {
+    public RegistryService<?> provide() {
         return SeataRegistryServiceImpl.getInstance();
     }
 }

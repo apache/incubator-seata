@@ -219,6 +219,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                             }
                             METADATA.setNodes(group, list);
                         }
+
                     }
                 }
             }
