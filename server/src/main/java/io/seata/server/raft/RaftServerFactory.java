@@ -58,7 +58,7 @@ public class RaftServerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerFactory.class);
 
-    private static final Map<String/*group*/,RaftServer/*raft-group-cluster*/> RAFT_SERVER_MAP = new HashMap<>();
+    private static final Map<String/*group*/, RaftServer/*raft-group-cluster*/> RAFT_SERVER_MAP = new HashMap<>();
 
     private Boolean raftMode = false;
 
@@ -105,8 +105,8 @@ public class RaftServerFactory {
         try {
             // as the foundation for multi raft group in the future
             RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_GROUP, serverId, nodeOptions);
-            RAFT_SERVER_MAP.put(DEFAULT_SEATA_GROUP,raftServer );
-           RaftStateMachine stateMachine = raftServer.getRaftStateMachine();
+            RAFT_SERVER_MAP.put(DEFAULT_SEATA_GROUP, raftServer);
+            RaftStateMachine stateMachine = raftServer.getRaftStateMachine();
             LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
@@ -204,7 +204,7 @@ public class RaftServerFactory {
     private static class SingletonHandler {
         private static final RaftServerFactory INSTANCE = new RaftServerFactory();
         private static final CliService CLI_SERVICE = RaftServiceFactory.createAndInitCliService(new CliOptions());
-        private static final CliClientServiceImpl CLI_CLIENT_SERVICE = new CliClientServiceImpl();
+        private static final CliClientService CLI_CLIENT_SERVICE = new CliClientServiceImpl();
         static {
             CLI_CLIENT_SERVICE.init(new CliOptions());
         }

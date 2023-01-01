@@ -31,6 +31,7 @@ import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.SingleResult;
+import io.seata.server.raft.RaftServer;
 import io.seata.server.raft.RaftServerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +54,10 @@ public class ClusterController {
     @GetMapping("/cluster")
     public MetadataResponse cluster(String group) {
         String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
-        MetadataResponse metadataResponse=new MetadataResponse();
+        MetadataResponse metadataResponse = new MetadataResponse();
         metadataResponse.setMode(mode);
-        if (StringUtils.equalsIgnoreCase(StoreMode.RAFT.getName(), mode)) {
+        RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
+        if (raftServer != null) {
             String currentConf = ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_CLUSTER);
             if (!StringUtils.isBlank(currentConf)) {
                 String raftGroup = StringUtils.isNotBlank(group) ? group : DEFAULT_SEATA_GROUP;
@@ -71,7 +73,7 @@ public class ClusterController {
                     routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), raftGroup, 1000);
                     PeerId leader = routeTable.selectLeader(raftGroup);
                     if (leader != null) {
-                        Set<Node> nodes =new HashSet<>();
+                        Set<Node> nodes = new HashSet<>();
                         Node leaderNode = new Node();
                         leaderNode.setRole(ClusterRole.LEADER);
                         leaderNode.setGroup(raftGroup);
@@ -89,8 +91,7 @@ public class ClusterController {
                             Node node = new Node();
                             node.setGroup(raftGroup);
                             node.setRole(ClusterRole.FOLLOWER);
-                            node.setAddress(
-                                    follower.getIp() + ":" + (follower.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
+                            node.setAddress(follower.getIp() + ":" + (follower.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
                             return node;
                         }).collect(Collectors.toList()));
                         metadataResponse.setNodes(new ArrayList<>(nodes));

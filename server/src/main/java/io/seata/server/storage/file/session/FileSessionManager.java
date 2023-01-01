@@ -76,9 +76,9 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
      */
     public FileSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
-        if (StringUtils.isNotBlank(sessionStoreFilePath)) {
-            transactionStoreManager = new FileTransactionStoreManager(
-                sessionStoreFilePath + File.separator + name, this);
+        if (StringUtils.isNotBlank(sessionStoreFilePath) && write) {
+            transactionStoreManager =
+                new FileTransactionStoreManager(sessionStoreFilePath + File.separator + name, this);
         } else {
             transactionStoreManager = new AbstractTransactionStoreManager() {
                 @Override

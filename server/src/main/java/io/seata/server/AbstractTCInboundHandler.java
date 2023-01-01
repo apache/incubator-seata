@@ -44,6 +44,7 @@ import io.seata.core.protocol.transaction.TCInboundHandler;
 import io.seata.core.rpc.RpcContext;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -375,7 +376,9 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
     }
 
     public void setPrevent(boolean prevent) {
-        this.prevent = prevent;
+        if (StoreConfig.getSessionMode() == StoreConfig.SessionMode.RAFT) {
+            this.prevent = prevent;
+        }
     }
     
 }

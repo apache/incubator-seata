@@ -34,6 +34,7 @@ import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.Metadata;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
+import io.seata.common.store.StoreMode;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -133,13 +134,14 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             // Refresh the metadata by initializing the address
             acquireClusterMetaData(clusterName);
         }
-        Node leader = METADATA.getLeader(clusterName);
-        // leader is not empty, it must be raft mode
-        if (leader != null) {
-            String[] address = leader.getAddress().split(IP_PORT_SPLIT_CHAR);
-            String ip = address[0];
-            int port = Integer.parseInt(address[1]);
-            return Collections.singletonList(new InetSocketAddress(ip, port));
+        if (METADATA.isRaftMode()) {
+            Node leader = METADATA.getLeader(clusterName);
+            if (leader != null) {
+                String[] address = leader.getAddress().split(IP_PORT_SPLIT_CHAR);
+                String ip = address[0];
+                int port = Integer.parseInt(address[1]);
+                return Collections.singletonList(new InetSocketAddress(ip, port));
+            }
         } else {
             List<Node> nodes = METADATA.getNodes(clusterName);
             if (CollectionUtils.isNotEmpty(nodes)) {
@@ -217,6 +219,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                                 }
                                 list.add(node);
                             }
+                            METADATA.setStoreMode(StoreMode.get(metadataResponse.getMode()));
                             METADATA.setNodes(group, list);
                         }
 
