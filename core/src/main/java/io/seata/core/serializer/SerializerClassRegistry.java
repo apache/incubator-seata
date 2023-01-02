@@ -15,7 +15,6 @@
  */
 package io.seata.core.serializer;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
