@@ -74,7 +74,6 @@ public class Metadata {
         this.leaders.put(group, leader);
     }
 
-
     public List<Node> getNodes() {
         return getNodes(DEFAULT_SEATA_GROUP);
     }

@@ -17,7 +17,6 @@ package io.seata.server.controller;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,10 +26,8 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
-import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.console.result.SingleResult;
 import io.seata.server.raft.RaftServer;
 import io.seata.server.raft.RaftServerFactory;
 import org.slf4j.Logger;

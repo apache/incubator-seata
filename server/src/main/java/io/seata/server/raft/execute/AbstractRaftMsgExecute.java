@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.lock.RaftLockManager;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen

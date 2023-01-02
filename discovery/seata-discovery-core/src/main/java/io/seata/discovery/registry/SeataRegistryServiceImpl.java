@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataRegistryServiceImpl.class);
     private static volatile SeataRegistryServiceImpl instance;
-    private static final RegistryService<?> registryService = FileRegistryServiceImpl.getInstance();
+    private static final RegistryService<?> FILE_REGISTRY_SERVICE = FileRegistryServiceImpl.getInstance();
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
     private static final Map<String, List<InetSocketAddress>> INIT_ADDRESSES = new HashMap<>();
@@ -125,12 +125,12 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         if (clusterName == null) {
             return null;
         }
-        if(!METADATA.containsGroup(clusterName)){
-            List<InetSocketAddress> list = registryService.lookup(key);
-            if(CollectionUtils.isEmpty(list)){
+        if (!METADATA.containsGroup(clusterName)) {
+            List<InetSocketAddress> list = FILE_REGISTRY_SERVICE.lookup(key);
+            if (CollectionUtils.isEmpty(list)) {
                 return null;
             }
-            INIT_ADDRESSES.put(clusterName,list);
+            INIT_ADDRESSES.put(clusterName, list);
             // Refresh the metadata by initializing the address
             acquireClusterMetaData(clusterName);
         }
@@ -151,7 +151,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         return Collections.emptyList();
     }
 
-    private InetSocketAddress convertInetSocketAddress(Node node){
+    private InetSocketAddress convertInetSocketAddress(Node node) {
         String[] address = node.getAddress().split(IP_PORT_SPLIT_CHAR);
         String ip = address[0];
         int port = Integer.parseInt(address[1]);
@@ -162,7 +162,6 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     public void close() throws Exception {
 
     }
-
 
     protected static void startQueryMetadata() {
         ScheduledThreadPoolExecutor findLeaderExecutor =
