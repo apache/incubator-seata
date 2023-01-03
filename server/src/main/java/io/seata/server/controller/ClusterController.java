@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
@@ -110,13 +112,19 @@ public class ClusterController {
     }
 
     @GetMapping("/watch")
-    public void watch(HttpServletRequest request, @RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String group,
-        @RequestParam(defaultValue = "30000") int timeout) {
+    public void watch(HttpServletRequest request, @RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String groupIds,
+        @RequestParam(defaultValue = "29000") int timeout, Long lastUpdateTime) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        Watcher<AsyncContext> watcher = new Watcher<>(group, context, timeout);
-        clusterWatcherManager.registryWatcher(watcher);
+        for (String group : groupIds.split(",")) {
+            Watcher<AsyncContext> watcher = new Watcher<>(group, context, timeout, lastUpdateTime);
+            boolean success = clusterWatcherManager.registryWatcher(watcher);
+            if (!success) {
+                HttpServletResponse httpServletResponse = (HttpServletResponse)watcher.getAsyncContext().getResponse();
+                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+                context.complete();
+            }
+        }
     }
-
 
 }

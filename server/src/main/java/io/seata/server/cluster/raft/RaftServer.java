@@ -55,8 +55,9 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
 
     public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions)
         throws IOException {
+        String groupPath = dataPath + File.separator + groupId;
         // Initialization path
-        FileUtils.forceMkdir(new File(dataPath));
+        FileUtils.forceMkdir(new File(groupPath));
 
         // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this separately
         final RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
@@ -66,11 +67,11 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
         nodeOptions.setFsm(this.raftStateMachine);
         // Set the storage path
         // Log, must
-        nodeOptions.setLogUri(dataPath + File.separator + "log");
+        nodeOptions.setLogUri(groupPath + File.separator + "log");
         // Meta information, must
-        nodeOptions.setRaftMetaUri(dataPath + File.separator + "raft_meta");
+        nodeOptions.setRaftMetaUri(groupPath + File.separator + "raft_meta");
         // Snapshot, optional, is generally recommended
-        nodeOptions.setSnapshotUri(dataPath + File.separator + "snapshot");
+        nodeOptions.setSnapshotUri(groupPath + File.separator + "snapshot");
         boolean reporterEnabled = ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
         nodeOptions.setEnableMetrics(reporterEnabled);
         // Initialize the raft Group service framework

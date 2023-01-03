@@ -16,6 +16,7 @@
 package io.seata.server.cluster.manager;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -28,6 +29,8 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
 import io.seata.server.cluster.listener.ClusterChangeListener;
 import io.seata.server.cluster.watch.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -42,6 +45,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private static final Map<String, Queue<Watcher<?>>> WATCHERS = new ConcurrentHashMap<>();
 
+    private static final Map<String, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
+
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
 
@@ -49,25 +54,26 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     public void init() {
         // Responds to monitors that time out
         scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
-            Queue<Watcher<?>> watchers = WATCHERS.remove(DEFAULT_SEATA_GROUP);
-            watchers.parallelStream().forEach(watcher -> {
-                if (!watcher.isDone()
-                    && (System.currentTimeMillis() - watcher.getCreateTime() > watcher.getTimeout())) {
-                    HttpServletResponse httpServletResponse = (HttpServletResponse)watcher.getAsyncContext();
-                    synchronized (httpServletResponse) {
-                        if (!watcher.isDone()
-                            && (System.currentTimeMillis() - watcher.getCreateTime() > watcher.getTimeout())) {
-                            watcher.setDone(true);
-                            httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            ((AsyncContext)watcher.getAsyncContext()).complete();
+            for (String group : WATCHERS.keySet()) {
+                Optional.ofNullable(WATCHERS.remove(group))
+                    .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
+                        if (!watcher.isDone() && (System.currentTimeMillis() > watcher.getTimeout())) {
+                            HttpServletResponse httpServletResponse =
+                                (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
+                            synchronized (httpServletResponse) {
+                                if (!watcher.isDone() && (System.currentTimeMillis() > watcher.getTimeout())) {
+                                    watcher.setDone(true);
+                                    httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                                    ((AsyncContext)watcher.getAsyncContext()).complete();
+                                }
+                            }
                         }
-                    }
-                }
-                if (!watcher.isDone()) {
-                    // Re-register
-                    registryWatcher(watcher);
-                }
-            });
+                        if (!watcher.isDone()) {
+                            // Re-register
+                            registryWatcher(watcher);
+                        }
+                    }));
+            }
         }, 1, 1, TimeUnit.SECONDS);
     }
 
@@ -75,25 +81,34 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @EventListener
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
+        GROUP_UPDATE_TIME.put(event.getGroup(), System.currentTimeMillis());
         // Notifications are made of changes in cluster information
-        Queue<Watcher<?>> watchers = WATCHERS.remove(event.getGroup());
-        watchers.parallelStream().forEach(watcher -> {
-            if (!watcher.isDone() && (System.currentTimeMillis() - watcher.getCreateTime() < watcher.getTimeout())) {
-                HttpServletResponse httpServletResponse = (HttpServletResponse)watcher.getAsyncContext();
-                synchronized (httpServletResponse) {
-                    if (!watcher.isDone()
-                        && (System.currentTimeMillis() - watcher.getCreateTime() < watcher.getTimeout())) {
-                        watcher.setDone(true);
-                        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-                        ((AsyncContext)watcher.getAsyncContext()).complete();
+        Optional.ofNullable(WATCHERS.remove(event.getGroup())).ifPresent(watchers -> {
+            watchers.parallelStream().forEach(watcher -> {
+                if (!watcher.isDone() && System.currentTimeMillis() < watcher.getTimeout()) {
+                    HttpServletResponse httpServletResponse =
+                        (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
+                    synchronized (httpServletResponse) {
+                        if (!watcher.isDone() && System.currentTimeMillis() < watcher.getTimeout()) {
+                            watcher.setDone(true);
+                            httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+                            ((AsyncContext)watcher.getAsyncContext()).complete();
+                        }
                     }
                 }
-            }
+            });
         });
     }
 
-    public void registryWatcher(Watcher<?> watcher) {
-        WATCHERS.computeIfAbsent(DEFAULT_SEATA_GROUP, value -> new ConcurrentLinkedQueue<>()).add(watcher);
+    public boolean registryWatcher(Watcher<?> watcher) {
+        String group = watcher.getGroup();
+        Long lastChangeTime = GROUP_UPDATE_TIME.get(group);
+        if (lastChangeTime == null || watcher.getLastUpdateTime() >= lastChangeTime) {
+            WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>()).add(watcher);
+        } else {
+            return false;
+        }
+        return true;
     }
 
 }

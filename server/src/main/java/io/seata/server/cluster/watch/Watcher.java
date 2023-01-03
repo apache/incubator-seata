@@ -28,16 +28,17 @@ public class Watcher<T> {
 
     private T asyncContext;
 
-    private int timeout;
+    private long timeout;
 
-    private long createTime = System.currentTimeMillis();
+    private long lastUpdateTime;
 
     private String protocol = HTTP;
 
-    public Watcher(String group, T asyncContext, int timeout) {
+    public Watcher(String group, T asyncContext, int timeout, long lastUpdateTime) {
         this.group = group;
         this.asyncContext = asyncContext;
-        this.timeout = timeout;
+        this.timeout = System.currentTimeMillis() + timeout;
+        this.lastUpdateTime = lastUpdateTime;
     }
 
     public String getGroup() {
@@ -64,11 +65,11 @@ public class Watcher<T> {
         this.asyncContext = asyncContext;
     }
 
-    public int getTimeout() {
+    public long getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(int timeout) {
+    public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
 
@@ -80,12 +81,12 @@ public class Watcher<T> {
         this.protocol = protocol;
     }
 
-    public long getCreateTime() {
-        return createTime;
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
     }
 
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
     }
 
     public interface Protocol {

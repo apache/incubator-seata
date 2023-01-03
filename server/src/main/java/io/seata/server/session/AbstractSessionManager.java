@@ -49,11 +49,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     protected String name;
 
     /**
-     * The Name.
-     */
-    protected static volatile boolean write = true;
-
-    /**
      * Instantiates a new Abstract session manager.
      */
     public AbstractSessionManager() {
@@ -163,7 +158,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
-        if (write && !transactionStoreManager.writeSession(logOperation, sessionStorable)) {
+        if (!transactionStoreManager.writeSession(logOperation, sessionStorable)) {
             if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
                 throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
                     "Fail to store global session");

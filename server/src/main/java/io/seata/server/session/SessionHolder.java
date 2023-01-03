@@ -130,7 +130,7 @@ public class SessionHolder {
             }
             if (SessionMode.RAFT.equals(sessionMode)) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
-                        new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                        new Object[] {ROOT_SESSION_MANAGER_NAME});
             } else {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                         new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});

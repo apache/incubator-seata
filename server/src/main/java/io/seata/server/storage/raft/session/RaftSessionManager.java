@@ -46,9 +46,8 @@ import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.UPDATE_GLO
 @LoadLevel(name = "raft", scope = Scope.PROTOTYPE)
 public class RaftSessionManager extends FileSessionManager {
 
-    public RaftSessionManager(String name, String sessionStoreFilePath) throws IOException {
-        super(name, sessionStoreFilePath);
-        write = false;
+    public RaftSessionManager(String name) throws IOException {
+        super(name);
     }
 
     @Override

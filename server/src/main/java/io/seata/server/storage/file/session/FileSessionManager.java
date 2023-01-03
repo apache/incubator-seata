@@ -62,10 +62,27 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE);
+
     /**
      * The Session map.
      */
     private Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<>();
+
+
+    /**
+     * Instantiates a new File based session manager.
+     *
+     * @param name the name
+     */
+    public FileSessionManager(String name) {
+        super(name);
+        transactionStoreManager = new AbstractTransactionStoreManager() {
+            @Override
+            public boolean writeSession(LogOperation logOperation, SessionStorable session) {
+                return true;
+            }
+        };
+    }
 
     /**
      * Instantiates a new File based session manager.
@@ -76,7 +93,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
      */
     public FileSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
-        if (StringUtils.isNotBlank(sessionStoreFilePath) && write) {
+        if (StringUtils.isNotBlank(sessionStoreFilePath)) {
             transactionStoreManager =
                 new FileTransactionStoreManager(sessionStoreFilePath + File.separator + name, this);
         } else {
