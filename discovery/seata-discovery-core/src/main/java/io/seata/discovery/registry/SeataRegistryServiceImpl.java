@@ -24,8 +24,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -75,7 +78,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
         new PoolingHttpClientConnectionManager();
 
-    private static volatile ScheduledThreadPoolExecutor FIND_LEADER_EXECUTOR;
+    private static volatile ThreadPoolExecutor FIND_LEADER_EXECUTOR;
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
@@ -97,8 +100,8 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                 if (instance == null) {
                     instance = new SeataRegistryServiceImpl();
                     startQueryMetadata();
-                    FIND_LEADER_EXECUTOR =
-                        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("queryMetadata", 1, true));
+                    FIND_LEADER_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(), new NamedThreadFactory("queryMetadata", 1, true));
                 }
             }
         }
@@ -158,7 +161,6 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     @Override
     public void close() throws Exception {
-
     }
 
     private static boolean watch() {
