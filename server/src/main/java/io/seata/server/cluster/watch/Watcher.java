@@ -22,75 +22,75 @@ import static io.seata.server.cluster.watch.Watcher.Protocol.HTTP;
  */
 public class Watcher<T> {
 
-	private String group;
+    private String group;
 
-	private volatile boolean done = false;
+    private volatile boolean done = false;
 
-	private T asyncContext;
+    private T asyncContext;
 
-	private int timeout;
+    private int timeout;
 
-	private long createTime = System.currentTimeMillis();
+    private long createTime = System.currentTimeMillis();
 
-	private String protocol = HTTP;
+    private String protocol = HTTP;
 
-	public Watcher(String group, T asyncContext, int timeout) {
-		this.group = group;
-		this.asyncContext = asyncContext;
-		this.timeout = timeout;
-	}
+    public Watcher(String group, T asyncContext, int timeout) {
+        this.group = group;
+        this.asyncContext = asyncContext;
+        this.timeout = timeout;
+    }
 
-	public String getGroup() {
-		return group;
-	}
+    public String getGroup() {
+        return group;
+    }
 
-	public void setGroup(String group) {
-		this.group = group;
-	}
+    public void setGroup(String group) {
+        this.group = group;
+    }
 
-	public boolean isDone() {
-		return done;
-	}
+    public boolean isDone() {
+        return done;
+    }
 
-	public void setDone(boolean done) {
-		this.done = done;
-	}
+    public void setDone(boolean done) {
+        this.done = done;
+    }
 
-	public T getAsyncContext() {
-		return asyncContext;
-	}
+    public T getAsyncContext() {
+        return asyncContext;
+    }
 
-	public void setAsyncContext(T asyncContext) {
-		this.asyncContext = asyncContext;
-	}
+    public void setAsyncContext(T asyncContext) {
+        this.asyncContext = asyncContext;
+    }
 
-	public int getTimeout() {
-		return timeout;
-	}
+    public int getTimeout() {
+        return timeout;
+    }
 
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
-	}
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
 
-	public String getProtocol() {
-		return protocol;
-	}
+    public String getProtocol() {
+        return protocol;
+    }
 
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
 
-	public long getCreateTime() {
-		return createTime;
-	}
+    public long getCreateTime() {
+        return createTime;
+    }
 
-	public void setCreateTime(long createTime) {
-		this.createTime = createTime;
-	}
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
 
-	public interface Protocol {
-		String GRPC = "grpc";
-		String HTTP = "http";
-	}
+    public interface Protocol {
+        String GRPC = "grpc";
+        String HTTP = "http";
+    }
 
 }

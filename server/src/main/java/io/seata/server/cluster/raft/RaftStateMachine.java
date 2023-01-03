@@ -86,6 +86,8 @@ public class RaftStateMachine extends StateMachineAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
     private final String mode;
+    
+    private final String group;
 
     private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
 
@@ -102,7 +104,8 @@ public class RaftStateMachine extends StateMachineAdapter {
         return this.leaderTerm.get() > 0;
     }
 
-    public RaftStateMachine() {
+    public RaftStateMachine(String group) {
+        this.group = group;
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
         if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
             EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
@@ -259,7 +262,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             });
         }
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this));
+            .publishEvent(new ClusterChangeEvent(this, group));
     }
 
     @Override
@@ -279,14 +282,14 @@ public class RaftStateMachine extends StateMachineAdapter {
         super.onStartFollowing(ctx);
         DefaultCoordinator.getInstance().setPrevent(false);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this));
+            .publishEvent(new ClusterChangeEvent(this, group));
     }
 
     @Override
     public void onConfigurationCommitted(Configuration conf) {
         super.onConfigurationCommitted(conf);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this));
+            .publishEvent(new ClusterChangeEvent(this, group));
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) {

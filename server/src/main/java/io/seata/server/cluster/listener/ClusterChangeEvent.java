@@ -23,12 +23,22 @@ import org.springframework.context.ApplicationEvent;
  */
 public class ClusterChangeEvent extends ApplicationEvent {
 
-	public ClusterChangeEvent(Object source) {
-		super(source);
-	}
+    private String group;
 
-	public ClusterChangeEvent(Object source, Clock clock) {
-		super(source, clock);
-	}
+    public ClusterChangeEvent(Object source, String group) {
+        super(source);
+        this.group = group;
+    }
 
+    public ClusterChangeEvent(Object source, Clock clock) {
+        super(source, clock);
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
 }

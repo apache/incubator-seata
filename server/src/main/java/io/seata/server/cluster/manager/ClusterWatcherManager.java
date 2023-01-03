@@ -76,7 +76,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
         // Notifications are made of changes in cluster information
-        Queue<Watcher<?>> watchers = WATCHERS.remove(DEFAULT_SEATA_GROUP);
+        Queue<Watcher<?>> watchers = WATCHERS.remove(event.getGroup());
         watchers.parallelStream().forEach(watcher -> {
             if (!watcher.isDone() && (System.currentTimeMillis() - watcher.getCreateTime() < watcher.getTimeout())) {
                 HttpServletResponse httpServletResponse = (HttpServletResponse)watcher.getAsyncContext();
