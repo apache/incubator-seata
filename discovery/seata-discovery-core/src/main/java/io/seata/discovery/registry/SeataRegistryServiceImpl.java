@@ -229,13 +229,12 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     private static boolean watch(long lastUpdateTime) {
         Map<String, String> param = new HashMap<>();
-        StringJoiner stringJoiner=new StringJoiner(ENDPOINT_AGAIN_SPLIT_CHAR);
+        StringJoiner stringJoiner = new StringJoiner(ENDPOINT_AGAIN_SPLIT_CHAR);
         METADATA.groups().parallelStream().forEach(stringJoiner::add);
         param.put("groupIds", stringJoiner.toString());
         param.put("lastUpdateTime", String.valueOf(lastUpdateTime));
         String tcAddress = queryHttpAddress(DEFAULT_SEATA_GROUP);
-        try (CloseableHttpResponse response =
-                     doGet("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
+        try (CloseableHttpResponse response = doGet("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -285,9 +284,9 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                         param.put("group", group);
                         String response = null;
                         try (CloseableHttpResponse httpResponse =
-                                     doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
+                            doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
                             if (httpResponse != null
-                                    && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                                && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                                 response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                             }
                             MetadataResponse metadataResponse = null;
@@ -320,7 +319,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     }
 
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
-                                              int timeout) {
+        int timeout) {
         try {
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {
@@ -334,10 +333,10 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                 header.forEach(httpGet::addHeader);
             }
             CloseableHttpClient client =
-                    HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                            .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                                    .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                            .build();
+                HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build();
             return client.execute(httpGet);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
