@@ -13,21 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.storage.raft.lock.RaftLockManager;
+package io.seata.server.cluster.listener;
 
 /**
  * @author jianbin.chen
  */
-public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
+public interface ClusterChangeListener {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-
-    protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
-
+	/**
+	 * cluster change event
+	 */
+	void onChangeEvent(ClusterChangeEvent event);
 }

@@ -13,12 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute.global;
+package io.seata.server.cluster.raft.execute.global;
 
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;

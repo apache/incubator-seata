@@ -13,22 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute;
+package io.seata.server.cluster.raft.execute;
 
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.seata.server.lock.LockerManagerFactory;
+import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  * @author jianbin.chen
  */
-public interface RaftMsgExecute<T> {
+public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
 
-    /**
-     * Execute t.
-     *
-     * @param sessionSyncMsg the sessionSyncMsg
-     * @return the t
-     * @throws Throwable the throwable
-     */
-    T execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable;
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
 
 }

@@ -41,7 +41,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;

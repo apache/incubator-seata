@@ -15,9 +15,10 @@
  */
 package io.seata.discovery.registry;
 
-
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -50,6 +52,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * The type File registry service.
@@ -70,8 +74,8 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
         new PoolingHttpClientConnectionManager();
-    private static final RequestConfig REQUEST_CONFIG =
-        RequestConfig.custom().setConnectionRequestTimeout(10000).setSocketTimeout(10000).setConnectTimeout(10000).build();
+
+    private static volatile ScheduledThreadPoolExecutor FIND_LEADER_EXECUTOR;
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
@@ -93,6 +97,8 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                 if (instance == null) {
                     instance = new SeataRegistryServiceImpl();
                     startQueryMetadata();
+                    FIND_LEADER_EXECUTOR =
+                        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("queryMetadata", 1, true));
                 }
             }
         }
@@ -119,6 +125,152 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     }
 
+    protected static void startQueryMetadata() {
+        FIND_LEADER_EXECUTOR.execute(() -> {
+            long currentTime = System.currentTimeMillis();
+            while (true) {
+                boolean fetch = System.currentTimeMillis() - currentTime >= 30000;
+                if (!fetch) {
+                    fetch = watch();
+                }
+                // Cluster changes or reaches timeout refresh time
+                if (fetch) {
+                    METADATA.groups().parallelStream().forEach(group -> {
+                        try {
+                            acquireClusterMetaData(group);
+                        } catch (Exception e) {
+                            // prevents an exception from being thrown that causes the thread to break
+                            LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
+                        }
+                    });
+                    currentTime = System.currentTimeMillis();
+                }
+            }
+        });
+    }
+
+    private InetSocketAddress convertInetSocketAddress(Node node) {
+        String[] address = node.getAddress().split(IP_PORT_SPLIT_CHAR);
+        String ip = address[0];
+        int port = Integer.parseInt(address[1]);
+        return new InetSocketAddress(ip, port);
+    }
+
+    @Override
+    public void close() throws Exception {
+
+    }
+
+    private static boolean watch() {
+        Map<String, String> param = new HashMap<>();
+        param.put("group", DEFAULT_SEATA_GROUP);
+        String tcAddress = queryHttpAddress(DEFAULT_SEATA_GROUP);
+        try (CloseableHttpResponse response =
+            doGet("http://" + tcAddress + "/metadata/v1/watcher", param, null, 30000)) {
+            if (response != null) {
+                StatusLine statusLine = response.getStatusLine();
+                return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
+            }
+        } catch (Exception e) {
+            LOGGER.error("watch cluster fail: {}", e.getMessage());
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        return false;
+    }
+
+    private static String queryHttpAddress(String group) {
+        List<Node> nodeList = METADATA.getNodes(group);
+        List<String> addressList;
+        if (CollectionUtils.isNotEmpty(nodeList)) {
+            addressList = nodeList.parallelStream().map(node -> {
+                String[] address = node.getAddress().split(IP_PORT_SPLIT_CHAR);
+                return address[0] + IP_PORT_SPLIT_CHAR + (Integer.parseInt(address[1]) - 1000);
+            }).collect(Collectors.toList());
+        } else {
+            // http port = netty port - 1000
+            addressList = INIT_ADDRESSES.get(group).parallelStream()
+                .map(inetSocketAddress -> inetSocketAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR
+                    + (inetSocketAddress.getPort() - 1000))
+                .collect(Collectors.toList());
+        }
+        int length = addressList.size();
+        return addressList.get(ThreadLocalRandom.current().nextInt(length));
+    }
+
+    private static void acquireClusterMetaData(String group) {
+        if (METADATA.isExpired(group)) {
+            synchronized (group.intern()) {
+                if (METADATA.isExpired(group)) {
+                    String tcAddress = queryHttpAddress(group);
+                    if (StringUtils.isNotBlank(tcAddress)) {
+                        Map<String, String> param = new HashMap<>();
+                        param.put("group", group);
+                        String response = null;
+                        try (CloseableHttpResponse httpResponse =
+                            doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
+                            if (httpResponse != null
+                                && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                                response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                            }
+                            MetadataResponse metadataResponse = null;
+                            if (StringUtils.isNotBlank(response)) {
+                                try {
+                                    metadataResponse = OBJECT_MAPPER.readValue(response, MetadataResponse.class);
+                                } catch (JsonProcessingException e) {
+                                    LOGGER.error(e.getMessage(), e);
+                                    return;
+                                }
+                            }
+                            if (metadataResponse != null) {
+                                List<Node> list = new ArrayList<>();
+                                for (Node node : metadataResponse.getNodes()) {
+                                    if (node.getRole() == ClusterRole.LEADER) {
+                                        METADATA.setLeader(node);
+                                    }
+                                    list.add(node);
+                                }
+                                METADATA.setStoreMode(StoreMode.get(metadataResponse.getMode()));
+                                METADATA.setNodes(group, list);
+                            }
+                        } catch (IOException e) {
+                            LOGGER.error(e.getMessage(), e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
+        int timeout) {
+        try {
+            URIBuilder builder = new URIBuilder(url);
+            if (param != null) {
+                for (String key : param.keySet()) {
+                    builder.addParameter(key, param.get(key));
+                }
+            }
+            URI uri = builder.build();
+            HttpGet httpGet = new HttpGet(uri);
+            if (header != null) {
+                header.forEach(httpGet::addHeader);
+            }
+            CloseableHttpClient client =
+                HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build();
+            return client.execute(httpGet);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
@@ -134,126 +286,35 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             // Refresh the metadata by initializing the address
             acquireClusterMetaData(clusterName);
         }
+        List<Node> nodes = METADATA.getNodes(clusterName);
+        if (CollectionUtils.isNotEmpty(nodes)) {
+            return nodes.parallelStream().map(this::convertInetSocketAddress).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
         if (METADATA.isRaftMode()) {
-            Node leader = METADATA.getLeader(clusterName);
+            Node leader = METADATA.getLeader(transactionServiceGroup);
             if (leader != null) {
                 String[] address = leader.getAddress().split(IP_PORT_SPLIT_CHAR);
                 String ip = address[0];
                 int port = Integer.parseInt(address[1]);
                 return Collections.singletonList(new InetSocketAddress(ip, port));
             }
-        } else {
-            List<Node> nodes = METADATA.getNodes(clusterName);
-            if (CollectionUtils.isNotEmpty(nodes)) {
-                return nodes.parallelStream().map(this::convertInetSocketAddress).collect(Collectors.toList());
-            }
         }
-        return Collections.emptyList();
-    }
-
-    private InetSocketAddress convertInetSocketAddress(Node node) {
-        String[] address = node.getAddress().split(IP_PORT_SPLIT_CHAR);
-        String ip = address[0];
-        int port = Integer.parseInt(address[1]);
-        return new InetSocketAddress(ip, port);
+        return RegistryService.super.aliveLookup(transactionServiceGroup);
     }
 
     @Override
-    public void close() throws Exception {
-
-    }
-
-    protected static void startQueryMetadata() {
-        ScheduledThreadPoolExecutor findLeaderExecutor =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("queryMetadata", 1, true));
-        // The leader election takes 5 second
-        findLeaderExecutor.scheduleAtFixedRate(() -> METADATA.groups().parallelStream().forEach(group -> {
-            try {
-                acquireClusterMetaData(group);
-            } catch (Exception e) {
-                // prevents an exception from being thrown that causes the thread to break
-                LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
-            }
-        }), 5000, 5000, TimeUnit.MILLISECONDS);
-    }
-
-    private static void acquireClusterMetaData(String group) {
-        if (METADATA.isExpired(group)) {
-            synchronized (group.intern()) {
-                if (METADATA.isExpired(group)) {
-                    List<Node> nodeList = METADATA.getNodes(group);
-                    List<String> addressList;
-                    if (CollectionUtils.isNotEmpty(nodeList)) {
-                        addressList = nodeList.parallelStream().map(node -> {
-                            String[] address = node.getAddress().split(IP_PORT_SPLIT_CHAR);
-                            return address[0] + IP_PORT_SPLIT_CHAR + (Integer.parseInt(address[1]) - 1000);
-                        }).collect(Collectors.toList());
-                    } else {
-                        // http port = netty port - 1000
-                        addressList = INIT_ADDRESSES.get(group).parallelStream()
-                            .map(inetSocketAddress -> inetSocketAddress.getAddress().getHostAddress()
-                                + IP_PORT_SPLIT_CHAR + (inetSocketAddress.getPort() - 1000))
-                            .collect(Collectors.toList());
-                    }
-                    int length = addressList.size();
-                    String tcAddress = addressList.get(ThreadLocalRandom.current().nextInt(length));
-                    if (StringUtils.isNotBlank(tcAddress)) {
-                        Map<String, String> param = new HashMap<>();
-                        param.put("group", group);
-                        String response = doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null);
-                        MetadataResponse metadataResponse = null;
-                        if (StringUtils.isNotBlank(response)) {
-                            try {
-                                metadataResponse = OBJECT_MAPPER.readValue(response, MetadataResponse.class);
-                            } catch (JsonProcessingException e) {
-                                LOGGER.error(e.getMessage(), e);
-                                return;
-                            }
-                        }
-                        if (metadataResponse != null) {
-                            List<Node> list = new ArrayList<>();
-                            for (Node node : metadataResponse.getNodes()) {
-                                if (node.getRole() == ClusterRole.LEADER) {
-                                    METADATA.setLeader(node);
-                                }
-                                list.add(node);
-                            }
-                            METADATA.setStoreMode(StoreMode.get(metadataResponse.getMode()));
-                            METADATA.setNodes(group, list);
-                        }
-
-                    }
-                }
-            }
+    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
+        List<InetSocketAddress> aliveAddress) {
+        if (METADATA.isRaftMode()) {
+            return Collections.emptyList();
+        } else {
+            return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
-    }
-
-    public static String doGet(String url, Map<String, String> param, Map<String, String> header) {
-        String resultString = "";
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            if (param != null) {
-                for (String key : param.keySet()) {
-                    builder.addParameter(key, param.get(key));
-                }
-            }
-            URI uri = builder.build();
-            HttpGet httpGet = new HttpGet(uri);
-            if (header != null) {
-                header.forEach(httpGet::addHeader);
-            }
-            CloseableHttpClient client =
-                HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(REQUEST_CONFIG).build();
-            try (CloseableHttpResponse response = client.execute(httpGet)) {
-                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return resultString;
     }
 
 }

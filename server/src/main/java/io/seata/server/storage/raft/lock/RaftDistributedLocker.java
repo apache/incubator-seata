@@ -16,7 +16,7 @@
 package io.seata.server.storage.raft.lock;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.server.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.storage.redis.lock.RedisDistributedLocker;

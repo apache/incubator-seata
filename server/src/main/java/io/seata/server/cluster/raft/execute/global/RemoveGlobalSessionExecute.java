@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute.global;
+package io.seata.server.cluster.raft.execute.global;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
-import io.seata.server.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;

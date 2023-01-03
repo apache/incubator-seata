@@ -13,30 +13,35 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute.global;
+package io.seata.server.cluster.raft.execute.branch;
 
-import io.seata.server.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
-public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
+public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
-        GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-        raftSessionManager.addGlobalSession(globalSession);
-        if (logger.isDebugEnabled()) {
-            logger.debug("addGlobalSession xid: {},status: {}", globalSession.getXid(), globalSession.getStatus());
+        GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
+        if (globalSession != null) {
+            BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
+            if (branchSession != null) {
+                raftLockManager.localReleaseLock(branchSession);
+                globalSession.remove(branchSession);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("removeBranch xid: {},branchId: {}", globalSession.getXid(),
+                    sessionSyncMsg.getBranchSession().getBranchId());
+            }
         }
         return true;
     }
-
 }

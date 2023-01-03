@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.snapshot;
+package io.seata.server.cluster.raft.snapshot;
 
 import java.io.File;
 import java.io.IOException;

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft;
+package io.seata.server.cluster.raft;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -27,11 +27,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
+import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -42,18 +44,19 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.raft.execute.RaftMsgExecute;
-import io.seata.server.raft.execute.branch.AddBranchSessionExecute;
-import io.seata.server.raft.execute.branch.RemoveBranchSessionExecute;
-import io.seata.server.raft.execute.branch.UpdateBranchSessionExecute;
-import io.seata.server.raft.execute.global.AddGlobalSessionExecute;
-import io.seata.server.raft.execute.global.RemoveGlobalSessionExecute;
-import io.seata.server.raft.execute.global.UpdateGlobalSessionExecute;
-import io.seata.server.raft.execute.lock.BranchReleaseLockExecute;
-import io.seata.server.raft.execute.lock.GlobalReleaseLockExecute;
-import io.seata.server.raft.msg.RaftSyncMsgSerializer;
-import io.seata.server.raft.snapshot.RaftSnapshot;
-import io.seata.server.raft.snapshot.RaftSnapshotFile;
+import io.seata.server.cluster.raft.execute.RaftMsgExecute;
+import io.seata.server.cluster.raft.execute.branch.AddBranchSessionExecute;
+import io.seata.server.cluster.raft.execute.branch.RemoveBranchSessionExecute;
+import io.seata.server.cluster.raft.execute.branch.UpdateBranchSessionExecute;
+import io.seata.server.cluster.raft.execute.global.AddGlobalSessionExecute;
+import io.seata.server.cluster.raft.execute.global.RemoveGlobalSessionExecute;
+import io.seata.server.cluster.raft.execute.global.UpdateGlobalSessionExecute;
+import io.seata.server.cluster.raft.execute.lock.BranchReleaseLockExecute;
+import io.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
+import io.seata.server.cluster.listener.ClusterChangeEvent;
+import io.seata.server.cluster.raft.msg.RaftSyncMsgSerializer;
+import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
+import io.seata.server.cluster.raft.snapshot.RaftSnapshotFile;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -62,7 +65,10 @@ import io.seata.server.storage.raft.session.RaftSessionManager;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 
+
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
@@ -253,6 +259,8 @@ public class RaftStateMachine extends StateMachineAdapter {
                     false);
             });
         }
+        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+            .publishEvent(new ClusterChangeEvent(this));
     }
 
     @Override
@@ -271,6 +279,15 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onStartFollowing(final LeaderChangeContext ctx) {
         super.onStartFollowing(ctx);
         DefaultCoordinator.getInstance().setPrevent(false);
+        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+            .publishEvent(new ClusterChangeEvent(this));
+    }
+
+    @Override
+    public void onConfigurationCommitted(Configuration conf) {
+        super.onConfigurationCommitted(conf);
+        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+            .publishEvent(new ClusterChangeEvent(this));
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) {
@@ -287,4 +304,5 @@ public class RaftStateMachine extends StateMachineAdapter {
             throw new RuntimeException(e);
         }
     }
+
 }

@@ -13,9 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute.branch;
+package io.seata.server.cluster.raft.execute.branch;
 
-import io.seata.server.raft.execute.AbstractRaftMsgExecute;
+import io.seata.core.model.BranchStatus;
+import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -25,23 +26,19 @@ import io.seata.server.storage.raft.session.RaftSessionManager;
 /**
  * @author jianbin.chen
  */
-public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
+public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
         RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
-        if (globalSession != null) {
-            BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
-            if (branchSession != null) {
-                raftLockManager.localReleaseLock(branchSession);
-                globalSession.remove(branchSession);
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("removeBranch xid: {},branchId: {}", globalSession.getXid(),
-                    sessionSyncMsg.getBranchSession().getBranchId());
-            }
+        BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
+        BranchStatus status = BranchStatus.get(sessionSyncMsg.getBranchSession().getStatus());
+        branchSession.setStatus(status);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update branch: {} , status: {}", branchSession.getBranchId(), branchSession.getStatus());
         }
         return true;
     }
+
 }

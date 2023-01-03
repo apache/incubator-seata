@@ -13,31 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft.execute.lock;
+package io.seata.server.cluster.raft.execute.global;
 
-import io.seata.server.raft.execute.AbstractRaftMsgExecute;
-import io.seata.server.session.BranchSession;
+import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
-public class BranchReleaseLockExecute extends AbstractRaftMsgExecute {
+public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
-        GlobalSession globalSession =
-            SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
-        BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
-        if (branchSession != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("releaseBranchSessionLock xid: {}", globalSession.getXid());
-            }
-            return raftLockManager.localReleaseLock(branchSession);
+        RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
+        GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
+        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        raftSessionManager.addGlobalSession(globalSession);
+        if (logger.isDebugEnabled()) {
+            logger.debug("addGlobalSession xid: {},status: {}", globalSession.getXid(), globalSession.getStatus());
         }
-        return false;
+        return true;
     }
 
 }
