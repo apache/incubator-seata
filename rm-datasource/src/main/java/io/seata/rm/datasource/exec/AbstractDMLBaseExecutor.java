@@ -30,6 +30,8 @@ import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.TableRecordsAware;
+import io.seata.rm.datasource.sql.struct.MultiTableRecords;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import org.slf4j.Logger;
@@ -42,14 +44,13 @@ import org.slf4j.LoggerFactory;
  * @param <S> the type parameter
  * @author sharajava
  */
-public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
+public abstract class AbstractDMLBaseExecutor<T, S extends Statement,R extends TableRecordsAware> extends BaseTransactionalExecutor<T, S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
 
     protected static final String WHERE = " WHERE ";
 
     protected static final String GROUP_BY = " GROUP BY ";
-
 
     /**
      * Instantiates a new Abstract dml base executor.
@@ -93,9 +94,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        TableRecords beforeImage = beforeImage();
+        R beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        TableRecords afterImage = afterImage(beforeImage);
+        R afterImage = afterImage(beforeImage);
         prepareUndoLog(beforeImage, afterImage);
         return result;
     }
@@ -152,12 +153,25 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     }
 
     /**
+     *
+     * @param beforeImage the beforeImage
+     * @param afterImage  the afterImage
+     */
+    protected void prepareUndoLog(R beforeImage,R afterImage) throws SQLException {
+        if (beforeImage instanceof TableRecords) {
+            prepareSingleTableUndoLog((TableRecords) beforeImage, (TableRecords) afterImage);
+        } else if (beforeImage instanceof MultiTableRecords) {
+            prepareMultiTableUndoLog((MultiTableRecords) beforeImage,(MultiTableRecords) afterImage);
+        }
+    }
+
+    /**
      * Before image table records.
      *
      * @return the table records
      * @throws SQLException the sql exception
      */
-    protected abstract TableRecords beforeImage() throws SQLException;
+    protected abstract R beforeImage() throws SQLException;
 
     /**
      * After image table records.
@@ -166,7 +180,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @return the table records
      * @throws SQLException the sql exception
      */
-    protected abstract TableRecords afterImage(TableRecords beforeImage) throws SQLException;
+    protected abstract R afterImage(R beforeImage) throws SQLException;
 
     private static class LockRetryPolicy extends ConnectionProxy.LockRetryPolicy {
 

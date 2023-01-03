@@ -42,6 +42,7 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.MultiTableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLInsertRecognizer;
@@ -369,13 +370,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
-     * prepare undo log.
+     * prepare single table undo log.
      *
      * @param beforeImage the before image
      * @param afterImage  the after image
      * @throws SQLException the sql exception
      */
-    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
+    protected void prepareSingleTableUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
         if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
@@ -393,6 +394,27 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
             SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
             connectionProxy.appendUndoLog(sqlUndoLog);
+        }
+    }
+
+    /**
+     * prepare multi table undo log.
+     *
+     * @param multiTableBeforeImage the multi table before image
+     * @param multiTableAfterImage  the multi table after image
+     * @throws SQLException the sql exception
+     */
+    protected void prepareMultiTableUndoLog(MultiTableRecords multiTableBeforeImage, MultiTableRecords multiTableAfterImage) throws SQLException {
+        Map<String,TableRecords> beforeImagesMap = multiTableBeforeImage.getMultiTableRecords();
+        Map<String,TableRecords> afterImagesMap = multiTableAfterImage.getMultiTableRecords();
+        if (CollectionUtils.isEmpty(beforeImagesMap) || CollectionUtils.isEmpty(afterImagesMap)) {
+            throw new IllegalStateException("images can not be null");
+        }
+        for (Map.Entry<String, TableRecords> entry : beforeImagesMap.entrySet()) {
+            String tableName = entry.getKey();
+            TableRecords tableBeforeImage = entry.getValue();
+            TableRecords tableAfterImage = afterImagesMap.get(tableName);
+            prepareSingleTableUndoLog(tableBeforeImage, tableAfterImage);
         }
     }
 

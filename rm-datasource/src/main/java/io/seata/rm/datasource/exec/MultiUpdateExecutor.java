@@ -47,7 +47,7 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
  * @param <S> the type parameter
  * @author wangwei-ying
  */
-public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S, TableRecords> {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 

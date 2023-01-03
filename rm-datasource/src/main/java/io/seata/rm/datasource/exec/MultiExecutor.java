@@ -16,11 +16,11 @@
 package io.seata.rm.datasource.exec;
 
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.MultiTableRecords;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.SQLType;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -40,11 +40,9 @@ import java.util.stream.Collectors;
  * @param <S> the type parameter
  * @author wangwei.ying
  */
-public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S, MultiTableRecords> {
 
     private Map<String, List<SQLRecognizer>> multiSqlGroup = new HashMap<>(4);
-    private Map<SQLRecognizer, TableRecords> beforeImagesMap = new HashMap<>(4);
-    private Map<SQLRecognizer, TableRecords> afterImagesMap = new HashMap<>(4);
 
     /**
      * Instantiates a new Abstract dml base executor.
@@ -65,10 +63,11 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
      * @see io.seata.rm.datasource.sql.SQLVisitorFactory#get(String, String) validate sqlType
      */
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    protected MultiTableRecords beforeImage() throws SQLException {
+        MultiTableRecords result = new MultiTableRecords();
         //group by sqlType
         multiSqlGroup = sqlRecognizers.stream().collect(Collectors.groupingBy(t -> t.getTableName()));
-        AbstractDMLBaseExecutor<T, S> executor = null;
+        AbstractDMLBaseExecutor<T, S, TableRecords> executor = null;
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
                 case UPDATE:
@@ -81,14 +80,15 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
                     throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
             }
             TableRecords beforeImage = executor.beforeImage();
-            beforeImagesMap.put(value.get(0), beforeImage);
+            result.addTableRecords(value.get(0).getTableName(), beforeImage);
         }
-        return null;
+        return result;
     }
 
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        AbstractDMLBaseExecutor<T, S> executor = null;
+    protected MultiTableRecords afterImage(MultiTableRecords beforeImage) throws SQLException {
+        MultiTableRecords result = new MultiTableRecords();
+        AbstractDMLBaseExecutor<T, S, TableRecords> executor = null;
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
                 case UPDATE:
@@ -100,42 +100,31 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
                 default:
                     throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
             }
-            beforeImage = beforeImagesMap.get(value.get(0));
-            TableRecords afterImage = executor.afterImage(beforeImage);
-            afterImagesMap.put(value.get(0), afterImage);
+            TableRecords tableBeforeImage = beforeImage.getTableRecordsByTableName(value.get(0).getTableName());
+            TableRecords afterImage = executor.afterImage(tableBeforeImage);
+            result.addTableRecords(value.get(0).getTableName(), afterImage);
         }
-        return null;
+        return result;
     }
 
-
     @Override
-    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if (beforeImagesMap == null || afterImagesMap == null) {
+    protected void prepareMultiTableUndoLog(MultiTableRecords multiTableBeforeImage, MultiTableRecords multiTableAfterImage) throws SQLException {
+        Map<String,TableRecords> beforeImagesMap = multiTableBeforeImage.getMultiTableRecords();
+        Map<String,TableRecords> afterImagesMap = multiTableAfterImage.getMultiTableRecords();
+        if (CollectionUtils.isEmpty(beforeImagesMap) || CollectionUtils.isEmpty(afterImagesMap)) {
             throw new IllegalStateException("images can not be null");
         }
-        SQLRecognizer recognizer;
-        for (Map.Entry<SQLRecognizer, TableRecords> entry : beforeImagesMap.entrySet()) {
-            sqlRecognizer = recognizer = entry.getKey();
-            beforeImage = entry.getValue();
-            afterImage = afterImagesMap.get(recognizer);
-            if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
-                if (beforeImage.getRows().size() != afterImage.getRows().size()) {
-                    throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
-                }
-            }
-            super.prepareUndoLog(beforeImage, afterImage);
+        for (Map.Entry<String, TableRecords> entry : beforeImagesMap.entrySet()) {
+            String tableName = entry.getKey();
+            List<SQLRecognizer> sqlRecognizers = multiSqlGroup.get(tableName);
+            sqlRecognizer = sqlRecognizers.get(0);
+            TableRecords tableBeforeImage = entry.getValue();
+            TableRecords tableAfterImage = afterImagesMap.get(tableName);
+            prepareSingleTableUndoLog(tableBeforeImage, tableAfterImage);
         }
     }
 
     public Map<String, List<SQLRecognizer>> getMultiSqlGroup() {
         return multiSqlGroup;
-    }
-
-    public Map<SQLRecognizer, TableRecords> getBeforeImagesMap() {
-        return beforeImagesMap;
-    }
-
-    public Map<SQLRecognizer, TableRecords> getAfterImagesMap() {
-        return afterImagesMap;
     }
 }

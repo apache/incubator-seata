@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * The Base Insert Executor.
  * @author jsbxyyx
  */
-public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> implements InsertExecutor<T> {
+public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S, TableRecords> implements InsertExecutor<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseInsertExecutor.class);
 

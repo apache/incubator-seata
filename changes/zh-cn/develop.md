@@ -13,6 +13,7 @@
 
 ### optimize:
 - [[#5212](https://github.com/seata/seata/pull/5212)] 优化不合理的日志信息级别
+- [[#5212](https://github.com/seata/seata/pull/5212)] 优化executor中获取image方法的返回值类型以兼容操作单表和多表等多种类型的sql语句
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试

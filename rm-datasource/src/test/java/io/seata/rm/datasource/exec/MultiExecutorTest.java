@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.seata.rm.datasource.sql.struct.MultiTableRecords;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -97,13 +98,13 @@ public class MultiExecutorTest {
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
         }, multi);
-        TableRecords beforeImage = executor.beforeImage();
+        MultiTableRecords beforeImage = executor.beforeImage();
         Map multiSqlGroup = executor.getMultiSqlGroup();
-        Map beforeImagesMap = executor.getBeforeImagesMap();
+        Map beforeImagesMap = beforeImage.getMultiTableRecords();
         Assertions.assertEquals(multiSqlGroup.size(), 1);
         Assertions.assertEquals(beforeImagesMap.size(), 1);
-        TableRecords afterImage = executor.afterImage(beforeImage);
-        Assertions.assertEquals(executor.getAfterImagesMap().size(), 1);
+        MultiTableRecords afterImage = executor.afterImage(beforeImage);
+        Assertions.assertEquals(afterImage.getMultiTableRecords().size(), 1);
         executor.prepareUndoLog(beforeImage, afterImage);
         List<SQLUndoLog> items = connectionProxy.getContext().getUndoItems();
         Assertions.assertTrue(items.stream().allMatch(t -> Objects.equals(t.getSqlType(), SQLType.UPDATE) && Objects.equals(t.getTableName(), "table_update_executor_test")));
@@ -120,11 +121,11 @@ public class MultiExecutorTest {
         }, multi);
         beforeImage = executor.beforeImage();
         multiSqlGroup = executor.getMultiSqlGroup();
-        beforeImagesMap = executor.getBeforeImagesMap();
+        beforeImagesMap = beforeImage.getMultiTableRecords();
         Assertions.assertEquals(multiSqlGroup.size(), 1);
         Assertions.assertEquals(beforeImagesMap.size(), 1);
         afterImage = executor.afterImage(beforeImage);
-        Assertions.assertEquals(executor.getAfterImagesMap().size(), 1);
+        Assertions.assertEquals(afterImage.getMultiTableRecords().size(), 1);
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
         Set<String> itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
@@ -141,11 +142,11 @@ public class MultiExecutorTest {
         }, multi);
         beforeImage = executor.beforeImage();
         multiSqlGroup = executor.getMultiSqlGroup();
-        beforeImagesMap = executor.getBeforeImagesMap();
+        beforeImagesMap = beforeImage.getMultiTableRecords();
         Assertions.assertEquals(multiSqlGroup.size(), 2);
         Assertions.assertEquals(beforeImagesMap.size(), 2);
         afterImage = executor.afterImage(beforeImage);
-        Assertions.assertEquals(executor.getAfterImagesMap().size(), 2);
+        Assertions.assertEquals(afterImage.getMultiTableRecords().size(), 2);
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
         itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
@@ -163,11 +164,11 @@ public class MultiExecutorTest {
         }, multi);
         beforeImage = executor.beforeImage();
         multiSqlGroup = executor.getMultiSqlGroup();
-        beforeImagesMap = executor.getBeforeImagesMap();
+        beforeImagesMap = beforeImage.getMultiTableRecords();
         Assertions.assertEquals(multiSqlGroup.size(), 2);
         Assertions.assertEquals(beforeImagesMap.size(), 2);
         afterImage = executor.afterImage(beforeImage);
-        Assertions.assertEquals(executor.getAfterImagesMap().size(), 2);
+        Assertions.assertEquals(afterImage.getMultiTableRecords().size(), 2);
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
         itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());

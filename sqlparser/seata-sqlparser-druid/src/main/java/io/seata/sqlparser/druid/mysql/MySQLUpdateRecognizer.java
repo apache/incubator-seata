@@ -145,7 +145,9 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     public String getTableName() {
         SQLTableSource tableSource = this.ast.getTableSource();
         if (tableSource instanceof SQLExprTableSource) {
-            return visitTableName((SQLExprTableSource) tableSource);
+            String tableName = visitTableName((SQLExprTableSource) tableSource);
+            tableName2AliasMap.put(tableName,tableSource.getAlias());
+            return tableName;
         } else if (tableSource instanceof SQLJoinTableSource) {
             //update join sql,like update t1 inner join t2 on t1.id = t2.id set name = ?, age = ?
             final int minTableNum = 2;
