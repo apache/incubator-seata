@@ -29,13 +29,9 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
 import io.seata.server.cluster.listener.ClusterChangeListener;
 import io.seata.server.cluster.watch.Watcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * @author jianbin.chen
