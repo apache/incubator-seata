@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
+import io.seata.common.XID;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
@@ -39,6 +40,7 @@ import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,7 +48,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_CLUSTER;
 import static io.seata.common.ConfigurationKeys.STORE_MODE;
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
@@ -61,47 +62,55 @@ public class ClusterController {
     @Resource
     ClusterWatcherManager clusterWatcherManager;
 
+    @Resource
+    ServerProperties serverProperties;
+
     @GetMapping("/cluster")
-    public MetadataResponse cluster(String group) {
+    public MetadataResponse cluster(@RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String group) {
         String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
         MetadataResponse metadataResponse = new MetadataResponse();
         metadataResponse.setMode(mode);
-        RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
+        RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer(group);
         if (raftServer != null) {
             String currentConf = ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_CLUSTER);
             if (!StringUtils.isBlank(currentConf)) {
-                String raftGroup = StringUtils.isNotBlank(group) ? group : DEFAULT_SEATA_GROUP;
                 final Configuration currentClusters = new Configuration();
                 if (!currentClusters.parse(currentConf)) {
                     throw new IllegalArgumentException("fail to parse initConf:" + currentConf);
                 }
                 RouteTable routeTable = RouteTable.getInstance();
-                if (!Objects.equals(routeTable.getConfiguration(raftGroup), currentClusters)) {
-                    routeTable.updateConfiguration(raftGroup, currentClusters);
+                if (!Objects.equals(routeTable.getConfiguration(group), currentClusters)) {
+                    routeTable.updateConfiguration(group, currentClusters);
                 }
                 try {
-                    routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), raftGroup, 1000);
-                    PeerId leader = routeTable.selectLeader(raftGroup);
+                    routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), group, 1000);
+                    PeerId leader = routeTable.selectLeader(group);
                     if (leader != null) {
                         Set<Node> nodes = new HashSet<>();
                         Node leaderNode = new Node();
                         leaderNode.setRole(ClusterRole.LEADER);
-                        leaderNode.setGroup(raftGroup);
-                        leaderNode.setAddress(leader.getIp() + ":" + (leader.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
+                        leaderNode.setGroup(group);
+                        leaderNode.setHttpPort(serverProperties.getPort());
+                        leaderNode.setNettyPort(XID.getPort());
+                        leaderNode.setHostAddress(leader.getIp());
                         nodes.add(leaderNode);
-                        Configuration configuration = routeTable.getConfiguration(raftGroup);
+                        Configuration configuration = routeTable.getConfiguration(group);
                         nodes.addAll(configuration.getLearners().parallelStream().map(learner -> {
                             Node node = new Node();
-                            node.setGroup(raftGroup);
+                            node.setGroup(group);
                             node.setRole(ClusterRole.LEARNER);
-                            node.setAddress(learner.getIp() + ":" + (learner.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
+                            node.setHttpPort(serverProperties.getPort());
+                            node.setNettyPort(XID.getPort());
+                            node.setHostAddress(learner.getIp());
                             return node;
                         }).collect(Collectors.toList()));
                         nodes.addAll(configuration.getPeers().parallelStream().map(follower -> {
                             Node node = new Node();
-                            node.setGroup(raftGroup);
+                            node.setGroup(group);
                             node.setRole(ClusterRole.FOLLOWER);
-                            node.setAddress(follower.getIp() + ":" + (follower.getPort() - DEFAULT_RAFT_PORT_INTERVAL));
+                            node.setHttpPort(serverProperties.getPort());
+                            node.setNettyPort(XID.getPort());
+                            node.setHostAddress(follower.getIp());
                             return node;
                         }).collect(Collectors.toList()));
                         metadataResponse.setNodes(new ArrayList<>(nodes));

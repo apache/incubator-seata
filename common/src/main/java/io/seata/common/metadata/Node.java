@@ -19,18 +19,24 @@ import java.util.Objects;
 
 public class Node {
 
-    private String address;
+    private String hostAddress;
+
+    private int nettyPort;
+
+    private int grpcPort;
+
+    private int httpPort;
 
     private String group;
 
     private ClusterRole role = ClusterRole.MEMBER;
 
-    public String getAddress() {
-        return address;
+    public String getHostAddress() {
+        return hostAddress;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setHostAddress(String hostAddress) {
+        this.hostAddress = hostAddress;
     }
 
     public String getGroup() {
@@ -49,6 +55,30 @@ public class Node {
         this.role = role;
     }
 
+    public int getNettyPort() {
+        return nettyPort;
+    }
+
+    public void setNettyPort(int nettyPort) {
+        this.nettyPort = nettyPort;
+    }
+
+    public int getGrpcPort() {
+        return grpcPort;
+    }
+
+    public void setGrpcPort(int grpcPort) {
+        this.grpcPort = grpcPort;
+    }
+
+    public int getHttpPort() {
+        return httpPort;
+    }
+
+    public void setHttpPort(int httpPort) {
+        this.httpPort = httpPort;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -58,12 +88,14 @@ public class Node {
             return false;
         }
         Node node = (Node)o;
-        return Objects.equals(address, node.address) && Objects.equals(group, node.group);
+        return Objects.equals(hostAddress, node.hostAddress) && Objects.equals(nettyPort, node.nettyPort)
+            && Objects.equals(grpcPort, node.grpcPort) && Objects.equals(httpPort, node.httpPort)
+            && Objects.equals(group, node.group);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(address, group);
+        return Objects.hash(hostAddress, group);
     }
 
 }

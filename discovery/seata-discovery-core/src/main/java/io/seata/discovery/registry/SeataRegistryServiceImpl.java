@@ -177,15 +177,38 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         }
     }
 
-    private InetSocketAddress convertInetSocketAddress(Node node) {
-        String[] address = node.getAddress().split(IP_PORT_SPLIT_CHAR);
-        String ip = address[0];
-        int port = Integer.parseInt(address[1]);
-        return new InetSocketAddress(ip, port);
+    private static String queryHttpAddress(String group) {
+        List<Node> nodeList = METADATA.getNodes(group);
+        List<String> addressList = null;
+        Stream<InetSocketAddress> stream = null;
+        if (CollectionUtils.isNotEmpty(nodeList)) {
+            List<InetSocketAddress> inetSocketAddresses = ALIVE_NODES.get(CURRENT_TRANSACTION_SERVICE_GROUP);
+            if (CollectionUtils.isEmpty(inetSocketAddresses)) {
+                addressList = nodeList.parallelStream()
+                    .map(node -> node.getHostAddress() + IP_PORT_SPLIT_CHAR + node.getHttpPort())
+                    .collect(Collectors.toList());
+            } else {
+                stream = inetSocketAddresses.parallelStream();
+            }
+        } else {
+            // http port = netty port - 1000
+            stream = INIT_ADDRESSES.get(group).parallelStream();
+        }
+        addressList = addressList != null ? addressList
+            : stream.map(inetSocketAddress -> inetSocketAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR
+                + (inetSocketAddress.getPort() - 1000)).collect(Collectors.toList());
+        int length = addressList.size();
+        return addressList.get(ThreadLocalRandom.current().nextInt(length));
     }
 
     @Override
     public void close() throws Exception {
+    }
+
+    private InetSocketAddress convertInetSocketAddress(Node node) {
+        String ip = node.getHostAddress();
+        int port = node.getNettyPort();
+        return new InetSocketAddress(ip, port);
     }
 
     @Override
@@ -194,6 +217,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         if (clusterName == null) {
             return null;
         }
+        CURRENT_TRANSACTION_SERVICE_GROUP = key;
         if (!METADATA.containsGroup(clusterName)) {
             List<InetSocketAddress> list = FILE_REGISTRY_SERVICE.lookup(key);
             if (CollectionUtils.isEmpty(list)) {
@@ -202,7 +226,6 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             INIT_ADDRESSES.put(clusterName, list);
             // Refresh the metadata by initializing the address
             acquireClusterMetaData(clusterName);
-            CURRENT_TRANSACTION_SERVICE_GROUP = key;
             startQueryMetadata();
         }
         List<Node> nodes = METADATA.getNodes(clusterName);
@@ -218,31 +241,10 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             String clusterName = getServiceGroup(transactionServiceGroup);
             Node leader = METADATA.getLeader(clusterName);
             if (leader != null) {
-                String[] address = leader.getAddress().split(IP_PORT_SPLIT_CHAR);
-                String ip = address[0];
-                int port = Integer.parseInt(address[1]);
-                return Collections.singletonList(new InetSocketAddress(ip, port));
+                return Collections.singletonList(new InetSocketAddress(leader.getHostAddress(), leader.getNettyPort()));
             }
         }
         return RegistryService.super.aliveLookup(transactionServiceGroup);
-    }
-
-    @Override
-    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
-        if (METADATA.isRaftMode()) {
-           Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
-           String[] address = leader.getAddress().split(IP_PORT_SPLIT_CHAR);
-           String ip = address[0];
-           int port = Integer.parseInt(address[1]);
-           return ALIVE_NODES.put(transactionServiceGroup,
-               aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
-                   // Since only follower will turn into leader, only the follower node needs to be listened to
-                   return inetSocketAddress.getPort() != port || !inetSocketAddress.getHostName().equals(ip);
-               }).collect(Collectors.toList()));
-       } else {
-            return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
-        }
     }
 
     private static boolean watch(long lastUpdateTime) {
@@ -267,29 +269,21 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         return false;
     }
 
-    private static String queryHttpAddress(String group) {
-        List<Node> nodeList = METADATA.getNodes(group);
-        List<String> addressList = null;
-        Stream<InetSocketAddress> stream = null;
-        if (CollectionUtils.isNotEmpty(nodeList)) {
-            List<InetSocketAddress> inetSocketAddresses = ALIVE_NODES.get(CURRENT_TRANSACTION_SERVICE_GROUP);
-            if (CollectionUtils.isEmpty(inetSocketAddresses)) {
-                addressList = nodeList.parallelStream().map(node -> {
-                    String[] address = node.getAddress().split(IP_PORT_SPLIT_CHAR);
-                    return address[0] + IP_PORT_SPLIT_CHAR + (Integer.parseInt(address[1]) - 1000);
-                }).collect(Collectors.toList());
-            } else {
-                stream = inetSocketAddresses.parallelStream();
-            }
+    @Override
+    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
+        List<InetSocketAddress> aliveAddress) {
+        if (METADATA.isRaftMode()) {
+            Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
+            String ip = leader.getHostAddress();
+            int port = leader.getNettyPort();
+            return ALIVE_NODES.put(transactionServiceGroup,
+                aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
+                    // Since only follower will turn into leader, only the follower node needs to be listened to
+                    return inetSocketAddress.getPort() != port || !inetSocketAddress.getHostName().equals(ip);
+                }).collect(Collectors.toList()));
         } else {
-            // http port = netty port - 1000
-            stream = INIT_ADDRESSES.get(group).parallelStream();
+            return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
-        addressList = addressList != null ? addressList
-            : stream.map(inetSocketAddress -> inetSocketAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR
-                + (inetSocketAddress.getPort() - 1000)).collect(Collectors.toList());
-        int length = addressList.size();
-        return addressList.get(ThreadLocalRandom.current().nextInt(length));
     }
 
     private static void acquireClusterMetaData(String group) {

@@ -27,14 +27,14 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
 @ConfigurationProperties(prefix = CLIENT_PREFIX)
 public class ClientProperties {
 
-	private Long metadataMaxAgeMs = 30000L;
+    private Long metadataMaxAgeMs = 30000L;
 
-	public Long getMetadataMaxAgeMs() {
-		return metadataMaxAgeMs;
-	}
+    public Long getMetadataMaxAgeMs() {
+        return metadataMaxAgeMs;
+    }
 
-	public void setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
-		this.metadataMaxAgeMs = metadataMaxAgeMs;
-	}
+    public void setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
+        this.metadataMaxAgeMs = metadataMaxAgeMs;
+    }
 
 }
