@@ -24,8 +24,6 @@ import java.util.Set;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 
-
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
@@ -59,7 +57,7 @@ public class Metadata {
 
     public boolean isExpired(String group) {
         Long timestamp = leaderUpdateTimes.get(group);
-        return timestamp == null || (System.currentTimeMillis() - timestamp) > DEFAULT_RAFT_PORT_INTERVAL;
+        return timestamp == null || (System.currentTimeMillis() - timestamp) > 1000;
     }
 
     public boolean isNotExpired() {

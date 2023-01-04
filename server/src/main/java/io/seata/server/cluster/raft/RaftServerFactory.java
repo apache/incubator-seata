@@ -39,6 +39,8 @@ import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
@@ -76,7 +78,7 @@ public class RaftServerFactory {
         return SingletonHandler.CLI_CLIENT_SERVICE;
     }
 
-    public void init(String host, int port) {
+    public void init(String host) {
         String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isBlank(initConfStr)) {
             if (LOGGER.isWarnEnabled()) {
@@ -88,11 +90,19 @@ public class RaftServerFactory {
         if (!initConf.parse(initConfStr)) {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
-        // analytic parameter
-        final PeerId serverId = new PeerId();
-        String serverIdStr = host + ":" + port;
-        if (!serverId.parse(serverIdStr)) {
-            throw new IllegalArgumentException("fail to parse serverId:" + serverIdStr);
+        int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
+        PeerId serverId = null;
+        if (port <= 0) {
+            // Highly available deployments require different nodes
+            for (PeerId peer : initConf.getPeers()) {
+                if (StringUtils.equals(peer.getIp(), host)) {
+                    serverId = peer;
+                    break;
+                }
+            }
+        } else {
+            // Local debugging use
+            serverId = new PeerId(host, port);
         }
         String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         StoreMode storeMode = StoreMode.get(mode);
@@ -100,13 +110,12 @@ public class RaftServerFactory {
             raftMode = true;
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-            + separator + serverIdStr.split(":")[1];
+            + separator + serverId.getPort();
         final NodeOptions nodeOptions = initNodeOptions(initConf);
         try {
             // as the foundation for multi raft group in the future
             RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_GROUP, serverId, nodeOptions);
             RAFT_SERVER_MAP.put(DEFAULT_SEATA_GROUP, raftServer);
-            RaftStateMachine stateMachine = raftServer.getRaftStateMachine();
             LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());

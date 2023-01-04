@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +42,7 @@ import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,10 +62,17 @@ public class ClusterController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
     @Resource
-    ClusterWatcherManager clusterWatcherManager;
+    private ClusterWatcherManager clusterWatcherManager;
 
     @Resource
-    ServerProperties serverProperties;
+    private ApplicationContext applicationContext;
+
+    private ServerProperties serverProperties;
+
+    @PostConstruct
+    public void init() {
+        serverProperties = applicationContext.getBean(ServerProperties.class);
+    }
 
     @GetMapping("/cluster")
     public MetadataResponse cluster(@RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String group) {

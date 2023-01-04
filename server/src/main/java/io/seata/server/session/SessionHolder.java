@@ -46,13 +46,12 @@ import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+
 /**
  * The type Session holder.
  *
@@ -153,8 +152,7 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
-        RaftServerFactory.getInstance().init(XID.getIpAddress(),
-            Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "9091")));
+        RaftServerFactory.getInstance().init(XID.getIpAddress());
         if (RaftServerFactory.getInstance().getRaftServer() != null) {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.RAFT.getName());
         } else {
