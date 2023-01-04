@@ -29,6 +29,7 @@ service.default.grouplist=127.0.0.1:8091
 service.enableDegrade=false
 service.disableGlobalTransaction=false
 
+client.metadataMaxAgeMs=30000
 #Transaction rule configuration, only for the client
 client.rm.acquireClusterRetryCount=2
 client.rm.asyncCommitBufferLimit=10000

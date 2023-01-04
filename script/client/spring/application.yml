@@ -11,6 +11,7 @@ seata:
   excludes-for-scanning: firstBeanNameForExclude,secondBeanNameForExclude
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
+    metadata-max-age-ms: 30000
     rm:
       async-commit-buffer-limit: 10000
       report-retry-count: 5
