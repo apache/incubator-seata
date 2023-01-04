@@ -13,18 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registry;
+package io.seata.spring.boot.autoconfigure.properties.client;
 
-import io.seata.common.loader.LoadLevel;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
 
 /**
  * @author funkye
  */
-@LoadLevel(name = "Seata", order = 1)
-public class SeataRegistryProvider implements RegistryProvider {
+@Component
+@ConfigurationProperties(prefix = CLIENT_PREFIX)
+public class ClientProperties {
 
-    @Override
-    public RegistryService<?> provide() {
-        return SeataRegistryServiceImpl.getInstance();
-    }
+	private Long metadataMaxAgeMs = 30000L;
+
+	public Long getMetadataMaxAgeMs() {
+		return metadataMaxAgeMs;
+	}
+
+	public void setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
+		this.metadataMaxAgeMs = metadataMaxAgeMs;
+	}
+
 }

@@ -59,18 +59,23 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * The type File registry service.
  *
- * @author slievrly
+ * @author funkye
  */
 public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataRegistryServiceImpl.class);
+
     private static volatile SeataRegistryServiceImpl instance;
+
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     private static final RegistryService<?> FILE_REGISTRY_SERVICE = FileRegistryServiceImpl.getInstance();
+
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
     private static final String ENDPOINT_AGAIN_SPLIT_CHAR = ",";
@@ -144,9 +149,14 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                     FIND_LEADER_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<>(), new NamedThreadFactory("queryMetadata", 1, true));
                     FIND_LEADER_EXECUTOR.execute(() -> {
+                        long metadataMaxAgeMs = CONFIG.getLong(CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (true) {
-                            boolean fetch = watch(currentTime);
+                            // Forced refresh of metadata information after set age
+                            boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
+                            if (!fetch) {
+                                fetch = watch(currentTime);
+                            }
                             // Cluster changes or reaches timeout refresh time
                             if (fetch) {
                                 METADATA.groups().parallelStream().forEach(group -> {
@@ -221,8 +231,16 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
         List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
-            return ALIVE_NODES.put(transactionServiceGroup, aliveAddress);
-        } else {
+           Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
+           String[] address = leader.getAddress().split(IP_PORT_SPLIT_CHAR);
+           String ip = address[0];
+           int port = Integer.parseInt(address[1]);
+           return ALIVE_NODES.put(transactionServiceGroup,
+               aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
+                   // Since only follower will turn into leader, only the follower node needs to be listened to
+                   return inetSocketAddress.getPort() != port || !inetSocketAddress.getHostName().equals(ip);
+               }).collect(Collectors.toList()));
+       } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
     }

@@ -905,6 +905,11 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_PORT_CAMEL = SERVER_PREFIX + "raftPort";
 
     /**
+     * The constant CLIENT_METADATA_MAX_AGE_MS.
+     */
+    String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
+
+    /**
      * The constant CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT.
      */
     String CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT = CLIENT_TM_PREFIX + "acquireClusterRetryCount";
