@@ -32,6 +32,7 @@ import com.alipay.sofa.jraft.option.RaftOptions;
 import com.alipay.sofa.jraft.rpc.CliClientService;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.XID;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -78,7 +79,7 @@ public class RaftServerFactory {
         return SingletonHandler.CLI_CLIENT_SERVICE;
     }
 
-    public void init(String host) {
+    public void init() {
         String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isBlank(initConfStr)) {
             if (LOGGER.isWarnEnabled()) {
@@ -91,18 +92,20 @@ public class RaftServerFactory {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
         int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
+        String host = XID.getIpAddress();
+        int nettyPort = XID.getPort();
         PeerId serverId = null;
         if (port <= 0) {
             // Highly available deployments require different nodes
             for (PeerId peer : initConf.getPeers()) {
-                if (StringUtils.equals(peer.getIp(), host)) {
+                if (StringUtils.equals(peer.getIp(), host) && peer.getIdx() == nettyPort) {
                     serverId = peer;
                     break;
                 }
             }
         } else {
             // Local debugging use
-            serverId = new PeerId(host, port);
+            serverId = new PeerId(host, port, nettyPort);
         }
         String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         StoreMode storeMode = StoreMode.get(mode);

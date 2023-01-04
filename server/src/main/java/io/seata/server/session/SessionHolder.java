@@ -152,7 +152,7 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
-        RaftServerFactory.getInstance().init(XID.getIpAddress());
+        RaftServerFactory.getInstance().init();
         if (RaftServerFactory.getInstance().getRaftServer() != null) {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.RAFT.getName());
         } else {

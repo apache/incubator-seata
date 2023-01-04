@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_CLUSTER;
 import static io.seata.common.ConfigurationKeys.STORE_MODE;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 
 /**
  * @author funkye
@@ -99,8 +100,8 @@ public class ClusterController {
                         Node leaderNode = new Node();
                         leaderNode.setRole(ClusterRole.LEADER);
                         leaderNode.setGroup(group);
-                        leaderNode.setHttpPort(serverProperties.getPort());
-                        leaderNode.setNettyPort(XID.getPort());
+                        leaderNode.setHttpPort(leader.getIdx() - SERVICE_OFFSET_SPRING_BOOT);
+                        leaderNode.setNettyPort(leader.getIdx());
                         leaderNode.setHostAddress(leader.getIp());
                         nodes.add(leaderNode);
                         Configuration configuration = routeTable.getConfiguration(group);
@@ -117,8 +118,8 @@ public class ClusterController {
                             Node node = new Node();
                             node.setGroup(group);
                             node.setRole(ClusterRole.FOLLOWER);
-                            node.setHttpPort(serverProperties.getPort());
-                            node.setNettyPort(XID.getPort());
+                            node.setHttpPort(follower.getIdx() - SERVICE_OFFSET_SPRING_BOOT);
+                            node.setNettyPort(follower.getIdx());
                             node.setHostAddress(follower.getIp());
                             return node;
                         }).collect(Collectors.toList()));

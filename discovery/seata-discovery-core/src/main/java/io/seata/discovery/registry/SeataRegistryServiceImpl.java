@@ -279,7 +279,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             return ALIVE_NODES.put(transactionServiceGroup,
                 aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
                     // Since only follower will turn into leader, only the follower node needs to be listened to
-                    return inetSocketAddress.getPort() != port || !inetSocketAddress.getHostName().equals(ip);
+                    return inetSocketAddress.getPort() != port || !inetSocketAddress.getAddress().getHostAddress().equals(ip);
                 }).collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
