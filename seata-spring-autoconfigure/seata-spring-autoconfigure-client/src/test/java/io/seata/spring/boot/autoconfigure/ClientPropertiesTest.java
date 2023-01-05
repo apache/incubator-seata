@@ -108,11 +108,8 @@ public class ClientPropertiesTest {
 
     @Test
     public void testLoadBalanceProperties() {
-        assertEquals("XID", context.getBean(LoadBalanceProperties.class).getType());
+        assertEquals("RandomLoadBalance", context.getBean(LoadBalanceProperties.class).getType());
         assertEquals(10, context.getBean(LoadBalanceProperties.class).getVirtualNodes());
-
-
-
     }
 
 
