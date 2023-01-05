@@ -53,20 +53,24 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             for (String group : WATCHERS.keySet()) {
                 Optional.ofNullable(WATCHERS.remove(group))
                     .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                        if (!watcher.isDone() && (System.currentTimeMillis() > watcher.getTimeout())) {
+                        if (System.currentTimeMillis() > watcher.getTimeout()) {
                             HttpServletResponse httpServletResponse =
                                 (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
-                            synchronized (httpServletResponse) {
-                                if (!watcher.isDone() && (System.currentTimeMillis() > watcher.getTimeout())) {
-                                    watcher.setDone(true);
-                                    httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                                    ((AsyncContext)watcher.getAsyncContext()).complete();
-                                }
+                            if (!watcher.isDone() && (System.currentTimeMillis() > watcher.getTimeout())) {
+                                watcher.setDone(true);
+                                httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                                ((AsyncContext)watcher.getAsyncContext()).complete();
                             }
                         }
                         if (!watcher.isDone()) {
                             // Re-register
-                            registryWatcher(watcher);
+                            boolean success = registryWatcher(watcher);
+                            if (!success) {
+                                HttpServletResponse httpServletResponse =
+                                    (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
+                                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+                                ((AsyncContext)watcher.getAsyncContext()).complete();
+                            }
                         }
                     }));
             }
@@ -79,21 +83,14 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     public void onChangeEvent(ClusterChangeEvent event) {
         GROUP_UPDATE_TIME.put(event.getGroup(), System.currentTimeMillis());
         // Notifications are made of changes in cluster information
-        Optional.ofNullable(WATCHERS.remove(event.getGroup())).ifPresent(watchers -> {
-            watchers.parallelStream().forEach(watcher -> {
-                if (!watcher.isDone() && System.currentTimeMillis() < watcher.getTimeout()) {
-                    HttpServletResponse httpServletResponse =
-                        (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
-                    synchronized (httpServletResponse) {
-                        if (!watcher.isDone() && System.currentTimeMillis() < watcher.getTimeout()) {
-                            watcher.setDone(true);
-                            httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-                            ((AsyncContext)watcher.getAsyncContext()).complete();
-                        }
-                    }
-                }
-            });
-        });
+        Optional.ofNullable(WATCHERS.remove(event.getGroup()))
+            .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
+                HttpServletResponse httpServletResponse =
+                    (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
+                watcher.setDone(true);
+                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+                ((AsyncContext)watcher.getAsyncContext()).complete();
+            }));
     }
 
     public boolean registryWatcher(Watcher<?> watcher) {
