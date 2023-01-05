@@ -114,7 +114,7 @@ public interface DefaultValues {
 
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
-    String DEFAULT_LOAD_BALANCE = "XID";
+    String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
     int VIRTUAL_NODES_DEFAULT = 10;
 
     /**
@@ -141,7 +141,7 @@ public interface DefaultValues {
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
-  
+
     /**
      * the constant TCC_ACTION_INTERCEPTOR_ORDER
      */
