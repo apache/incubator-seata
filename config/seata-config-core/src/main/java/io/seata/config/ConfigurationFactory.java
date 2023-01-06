@@ -69,10 +69,8 @@ public final class ConfigurationFactory {
                 LOGGER.info("load Configuration from :{}", extConfiguration == null ?
                     configuration.getClass().getSimpleName() : "Spring Configuration");
             }
-        } catch (EnhancedServiceNotFoundException e) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.warn("load Configuration failed: {}", e.getMessage(), e);
-            }
+        } catch (EnhancedServiceNotFoundException ignore) {
+
         } catch (Exception e) {
             LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
         }
