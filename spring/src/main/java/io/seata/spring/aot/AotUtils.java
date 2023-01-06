@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import io.seata.common.util.ReflectionUtil;
-import io.seata.spring.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;

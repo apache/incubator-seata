@@ -13,21 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.util;
+package io.seata.spring.aot;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.stream.Stream;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
- * State lang resource util.
+ * Resource util.
  *
  * @author wang.liang
  */
-public class ResourceUtil {
+class ResourceUtil {
 
     private static final ResourcePatternResolver RESOURCE_RESOLVER = new PathMatchingResourcePatternResolver();
 
@@ -37,12 +36,5 @@ public class ResourceUtil {
         } catch (IOException e) {
             return new Resource[0];
         }
-    }
-
-    public static Resource[] getResources(String[] locationArr) {
-        return Stream
-            .of(Optional.ofNullable(locationArr).orElse(new String[0]))
-            .flatMap(location -> Stream.of(getResources(location)))
-            .toArray(Resource[]::new);
     }
 }
