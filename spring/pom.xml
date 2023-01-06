@@ -77,7 +77,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-spring-framework-dummy</artifactId>
+            <artifactId>seata-spring-framework-fake</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

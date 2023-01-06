@@ -23,9 +23,9 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-spring-framework-dummy</artifactId>
-    <name>seata-spring-framework-dummy ${project.version}</name>
-    <description>spring-framework-dummy for Seata built with Maven</description>
+    <artifactId>seata-spring-framework-fake</artifactId>
+    <name>seata-spring-framework-fake ${project.version}</name>
+    <description>spring-framework-fake for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
