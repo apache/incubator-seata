@@ -68,7 +68,7 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
         this.registerHintsForXAMode(hints);
 
         // Register the seata classes
-        AotUtils.registerReflectionType(reflectionHints,
+        AotUtils.registerTypes(reflectionHints,
                 MEMBER_CATEGORIES_FOR_INSTANTIATE,
                 "io.seata.sqlparser.druid.DruidDbTypeParserImpl", // see DruidDelegatingDbTypeParser
                 "io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl", // see DruidDelegatingSQLRecognizerFactory
@@ -81,7 +81,7 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
     private void registerServices(RuntimeHints hints) {
         // Register the services to reflection hints in 'META-INF/services', only the services required by seata.
         Predicate<Resource> predicate = this::isSeataServicesResource;
-        AotUtils.registerReflectionServices(hints.reflection(), predicate, MEMBER_CATEGORIES_FOR_INSTANTIATE);
+        AotUtils.registerServices(hints.reflection(), predicate, MEMBER_CATEGORIES_FOR_INSTANTIATE);
 
         // Register the service files to resources hints.
         ResourceHints resourceHints = hints.resources();
@@ -103,18 +103,16 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
             for (Class<?> clazz : classes) {
                 String simpleClassName = clazz.getSimpleName();
                 if (simpleClassName.length() > 0 && simpleClassName.toUpperCase().equals(simpleClassName)) {
-                    AotUtils.registerReflectionType(reflectionHints,
-                            MEMBER_CATEGORIES_FOR_INSTANTIATE,
-                            clazz);
+                    AotUtils.registerType(reflectionHints, clazz, MEMBER_CATEGORIES_FOR_INSTANTIATE);
                 }
             }
         }
 
         // Register DataSource for 'io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice'
-        reflectionHints.registerType(DataSource.class, INVOKE_DECLARED_METHODS);
+        AotUtils.registerType(reflectionHints, DataSource.class, INVOKE_DECLARED_METHODS);
 
         // Register the beans for serialize
-        AotUtils.registerReflectionType(reflectionHints,
+        AotUtils.registerTypes(reflectionHints,
                 ALL_MEMBER_CATEGORIES,
                 BranchUndoLog.class,
                 SQLUndoLog.class,
@@ -131,7 +129,7 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
     private void registerHintsForXAMode(RuntimeHints hints) {
         // Register the MySQL classes for XA mode.
         // See the class 'com.alibaba.druid.util.MySqlUtils'
-        AotUtils.registerReflectionType(hints.reflection(),
+        AotUtils.registerTypes(hints.reflection(),
                 MEMBER_CATEGORIES_FOR_INSTANTIATE_AND_INVOKE,
                 "com.mysql.cj.api.conf.PropertySet",
                 "com.mysql.cj.api.conf.ReadableProperty",

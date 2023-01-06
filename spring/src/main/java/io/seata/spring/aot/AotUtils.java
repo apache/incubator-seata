@@ -119,11 +119,11 @@ public class AotUtils {
      * @param reflectionHints  the reflection hints
      * @param memberCategories the member categories
      */
-    public static void registerAllOfClass(Class<?> clazz, boolean registerSelf, ReflectionHints reflectionHints, MemberCategory... memberCategories) {
-        registerAllOfClassInternal(new HashSet<>(), clazz, registerSelf, reflectionHints, memberCategories);
+    public static void registerAllOfClass(boolean registerSelf, ReflectionHints reflectionHints, Class<?> clazz, MemberCategory... memberCategories) {
+        registerAllOfClassInternal(new HashSet<>(), registerSelf, reflectionHints, clazz, memberCategories);
     }
 
-    private static void registerAllOfClassInternal(@NonNull Set<Class<?>> cache, Class<?> clazz, boolean registerSelf, ReflectionHints reflectionHints, MemberCategory... memberCategories) {
+    private static void registerAllOfClassInternal(@NonNull Set<Class<?>> cache, boolean registerSelf, ReflectionHints reflectionHints, Class<?> clazz, MemberCategory... memberCategories) {
         if (clazz == null) {
             return;
         }
@@ -133,7 +133,7 @@ public class AotUtils {
         }
 
         if (clazz.isArray()) {
-            registerAllOfClassInternal(cache, clazz.getComponentType(), true, reflectionHints, memberCategories);
+            registerAllOfClassInternal(cache, true, reflectionHints, clazz.getComponentType(), memberCategories);
             return;
         }
 
@@ -149,25 +149,24 @@ public class AotUtils {
 
         // register self
         if (registerSelf) {
-            reflectionHints.registerType(clazz, memberCategories);
-            LOGGER.debug("Register class '{}' to reflection hints with member categories: {}", clazz.getName(), memberCategories);
+            registerType(reflectionHints, clazz, memberCategories);
         }
 
         // register the interfaces
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(clazz);
         for (Class<?> interfaceClass : interfaceClasses) {
             if (!interfaceClass.equals(clazz)) {
-                registerAllOfClassInternal(cache, interfaceClass, true, reflectionHints, memberCategories);
+                registerAllOfClassInternal(cache, true, reflectionHints, interfaceClass, memberCategories);
             }
         }
 
         // register the supper class
-        registerAllOfClassInternal(cache, clazz.getSuperclass(), true, reflectionHints, memberCategories);
+        registerAllOfClassInternal(cache, true, reflectionHints, clazz.getSuperclass(), memberCategories);
 
         // register the fields
         Field[] fields = ReflectionUtil.getAllFields(clazz);
         for (Field field : fields) {
-            registerAllOfClassInternal(cache, field.getType(), true, reflectionHints, memberCategories);
+            registerAllOfClassInternal(cache, true, reflectionHints, field.getType(), memberCategories);
         }
 
         // register the parameters of methods
@@ -175,37 +174,39 @@ public class AotUtils {
         for (Method method : methods) {
             Class<?>[] parameterTypes = method.getParameterTypes();
             for (Class<?> parameterType : parameterTypes) {
-                registerAllOfClassInternal(cache, parameterType, true, reflectionHints, memberCategories);
+                registerAllOfClassInternal(cache, true, reflectionHints, parameterType, memberCategories);
             }
         }
     }
 
 
-    public static void registerReflectionType(ReflectionHints reflectionHints, MemberCategory[] memberCategories, String... classNames) {
+    public static void registerType(ReflectionHints reflectionHints, Class<?> clazz, MemberCategory... memberCategories) {
+        reflectionHints.registerType(clazz, memberCategories);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.info("Register reflection type '{}' with member categories {}", clazz.getName(), memberCategories);
+        }
+    }
+
+    public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, String... classNames) {
         for (String className : classNames) {
             try {
-                registerReflectionType(reflectionHints, memberCategories, Class.forName(className));
+                registerType(reflectionHints, Class.forName(className), memberCategories);
             } catch (ClassNotFoundException | NoClassDefFoundError e) {
                 LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
             }
         }
     }
 
-    public static void registerReflectionType(ReflectionHints reflectionHints, MemberCategory[] memberCategories, Class<?>... classes) {
+    public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, Class<?>... classes) {
         for (Class<?> clazz : classes) {
-            registerReflectionType(reflectionHints, memberCategories, clazz);
+            registerType(reflectionHints, clazz, memberCategories);
         }
-    }
-
-    private static void registerReflectionType(ReflectionHints reflectionHints, MemberCategory[] memberCategories, Class<?> clazz) {
-        reflectionHints.registerType(clazz, memberCategories);
-        LOGGER.debug("Register reflection type: {}", clazz.getName());
     }
 
 
     //region ## register services
 
-    public static void registerReflectionServices(ReflectionHints reflectionHints, @Nullable Predicate<Resource> predicate, MemberCategory... memberCategories) {
+    public static void registerServices(ReflectionHints reflectionHints, @Nullable Predicate<Resource> predicate, MemberCategory... memberCategories) {
         Resource[] resources = ResourceUtil.getResources("classpath*:META-INF/services/*");
         for (Resource resource : resources) {
             if (predicate != null && !predicate.test(resource)) {
@@ -215,7 +216,7 @@ public class AotUtils {
             try (InputStreamReader isr = new InputStreamReader(resource.getInputStream());
                  BufferedReader br = new BufferedReader(isr)) {
                 br.lines().forEach(className -> {
-                    AotUtils.registerReflectionType(reflectionHints, memberCategories, className);
+                    AotUtils.registerTypes(reflectionHints, memberCategories, className);
                 });
             } catch (IOException e) {
                 LOGGER.error("Register services '{}' fail: {}", resource.getFilename(), e.getMessage(), e);
@@ -223,8 +224,8 @@ public class AotUtils {
         }
     }
 
-    public static void registerReflectionServices(ReflectionHints reflectionHints, MemberCategory... memberCategories) {
-        registerReflectionServices(reflectionHints, null, memberCategories);
+    public static void registerServices(ReflectionHints reflectionHints, MemberCategory... memberCategories) {
+        registerServices(reflectionHints, null, memberCategories);
     }
 
     //endregion ##

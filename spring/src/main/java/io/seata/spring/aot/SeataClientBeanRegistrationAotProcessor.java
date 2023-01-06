@@ -81,8 +81,8 @@ class SeataClientBeanRegistrationAotProcessor implements BeanRegistrationAotProc
         private void registerClassAndItsInterfacesIfLocalTcc(ReflectionHints reflectionHints, Class<?> clazz) {
             if (clazz.isAnnotationPresent(LocalTCC.class)) {
                 reflectionHints.registerType(clazz, INVOKE_PUBLIC_METHODS);
-                AotUtils.registerAllOfClass(clazz, false, reflectionHints, ALL_MEMBER_CATEGORIES);
-                LOGGER.info("Register @LocalTCC class [{}] to reflectively access the method", clazz.getName());
+                LOGGER.info("TCC: Register reflection type '{}' (annotated `@LocalTCC`) with member categories {}", clazz.getName(), INVOKE_PUBLIC_METHODS);
+                AotUtils.registerAllOfClass(false, reflectionHints, clazz, ALL_MEMBER_CATEGORIES);
             }
         }
     }
