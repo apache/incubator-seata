@@ -27,7 +27,7 @@ import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
 import static org.springframework.aot.hint.MemberCategory.PUBLIC_CLASSES;
 import static org.springframework.aot.hint.MemberCategory.PUBLIC_FIELDS;
 
-public abstract class AotUtils {
+public class AotUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AotUtils.class);
 
