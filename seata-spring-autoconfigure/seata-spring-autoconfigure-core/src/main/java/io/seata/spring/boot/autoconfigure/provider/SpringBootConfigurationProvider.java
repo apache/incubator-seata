@@ -57,29 +57,29 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     @Override
     public Configuration provide(Configuration originalConfiguration) {
         return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
-                , (proxy, method, args) -> {
-                    if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
-                        Object result;
-                        String rawDataId = (String)args[0];
-                        result = originalConfiguration.getConfigFromSys(rawDataId);
-                        if (null == result) {
-                            if (args.length == 1) {
-                                result = get(convertDataId(rawDataId));
-                            } else {
-                                result = get(convertDataId(rawDataId), args[1]);
-                            }
-                        }
-                        if (result != null) {
-                            // If the return type is String,need to convert the object to string
-                            if (method.getReturnType().equals(String.class)) {
-                                return String.valueOf(result);
-                            }
-                            return result;
+            , (proxy, method, args) -> {
+                if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
+                    Object result;
+                    String rawDataId = (String)args[0];
+                    result = originalConfiguration.getConfigFromSys(rawDataId);
+                    if (null == result) {
+                        if (args.length == 1) {
+                            result = get(convertDataId(rawDataId));
+                        } else {
+                            result = get(convertDataId(rawDataId), args[1]);
                         }
                     }
+                    if (result != null) {
+                        // If the return type is String,need to convert the object to string
+                        if (method.getReturnType().equals(String.class)) {
+                            return String.valueOf(result);
+                        }
+                        return result;
+                    }
+                }
 
-                    return method.invoke(originalConfiguration, args);
-                });
+                return method.invoke(originalConfiguration, args);
+            });
     }
 
     private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
