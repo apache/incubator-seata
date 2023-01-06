@@ -203,7 +203,7 @@ public class AotUtils {
     }
 
 
-    //region ## register resources
+    //region ## register services
 
     public static void registerReflectionServices(ReflectionHints reflectionHints, @Nullable Predicate<Resource> predicate, MemberCategory... memberCategories) {
         Resource[] resources = ResourceUtil.getResources("classpath*:META-INF/services/*");
