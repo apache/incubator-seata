@@ -226,7 +226,7 @@ public interface DefaultValues {
     int DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE = 100;
 
     /**
-     * the constant DEFAULT_PROMETHEUS_PORT
+     *the constant DEFAULT_PROMETHEUS_PORT
      */
     int DEFAULT_PROMETHEUS_PORT = 9898;
 
