@@ -553,16 +553,17 @@ public class EnhancedServiceLoader {
                         LOGGER.warn("load class instance error: {}", e.getMessage());
                     }
                 }
+
 				if (LOGGER.isDebugEnabled()) {
 					if (!hasServiceFile) {
-						LOGGER.warn("Load [] class fail: no service files found in '{}'.", type.getName(), dir);
+						LOGGER.warn("Load [{}] class fail: no service files found in '{}'.", type.getName(), dir);
 					} else if (!hasClasses) {
-						LOGGER.warn("Load [] class fail: the service files in '{}' is all empty.", type.getName(), dir);
+						LOGGER.warn("Load [{}] class fail: the service files in '{}' is all empty.", type.getName(), dir);
 					}
 				}
             } else {
 				if (LOGGER.isDebugEnabled()) {
-					LOGGER.warn("Load [] class fail: no urls found is null in '{}'.", type.getName(), dir);
+					LOGGER.warn("Load [{}] class fail: no urls found is null in '{}'.", type.getName(), dir);
 				}
             }
         }
