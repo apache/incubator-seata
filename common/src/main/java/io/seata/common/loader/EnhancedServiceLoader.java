@@ -397,14 +397,12 @@ public class EnhancedServiceLoader {
                 loadAllExtensionClass(loader);
                 ExtensionDefinition<S> defaultExtensionDefinition = getDefaultExtensionDefinition();
                 return getExtensionInstance(defaultExtensionDefinition, loader, argTypes, args);
+            } catch (EnhancedServiceNotFoundException e) {
+                throw e;
             } catch (Throwable e) {
-                if (e instanceof EnhancedServiceNotFoundException) {
-                    throw (EnhancedServiceNotFoundException)e;
-                } else {
-                    throw new EnhancedServiceNotFoundException(
-                        "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
-                            .getFullStackTrace(e));
-                }
+                throw new EnhancedServiceNotFoundException(
+                    "not found service provider for : " + type.getName()
+                        + " caused by " + ExceptionUtils.getFullStackTrace(e));
             }
         }
 
