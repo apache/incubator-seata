@@ -50,9 +50,13 @@ public class AotUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AotUtils.class);
 
+    // See https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java
+    private static final boolean imageCode = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
+
 
     public static final String SPRING_AOT_PROCESSING = "spring.aot.processing";
     public static final String SPRING_AOT_ENABLED = "spring.aot.enabled";
+
 
     public static final MemberCategory[] ALL_MEMBER_CATEGORIES = MemberCategory.values();
 
@@ -88,13 +92,14 @@ public class AotUtils {
      * Whether run in native-image
      *
      * @return the boolean
+     * @see NativeDetector#inNativeImage()
      */
     public static boolean inNativeImage() {
-        return NativeDetector.inNativeImage();
+        return imageCode;
     }
 
 
-    //region # register reflection hints
+    //region # Register type to ReflectionHints
 
     /**
      * Recursively register the class and its supper classes, interfaces, fields, and the parameters of methods to the reflection hints.
@@ -189,7 +194,7 @@ public class AotUtils {
     }
 
 
-    //region ## register services
+    //region ## Register 'classpath*:META-INF/services/*' to ReflectionHints
 
     public static void registerServices(ReflectionHints reflectionHints, @Nullable Predicate<Resource> predicate, MemberCategory... memberCategories) {
         Resource[] resources = ResourceUtil.getResources("classpath*:META-INF/services/*");
