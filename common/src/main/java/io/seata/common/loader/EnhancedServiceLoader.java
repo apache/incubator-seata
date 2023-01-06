@@ -556,17 +556,17 @@ public class EnhancedServiceLoader {
                     }
                 }
 
-				if (LOGGER.isDebugEnabled()) {
-					if (!hasServiceFile) {
-						LOGGER.warn("Load [{}] class fail: no service files found in '{}'.", type.getName(), dir);
-					} else if (!hasClasses) {
-						LOGGER.warn("Load [{}] class fail: the service files in '{}' is all empty.", type.getName(), dir);
-					}
-				}
+                if (LOGGER.isDebugEnabled()) {
+                    if (!hasServiceFile) {
+                        LOGGER.warn("Load [{}] class fail: no service files found in '{}'.", type.getName(), dir);
+                    } else if (!hasClasses) {
+                        LOGGER.warn("Load [{}] class fail: the service files in '{}' is all empty.", type.getName(), dir);
+                    }
+                }
             } else {
-				if (LOGGER.isDebugEnabled()) {
-					LOGGER.warn("Load [{}] class fail: no urls found is null in '{}'.", type.getName(), dir);
-				}
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.warn("Load [{}] class fail: no urls found is null in '{}'.", type.getName(), dir);
+                }
             }
         }
 
