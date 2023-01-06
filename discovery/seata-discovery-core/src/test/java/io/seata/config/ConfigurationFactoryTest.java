@@ -38,7 +38,7 @@ class ConfigurationFactoryTest {
         Configuration configuration = ConfigurationFactory.getInstance();
         String loadBalanceType = configuration.getConfig(LoadBalanceFactory.LOAD_BALANCE_TYPE);
         int virtualNode = configuration.getInt(ConsistentHashLoadBalance.LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES);
-        Assertions.assertEquals("RandomLoadBalance", loadBalanceType);
+        Assertions.assertEquals("XID", loadBalanceType);
         Assertions.assertEquals(10,virtualNode);
     }
 
