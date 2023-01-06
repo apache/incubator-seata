@@ -168,6 +168,6 @@ public class AotUtils {
 
     private static void registerReflectionType(ReflectionHints reflectionHints, MemberCategory[] memberCategories, Class<?> clazz) {
         reflectionHints.registerType(clazz, memberCategories);
-        LOGGER.info("Register reflection type: {}", clazz.getName());
+        LOGGER.debug("Register reflection type: {}", clazz.getName());
     }
 }
