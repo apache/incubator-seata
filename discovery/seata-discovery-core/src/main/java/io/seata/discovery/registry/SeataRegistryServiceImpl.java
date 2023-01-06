@@ -91,7 +91,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     private static volatile String CURRENT_TRANSACTION_SERVICE_GROUP;
 
-    private static volatile ThreadPoolExecutor FIND_LEADER_EXECUTOR;
+    private static volatile ThreadPoolExecutor REFRESH_METADATA_EXECUTOR;
 
     /**
      * Service node health check
@@ -143,12 +143,12 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     }
 
     protected static void startQueryMetadata() {
-        if (FIND_LEADER_EXECUTOR == null) {
+        if (REFRESH_METADATA_EXECUTOR == null) {
             synchronized (INIT_ADDRESSES) {
-                if (FIND_LEADER_EXECUTOR == null) {
-                    FIND_LEADER_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<>(), new NamedThreadFactory("queryMetadata", 1, true));
-                    FIND_LEADER_EXECUTOR.execute(() -> {
+                if (REFRESH_METADATA_EXECUTOR == null) {
+                    REFRESH_METADATA_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(), new NamedThreadFactory("refreshMetadata", 1, true));
+                    REFRESH_METADATA_EXECUTOR.execute(() -> {
                         long metadataMaxAgeMs = CONFIG.getLong(CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (true) {
@@ -171,7 +171,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                             }
                         }
                     });
-                    Runtime.getRuntime().addShutdownHook(new Thread(FIND_LEADER_EXECUTOR::shutdown));
+                    Runtime.getRuntime().addShutdownHook(new Thread(REFRESH_METADATA_EXECUTOR::shutdown));
                 }
             }
         }

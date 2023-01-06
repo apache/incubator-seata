@@ -17,6 +17,9 @@ package io.seata.common.metadata;
 
 import java.util.Objects;
 
+/**
+ * @author funkye
+ */
 public class Node {
 
     private String hostAddress;
@@ -95,7 +98,7 @@ public class Node {
 
     @Override
     public int hashCode() {
-        return Objects.hash(hostAddress, group);
+        return Objects.hash(hostAddress, nettyPort, grpcPort, httpPort, group);
     }
 
 }

@@ -39,13 +39,17 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) {
         // when the global transaction needs to be deleted, it does not affect any consistency issues, and can be
         // deleted in an asynchronous thread to improve the throughput of the state machine
-        EXECUTOR.execute(() -> {
-            RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
-            GlobalSession globalSession =
+        RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
+        GlobalSession globalSession =
                 raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
+        try {
+            raftLockManager.localReleaseGlobalSessionLock(globalSession);
+        } catch (TransactionException e) {
+            logger.error(e.getMessage(), e);
+        }
+        EXECUTOR.execute(() -> {
             if (globalSession != null) {
                 try {
-                    raftLockManager.localReleaseGlobalSessionLock(globalSession);
                     raftSessionManager.removeGlobalSession(globalSession);
                     if (logger.isDebugEnabled()) {
                         logger.debug("end xid: {}", globalSession.getXid());

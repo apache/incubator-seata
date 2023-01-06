@@ -148,7 +148,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             done.run(Status.OK());
             return;
         }
-        // gets a record of the lock and session at the moment
+        // gets a record of the session at the moment
         Map<String, Object> maps = new HashMap<>(2);
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();

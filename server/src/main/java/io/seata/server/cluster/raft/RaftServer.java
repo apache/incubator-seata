@@ -83,7 +83,7 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
                 .outputTo(logger).convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-            reporter.start(ConfigurationFactory.getInstance().getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY, 30),
+            reporter.start(ConfigurationFactory.getInstance().getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY, 60),
                 TimeUnit.MINUTES);
         }
     }

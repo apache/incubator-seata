@@ -116,8 +116,8 @@ public class RaftServerFactory {
             + separator + serverId.getPort();
         final NodeOptions nodeOptions = initNodeOptions(initConf);
         try {
-            // as the foundation for multi raft group in the future
             RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_GROUP, serverId, nodeOptions);
+            // as the foundation for multi raft group in the future
             RAFT_SERVER_MAP.put(DEFAULT_SEATA_GROUP, raftServer);
             LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         } catch (IOException e) {

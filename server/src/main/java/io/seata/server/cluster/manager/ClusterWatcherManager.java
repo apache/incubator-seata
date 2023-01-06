@@ -56,11 +56,9 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                         if (System.currentTimeMillis() > watcher.getTimeout()) {
                             HttpServletResponse httpServletResponse =
                                 (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
-                            if (!watcher.isDone() && (System.currentTimeMillis() > watcher.getTimeout())) {
-                                watcher.setDone(true);
-                                httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                                ((AsyncContext)watcher.getAsyncContext()).complete();
-                            }
+                            watcher.setDone(true);
+                            httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            ((AsyncContext)watcher.getAsyncContext()).complete();
                         }
                         if (!watcher.isDone()) {
                             // Re-register
